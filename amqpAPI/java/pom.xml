@@ -1,0 +1,120 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  
+  <!--
+  /////////////////////////////////////////////////////////////////////////
+  //
+  // © University of Southampton IT Innovation Centre, 2012
+  //
+  // Copyright in this software belongs to University of Southampton
+  // IT Innovation Centre of Gamma House, Enterprise Road, 
+  // Chilworth Science Park, Southampton, SO16 7NS, UK.
+  //
+  // This software may not be used, sold, licensed, transferred, copied
+  // or reproduced in whole or in part in any manner or form or in or
+  // on any media by any person other than in accordance with the terms
+  // of the Licence Agreement supplied with the software, or otherwise
+  // without the prior written consent of the copyright owners.
+  //
+  // This software is distributed WITHOUT ANY WARRANTY, without even the
+  // implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+  // PURPOSE, except where stated in the Licence Agreement supplied with
+  // the software.
+  //
+  //      Created By :            sgc
+  //      Created Date :          2012-07-06
+  //      Created for Project :   EXPERIMEDIA
+  //
+  /////////////////////////////////////////////////////////////////////////
+  -->
+    
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
+  <artifactId>experimedia-arch-ecc-extCommsAPI</artifactId>
+  <version>0.1-SNAPSHOT</version> 
+  <name>ECC External Comms API</name> 
+  <packaging>pom</packaging>
+  
+  <!-- Reference to IT Innovation maven repository (ALTANO) -->
+  <!--
+  <distributionManagement>
+	<repository>
+	  <id>itinnovation-catlib-deploy</id>
+	  <url>scpexe://altano.it-innovation.soton.ac.uk/var/www/maven2/release/experimedia/arch/ecc/</url>
+	</repository>
+  </distributionManagement>
+  -->
+  
+  <build>
+    <plugins>
+        
+      <!-- Plug-in to build the project with UTF-8 encoding -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.3.2</version>
+        <configuration>
+          <encoding>${project.build.sourceEncoding}</encoding>
+        </configuration>
+      </plugin>
+      
+      <!-- Plug-in to build the project with UTF-8 encoding -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>2.4.3</version>
+        <configuration>
+          <encoding>${project.build.sourceEncoding}</encoding>
+        </configuration>
+      </plugin>
+	
+      <!-- Plug-in to list dependencies and licenses -->
+      <!-- UNCOMMENT AND CHECK BEFORE MAJOR RELEASES
+      <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-project-info-reports-plugin</artifactId>
+          <executions>
+            <execution>
+              <id>add-licenses</id>
+              <phase>package</phase>
+              <goals>
+                <goal>dependencies</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        -->
+	</plugins>
+	
+  <!-- SSH transmission to ALTANO -->
+	<extensions>
+    <extension>
+      <groupId>org.apache.maven.wagon</groupId>
+      <artifactId>wagon-ssh-external</artifactId>
+      <version>1.0-beta-6</version>
+    </extension>
+  </extensions>
+	
+  </build>
+  
+  <licenses>
+    <license>
+      <name>LGPL</name>
+      <url>http://www.gnu.org/licenses/lgpl.html</url>
+    </license>
+  </licenses>
+  
+  <!-- 3rd party repositories -->
+  <repositories>
+  
+  </repositories>
+  
+  <modules>
+    <module>spec</module>
+    <module>impl</module>
+  </modules>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+</project>
