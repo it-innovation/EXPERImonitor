@@ -32,7 +32,7 @@ using System.Threading;
 
 
 
-namespace uk.ac.soton.itinnovation.experimedia.arch.ecc.commsAPI.impl.eccInterface
+namespace uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.eccInterface
 {
   public class ECCInterfaceMessageDispatch
   {

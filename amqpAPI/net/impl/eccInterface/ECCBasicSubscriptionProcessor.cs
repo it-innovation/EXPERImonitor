@@ -34,7 +34,7 @@ using RabbitMQ.Client;
 
 
 
-namespace uk.ac.soton.itinnovation.experimedia.arch.ecc.commsAPI.impl.eccInterface
+namespace uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.eccInterface
 {
   // Not for client code usage
   public class ECCBasicSubscriptionProcessor

@@ -5,7 +5,7 @@
   <!--
   /////////////////////////////////////////////////////////////////////////
   //
-  // Â© University of Southampton IT Innovation Centre, 2011
+  // © University of Southampton IT Innovation Centre, 2011
   //
   // Copyright in this software belongs to University of Southampton
   // IT Innovation Centre of Gamma House, Enterprise Road, 
@@ -31,15 +31,19 @@
   
   <modelVersion>4.0.0</modelVersion>
   <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
-  <artifactId>experimedia-arch-ecc-CommsAPI-spec</artifactId>
+  <artifactId>experimedia-arch-ecc-amqpAPI-spec</artifactId>
   <version>0.1</version>
   <packaging>jar</packaging>
   
   <parent>
     <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
-    <artifactId>experimedia-arch-ecc-extCommsAPI</artifactId>
+    <artifactId>experimedia-arch-ecc-amqpAPI</artifactId>
     <version>0.1-SNAPSHOT</version>
   </parent>
+  
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
   
   <build>
     <plugins>
@@ -70,11 +74,8 @@
   
   <dependencies>
 	
-	<!-- 3rd party dependencies __________________________________________ -->
+	<!-- 3rd party dependencies ______________________________________________ -->
 	
   </dependencies>
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
-    <name>experimedia-arch-ecc-commsAPI-spec</name>
+
 </project>

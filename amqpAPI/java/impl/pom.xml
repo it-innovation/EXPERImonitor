@@ -31,15 +31,19 @@
   
   <modelVersion>4.0.0</modelVersion>
   <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
-  <artifactId>experimedia-arch-ecc-extCommsAPI-impl</artifactId>
+  <artifactId>experimedia-arch-ecc-amqpAPI-impl</artifactId>
   <version>0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
   
   <parent>
     <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
-    <artifactId>experimedia-arch-ecc-extCommsAPI</artifactId>
+    <artifactId>experimedia-arch-ecc-amqpAPI</artifactId>
     <version>0.1-SNAPSHOT</version>
   </parent>
+  
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
   
   <build>
     <plugins>
@@ -78,8 +82,5 @@
     </dependency>
 	
   </dependencies>
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
-    <name>experimedia-arch-ecc-commsAPI-impl</name>
+    
 </project>

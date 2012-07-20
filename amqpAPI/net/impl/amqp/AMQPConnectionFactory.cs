@@ -34,7 +34,7 @@ using RabbitMQ.Client;
 
 
 
-namespace uk.ac.soton.itinnovation.experimedia.arch.ecc.commsAPI.impl.amqp
+namespace uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp
 {
   public class AMQPConnectionFactory
   {

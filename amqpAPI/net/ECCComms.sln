@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual C# Express 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ECCComms", "ECCComms.csproj", "{CE5228EE-4562-4D40-A64C-98D9F73F9E7B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ampqAPI-Impl", "impl\ampqAPI-Impl.csproj", "{A8CD2A25-E7C4-4FC0-955A-61150FA20DA1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -9,10 +9,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{CE5228EE-4562-4D40-A64C-98D9F73F9E7B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CE5228EE-4562-4D40-A64C-98D9F73F9E7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CE5228EE-4562-4D40-A64C-98D9F73F9E7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CE5228EE-4562-4D40-A64C-98D9F73F9E7B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A8CD2A25-E7C4-4FC0-955A-61150FA20DA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8CD2A25-E7C4-4FC0-955A-61150FA20DA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8CD2A25-E7C4-4FC0-955A-61150FA20DA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8CD2A25-E7C4-4FC0-955A-61150FA20DA1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

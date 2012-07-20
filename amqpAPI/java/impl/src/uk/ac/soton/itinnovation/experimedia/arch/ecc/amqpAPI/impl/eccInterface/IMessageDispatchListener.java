@@ -23,33 +23,12 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.commsAPI.impl.amqp;
-
-import com.rabbitmq.client.*;
-
-import java.io.IOException;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.eccInterface;
 
 
 
 
-public class AMQPBasicChannel
+public interface IMessageDispatchListener
 {
-  private Channel amqpChannel;
-  
-  public AMQPBasicChannel( Channel channel )
-  {
-    amqpChannel = channel;
-  }
-  
-  public Object getChannelImpl()
-  { return amqpChannel; }
-  
-  public void close()
-  {
-    if ( amqpChannel != null )
-      if ( amqpChannel.isOpen() )
-        try { amqpChannel.close(); }
-        catch (IOException ioe) {}
-  }
-  
+  void onSimpleMessageDispatched( String queueName, byte[] data );
 }

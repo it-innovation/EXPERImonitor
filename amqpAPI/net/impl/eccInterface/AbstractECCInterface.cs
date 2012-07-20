@@ -30,12 +30,12 @@ using System.Text;
 
 using RabbitMQ.Client;
 
-using uk.ac.soton.itinnovation.experimedia.arch.ecc.commsAPI.impl.amqp;
+using uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp;
 
 
 
 
-namespace uk.ac.soton.itinnovation.experimedia.arch.ecc.commsAPI.impl.eccInterface
+namespace uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.eccInterface
 {
   public abstract class AbstractECCInterface
   {

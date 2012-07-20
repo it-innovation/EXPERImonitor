@@ -23,7 +23,7 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.commsAPI.impl.eccInterface;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.eccInterface;
 
 import java.util.*;
 import java.util.Map.*;

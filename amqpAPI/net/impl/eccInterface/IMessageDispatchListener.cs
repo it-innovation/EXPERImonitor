@@ -28,7 +28,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace uk.ac.soton.itinnovation.experimedia.arch.ecc.commsAPI.impl.eccInterface
+namespace uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.eccInterface
 {
   public interface IMessageDispatchListener
   {

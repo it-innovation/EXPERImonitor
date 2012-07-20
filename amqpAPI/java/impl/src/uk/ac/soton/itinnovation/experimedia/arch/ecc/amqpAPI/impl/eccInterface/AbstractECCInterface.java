@@ -23,9 +23,9 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.commsAPI.impl.eccInterface;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.eccInterface;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.commsAPI.impl.amqp.AMQPBasicChannel;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasicChannel;
 
 import com.rabbitmq.client.*;
 

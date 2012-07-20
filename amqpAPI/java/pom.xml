@@ -5,7 +5,7 @@
   <!--
   /////////////////////////////////////////////////////////////////////////
   //
-  // © University of Southampton IT Innovation Centre, 2012
+  // Â© University of Southampton IT Innovation Centre, 2011
   //
   // Copyright in this software belongs to University of Southampton
   // IT Innovation Centre of Gamma House, Enterprise Road, 
@@ -31,10 +31,14 @@
     
   <modelVersion>4.0.0</modelVersion>
   <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
-  <artifactId>experimedia-arch-ecc-extCommsAPI</artifactId>
+  <artifactId>experimedia-arch-ecc-amqpAPI</artifactId>
   <version>0.1-SNAPSHOT</version> 
-  <name>ECC External Comms API</name> 
+  <name>ECC AMQP Comms API</name> 
   <packaging>pom</packaging>
+  
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
   
   <!-- Reference to IT Innovation maven repository (ALTANO) -->
   <!--
@@ -114,7 +118,5 @@
     <module>spec</module>
     <module>impl</module>
   </modules>
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
+    
 </project>

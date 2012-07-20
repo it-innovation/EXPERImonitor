@@ -23,11 +23,12 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.commsAPI.impl.eccInterface;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.eccInterface;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.commsAPI.impl.amqp.AMQPBasicChannel;
 
-import com.rabbitmq.client.Channel;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasicChannel;
+
+import com.rabbitmq.client.*;
 
 import java.util.UUID;
 import java.io.IOException;
@@ -35,42 +36,41 @@ import java.io.IOException;
 
 
 
-public class ECCFullInterfaceBase extends AbstractECCInterface
+public class ECCHalfInterfaceBase extends AbstractECCInterface
 {
-  public ECCFullInterfaceBase( AMQPBasicChannel channel )
+  public ECCHalfInterfaceBase( AMQPBasicChannel channel )
   {
-    super (channel);
+    super( channel );
   }
 
-  public boolean initialise( String  iName,
-                             UUID    providerID,
-                             UUID    userID,
+  public boolean initialise( String iName,
+                             UUID targetID,
                              boolean asProvider )
   {
     interfaceReady = false;
 
     // Safety first
-    if ( setInitParams(iName, providerID, userID, asProvider) == false )
+    if ( setInitParams(iName, targetID, asProvider) == false )
       return false;
     
     // Get RabbitMQ channel
     Channel channelImpl = (Channel) amqpChannel.getChannelImpl();
+    String targetQueueName = interfaceName + targetID.toString();
 
+    // Either act only as a provider or user of the interface
     try
     {
-      // Create exchanges
-      channelImpl.exchangeDeclare( providerExchangeName, "fanout" );
-      channelImpl.exchangeDeclare( userExchangeName, "fanout" );
-      
-      // Create queues
-      createQueue( channelImpl, providerQueueName, providerRoutingKey );
-      createQueue( channelImpl, userQueueName, userRoutingKey );
-      
-      // Subscribe to appropriate queue
       if ( actingAsProvider )
-        createSubscriptionComponent( providerQueueName );
+      {
+        channelImpl.exchangeDeclare( interfaceName, "fanout" );
+        createQueue( channelImpl, targetQueueName, providerRoutingKey );
+        createSubscriptionComponent( targetQueueName );
+      }
       else
-        createSubscriptionComponent( userQueueName );
+      {
+        channelImpl.exchangeDeclare( interfaceName, "fanout" );
+        createQueue( channelImpl, targetQueueName, userRoutingKey );
+      }
     }
     catch (IOException ioe) {}
     
@@ -82,22 +82,20 @@ public class ECCFullInterfaceBase extends AbstractECCInterface
 
   // Private methods -----------------------------------------------------------
   private boolean setInitParams( String iName,
-                                 UUID providerID,
-                                 UUID userID,
-                                 boolean asProvider)
+                                 UUID targetID,
+                                 boolean asProvider )
   {
     // Safety first
     if ( iName       == null ||
-         providerID  == null ||
-         userID      == null ||
-         amqpChannel == null)
+         targetID    == null ||
+         amqpChannel == null )
       return false;
-
-    createInterfaceExchangeNames( iName );
     
+    createInterfaceExchangeNames( iName );
+
     actingAsProvider = asProvider;
-    providerQueueName = interfaceName + "_" + providerID.toString();
-    userQueueName = interfaceName + "_" + userID.toString();
+    providerQueueName = interfaceName + "_" + targetID.toString();
+    userQueueName = interfaceName + "_" + targetID.toString();
     providerRoutingKey = "";
     userRoutingKey = "";
 

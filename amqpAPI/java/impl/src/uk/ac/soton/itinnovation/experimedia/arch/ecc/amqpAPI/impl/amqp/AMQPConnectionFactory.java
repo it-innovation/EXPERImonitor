@@ -23,7 +23,7 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.commsAPI.impl.amqp;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp;
 
 import java.io.*;
 import java.net.*;
