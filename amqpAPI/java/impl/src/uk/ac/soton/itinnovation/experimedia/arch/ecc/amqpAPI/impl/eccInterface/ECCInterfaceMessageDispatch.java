@@ -38,7 +38,7 @@ public class ECCInterfaceMessageDispatch implements Runnable
   private Thread                           dispatchThread;
   private LinkedList<Entry<String,byte[]>> dispatchList;
   private boolean                          dispatchRunning;
-  private IMessageDispatchListener         dispatchListener;
+  private MessageDispatchListener         dispatchListener;
   
   
   public ECCInterfaceMessageDispatch()
@@ -48,7 +48,7 @@ public class ECCInterfaceMessageDispatch implements Runnable
     dispatchThread.setPriority( Thread.MIN_PRIORITY );
   }
   
-  public boolean start( IMessageDispatchListener listener )
+  public boolean start( MessageDispatchListener listener )
   {
     if ( listener == null ) return false;
     

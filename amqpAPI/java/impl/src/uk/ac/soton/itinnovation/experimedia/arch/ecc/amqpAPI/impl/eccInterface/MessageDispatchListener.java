@@ -28,7 +28,7 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.eccInterface;
 
 
 
-public interface IMessageDispatchListener
+public interface MessageDispatchListener
 {
   void onSimpleMessageDispatched( String queueName, byte[] data );
 }

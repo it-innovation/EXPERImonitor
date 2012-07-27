@@ -50,7 +50,7 @@
     <Compile Include="eccInterface\ECCFullInterfaceBase.cs" />
     <Compile Include="eccInterface\ECCHalfInterfaceBase.cs" />
     <Compile Include="eccInterface\ECCInterfaceMessageDispatch.cs" />
-    <Compile Include="eccInterface\IMessageDispatchListener.cs" />
+    <Compile Include="eccInterface\MessageDispatchListener.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

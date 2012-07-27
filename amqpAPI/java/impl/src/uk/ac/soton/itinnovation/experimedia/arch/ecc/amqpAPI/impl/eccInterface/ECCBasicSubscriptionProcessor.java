@@ -74,7 +74,7 @@ class ECCBasicSubscriptionProcessor implements Runnable
 
   public boolean startProcessing()
   {
-    if (!isProcessingSubs)
+    if ( !isProcessingSubs )
     {
       procThread = new Thread( this );
       procThread.setPriority( Thread.MIN_PRIORITY );
@@ -87,9 +87,9 @@ class ECCBasicSubscriptionProcessor implements Runnable
 
   public void stopProcessing()
   {
-    if (isProcessingSubs)
+    if ( isProcessingSubs )
     {
-      while (isGettingMessage)
+      while ( isGettingMessage )
       { /* Wait unless current message is finished */ }
 
       isProcessingSubs = false;
@@ -104,7 +104,7 @@ class ECCBasicSubscriptionProcessor implements Runnable
   public void run()
   {
     if ( messageDispatch != null )
-      while (isProcessingSubs)
+      while ( isProcessingSubs )
       {
         isGettingMessage = true;
 

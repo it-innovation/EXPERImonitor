@@ -130,7 +130,7 @@ public abstract class AbstractECCInterface
       channel.queueDeclare( queueName,
                             false,  // Durable
                             false,  // Exclusive
-                            true,  // Auto-delete
+                            true,   // Auto-delete
                             null ); // Args
   
       channel.queueBind( queueName,

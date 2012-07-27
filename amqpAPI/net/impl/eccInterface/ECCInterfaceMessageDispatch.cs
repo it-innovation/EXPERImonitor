@@ -41,7 +41,7 @@ namespace uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.eccInterfac
     private Thread dispatchThread;
     private LinkedList<KeyValuePair<String, byte[]>> dispatchList;
     private Boolean dispatchRunning;
-    private IMessageDispatchListener dispatchListener;
+    private MessageDispatchListener dispatchListener;
 
 
     public ECCInterfaceMessageDispatch()
@@ -51,7 +51,7 @@ namespace uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.eccInterfac
       dispatchThread.Priority = ThreadPriority.BelowNormal;
     }
 
-    public Boolean start(IMessageDispatchListener listener)
+    public Boolean start(MessageDispatchListener listener)
     {
       if (listener == null) return false;
 
