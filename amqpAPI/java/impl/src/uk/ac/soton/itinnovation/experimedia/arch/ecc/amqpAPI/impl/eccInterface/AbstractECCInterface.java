@@ -36,9 +36,10 @@ import java.io.*;
 
 public abstract class AbstractECCInterface
 {
-  protected AMQPBasicChannel              amqpChannel;
-  protected ECCBasicSubscriptionProcessor subProcessor;
-  protected ECCInterfaceMessageDispatch   msgDispatch;
+  private ECCBasicSubscriptionProcessor subProcessor;
+  
+  protected AMQPBasicChannel            amqpChannel;
+  protected ECCInterfaceMessageDispatch msgDispatch;
 
   protected String  interfaceName;
   protected String  providerExchangeName, userExchangeName;

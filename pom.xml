@@ -22,56 +22,50 @@
   // PURPOSE, except where stated in the Licence Agreement supplied with
   // the software.
   //
-  //      Created By :            sgc
-  //      Created Date :          2012-07-08
-  //      Created for Project :   EXPERIMEDIA
+  //      Created By :          sgc
+  //      Created Date :        2012-07-06
+  //      Created for Project : EXPERIMEDIA
   //
   /////////////////////////////////////////////////////////////////////////
   -->
-  
+    
   <modelVersion>4.0.0</modelVersion>
   <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
-  <artifactId>experimedia-arch-ecc-amqpAPI-spec</artifactId>
-  <version>0.1</version>
-  <packaging>jar</packaging>
+  <artifactId>experimedia-arch-ecc</artifactId>
+  <version>0.1-SNAPSHOT</version> 
+  <name>Experiment Content Component</name> 
+  <packaging>pom</packaging>
   
-  <parent>
-    <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
-    <artifactId>experimedia-arch-ecc-amqpAPI</artifactId>
-    <version>0.1-SNAPSHOT</version>
-  </parent>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <ecc.java.version>1.6</ecc.java.version>
+  </properties>
   
   <build>
     <plugins>
-      
-      <!-- Maven compiler -->
+              
+      <!-- Plug-in to build the project with UTF-8 encoding -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>2.4.3</version>
         <configuration>
-          <source>${ecc.java.version}</source>
-          <target>${ecc.java.version}</target>
           <encoding>${project.build.sourceEncoding}</encoding>
         </configuration>
       </plugin>
-        <plugin>
-		  <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-resources-plugin</artifactId>
-          <version>2.4.3</version>
-          <configuration>
-            <encoding>${project.build.sourceEncoding}</encoding>
-          </configuration>
-        </plugin>
-    </plugins>
-  
-    <directory>lib</directory>
-    <sourceDirectory>src</sourceDirectory>
+	
+	</plugins>
+	
   </build>
   
-  <dependencies>
-	
-	<!-- 3rd party dependencies __________________________________________ -->
-	
-  </dependencies>
-
+  <!-- 3rd party repositories -->
+  <repositories>
+  
+  </repositories>
+  
+  <modules>
+    <module>amqpAPI</module>
+    <module>em</module>
+  </modules>
+    
 </project>

@@ -22,22 +22,22 @@
   // PURPOSE, except where stated in the Licence Agreement supplied with
   // the software.
   //
-  //      Created By :            sgc
-  //      Created Date :          2012-07-08
-  //      Created for Project :   EXPERIMEDIA
+  //      Created By :          sgc
+  //      Created Date :        2012-07-29
+  //      Created for Project : EXPERIMEDIA
   //
   /////////////////////////////////////////////////////////////////////////
   -->
   
   <modelVersion>4.0.0</modelVersion>
   <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
-  <artifactId>experimedia-arch-ecc-amqpAPI-spec</artifactId>
-  <version>0.1</version>
+  <artifactId>experimedia-arch-ecc-em-factory</artifactId>
+  <version>0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
   
   <parent>
     <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
-    <artifactId>experimedia-arch-ecc-amqpAPI</artifactId>
+    <artifactId>experimedia-arch-ecc-em</artifactId>
     <version>0.1-SNAPSHOT</version>
   </parent>
   
@@ -70,8 +70,6 @@
   
   <dependencies>
 	
-	<!-- 3rd party dependencies __________________________________________ -->
-	
   </dependencies>
-
+    
 </project>

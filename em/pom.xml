@@ -22,56 +22,30 @@
   // PURPOSE, except where stated in the Licence Agreement supplied with
   // the software.
   //
-  //      Created By :            sgc
-  //      Created Date :          2012-07-08
-  //      Created for Project :   EXPERIMEDIA
+  //      Created By :          sgc
+  //      Created Date :        2012-07-29
+  //      Created for Project : EXPERIMEDIA
   //
   /////////////////////////////////////////////////////////////////////////
   -->
-  
+    
   <modelVersion>4.0.0</modelVersion>
   <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
-  <artifactId>experimedia-arch-ecc-amqpAPI-spec</artifactId>
-  <version>0.1</version>
-  <packaging>jar</packaging>
+  <artifactId>experimedia-arch-ecc-em</artifactId>
+  <name>ECC Experiment Monitoring</name>
+  <version>0.1-SNAPSHOT</version>
+  <packaging>pom</packaging>
   
   <parent>
     <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
-    <artifactId>experimedia-arch-ecc-amqpAPI</artifactId>
+    <artifactId>experimedia-arch-ecc</artifactId>
     <version>0.1-SNAPSHOT</version>
   </parent>
-  
-  <build>
-    <plugins>
-      
-      <!-- Maven compiler -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>${ecc.java.version}</source>
-          <target>${ecc.java.version}</target>
-          <encoding>${project.build.sourceEncoding}</encoding>
-        </configuration>
-      </plugin>
-        <plugin>
-		  <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-resources-plugin</artifactId>
-          <version>2.4.3</version>
-          <configuration>
-            <encoding>${project.build.sourceEncoding}</encoding>
-          </configuration>
-        </plugin>
-    </plugins>
-  
-    <directory>lib</directory>
-    <sourceDirectory>src</sourceDirectory>
-  </build>
-  
-  <dependencies>
-	
-	<!-- 3rd party dependencies __________________________________________ -->
-	
-  </dependencies>
 
+  <modules>
+    <module>spec</module>
+	<module>impl</module>
+	<module>factory</module>
+  </modules>
+    
 </project>
