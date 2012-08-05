@@ -18,31 +18,17 @@
 // the software.
 //
 //      Created By :            sgc
-//      Created Date :          29-Jul-2012
+//      Created Date :          05-Aug-2012
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec;
 
-import java.util.List;
 
 
 
-
-public interface IEMInterface
+public interface IECCTest_Listener
 {
-  String getName();
-  
-  String getVersion();
-  
-  boolean isProvider();
-  
-  List<String> getAvailableMethods();
-  
-  List<String> getAvailableEvents();
-  
-  IEMMethod createMethod( String methodName ) throws Exception;
-  
-  void setEventListener( IEMEventListener listener ) throws Exception;
+  void onReceivedData( int dataSize, byte[] dataBody );
 }

@@ -18,46 +18,27 @@
 // the software.
 //
 //      Created By :            sgc
-//      Created Date :          11-Jul-2012
-//      Created for Project :   EXPERIMEDIA
+//      Created Date :          05-Aug-2012
+//      Created for Project :   experimedia-arch-ecc-em-spec
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp;
-
-import com.rabbitmq.client.*;
-
-import java.io.IOException;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec;
 
 
 
 
-public class AMQPBasicChannel
+public interface IECCMonitor_UserListener
 {
-  private Channel amqpChannel;
+  void onCreateInterface( IECCMonitor.EMInterfaceType type );
   
-  public AMQPBasicChannel( Channel channel )
-  {
-    amqpChannel = channel;
-  }
+  void onRegistrationConfirmed( Boolean confirmed );
   
-  public Object getChannelImpl()
-  { return amqpChannel; }
+  void onRequestActivityPhases();
   
-  public boolean isOpen()
-  {
-    if ( amqpChannel != null )
-      return ( amqpChannel.isOpen() );
-    
-    return false;
-  }
+  void onDiscoverMetricProviders();
   
-  public void close()
-  {
-    if ( amqpChannel != null )
-      if ( amqpChannel.isOpen() )
-        try { amqpChannel.close(); }
-        catch (IOException ioe) {}
-  }
+  void onDiscoveryTimeOut();
   
+  void onSetStatusMonitorEndpoint( /* Data model under development */ );
 }

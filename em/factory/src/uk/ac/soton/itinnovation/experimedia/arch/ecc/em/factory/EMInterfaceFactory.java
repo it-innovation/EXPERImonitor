@@ -18,46 +18,47 @@
 // the software.
 //
 //      Created By :            sgc
-//      Created Date :          11-Jul-2012
+//      Created Date :          05-Aug-2012
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.factory;
 
-import com.rabbitmq.client.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.*;
 
-import java.io.IOException;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasicChannel;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.base.*;
+
+import java.util.UUID;
 
 
 
 
-public class AMQPBasicChannel
+
+public class EMInterfaceFactory
 {
-  private Channel amqpChannel;
+  private AMQPBasicChannel amqpChannel;
+  private boolean          generateProviders ;
   
-  public AMQPBasicChannel( Channel channel )
+  public EMInterfaceFactory( AMQPBasicChannel channel, boolean createProviders )
   {
-    amqpChannel = channel;
+    amqpChannel       = channel;
+    generateProviders = createProviders;
   }
   
-  public Object getChannelImpl()
-  { return amqpChannel; }
-  
-  public boolean isOpen()
+  public IECCMonitorEntryPoint createEntryPoint( UUID providerID )
   {
-    if ( amqpChannel != null )
-      return ( amqpChannel.isOpen() );
-    
-    return false;
+    return new ECCMonitorEntryPoint( amqpChannel, providerID, generateProviders );
   }
   
-  public void close()
+  public IECCMonitor createMonitor( UUID providerID, UUID userID )
   {
-    if ( amqpChannel != null )
-      if ( amqpChannel.isOpen() )
-        try { amqpChannel.close(); }
-        catch (IOException ioe) {}
+    return new ECCMonitor( amqpChannel, providerID, userID, generateProviders );
   }
   
+  public IECCTest createTest( UUID providerID, UUID userID )
+  {
+    return new ECCTest( amqpChannel, providerID, userID, generateProviders );
+  }
 }

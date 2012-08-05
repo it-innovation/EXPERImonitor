@@ -18,19 +18,19 @@
 // the software.
 //
 //      Created By :            sgc
-//      Created Date :          29-Jul-2012
-//      Created for Project :   EXPERIMEDIA
+//      Created Date :          05-Aug-2012
+//      Created for Project :   experimedia-arch-ecc-em-spec
 //
 /////////////////////////////////////////////////////////////////////////
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec;
 
-import java.util.List;
+import java.util.UUID;
 
 
 
 
-public interface IEMEventListener
+public interface IECCMonitorEntryPoint_ProviderListener
 {
-  void onEvent( Integer eventIndex, List<Object> parameters );
+  void onRegisterAsEMClient( UUID userID, String userName );
 }

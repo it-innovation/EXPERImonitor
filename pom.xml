@@ -39,6 +39,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <ecc.java.version>1.6</ecc.java.version>
+    <ecc.junit.version>4.10</ecc.junit.version>
   </properties>
   
   <build>

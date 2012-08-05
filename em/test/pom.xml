@@ -5,7 +5,7 @@
   <!--
   /////////////////////////////////////////////////////////////////////////
   //
-  // © University of Southampton IT Innovation Centre, 2011
+  // � University of Southampton IT Innovation Centre, 2011
   //
   // Copyright in this software belongs to University of Southampton
   // IT Innovation Centre of Gamma House, Enterprise Road, 
@@ -22,22 +22,22 @@
   // PURPOSE, except where stated in the Licence Agreement supplied with
   // the software.
   //
-  //      Created By :            sgc
-  //      Created Date :          2012-07-08
-  //      Created for Project :   EXPERIMEDIA
+  //      Created By :          sgc
+  //      Created Date :        2012-07-31
+  //      Created for Project : EXPERIMEDIA
   //
   /////////////////////////////////////////////////////////////////////////
   -->
   
   <modelVersion>4.0.0</modelVersion>
   <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
-  <artifactId>experimedia-arch-ecc-amqpAPI-spec</artifactId>
-  <version>0.1</version>
+  <artifactId>experimedia-arch-ecc-em-test</artifactId>
+  <version>0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
   
   <parent>
     <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
-    <artifactId>experimedia-arch-ecc-amqpAPI</artifactId>
+    <artifactId>experimedia-arch-ecc-em</artifactId>
     <version>0.1-SNAPSHOT</version>
   </parent>
   
@@ -69,9 +69,32 @@
   </build>
   
   <dependencies>
-	
-	<!-- 3rd party dependencies __________________________________________ -->
-	
+    
+    <dependency>
+      <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
+      <artifactId>experimedia-arch-ecc-amqpAPI-impl</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
+      <artifactId>experimedia-arch-ecc-em-spec</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
+      <artifactId>experimedia-arch-ecc-em-factory</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </dependency>
+    
+    <!-- 3rd party dependencies ____________________________________________ -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>${ecc.junit.version}</version>
+    </dependency>
+            
   </dependencies>
-
+    
 </project>

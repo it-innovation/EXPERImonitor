@@ -38,7 +38,7 @@ public class ECCInterfaceMessageDispatch implements Runnable
   private Thread                           dispatchThread;
   private LinkedList<Entry<String,byte[]>> dispatchList;
   private boolean                          dispatchRunning;
-  private MessageDispatchListener         dispatchListener;
+  private MessageDispatchListener          dispatchListener;
   
   
   public ECCInterfaceMessageDispatch()

@@ -5,7 +5,7 @@
   <!--
   /////////////////////////////////////////////////////////////////////////
   //
-  // Â© University of Southampton IT Innovation Centre, 2011
+  // © University of Southampton IT Innovation Centre, 2011
   //
   // Copyright in this software belongs to University of Southampton
   // IT Innovation Centre of Gamma House, Enterprise Road, 
@@ -28,26 +28,48 @@
   //
   /////////////////////////////////////////////////////////////////////////
   -->
-    
+  
   <modelVersion>4.0.0</modelVersion>
   <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
-  <artifactId>experimedia-arch-ecc-em</artifactId>
-  <name>ECC Experiment Monitoring</name>
+  <artifactId>experimedia-arch-ecc-em-dataModel</artifactId>
   <version>0.1-SNAPSHOT</version>
-  <packaging>pom</packaging>
+  <packaging>jar</packaging>
   
   <parent>
     <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
-    <artifactId>experimedia-arch-ecc</artifactId>
+    <artifactId>experimedia-arch-ecc-em</artifactId>
     <version>0.1-SNAPSHOT</version>
   </parent>
-
-  <modules>
-    <module>spec</module>
-    <module>impl</module>
-    <module>factory</module>
-    <module>dataModel</module>
-    <module>test</module>
-  </modules>
+  
+  <build>
+    <plugins>
+      
+      <!-- Maven compiler -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>${ecc.java.version}</source>
+          <target>${ecc.java.version}</target>
+          <encoding>${project.build.sourceEncoding}</encoding>
+        </configuration>
+      </plugin>
+        <plugin>
+		  <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>2.4.3</version>
+          <configuration>
+            <encoding>${project.build.sourceEncoding}</encoding>
+          </configuration>
+        </plugin>
+    </plugins>
+  
+    <directory>lib</directory>
+    <sourceDirectory>src</sourceDirectory>
+  </build>
+  
+  <dependencies>
+            
+  </dependencies>
     
 </project>

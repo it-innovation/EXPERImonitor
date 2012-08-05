@@ -18,32 +18,39 @@
 // the software.
 //
 //      Created By :            sgc
-//      Created Date :          29-Jul-2012
-//      Created for Project :   experimedia-arch-ecc-em-impl
+//      Created Date :          31-Jul-2012
+//      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl;
+package uk.ac.soton.itinnovation.experimedia.arch.em.test.v1;
 
-import java.util.List;
+import uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccEntryPoint.ECCMonitorEntryPointTest;
+import uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccMonitor.ECCMonitorTest;
+
+import junit.framework.*;
 
 
 
 
-class EMMethodPayload
+public class BasicProtocolTest
 {
-  private final Integer      payloadMethodIndex;
-  private final List<Object> payloadParameters;
-  
-  EMMethodPayload( Integer methodIndex, List<Object> parameters )
+  public static void main( String[] args )
   {
-    payloadMethodIndex = methodIndex;
-    payloadParameters  = parameters;
+    junit.textui.TestRunner.run( getEMEntryPointSuite() );
   }
   
-  public Integer getIndex()
-  { return payloadMethodIndex; }
-  
-  public List<Object> getParameters()
-  { return payloadParameters; }
+  // Private methods -----------------------------------------------------------
+  private static Test getEMEntryPointSuite()
+  {
+    TestSuite suite = new TestSuite( "EM EntryPoint Tests" );
+    
+    // ECCMonitorEntryPointInterface
+    suite.addTestSuite( ECCMonitorEntryPointTest.class );
+    
+    // ECCMonitorInterface
+    suite.addTestSuite( ECCMonitorTest.class );
+    
+    return suite;
+  }
 }

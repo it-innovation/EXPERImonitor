@@ -18,44 +18,19 @@
 // the software.
 //
 //      Created By :            sgc
-//      Created Date :          11-Jul-2012
+//      Created Date :          05-Aug-2012
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.eccInterface;
-
-import com.rabbitmq.client.*;
-import java.io.IOException;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec;
 
 
 
 
-class ECCBasicSubscriptionProcessor extends DefaultConsumer
+public interface IECCTest
 {
-  private String                      queueName;
-  private ECCInterfaceMessageDispatch messageDispatch;
-
+  void setListener( IECCTest_Listener listener );
   
-  public ECCBasicSubscriptionProcessor( Channel channel,
-                                        String qName,
-                                        ECCInterfaceMessageDispatch dispatch )
-  {
-    super( channel );
-    
-    queueName       = qName;
-    messageDispatch = dispatch;
-  }
-  
-  @Override
-  public void handleDelivery( String consumerTag,
-                              Envelope envelope,
-                              AMQP.BasicProperties properties,
-                              byte[] body )
-  {
-    messageDispatch.addMessage( queueName, body );
-    
-    try { getChannel().basicAck( envelope.getDeliveryTag(), true ); }
-    catch (IOException ioe) {}
-  }
+  void sendData( int dataSize, byte[] dataBody );
 }

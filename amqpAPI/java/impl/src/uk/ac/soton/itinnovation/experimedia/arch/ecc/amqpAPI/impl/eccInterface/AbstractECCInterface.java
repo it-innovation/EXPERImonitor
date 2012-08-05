@@ -55,9 +55,12 @@ public abstract class AbstractECCInterface
     // Safety first
     if ( !interfaceReady        || 
           message       == null ||
-          interfaceName == null ||
           (providerRoutingKey == null && userRoutingKey == null) ) 
       return false;
+    
+    // Make sure producer sends to user (or other way around) - targets are reversed
+    String targetExchange = actingAsProvider ? userExchangeName : providerExchangeName;
+    String targetRouteKey = actingAsProvider ? userRoutingKey : providerRoutingKey;
     
     byte[] messageBody;
     
@@ -67,43 +70,15 @@ public abstract class AbstractECCInterface
     try
     {
       Channel channelImpl = (Channel) amqpChannel.getChannelImpl();
-
-      if ( actingAsProvider )
-        channelImpl.basicPublish( interfaceName,
-                                  userRoutingKey,
-                                  null, // Properties
-                                  messageBody );
-      else
-        channelImpl.basicPublish( interfaceName,
-                                  providerRoutingKey,
-                                  null, // Properties
-                                  messageBody );
+      
+      channelImpl.basicPublish( targetExchange,
+                                targetRouteKey,
+                                null, // Properties
+                                messageBody );
     }
     catch(IOException ioe) { return false; }
     
     return true;
-  }
-
-  public void removeInterface()
-  {
-    // Wind down subscription processor
-    if (subProcessor != null)
-    {
-      if (subProcessor.isProcessing())
-      {
-        subProcessor.stopProcessing();
-        while (subProcessor.isProcessing())
-        {
-          // TODO: Change this!
-          // Wait indefinitely.
-        }
-
-        subProcessor = null;
-      }
-    }
-
-    // Close channel
-    if (amqpChannel != null) amqpChannel.close();
   }
 
   public void setMessageDispatch( ECCInterfaceMessageDispatch dispatch )
@@ -118,39 +93,44 @@ public abstract class AbstractECCInterface
   protected void createInterfaceExchangeNames( String iName )
   {
     interfaceName        = iName;
-    providerExchangeName = iName + "_Provider";
-    userExchangeName     = iName + "_User";
+    providerExchangeName = iName + " [P]";
+    userExchangeName     = iName + " [U]";
   }
 
-  protected void createQueue( Channel channel,
-                              String queueName,
-                              String routingKey )
+  protected void createQueue()
   {
+    String targetExchange = actingAsProvider ? providerExchangeName : userExchangeName;
+    String targetQueue    = actingAsProvider ? providerQueueName    : userQueueName;
+    String targetRouteKey = actingAsProvider ? providerRoutingKey   : userRoutingKey;
+    
     try
     {
-      channel.queueDeclare( queueName,
+      Channel channel = (Channel) amqpChannel.getChannelImpl();
+      
+      channel.queueDeclare( targetQueue,
                             false,  // Durable
                             false,  // Exclusive
                             true,   // Auto-delete
                             null ); // Args
   
-      channel.queueBind( queueName,
-                         interfaceName,
-                         "" );    // Args
+      channel.queueBind( targetQueue,
+                         targetExchange,
+                         targetRouteKey );    // Args
     }
     catch (IOException ioe) {}
     
   }
 
-  protected void createSubscriptionComponent(String queueName)
+  protected void createSubscriptionComponent()
   {
-    subProcessor = new ECCBasicSubscriptionProcessor();
-
-    subProcessor.initialise( (Channel) amqpChannel.getChannelImpl(),
-                              queueName,
-                              true,
-                              msgDispatch );
-
-    subProcessor.startProcessing();
+    Channel    channel = (Channel) amqpChannel.getChannelImpl();
+    String targetQueue = actingAsProvider ? providerQueueName : userQueueName;
+    
+    subProcessor = new ECCBasicSubscriptionProcessor( channel,
+                                                      targetQueue,
+                                                      msgDispatch );
+    
+    try { channel.basicConsume( targetQueue, false, subProcessor ); }
+    catch ( IOException ioe ) {}
   }
 }

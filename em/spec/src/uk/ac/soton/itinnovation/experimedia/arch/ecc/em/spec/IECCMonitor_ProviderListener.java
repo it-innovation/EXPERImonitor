@@ -18,26 +18,25 @@
 // the software.
 //
 //      Created By :            sgc
-//      Created Date :          29-Jul-2012
+//      Created Date :          05-Aug-2012
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec;
 
-import java.util.*;
+import java.util.List;
 
 
 
 
-public interface IEMInterfaceFactory
+public interface IECCMonitor_ProviderListener
 {
-  List<Map.Entry<String, String>> getAvailableInterfaces();
+  void onReadyToInitialise();
   
-  IEMInterface createInterface( String iName,
-                                String iVersion,
-                                boolean asProvider,
-                                boolean asHalf ) throws Exception;
+  void onSendActivityPhases( List<IECCMonitor.EMMonitorPhases> interfaceNames );
   
-  IEMInterfaceAdapter createInterfaceAdapter( IEMInterface face ) throws Exception;
+  void onSendDiscoveryResult( /* Data model under development*/ );
+  
+  void onClientDisconnecting();
 }

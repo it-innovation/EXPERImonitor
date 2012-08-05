@@ -18,19 +18,41 @@
 // the software.
 //
 //      Created By :            sgc
-//      Created Date :          29-Jul-2012
+//      Created Date :          05-Aug-2012
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec;
 
-import java.util.List;
+import java.util.UUID;
 
 
 
-
-public interface IEMMethod
-{ 
-  void execute( List<Object> parameters ) throws Exception;
+/**
+ * IECCMonitorEntryPoint is a 'half interface' that allows users wishing to
+ * register with the provider of the interface to do so. The provider of 
+ * IECCMonitorEntryPoint can listen for connecting users using the
+ * IECCMonitorEntryPoint_ProviderListener interface
+ * 
+ * @author sgc
+ */
+public interface IECCMonitorEntryPoint
+{
+  /**
+   * Listen to the messages sent to the provider part of this interface.
+   * 
+   * @param listener - IECCMonitorEntryPoint_ProviderListener listener
+   */
+  void setListener( IECCMonitorEntryPoint_ProviderListener listener );
+  
+  // Provider methods ----------------------------------------------------------
+  /**
+   * As a user of the interface, use this method to register yourself with the
+   * provider.
+   * 
+   * @param userID    -- UUID that uniquely identifies the user connecting
+   * @param userName  -- Informal label identifying the connecting user
+   */
+  void registerAsEMClient( UUID userID, String userName );
 }

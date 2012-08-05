@@ -57,20 +57,17 @@ public class ECCFullInterfaceBase extends AbstractECCInterface
     Channel channelImpl = (Channel) amqpChannel.getChannelImpl();
 
     try
-    {
-      // Create exchanges
-      channelImpl.exchangeDeclare( providerExchangeName, "fanout" );
-      channelImpl.exchangeDeclare( userExchangeName, "fanout" );
-      
-      // Create queues
-      createQueue( channelImpl, providerQueueName, providerRoutingKey );
-      createQueue( channelImpl, userQueueName, userRoutingKey );
-      
-      // Subscribe to appropriate queue
+    {      
+      // Declare the appropriate exchange
       if ( actingAsProvider )
-        createSubscriptionComponent( providerQueueName );
+        channelImpl.exchangeDeclare( providerExchangeName, "fanout" );
       else
-        createSubscriptionComponent( userQueueName );
+        channelImpl.exchangeDeclare( userExchangeName, "fanout" );
+      
+      // Create queue and subscription
+      createQueue();
+      createSubscriptionComponent();
+  
     }
     catch (IOException ioe) {}
     
@@ -96,8 +93,8 @@ public class ECCFullInterfaceBase extends AbstractECCInterface
     createInterfaceExchangeNames( iName );
     
     actingAsProvider = asProvider;
-    providerQueueName = interfaceName + "_" + providerID.toString();
-    userQueueName = interfaceName + "_" + userID.toString();
+    providerQueueName = interfaceName + "_" + providerID.toString() + "[P]";
+    userQueueName = interfaceName + "_" + userID.toString() + "[U]";
     providerRoutingKey = "";
     userRoutingKey = "";
 

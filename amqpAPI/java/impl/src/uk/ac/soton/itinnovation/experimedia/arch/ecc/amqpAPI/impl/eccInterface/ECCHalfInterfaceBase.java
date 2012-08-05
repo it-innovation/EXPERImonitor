@@ -43,8 +43,8 @@ public class ECCHalfInterfaceBase extends AbstractECCInterface
     super( channel );
   }
 
-  public boolean initialise( String iName,
-                             UUID targetID,
+  public boolean initialise( String  iName,
+                             UUID    targetID,
                              boolean asProvider )
   {
     interfaceReady = false;
@@ -55,22 +55,16 @@ public class ECCHalfInterfaceBase extends AbstractECCInterface
     
     // Get RabbitMQ channel
     Channel channelImpl = (Channel) amqpChannel.getChannelImpl();
-    String targetQueueName = interfaceName + targetID.toString();
 
     // Either act only as a provider or user of the interface
+    // (But always use the same exchange name)
     try
     {
-      if ( actingAsProvider )
-      {
-        channelImpl.exchangeDeclare( interfaceName, "fanout" );
-        createQueue( channelImpl, targetQueueName, providerRoutingKey );
-        createSubscriptionComponent( targetQueueName );
-      }
-      else
-      {
-        channelImpl.exchangeDeclare( interfaceName, "fanout" );
-        createQueue( channelImpl, targetQueueName, userRoutingKey );
-      }
+      channelImpl.exchangeDeclare( providerExchangeName, "fanout" );
+      createQueue();
+      
+      // If we're a provider, then listen to messages sent
+      if ( actingAsProvider ) createSubscriptionComponent();
     }
     catch (IOException ioe) {}
     
@@ -78,6 +72,15 @@ public class ECCHalfInterfaceBase extends AbstractECCInterface
     interfaceReady = true;
 
     return interfaceReady;
+  }
+  
+  // Protected methods ---------------------------------------------------------
+  @Override
+  protected void createInterfaceExchangeNames( String iName )
+  {
+    interfaceName        = iName;
+    providerExchangeName = iName + " [P]";
+    userExchangeName     = providerExchangeName; // Single direction of traffic only
   }
 
   // Private methods -----------------------------------------------------------
@@ -93,11 +96,11 @@ public class ECCHalfInterfaceBase extends AbstractECCInterface
     
     createInterfaceExchangeNames( iName );
 
-    actingAsProvider = asProvider;
-    providerQueueName = interfaceName + "_" + targetID.toString();
-    userQueueName = interfaceName + "_" + targetID.toString();
+    actingAsProvider   = asProvider;
+    providerQueueName  = interfaceName + "_" + targetID.toString() + "[P]";
+    userQueueName      = providerQueueName; // One direct of traffic only
     providerRoutingKey = "";
-    userRoutingKey = "";
+    userRoutingKey     = "";
 
     return true;
   }
