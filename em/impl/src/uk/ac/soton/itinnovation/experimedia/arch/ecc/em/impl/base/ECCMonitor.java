@@ -109,7 +109,7 @@ public class ECCMonitor extends ECCBaseInterface
   
   // Method ID = 4
   @Override
-  public void discoverMetricProviders()
+  public void discoverMetricGenerators()
   {
     executeMethod( 4, null );
   }
@@ -138,10 +138,10 @@ public class ECCMonitor extends ECCBaseInterface
   
   // Method ID = 8
   @Override
-  public void sendActivePhases( List<IECCMonitor.EMMonitorPhases> interfaceNames )
+  public void sendActivePhases( List<EMSupportedPhase> supportedPhases )
   {
     ArrayList<Object> params = new ArrayList<Object>();
-    params.add( interfaceNames );
+    params.add( supportedPhases );
     
     executeMethod( 8, params );
   }
@@ -173,7 +173,7 @@ public class ECCMonitor extends ECCBaseInterface
         if ( userListener != null )
         {
           IECCMonitor.EMInterfaceType type = (IECCMonitor.EMInterfaceType) params.get( 0 );
-          userListener.onCreateInterface( type );
+          userListener.onCreateInterface( interfaceProviderID, type );
         }
         
       } break;
@@ -183,42 +183,42 @@ public class ECCMonitor extends ECCBaseInterface
         if ( userListener != null )
         {
           boolean confirmed = (Boolean) params.get( 0 );
-          userListener.onRegistrationConfirmed( confirmed );
+          userListener.onRegistrationConfirmed( interfaceProviderID, confirmed );
         }
       } break;
         
       case ( 3 ) :
       {
         if ( userListener != null )
-          userListener.onRequestActivityPhases();
+          userListener.onRequestActivityPhases( interfaceProviderID );
         
       } break;
         
       case ( 4 ) :
       {
         if ( userListener != null )
-          userListener.onDiscoverMetricProviders();
+          userListener.onDiscoverMetricGenerators( interfaceProviderID );
         
       } break;
         
       case ( 5 ) :
       {
         if ( userListener != null )
-          userListener.onDiscoveryTimeOut();
+          userListener.onDiscoveryTimeOut( interfaceProviderID );
         
       } break;
         
       case ( 6 ) :
       {
         if ( userListener != null )
-          userListener.onSetStatusMonitorEndpoint();
+          userListener.onSetStatusMonitorEndpoint( interfaceProviderID );
         
       } break;
         
       case ( 7 ) :
       {
         if ( providerListener != null )
-          providerListener.onReadyToInitialise();
+          providerListener.onReadyToInitialise( interfaceUserID );
         
       } break;
         
@@ -226,8 +226,8 @@ public class ECCMonitor extends ECCBaseInterface
       {
         if ( providerListener != null )
         {
-          List<IECCMonitor.EMMonitorPhases> phases = (List<IECCMonitor.EMMonitorPhases>) params.get( 0 );       
-          providerListener.onSendActivityPhases( phases );
+          List<EMSupportedPhase> phases = (List<EMSupportedPhase>) params.get( 0 );       
+          providerListener.onSendActivityPhases( interfaceUserID, phases );
         }
         
       } break;
@@ -235,14 +235,14 @@ public class ECCMonitor extends ECCBaseInterface
       case ( 9 ) :
       {
         if ( providerListener != null )
-          providerListener.onSendDiscoveryResult();
+          providerListener.onSendDiscoveryResult( interfaceUserID );
         
       } break;
         
       case ( 10 ) :
       {
         if ( providerListener != null )
-          providerListener.onClientDisconnecting();
+          providerListener.onClientDisconnecting( interfaceUserID );
         
       } break;
     }

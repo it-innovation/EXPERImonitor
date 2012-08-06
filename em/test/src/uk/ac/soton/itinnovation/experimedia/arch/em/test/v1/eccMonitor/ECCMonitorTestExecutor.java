@@ -111,15 +111,15 @@ public class ECCMonitorTestExecutor implements Runnable,
   
   // IECCTest_Listener ---------------------------------------------------------
   @Override
-  public void onReceivedData( int dataSize, byte[] dataBody )
+  public void onReceivedData( int byteCount, byte[] dataBody )
   {
     // Check data size
-    if ( dataSize == testDataSize )
+    if ( byteCount == testDataSize )
     {
       // Check data integrity
       boolean dataOK = true;
       
-      for ( int i=0; i < dataSize; i++ )
+      for ( int i=0; i < byteCount; i++ )
         if ( dataBody[i] != testDataBody[i] )
         {
           dataOK = false;
@@ -132,88 +132,105 @@ public class ECCMonitorTestExecutor implements Runnable,
   
   // IECCMonitor_ProviderListener ----------------------------------------------
   @Override
-  public void onReadyToInitialise()
+  public void onReadyToInitialise( UUID senderID )
   {
-    providerGotReadyToInit = true;
+    // Make sure event is from the correct sender
+    if ( senderID.equals( ECCMonitorEntryPointTest.EMUserUUID) )
+    {
+      providerGotReadyToInit = true;
     
-    // Create a test interface here and get ready for data
-    EMInterfaceFactory providerFactory = new EMInterfaceFactory( providerChannel, true );
-    
-    providerTest = providerFactory.createTest( ECCMonitorEntryPointTest.EMProviderUUID,
-                                               ECCMonitorEntryPointTest.EMUserUUID );
-    
-    providerTest.setListener( this );
-    
-    // Tell user to create a test interface
-    providerMonitor.createInterface( IECCMonitor.EMInterfaceType.eECCTestInterface );
+      // Create a test interface here and get ready for data
+      EMInterfaceFactory providerFactory = new EMInterfaceFactory( providerChannel, true );
+
+      providerTest = providerFactory.createTest( ECCMonitorEntryPointTest.EMProviderUUID,
+                                                ECCMonitorEntryPointTest.EMUserUUID );
+
+      providerTest.setListener( this );
+
+      // Tell user to create a test interface
+      providerMonitor.createInterface( IECCMonitor.EMInterfaceType.eECCTestInterface );
+    }
   }
   
   @Override
-  public void onSendActivityPhases( List<IECCMonitor.EMMonitorPhases> interfaceNames )
+  public void onSendActivityPhases( UUID senderID,
+                                    List<IECCMonitor.EMSupportedPhase> supportedPhases )
   { /*Not implemented in this test*/ }
   
   @Override
-  public void onSendDiscoveryResult( /* Data model under development*/ )
+  public void onSendDiscoveryResult( UUID senderID /* Data model under development*/ )
   { /*Not implemented in this test*/ }
   
   @Override
-  public void onClientDisconnecting()
+  public void onClientDisconnecting( UUID senderID )
   {
-    if ( !providerGotTestBytes )
-      System.out.println( "Disconnecting client before send bytes ended!" );
+    // Make sure event is from the correct sender
+    if ( senderID.equals( ECCMonitorEntryPointTest.EMUserUUID) )
+    {
+      if ( !providerGotTestBytes )
+        System.out.println( "Disconnecting client before send bytes ended!" );
     
-    providerGotDisconnectNotice = true;
+      providerGotDisconnectNotice = true;
+    }
   }
   
   // IECCMonitor_UserListener --------------------------------------------------
   @Override
-  public void onCreateInterface( IECCMonitor.EMInterfaceType type )
+  public void onCreateInterface( UUID senderID, IECCMonitor.EMInterfaceType type )
   {
-    if ( type == IECCMonitor.EMInterfaceType.eECCTestInterface )
+    // Make sure event is from the correct sender
+    if ( senderID.equals( ECCMonitorEntryPointTest.EMProviderUUID) )
+    {
+      if ( type == IECCMonitor.EMInterfaceType.eECCTestInterface )
       userGotCreateTestFaceCommand = true;
     
-    // Create a test interface here
-    EMInterfaceFactory userFactory = new EMInterfaceFactory( providerChannel, false );
-    
-    userTest = userFactory.createTest( ECCMonitorEntryPointTest.EMProviderUUID,
-                                       ECCMonitorEntryPointTest.EMUserUUID );
-    
-    // Create some test data
-    testDataSize = 2048;
-    testDataBody = new byte[testDataSize];
-    Random rand = new Random();
-    rand.nextBytes( testDataBody );
-    
-    // Send the data to the provider
-    userTest.sendData( testDataSize, testDataBody );
-    
-    // And immediately send a dis-connection notice (will it arrive before end of data?)
-    userMonitor.clientDisconnecting();
+      // Create a test interface here
+      EMInterfaceFactory userFactory = new EMInterfaceFactory( providerChannel, false );
+
+      userTest = userFactory.createTest( ECCMonitorEntryPointTest.EMProviderUUID,
+                                        ECCMonitorEntryPointTest.EMUserUUID );
+
+      // Create some test data
+      testDataSize = 2048;
+      testDataBody = new byte[testDataSize];
+      Random rand = new Random();
+      rand.nextBytes( testDataBody );
+
+      // Send the data to the provider
+      userTest.sendData( testDataSize, testDataBody );
+
+      // And immediately send a dis-connection notice (will it arrive before end of data?)
+      userMonitor.clientDisconnecting();
+    }
   }
   
   @Override
-  public void onRegistrationConfirmed( Boolean confirmed )
+  public void onRegistrationConfirmed( UUID senderID, Boolean confirmed )
   {
-    userGotRegistrationConfirmed = true; // Don't really care about the result
+    // Make sure event is from the correct sender
+    if ( senderID.equals( ECCMonitorEntryPointTest.EMProviderUUID) )
+    {
+      userGotRegistrationConfirmed = true; // Don't really care about the result
     
-    // Send provider notice that user is ready to initialise
-    userMonitor.readyToInitialise();
+      // Send provider notice that user is ready to initialise
+      userMonitor.readyToInitialise();
+    }
   }
   
   @Override
-  public void onRequestActivityPhases()
+  public void onRequestActivityPhases( UUID senderID )
   { /*Not implemented in this test*/ }
   
   @Override
-  public void onDiscoverMetricProviders()
+  public void onDiscoverMetricGenerators( UUID senderID )
   { /*Not implemented in this test*/ }
   
   @Override
-  public void onDiscoveryTimeOut()
+  public void onDiscoveryTimeOut( UUID senderID )
   { /*Not implemented in this test*/ }
   
   @Override
-  public void onSetStatusMonitorEndpoint( /* Data model under development */ )
+  public void onSetStatusMonitorEndpoint( UUID senderID /* Data model under development */ )
   { /*Not implemented in this test*/ }
   
   // Runnable ------------------------------------------------------------------

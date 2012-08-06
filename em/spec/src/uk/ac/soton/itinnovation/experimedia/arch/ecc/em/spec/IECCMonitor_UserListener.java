@@ -19,26 +19,72 @@
 //
 //      Created By :            sgc
 //      Created Date :          05-Aug-2012
-//      Created for Project :   experimedia-arch-ecc-em-spec
+//      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec;
 
+import java.util.UUID;
 
 
 
+/**
+ * This listener provides access to methods executed by the provider (the EM)
+ * which are sent to the user. This includes requests to generate interfaces; 
+ * confirmation of registration; request for activity phase support etc.
+ * 
+ * @author sgc
+ */
 public interface IECCMonitor_UserListener
 {
-  void onCreateInterface( IECCMonitor.EMInterfaceType type );
+  /**
+   * Request by the provider for the user to create a (user) interface instance
+   * of the type EMInterfaceType.
+   * 
+   * @param senderID - ID of the EM sending this event
+   * @param type     - type (EMInterfaceType) of interface required
+   */
+  void onCreateInterface( UUID senderID, IECCMonitor.EMInterfaceType type );
   
-  void onRegistrationConfirmed( Boolean confirmed );
+  /**
+   * Provider (EM) notifies the user that they have successfully (or not)
+   * registered.
+   * 
+   * @param senderID  - ID of the EM sending this event
+   * @param confirmed - confirmation (or not) of registration
+   */
+  void onRegistrationConfirmed( UUID senderID, Boolean confirmed );
   
-  void onRequestActivityPhases();
+  /**
+   * EM requests a list of supported activities by the user.
+   * 
+   * @param senderID - ID of the EM sending this event
+   */
+  void onRequestActivityPhases( UUID senderID );
   
-  void onDiscoverMetricProviders();
+  /**
+   * EM requests the user discovers any metric generators that are available
+   * to generate metric data to send to the EM.
+   * 
+   * @param senderID - ID of the EM sending this event
+   */
+  void onDiscoverMetricGenerators( UUID senderID );
   
-  void onDiscoveryTimeOut();
+  /**
+   * EM notifies the user that time has run out to discover any more metric
+   * generators - the user should stop this process if it is continuing.
+   * 
+   * @param senderID - ID of the EM sending this event
+   */
+  void onDiscoveryTimeOut( UUID senderID );
   
-  void onSetStatusMonitorEndpoint( /* Data model under development */ );
+  /**
+   * The EM has sent a status monitoring end-point for the user to (optionally)
+   * use to provide active reporting of the systems it is currently using.
+   * 
+   * @param senderID - ID of the EM sending this event
+   */
+  void onSetStatusMonitorEndpoint( UUID senderID
+                                   /* Data model under development */ );
 }

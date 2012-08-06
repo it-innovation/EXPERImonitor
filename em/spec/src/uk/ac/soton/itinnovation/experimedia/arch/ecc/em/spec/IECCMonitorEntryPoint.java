@@ -40,7 +40,7 @@ import java.util.UUID;
 public interface IECCMonitorEntryPoint
 {
   /**
-   * Listen to the messages sent to the provider part of this interface.
+   * Listen to the messages sent to the provider (EM) part of this interface.
    * 
    * @param listener - IECCMonitorEntryPoint_ProviderListener listener
    */
@@ -49,7 +49,7 @@ public interface IECCMonitorEntryPoint
   // Provider methods ----------------------------------------------------------
   /**
    * As a user of the interface, use this method to register yourself with the
-   * provider.
+   * provider (the EM).
    * 
    * @param userID    -- UUID that uniquely identifies the user connecting
    * @param userName  -- Informal label identifying the connecting user

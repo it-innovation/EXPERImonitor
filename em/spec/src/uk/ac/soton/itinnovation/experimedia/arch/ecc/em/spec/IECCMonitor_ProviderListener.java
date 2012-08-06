@@ -25,18 +25,43 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec;
 
-import java.util.List;
+import java.util.*;
 
 
 
 
+/**
+ * Use this listener to listen to in-coming events targeted at a provider instance
+ * (EM) of the IECCMonitor interface. This listener notifies of initialisation,
+ * activity, discovery and disconnection events.
+ * 
+ * @author sgc
+ */
 public interface IECCMonitor_ProviderListener
 {
-  void onReadyToInitialise();
+  /**
+   * Notification of a user who is now ready to initialise.
+   */
+  void onReadyToInitialise( UUID senderID );
   
-  void onSendActivityPhases( List<IECCMonitor.EMMonitorPhases> interfaceNames );
+  /**
+   * Notification of a user's declaration of which activity phases it supports.
+   * 
+   * @param supportedPhases - a list of enumerated phases supported by the user.
+   */
+  void onSendActivityPhases( UUID senderID, 
+                             List<IECCMonitor.EMSupportedPhase> supportedPhases );
   
-  void onSendDiscoveryResult( /* Data model under development*/ );
+  /**
+   * Notification that the user has finished their discovery process and is
+   * reporting on which metric generators they currently have available.
+   */
+  void onSendDiscoveryResult( UUID senderID
+                              /* Data model under development*/ );
   
-  void onClientDisconnecting();
+  /**
+   * Notification that the user is disconnecting from the EM.
+   * 
+   */
+  void onClientDisconnecting( UUID senderID );
 }
