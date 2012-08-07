@@ -1,72 +1,45 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  
-  <!--
-  /////////////////////////////////////////////////////////////////////////
-  //
-  // © University of Southampton IT Innovation Centre, 2011
-  //
-  // Copyright in this software belongs to University of Southampton
-  // IT Innovation Centre of Gamma House, Enterprise Road, 
-  // Chilworth Science Park, Southampton, SO16 7NS, UK.
-  //
-  // This software may not be used, sold, licensed, transferred, copied
-  // or reproduced in whole or in part in any manner or form or in or
-  // on any media by any person other than in accordance with the terms
-  // of the Licence Agreement supplied with the software, or otherwise
-  // without the prior written consent of the copyright owners.
-  //
-  // This software is distributed WITHOUT ANY WARRANTY, without even the
-  // implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-  // PURPOSE, except where stated in the Licence Agreement supplied with
-  // the software.
-  //
-  //      Created By :          sgc
-  //      Created Date :        2012-07-06
-  //      Created for Project : EXPERIMEDIA
-  //
-  /////////////////////////////////////////////////////////////////////////
-  -->
     
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
-  <artifactId>experimedia-arch-ecc</artifactId>
-  <version>0.1-SNAPSHOT</version> 
-  <name>Experiment Content Component</name> 
-  <packaging>pom</packaging>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
+    <artifactId>experimedia-arch-ecc</artifactId>
+    <version>0.1-SNAPSHOT</version> 
+    <name>Experiment Content Component</name> 
+    <packaging>pom</packaging>
   
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <ecc.java.version>1.6</ecc.java.version>
-    <ecc.junit.version>4.10</ecc.junit.version>
-  </properties>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <ecc.java.version>1.6</ecc.java.version>
+        <ecc.junit.version>4.10</ecc.junit.version>
+    </properties>
   
-  <build>
-    <plugins>
+    <build>
+        <plugins>
               
       <!-- Plug-in to build the project with UTF-8 encoding -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-resources-plugin</artifactId>
-        <version>2.4.3</version>
-        <configuration>
-          <encoding>${project.build.sourceEncoding}</encoding>
-        </configuration>
-      </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.4.3</version>
+                <configuration>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
+            </plugin>
 	
-	</plugins>
+        </plugins>
 	
-  </build>
+    </build>
   
   <!-- 3rd party repositories -->
-  <repositories>
+    <repositories>
   
-  </repositories>
+    </repositories>
   
-  <modules>
-    <module>amqpAPI</module>
-    <module>em</module>
-  </modules>
+    <modules>
+        <module>amqpAPI</module>
+        <module>em</module>
+    </modules>
     
 </project>
