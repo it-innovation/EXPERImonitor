@@ -104,7 +104,11 @@ public class ECCMonitorTestExecutor implements Runnable,
          userGotCreateTestFaceCommand == true &&
          providerGotTestBytes         == true &&
          providerGotDisconnectNotice  == true )
+    {
+      System.out.println( "ECCMonitorTest is GOOD." );
       return true;
+    }
+      
     
     return false;
   }

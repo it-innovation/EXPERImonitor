@@ -25,7 +25,6 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.em.test.v1;
 
-import uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccEntryPoint.ECCMonitorEntryPointTest;
 import uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccMonitor.ECCMonitorTest;
 
 import junit.framework.*;
@@ -33,20 +32,20 @@ import junit.framework.*;
 
 
 
-public class BasicProtocolTest
+public class BasicProtocolTest extends TestCase
 {
   public static void main( String[] args )
   {
     junit.textui.TestRunner.run( getEMEntryPointSuite() );
+    
+    System.out.println( "Basic protocol test completed." );
+    System.exit( 0 );
   }
   
   // Private methods -----------------------------------------------------------
   private static Test getEMEntryPointSuite()
   {
     TestSuite suite = new TestSuite( "EM EntryPoint Tests" );
-    
-    // ECCMonitorEntryPointInterface
-    suite.addTestSuite( ECCMonitorEntryPointTest.class );
     
     // ECCMonitorInterface
     suite.addTestSuite( ECCMonitorTest.class );

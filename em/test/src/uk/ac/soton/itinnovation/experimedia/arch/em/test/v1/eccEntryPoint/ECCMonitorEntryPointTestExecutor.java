@@ -66,7 +66,11 @@ public class ECCMonitorEntryPointTestExecutor implements Runnable,
   }
   
   public boolean getTestResult()
-  { return gotClientRegistration; }
+  {
+    if ( gotClientRegistration ) System.out.println( "ECCMonitorEntryPointTest is GOOD." );
+    
+    return gotClientRegistration; 
+  }
   
   // IECCMonitorEntryPoint_ProviderListener
   @Override
