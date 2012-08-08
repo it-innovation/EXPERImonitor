@@ -1,0 +1,28 @@
+This software distribution is licenced under the terms found in the file ITInnov-EXPERIMEDIA-licence-v1.0.txt
+
+This software requires various third-party libraries to compile and execute.  These libraries, where they can be found and their associated licences are:
+
+Java
+	JDK v6
+	http://java.sun.com
+	Sun Microsystems, Inc. Binary Code License Agreement (http://java.sun.com/javase/6/jdk-6u3-license.txt)
+	
+RabbitMQ Java Client
+	com.rabbitmq:amqp-client:2.8.4
+	http://www.rabbitmq.com
+	GPL v2 (http://www.gnu.org/licenses/gpl-2.0.html) and MPL 1.1 (http://www.rabbitmq.com/mpl.html)
+	
+JUnit
+	junit:junit:4.10
+	http://junit.org
+	Common Public License Version 1.0 (http://junit.sourceforge.net/cpl-v10.html)
+	 
+Hamcrest Core
+	org.hamcrest:hamcrest-core:1.1
+	http://code.google.com/p/hamcrest/
+	BSD style (http://opensource.org/licenses/BSD-3-Clause)
+
+SnakeYAML
+	org.yaml:snakeyaml:1.5
+	http://code.google.com/p/snakeyaml/
+	Apache License Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
