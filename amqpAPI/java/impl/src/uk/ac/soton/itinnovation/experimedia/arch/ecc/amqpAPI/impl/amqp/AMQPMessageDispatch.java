@@ -23,50 +23,27 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.eccInterface;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.spec.*;
 import java.util.*;
 import java.util.Map.*;
 
 
 
 
-public class AMQPMessageDispatch implements Runnable
+public class AMQPMessageDispatch implements IAMQPMessageDispatch
 {
   private final Object dispatchLock = new Object();
   
-  private Thread                           dispatchThread;
   private LinkedList<Entry<String,byte[]>> dispatchList;
-  private boolean                          dispatchRunning;
-  private AMQPMessageDispatchListener          dispatchListener;
+  private IAMQPMessageDispatchListener     dispatchListener;
   
   
   public AMQPMessageDispatch()
   {
     dispatchList = new LinkedList<Entry<String,byte[]>>();
-    dispatchThread = new Thread( this );
-    dispatchThread.setPriority( Thread.MIN_PRIORITY );
   }
-  
-  public boolean start( AMQPMessageDispatchListener listener )
-  {
-    if ( listener == null ) return false;
-    
-    dispatchListener = listener;
-    dispatchRunning = true;
-    dispatchThread.start();
-    
-    return true;
-  }
-  
-  public void stop()
-  {
-    synchronized (dispatchLock)
-    { dispatchRunning = false; }
-  }
-  
-  public boolean isRunning()
-  { return dispatchRunning; }
   
   public boolean addMessage( String queueName, byte[] data )
   {
@@ -74,42 +51,35 @@ public class AMQPMessageDispatch implements Runnable
     
     if ( queueName != null && data != null )
     {
-      synchronized (dispatchLock)
-      {
-        if ( dispatchRunning )
-        {
-          dispatchList.addLast(
+      synchronized( dispatchLock )
+      { dispatchList.addLast(
             new HashMap.SimpleEntry<String, byte[]>( queueName, data ) ); 
           
           addResult = true;
-        }
       }
     }
     
     return addResult;
   }
   
-  // Runnable ------------------------------------------------------------------
-  @Override
-  public void run()
+  public synchronized void iterateDispatch()
   {
-    while ( dispatchRunning )
+    if ( !dispatchList.isEmpty() && dispatchListener != null )
     {
-      Entry<String, byte[]> amqpMessage = null;
+      Entry<String,byte[]> nextMessage = dispatchList.getFirst();
+      dispatchList.removeFirst();
       
-      synchronized (dispatchLock)
-      {
-        if ( !dispatchList.isEmpty() )
-        {
-          amqpMessage = dispatchList.get( 0 );
-          dispatchList.remove(0);
-        }
-      }
-      
-      // Dispatch next message
-      if ( amqpMessage != null )
-        dispatchListener.onSimpleMessageDispatched( amqpMessage.getKey(),
-                                                    amqpMessage.getValue() );
-    }
+      dispatchListener.onSimpleMessageDispatched( nextMessage.getKey(),
+                                                  nextMessage.getValue() );
+    }    
   }
+  
+  // IAMQPMessageDispatch ------------------------------------------------------
+  @Override
+  public void setListener( IAMQPMessageDispatchListener listener )
+  { dispatchListener = listener; }
+  
+  @Override
+  public IAMQPMessageDispatchListener getListener()
+  { return dispatchListener; }
 }

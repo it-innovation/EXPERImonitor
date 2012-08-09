@@ -42,16 +42,22 @@
   </build>
   
   <dependencies>
-        
+    
     <dependency>
       <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
-      <artifactId>experimedia-arch-ecc-amqpAPI-impl</artifactId>
+      <artifactId>experimedia-arch-ecc-amqpAPI-spec</artifactId>
       <version>0.1-SNAPSHOT</version>
     </dependency>
     
     <dependency>
       <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
       <artifactId>experimedia-arch-ecc-em-spec</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </dependency>
+        
+    <dependency>
+      <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
+      <artifactId>experimedia-arch-ecc-amqpAPI-impl</artifactId>
       <version>0.1-SNAPSHOT</version>
     </dependency>
     

@@ -25,13 +25,13 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccEntryPoint;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.spec.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasicChannel;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.factory.EMInterfaceFactory;
 
 import java.util.UUID;
-
 
 
 
@@ -51,6 +51,8 @@ public class ECCMonitorEntryPointTestExecutor implements Runnable,
 {
   private AMQPBasicChannel providerChannel;
   private AMQPBasicChannel userChannel;
+  
+  IAMQPMessageDispatchPump dispatchPump;
   
   IECCMonitorEntryPoint providerEP;
   IECCMonitorEntryPoint userEP;
@@ -93,12 +95,27 @@ public class ECCMonitorEntryPointTestExecutor implements Runnable,
     // User factory
     EMInterfaceFactory userFactory     = new EMInterfaceFactory( userChannel, false );
     
+    // Share a dispatch message pump
+    dispatchPump = providerFactory.createDispatchPump( "Shared pump", 
+                                                       IAMQPMessageDispatchPump.ePumpPriority.MINIMUM );
+    
+    // Create dispatchers for both provider and user
+    IAMQPMessageDispatch providerDispatch = providerFactory.createDispatch();
+    IAMQPMessageDispatch userDispatch     = userFactory.createDispatch();
+    dispatchPump.addDispatch( providerDispatch );
+    dispatchPump.addDispatch( userDispatch );
+    dispatchPump.startPump();
+    
     // Set up the provider interface (and listen for in-coming user connections)
-    providerEP = providerFactory.createEntryPoint( ECCMonitorEntryPointTest.EMProviderUUID );
+    providerEP = providerFactory.createEntryPoint( ECCMonitorEntryPointTest.EMProviderUUID,
+                                                   providerDispatch );
     providerEP.setListener( this );
     
     // Create user interface and try to connect to the provider
-    userEP = userFactory.createEntryPoint( ECCMonitorEntryPointTest.EMProviderUUID );
+    userEP = userFactory.createEntryPoint( ECCMonitorEntryPointTest.EMProviderUUID,
+                                           userDispatch );
+    
+    // Start by trying to register as EM client
     userEP.registerAsEMClient( ECCMonitorEntryPointTest.EMUserUUID, "EM Entry Point Test User" );
   }
 }

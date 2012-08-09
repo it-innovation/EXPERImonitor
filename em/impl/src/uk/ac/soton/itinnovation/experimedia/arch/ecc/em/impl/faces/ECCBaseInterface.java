@@ -25,8 +25,10 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasicChannel;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.eccInterface.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.spec.IAMQPMessageDispatchListener;
+
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.faces.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel.EMMethodPayload;
 
 import org.yaml.snakeyaml.*;
@@ -37,7 +39,7 @@ import java.util.*;
 
 
 
-public abstract class ECCBaseInterface implements AMQPMessageDispatchListener
+public abstract class ECCBaseInterface implements IAMQPMessageDispatchListener
 {
   protected String               interfaceName;
   protected String               interfaceVersion;
@@ -49,10 +51,8 @@ public abstract class ECCBaseInterface implements AMQPMessageDispatchListener
   protected UUID                 interfaceUserID;
   protected UUID                 interfaceProviderID;
   
-
   
-  
-  // MessageDispatchListener ---------------------------------------------------
+  // IAMQPMessageDispatchListener ----------------------------------------------
   @Override
   public void onSimpleMessageDispatched( String queueName, byte[] data )
   {        
@@ -69,15 +69,16 @@ public abstract class ECCBaseInterface implements AMQPMessageDispatchListener
     yamlUtil    = new Yaml();
   }
   
-  protected void initialiseAMQP( AbstractAMQPInterface eccIFace )
+  protected void initialiseAMQP( AbstractAMQPInterface eccIFace,
+                                 AMQPMessageDispatch msgDispatch )
   {
-    amqpInterface = eccIFace;
-    
-    if ( amqpInterface != null )
+    if ( eccIFace != null && msgDispatch != null )
     {
-      AMQPMessageDispatch dispatch = new AMQPMessageDispatch();
-      amqpInterface.setMessageDispatch( dispatch );
-      dispatch.start( this );
+      amqpInterface = eccIFace;
+      
+      msgDispatch.setListener( this );
+      amqpInterface.setMessageDispatch( msgDispatch );
+   
       
       String faceName = interfaceName + " " + interfaceVersion;
       

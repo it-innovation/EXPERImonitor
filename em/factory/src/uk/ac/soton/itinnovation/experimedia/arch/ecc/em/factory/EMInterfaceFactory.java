@@ -25,13 +25,13 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.factory;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.spec.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.*;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasicChannel;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces.*;
 
 import java.util.UUID;
-
 
 
 
@@ -41,24 +41,52 @@ public class EMInterfaceFactory
   private AMQPBasicChannel amqpChannel;
   private boolean          generateProviders ;
   
+  
   public EMInterfaceFactory( AMQPBasicChannel channel, boolean createProviders )
   {
     amqpChannel       = channel;
     generateProviders = createProviders;
   }
   
-  public IECCMonitorEntryPoint createEntryPoint( UUID providerID )
+  public IAMQPMessageDispatchPump createDispatchPump( String name,
+                                                      IAMQPMessageDispatchPump.ePumpPriority priority )
   {
-    return new ECCMonitorEntryPoint( amqpChannel, providerID, generateProviders );
+    return new AMQPMessageDispatchPump( name, priority );
   }
   
-  public IECCMonitor createMonitor( UUID providerID, UUID userID )
+  public IAMQPMessageDispatch createDispatch()
   {
-    return new ECCMonitor( amqpChannel, providerID, userID, generateProviders );
+    return new AMQPMessageDispatch();
   }
   
-  public IECCTest createTest( UUID providerID, UUID userID )
+  public IECCMonitorEntryPoint createEntryPoint( UUID providerID,
+                                                 IAMQPMessageDispatch dispatch )
   {
-    return new ECCTest( amqpChannel, providerID, userID, generateProviders );
+    return new ECCMonitorEntryPoint( amqpChannel,
+                                     (AMQPMessageDispatch) dispatch,
+                                     providerID, 
+                                     generateProviders );
+  }
+  
+  public IECCMonitor createMonitor( UUID providerID,
+                                    UUID userID,
+                                    IAMQPMessageDispatch dispatch )
+  {
+    return new ECCMonitor( amqpChannel,
+                           (AMQPMessageDispatch) dispatch,
+                           providerID,
+                           userID,
+                           generateProviders );
+  }
+  
+  public IECCTest createTest( UUID providerID,
+                              UUID userID,
+                              IAMQPMessageDispatch dispatch )
+  {
+    return new ECCTest( amqpChannel,
+                        (AMQPMessageDispatch) dispatch,
+                        providerID, 
+                        userID, 
+                        generateProviders );
   }
 }

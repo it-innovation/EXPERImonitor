@@ -23,9 +23,9 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.eccInterface;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.faces;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasicChannel;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 
 import com.rabbitmq.client.*;
 
@@ -38,7 +38,7 @@ public abstract class AbstractAMQPInterface
 {
   private AMQPBasicSubscriptionProcessor subProcessor;
   
-  protected AMQPBasicChannel            amqpChannel;
+  protected AMQPBasicChannel    amqpChannel;
   protected AMQPMessageDispatch msgDispatch;
 
   protected String  interfaceName;
@@ -127,8 +127,8 @@ public abstract class AbstractAMQPInterface
     String targetQueue = actingAsProvider ? providerQueueName : userQueueName;
     
     subProcessor = new AMQPBasicSubscriptionProcessor( channel,
-                                                      targetQueue,
-                                                      msgDispatch );
+                                                       targetQueue,
+                                                       msgDispatch );
     
     try { channel.basicConsume( targetQueue, false, subProcessor ); }
     catch ( IOException ioe ) {}

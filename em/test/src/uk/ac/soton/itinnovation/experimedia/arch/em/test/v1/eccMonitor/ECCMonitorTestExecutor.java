@@ -25,6 +25,7 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccMonitor;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.spec.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasicChannel;
@@ -33,7 +34,6 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.factory.EMInterfaceFacto
 import uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccEntryPoint.ECCMonitorEntryPointTest;
 
 import java.util.*;
-
 
 
 
@@ -73,6 +73,8 @@ public class ECCMonitorTestExecutor implements Runnable,
 {
   private AMQPBasicChannel providerChannel;
   private AMQPBasicChannel userChannel;
+  
+  IAMQPMessageDispatchPump dispatchPump;
   
   private IECCMonitor providerMonitor;
   private IECCMonitor userMonitor;
@@ -145,9 +147,18 @@ public class ECCMonitorTestExecutor implements Runnable,
     
       // Create a test interface here and get ready for data
       EMInterfaceFactory providerFactory = new EMInterfaceFactory( providerChannel, true );
+      
+      // Create dispatcher & attach dispatcher to (shared) pump
+      IAMQPMessageDispatch providerDispatch = providerFactory.createDispatch();
+      dispatchPump.addDispatch( providerDispatch );
+
+      userTest = providerFactory.createTest( ECCMonitorEntryPointTest.EMProviderUUID,
+                                             ECCMonitorEntryPointTest.EMUserUUID,
+                                             providerDispatch );
 
       providerTest = providerFactory.createTest( ECCMonitorEntryPointTest.EMProviderUUID,
-                                                ECCMonitorEntryPointTest.EMUserUUID );
+                                                 ECCMonitorEntryPointTest.EMUserUUID,
+                                                 providerDispatch );
 
       providerTest.setListener( this );
 
@@ -190,9 +201,14 @@ public class ECCMonitorTestExecutor implements Runnable,
     
       // Create a test interface here
       EMInterfaceFactory userFactory = new EMInterfaceFactory( providerChannel, false );
+      
+      // Create dispatcher & attach dispatcher to (shared) pump
+      IAMQPMessageDispatch userDispatch = userFactory.createDispatch();
+      dispatchPump.addDispatch( userDispatch );
 
       userTest = userFactory.createTest( ECCMonitorEntryPointTest.EMProviderUUID,
-                                        ECCMonitorEntryPointTest.EMUserUUID );
+                                         ECCMonitorEntryPointTest.EMUserUUID,
+                                         userDispatch );
 
       // Create some test data
       testDataSize = 2048;
@@ -245,11 +261,24 @@ public class ECCMonitorTestExecutor implements Runnable,
     EMInterfaceFactory providerFactory = new EMInterfaceFactory( providerChannel, true );
     EMInterfaceFactory userFactory     = new EMInterfaceFactory( userChannel, false );
     
+    // Share a dispatch message pump
+    dispatchPump = providerFactory.createDispatchPump( "Shared pump", 
+                                                       IAMQPMessageDispatchPump.ePumpPriority.MINIMUM );
+    
+    // Create dispatchers for both provider and user
+    IAMQPMessageDispatch providerDispatch = providerFactory.createDispatch();
+    IAMQPMessageDispatch userDispatch     = userFactory.createDispatch();
+    dispatchPump.addDispatch( providerDispatch );
+    dispatchPump.addDispatch( userDispatch );
+    dispatchPump.startPump();
+    
     providerMonitor = providerFactory.createMonitor( ECCMonitorEntryPointTest.EMProviderUUID,
-                                                     ECCMonitorEntryPointTest.EMUserUUID );
+                                                     ECCMonitorEntryPointTest.EMUserUUID,
+                                                     providerDispatch );
     
     userMonitor = userFactory.createMonitor( ECCMonitorEntryPointTest.EMProviderUUID,
-                                             ECCMonitorEntryPointTest.EMUserUUID );
+                                             ECCMonitorEntryPointTest.EMUserUUID,
+                                             userDispatch );
     
     // This class acts as BOTH provider and user
     providerMonitor.setProviderListener( this );

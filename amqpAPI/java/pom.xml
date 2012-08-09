@@ -42,6 +42,7 @@
   </parent>
 
   <modules>
+    <module>spec</module>
     <module>impl</module>
   </modules>
     

@@ -28,12 +28,13 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasicChannel;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.eccInterface.AMQPHalfInterfaceBase;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.faces.AMQPHalfInterfaceBase;
 
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel.EMMethodPayload;
 
 import java.util.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPMessageDispatch;
 
 
 
@@ -45,9 +46,10 @@ public class ECCMonitorEntryPoint extends ECCBaseInterface
   private IECCMonitorEntryPoint_ProviderListener providerListener;
   
   
-  public ECCMonitorEntryPoint( AMQPBasicChannel channel,
-                               UUID             providerID,
-                               boolean          isProvider )
+  public ECCMonitorEntryPoint( AMQPBasicChannel    channel,
+                               AMQPMessageDispatch dispatch,
+                               UUID                providerID,
+                               boolean             isProvider )
   {
     super( channel, isProvider );
     interfaceName = "IECCMonitorEntryPoint";
@@ -56,7 +58,7 @@ public class ECCMonitorEntryPoint extends ECCBaseInterface
     interfaceProviderID = providerID;
     
     AMQPHalfInterfaceBase entryPoint = new AMQPHalfInterfaceBase( channel );
-    initialiseAMQP( entryPoint );
+    initialiseAMQP( entryPoint, dispatch );
   }
   
   // IECCMonitorEntryPoint -----------------------------------------------------

@@ -4,13 +4,13 @@
     
   <modelVersion>4.0.0</modelVersion>
   <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
-  <artifactId>experimedia-arch-ecc-em-test</artifactId>
+  <artifactId>experimedia-arch-ecc-amqpAPI-spec</artifactId>
   <version>0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
   
   <parent>
     <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
-    <artifactId>experimedia-arch-ecc-em</artifactId>
+    <artifactId>experimedia-arch-ecc-amqpAPI</artifactId>
     <version>0.1-SNAPSHOT</version>
   </parent>
   
@@ -42,38 +42,7 @@
   </build>
   
   <dependencies>
-    
-    <dependency>
-      <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
-      <artifactId>experimedia-arch-ecc-amqpAPI-spec</artifactId>
-      <version>0.1-SNAPSHOT</version>
-    </dependency>
-    
-    <dependency>
-      <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
-      <artifactId>experimedia-arch-ecc-em-spec</artifactId>
-      <version>0.1-SNAPSHOT</version>
-    </dependency>
-    
-    <dependency>
-      <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
-      <artifactId>experimedia-arch-ecc-amqpAPI-impl</artifactId>
-      <version>0.1-SNAPSHOT</version>
-    </dependency>
-    
-    <dependency>
-      <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
-      <artifactId>experimedia-arch-ecc-em-factory</artifactId>
-      <version>0.1-SNAPSHOT</version>
-    </dependency>
-    
-    <!-- 3rd party dependencies ____________________________________________ -->
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>${ecc.junit.version}</version>
-    </dependency>
-            
+		
   </dependencies>
     
 </project>

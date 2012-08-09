@@ -26,10 +26,11 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasicChannel;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.eccInterface.AMQPFullInterfaceBase;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.faces.AMQPFullInterfaceBase;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.*;
 
 import java.util.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPMessageDispatch;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel.EMMethodPayload;
 
 
@@ -41,6 +42,7 @@ public class ECCTest extends ECCBaseInterface
   private IECCTest_Listener testListener;
   
   public ECCTest( AMQPBasicChannel channel,
+                  AMQPMessageDispatch dispatch,
                   UUID providerID,
                   UUID userID,
                   boolean isProvider )
@@ -54,7 +56,7 @@ public class ECCTest extends ECCBaseInterface
     interfaceUserID     = userID;
     
     AMQPFullInterfaceBase fullFace = new AMQPFullInterfaceBase( channel );
-    initialiseAMQP( fullFace );
+    initialiseAMQP( fullFace, dispatch );
   }
   
   // IECCTest ------------------------------------------------------------------

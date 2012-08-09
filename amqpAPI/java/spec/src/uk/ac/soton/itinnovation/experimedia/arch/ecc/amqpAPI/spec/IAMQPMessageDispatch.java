@@ -18,17 +18,19 @@
 // the software.
 //
 //      Created By :            Simon Crowle
-//      Created Date :          11-Jul-2012
+//      Created Date :          09-Aug-2012
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.eccInterface;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.spec;
 
 
 
 
-public interface AMQPMessageDispatchListener
+public interface IAMQPMessageDispatch
 {
-  void onSimpleMessageDispatched( String queueName, byte[] data );
+  void setListener( IAMQPMessageDispatchListener listener );
+  
+  IAMQPMessageDispatchListener getListener();
 }

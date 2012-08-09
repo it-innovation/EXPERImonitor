@@ -23,7 +23,7 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.eccInterface;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp;
 
 import com.rabbitmq.client.*;
 import java.io.IOException;
@@ -31,15 +31,15 @@ import java.io.IOException;
 
 
 
-class AMQPBasicSubscriptionProcessor extends DefaultConsumer
+public class AMQPBasicSubscriptionProcessor extends DefaultConsumer
 {
-  private String                      queueName;
+  private String              queueName;
   private AMQPMessageDispatch messageDispatch;
 
   
   public AMQPBasicSubscriptionProcessor( Channel channel,
-                                        String qName,
-                                        AMQPMessageDispatch dispatch )
+                                         String qName,
+                                         AMQPMessageDispatch dispatch )
   {
     super( channel );
     

@@ -28,10 +28,11 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasicChannel;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.eccInterface.AMQPFullInterfaceBase;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.faces.AMQPFullInterfaceBase;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel.EMMethodPayload;
 
 import java.util.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPMessageDispatch;
 
 
 
@@ -56,6 +57,7 @@ public class ECCMonitor extends ECCBaseInterface
   
   
   public ECCMonitor( AMQPBasicChannel channel,
+                     AMQPMessageDispatch dispatch,
                      UUID providerID,
                      UUID userID,
                      boolean isProvider )
@@ -68,7 +70,7 @@ public class ECCMonitor extends ECCBaseInterface
     interfaceUserID     = userID;
     
     AMQPFullInterfaceBase fullFace = new AMQPFullInterfaceBase( channel );
-    initialiseAMQP( fullFace );
+    initialiseAMQP( fullFace, dispatch );
   }
   
   // IECCMonitor ---------------------------------------------------------------
