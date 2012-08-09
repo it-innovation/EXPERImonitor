@@ -11,18 +11,22 @@ RabbitMQ Java Client
 	com.rabbitmq:amqp-client:2.8.4
 	http://www.rabbitmq.com
 	GPL v2 (http://www.gnu.org/licenses/gpl-2.0.html) and MPL 1.1 (http://www.rabbitmq.com/mpl.html)
+	See licences/MPL_v1.1.txt
 	
 JUnit
 	junit:junit:4.10
 	http://junit.org
 	Common Public License Version 1.0 (http://junit.sourceforge.net/cpl-v10.html)
+	See licences/CPL_v1.0.txt
 	 
 Hamcrest Core
 	org.hamcrest:hamcrest-core:1.1
 	http://code.google.com/p/hamcrest/
-	BSD style (http://opensource.org/licenses/BSD-3-Clause)
+	The above URL references the BSD-3-Clause licence (http://opensource.org/licenses/BSD-3-Clause) but does not actually provide a licence file.  The source code for the Java library includes the BSD 2 clause licence which may be found in the licences folder.
+	See licences/BSD_Hamcrest.txt
 
 SnakeYAML
 	org.yaml:snakeyaml:1.5
 	http://code.google.com/p/snakeyaml/
 	Apache License Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+	See licences/Apache_v2.0.txt
