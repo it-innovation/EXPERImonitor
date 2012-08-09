@@ -40,7 +40,7 @@ This usage scenario assumes you will run a RabbitMQ server on your local machine
 	
 4. Run 'releases/EMProtocolTestReleaseV1/runTest.bat'
 
-5. 3 tests should be successful
+5. 2 tests should be successful
 
 6. Shutdown your RabbitMQ server by typing in your RabbitMQ 'sbin' Command window:
 	rabbitmq-service stop
