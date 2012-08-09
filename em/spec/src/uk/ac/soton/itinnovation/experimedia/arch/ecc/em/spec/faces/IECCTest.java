@@ -23,45 +23,38 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces;
 
-import java.util.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.listeners.IECCTest_Listener;
 
 
 
 
 /**
- * Use this listener to listen to in-coming events targeted at a provider instance
- * (EM) of the IECCMonitor interface. This listener notifies of initialisation,
- * activity, discovery and disconnection events.
+ * This is test interface is not properly part of the EM monitoring life-cycle.
+ * It has been developed for the purposes of supporting the testing unit associated
+ * with the EM. Both producer and users of this interface can use this test
+ * interface to send the other test data.
  * 
  * @author sgc
  */
-public interface IECCMonitor_ProviderListener
+public interface IECCTest
 {
   /**
-   * Notification of a user who is now ready to initialise.
-   */
-  void onReadyToInitialise( UUID senderID );
-  
-  /**
-   * Notification of a user's declaration of which activity phases it supports.
+   * Sets a listener to the interface that allows data to be received by either
+   * producer or user.
    * 
-   * @param supportedPhases - a list of enumerated phases supported by the user.
+   * @param listener - IECCTest_Listener instance providing notification of test
+   * events.
    */
-  void onSendActivityPhases( UUID senderID, 
-                             List<IECCMonitor.EMSupportedPhase> supportedPhases );
+  void setListener( IECCTest_Listener listener );
   
   /**
-   * Notification that the user has finished their discovery process and is
-   * reporting on which metric generators they currently have available.
-   */
-  void onSendDiscoveryResult( UUID senderID
-                              /* Data model under development*/ );
-  
-  /**
-   * Notification that the user is disconnecting from the EM.
+   * Use this method to send test data to either the user or producer instance of
+   * this interface.
    * 
+   * @param byteCount - Number of bytes expected to be sent in this method
+   * @param dataBody  - Array of byte test data being sent
    */
-  void onClientDisconnecting( UUID senderID );
+  void sendData( int byteCount, byte[] dataBody );
 }

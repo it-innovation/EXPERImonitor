@@ -26,7 +26,8 @@
 package uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccMonitor;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.spec.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.listeners.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasicChannel;
 

@@ -18,30 +18,23 @@
 // the software.
 //
 //      Created By :            Simon Crowle
-//      Created Date :          05-Aug-2012
+//      Created Date :          09-Aug-2012
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.listeners;
+
+import java.util.UUID;
 
 
 
-/**
- * The is a symmetric listener (for either producer or user to use) that notifies
- * when the producer/user has sent some data. This listener is only intended to be
- * used with the IECCTest interface and is not a 'proper' part of the EM monitoring
- * life-cycle.
- * 
- * @author sgc
- */
-public interface IECCTest_Listener
+
+public interface IECCMetricEnumerator_ProviderListener
 {
-  /**
-   * Notification of some data received.
-   * 
-   * @param dataSize - Number of bytes sent in this event
-   * @param dataBody - Array of byte data sent
-   */
-  void onReceivedData( int byteCount, byte[] dataBody );
+  void onNotifyReadyToEnumerate( UUID senderID );
+  
+  void onSendMetricGeneratorInfo( UUID senderID /* data model here*/ );
+  
+  void onNotifyEnumerationComplete( UUID senderID );
 }

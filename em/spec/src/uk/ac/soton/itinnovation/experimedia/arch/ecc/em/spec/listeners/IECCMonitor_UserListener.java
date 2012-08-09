@@ -23,8 +23,9 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.listeners;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.IECCMonitor;
 import java.util.UUID;
 
 

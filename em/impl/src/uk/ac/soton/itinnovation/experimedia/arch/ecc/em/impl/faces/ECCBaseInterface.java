@@ -37,8 +37,6 @@ import java.util.*;
 
 
 
-
-
 public abstract class ECCBaseInterface implements IAMQPMessageDispatchListener
 {
   protected String               interfaceName;
