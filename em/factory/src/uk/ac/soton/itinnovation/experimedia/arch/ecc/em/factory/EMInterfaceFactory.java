@@ -28,7 +28,7 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.factory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasicChannel;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.base.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces.*;
 
 import java.util.UUID;
 

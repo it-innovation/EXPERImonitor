@@ -23,7 +23,7 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.base;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasicChannel;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.eccInterface.*;
@@ -37,7 +37,7 @@ import java.util.*;
 
 
 
-public abstract class ECCBaseInterface implements MessageDispatchListener
+public abstract class ECCBaseInterface implements AMQPMessageDispatchListener
 {
   protected String               interfaceName;
   protected String               interfaceVersion;
@@ -45,7 +45,7 @@ public abstract class ECCBaseInterface implements MessageDispatchListener
   protected Yaml                 yamlUtil;
   
   protected AMQPBasicChannel     amqpChannel;
-  protected AbstractECCInterface amqpInterface;
+  protected AbstractAMQPInterface amqpInterface;
   protected UUID                 interfaceUserID;
   protected UUID                 interfaceProviderID;
   
@@ -69,26 +69,26 @@ public abstract class ECCBaseInterface implements MessageDispatchListener
     yamlUtil    = new Yaml();
   }
   
-  protected void initialiseAMQP( AbstractECCInterface eccIFace )
+  protected void initialiseAMQP( AbstractAMQPInterface eccIFace )
   {
     amqpInterface = eccIFace;
     
     if ( amqpInterface != null )
     {
-      ECCInterfaceMessageDispatch dispatch = new ECCInterfaceMessageDispatch();
+      AMQPMessageDispatch dispatch = new AMQPMessageDispatch();
       amqpInterface.setMessageDispatch( dispatch );
       dispatch.start( this );
       
       String faceName = interfaceName + " " + interfaceVersion;
       
-      if ( eccIFace instanceof ECCHalfInterfaceBase )
+      if ( eccIFace instanceof AMQPHalfInterfaceBase )
       {
-        ECCHalfInterfaceBase halfFace = (ECCHalfInterfaceBase) eccIFace;
+        AMQPHalfInterfaceBase halfFace = (AMQPHalfInterfaceBase) eccIFace;
         halfFace.initialise( faceName, interfaceProviderID, isProvider );
       }
-      else if ( eccIFace instanceof ECCFullInterfaceBase )
+      else if ( eccIFace instanceof AMQPFullInterfaceBase )
       {
-        ECCFullInterfaceBase fullFace = (ECCFullInterfaceBase) eccIFace;
+        AMQPFullInterfaceBase fullFace = (AMQPFullInterfaceBase) eccIFace;
         fullFace.initialise( faceName, interfaceProviderID, interfaceUserID, isProvider );
       }
     }

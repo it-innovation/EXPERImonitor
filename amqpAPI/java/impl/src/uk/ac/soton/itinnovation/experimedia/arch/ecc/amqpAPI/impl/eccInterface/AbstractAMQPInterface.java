@@ -34,12 +34,12 @@ import java.io.*;
 
 
 
-public abstract class AbstractECCInterface
+public abstract class AbstractAMQPInterface
 {
-  private ECCBasicSubscriptionProcessor subProcessor;
+  private AMQPBasicSubscriptionProcessor subProcessor;
   
   protected AMQPBasicChannel            amqpChannel;
-  protected ECCInterfaceMessageDispatch msgDispatch;
+  protected AMQPMessageDispatch msgDispatch;
 
   protected String  interfaceName;
   protected String  providerExchangeName, userExchangeName;
@@ -81,11 +81,11 @@ public abstract class AbstractECCInterface
     return true;
   }
 
-  public void setMessageDispatch( ECCInterfaceMessageDispatch dispatch )
+  public void setMessageDispatch( AMQPMessageDispatch dispatch )
   { msgDispatch = dispatch; }
   
   // Protected methods ---------------------------------------------------------
-  protected AbstractECCInterface(AMQPBasicChannel channel)
+  protected AbstractAMQPInterface(AMQPBasicChannel channel)
   {
     amqpChannel = channel;
   }
@@ -126,7 +126,7 @@ public abstract class AbstractECCInterface
     Channel    channel = (Channel) amqpChannel.getChannelImpl();
     String targetQueue = actingAsProvider ? providerQueueName : userQueueName;
     
-    subProcessor = new ECCBasicSubscriptionProcessor( channel,
+    subProcessor = new AMQPBasicSubscriptionProcessor( channel,
                                                       targetQueue,
                                                       msgDispatch );
     

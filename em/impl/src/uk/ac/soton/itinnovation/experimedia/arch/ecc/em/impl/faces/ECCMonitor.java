@@ -23,12 +23,12 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.base;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasicChannel;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.eccInterface.ECCFullInterfaceBase;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.eccInterface.AMQPFullInterfaceBase;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel.EMMethodPayload;
 
 import java.util.*;
@@ -42,6 +42,19 @@ public class ECCMonitor extends ECCBaseInterface
   private IECCMonitor_ProviderListener providerListener;
   private IECCMonitor_UserListener     userListener;
   
+  public enum EMInterfaceType { eECCMetricEnumerator,
+                                eECCMetricCalibration,
+                                eECCMonitorControl,
+                                eECCReport,
+                                eECCTearDown,
+                                eECCTestInterface };
+  
+  public enum EMMonitorPhases { eEnumerateMetrics,
+                                eMetricCalibration,
+                                eMonitorControl,
+                                eReport };
+  
+  
   public ECCMonitor( AMQPBasicChannel channel,
                      UUID providerID,
                      UUID userID,
@@ -54,21 +67,9 @@ public class ECCMonitor extends ECCBaseInterface
     interfaceProviderID = providerID;
     interfaceUserID     = userID;
     
-    ECCFullInterfaceBase fullFace = new ECCFullInterfaceBase( channel );
+    AMQPFullInterfaceBase fullFace = new AMQPFullInterfaceBase( channel );
     initialiseAMQP( fullFace );
   }
-  
-  public enum EMInterfaceType { eECCMetricEnumerator,
-                                eECCMetricCalibration,
-                                eECCMonitorControl,
-                                eECCReport,
-                                eECCTearDown,
-                                eECCTestInterface };
-  
-  public enum EMMonitorPhases { eEnumerateMetrics,
-                                eMetricCalibration,
-                                eMonitorControl,
-                                eReport };
   
   // IECCMonitor ---------------------------------------------------------------
   @Override

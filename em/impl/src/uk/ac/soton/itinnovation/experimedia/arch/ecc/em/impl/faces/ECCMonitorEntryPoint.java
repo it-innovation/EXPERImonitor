@@ -23,12 +23,12 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.base;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasicChannel;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.eccInterface.ECCHalfInterfaceBase;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.eccInterface.AMQPHalfInterfaceBase;
 
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel.EMMethodPayload;
@@ -55,7 +55,7 @@ public class ECCMonitorEntryPoint extends ECCBaseInterface
     
     interfaceProviderID = providerID;
     
-    ECCHalfInterfaceBase entryPoint = new ECCHalfInterfaceBase( channel );
+    AMQPHalfInterfaceBase entryPoint = new AMQPHalfInterfaceBase( channel );
     initialiseAMQP( entryPoint );
   }
   

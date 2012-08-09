@@ -35,9 +35,9 @@ import java.io.IOException;
 
 
 
-public class ECCFullInterfaceBase extends AbstractECCInterface
+public class AMQPFullInterfaceBase extends AbstractAMQPInterface
 {
-  public ECCFullInterfaceBase( AMQPBasicChannel channel )
+  public AMQPFullInterfaceBase( AMQPBasicChannel channel )
   {
     super (channel);
   }

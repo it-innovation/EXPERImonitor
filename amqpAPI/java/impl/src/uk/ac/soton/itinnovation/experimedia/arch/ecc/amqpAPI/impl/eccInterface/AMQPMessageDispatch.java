@@ -31,24 +31,24 @@ import java.util.Map.*;
 
 
 
-public class ECCInterfaceMessageDispatch implements Runnable
+public class AMQPMessageDispatch implements Runnable
 {
   private final Object dispatchLock = new Object();
   
   private Thread                           dispatchThread;
   private LinkedList<Entry<String,byte[]>> dispatchList;
   private boolean                          dispatchRunning;
-  private MessageDispatchListener          dispatchListener;
+  private AMQPMessageDispatchListener          dispatchListener;
   
   
-  public ECCInterfaceMessageDispatch()
+  public AMQPMessageDispatch()
   {
     dispatchList = new LinkedList<Entry<String,byte[]>>();
     dispatchThread = new Thread( this );
     dispatchThread.setPriority( Thread.MIN_PRIORITY );
   }
   
-  public boolean start( MessageDispatchListener listener )
+  public boolean start( AMQPMessageDispatchListener listener )
   {
     if ( listener == null ) return false;
     

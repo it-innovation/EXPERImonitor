@@ -23,10 +23,10 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.base;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasicChannel;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.eccInterface.ECCFullInterfaceBase;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.eccInterface.AMQPFullInterfaceBase;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.*;
 
 import java.util.*;
@@ -53,7 +53,7 @@ public class ECCTest extends ECCBaseInterface
     interfaceProviderID = providerID;
     interfaceUserID     = userID;
     
-    ECCFullInterfaceBase fullFace = new ECCFullInterfaceBase( channel );
+    AMQPFullInterfaceBase fullFace = new AMQPFullInterfaceBase( channel );
     initialiseAMQP( fullFace );
   }
   
