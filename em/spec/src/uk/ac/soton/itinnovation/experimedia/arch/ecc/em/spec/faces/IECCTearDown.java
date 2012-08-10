@@ -25,13 +25,17 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.listeners.*;
+
 
 
 
 public interface IECCTearDown
 {
   // Listeners -----------------------------------------------------------------
+  void setProviderListener( IECCTearDown_ProviderListener listener );
   
+  void setUserListener( IECCTearDown_UserListener listener );
   
   // Provider methods ----------------------------------------------------------
   void tearDownMetricGenerators();

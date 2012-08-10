@@ -25,13 +25,17 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.listeners.*;
+
 
 
 
 public interface IECCReport
 {
   // Listeners -----------------------------------------------------------------
+  void setProviderListener( IECCReport_ProviderListener listener );
   
+  void setUserListener( IECCReport_UserListener listener );
   
   // Provider methods ----------------------------------------------------------
   void requestReportSummary();
