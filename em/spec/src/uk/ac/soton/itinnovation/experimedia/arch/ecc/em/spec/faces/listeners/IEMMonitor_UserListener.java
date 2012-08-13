@@ -23,7 +23,7 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.listeners;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.IEMMonitor;
 import java.util.UUID;
@@ -37,7 +37,7 @@ import java.util.UUID;
  * 
  * @author sgc
  */
-public interface IECCMonitor_UserListener
+public interface IEMMonitor_UserListener
 {
   /**
    * Request by the provider for the user to create a (user) interface instance

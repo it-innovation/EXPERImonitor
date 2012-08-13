@@ -17,34 +17,20 @@
 // PURPOSE, except where stated in the Licence Agreement supplied with
 // the software.
 //
-//      Created By :            Simon Crowle
-//      Created Date :          09-Aug-2012
-//      Created for Project :   EXPERIMEDIA
+//      Created By :            sgc
+//      Created Date :          13-Aug-2012
+//      Created for Project :   experimedia-arch-ecc-em-spec
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEMTearDown_UserListener;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEMTearDown_ProviderListener;
-
+import java.util.UUID;
 
 
 
-public interface IEMTearDown
+
+public interface IExperimentMonitorListener
 {
-  // Listeners -----------------------------------------------------------------
-  void setProviderListener( IEMTearDown_ProviderListener listener );
-  
-  void setUserListener( IEMTearDown_UserListener listener );
-  
-  // Provider methods ----------------------------------------------------------
-  void tearDownMetricGenerators();
-  
-  void tearDownTimeOut();
-  
-  // User methods --------------------------------------------------------------
-  void notifyReadyToTearDown();
-  
-  void sendTearDownResult( /* data model */ );
+  void onClientConnected( UUID id, String clientName );
 }

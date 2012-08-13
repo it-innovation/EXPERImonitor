@@ -23,20 +23,22 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.listeners;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners;
 
 import java.util.UUID;
 
 
 
 
-public interface IECCReport_ProviderListener
+public interface IEMMonitorControl_ProviderListener
 {
-  void onNotifyReadyToReport( UUID senderID );
+  void onNotifyReadyToPush( UUID senderID );
   
-  void onSendReportSummary( UUID senderID /*data model here */ );
+  void onPushMetric( UUID senderID /*data model here*/ );
   
-  void onSendReportMetaData( UUID senderID /* data model here */ );
+  void onNotifyPushingComplete( UUID senderID );
   
-  void onSendDataPart( UUID senderID /* data model here */ );
+  void onNotifyReadyForPull( UUID senderID );
+  
+  void onSendPulledMetric( UUID senderID /*data model here*/ );
 }

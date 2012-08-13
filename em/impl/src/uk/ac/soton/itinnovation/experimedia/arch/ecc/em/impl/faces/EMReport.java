@@ -25,8 +25,9 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEMReport_UserListener;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEMReport_ProviderListener;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.IEMReport;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.listeners.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasicChannel;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPMessageDispatch;
@@ -41,14 +42,14 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel.EMMethodPayloa
 public class EMReport extends EMBaseInterface
                        implements IEMReport
 {
-  private IECCReport_ProviderListener providerListener;
-  private IECCReport_UserListener     userListener;
+  private IEMReport_ProviderListener providerListener;
+  private IEMReport_UserListener     userListener;
   
   public EMReport( AMQPBasicChannel channel,
-                    AMQPMessageDispatch dispatch,
-                    UUID providerID,
-                    UUID userID,
-                    boolean isProvider )
+                   AMQPMessageDispatch dispatch,
+                   UUID providerID,
+                   UUID userID,
+                   boolean isProvider )
   {
     super( channel, isProvider );
     interfaceName = "IECCReport";
@@ -63,11 +64,11 @@ public class EMReport extends EMBaseInterface
   
   // IECCReport ----------------------------------------------------------------
   @Override
-  public void setProviderListener( IECCReport_ProviderListener listener )
+  public void setProviderListener( IEMReport_ProviderListener listener )
   { providerListener = listener; }
   
   @Override
-  public void setUserListener( IECCReport_UserListener listener )
+  public void setUserListener( IEMReport_UserListener listener )
   { userListener = listener; }
   
   // Provider methods ----------------------------------------------------------

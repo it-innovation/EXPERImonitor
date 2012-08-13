@@ -18,33 +18,32 @@
 // the software.
 //
 //      Created By :            Simon Crowle
-//      Created Date :          09-Aug-2012
-//      Created for Project :   EXPERIMEDIA
+//      Created Date :          05-Aug-2012
+//      Created for Project :   experimedia-arch-ecc-em-spec
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEMTearDown_UserListener;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEMTearDown_ProviderListener;
-
+import java.util.UUID;
 
 
 
-public interface IEMTearDown
+/**
+ * This listener provides access to methods sent to the provider (the EM).
+ * Implement this listener with a provider interface instance to find out about
+ * users attempting to connect to the EM entry point.
+ * 
+ * @author sgc
+ */
+public interface IEMMonitorEntryPoint_ProviderListener
 {
-  // Listeners -----------------------------------------------------------------
-  void setProviderListener( IEMTearDown_ProviderListener listener );
-  
-  void setUserListener( IEMTearDown_UserListener listener );
-  
-  // Provider methods ----------------------------------------------------------
-  void tearDownMetricGenerators();
-  
-  void tearDownTimeOut();
-  
-  // User methods --------------------------------------------------------------
-  void notifyReadyToTearDown();
-  
-  void sendTearDownResult( /* data model */ );
+  /**
+   * The event indicating that a user is attempting to register as a client of
+   * the EM.
+   * 
+   * @param userID    - UUID of the user connecting to the EM
+   * @param userName  - Informal name of the user connecting to the EM
+   */
+  void onRegisterAsEMClient( UUID userID, String userName );
 }

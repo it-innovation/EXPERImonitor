@@ -25,7 +25,8 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.listeners.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEMReport_UserListener;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEMReport_ProviderListener;
 
 
 
@@ -33,9 +34,9 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.listeners.*;
 public interface IEMReport
 {
   // Listeners -----------------------------------------------------------------
-  void setProviderListener( IECCReport_ProviderListener listener );
+  void setProviderListener( IEMReport_ProviderListener listener );
   
-  void setUserListener( IECCReport_UserListener listener );
+  void setUserListener( IEMReport_UserListener listener );
   
   // Provider methods ----------------------------------------------------------
   void requestReportSummary();

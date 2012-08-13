@@ -23,7 +23,7 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.listeners;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.IEMMonitor;
 
@@ -39,7 +39,7 @@ import java.util.*;
  * 
  * @author sgc
  */
-public interface IECCMonitor_ProviderListener
+public interface IEMMonitor_ProviderListener
 {
   /**
    * Notification of a user who is now ready to initialise.

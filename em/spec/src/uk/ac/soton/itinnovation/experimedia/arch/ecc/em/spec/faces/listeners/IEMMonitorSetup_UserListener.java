@@ -23,16 +23,16 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.listeners;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners;
 
 import java.util.UUID;
 
 
 
 
-public interface IECCMetricEnumerator_UserListener
+public interface IEMMonitorSetup_UserListener
 {
-  void onRequestNextMetricGeneratorInfo( UUID senderID );
+  void onSetupMetricGenerator( UUID senderID /* data model here */ );
   
-  void onEnumerationTimeOut( UUID senderID );
+  void onSetupTimeOut( UUID senderID /* data model here */ );
 }

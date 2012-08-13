@@ -27,7 +27,7 @@ package uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccEntryPoint;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.spec.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.listeners.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasicChannel;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.factory.EMInterfaceFactory;
@@ -48,7 +48,7 @@ import java.util.UUID;
  * @author sgc
  */
 public class ECCMonitorEntryPointTestExecutor implements Runnable,
-                                                         IECCMonitorEntryPoint_ProviderListener
+                                                         IEMMonitorEntryPoint_ProviderListener
 {
   private AMQPBasicChannel providerChannel;
   private AMQPBasicChannel userChannel;

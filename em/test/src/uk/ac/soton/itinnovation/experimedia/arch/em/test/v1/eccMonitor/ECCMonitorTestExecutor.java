@@ -27,7 +27,7 @@ package uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccMonitor;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.spec.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.listeners.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasicChannel;
 
@@ -67,9 +67,9 @@ import java.util.*;
  * @author sgc
  */
 public class ECCMonitorTestExecutor implements Runnable,
-                                               IECCMonitor_ProviderListener,
-                                               IECCMonitor_UserListener,
-                                               IECCTest_Listener
+                                               IEMMonitor_ProviderListener,
+                                               IEMMonitor_UserListener,
+                                               IEMTest_Listener
         
 {
   private AMQPBasicChannel providerChannel;

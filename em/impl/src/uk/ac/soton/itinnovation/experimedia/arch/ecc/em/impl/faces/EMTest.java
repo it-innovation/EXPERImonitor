@@ -25,8 +25,8 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEMTest_Listener;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.listeners.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.faces.AMQPFullInterfaceBase;
@@ -41,13 +41,13 @@ import java.util.*;
 public class EMTest extends EMBaseInterface
                      implements IEMTest
 {
-  private IECCTest_Listener testListener;
+  private IEMTest_Listener testListener;
   
   public EMTest( AMQPBasicChannel channel,
-                  AMQPMessageDispatch dispatch,
-                  UUID providerID,
-                  UUID userID,
-                  boolean isProvider )
+                 AMQPMessageDispatch dispatch,
+                 UUID providerID,
+                 UUID userID,
+                 boolean isProvider )
   {
     super( channel, isProvider );
     
@@ -63,7 +63,7 @@ public class EMTest extends EMBaseInterface
   
   // IECCTest ------------------------------------------------------------------
   @Override
-  public void setListener( IECCTest_Listener listener )
+  public void setListener( IEMTest_Listener listener )
   { testListener = listener; }
   
   @Override

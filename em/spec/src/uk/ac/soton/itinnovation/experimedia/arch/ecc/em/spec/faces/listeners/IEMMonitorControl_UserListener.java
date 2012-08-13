@@ -17,33 +17,26 @@
 // PURPOSE, except where stated in the Licence Agreement supplied with
 // the software.
 //
-//      Created By :            Simon Crowle
-//      Created Date :          05-Aug-2012
-//      Created for Project :   experimedia-arch-ecc-em-spec
+//      Created By :            Simpn Crowle
+//      Created Date :          09-Aug-2012
+//      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.listeners;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners;
 
 import java.util.UUID;
 
 
 
-/**
- * This listener provides access to methods sent to the provider (the EM).
- * Implement this listener with a provider interface instance to find out about
- * users attempting to connect to the EM entry point.
- * 
- * @author sgc
- */
-public interface IECCMonitorEntryPoint_ProviderListener
+
+public interface IEMMonitorControl_UserListener
 {
-  /**
-   * The event indicating that a user is attempting to register as a client of
-   * the EM.
-   * 
-   * @param userID    - UUID of the user connecting to the EM
-   * @param userName  - Informal name of the user connecting to the EM
-   */
-  void onRegisterAsEMClient( UUID userID, String userName );
+  void onStartPushing( UUID senderID );
+  
+  void onPullMetric( UUID senderID /*data model here*/ );
+  
+  void onPullMetricTimeOut( UUID senderID /*data model here */ );
+  
+  void onPullingStopped( UUID senderID );
 }

@@ -17,26 +17,31 @@
 // PURPOSE, except where stated in the Licence Agreement supplied with
 // the software.
 //
-//      Created By :            Simpn Crowle
-//      Created Date :          09-Aug-2012
+//      Created By :            Simon Crowle
+//      Created Date :          05-Aug-2012
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.listeners;
-
-import java.util.UUID;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners;
 
 
 
-
-public interface IECCMonitorControl_UserListener
+/**
+ * The is a symmetric listener (for either producer or user to use) that notifies
+ * when the producer/user has sent some data. This listener is only intended to be
+ * used with the IECCTest interface and is not a 'proper' part of the EM monitoring
+ * life-cycle.
+ * 
+ * @author sgc
+ */
+public interface IEMTest_Listener
 {
-  void onStartPushing( UUID senderID );
-  
-  void onPullMetric( UUID senderID /*data model here*/ );
-  
-  void onPullMetricTimeOut( UUID senderID /*data model here */ );
-  
-  void onPullingStopped( UUID senderID );
+  /**
+   * Notification of some data received.
+   * 
+   * @param dataSize - Number of bytes sent in this event
+   * @param dataBody - Array of byte data sent
+   */
+  void onReceivedData( int byteCount, byte[] dataBody );
 }

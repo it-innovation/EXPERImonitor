@@ -25,7 +25,7 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.listeners.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEMMonitorEntryPoint_ProviderListener;
 
 import java.util.UUID;
 
@@ -47,7 +47,7 @@ public interface IEMMonitorEntryPoint
    * 
    * @param listener - IECCMonitorEntryPoint_ProviderListener listener
    */
-  void setListener( IECCMonitorEntryPoint_ProviderListener listener );
+  void setListener( IEMMonitorEntryPoint_ProviderListener listener );
   
   // Provider methods ----------------------------------------------------------
   /**

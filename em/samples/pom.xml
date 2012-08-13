@@ -4,24 +4,19 @@
     
   <modelVersion>4.0.0</modelVersion>
   <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
-  <artifactId>experimedia-arch-ecc-em</artifactId>
-  <name>ECC Experiment Monitoring</name>
+  <artifactId>experimedia-arch-ecc-em-samples</artifactId>
   <version>0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   
   <parent>
     <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
-    <artifactId>experimedia-arch-ecc</artifactId>
+    <artifactId>experimedia-arch-ecc-em</artifactId>
     <version>0.1-SNAPSHOT</version>
   </parent>
 
   <modules>
-    <module>spec</module>
-    <module>impl</module>
-    <module>factory</module>
-    <module>dataModel</module>
-    <module>test</module>
-    <module>samples</module>
+    <module>basicEMClient</module>
+    <module>basicEMContainer</module>
   </modules>
     
 </project>

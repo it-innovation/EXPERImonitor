@@ -25,8 +25,9 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEMMonitor_UserListener;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEMMonitor_ProviderListener;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.listeners.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.faces.AMQPFullInterfaceBase;
@@ -42,8 +43,8 @@ import java.util.*;
 public class EMMonitor extends EMBaseInterface
                         implements IEMMonitor
 {
-  private IECCMonitor_ProviderListener providerListener;
-  private IECCMonitor_UserListener     userListener;
+  private IEMMonitor_ProviderListener providerListener;
+  private IEMMonitor_UserListener     userListener;
   
   public enum EMInterfaceType { eECCMetricEnumerator,
                                 eECCMetricCalibration,
@@ -59,10 +60,10 @@ public class EMMonitor extends EMBaseInterface
   
   
   public EMMonitor( AMQPBasicChannel channel,
-                     AMQPMessageDispatch dispatch,
-                     UUID providerID,
-                     UUID userID,
-                     boolean isProvider )
+                    AMQPMessageDispatch dispatch,
+                    UUID providerID,
+                    UUID userID,
+                    boolean isProvider )
   {
     super( channel, isProvider );
     interfaceName = "IECCMonitor";
@@ -77,11 +78,11 @@ public class EMMonitor extends EMBaseInterface
   
   // IECCMonitor ---------------------------------------------------------------
   @Override
-  public void setProviderListener( IECCMonitor_ProviderListener listener )
+  public void setProviderListener( IEMMonitor_ProviderListener listener )
   { providerListener = listener; }
   
   @Override
-  public void setUserListener( IECCMonitor_UserListener listener)
+  public void setUserListener( IEMMonitor_UserListener listener)
   { userListener = listener; }
   
   // Provider ------------------------------------------------------------------

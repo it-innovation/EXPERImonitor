@@ -17,26 +17,22 @@
 // PURPOSE, except where stated in the Licence Agreement supplied with
 // the software.
 //
-//      Created By :            sgc
+//      Created By :            Simon Crowle
 //      Created Date :          09-Aug-2012
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.listeners;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners;
 
 import java.util.UUID;
 
 
 
 
-public interface IECCReport_UserListener
+public interface IEMTearDown_UserListener
 {
-  void onRequestReportSummary( UUID senderID );
+  void onTearDownMetricGenerators( UUID senderID );
   
-  void onRequestNextReportMetadata( UUID senderID );
-  
-  void onRequestDataPart( UUID senderID /* data model */ );
-  
-  void onNotifyReportTimeOut( UUID senderID );
+  void onTearDownTimeOut( UUID senderID );
 }

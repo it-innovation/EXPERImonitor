@@ -18,23 +18,43 @@
 // the software.
 //
 //      Created By :            Simon Crowle
-//      Created Date :          09-Aug-2012
+//      Created Date :          13-Aug-2012
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.listeners;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel;
+
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.IEMMonitor;
 
 import java.util.UUID;
 
 
 
 
-public interface IECCMetricEnumerator_ProviderListener
+public class EMClient
 {
-  void onNotifyReadyToEnumerate( UUID senderID );
+  private UUID   clientID;
+  private String clientName;
   
-  void onSendMetricGeneratorInfo( UUID senderID /* data model here*/ );
+  IEMMonitor monitorFace;
   
-  void onNotifyEnumerationComplete( UUID senderID );
+  public EMClient( UUID id, String name )
+  {
+    clientID = id;
+    clientName = name;
+  }
+  
+  public UUID getID()
+  { return clientID; }
+  
+  public String getName()
+  { return clientName; }
+  
+  public IEMMonitor getEMMonitorInterface()
+  { return monitorFace; }
+  
+  public void setEMMonitorInterface( IEMMonitor face )
+  { monitorFace = face; }
+  
 }

@@ -23,16 +23,18 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.listeners;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners;
 
 import java.util.UUID;
 
 
 
 
-public interface IECCTearDown_ProviderListener
+public interface IEMMonitorSetup_ProviderListener
 {
-  void onNotifyReadyToTearDown( UUID senderID );
+  void onNotifyReadyToSetup( UUID senderID );
   
-  void onNotifyTearDownResult( UUID senderID );
+  void onNotifyMetricGeneratorSetupResult( UUID senderID /*data model here*/ );
+  
+  void onNotifySetupComplete( UUID senderID );
 }

@@ -25,7 +25,7 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.listeners.IECCTest_Listener;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEMTest_Listener;
 
 
 
@@ -47,7 +47,7 @@ public interface IEMTest
    * @param listener - IECCTest_Listener instance providing notification of test
    * events.
    */
-  void setListener( IECCTest_Listener listener );
+  void setListener( IEMTest_Listener listener );
   
   /**
    * Use this method to send test data to either the user or producer instance of

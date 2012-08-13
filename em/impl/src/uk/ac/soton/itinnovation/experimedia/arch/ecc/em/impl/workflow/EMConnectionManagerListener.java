@@ -18,30 +18,19 @@
 // the software.
 //
 //      Created By :            Simon Crowle
-//      Created Date :          05-Aug-2012
+//      Created Date :          13-Aug-2012
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.listeners;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow;
+
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel.EMClient;
 
 
 
-/**
- * The is a symmetric listener (for either producer or user to use) that notifies
- * when the producer/user has sent some data. This listener is only intended to be
- * used with the IECCTest interface and is not a 'proper' part of the EM monitoring
- * life-cycle.
- * 
- * @author sgc
- */
-public interface IECCTest_Listener
+
+public interface EMConnectionManagerListener
 {
-  /**
-   * Notification of some data received.
-   * 
-   * @param dataSize - Number of bytes sent in this event
-   * @param dataBody - Array of byte data sent
-   */
-  void onReceivedData( int byteCount, byte[] dataBody );
+  void onClientRegistered( EMClient client );
 }
