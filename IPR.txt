@@ -30,3 +30,9 @@ SnakeYAML
 	http://code.google.com/p/snakeyaml/
 	Apache License Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 	See licences/Apache_v2.0.txt
+
+JScience
+	org.jscience:jscience:4.3.1
+	http://www.jscience.org/
+	JScience bundles are free; permission to use, copy, modify, and distribute these modules is freely granted, provided that copyright notices are preserved
+	See licences/JScience.txt
