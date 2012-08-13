@@ -18,7 +18,7 @@
     <build>
         <plugins>
               
-      <!-- Plug-in to build the project with UTF-8 encoding -->
+            <!-- Plug-in to build the project with UTF-8 encoding -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
@@ -32,12 +32,13 @@
 	
     </build>
   
-  <!-- 3rd party repositories -->
+    <!-- 3rd party repositories -->
     <repositories>
-  
+
     </repositories>
   
     <modules>
+        <module>common</module>
         <module>amqpAPI</module>
         <module>em</module>
     </modules>
