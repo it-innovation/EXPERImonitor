@@ -18,32 +18,43 @@
 // the software.
 //
 //      Created By :            Simon Crowle
-//      Created Date :          09-Aug-2012
+//      Created Date :          05-Aug-2012
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.listeners.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.listeners.IECCTest_Listener;
 
 
 
 
-public interface IECCTearDown
+/**
+ * This is test interface is not properly part of the EM monitoring life-cycle.
+ * It has been developed for the purposes of supporting the testing unit associated
+ * with the EM. Both producer and users of this interface can use this test
+ * interface to send the other test data.
+ * 
+ * @author sgc
+ */
+public interface IEMTest
 {
-  // Listeners -----------------------------------------------------------------
-  void setProviderListener( IECCTearDown_ProviderListener listener );
+  /**
+   * Sets a listener to the interface that allows data to be received by either
+   * producer or user.
+   * 
+   * @param listener - IECCTest_Listener instance providing notification of test
+   * events.
+   */
+  void setListener( IECCTest_Listener listener );
   
-  void setUserListener( IECCTearDown_UserListener listener );
-  
-  // Provider methods ----------------------------------------------------------
-  void tearDownMetricGenerators();
-  
-  void tearDownTimeOut();
-  
-  // User methods --------------------------------------------------------------
-  void notifyReadyToTearDown();
-  
-  void sendTearDownResult( /* data model */ );
+  /**
+   * Use this method to send test data to either the user or producer instance of
+   * this interface.
+   * 
+   * @param byteCount - Number of bytes expected to be sent in this method
+   * @param dataBody  - Array of byte test data being sent
+   */
+  void sendData( int byteCount, byte[] dataBody );
 }

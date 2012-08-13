@@ -18,7 +18,7 @@
 // the software.
 //
 //      Created By :            Simon Crowle
-//      Created Date :          31-Jul-2012
+//      Created Date :          05-Aug-2012
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
@@ -29,7 +29,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.listeners.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.faces.AMQPHalfInterfaceBase;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.faces.AMQPFullInterfaceBase;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel.EMMethodPayload;
 
@@ -38,57 +38,66 @@ import java.util.*;
 
 
 
-
-public class ECCMonitorEntryPoint extends ECCBaseInterface
-                                  implements IECCMonitorEntryPoint
+public class EMTest extends EMBaseInterface
+                     implements IEMTest
 {
-  private IECCMonitorEntryPoint_ProviderListener providerListener;
+  private IECCTest_Listener testListener;
   
-  
-  public ECCMonitorEntryPoint( AMQPBasicChannel    channel,
-                               AMQPMessageDispatch dispatch,
-                               UUID                providerID,
-                               boolean             isProvider )
+  public EMTest( AMQPBasicChannel channel,
+                  AMQPMessageDispatch dispatch,
+                  UUID providerID,
+                  UUID userID,
+                  boolean isProvider )
   {
     super( channel, isProvider );
-    interfaceName = "IECCMonitorEntryPoint";
+    
+    interfaceName = "IECCTest";
     interfaceVersion = "0.1";
-    
+            
     interfaceProviderID = providerID;
+    interfaceUserID     = userID;
     
-    AMQPHalfInterfaceBase entryPoint = new AMQPHalfInterfaceBase( channel );
-    initialiseAMQP( entryPoint, dispatch );
+    AMQPFullInterfaceBase fullFace = new AMQPFullInterfaceBase( channel );
+    initialiseAMQP( fullFace, dispatch );
   }
   
-  // IECCMonitorEntryPoint -----------------------------------------------------
+  // IECCTest ------------------------------------------------------------------
   @Override
-  public void setListener( IECCMonitorEntryPoint_ProviderListener listener )
-  { providerListener = listener; }
+  public void setListener( IECCTest_Listener listener )
+  { testListener = listener; }
   
-  // Method ID = 1
   @Override
-  public void registerAsEMClient( UUID userID, String userName )
+  // Method ID = 1
+  public void sendData( int dataSize, byte[] dataBody )
   {
-    ArrayList<Object> params = new ArrayList<Object>();
-    params.add( userID.toString() );
-    params.add( userName );
-    
-    executeMethod( 1, params );
+    if ( dataSize > 0 && dataBody != null )
+    {
+      ArrayList<Object> params = new ArrayList<Object>();
+      params.add( new Integer(dataSize) );
+      params.add( dataBody );
+      
+      executeMethod( 1, params );
+    }
   }
   
   // Protected methods ---------------------------------------------------------
   @Override
   protected void onInterpretMessage( EMMethodPayload payload )
   {
-    // 'RegisterAsEMClient' method (ID = 1) ------------------------------------
-    if ( payload.getMethodID() == 1 && providerListener != null )
+    List<Object> params = payload.getParameters();
+    
+    switch ( payload.getMethodID() )
     {
-      List<Object> params = payload.getParameters();
-      
-      UUID userID = UUID.fromString( (String) params.get(0) );
-      String userName = (String) params.get(1);
-      
-      providerListener.onRegisterAsEMClient( userID, userName );
-    }
+      case ( 1 ) :
+      {
+        if ( testListener != null )
+        {
+          int dataSize    = (Integer) params.get(0);
+          byte[] dataBody = (byte[]) params.get(1);
+          
+          testListener.onReceivedData( dataSize, dataBody );
+        }
+      } break;
+    } 
   }
 }

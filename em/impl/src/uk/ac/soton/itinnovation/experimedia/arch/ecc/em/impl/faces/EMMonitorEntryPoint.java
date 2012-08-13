@@ -18,7 +18,7 @@
 // the software.
 //
 //      Created By :            Simon Crowle
-//      Created Date :          05-Aug-2012
+//      Created Date :          31-Jul-2012
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
@@ -29,7 +29,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.listeners.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.faces.AMQPFullInterfaceBase;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.faces.AMQPHalfInterfaceBase;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel.EMMethodPayload;
 
@@ -38,66 +38,57 @@ import java.util.*;
 
 
 
-public class ECCTest extends ECCBaseInterface
-                     implements IECCTest
+
+public class EMMonitorEntryPoint extends EMBaseInterface
+                                  implements IEMMonitorEntryPoint
 {
-  private IECCTest_Listener testListener;
+  private IECCMonitorEntryPoint_ProviderListener providerListener;
   
-  public ECCTest( AMQPBasicChannel channel,
-                  AMQPMessageDispatch dispatch,
-                  UUID providerID,
-                  UUID userID,
-                  boolean isProvider )
+  
+  public EMMonitorEntryPoint( AMQPBasicChannel    channel,
+                               AMQPMessageDispatch dispatch,
+                               UUID                providerID,
+                               boolean             isProvider )
   {
     super( channel, isProvider );
-    
-    interfaceName = "IECCTest";
+    interfaceName = "IECCMonitorEntryPoint";
     interfaceVersion = "0.1";
-            
-    interfaceProviderID = providerID;
-    interfaceUserID     = userID;
     
-    AMQPFullInterfaceBase fullFace = new AMQPFullInterfaceBase( channel );
-    initialiseAMQP( fullFace, dispatch );
+    interfaceProviderID = providerID;
+    
+    AMQPHalfInterfaceBase entryPoint = new AMQPHalfInterfaceBase( channel );
+    initialiseAMQP( entryPoint, dispatch );
   }
   
-  // IECCTest ------------------------------------------------------------------
+  // IECCMonitorEntryPoint -----------------------------------------------------
   @Override
-  public void setListener( IECCTest_Listener listener )
-  { testListener = listener; }
+  public void setListener( IECCMonitorEntryPoint_ProviderListener listener )
+  { providerListener = listener; }
   
-  @Override
   // Method ID = 1
-  public void sendData( int dataSize, byte[] dataBody )
+  @Override
+  public void registerAsEMClient( UUID userID, String userName )
   {
-    if ( dataSize > 0 && dataBody != null )
-    {
-      ArrayList<Object> params = new ArrayList<Object>();
-      params.add( new Integer(dataSize) );
-      params.add( dataBody );
-      
-      executeMethod( 1, params );
-    }
+    ArrayList<Object> params = new ArrayList<Object>();
+    params.add( userID.toString() );
+    params.add( userName );
+    
+    executeMethod( 1, params );
   }
   
   // Protected methods ---------------------------------------------------------
   @Override
   protected void onInterpretMessage( EMMethodPayload payload )
   {
-    List<Object> params = payload.getParameters();
-    
-    switch ( payload.getMethodID() )
+    // 'RegisterAsEMClient' method (ID = 1) ------------------------------------
+    if ( payload.getMethodID() == 1 && providerListener != null )
     {
-      case ( 1 ) :
-      {
-        if ( testListener != null )
-        {
-          int dataSize    = (Integer) params.get(0);
-          byte[] dataBody = (byte[]) params.get(1);
-          
-          testListener.onReceivedData( dataSize, dataBody );
-        }
-      } break;
-    } 
+      List<Object> params = payload.getParameters();
+      
+      UUID userID = UUID.fromString( (String) params.get(0) );
+      String userName = (String) params.get(1);
+      
+      providerListener.onRegisterAsEMClient( userID, userName );
+    }
   }
 }

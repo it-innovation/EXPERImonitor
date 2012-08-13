@@ -77,11 +77,11 @@ public class ECCMonitorTestExecutor implements Runnable,
   
   IAMQPMessageDispatchPump dispatchPump;
   
-  private IECCMonitor providerMonitor;
-  private IECCMonitor userMonitor;
+  private IEMMonitor providerMonitor;
+  private IEMMonitor userMonitor;
   
-  private IECCTest providerTest;
-  private IECCTest userTest;
+  private IEMTest providerTest;
+  private IEMTest userTest;
   
   private int    testDataSize;
   private byte[] testDataBody;
@@ -164,13 +164,13 @@ public class ECCMonitorTestExecutor implements Runnable,
       providerTest.setListener( this );
 
       // Tell user to create a test interface
-      providerMonitor.createInterface( IECCMonitor.EMInterfaceType.eECCTestInterface );
+      providerMonitor.createInterface( IEMMonitor.EMInterfaceType.eECCTestInterface );
     }
   }
   
   @Override
   public void onSendActivityPhases( UUID senderID,
-                                    List<IECCMonitor.EMSupportedPhase> supportedPhases )
+                                    List<IEMMonitor.EMSupportedPhase> supportedPhases )
   { /*Not implemented in this test*/ }
   
   @Override
@@ -192,12 +192,12 @@ public class ECCMonitorTestExecutor implements Runnable,
   
   // IECCMonitor_UserListener --------------------------------------------------
   @Override
-  public void onCreateInterface( UUID senderID, IECCMonitor.EMInterfaceType type )
+  public void onCreateInterface( UUID senderID, IEMMonitor.EMInterfaceType type )
   {
     // Make sure event is from the correct sender
     if ( senderID.equals( ECCMonitorEntryPointTest.EMProviderUUID) )
     {
-      if ( type == IECCMonitor.EMInterfaceType.eECCTestInterface )
+      if ( type == IEMMonitor.EMInterfaceType.eECCTestInterface )
       userGotCreateTestFaceCommand = true;
     
       // Create a test interface here

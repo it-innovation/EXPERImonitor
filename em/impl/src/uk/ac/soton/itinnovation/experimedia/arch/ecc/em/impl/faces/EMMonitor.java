@@ -39,8 +39,8 @@ import java.util.*;
 
 
 
-public class ECCMonitor extends ECCBaseInterface
-                        implements IECCMonitor
+public class EMMonitor extends EMBaseInterface
+                        implements IEMMonitor
 {
   private IECCMonitor_ProviderListener providerListener;
   private IECCMonitor_UserListener     userListener;
@@ -58,7 +58,7 @@ public class ECCMonitor extends ECCBaseInterface
                                 eReport };
   
   
-  public ECCMonitor( AMQPBasicChannel channel,
+  public EMMonitor( AMQPBasicChannel channel,
                      AMQPMessageDispatch dispatch,
                      UUID providerID,
                      UUID userID,
@@ -87,7 +87,7 @@ public class ECCMonitor extends ECCBaseInterface
   // Provider ------------------------------------------------------------------
   // Method ID = 1
   @Override
-  public void createInterface( IECCMonitor.EMInterfaceType type )
+  public void createInterface( IEMMonitor.EMInterfaceType type )
   {
     ArrayList<Object> params = new ArrayList<Object>();
     params.add( type );
@@ -177,7 +177,7 @@ public class ECCMonitor extends ECCBaseInterface
       {
         if ( userListener != null )
         {
-          IECCMonitor.EMInterfaceType type = (IECCMonitor.EMInterfaceType) params.get( 0 );
+          IEMMonitor.EMInterfaceType type = (IEMMonitor.EMInterfaceType) params.get( 0 );
           userListener.onCreateInterface( interfaceProviderID, type );
         }
         

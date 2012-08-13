@@ -28,20 +28,20 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces;
 
 
 
-public interface IECCMetricEnumerator
+public interface IEMMonitorSetup
 {
   // Listeners -----------------------------------------------------------------
   
   
   // Provider methods ----------------------------------------------------------
-  void requestNextMetricGeneratorInfo();
+  void setupMetricGenerator( /* data model here */ );
   
-  void enumerationTimeOut();
+  void setupTimeOut( /* data model here */ );
   
   // User methods --------------------------------------------------------------
-  void notifyReadyToEnumerate();
+  void notifyReadyToSetup();
   
-  void sendMetricGeneratorInfo( /*TODO: Data model */ );
+  void notifyMetricGeneratorSetupResult( /* data model here */ );
   
-  void notifyEnumerationComplete();
+  void notifySetupComplete();
 }

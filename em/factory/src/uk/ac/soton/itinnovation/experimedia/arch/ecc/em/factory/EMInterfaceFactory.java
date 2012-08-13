@@ -59,34 +59,34 @@ public class EMInterfaceFactory
     return new AMQPMessageDispatch();
   }
   
-  public IECCMonitorEntryPoint createEntryPoint( UUID providerID,
-                                                 IAMQPMessageDispatch dispatch )
+  public IEMMonitorEntryPoint createEntryPoint( UUID providerID,
+                                                IAMQPMessageDispatch dispatch )
   {
-    return new ECCMonitorEntryPoint( amqpChannel,
-                                     (AMQPMessageDispatch) dispatch,
-                                     providerID, 
-                                     generateProviders );
+    return new EMMonitorEntryPoint( amqpChannel,
+                                    (AMQPMessageDispatch) dispatch,
+                                    providerID, 
+                                    generateProviders );
   }
   
-  public IECCMonitor createMonitor( UUID providerID,
-                                    UUID userID,
-                                    IAMQPMessageDispatch dispatch )
+  public IEMMonitor createMonitor( UUID providerID,
+                                   UUID userID,
+                                   IAMQPMessageDispatch dispatch )
   {
-    return new ECCMonitor( amqpChannel,
-                           (AMQPMessageDispatch) dispatch,
-                           providerID,
-                           userID,
-                           generateProviders );
+    return new EMMonitor( amqpChannel,
+                          (AMQPMessageDispatch) dispatch,
+                          providerID,
+                          userID,
+                          generateProviders );
   }
   
-  public IECCTest createTest( UUID providerID,
-                              UUID userID,
-                              IAMQPMessageDispatch dispatch )
+  public IEMTest createTest( UUID providerID,
+                             UUID userID,
+                             IAMQPMessageDispatch dispatch )
   {
-    return new ECCTest( amqpChannel,
-                        (AMQPMessageDispatch) dispatch,
-                        providerID, 
-                        userID, 
-                        generateProviders );
+    return new EMTest( amqpChannel,
+                       (AMQPMessageDispatch) dispatch,
+                       providerID, 
+                       userID, 
+                       generateProviders );
   }
 }

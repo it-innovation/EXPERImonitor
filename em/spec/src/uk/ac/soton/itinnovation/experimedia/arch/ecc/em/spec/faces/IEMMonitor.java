@@ -38,7 +38,7 @@ import java.util.List;
  * 
  * @author sgc
  */
-public interface IECCMonitor
+public interface IEMMonitor
 {
   // Interface types supported by the EM
   enum EMInterfaceType { eECCMetricEnumerator,

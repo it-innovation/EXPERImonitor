@@ -25,7 +25,7 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.listeners;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.IECCMonitor;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.IEMMonitor;
 
 import java.util.*;
 
@@ -52,7 +52,7 @@ public interface IECCMonitor_ProviderListener
    * @param supportedPhases - a list of enumerated phases supported by the user.
    */
   void onSendActivityPhases( UUID senderID, 
-                             List<IECCMonitor.EMSupportedPhase> supportedPhases );
+                             List<IEMMonitor.EMSupportedPhase> supportedPhases );
   
   /**
    * Notification that the user has finished their discovery process and is

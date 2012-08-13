@@ -25,7 +25,7 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.IECCReport;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.IEMReport;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.listeners.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasicChannel;
@@ -38,13 +38,13 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel.EMMethodPayloa
 
 
 
-public class ECCReport extends ECCBaseInterface
-                       implements IECCReport
+public class EMReport extends EMBaseInterface
+                       implements IEMReport
 {
   private IECCReport_ProviderListener providerListener;
   private IECCReport_UserListener     userListener;
   
-  public ECCReport( AMQPBasicChannel channel,
+  public EMReport( AMQPBasicChannel channel,
                     AMQPMessageDispatch dispatch,
                     UUID providerID,
                     UUID userID,

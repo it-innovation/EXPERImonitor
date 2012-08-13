@@ -37,7 +37,7 @@ import java.util.*;
 
 
 
-public abstract class ECCBaseInterface implements IAMQPMessageDispatchListener
+public abstract class EMBaseInterface implements IAMQPMessageDispatchListener
 {
   protected String               interfaceName;
   protected String               interfaceVersion;
@@ -59,7 +59,7 @@ public abstract class ECCBaseInterface implements IAMQPMessageDispatchListener
   }
   
   // Protected methods ---------------------------------------------------------
-  protected ECCBaseInterface( AMQPBasicChannel channel,
+  protected EMBaseInterface( AMQPBasicChannel channel,
                               boolean asProvider )
   {
     amqpChannel = channel;

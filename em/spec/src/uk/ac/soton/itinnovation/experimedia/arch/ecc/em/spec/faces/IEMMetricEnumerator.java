@@ -25,33 +25,23 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.listeners.*;
 
 
 
-
-public interface IECCReport
+public interface IEMMetricEnumerator
 {
   // Listeners -----------------------------------------------------------------
-  void setProviderListener( IECCReport_ProviderListener listener );
   
-  void setUserListener( IECCReport_UserListener listener );
   
   // Provider methods ----------------------------------------------------------
-  void requestReportSummary();
+  void requestNextMetricGeneratorInfo();
   
-  void requestNextReportMetadata();
-  
-  void requestDataPart( /* data model */ );
-  
-  void notifyReportTimeOut( /* data model */ );
+  void enumerationTimeOut();
   
   // User methods --------------------------------------------------------------
-  void notifyReadyToReport();
+  void notifyReadyToEnumerate();
   
-  void sendReportSummary( /* data model here */ );
+  void sendMetricGeneratorInfo( /*TODO: Data model */ );
   
-  void sendReportMetaData( /* data model here */ );
-  
-  void sendDataPart( /* data model here */ );
+  void notifyEnumerationComplete();
 }

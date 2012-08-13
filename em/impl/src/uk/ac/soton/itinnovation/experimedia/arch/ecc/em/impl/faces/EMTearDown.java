@@ -25,7 +25,7 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.IECCTearDown;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.IEMTearDown;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.listeners.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
@@ -36,14 +36,14 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel.EMMethodPayloa
 import java.util.*;
 
 
-public class ECCTearDown extends ECCBaseInterface
-                         implements IECCTearDown
+public class EMTearDown extends EMBaseInterface
+                         implements IEMTearDown
 {
   private IECCTearDown_ProviderListener providerListener;
   private IECCTearDown_UserListener     userListener;
   
   
-  public ECCTearDown( AMQPBasicChannel channel,
+  public EMTearDown( AMQPBasicChannel channel,
                       AMQPMessageDispatch dispatch,
                       UUID providerID,
                       UUID userID,

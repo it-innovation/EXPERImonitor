@@ -25,7 +25,7 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.listeners;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.IECCMonitor;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.IEMMonitor;
 import java.util.UUID;
 
 
@@ -46,7 +46,7 @@ public interface IECCMonitor_UserListener
    * @param senderID - ID of the EM sending this event
    * @param type     - type (EMInterfaceType) of interface required
    */
-  void onCreateInterface( UUID senderID, IECCMonitor.EMInterfaceType type );
+  void onCreateInterface( UUID senderID, IEMMonitor.EMInterfaceType type );
   
   /**
    * Provider (EM) notifies the user that they have successfully (or not)

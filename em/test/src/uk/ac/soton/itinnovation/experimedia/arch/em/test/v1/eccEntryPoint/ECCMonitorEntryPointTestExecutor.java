@@ -55,8 +55,8 @@ public class ECCMonitorEntryPointTestExecutor implements Runnable,
   
   IAMQPMessageDispatchPump dispatchPump;
   
-  IECCMonitorEntryPoint providerEP;
-  IECCMonitorEntryPoint userEP;
+  IEMMonitorEntryPoint providerEP;
+  IEMMonitorEntryPoint userEP;
   
   private boolean gotClientRegistration = false;
   
