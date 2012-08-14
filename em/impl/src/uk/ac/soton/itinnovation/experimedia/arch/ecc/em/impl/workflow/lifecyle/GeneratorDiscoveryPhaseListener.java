@@ -17,20 +17,22 @@
 // PURPOSE, except where stated in the Licence Agreement supplied with
 // the software.
 //
-//      Created By :            sgc
-//      Created Date :          13-Aug-2012
-//      Created for Project :   experimedia-arch-ecc-em-spec
+//      Created By :            Simon Crowle
+//      Created Date :          14-Aug-2012
+//      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecyle;
 
-import java.util.UUID;
-
-
+import java.util.*;
 
 
-public interface IExperimentMonitorListener
+
+
+interface GeneratorDiscoveryPhaseListener
 {
-  void onClientRegistered( UUID id, String clientName );
+  void onSentRegisterationConfirmation( Set<UUID> clientIDs );
+  
+  void onDiscoveryPhaseCompleted();
 }

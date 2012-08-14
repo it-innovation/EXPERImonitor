@@ -36,6 +36,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces.EMMonitorEntr
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel.EMClient;
 
 import java.util.*;
+import java.util.Map.Entry;
 
 
 
@@ -97,8 +98,21 @@ public class EMConnectionManager implements IEMMonitorEntryPoint_ProviderListene
   { return entryPointOpen; }
   
   public void disconnectClients()
+  { entryPointPump.stopPump(); }
+  
+  public int getConnectedClientCount()
+  { return connectedClients.size(); }
+  
+  public Set<Entry<UUID, String>> getConnectedClientInfo()
   {
-    entryPointPump.stopPump();
+    Set<Entry<UUID, String>> clientInfoSet = new HashSet<Entry<UUID, String>>();
+    
+    Set<Entry<UUID, EMClient>> currClients = connectedClients.entrySet();
+    for ( Entry<UUID, EMClient> cEntry : currClients )
+      clientInfoSet.add( new HashMap.SimpleEntry<UUID, String>( cEntry.getKey(), 
+                                                                cEntry.getValue().getName() ) );
+    
+    return clientInfoSet;
   }
   
   // IEMMonitorEntryPoint_ProviderListener -------------------------------------

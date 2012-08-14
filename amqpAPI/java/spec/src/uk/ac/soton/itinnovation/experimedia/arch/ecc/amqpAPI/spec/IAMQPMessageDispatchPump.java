@@ -41,4 +41,6 @@ public interface IAMQPMessageDispatchPump
   boolean isPumping();
   
   void addDispatch( IAMQPMessageDispatch dispatch );
+  
+  void removeDispatch( IAMQPMessageDispatch dispatch );
 }

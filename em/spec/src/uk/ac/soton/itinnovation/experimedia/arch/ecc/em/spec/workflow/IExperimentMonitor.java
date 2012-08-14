@@ -34,11 +34,15 @@ public interface IExperimentMonitor
 {
   enum eStatus { NOT_YET_INITIALISED,
                  INITIALISED,
-                 ENTRY_POINT_OPEN };
+                 ENTRY_POINT_OPEN,
+                 LIFECYCLE_STARTED,
+                 LIFECYCLE_ENDED };
   
   eStatus getStatus();
   
-  void openEntryPoint( UUID entryPointID ) throws Exception;
+  void openEntryPoint( String rabbitServerIP, UUID entryPointID ) throws Exception;
+  
+  Set<Map.Entry<UUID, String>> getConnectedClientInfo();
   
   void startLifecycle() throws Exception;
   

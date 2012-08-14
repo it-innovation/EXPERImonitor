@@ -27,9 +27,12 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.factory;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.spec.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.IExperimentMonitor;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
+
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.ExperimentMonitor;
 
 import java.util.UUID;
 
@@ -89,4 +92,8 @@ public class EMInterfaceFactory
                        userID, 
                        generateProviders );
   }
+  
+  // For Experiment Monitor container client code only -------------------------
+  public IExperimentMonitor createEM()
+  { return new ExperimentMonitor(); }
 }

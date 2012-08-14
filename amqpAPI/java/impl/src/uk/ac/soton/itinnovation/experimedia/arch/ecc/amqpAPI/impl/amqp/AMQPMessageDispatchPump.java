@@ -103,6 +103,14 @@ public class AMQPMessageDispatchPump implements Runnable,
         { dispatchList.addLast( amqpDisp ); }
   }
   
+  @Override
+  public void removeDispatch( IAMQPMessageDispatch dispatch )
+  {
+    if ( dispatch != null )
+      synchronized (pumpLock)
+        { dispatchList.removeFirstOccurrence(dispatch); }
+  }
+  
   // Runnable ------------------------------------------------------------------
   @Override
   public void run()

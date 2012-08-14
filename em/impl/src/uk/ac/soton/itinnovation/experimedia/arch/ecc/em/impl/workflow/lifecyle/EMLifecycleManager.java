@@ -25,58 +25,92 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecyle;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.spec.IAMQPMessageDispatchPump;
-
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.EMConnectionManagerListener;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel.EMClient;
 
-import java.util.UUID;
+import java.util.*;
 
 
 
 
-public class EMLifecycleManager implements EMConnectionManagerListener
+
+public class EMLifecycleManager implements EMConnectionManagerListener,
+                                           GeneratorDiscoveryPhaseListener
 {
-  private AMQPBasicChannel        emChannel;
-  private UUID                    emProviderID;
-  private AMQPMessageDispatchPump generalMsgPump;
-
+  private AMQPBasicChannel emChannel;
+  private UUID             emProviderID;
   
-  public EMLifecycleManager()
+  private HashMap<Integer, AbstractEMLCPhase> lifecyclePhases;
+  private int lifecycleIndex     = 0;
+  private int lifecycleLastIndex = 1;
+  
+  private EMLifecycleManagerListener lifecycleListener;
+  
+  
+  public EMLifecycleManager() 
   {
+    lifecyclePhases = new HashMap<Integer, AbstractEMLCPhase>();
   }
   
-  public boolean initialise( UUID providerID, 
-                             AMQPBasicChannel channel )
+  public void initialise( AMQPBasicChannel channel, 
+                          UUID providerID,
+                          EMLifecycleManagerListener listener )
   {
-    if ( providerID != null && channel != null )
+    emChannel         = channel;
+    emProviderID      = providerID;
+    lifecycleListener = listener;
+
+    // Create life-cycle phases
+    EMGeneratorDiscoveryPhase gdp = new EMGeneratorDiscoveryPhase( emChannel,
+                                                                   emProviderID,
+                                                                   this );
+    lifecyclePhases.put( 1, gdp );
+  }
+  
+  public void iterateLifecycle()
+  {
+    if ( lifecycleIndex < lifecycleLastIndex && !lifecyclePhases.isEmpty() )
     {
-      emProviderID = providerID;
-      emChannel = channel;
+      lifecycleIndex++;
       
-      generalMsgPump = new AMQPMessageDispatchPump( "EM General message pump",
-                                                    IAMQPMessageDispatchPump.ePumpPriority.NORMAL );
-      
-      generalMsgPump.startPump();
-      
-      return true;
+      AbstractEMLCPhase lcPhase = lifecyclePhases.get( lifecycleIndex );
+      if ( lcPhase != null )
+        try { lcPhase.start(); }
+        catch( Exception e ) 
+        { 
+          System.out.println("Could not start lifecycle phase: " + lcPhase.getName() );
+          System.out.println("Life-cycle exception: " + e.getMessage() );
+        }
     }
-    
-    return false;
   }
   
   // EMConnectionManagerListener -----------------------------------------------
   @Override
   public void onClientRegistered( EMClient client )
   {
-    if ( client != null )
+    // Attach client to GeneratorDiscoveryPhase
+    if ( client          != null && 
+         lifecyclePhases != null &&
+         lifecycleIndex  == 0 ) // Only register client if we've not started a life-cycle
     {
-      // Create a new IEMMonitor interface for the client
-      
-      // Send them a confirmation message 
+      AbstractEMLCPhase discovery = lifecyclePhases.get( 1 );
+      if ( discovery != null ) discovery.addClient( client );
     }
+  }
+  
+  // GeneratorDiscoveryPhaseListener -------------------------------------------
+  @Override
+  public void onSentRegisterationConfirmation( Set<UUID> clientIDs )
+  {
+    
+  }
+  
+  @Override
+  public void onDiscoveryPhaseCompleted()
+  {
+    
   }
 }

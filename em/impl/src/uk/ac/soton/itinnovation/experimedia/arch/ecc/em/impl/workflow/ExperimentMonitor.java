@@ -29,15 +29,18 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecyle.EMLifecycleManager;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecyle.*;
 
-import java.util.UUID;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel.EMClient;
+
+import java.util.*;
 
 
 
 
-
-public class ExperimentMonitor implements IExperimentMonitor
+public class ExperimentMonitor implements IExperimentMonitor,
+                                          EMConnectionManagerListener,
+                                          EMLifecycleManagerListener
 {
   private IExperimentMonitor.eStatus monitorStatus = IExperimentMonitor.eStatus.NOT_YET_INITIALISED;
   private IExperimentMonitorListener expMonitorListener;
@@ -50,11 +53,83 @@ public class ExperimentMonitor implements IExperimentMonitor
   public ExperimentMonitor()
   {
   }
+ 
+  // IExperimentMonitor --------------------------------------------------------
+  @Override
+  public eStatus getStatus()
+  { return monitorStatus; }
   
-  public void initialise( String rabbitServerIP ) throws Exception
+  @Override
+  public void openEntryPoint( String rabbitServerIP, UUID epID ) throws Exception
   {
-    if ( rabbitServerIP == null ) throw new Exception( "Rabbit Server IP address is empty" );
+    // Safety first
+    if ( rabbitServerIP == null || rabbitServerIP.equals("") )
+      throw new Exception( "Rabbit server IP is invalid" );
     
+    if ( epID == null ) 
+      throw new Exception( "Entry point ID is null" );
+    
+    // Try initialising a connection with the Rabbit Server
+    try { initialise(rabbitServerIP); }
+    catch( Exception e ) { throw e; }
+    
+    if ( monitorStatus != IExperimentMonitor.eStatus.INITIALISED ) 
+      throw new Exception( "Not in a state to open entry point" );
+    
+    // Initialise connection manager
+    if ( !connectionManager.initialise( epID, amqpChannel, lifecycleManager ) )
+      throw new Exception( "Could not open entry point interface!" );
+    
+    // Initialise lifecycle manager
+    lifecycleManager.initialise( amqpChannel, epID, this );
+  
+    monitorStatus = IExperimentMonitor.eStatus.ENTRY_POINT_OPEN;
+  }
+  
+  @Override
+  public Set<Map.Entry<UUID, String>> getConnectedClientInfo()
+  {
+    if ( connectionManager == null )
+      return new HashSet<Map.Entry<UUID, String>>();
+    
+    return connectionManager.getConnectedClientInfo();
+  }
+  
+  @Override
+  public void startLifecycle() throws Exception
+  {
+    if ( monitorStatus != IExperimentMonitor.eStatus.ENTRY_POINT_OPEN )
+      throw new Exception( "Not in a state ready to start lifecycle" );
+    
+    if ( connectionManager.getConnectedClientCount() == 0 )
+      throw new Exception( "No clients connected to monitor" );
+  }
+  
+  @Override
+  public void endLifecycle() throws Exception
+  {
+    if ( amqpChannel != null ) amqpChannel.close();
+  }
+  
+  @Override
+  public void setListener( IExperimentMonitorListener listener )
+  { if ( listener != null ) expMonitorListener = listener; }
+  
+  // EMConnectionManagerListener -----------------------------------------------
+  @Override
+  public void onClientRegistered( EMClient client )
+  {
+    if ( expMonitorListener != null )
+      expMonitorListener.onClientRegistered( client.getID(),
+                                             client.getName() );
+  }
+  
+  // EMLifecycleManagerListener ------------------------------------------------
+  
+  
+  // Private methods -----------------------------------------------------------
+  private void initialise( String rabbitServerIP ) throws Exception
+  {
     AMQPConnectionFactory amqpCF = new AMQPConnectionFactory();
     
     if ( !amqpCF.setAMQPHostIPAddress(rabbitServerIP) )
@@ -71,47 +146,6 @@ public class ExperimentMonitor implements IExperimentMonitor
     connectionManager = new EMConnectionManager();
     lifecycleManager  = new EMLifecycleManager();
     
-    
     monitorStatus = IExperimentMonitor.eStatus.INITIALISED;
   }
-  
-  // IExperimentMonitor --------------------------------------------------------
-  @Override
-  public eStatus getStatus()
-  { return monitorStatus; }
-  
-  @Override
-  public void openEntryPoint( UUID epID ) throws Exception
-  {
-    // Safety first
-    if ( monitorStatus != IExperimentMonitor.eStatus.INITIALISED ) 
-      throw new Exception( "Not in a state to open entry point" );
-    
-    if ( epID == null ) 
-      throw new Exception( "Entry point ID is null" );
-    
-    // Initialise connection manager
-    if ( !connectionManager.initialise( epID, amqpChannel, lifecycleManager ) )
-      throw new Exception( "Could not open entry point interface!" );
-    
-    // Initialise lifecycle manager
-    lifecycleManager.initialise( epID, amqpChannel );
-  
-    monitorStatus = IExperimentMonitor.eStatus.ENTRY_POINT_OPEN;
-  }
-  
-  @Override
-  public void startLifecycle()
-  {
-  }
-  
-  @Override
-  public void endLifecycle()
-  {
-    if ( amqpChannel != null )    amqpChannel.close();
-  }
-  
-  @Override
-  public void setListener( IExperimentMonitorListener listener )
-  { if ( listener != null ) expMonitorListener = listener; }
 }
