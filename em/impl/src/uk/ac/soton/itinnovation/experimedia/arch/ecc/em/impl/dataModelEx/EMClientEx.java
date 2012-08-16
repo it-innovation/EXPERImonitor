@@ -18,19 +18,41 @@
 // the software.
 //
 //      Created By :            Simon Crowle
-//      Created Date :          13-Aug-2012
+//      Created Date :          16-Aug-2012
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.*;
+
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel.EMClient;
+
+
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel.EMPhase;
+
+import java.util.*;
 
 
 
 
-public interface EMConnectionManagerListener
-{
-  void onClientRegistered( EMClientEx client );
+public class EMClientEx extends EMClient
+{ 
+  private IEMMonitor monitorFace;
+  
+ 
+  public EMClientEx( UUID id, String name )
+  {
+    super( id, name );
+  }
+  
+  public IEMMonitor getEMMonitorInterface()
+  { return monitorFace; }
+  
+  public void setEMMonitorInterface( IEMMonitor face )
+  { monitorFace = face; }
+  
+  public void setSupportedPhases( EnumSet<EMPhase> phases )
+  { supportedPhases = phases; }
 }

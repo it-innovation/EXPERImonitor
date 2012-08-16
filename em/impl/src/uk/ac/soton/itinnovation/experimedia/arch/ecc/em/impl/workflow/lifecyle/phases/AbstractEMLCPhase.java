@@ -23,65 +23,52 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecyle;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecyle.phases;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.spec.IAMQPMessageDispatchPump;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel.EMClient;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
+
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel.EMPhase;
 
 import java.util.*;
 
 
 
 
-
-abstract class AbstractEMLCPhase
+public abstract class AbstractEMLCPhase
 {
-  protected String                  phaseName;
-  protected String                  phaseState;
-  protected HashMap<UUID, EMClient> phaseClients;
+  protected EMPhase                   phaseType;
+  protected String                    phaseState;
+  protected HashMap<UUID, EMClientEx> phaseClients;
   
   protected AMQPBasicChannel        emChannel;
   protected UUID                    emProviderID;
   protected AMQPMessageDispatchPump phaseMsgPump;
   
   protected boolean phaseActive = false;
+
   
+  public EMPhase getPhaseType()
+  { return phaseType; }
   
-  protected AbstractEMLCPhase( String name,
-                               AMQPBasicChannel channel,
-                               UUID providerID )
-  {
-    phaseName = name;
-    emChannel = channel;
-    emProviderID = providerID;
-    
-    phaseMsgPump =
-            new AMQPMessageDispatchPump( name + " message pump",
-                                         IAMQPMessageDispatchPump.ePumpPriority.NORMAL );
-    
-    phaseMsgPump.startPump();
-  }
-  
-  protected String getName()
-  { return phaseName; }
-  
-  protected String getState()
+  public String getState()
   { return phaseState; }
   
-  protected boolean addClient( EMClient client )
+  public boolean addClient( EMClientEx client )
   {
     if ( client == null ) return false;
-    if ( phaseClients.containsKey(client.getID()) ) return false;
-    if ( phaseActive ) return false;
+    if ( phaseActive    ) return false;
+    
+    if ( phaseClients.containsKey(client.getID()) ) return true;
     
     phaseClients.put( client.getID(), client );
     return true;
   }
   
-  protected boolean removeClient( UUID id )
+  public boolean removeClient( UUID id )
   {
     if ( id == null ) return false;
     if ( !phaseClients.containsKey(id) ) return false;
@@ -91,16 +78,33 @@ abstract class AbstractEMLCPhase
     return true;
   }
   
-  protected Set<EMClient> getCopySetOfCurrentClients()
+  public Set<EMClientEx> getCopySetOfCurrentClients()
   {
-    HashSet<EMClient> clientSet = new HashSet<EMClient>();
+    HashSet<EMClientEx> clientSet = new HashSet<EMClientEx>();
     clientSet.addAll( phaseClients.values() );
     
     return clientSet;
   }
   
   // Deriving classes must implement phase start/stopping behaviour ------------
-  protected abstract void start() throws Exception;
+  public abstract void start() throws Exception;
   
-  protected abstract void stop() throws Exception;
+  public abstract void stop() throws Exception;
+  
+  // Protected methods ---------------------------------------------------------
+  protected AbstractEMLCPhase( EMPhase phase,
+                               AMQPBasicChannel channel,
+                               UUID providerID )
+  {
+    phaseType    = phase;
+    emChannel    = channel;
+    emProviderID = providerID;
+    phaseClients = new HashMap<UUID, EMClientEx>();
+    
+    phaseMsgPump =
+            new AMQPMessageDispatchPump( phaseType + " message pump",
+                                         IAMQPMessageDispatchPump.ePumpPriority.NORMAL );
+    
+    phaseMsgPump.startPump();
+  }
 }

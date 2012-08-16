@@ -33,7 +33,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces.EMMonitorEntryPoint;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel.EMClient;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -51,25 +51,24 @@ public class EMConnectionManager implements IEMMonitorEntryPoint_ProviderListene
   
   private boolean entryPointOpen = false;
   
-  private HashMap<UUID, EMClient>     connectedClients;
-  private EMConnectionManagerListener managerListener;
+  private HashMap<UUID, EMClientEx>        connectedClients;
+  private Set<EMConnectionManagerListener> connectionListeners;
   
   
   public EMConnectionManager()
   {
-    connectedClients = new HashMap<UUID, EMClient>();
+    connectedClients    = new HashMap<UUID, EMClientEx>();
+    connectionListeners = new HashSet<EMConnectionManagerListener>();
   }
   
   public boolean initialise( UUID epID, 
-                             AMQPBasicChannel channel,
-                             EMConnectionManagerListener listener )
+                             AMQPBasicChannel channel )
   {
     if ( !entryPointOpen )
     {
-      if ( epID != null && channel != null && listener != null )
+      if ( epID != null && channel != null )
       {
         entryPointID    = epID;
-        managerListener = listener;
 
         AMQPMessageDispatch dispatch = new AMQPMessageDispatch();
 
@@ -94,6 +93,9 @@ public class EMConnectionManager implements IEMMonitorEntryPoint_ProviderListene
     return entryPointOpen;
   }
   
+  public void addConnectionListener( EMConnectionManagerListener listener )
+  { connectionListeners.add( listener ); }
+  
   public boolean isEntryPointOpen()
   { return entryPointOpen; }
   
@@ -103,16 +105,12 @@ public class EMConnectionManager implements IEMMonitorEntryPoint_ProviderListene
   public int getConnectedClientCount()
   { return connectedClients.size(); }
   
-  public Set<Entry<UUID, String>> getConnectedClientInfo()
+  public Set<EMClientEx> getCopyConnectedClients()
   {
-    Set<Entry<UUID, String>> clientInfoSet = new HashSet<Entry<UUID, String>>();
+    Set<EMClientEx> copyOfClients = new HashSet<EMClientEx>();
+    copyOfClients.addAll( connectedClients.values() );
     
-    Set<Entry<UUID, EMClient>> currClients = connectedClients.entrySet();
-    for ( Entry<UUID, EMClient> cEntry : currClients )
-      clientInfoSet.add( new HashMap.SimpleEntry<UUID, String>( cEntry.getKey(), 
-                                                                cEntry.getValue().getName() ) );
-    
-    return clientInfoSet;
+    return copyOfClients;
   }
   
   // IEMMonitorEntryPoint_ProviderListener -------------------------------------
@@ -122,10 +120,12 @@ public class EMConnectionManager implements IEMMonitorEntryPoint_ProviderListene
     if ( userID != null && userName != null )
       if ( !connectedClients.containsKey(userID) )
       {
-        EMClient client = new EMClient( userID, userName );
+        EMClientEx client = new EMClientEx( userID, userName );
         connectedClients.put( userID, client );
         
-        managerListener.onClientRegistered( client );
+        Iterator<EMConnectionManagerListener> listeners = connectionListeners.iterator();
+        while ( listeners.hasNext() )
+          listeners.next().onClientRegistered( client );
       }
   }
 }

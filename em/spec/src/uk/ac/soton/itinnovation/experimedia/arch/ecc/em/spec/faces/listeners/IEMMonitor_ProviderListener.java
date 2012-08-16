@@ -25,9 +25,10 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.IEMMonitor;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel.EMPhase;
 
 import java.util.*;
+
 
 
 
@@ -52,7 +53,7 @@ public interface IEMMonitor_ProviderListener
    * @param supportedPhases - a list of enumerated phases supported by the user.
    */
   void onSendActivityPhases( UUID senderID, 
-                             List<IEMMonitor.EMSupportedPhase> supportedPhases );
+                             EnumSet<EMPhase> supportedPhases );
   
   /**
    * Notification that the user has finished their discovery process and is

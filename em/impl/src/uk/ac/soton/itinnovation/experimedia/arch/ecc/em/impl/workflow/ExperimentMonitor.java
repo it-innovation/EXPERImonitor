@@ -28,12 +28,13 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
-
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecyle.*;
-
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel.EMClient;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecyle.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
+
 import java.util.*;
+
 
 
 
@@ -43,11 +44,12 @@ public class ExperimentMonitor implements IExperimentMonitor,
                                           EMLifecycleManagerListener
 {
   private IExperimentMonitor.eStatus monitorStatus = IExperimentMonitor.eStatus.NOT_YET_INITIALISED;
-  private IExperimentMonitorListener expMonitorListener;
   private AMQPBasicChannel           amqpChannel;
   
   private EMConnectionManager connectionManager;
   private EMLifecycleManager  lifecycleManager;
+  
+  private IEMClientListener emClientListener;
   
   
   public ExperimentMonitor()
@@ -77,8 +79,12 @@ public class ExperimentMonitor implements IExperimentMonitor,
       throw new Exception( "Not in a state to open entry point" );
     
     // Initialise connection manager
-    if ( !connectionManager.initialise( epID, amqpChannel, lifecycleManager ) )
+    if ( !connectionManager.initialise( epID, amqpChannel ) )
       throw new Exception( "Could not open entry point interface!" );
+    
+    // Add client listeners
+    connectionManager.addConnectionListener( this );
+    connectionManager.addConnectionListener( lifecycleManager );
     
     // Initialise lifecycle manager
     lifecycleManager.initialise( amqpChannel, epID, this );
@@ -87,12 +93,9 @@ public class ExperimentMonitor implements IExperimentMonitor,
   }
   
   @Override
-  public Set<Map.Entry<UUID, String>> getConnectedClientInfo()
-  {
-    if ( connectionManager == null )
-      return new HashSet<Map.Entry<UUID, String>>();
-    
-    return connectionManager.getConnectedClientInfo();
+  public Set<EMClient> getConnectedClients()
+  {    
+    return getSimpleClientSet( connectionManager.getCopyConnectedClients() );
   }
   
   @Override
@@ -103,25 +106,31 @@ public class ExperimentMonitor implements IExperimentMonitor,
     
     if ( connectionManager.getConnectedClientCount() == 0 )
       throw new Exception( "No clients connected to monitor" );
+    
+    if ( lifecycleManager.isLifecycleStarted() )
+      throw new Exception( "Lifecycle has already started" );
+    
+    lifecycleManager.iterateLifecycle();
   }
   
   @Override
   public void endLifecycle() throws Exception
   {
+    lifecycleManager.endLifecycle();
+    
     if ( amqpChannel != null ) amqpChannel.close();
   }
   
   @Override
-  public void setListener( IExperimentMonitorListener listener )
-  { if ( listener != null ) expMonitorListener = listener; }
+  public void setClientListener( IEMClientListener listener )
+  { if ( listener != null ) emClientListener = listener; }
   
   // EMConnectionManagerListener -----------------------------------------------
   @Override
-  public void onClientRegistered( EMClient client )
+  public void onClientRegistered( EMClientEx client )
   {
-    if ( expMonitorListener != null )
-      expMonitorListener.onClientRegistered( client.getID(),
-                                             client.getName() );
+    if ( emClientListener != null )
+      emClientListener.onClientRegistered( (EMClient) client );
   }
   
   // EMLifecycleManagerListener ------------------------------------------------
@@ -147,5 +156,16 @@ public class ExperimentMonitor implements IExperimentMonitor,
     lifecycleManager  = new EMLifecycleManager();
     
     monitorStatus = IExperimentMonitor.eStatus.INITIALISED;
+  }
+  
+  private Set<EMClient> getSimpleClientSet( Set<EMClientEx> exClients )
+  {
+    HashSet<EMClient> simpleClients = new HashSet<EMClient>();
+    Iterator<EMClientEx> exIt       = exClients.iterator();
+    
+    while ( exIt.hasNext() )
+      simpleClients.add( (EMClient) exIt.next() );
+    
+    return simpleClients;
   }
 }

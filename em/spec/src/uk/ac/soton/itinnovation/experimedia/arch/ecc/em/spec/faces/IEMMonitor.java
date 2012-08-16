@@ -28,7 +28,10 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEMMonitor_UserListener;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEMMonitor_ProviderListener;
 
-import java.util.List;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel.EMPhase;
+
+import java.util.*;
+
 
 
 
@@ -48,12 +51,6 @@ public interface IEMMonitor
                          eECCReport,
                          eECCTearDown,
                          eECCTestInterface };
-  
-  // Monitoring phases
-  enum EMSupportedPhase { eECCEnumerate_Metrics_Phase,
-                          eECCSetupMetricsPhase,
-                          eECCLiveMonitorMetricsPhase,
-                          eECCPostReportingPhase };
   
   // Listeners -----------------------------------------------------------------
   /**
@@ -127,7 +124,7 @@ public interface IEMMonitor
    * 
    * @param supportedPhases - a list of the monitoring phases supported.
    */
-  void sendActivePhases( List<EMSupportedPhase> supportedPhases );
+  void sendActivePhases( EnumSet<EMPhase> supportedPhases );
   
   /**
    * Send the provider with the result of the user's search for metric generators.

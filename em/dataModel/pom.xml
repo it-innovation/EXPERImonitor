@@ -45,7 +45,7 @@
     
     <dependency>
       <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
-      <artifactId>experimedia-arch-ecc-em-spec</artifactId>
+      <artifactId>experimedia-arch-ecc-common-dataModel-metrics</artifactId>
       <version>0.1-SNAPSHOT</version>
     </dependency>
             

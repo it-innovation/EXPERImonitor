@@ -25,12 +25,12 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow;
 
-import java.util.UUID;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel.EMClient;
 
 
 
 
-public interface IExperimentMonitorListener
+public interface IEMClientListener
 {
-  void onClientRegistered( UUID id, String clientName );
+  void onClientRegistered( EMClient client );
 }

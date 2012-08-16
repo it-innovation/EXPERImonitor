@@ -94,6 +94,6 @@ public class EMInterfaceFactory
   }
   
   // For Experiment Monitor container client code only -------------------------
-  public IExperimentMonitor createEM()
+  public static IExperimentMonitor createEM()
   { return new ExperimentMonitor(); }
 }

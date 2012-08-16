@@ -25,24 +25,24 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.IEMMonitor;
-
-import java.util.UUID;
+import java.util.*;
 
 
 
 
 public class EMClient
 {
-  private UUID   clientID;
-  private String clientName;
+  protected UUID             clientID;
+  protected String           clientName;
+  protected EnumSet<EMPhase> supportedPhases;
   
-  IEMMonitor monitorFace;
   
   public EMClient( UUID id, String name )
   {
     clientID = id;
     clientName = name;
+    
+    supportedPhases = EnumSet.noneOf( EMPhase.class );
   }
   
   public UUID getID()
@@ -51,10 +51,11 @@ public class EMClient
   public String getName()
   { return clientName; }
   
-  public IEMMonitor getEMMonitorInterface()
-  { return monitorFace; }
-  
-  public void setEMMonitorInterface( IEMMonitor face )
-  { monitorFace = face; }
-  
+  public EnumSet<EMPhase> getCopyOfSupportedPhases()
+  {
+    EnumSet<EMPhase> phaseCopy = EnumSet.noneOf( EMPhase.class );
+    phaseCopy.addAll( supportedPhases );
+    
+    return phaseCopy;
+  }
 }

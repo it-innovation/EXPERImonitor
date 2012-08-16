@@ -42,6 +42,12 @@
   </build>
   
   <dependencies>
+    
+    <dependency>
+      <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
+      <artifactId>experimedia-arch-ecc-em-dataModel</artifactId>
+      <version>0.1-SNAPSHOT</version>
+    </dependency>
 	
   </dependencies>
     

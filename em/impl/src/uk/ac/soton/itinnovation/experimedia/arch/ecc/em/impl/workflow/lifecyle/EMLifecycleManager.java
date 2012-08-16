@@ -27,11 +27,16 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecyle;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel.EMPhase;
+
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.EMConnectionManagerListener;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel.EMClient;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
+
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecyle.phases.*;
 
 import java.util.*;
+
 
 
 
@@ -43,16 +48,15 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   private AMQPBasicChannel emChannel;
   private UUID             emProviderID;
   
-  private HashMap<Integer, AbstractEMLCPhase> lifecyclePhases;
-  private int lifecycleIndex     = 0;
-  private int lifecycleLastIndex = 1;
+  private EnumMap<EMPhase, AbstractEMLCPhase> lifecyclePhases;
+  private EMPhase currentPhase = EMPhase.eEMUnknownPhase;
   
   private EMLifecycleManagerListener lifecycleListener;
   
   
   public EMLifecycleManager() 
   {
-    lifecyclePhases = new HashMap<Integer, AbstractEMLCPhase>();
+    lifecyclePhases = new EnumMap<EMPhase, AbstractEMLCPhase>( EMPhase.class );
   }
   
   public void initialise( AMQPBasicChannel channel, 
@@ -67,45 +71,65 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
     EMGeneratorDiscoveryPhase gdp = new EMGeneratorDiscoveryPhase( emChannel,
                                                                    emProviderID,
                                                                    this );
-    lifecyclePhases.put( 1, gdp );
+    lifecyclePhases.put( EMPhase.eEMDiscoverMetricGenerators, gdp );
   }
+  
+  public boolean isLifecycleStarted()
+  { return (currentPhase.getIndex() > 0); }
   
   public void iterateLifecycle()
   {
-    if ( lifecycleIndex < lifecycleLastIndex && !lifecyclePhases.isEmpty() )
+    if ( currentPhase != EMPhase.eEMProtocolComplete && !lifecyclePhases.isEmpty() )
     {
-      lifecycleIndex++;
+      currentPhase = currentPhase.nextPhase();
       
-      AbstractEMLCPhase lcPhase = lifecyclePhases.get( lifecycleIndex );
+      AbstractEMLCPhase lcPhase = lifecyclePhases.get( currentPhase );
       if ( lcPhase != null )
         try { lcPhase.start(); }
         catch( Exception e ) 
         { 
-          System.out.println("Could not start lifecycle phase: " + lcPhase.getName() );
+          System.out.println("Could not start lifecycle phase: " + lcPhase.getPhaseType() );
           System.out.println("Life-cycle exception: " + e.getMessage() );
         }
     }
   }
   
+  public void endLifecycle()
+  {
+    currentPhase = EMPhase.eEMUnknownPhase;
+    
+    //TODO: Tidy up
+  }
+  
   // EMConnectionManagerListener -----------------------------------------------
   @Override
-  public void onClientRegistered( EMClient client )
+  public void onClientRegistered( EMClientEx client )
   {
     // Attach client to GeneratorDiscoveryPhase
     if ( client          != null && 
          lifecyclePhases != null &&
-         lifecycleIndex  == 0 ) // Only register client if we've not started a life-cycle
+         currentPhase    == EMPhase.eEMUnknownPhase ) // Only register client if we've not started a life-cycle
     {
-      AbstractEMLCPhase discovery = lifecyclePhases.get( 1 );
+      AbstractEMLCPhase discovery = 
+              lifecyclePhases.get( EMPhase.eEMDiscoverMetricGenerators );
+      
       if ( discovery != null ) discovery.addClient( client );
     }
   }
   
   // GeneratorDiscoveryPhaseListener -------------------------------------------
   @Override
-  public void onSentRegisterationConfirmation( Set<UUID> clientIDs )
+  public void onClientPhaseSupportReceived( EMClientEx client )
   {
+    EnumSet<EMPhase> clientPhases = client.getCopyOfSupportedPhases();
+    Iterator<EMPhase> phaseIt = clientPhases.iterator();
     
+    while ( phaseIt.hasNext() )
+    {
+      AbstractEMLCPhase phase = lifecyclePhases.get( phaseIt.next() );
+      if ( phase != null )
+        phase.addClient( client );
+    }
   }
   
   @Override

@@ -18,19 +18,20 @@
 // the software.
 //
 //      Created By :            Simon Crowle
-//      Created Date :          13-Aug-2012
+//      Created Date :          16-Aug-2012
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow;
-
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel;
 
 
 
 
-public interface EMConnectionManagerListener
+public class EMClientDiscoveryResult
 {
-  void onClientRegistered( EMClientEx client );
+  private int numberOfMetricGenerators;
+  
+  public EMClientDiscoveryResult()
+  {}
 }

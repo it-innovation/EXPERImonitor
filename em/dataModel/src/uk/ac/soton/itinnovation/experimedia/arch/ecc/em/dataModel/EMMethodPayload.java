@@ -19,7 +19,7 @@
 //
 //      Created By :            Simon Crowle
 //      Created Date :          29-Jul-2012
-//      Created for Project :   experimedia-arch-ecc-em-impl
+//      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 

@@ -32,9 +32,13 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasicChannel;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.factory.EMInterfaceFactory;
+
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel.EMPhase;
+
 import uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccEntryPoint.ECCMonitorEntryPointTest;
 
 import java.util.*;
+
 
 
 
@@ -170,7 +174,7 @@ public class ECCMonitorTestExecutor implements Runnable,
   
   @Override
   public void onSendActivityPhases( UUID senderID,
-                                    List<IEMMonitor.EMSupportedPhase> supportedPhases )
+                                    EnumSet<EMPhase> supportedPhases )
   { /*Not implemented in this test*/ }
   
   @Override

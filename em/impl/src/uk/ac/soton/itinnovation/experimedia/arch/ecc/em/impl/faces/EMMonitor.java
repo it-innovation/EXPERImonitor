@@ -32,16 +32,15 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.faces.AMQPFullInterfaceBase;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel.EMMethodPayload;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel.*;
 
 import java.util.*;
 
 
 
 
-
 public class EMMonitor extends EMBaseInterface
-                        implements IEMMonitor
+                       implements IEMMonitor
 {
   private IEMMonitor_ProviderListener providerListener;
   private IEMMonitor_UserListener     userListener;
@@ -59,11 +58,11 @@ public class EMMonitor extends EMBaseInterface
                                 eReport };
   
   
-  public EMMonitor( AMQPBasicChannel channel,
+  public EMMonitor( AMQPBasicChannel    channel,
                     AMQPMessageDispatch dispatch,
-                    UUID providerID,
-                    UUID userID,
-                    boolean isProvider )
+                    UUID                providerID,
+                    UUID                userID,
+                    boolean             isProvider )
   {
     super( channel, isProvider );
     interfaceName = "IECCMonitor";
@@ -144,7 +143,7 @@ public class EMMonitor extends EMBaseInterface
   
   // Method ID = 8
   @Override
-  public void sendActivePhases( List<EMSupportedPhase> supportedPhases )
+  public void sendActivePhases( EnumSet<EMPhase> supportedPhases )
   {
     ArrayList<Object> params = new ArrayList<Object>();
     params.add( supportedPhases );
@@ -232,7 +231,7 @@ public class EMMonitor extends EMBaseInterface
       {
         if ( providerListener != null )
         {
-          List<EMSupportedPhase> phases = (List<EMSupportedPhase>) params.get( 0 );       
+          EnumSet<EMPhase> phases = (EnumSet<EMPhase>) params.get( 0 );       
           providerListener.onSendActivityPhases( interfaceUserID, phases );
         }
         

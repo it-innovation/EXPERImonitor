@@ -25,7 +25,10 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel.EMClient;
+
 import java.util.*;
+
 
 
 
@@ -42,11 +45,11 @@ public interface IExperimentMonitor
   
   void openEntryPoint( String rabbitServerIP, UUID entryPointID ) throws Exception;
   
-  Set<Map.Entry<UUID, String>> getConnectedClientInfo();
+  Set<EMClient> getConnectedClients();
   
   void startLifecycle() throws Exception;
   
   void endLifecycle() throws Exception;
   
-  void setListener( IExperimentMonitorListener listener );
+  void setClientListener( IEMClientListener listener );
 }

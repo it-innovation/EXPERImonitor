@@ -23,7 +23,7 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecyle;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecyle.phases;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.IEMMonitor;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEMMonitor_ProviderListener;
@@ -33,7 +33,9 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces.EMMonitor;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel.EMClient;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel.*;
+
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
 
 import java.util.*;
 
@@ -41,25 +43,31 @@ import java.util.*;
 
 
 
-class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
-                                implements IEMMonitor_ProviderListener
+
+public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
+                                       implements IEMMonitor_ProviderListener
 {
   private GeneratorDiscoveryPhaseListener phaseListener;
   
-  protected EMGeneratorDiscoveryPhase( AMQPBasicChannel channel,
+  private HashSet<EMClientEx> clientsDiscovering;
+  
+  
+  public EMGeneratorDiscoveryPhase( AMQPBasicChannel channel,
                                        UUID providerID,
                                        GeneratorDiscoveryPhaseListener listener )
   {
-    super( "Generator discovery phase", channel, providerID );
+    super( EMPhase.eEMDiscoverMetricGenerators, channel, providerID );
     
     phaseListener = listener;
+    
+    clientsDiscovering = new HashSet<EMClientEx>();
     
     phaseState = "Waiting for clients";
   }
   
   // AbstractEMLCPhase ---------------------------------------------------------
   @Override
-  protected boolean addClient( EMClient client )
+  public boolean addClient( EMClientEx client )
   {
     if ( super.addClient(client) )
     {
@@ -82,26 +90,21 @@ class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
   }
   
   @Override
-  protected void start() throws Exception
+  public void start() throws Exception
   {
     if ( phaseClients.isEmpty() ) throw new Exception( "No clients available for this phase" );
   
     // Confirm registration with clients...
-    for ( EMClient client : phaseClients.values() )
+    for ( EMClientEx client : phaseClients.values() )
     {
       IEMMonitor monFace = client.getEMMonitorInterface();
       monFace.registrationConfirmed( true );
-    }
-    
-    // Notify listener
-    if ( phaseListener != null ) 
-      phaseListener.onSentRegisterationConfirmation( phaseClients.keySet() );
-    
+    }    
     //... remainder of protocol implemented through events
   }
   
   @Override
-  protected void stop() throws Exception
+  public void stop() throws Exception
   {
     
   }
@@ -110,14 +113,44 @@ class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
   @Override
   public void onReadyToInitialise( UUID senderID )
   {
-    
+    EMClientEx client = phaseClients.get( senderID );
+    if ( client != null )
+    {
+      // Assumes client has already created IEMMonitor interface
+      
+      AMQPMessageDispatch dispatch = new AMQPMessageDispatch();
+      
+      EMMonitor monitorFace = new EMMonitor( emChannel,
+                                             dispatch,
+                                             emProviderID,
+                                             senderID,
+                                             true );
+              
+      phaseMsgPump.addDispatch( dispatch );
+      
+      client.setEMMonitorInterface( monitorFace );
+      
+      monitorFace.requestActivityPhases();
+    }
   }
   
   @Override
   public void onSendActivityPhases( UUID senderID, 
-                                    List<IEMMonitor.EMSupportedPhase> supportedPhases )
+                                    EnumSet<EMPhase> supportedPhases )
   {
+    EMClientEx client = phaseClients.get( senderID );
     
+    if ( client != null && supportedPhases != null )
+    {
+      // Tell Lifecycle manager about supported phases by client
+      client.setSupportedPhases( supportedPhases );
+      phaseListener.onClientPhaseSupportReceived( client );
+      
+      // Ask clients to start discovering metric generators
+      clientsDiscovering.add( client );
+      
+      client.getEMMonitorInterface().discoverMetricGenerators(); 
+    }
   }
   
   @Override

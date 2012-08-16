@@ -18,21 +18,33 @@
 // the software.
 //
 //      Created By :            Simon Crowle
-//      Created Date :          14-Aug-2012
+//      Created Date :          15-Aug-2012
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecyle;
+package uk.ac.soton.itinnovation.experimedia.ecc.em.samples.basicEMClient;
 
-import java.util.*;
-
-
+import java.util.UUID;
 
 
-interface GeneratorDiscoveryPhaseListener
+
+
+public class EMClientContainer
 {
-  void onSentRegisterationConfirmation( Set<UUID> clientIDs );
-  
-  void onDiscoveryPhaseCompleted();
+  public static void main( String args[] )
+  {
+    EMClientController ctrl = new EMClientController();
+    
+    try
+    {
+    ctrl.start( "127.0.0.1",
+                UUID.fromString("00000000-0000-0000-0000-000000000000"), // EM ID
+                UUID.randomUUID() );                                     // ID of this client
+    }
+    catch (Exception e )
+    {
+      System.out.println("Had a problem connecting to the EM:\n" + e.getMessage() );
+    }
+  }
 }

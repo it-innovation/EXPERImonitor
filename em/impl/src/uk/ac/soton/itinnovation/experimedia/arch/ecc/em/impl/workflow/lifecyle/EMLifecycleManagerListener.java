@@ -30,5 +30,5 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecyle;
 
 public interface EMLifecycleManagerListener
 {
-
+  
 }
