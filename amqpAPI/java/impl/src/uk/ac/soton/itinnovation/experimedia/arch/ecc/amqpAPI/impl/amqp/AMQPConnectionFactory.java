@@ -27,7 +27,6 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp;
 
 import java.io.*;
 import java.net.*;
-import java.util.*;
 
 import com.rabbitmq.client.*;
 
@@ -39,11 +38,9 @@ public class AMQPConnectionFactory
   private InetAddress amqpHostIP;
   private Connection  amqpConnection;
   
-  private HashSet<AMQPBasicChannel> amqpChannels;
   
   public AMQPConnectionFactory()
   {
-    amqpChannels = new HashSet<AMQPBasicChannel>();
   } 
   
   public boolean setAMQPHostIPAddress( String addr )
@@ -91,26 +88,10 @@ public class AMQPConnectionFactory
   public boolean isConnectionValid()
   { return (amqpConnection != null); }
   
-  public void disconnectAMSQPHost()
-  {
-    // Close known channels
-    Iterator<AMQPBasicChannel> channelIt = amqpChannels.iterator();
-    while ( channelIt.hasNext() )
-    { channelIt.next().close(); }
-    
-    amqpChannels.clear();
-    
-    try { if ( amqpConnection != null ) amqpConnection.close(); }
-    catch (IOException ioe) {}
-  }
-  
   public AMQPBasicChannel createNewChannel() throws Exception
   {
     if ( amqpConnection == null ) throw new Exception( "No AMSQP connection available" );
     
-    AMQPBasicChannel newChannel = new AMQPBasicChannel( amqpConnection.createChannel() );
-    amqpChannels.add( newChannel );
-    
-    return newChannel;
+    return new AMQPBasicChannel( amqpConnection.createChannel() );
   }
 }
