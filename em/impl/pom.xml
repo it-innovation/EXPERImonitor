@@ -63,7 +63,7 @@
     
     <dependency>
       <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
-      <artifactId>experimedia-arch-ecc-em-dataModel</artifactId>
+      <artifactId>experimedia-arch-ecc-common-dataModel-experimentMonitor</artifactId>
       <version>0.1-SNAPSHOT</version>
     </dependency>
     

@@ -18,40 +18,20 @@
 // the software.
 //
 //      Created By :            Simon Crowle
-//      Created Date :          29-Jul-2012
+//      Created Date :          16-Aug-2012
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel;
-
-import java.util.List;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experimentMonitor;
 
 
 
-/**
- * EMMethodPayload encapsulates message data sent in EM interfaces
- * This class must conform the bean standard (YAML requirement)
- * 
- * @author sgc
- */
-public class EMMethodPayload
+
+public class EMClientDiscoveryResult
 {
-  private int          methodID;
-  private List<Object> parameters;
+  private int numberOfMetricGenerators;
   
-  public EMMethodPayload()
+  public EMClientDiscoveryResult()
   {}
-  
-  public int getMethodID()
-  { return methodID; }
-  
-  public void setMethodID( int id )
-  { methodID = id; }
-  
-  public List<Object> getParameters()
-  { return parameters; }
-  
-  public void setParameters( List<Object> params )
-  { parameters = params; }
 }

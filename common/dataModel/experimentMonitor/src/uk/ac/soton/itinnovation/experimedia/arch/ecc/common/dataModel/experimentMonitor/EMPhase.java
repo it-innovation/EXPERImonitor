@@ -23,7 +23,7 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experimentMonitor;
 
 import java.util.Comparator;
 

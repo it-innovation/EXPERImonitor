@@ -19,7 +19,6 @@
     <module>spec</module>
     <module>impl</module>
     <module>factory</module>
-    <module>dataModel</module>
     <module>test</module>
     <module>samples</module>
   </modules>

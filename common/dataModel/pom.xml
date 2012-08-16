@@ -43,6 +43,7 @@
     <modules>
         <module>metrics</module>
         <module>provenance</module>
+		<module>experimentMonitor</module>
     </modules>
     
 </project>
