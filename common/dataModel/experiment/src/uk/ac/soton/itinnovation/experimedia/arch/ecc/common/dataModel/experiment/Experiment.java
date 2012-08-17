@@ -22,13 +22,14 @@
 //      Created for Project :   BonFIRE
 //
 /////////////////////////////////////////////////////////////////////////
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment;
 
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
 
 /**
  * An experiment is the top-level class that all entities are part of, and that 
@@ -48,7 +49,6 @@ public class Experiment implements Serializable
     private String description;
     private Date startTime;
     private Date endTime;
-    //private Set<Entity> entities; // may include this relationship later
     private Set<MetricGenerator> metricGenerators;
 
     // other things?
@@ -60,7 +60,6 @@ public class Experiment implements Serializable
     public Experiment()
     {
         this.uuid = UUID.randomUUID();
-        //this.entities = new HashSet<Entity>();
         this.metricGenerators = new HashSet<MetricGenerator>();
     }
     
@@ -79,13 +78,6 @@ public class Experiment implements Serializable
         this.description = ex.getDescription();
         this.startTime = new Date(ex.getStartTime().getTime());
         this.endTime = new Date(ex.getEndTime().getTime());
-        
-        /*this.entities = new HashSet<Entity>();
-        if (ex.getEntities() != null)
-        {
-            for (Entity e: ex.getEntities())
-                this.entities.add(new Entity(e));
-        }*/
         
         this.metricGenerators = new HashSet<MetricGenerator>();
         if (ex.getMetricGenerators() != null)
@@ -128,38 +120,6 @@ public class Experiment implements Serializable
         this(uuid, experimentID, name, description, creationTime);
         this.endTime = endTime;
     }
-    
-    /**
-     * Constructor to set the basic information about the experiment likely known
-     * at the start, in addition to the entities.
-     * @param uuid UUID used to uniquely identify an experiment in this framework.
-     * @param experimentID An experiment ID, as per the facility the experiment is/was running in.
-     * @param name Name of the experiment.
-     * @param description A description of the experiment.
-     * @param creationTime The time stamp when the experiment was started.
-     * @param entities The entities that are/were a part of the experiment.
-     *
-    public Experiment(UUID uuid, String experimentID, String name, String description, Date creationTime, Set<Entity> entities)
-    {
-        this(uuid, experimentID, name, description, creationTime);
-        this.entities = entities;
-    }*/
-    
-    /**
-     * Constructor to set all the information about the experiment.
-     * @param uuid UUID used to uniquely identify an experiment in this framework.
-     * @param experimentID An experiment ID, as per the facility the experiment is/was running in.
-     * @param name Name of the experiment.
-     * @param description A description of the experiment.
-     * @param creationTime The time stamp when the experiment was started.
-     * @param endTime The time stamp when the experiment ended.
-     * @param entities The entities that are/were a part of the experiment.
-     *
-    public Experiment(UUID uuid, String experimentID, String name, String description, Date creationTime, Date endTime, Set<Entity> entities)
-    {
-        this(uuid, experimentID, name, description, creationTime, entities);
-        this.endTime = endTime;
-    }*/
     
     /**
      * @return the uuid
@@ -256,51 +216,7 @@ public class Experiment implements Serializable
     {
         this.endTime = endTime;
     }
-
-    /**
-     * @return the entities
-     *
-    public Set<Entity> getEntities()
-    {
-        return entities;
-    }*/
-
-    /**
-     * @param entities the entities to set
-     *
-    public void setEntities(Set<Entity> entities)
-    {
-        this.entities = entities;
-    }*/
     
-    /**
-     * @param entity the entity to add
-     *
-    public void addEntity(Entity entity)
-    {
-        if (entity == null)
-            return;
-        
-        if (this.entities == null)
-            this.entities = new HashSet<Entity>();
-        
-        this.entities.add(entity);
-    }*/
-    
-    /**
-     * @param entities the entities to add
-     *
-    public void addEntities(Set<Entity> entities)
-    {
-        if ((entities == null) || entities.isEmpty())
-            return;
-        
-        if (this.entities == null)
-            this.entities = new HashSet<Entity>();
-        
-        this.entities.addAll(entities);
-    }*/
-
     /**
      * @return the metricGenerators
      */

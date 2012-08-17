@@ -31,6 +31,28 @@ import javax.measure.unit.Unit;
 /**
  * The metric class details the measurement of an attribute (of an entity).
  * 
+ * For information about using the JScience unit, have a look at these resources:
+ * 
+ *   http://www.javaworld.com/javaworld/jw-10-2007/jw-10-jsr275.html
+ *   http://www.jscience.org/api/index.html
+ *   http://www.jscience.org/api/javax/measure/unit/Unit.html
+ *   http://www.jscience.org/api/javax/measure/quantity/Quantity.html
+ *   http://www.jscience.org/api/javax/measure/unit/SI.html
+ * 
+ * Examples of units are:
+ * 
+ *   Unit<Duration> min = MINUTE;
+ *   Unit<Duration> ms = MILLI(SECOND);
+ * 
+ *   Unit<Length> metre = METRE;
+ *   Unit<Length> cm = CENTI(METER);
+ *   Unit<Length> FOOT = METER.times(3048).divide(10000); // Exact
+ * 
+ * Setting a unit:
+ * 
+ *   Metric m = new Metric();
+ *   m.setUnit(MINUTE);
+ * 
  * @author Vegard Engen
  */
 public class Metric implements Serializable
