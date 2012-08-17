@@ -41,6 +41,7 @@
         <module>common</module>
         <module>amqpAPI</module>
         <module>em</module>
+        <module>edm</module>
     </modules>
     
 </project>
