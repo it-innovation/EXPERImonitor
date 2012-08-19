@@ -17,20 +17,18 @@
 // PURPOSE, except where stated in the Licence Agreement supplied with
 // the software.
 //
-//      Created By :            sgc
-//      Created Date :          13-Aug-2012
-//      Created for Project :   experimedia-arch-ecc-em-spec
+//      Created By :            Simon Crowle
+//      Created Date :          19-Aug-2012
+//      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow;
-
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMClient;
+package uk.ac.soton.itinnovation.experimedia.ecc.em.samples.basicEMContainer;
 
 
 
 
-public interface IEMClientListener
+public interface EMViewListener
 {
-  void onClientRegistered( EMClient client );
+  void onStartPhasesButtonClicked();
 }

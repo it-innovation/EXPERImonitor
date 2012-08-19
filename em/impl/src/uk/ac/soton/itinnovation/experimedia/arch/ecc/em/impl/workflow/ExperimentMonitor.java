@@ -50,7 +50,7 @@ public class ExperimentMonitor implements IExperimentMonitor,
   private EMConnectionManager connectionManager;
   private EMLifecycleManager  lifecycleManager;
   
-  private IEMClientListener emClientListener;
+  private IExperimentMonitorListener emClientListener;
   
   
   public ExperimentMonitor()
@@ -96,7 +96,7 @@ public class ExperimentMonitor implements IExperimentMonitor,
   @Override
   public Set<EMClient> getConnectedClients()
   {    
-    return getSimpleClientSet( connectionManager.getCopyConnectedClients() );
+    return getSimpleClientSet( connectionManager.getConnectedClients() );
   }
   
   @Override
@@ -123,7 +123,7 @@ public class ExperimentMonitor implements IExperimentMonitor,
   }
   
   @Override
-  public void setClientListener( IEMClientListener listener )
+  public void setListener( IExperimentMonitorListener listener )
   { if ( listener != null ) emClientListener = listener; }
   
   // EMConnectionManagerListener -----------------------------------------------
@@ -135,7 +135,14 @@ public class ExperimentMonitor implements IExperimentMonitor,
   }
   
   // EMLifecycleManagerListener ------------------------------------------------
-  
+  @Override
+  public void onFoundClientWithMetricGenerators( UUID clientID )
+  {
+    EMClient client = connectionManager.getClient( clientID );
+    
+    if ( client != null && emClientListener != null )
+      emClientListener.onClientHasMetricGenerators( client );
+  }
   
   // Private methods -----------------------------------------------------------
   private void initialise( String rabbitServerIP ) throws Exception

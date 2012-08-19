@@ -32,13 +32,15 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasicChannel;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.factory.EMInterfaceFactory;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
+
 import java.util.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMInterfaceType;
 
 
 
-
-public class EMInterfaceAdapter implements IEMMonitor_UserListener
+public class EMInterfaceAdapter implements IEMMonitor_UserListener,
+                                           IEMMonitorSetup_UserListener
 {
   private EMIAdapterListener emiListener;
   private String             clientName;
@@ -98,8 +100,10 @@ public class EMInterfaceAdapter implements IEMMonitor_UserListener
     IAMQPMessageDispatch monDispatch = interfaceFactory.createDispatch();
     dispatchPump.addDispatch( monDispatch );
     monitorFace = interfaceFactory.createMonitor( expMonitorID, 
-                                                  ourID, 
+                                                  clientID, 
                                                   monDispatch );
+    
+    monitorFace.setUserListener( this );
       
     //.. and finally, try registering with the EM!
     entryPointFace.registerAsEMClient( clientID, "Simple EM Client" );
@@ -117,29 +121,30 @@ public class EMInterfaceAdapter implements IEMMonitor_UserListener
         {
           if ( setupFace == null )
           {
-            /*
-             * IAMQPMessageDispatch monDispatch = interfaceFactory.createDispatch();
-                                    dispatchPump.addDispatch( monDispatch );
-                                    monitorFace = interfaceFactory.createMonitor( expMonitorID, 
-                                                  ourID, 
-                                                  monDispatch );
-             */
+            IAMQPMessageDispatch monDispatch = interfaceFactory.createDispatch();
+            dispatchPump.addDispatch( monDispatch );
+            
+            setupFace = interfaceFactory.createSetup( expMonitorID, 
+                                                      clientID, 
+                                                      monDispatch );
+            
+            setupFace.setUserListener( this );
           }
         } break;
           
         case eEMMonitorControl :
         {
-          
+          //TODO
         } break;
           
         case eECCReport :
         {
-          
+          //TODO
         } break;
           
         case eECCTearDown :
         {
-          
+          //TODO
         } break;
       }
     }
@@ -148,37 +153,70 @@ public class EMInterfaceAdapter implements IEMMonitor_UserListener
   @Override
   public void onRegistrationConfirmed( UUID senderID, Boolean confirmed )
   {
-    
+    if ( senderID.equals(expMonitorID) && emiListener != null )
+    {
+      emiListener.onEMConnectionResult( confirmed );
+      
+      monitorFace.readyToInitialise();
+    }
   }
   
   @Override
   public void onRequestActivityPhases( UUID senderID )
   {
-    
+    if ( senderID.equals(expMonitorID) )
+    {
+      // Notify EM of all the phases supported by this adapter
+      EnumSet<EMPhase> phases = EnumSet.noneOf( EMPhase.class );
+      phases.add( EMPhase.eEMDiscoverMetricGenerators );
+      phases.add( EMPhase.eEMSetUpMetricGenerators );
+      phases.add( EMPhase.eEMLiveMonitoring );
+      phases.add( EMPhase.eEMPostMonitoringReport );
+      phases.add( EMPhase.eEMTearDown );
+
+      monitorFace.sendActivePhases( phases );
+    }
   }
   
   @Override
   public void onDiscoverMetricGenerators( UUID senderID )
   {
-    
+    // Just assume that all metric generators have been discovered
+    if ( senderID.equals(expMonitorID) )
+      monitorFace.sendDiscoveryResult( true );
   }
   
   @Override
   public void onRequestMetricGeneratorInfo( UUID senderID )
   {
-    
+    if ( senderID.equals(expMonitorID) && emiListener != null )
+    {
+      HashSet<MetricGenerator> genSet = new HashSet<MetricGenerator>();
+      emiListener.updateMetricGenerators( genSet );
+      
+      monitorFace.sendMetricGeneratorInfo( genSet );
+    }
   }
   
   @Override
   public void onDiscoveryTimeOut( UUID senderID )
-  {
-    
-  }
+  { /* Not implemented in this demo */ }
   
   @Override
   public void onSetStatusMonitorEndpoint( UUID senderID,
                                           String endPoint )
+  { /* Not implemented in this demo */ }
+  
+  // IEMMonitorSetup_UserListener ----------------------------------------------
+  @Override
+  public void onSetupMetricGenerator( UUID senderID, UUID genID )
   {
-    
+    // Just assume metrics are ready to go for this demo
+    if ( senderID.equals(expMonitorID) && setupFace != null )
+      setupFace.notifyMetricGeneratorSetupResult(genID, true );
   }
+  
+  @Override
+  public void onSetupTimeOut( UUID senderID, UUID genID )
+  { /* Not imeplemented in this demo */ }
 }

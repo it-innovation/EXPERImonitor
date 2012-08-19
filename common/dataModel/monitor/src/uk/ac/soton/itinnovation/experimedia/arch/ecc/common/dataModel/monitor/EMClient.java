@@ -25,6 +25,8 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
+
 import java.util.*;
 
 
@@ -32,9 +34,10 @@ import java.util.*;
 
 public class EMClient
 {
-  protected UUID             clientID;
-  protected String           clientName;
-  protected EnumSet<EMPhase> supportedPhases;
+  protected UUID                     clientID;
+  protected String                   clientName;
+  protected EnumSet<EMPhase>         supportedPhases;
+  protected HashSet<MetricGenerator> metricGenerators;
   
   
   public EMClient( UUID id, String name )
@@ -42,7 +45,8 @@ public class EMClient
     clientID = id;
     clientName = name;
     
-    supportedPhases = EnumSet.noneOf( EMPhase.class );
+    supportedPhases  = EnumSet.noneOf( EMPhase.class );
+    metricGenerators = new HashSet<MetricGenerator>();
   }
   
   public UUID getID()
@@ -57,5 +61,19 @@ public class EMClient
     phaseCopy.addAll( supportedPhases );
     
     return phaseCopy;
+  }
+  
+  public Set<MetricGenerator> getCopyOfMetricGenerators()
+  {
+    HashSet<MetricGenerator> mgCopies = new HashSet<MetricGenerator>();
+    
+    Iterator<MetricGenerator> copyIt = metricGenerators.iterator();
+    while ( copyIt.hasNext() )
+    {
+      MetricGenerator clone = new MetricGenerator( copyIt.next() );
+      mgCopies.add( clone );
+    }
+    
+    return mgCopies;
   }
 }

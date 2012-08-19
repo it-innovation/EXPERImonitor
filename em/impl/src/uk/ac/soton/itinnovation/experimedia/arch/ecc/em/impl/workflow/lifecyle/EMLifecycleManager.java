@@ -41,6 +41,7 @@ import java.util.*;
 
 
 
+
 public class EMLifecycleManager implements EMConnectionManagerListener,
                                            GeneratorDiscoveryPhaseListener
 {
@@ -110,7 +111,7 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
          currentPhase    == EMPhase.eEMUnknownPhase ) // Only register client if we've not started a life-cycle
     {
       AbstractEMLCPhase discovery = 
-              lifecyclePhases.get( EMPhase.eEMDiscoverMetricGenerators );
+          lifecyclePhases.get( EMPhase.eEMDiscoverMetricGenerators );
       
       if ( discovery != null ) discovery.addClient( client );
     }
@@ -129,6 +130,12 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
       if ( phase != null )
         phase.addClient( client );
     }
+  }
+  
+  @Override
+  public void onClientMetricGeneratorsFound( UUID clientID )
+  {
+    lifecycleListener.onFoundClientWithMetricGenerators( clientID );
   }
   
   @Override

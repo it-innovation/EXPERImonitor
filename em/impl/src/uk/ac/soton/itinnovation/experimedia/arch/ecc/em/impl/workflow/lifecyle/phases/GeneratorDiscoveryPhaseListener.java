@@ -27,12 +27,16 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecyle.
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
 
+import java.util.*;
+
 
 
 
 public interface GeneratorDiscoveryPhaseListener
 {
   void onClientPhaseSupportReceived( EMClientEx client );
+  
+  void onClientMetricGeneratorsFound( UUID clientID );
   
   void onDiscoveryPhaseCompleted();
 }

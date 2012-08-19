@@ -36,7 +36,6 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces.EMMonitorEntr
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
 
 import java.util.*;
-import java.util.Map.Entry;
 
 
 
@@ -105,12 +104,15 @@ public class EMConnectionManager implements IEMMonitorEntryPoint_ProviderListene
   public int getConnectedClientCount()
   { return connectedClients.size(); }
   
-  public Set<EMClientEx> getCopyConnectedClients()
+  public EMClientEx getClient( UUID clientID )
+  { return connectedClients.get( clientID ); }
+  
+  public Set<EMClientEx> getConnectedClients()
   {
-    Set<EMClientEx> copyOfClients = new HashSet<EMClientEx>();
-    copyOfClients.addAll( connectedClients.values() );
+    HashSet<EMClientEx> currClients = new HashSet<EMClientEx>();
+    currClients.addAll( connectedClients.values() );
     
-    return copyOfClients;
+    return currClients;
   }
   
   // IEMMonitorEntryPoint_ProviderListener -------------------------------------

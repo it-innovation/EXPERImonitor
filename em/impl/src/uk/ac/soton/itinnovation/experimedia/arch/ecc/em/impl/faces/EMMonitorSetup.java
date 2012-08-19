@@ -31,8 +31,9 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.faces.AMQPFullInterfaceBase;
 
-import java.util.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMMethodPayload;
+
+import java.util.*;
 
 
 
@@ -76,14 +77,20 @@ public class EMMonitorSetup extends EMBaseInterface
   @Override
   public void setupMetricGenerator( UUID genID )
   {
+    ArrayList<Object> params = new ArrayList<Object>();
+    params.add( genID );
     
+    executeMethod( 1, params );
   }
   
   // Method ID = 2
   @Override
   public void setupTimeOut( UUID genID )
   {
+    ArrayList<Object> params = new ArrayList<Object>();
+    params.add( genID );
     
+    executeMethod( 2, params );
   }
   
   // User methods --------------------------------------------------------------
@@ -91,14 +98,18 @@ public class EMMonitorSetup extends EMBaseInterface
   @Override
   public void notifyReadyToSetup()
   {
-    
+    executeMethod( 3, null );
   }
   
   // Method ID = 4
   @Override
   public void notifyMetricGeneratorSetupResult( UUID genID, Boolean success )
   {
+    ArrayList<Object> params = new ArrayList<Object>();
+    params.add( genID );
+    params.add( success );
     
+    executeMethod( 4, params );
   }
   
   // Protected methods ---------------------------------------------------------
@@ -110,10 +121,11 @@ public class EMMonitorSetup extends EMBaseInterface
     switch ( payload.getMethodID() )
     {
       case ( 1 ) :
-      {
+      { 
         if ( userListener != null )
         {
-          
+          UUID genID = UUID.fromString( (String) params.get(0) );
+          userListener.onSetupMetricGenerator( interfaceProviderID, genID );
         }
         
       } break;
@@ -122,7 +134,8 @@ public class EMMonitorSetup extends EMBaseInterface
       {
         if ( userListener != null )
         {
-          
+          UUID genID = UUID.fromString( (String) params.get(0) );
+          userListener.onSetupTimeOut( interfaceProviderID, genID );
         }
         
       } break;
@@ -130,9 +143,7 @@ public class EMMonitorSetup extends EMBaseInterface
       case ( 3 ) :
       {
         if ( providerListener != null )
-        {
-          
-        }
+          providerListener.onNotifyReadyToSetup( interfaceUserID );
         
       } break;
         
@@ -140,7 +151,12 @@ public class EMMonitorSetup extends EMBaseInterface
       {
         if ( providerListener != null )
         {
+          UUID genID      = UUID.fromString( (String) params.get(0) );
+          Boolean success = (Boolean) params.get(1);
           
+          providerListener.onNotifyMetricGeneratorSetupResult( interfaceUserID, 
+                                                               genID, 
+                                                               success );
         }
         
       } break;

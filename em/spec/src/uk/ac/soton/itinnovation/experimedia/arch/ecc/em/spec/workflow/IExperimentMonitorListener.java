@@ -17,20 +17,22 @@
 // PURPOSE, except where stated in the Licence Agreement supplied with
 // the software.
 //
-//      Created By :            Simon Crowle
-//      Created Date :          14-Aug-2012
-//      Created for Project :   EXPERIMEDIA
+//      Created By :            sgc
+//      Created Date :          13-Aug-2012
+//      Created for Project :   experimedia-arch-ecc-em-spec
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecyle;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow;
 
-import java.util.UUID;
-
-
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMClient;
 
 
-public interface EMLifecycleManagerListener
+
+
+public interface IExperimentMonitorListener
 {
-  void onFoundClientWithMetricGenerators( UUID clientID );
+  void onClientRegistered( EMClient client );
+  
+  void onClientHasMetricGenerators( EMClient client );
 }

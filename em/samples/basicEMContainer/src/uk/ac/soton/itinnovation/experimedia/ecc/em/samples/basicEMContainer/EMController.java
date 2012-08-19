@@ -31,15 +31,16 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.factory.EMInterfaceFacto
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMClient;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
+
 import java.awt.event.*;
 
-import java.util.UUID;
+import java.util.*;
 
 
 
 
-
-public class EMController implements IEMClientListener
+public class EMController implements IExperimentMonitorListener
 {
   private IExperimentMonitor expMonitor;
   private EMView             mainView;
@@ -47,19 +48,17 @@ public class EMController implements IEMClientListener
   public EMController()
   {    
     expMonitor = EMInterfaceFactory.createEM();
-    expMonitor.setClientListener( this );
+    expMonitor.setListener( this );
   }
   
   public void start( String rabbitIP, UUID emID )
   {
-    mainView = new EMView();
+    mainView = new EMView( new MonitorViewListener() );
     mainView.setVisible( true );
     mainView.addWindowListener( new ViewWindowListener() );
     
     try
-    {
-      expMonitor.openEntryPoint( rabbitIP, emID );
-    }
+    { expMonitor.openEntryPoint( rabbitIP, emID ); }
     catch (Exception e) {}
   }
   
@@ -71,11 +70,39 @@ public class EMController implements IEMClientListener
       mainView.addConnectedClient( client.getID(), client.getName() );
   }
   
+  @Override
+  public void onClientHasMetricGenerators( EMClient client )
+  {
+    if ( client != null )
+    {
+      Set<MetricGenerator> generators = client.getCopyOfMetricGenerators();
+      Iterator<MetricGenerator> mgIt = generators.iterator();
+      
+      while ( mgIt.hasNext() )
+      {
+        MetricGenerator mg = mgIt.next();
+        
+        mainView.addLogText( client.getName() + " has metric generator: " + mg.getName() );
+      }
+    }
+  }
+  
   // Private methods -----------------------------------------------------------
   private void onViewClosed()
   {
     try { expMonitor.endLifecycle(); }
     catch ( Exception e ) {}
+  }
+  
+  private void startMonitoringProcess()
+  {
+    if ( expMonitor != null )
+      try
+      { 
+        expMonitor.startLifecycle();
+        mainView.setMonitoringPhaseValue( "Discovering metric providers" );
+      }
+      catch ( Exception e ) {}
   }
   
   // Internal event handling ---------------------------------------------------
@@ -84,5 +111,12 @@ public class EMController implements IEMClientListener
     @Override
     public void windowClosed( WindowEvent we )
     { onViewClosed(); }
+  }
+  
+  private class MonitorViewListener implements EMViewListener
+  {
+    @Override
+    public void onStartPhasesButtonClicked()
+    { startMonitoringProcess(); }
   }
 }

@@ -27,9 +27,9 @@ package uk.ac.soton.itinnovation.experimedia.ecc.em.samples.basicEMClient;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
+
 import java.util.*;
-
-
 
 
 
@@ -40,7 +40,6 @@ public class EMClientController implements EMIAdapterListener
   private AMQPBasicChannel   amqpChannel;
   private EMInterfaceAdapter emiAdapter;
   private EMClientView       clientView;
-  
   
   public EMClientController()
   {
@@ -82,4 +81,28 @@ public class EMClientController implements EMIAdapterListener
   }
   
   // EMIAdapterListener --------------------------------------------------------
+  @Override
+  public void onEMConnectionResult( boolean connected )
+  {
+    if ( connected )
+      clientView.setStatus( "Connected to EM" );
+    else
+      clientView.setStatus( "Refused connection to EM" );
+  }
+  
+  @Override
+  public void updateMetricGenerators( Set<MetricGenerator> genSetOUT )
+  {
+    clientView.setStatus( "Sending metric meta-data to EM" );
+    
+    // Mock up some metric generators
+    MetricGenerator mg = new MetricGenerator();
+    mg.setName( "Demo metric generator" );
+    mg.setDescription( "Metric generator demonstration" );
+    genSetOUT.add( mg );
+    
+    //TODO: Entities & Attributes
+    
+    //TODO: Metric sets, metric types & units 
+  }
 }

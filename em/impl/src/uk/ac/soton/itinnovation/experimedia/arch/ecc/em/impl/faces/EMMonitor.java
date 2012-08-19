@@ -36,6 +36,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
 
 import java.util.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
 
 
 
@@ -157,7 +158,7 @@ public class EMMonitor extends EMBaseInterface
     ArrayList<Object> params = new ArrayList<Object>();
     params.add( discoveredGenerators );
     
-    executeMethod( 10, null );
+    executeMethod( 10, params );
   }
   
   // Method ID = 11
@@ -253,7 +254,12 @@ public class EMMonitor extends EMBaseInterface
       {
         if ( providerListener != null )
         {
-          EnumSet<EMPhase> phases = (EnumSet<EMPhase>) params.get( 0 );       
+          ArrayList<String> stringPhases = (ArrayList<String>) params.get(0);
+          EnumSet<EMPhase> phases = EnumSet.noneOf( EMPhase.class );
+          
+          for ( String phaseString : stringPhases )
+            phases.add( EMPhase.valueOf(phaseString) );
+                
           providerListener.onSendActivityPhases( interfaceUserID, phases );
         }
         
@@ -273,7 +279,20 @@ public class EMMonitor extends EMBaseInterface
       {
         if ( providerListener != null )
         {
-          Set<MetricGenerator> generators = (Set<MetricGenerator>) params.get( 0 );
+          //TODO: Write jolly MetricGenerator de-serializer :(
+          ArrayList<LinkedHashMap> serialGens
+             = new ArrayList<LinkedHashMap>( (ArrayList<LinkedHashMap>) params.get(0) );
+          
+          Set<MetricGenerator> generators = new HashSet<MetricGenerator>();
+          
+          for ( LinkedHashMap lhm : serialGens )
+          {
+            MetricGenerator mg = new MetricGenerator( UUID.fromString( (String) lhm.get("uuid") ),
+                                                      (String) lhm.get("name"),
+                                                      (String) lhm.get("description") );
+            generators.add( mg );
+          }
+          
           providerListener.onSendMetricGeneratorInfo( interfaceUserID, generators );
         }
         

@@ -50,5 +50,5 @@ public interface IExperimentMonitor
   
   void endLifecycle() throws Exception;
   
-  void setClientListener( IEMClientListener listener );
+  void setListener( IExperimentMonitorListener listener );
 }

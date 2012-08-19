@@ -62,16 +62,18 @@ public class AMQPMessageDispatch implements IAMQPMessageDispatch
     return addResult;
   }
   
-  public synchronized void iterateDispatch()
+  public void iterateDispatch()
   {
-    if ( !dispatchList.isEmpty() && dispatchListener != null )
+    synchronized( dispatchLock )
     {
-      Entry<String,byte[]> nextMessage = dispatchList.getFirst();
-      dispatchList.removeFirst();
-      
-      dispatchListener.onSimpleMessageDispatched( nextMessage.getKey(),
-                                                  nextMessage.getValue() );
-    }    
+      if ( !dispatchList.isEmpty() && dispatchListener != null )
+      {
+        Entry<String,byte[]> nextMessage = dispatchList.pop();
+
+        dispatchListener.onSimpleMessageDispatched( nextMessage.getKey(),
+                                                    nextMessage.getValue() );
+      }  
+    }
   }
   
   // IAMQPMessageDispatch ------------------------------------------------------

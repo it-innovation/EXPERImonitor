@@ -45,9 +45,7 @@ public class AMQPMessageDispatchPump implements Runnable,
   
   private LinkedList<AMQPMessageDispatch> dispatchList;
   
-  
-  
-  
+ 
   public AMQPMessageDispatchPump( String pName, 
                                   IAMQPMessageDispatchPump.ePumpPriority priority )
   {
@@ -71,7 +69,7 @@ public class AMQPMessageDispatchPump implements Runnable,
   @Override
   public boolean startPump()
   {
-    if ( !dispatchList.isEmpty() && !isPumping )
+    if ( !isPumping )
     {
       isPumping = true;
       pumpThread.start();

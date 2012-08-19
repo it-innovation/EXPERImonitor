@@ -25,10 +25,16 @@
 
 package uk.ac.soton.itinnovation.experimedia.ecc.em.samples.basicEMClient;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
+
+import java.util.Set;
+
 
 
 
 public interface EMIAdapterListener
 {
+  void onEMConnectionResult( boolean connected );
   
+  void updateMetricGenerators( Set<MetricGenerator> genSetOUT );
 }

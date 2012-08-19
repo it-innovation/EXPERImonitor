@@ -29,9 +29,9 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
+
 import java.util.*;
-
-
 
 
 
@@ -54,4 +54,10 @@ public class EMClientEx extends EMClient
   
   public void setSupportedPhases( EnumSet<EMPhase> phases )
   { supportedPhases = phases; }
+  
+  public void setMetricGenerators( Set<MetricGenerator> generators )
+  {
+    if ( generators != null ) metricGenerators = 
+            (HashSet<MetricGenerator>) generators;
+  }
 }
