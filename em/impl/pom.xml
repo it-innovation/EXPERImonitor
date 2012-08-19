@@ -63,17 +63,16 @@
     
     <dependency>
       <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
-      <artifactId>experimedia-arch-ecc-common-dataModel-experimentMonitor</artifactId>
+      <artifactId>experimedia-arch-ecc-common-dataModel-monitor</artifactId>
       <version>0.1-SNAPSHOT</version>
     </dependency>
     
     <!-- 3rd party dependencies ____________________________________________ -->
     <dependency>
-      <groupId>org.yaml</groupId>
-      <artifactId>snakeyaml</artifactId>
-      <version>1.5</version>
-    </dependency>
-            
+      <groupId>org.codehaus.jackson</groupId>
+      <artifactId>jackson-mapper-asl</artifactId>
+      <version>1.9.9</version>
+    </dependency>        
 	
   </dependencies>
     

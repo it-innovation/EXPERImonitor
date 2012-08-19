@@ -31,7 +31,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.faces.AMQPHalfInterfaceBase;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel.EMMethodPayload;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMMethodPayload;
 
 import java.util.*;
 
@@ -40,7 +40,7 @@ import java.util.*;
 
 
 public class EMMonitorEntryPoint extends EMBaseInterface
-                                  implements IEMMonitorEntryPoint
+                                 implements IEMMonitorEntryPoint
 {
   private IEMMonitorEntryPoint_ProviderListener providerListener;
   

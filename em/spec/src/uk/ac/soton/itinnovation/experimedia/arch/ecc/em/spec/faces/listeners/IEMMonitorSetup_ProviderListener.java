@@ -34,7 +34,7 @@ public interface IEMMonitorSetup_ProviderListener
 {
   void onNotifyReadyToSetup( UUID senderID );
   
-  void onNotifyMetricGeneratorSetupResult( UUID senderID /*data model here*/ );
-  
-  void onNotifySetupComplete( UUID senderID );
+  void onNotifyMetricGeneratorSetupResult( UUID senderID,
+                                           UUID genID,
+                                           Boolean success );
 }

@@ -82,6 +82,17 @@ public class EMInterfaceFactory
                           generateProviders );
   }
   
+  public IEMMonitorSetup createSetup( UUID providerID,
+                                      UUID userID,
+                                      IAMQPMessageDispatch dispatch )
+  {
+    return new EMMonitorSetup( amqpChannel,
+                              (AMQPMessageDispatch) dispatch,
+                              providerID,
+                              userID,
+                              generateProviders );
+  }
+  
   public IEMTest createTest( UUID providerID,
                              UUID userID,
                              IAMQPMessageDispatch dispatch )

@@ -18,40 +18,44 @@
 // the software.
 //
 //      Created By :            Simon Crowle
-//      Created Date :          29-Jul-2012
+//      Created Date :          13-Aug-2012
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experimentMonitor;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor;
 
-import java.util.List;
+import java.util.*;
 
 
 
-/**
- * EMMethodPayload encapsulates message data sent in EM interfaces
- * This class must conform the bean standard (YAML requirement)
- * 
- * @author sgc
- */
-public class EMMethodPayload
+
+public class EMClient
 {
-  private int          methodID;
-  private List<Object> parameters;
+  protected UUID             clientID;
+  protected String           clientName;
+  protected EnumSet<EMPhase> supportedPhases;
   
-  public EMMethodPayload()
-  {}
   
-  public int getMethodID()
-  { return methodID; }
+  public EMClient( UUID id, String name )
+  {
+    clientID = id;
+    clientName = name;
+    
+    supportedPhases = EnumSet.noneOf( EMPhase.class );
+  }
   
-  public void setMethodID( int id )
-  { methodID = id; }
+  public UUID getID()
+  { return clientID; }
   
-  public List<Object> getParameters()
-  { return parameters; }
+  public String getName()
+  { return clientName; }
   
-  public void setParameters( List<Object> params )
-  { parameters = params; }
+  public EnumSet<EMPhase> getCopyOfSupportedPhases()
+  {
+    EnumSet<EMPhase> phaseCopy = EnumSet.noneOf( EMPhase.class );
+    phaseCopy.addAll( supportedPhases );
+    
+    return phaseCopy;
+  }
 }

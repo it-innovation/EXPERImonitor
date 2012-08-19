@@ -25,46 +25,56 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces;
 
+
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.spec.IAMQPMessageDispatchListener;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.faces.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel.EMMethodPayload;
 
-import org.yaml.snakeyaml.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMMethodPayload;
+
+import org.codehaus.jackson.map.ObjectMapper;
+
+import java.io.*;
 import java.util.*;
+
+
 
 
 
 
 public abstract class EMBaseInterface implements IAMQPMessageDispatchListener
 {
-  protected String               interfaceName;
-  protected String               interfaceVersion;
-  protected boolean              isProvider;
-  protected Yaml                 yamlUtil;
+  protected String       interfaceName;
+  protected String       interfaceVersion;
+  protected boolean      isProvider;
+  protected ObjectMapper jsonMapper;
   
-  protected AMQPBasicChannel     amqpChannel;
+  protected AMQPBasicChannel      amqpChannel;
   protected AbstractAMQPInterface amqpInterface;
-  protected UUID                 interfaceUserID;
-  protected UUID                 interfaceProviderID;
+  protected UUID                  interfaceUserID;
+  protected UUID                  interfaceProviderID;
   
   
   // IAMQPMessageDispatchListener ----------------------------------------------
   @Override
   public void onSimpleMessageDispatched( String queueName, byte[] data )
   {        
-    EMMethodPayload empl = (EMMethodPayload) yamlUtil.load( new String(data) );
+    EMMethodPayload empl = null;
+    
+    try { empl = (EMMethodPayload) jsonMapper.readValue( data, EMMethodPayload.class ); }
+    catch( Exception e ) {}
+    
     if ( empl != null ) onInterpretMessage( empl );
   }
   
   // Protected methods ---------------------------------------------------------
   protected EMBaseInterface( AMQPBasicChannel channel,
-                              boolean asProvider )
+                             boolean asProvider )
   {
     amqpChannel = channel;
     isProvider  = asProvider;
-    yamlUtil    = new Yaml();
+    jsonMapper  = new ObjectMapper();
   }
   
   protected void initialiseAMQP( AbstractAMQPInterface eccIFace,
@@ -105,8 +115,21 @@ public abstract class EMBaseInterface implements IAMQPMessageDispatchListener
       empl.setMethodID( methodID );
       empl.setParameters( parameters );
       
-      amqpInterface.sendBasicMessage( yamlUtil.dump(empl) );
-      result = true;
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      try { jsonMapper.writeValue( baos, empl ); }
+      catch ( IOException ioe )
+      { 
+        try { baos.close(); } catch (IOException ioe2) {}
+        baos = null;
+      }
+      
+      if ( baos != null )
+      {
+        amqpInterface.sendBasicMessage( baos );
+        try { baos.close(); }
+        catch (IOException ioe) {}
+        result = true;
+      }
     }
     
     return result;

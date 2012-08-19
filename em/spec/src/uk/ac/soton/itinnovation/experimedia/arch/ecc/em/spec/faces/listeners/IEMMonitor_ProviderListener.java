@@ -25,10 +25,10 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel.EMPhase;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMPhase;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
 
 import java.util.*;
-
 
 
 
@@ -59,8 +59,11 @@ public interface IEMMonitor_ProviderListener
    * Notification that the user has finished their discovery process and is
    * reporting on which metric generators they currently have available.
    */
-  void onSendDiscoveryResult( UUID senderID
-                              /* Data model under development*/ );
+  void onSendDiscoveryResult( UUID senderID,
+                              Boolean discoveredGenerators );
+  
+  void onSendMetricGeneratorInfo( UUID senderID,
+                                  Set<MetricGenerator> generators );
   
   /**
    * Notification that the user is disconnecting from the EM.

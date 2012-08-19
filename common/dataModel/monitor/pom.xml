@@ -4,7 +4,7 @@
     
   <modelVersion>4.0.0</modelVersion>
   <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
-  <artifactId>experimedia-arch-ecc-common-dataModel-experimentMonitor</artifactId>
+  <artifactId>experimedia-arch-ecc-common-dataModel-monitor</artifactId>
   <version>0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
   

@@ -33,14 +33,16 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasic
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPMessageDispatch;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.faces.AMQPFullInterfaceBase;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMMethodPayload;
+
 import java.util.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel.EMMethodPayload;
+
 
 
 
 
 public class EMReport extends EMBaseInterface
-                       implements IEMReport
+                      implements IEMReport
 {
   private IEMReport_ProviderListener providerListener;
   private IEMReport_UserListener     userListener;

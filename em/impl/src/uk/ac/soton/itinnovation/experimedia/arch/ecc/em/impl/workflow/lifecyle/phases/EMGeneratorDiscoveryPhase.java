@@ -33,11 +33,13 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces.EMMonitor;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMPhase;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
 
 import java.util.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
+
 
 
 
@@ -154,8 +156,15 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
   }
   
   @Override
-  public void onSendDiscoveryResult( UUID senderID
-                                     /* Data model under development*/ )
+  public void onSendDiscoveryResult( UUID senderID,
+                                     Boolean discoveredGenerators )
+  {
+    
+  }
+  
+  @Override
+  public void onSendMetricGeneratorInfo( UUID senderID,
+                                         Set<MetricGenerator> generators )
   {
     
   }

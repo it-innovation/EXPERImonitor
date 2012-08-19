@@ -32,7 +32,7 @@ import java.util.UUID;
 
 public interface IEMMonitorSetup_UserListener
 {
-  void onSetupMetricGenerator( UUID senderID /* data model here */ );
+  void onSetupMetricGenerator( UUID senderID, UUID genID );
   
-  void onSetupTimeOut( UUID senderID /* data model here */ );
+  void onSetupTimeOut( UUID senderID, UUID genID );
 }

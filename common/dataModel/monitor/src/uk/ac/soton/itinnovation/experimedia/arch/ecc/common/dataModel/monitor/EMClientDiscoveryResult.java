@@ -18,44 +18,20 @@
 // the software.
 //
 //      Created By :            Simon Crowle
-//      Created Date :          13-Aug-2012
+//      Created Date :          16-Aug-2012
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experimentMonitor;
-
-import java.util.*;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor;
 
 
 
 
-public class EMClient
+public class EMClientDiscoveryResult
 {
-  protected UUID             clientID;
-  protected String           clientName;
-  protected EnumSet<EMPhase> supportedPhases;
+  private int numberOfMetricGenerators;
   
-  
-  public EMClient( UUID id, String name )
-  {
-    clientID = id;
-    clientName = name;
-    
-    supportedPhases = EnumSet.noneOf( EMPhase.class );
-  }
-  
-  public UUID getID()
-  { return clientID; }
-  
-  public String getName()
-  { return clientName; }
-  
-  public EnumSet<EMPhase> getCopyOfSupportedPhases()
-  {
-    EnumSet<EMPhase> phaseCopy = EnumSet.noneOf( EMPhase.class );
-    phaseCopy.addAll( supportedPhases );
-    
-    return phaseCopy;
-  }
+  public EMClientDiscoveryResult()
+  {}
 }

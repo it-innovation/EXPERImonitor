@@ -32,7 +32,8 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.faces.AMQPFullInterfaceBase;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
 
 import java.util.*;
 
@@ -44,19 +45,7 @@ public class EMMonitor extends EMBaseInterface
 {
   private IEMMonitor_ProviderListener providerListener;
   private IEMMonitor_UserListener     userListener;
-  
-  public enum EMInterfaceType { eECCMetricEnumerator,
-                                eECCMetricCalibration,
-                                eECCMonitorControl,
-                                eECCReport,
-                                eECCTearDown,
-                                eECCTestInterface };
-  
-  public enum EMMonitorPhases { eEnumerateMetrics,
-                                eMetricCalibration,
-                                eMonitorControl,
-                                eReport };
-  
+    
   
   public EMMonitor( AMQPBasicChannel    channel,
                     AMQPMessageDispatch dispatch,
@@ -87,7 +76,7 @@ public class EMMonitor extends EMBaseInterface
   // Provider ------------------------------------------------------------------
   // Method ID = 1
   @Override
-  public void createInterface( IEMMonitor.EMInterfaceType type )
+  public void createInterface( EMInterfaceType type )
   {
     ArrayList<Object> params = new ArrayList<Object>();
     params.add( type );
@@ -121,48 +110,71 @@ public class EMMonitor extends EMBaseInterface
   
   // Method ID = 5
   @Override
-  public void discoveryTimeOut()
+  public void requestMetricGeneratorInfo()
   {
     executeMethod( 5, null );
   }
   
   // Method ID = 6
   @Override
-  public void setStatusMonitorEndpoint( /* Data model under development */ )
+  public void discoveryTimeOut()
   {
     executeMethod( 6, null );
   }
   
-  // User methods --------------------------------------------------------------
   // Method ID = 7
+  @Override
+  public void setStatusMonitorEndpoint( String endPoint )
+  {
+    ArrayList<Object> params = new ArrayList<Object>();
+    params.add( endPoint );
+    
+    executeMethod( 7, params );
+  }
+  
+  // User methods --------------------------------------------------------------
+  // Method ID = 8
   @Override
   public void readyToInitialise()
   {
-    executeMethod( 7, null );
+    executeMethod( 8, null );
   }
   
-  // Method ID = 8
+  // Method ID = 9
   @Override
   public void sendActivePhases( EnumSet<EMPhase> supportedPhases )
   {
     ArrayList<Object> params = new ArrayList<Object>();
     params.add( supportedPhases );
     
-    executeMethod( 8, params );
-  }
-  
-  // Method ID = 9
-  @Override
-  public void sendDiscoveryResult( /* Data model under development*/ )
-  {
-    executeMethod( 9, null );
+    executeMethod( 9, params );
   }
   
   // Method ID = 10
   @Override
+  public void sendDiscoveryResult( Boolean discoveredGenerators )
+  {
+    ArrayList<Object> params = new ArrayList<Object>();
+    params.add( discoveredGenerators );
+    
+    executeMethod( 10, null );
+  }
+  
+  // Method ID = 11
+  @Override 
+  public void sendMetricGeneratorInfo( Set<MetricGenerator> generators )
+  {
+    ArrayList<Object> params = new ArrayList<Object>();
+    params.add( generators );
+    
+    executeMethod( 11, params );
+  }
+  
+  // Method ID = 12
+  @Override
   public void clientDisconnecting()
   {
-    executeMethod( 10, null );
+    executeMethod( 12, null );
   }
   
   // Protected methods ---------------------------------------------------------
@@ -177,7 +189,7 @@ public class EMMonitor extends EMBaseInterface
       {
         if ( userListener != null )
         {
-          IEMMonitor.EMInterfaceType type = (IEMMonitor.EMInterfaceType) params.get( 0 );
+          EMInterfaceType type = EMInterfaceType.valueOf( (String) params.get( 0 ) );
           userListener.onCreateInterface( interfaceProviderID, type );
         }
         
@@ -209,25 +221,35 @@ public class EMMonitor extends EMBaseInterface
       case ( 5 ) :
       {
         if ( userListener != null )
-          userListener.onDiscoveryTimeOut( interfaceProviderID );
+          userListener.onRequestMetricGeneratorInfo( interfaceProviderID );
         
       } break;
         
       case ( 6 ) :
       {
         if ( userListener != null )
-          userListener.onSetStatusMonitorEndpoint( interfaceProviderID );
+          userListener.onDiscoveryTimeOut( interfaceProviderID );
         
       } break;
         
       case ( 7 ) :
+      {
+        if ( userListener != null )
+        {
+          String endPoint = (String) params.get( 0 );
+          userListener.onSetStatusMonitorEndpoint( interfaceProviderID, endPoint );
+        } 
+        
+      } break;
+        
+      case ( 8 ) :
       {
         if ( providerListener != null )
           providerListener.onReadyToInitialise( interfaceUserID );
         
       } break;
         
-      case ( 8 ) :
+      case ( 9 ) :
       {
         if ( providerListener != null )
         {
@@ -237,14 +259,27 @@ public class EMMonitor extends EMBaseInterface
         
       } break;
         
-      case ( 9 ) :
+      case ( 10 ) :
       {
         if ( providerListener != null )
-          providerListener.onSendDiscoveryResult( interfaceUserID );
+        {
+          Boolean result = (Boolean) params.get( 0 );
+          providerListener.onSendDiscoveryResult( interfaceUserID, result );
+        }
+          
+      } break;
+        
+      case ( 11 ) :
+      {
+        if ( providerListener != null )
+        {
+          Set<MetricGenerator> generators = (Set<MetricGenerator>) params.get( 0 );
+          providerListener.onSendMetricGeneratorInfo( interfaceUserID, generators );
+        }
         
       } break;
         
-      case ( 10 ) :
+      case ( 12 ) :
       {
         if ( providerListener != null )
           providerListener.onClientDisconnecting( interfaceUserID );

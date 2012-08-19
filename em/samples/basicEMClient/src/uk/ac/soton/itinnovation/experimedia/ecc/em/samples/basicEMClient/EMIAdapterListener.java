@@ -18,30 +18,17 @@
 // the software.
 //
 //      Created By :            Simon Crowle
-//      Created Date :          09-Aug-2012
+//      Created Date :          19-Aug-2012
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces;
+package uk.ac.soton.itinnovation.experimedia.ecc.em.samples.basicEMClient;
 
 
 
 
-public interface IEMMetricEnumerator
+public interface EMIAdapterListener
 {
-  // Listeners -----------------------------------------------------------------
   
-  
-  // Provider methods ----------------------------------------------------------
-  void requestNextMetricGeneratorInfo();
-  
-  void enumerationTimeOut();
-  
-  // User methods --------------------------------------------------------------
-  void notifyReadyToEnumerate();
-  
-  void sendMetricGeneratorInfo( /*TODO: Data model */ );
-  
-  void notifyEnumerationComplete();
 }

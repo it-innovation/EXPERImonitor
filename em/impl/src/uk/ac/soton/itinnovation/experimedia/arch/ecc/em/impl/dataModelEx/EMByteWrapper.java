@@ -18,23 +18,47 @@
 // the software.
 //
 //      Created By :            Simon Crowle
-//      Created Date :          09-Aug-2012
+//      Created Date :          19-Aug-2012
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx;
 
-import java.util.UUID;
-
-
+import sun.misc.*;
 
 
-public interface IEMMetricEnumerator_ProviderListener
+
+
+public class EMByteWrapper
 {
-  void onNotifyReadyToEnumerate( UUID senderID );
+  private BASE64Encoder base64Encoder;
+  private BASE64Decoder base64Decoder;
   
-  void onSendMetricGeneratorInfo( UUID senderID /* data model here*/ );
+  public EMByteWrapper()
+  {
+    base64Encoder  = new BASE64Encoder();
+    base64Decoder = new BASE64Decoder();
+  }
   
-  void onNotifyEnumerationComplete( UUID senderID );
+  public String encode( byte[] data )
+  {
+    String code = null;
+    
+    if ( data != null && data.length > 0 )
+      code = base64Encoder.encodeBuffer( data );
+    
+    return code;
+  }
+  
+  public byte[] decode( String data )
+  {
+    byte[] dataBytes = null;
+    
+    if ( data != null && !data.isEmpty() )
+      try { dataBytes = base64Decoder.decodeBuffer( data ); }
+      catch (Exception e) { dataBytes = null; }
+    
+    return dataBytes;
+  }
 }

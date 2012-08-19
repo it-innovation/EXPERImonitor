@@ -18,21 +18,40 @@
 // the software.
 //
 //      Created By :            Simon Crowle
-//      Created Date :          09-Aug-2012
+//      Created Date :          29-Jul-2012
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor;
 
-import java.util.UUID;
-
-
+import java.util.List;
 
 
-public interface IEMMetricEnumerator_UserListener
+
+/**
+ * EMMethodPayload encapsulates message data sent in EM interfaces
+ * This class must conform the bean standard (YAML requirement)
+ * 
+ * @author sgc
+ */
+public class EMMethodPayload
 {
-  void onRequestNextMetricGeneratorInfo( UUID senderID );
+  private int          methodID;
+  private List<Object> parameters;
   
-  void onEnumerationTimeOut( UUID senderID );
+  public EMMethodPayload()
+  {}
+  
+  public int getMethodID()
+  { return methodID; }
+  
+  public void setMethodID( int id )
+  { methodID = id; }
+  
+  public List<Object> getParameters()
+  { return parameters; }
+  
+  public void setParameters( List<Object> params )
+  { parameters = params; }
 }

@@ -33,11 +33,13 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasic
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.factory.EMInterfaceFactory;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel.EMPhase;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccEntryPoint.ECCMonitorEntryPointTest;
 
 import java.util.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
+
 
 
 
@@ -168,7 +170,7 @@ public class ECCMonitorTestExecutor implements Runnable,
       providerTest.setListener( this );
 
       // Tell user to create a test interface
-      providerMonitor.createInterface( IEMMonitor.EMInterfaceType.eECCTestInterface );
+      providerMonitor.createInterface( EMInterfaceType.eECCTestInterface );
     }
   }
   
@@ -178,7 +180,13 @@ public class ECCMonitorTestExecutor implements Runnable,
   { /*Not implemented in this test*/ }
   
   @Override
-  public void onSendDiscoveryResult( UUID senderID /* Data model under development*/ )
+  public void onSendDiscoveryResult( UUID senderID,
+                                     Boolean discoveredGenerators )
+  { /*Not implemented in this test*/ }
+  
+  @Override
+  public void onSendMetricGeneratorInfo( UUID senderID,
+                                         Set<MetricGenerator> generators )
   { /*Not implemented in this test*/ }
   
   @Override
@@ -196,12 +204,12 @@ public class ECCMonitorTestExecutor implements Runnable,
   
   // IECCMonitor_UserListener --------------------------------------------------
   @Override
-  public void onCreateInterface( UUID senderID, IEMMonitor.EMInterfaceType type )
+  public void onCreateInterface( UUID senderID, EMInterfaceType type )
   {
     // Make sure event is from the correct sender
     if ( senderID.equals( ECCMonitorEntryPointTest.EMProviderUUID) )
     {
-      if ( type == IEMMonitor.EMInterfaceType.eECCTestInterface )
+      if ( type == EMInterfaceType.eECCTestInterface )
       userGotCreateTestFaceCommand = true;
     
       // Create a test interface here
@@ -251,11 +259,15 @@ public class ECCMonitorTestExecutor implements Runnable,
   { /*Not implemented in this test*/ }
   
   @Override
+  public void onRequestMetricGeneratorInfo( UUID senderID )
+  { /*Not implemented in this test*/ }
+  
+  @Override
   public void onDiscoveryTimeOut( UUID senderID )
   { /*Not implemented in this test*/ }
   
   @Override
-  public void onSetStatusMonitorEndpoint( UUID senderID /* Data model under development */ )
+  public void onSetStatusMonitorEndpoint( UUID senderID, String endPoint )
   { /*Not implemented in this test*/ }
   
   // Runnable ------------------------------------------------------------------

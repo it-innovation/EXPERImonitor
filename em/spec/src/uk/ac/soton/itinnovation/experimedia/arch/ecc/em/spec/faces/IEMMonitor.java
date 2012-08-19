@@ -28,10 +28,10 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEMMonitor_UserListener;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEMMonitor_ProviderListener;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel.EMPhase;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
 
 import java.util.*;
-
 
 
 
@@ -43,15 +43,7 @@ import java.util.*;
  * @author sgc
  */
 public interface IEMMonitor
-{
-  // Interface types supported by the EM
-  enum EMInterfaceType { eECCMetricEnumerator,
-                         eECCMetricSetup,
-                         eECCMonitorControl,
-                         eECCReport,
-                         eECCTearDown,
-                         eECCTestInterface };
-  
+{  
   // Listeners -----------------------------------------------------------------
   /**
    * If you are acting as a 'provider' of this interface (the EM does this) then
@@ -99,6 +91,11 @@ public interface IEMMonitor
   void discoverMetricGenerators();
   
   /**
+   * Request the user sends information about all metric generators it has discovered
+   */
+  void requestMetricGeneratorInfo();
+  
+  /**
    * Notify the user that it has taken too long to discover its metric providers 
    * and that it should stop.
    */
@@ -109,7 +106,7 @@ public interface IEMMonitor
    * allow them to send general status information about the user's technology
    * to a dashboard view.
    */
-  void setStatusMonitorEndpoint( /* Data model under development */ );
+  void setStatusMonitorEndpoint( String endPoint );
   
   // User methods --------------------------------------------------------------
   /**
@@ -129,7 +126,13 @@ public interface IEMMonitor
   /**
    * Send the provider with the result of the user's search for metric generators.
    */
-  void sendDiscoveryResult( /* Data model under development*/ );
+  void sendDiscoveryResult( Boolean discoveredGenerators );
+  
+  /**
+   * Sends the provider a model of all the metric generators the user currently
+   * has available.
+   */
+  void sendMetricGeneratorInfo( Set<MetricGenerator> generators );
   
   /**
    * Notify the EM that the user is disconnecting.

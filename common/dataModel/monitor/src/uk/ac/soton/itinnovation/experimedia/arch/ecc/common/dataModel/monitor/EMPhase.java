@@ -23,7 +23,7 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experimentMonitor;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor;
 
 import java.util.Comparator;
 
@@ -33,13 +33,12 @@ public enum EMPhase implements Comparator
   eEMUnknownPhase             ( "Undefined EM phase"                 , 0 ),
   eEMDiscoverMetricGenerators ( "EM Metric generator discovery phase", 1 ),
   eEMSetUpMetricGenerators    ( "EM Metric generator set-up phase",    2 ),
-  eEMMetricEnumeration        ( "EM Metric enumeration phase",         3 ),
-  eEMLiveMonitoring           ( "EM Metric live monitoring phase",     4 ),
-  eEMPostMonitoringReport     ( "EM Post-monitoring reporting phase",  5 ),
-  eEMTearDown                 ( "EM Monitoring tear-down phase",       6 ),
+  eEMLiveMonitoring           ( "EM Metric live monitoring phase",     3 ),
+  eEMPostMonitoringReport     ( "EM Post-monitoring reporting phase",  4 ),
+  eEMTearDown                 ( "EM Monitoring tear-down phase",       5 ),
   
   // Always at the end of the protocol
-  eEMProtocolComplete         ( "EM Monitoring protocol is complete",  7 );
+  eEMProtocolComplete         ( "EM Monitoring protocol is complete",  6 );
   
   private final int    phaseIndex;
   private final String phaseDescription;
@@ -63,11 +62,10 @@ public enum EMPhase implements Comparator
     {
       case 0 : nextPhase = eEMDiscoverMetricGenerators; break;
       case 1 : nextPhase = eEMSetUpMetricGenerators;    break;
-      case 2 : nextPhase = eEMMetricEnumeration;        break;
-      case 3 : nextPhase = eEMLiveMonitoring;           break;
-      case 4 : nextPhase = eEMPostMonitoringReport;     break;
-      case 5 : nextPhase = eEMTearDown;                 break;
-      case 6 : nextPhase = eEMProtocolComplete;         break;
+      case 2 : nextPhase = eEMLiveMonitoring;           break;
+      case 3 : nextPhase = eEMPostMonitoringReport;     break;
+      case 4 : nextPhase = eEMTearDown;                 break;
+      case 5 : nextPhase = eEMProtocolComplete;         break;
     }
     
     return nextPhase;

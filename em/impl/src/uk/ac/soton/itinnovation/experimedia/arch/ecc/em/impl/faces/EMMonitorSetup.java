@@ -18,76 +18,87 @@
 // the software.
 //
 //      Created By :            Simon Crowle
-//      Created Date :          05-Aug-2012
+//      Created Date :          19-Aug-2012
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEMTest_Listener;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.IEMMonitorSetup;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.faces.AMQPFullInterfaceBase;
 
+import java.util.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMMethodPayload;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMByteWrapper;
-
-import java.util.*;
 
 
 
 
-public class EMTest extends EMBaseInterface
-                     implements IEMTest
+public class EMMonitorSetup extends EMBaseInterface
+                            implements IEMMonitorSetup
 {
-  private EMByteWrapper    byteWrapper;
-  private IEMTest_Listener testListener;
+  private IEMMonitorSetup_ProviderListener providerListener;
+  private IEMMonitorSetup_UserListener     userListener;
   
-  
-  
-  public EMTest( AMQPBasicChannel channel,
-                 AMQPMessageDispatch dispatch,
-                 UUID providerID,
-                 UUID userID,
-                 boolean isProvider )
+  public EMMonitorSetup( AMQPBasicChannel channel,
+                         AMQPMessageDispatch dispatch,
+                         UUID providerID,
+                         UUID userID,
+                         boolean isProvider )
   {
     super( channel, isProvider );
     
-    interfaceName = "IECCTest";
+    interfaceName = "IECCSetup";
     interfaceVersion = "0.1";
             
     interfaceProviderID = providerID;
     interfaceUserID     = userID;
     
-    byteWrapper = new EMByteWrapper();
-    
     AMQPFullInterfaceBase fullFace = new AMQPFullInterfaceBase( channel );
     initialiseAMQP( fullFace, dispatch );
   }
   
-  // IECCTest ------------------------------------------------------------------
+  // IEMMonitorSetup -----------------------------------------------------------
   @Override
-  public void setListener( IEMTest_Listener listener )
-  { testListener = listener; }
+  public void setProviderListener( IEMMonitorSetup_ProviderListener listener )
+  { providerListener = listener; }
   
   @Override
+  public void setUserListener( IEMMonitorSetup_UserListener listener)
+  { userListener = listener; }
+  
+  // Provider methods ----------------------------------------------------------
   // Method ID = 1
-  public void sendData( int dataSize, byte[] dataBody )
+  @Override
+  public void setupMetricGenerator( UUID genID )
   {
-    if ( dataSize > 0 && dataBody != null )
-    {
-      ArrayList<Object> params = new ArrayList<Object>();
-      params.add( new Integer(dataSize) );
-      
-      // Encode bytes in Base64
-      String encodedData = byteWrapper.encode( dataBody );
-      params.add( encodedData );
-      
-      executeMethod( 1, params );
-    }
+    
+  }
+  
+  // Method ID = 2
+  @Override
+  public void setupTimeOut( UUID genID )
+  {
+    
+  }
+  
+  // User methods --------------------------------------------------------------
+  // Method ID = 3
+  @Override
+  public void notifyReadyToSetup()
+  {
+    
+  }
+  
+  // Method ID = 4
+  @Override
+  public void notifyMetricGeneratorSetupResult( UUID genID, Boolean success )
+  {
+    
   }
   
   // Protected methods ---------------------------------------------------------
@@ -100,17 +111,39 @@ public class EMTest extends EMBaseInterface
     {
       case ( 1 ) :
       {
-        if ( testListener != null )
+        if ( userListener != null )
         {
-          int dataSize    = (Integer) params.get(0);
           
-          // De-encode Base64
-          String encodedData = (String) params.get(1);          
-          byte[] dataBody = byteWrapper.decode( encodedData );
-          
-          testListener.onReceivedData( dataSize, dataBody );
         }
+        
       } break;
-    } 
+        
+      case ( 2 ) :
+      {
+        if ( userListener != null )
+        {
+          
+        }
+        
+      } break;
+        
+      case ( 3 ) :
+      {
+        if ( providerListener != null )
+        {
+          
+        }
+        
+      } break;
+        
+      case ( 4 ) :
+      {
+        if ( providerListener != null )
+        {
+          
+        }
+        
+      } break;
+    }
   }
 }

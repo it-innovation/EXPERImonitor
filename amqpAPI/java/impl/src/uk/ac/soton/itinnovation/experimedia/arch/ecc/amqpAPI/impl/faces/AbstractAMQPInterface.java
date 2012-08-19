@@ -50,7 +50,7 @@ public abstract class AbstractAMQPInterface
   protected boolean actingAsProvider;
   
   
-  public boolean sendBasicMessage( String message )
+  public boolean sendBasicMessage( ByteArrayOutputStream message )
   {
     // Safety first
     if ( !interfaceReady        || 
@@ -62,10 +62,7 @@ public abstract class AbstractAMQPInterface
     String targetExchange = actingAsProvider ? userExchangeName : providerExchangeName;
     String targetRouteKey = actingAsProvider ? userRoutingKey : providerRoutingKey;
     
-    byte[] messageBody;
-    
-    try { messageBody = message.getBytes( "UTF8" ); }
-    catch (UnsupportedEncodingException uee) { return false; }
+    byte[] messageBody = message.toByteArray();
     
     try
     {

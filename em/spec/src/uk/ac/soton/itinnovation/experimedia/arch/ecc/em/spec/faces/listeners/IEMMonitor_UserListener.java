@@ -25,8 +25,10 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.IEMMonitor;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMInterfaceType;
+
 import java.util.UUID;
+
 
 
 
@@ -46,7 +48,7 @@ public interface IEMMonitor_UserListener
    * @param senderID - ID of the EM sending this event
    * @param type     - type (EMInterfaceType) of interface required
    */
-  void onCreateInterface( UUID senderID, IEMMonitor.EMInterfaceType type );
+  void onCreateInterface( UUID senderID, EMInterfaceType type );
   
   /**
    * Provider (EM) notifies the user that they have successfully (or not)
@@ -73,6 +75,14 @@ public interface IEMMonitor_UserListener
   void onDiscoverMetricGenerators( UUID senderID );
   
   /**
+   * EM requests the user sends it a model of the generators that it has available
+   * to it
+   * 
+   * @param senderID - ID of the EM sending this event
+   */
+  void onRequestMetricGeneratorInfo( UUID senderID );
+  
+  /**
    * EM notifies the user that time has run out to discover any more metric
    * generators - the user should stop this process if it is continuing.
    * 
@@ -86,6 +96,6 @@ public interface IEMMonitor_UserListener
    * 
    * @param senderID - ID of the EM sending this event
    */
-  void onSetStatusMonitorEndpoint( UUID senderID
-                                   /* Data model under development */ );
+  void onSetStatusMonitorEndpoint( UUID senderID,
+                                   String endPoint );
 }

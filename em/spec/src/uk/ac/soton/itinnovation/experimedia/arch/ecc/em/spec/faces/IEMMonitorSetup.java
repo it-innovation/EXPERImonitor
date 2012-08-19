@@ -25,23 +25,39 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.*;
+
+import java.util.UUID;
+
 
 
 
 public interface IEMMonitorSetup
 {
   // Listeners -----------------------------------------------------------------
+  /**
+   * If you are acting as a 'provider' of this interface (the EM does this) then
+   * use this method to set your listener to incoming methods called by the user.
+   * 
+   * @param listener - Listener interface for provider actors
+   */
+  void setProviderListener( IEMMonitorSetup_ProviderListener listener );
   
+  /**
+   * If you are acting as a 'user' of this interface (a client of the EM) then
+   * use this method to set your listener to incoming methods called by the provider
+   * 
+   * @param listener - Listener interface for listener actors
+   */
+  void setUserListener( IEMMonitorSetup_UserListener listener);
   
   // Provider methods ----------------------------------------------------------
-  void setupMetricGenerator( /* data model here */ );
+  void setupMetricGenerator( UUID genID );
   
-  void setupTimeOut( /* data model here */ );
+  void setupTimeOut( UUID genID );
   
   // User methods --------------------------------------------------------------
   void notifyReadyToSetup();
   
-  void notifyMetricGeneratorSetupResult( /* data model here */ );
-  
-  void notifySetupComplete();
+  void notifyMetricGeneratorSetupResult( UUID genID, Boolean success );
 }

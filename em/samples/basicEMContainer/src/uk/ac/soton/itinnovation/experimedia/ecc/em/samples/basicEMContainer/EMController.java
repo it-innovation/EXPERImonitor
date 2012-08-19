@@ -28,11 +28,13 @@ package uk.ac.soton.itinnovation.experimedia.ecc.em.samples.basicEMContainer;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.factory.EMInterfaceFactory;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.dataModel.EMClient;
+
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMClient;
 
 import java.awt.event.*;
 
 import java.util.UUID;
+
 
 
 

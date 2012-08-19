@@ -25,29 +25,22 @@
 
 package uk.ac.soton.itinnovation.experimedia.ecc.em.samples.basicEMClient;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.spec.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.*;
-
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.factory.EMInterfaceFactory;
 
-import java.util.UUID;
-
+import java.util.*;
 
 
 
 
 
 
-public class EMClientController
+
+public class EMClientController implements EMIAdapterListener
 {
-  private AMQPBasicChannel         amqpChannel;
-  private IAMQPMessageDispatchPump dispatchPump;
+  private AMQPBasicChannel   amqpChannel;
+  private EMInterfaceAdapter emiAdapter;
+  private EMClientView       clientView;
   
-  // EM Interfaces
-  private IEMMonitorEntryPoint entryPoint;
-  
-  private EMClientView clientView;
   
   public EMClientController()
   {
@@ -75,23 +68,18 @@ public class EMClientController
       clientView = new EMClientView();
       clientView.setVisible( true );
       
-      // Create our first EM interface -----------------------------------------
-      EMInterfaceFactory interfaceFactory = new EMInterfaceFactory( amqpChannel, false );
+      // Create EM interface adapter, listen to it...
+      emiAdapter = new EMInterfaceAdapter( this );
       
-      // Create dispatch pump (only need to do this once)
-      dispatchPump = interfaceFactory.createDispatchPump( "EM Client pump", 
-                                                          IAMQPMessageDispatchPump.ePumpPriority.NORMAL);
-      dispatchPump.startPump();
-      
-      // Create a dispatch and add to the pump
-      IAMQPMessageDispatch dispatch = interfaceFactory.createDispatch();
-      dispatchPump.addDispatch( dispatch );
-      
-      // Crate our entry point interface
-      entryPoint = interfaceFactory.createEntryPoint( expMonitorID, dispatch );
-      
-      //.. and finally, try registering with the EM!
-      entryPoint.registerAsEMClient( clientID, "Simple EM Client" );
+      // ... and try registering with the EM.
+      Date date = new Date();
+      try { emiAdapter.registerWithEM( "Test Client (" + date.toString() + ")",
+                                       amqpChannel, 
+                                       expMonitorID, clientID ); }
+      catch ( Exception e ) 
+      { throw e; }
     }
   }
+  
+  // EMIAdapterListener --------------------------------------------------------
 }
