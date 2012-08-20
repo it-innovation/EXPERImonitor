@@ -23,7 +23,7 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.ecc.em.samples.basicEMContainer;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.samples.basicEMContainer;
 
 import java.util.UUID;
 

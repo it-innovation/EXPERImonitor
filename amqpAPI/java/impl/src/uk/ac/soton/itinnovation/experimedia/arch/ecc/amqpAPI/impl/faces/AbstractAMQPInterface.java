@@ -60,7 +60,7 @@ public abstract class AbstractAMQPInterface
     
     // Make sure producer sends to user (or other way around) - targets are reversed
     String targetExchange = actingAsProvider ? userExchangeName : providerExchangeName;
-    String targetRouteKey = actingAsProvider ? userRoutingKey : providerRoutingKey;
+    String targetRouteKey = actingAsProvider ? userRoutingKey   : providerRoutingKey;
     
     byte[] messageBody = message.toByteArray();
     

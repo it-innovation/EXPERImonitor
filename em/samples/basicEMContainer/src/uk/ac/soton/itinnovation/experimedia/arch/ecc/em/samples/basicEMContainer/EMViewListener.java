@@ -23,18 +23,12 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.ecc.em.samples.basicEMClient;
-
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
-
-import java.util.Set;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.samples.basicEMContainer;
 
 
 
 
-public interface EMIAdapterListener
+public interface EMViewListener
 {
-  void onEMConnectionResult( boolean connected );
-  
-  void updateMetricGenerators( Set<MetricGenerator> genSetOUT );
+  void onStartPhasesButtonClicked();
 }

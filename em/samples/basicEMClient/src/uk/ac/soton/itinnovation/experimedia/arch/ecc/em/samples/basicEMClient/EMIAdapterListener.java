@@ -18,33 +18,23 @@
 // the software.
 //
 //      Created By :            Simon Crowle
-//      Created Date :          15-Aug-2012
+//      Created Date :          19-Aug-2012
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.ecc.em.samples.basicEMClient;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.samples.basicEMClient;
 
-import java.util.UUID;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
+
+import java.util.Set;
 
 
 
 
-public class EMClientContainer
+public interface EMIAdapterListener
 {
-  public static void main( String args[] )
-  {
-    EMClientController ctrl = new EMClientController();
-    
-    try
-    {
-    ctrl.start( "127.0.0.1",
-                UUID.fromString("00000000-0000-0000-0000-000000000000"), // EM ID
-                UUID.randomUUID() );                                     // ID of this client
-    }
-    catch (Exception e )
-    {
-      System.out.println("Had a problem connecting to the EM:\n" + e.getMessage() );
-    }
-  }
+  void onEMConnectionResult( boolean connected );
+  
+  void updateMetricGenerators( Set<MetricGenerator> genSetOUT );
 }

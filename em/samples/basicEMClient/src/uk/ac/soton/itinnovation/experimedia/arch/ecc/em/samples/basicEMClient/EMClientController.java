@@ -23,7 +23,7 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.ecc.em.samples.basicEMClient;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.samples.basicEMClient;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 

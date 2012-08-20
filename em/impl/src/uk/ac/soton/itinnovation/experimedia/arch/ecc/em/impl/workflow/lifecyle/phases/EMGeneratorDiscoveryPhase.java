@@ -53,8 +53,8 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
   
   
   public EMGeneratorDiscoveryPhase( AMQPBasicChannel channel,
-                                       UUID providerID,
-                                       GeneratorDiscoveryPhaseListener listener )
+                                    UUID providerID,
+                                    GeneratorDiscoveryPhaseListener listener )
   {
     super( EMPhase.eEMDiscoverMetricGenerators, channel, providerID );
     
@@ -68,7 +68,7 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
   public boolean addClient( EMClientEx client )
   {
     if ( super.addClient(client) )
-    {
+    {   
       // Create a new IEMMonitor interface for the client
       AMQPMessageDispatch dispatch = new AMQPMessageDispatch();
       phaseMsgPump.addDispatch( dispatch );
@@ -91,6 +91,7 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
   @Override
   public void start() throws Exception
   {
+    if ( phaseActive ) throw new Exception( "Phase already active" );
     if ( phaseClients.isEmpty() ) throw new Exception( "No clients available for this phase" );
   
     // Confirm registration with clients...
@@ -105,15 +106,16 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
   @Override
   public void stop() throws Exception
   {
-    
+    if ( phaseActive )
+    {
+      
+    }
   }
   
   // IEMMonitor_ProviderListener -----------------------------------------------
   @Override
   public void onReadyToInitialise( UUID senderID )
   {
-    System.out.print( "RTI " );
-    
     EMClientEx client = phaseClients.get( senderID );
     if ( client != null )
       client.getEMMonitorInterface().requestActivityPhases();
@@ -123,8 +125,6 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
   public void onSendActivityPhases( UUID senderID, 
                                     EnumSet<EMPhase> supportedPhases )
   {
-    System.out.print( "SAP " );
-    
     EMClientEx client = phaseClients.get( senderID );
     
     if ( client != null && supportedPhases != null )
@@ -144,8 +144,6 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
   public void onSendDiscoveryResult( UUID senderID,
                                      Boolean discoveredGenerators )
   {
-    System.out.print( "SDR " );
-    
     EMClientEx client = phaseClients.get( senderID );
     
     if ( client != null && discoveredGenerators == true )
@@ -156,8 +154,6 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
   public void onSendMetricGeneratorInfo( UUID senderID,
                                          Set<MetricGenerator> generators )
   {
-    System.out.print( "SMGI " );
-    
     EMClientEx client = phaseClients.get( senderID );
     
     if ( client != null )

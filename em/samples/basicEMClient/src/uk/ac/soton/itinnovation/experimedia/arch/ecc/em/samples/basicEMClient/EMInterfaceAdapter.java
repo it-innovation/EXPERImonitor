@@ -23,7 +23,7 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.ecc.em.samples.basicEMClient;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.samples.basicEMClient;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.spec.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.*;
@@ -86,7 +86,7 @@ public class EMInterfaceAdapter implements IEMMonitor_UserListener,
     
     // Create dispatch pump (only need to do this once)
     dispatchPump = interfaceFactory.createDispatchPump( "EM Client pump", 
-                                                        IAMQPMessageDispatchPump.ePumpPriority.NORMAL );
+                                                        IAMQPMessageDispatchPump.ePumpPriority.MINIMUM );
     dispatchPump.startPump();
       
     // Create a dispatch (for entry point interface) and add to the pump
@@ -156,7 +156,6 @@ public class EMInterfaceAdapter implements IEMMonitor_UserListener,
     if ( senderID.equals(expMonitorID) && emiListener != null )
     {
       emiListener.onEMConnectionResult( confirmed );
-      
       monitorFace.readyToInitialise();
     }
   }

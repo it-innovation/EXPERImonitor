@@ -60,7 +60,7 @@ public class AMQPHalfInterfaceBase extends AbstractAMQPInterface
     // (But always use the same exchange name)
     try
     {
-      channelImpl.exchangeDeclare( providerExchangeName, "fanout" );
+      channelImpl.exchangeDeclare( providerExchangeName, "direct" );
       createQueue();
       
       // If we're a provider, then listen to messages sent

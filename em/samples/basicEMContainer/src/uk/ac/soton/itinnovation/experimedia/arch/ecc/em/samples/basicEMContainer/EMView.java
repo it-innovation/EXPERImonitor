@@ -27,7 +27,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package uk.ac.soton.itinnovation.experimedia.ecc.em.samples.basicEMContainer;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.samples.basicEMContainer;
 
 import javax.swing.DefaultListModel;
 

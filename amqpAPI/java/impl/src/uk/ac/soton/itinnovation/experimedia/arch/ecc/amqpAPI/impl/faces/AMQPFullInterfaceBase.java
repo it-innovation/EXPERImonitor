@@ -60,9 +60,9 @@ public class AMQPFullInterfaceBase extends AbstractAMQPInterface
     {      
       // Declare the appropriate exchange
       if ( actingAsProvider )
-        channelImpl.exchangeDeclare( providerExchangeName, "fanout" );
+        channelImpl.exchangeDeclare( providerExchangeName, "direct" );
       else
-        channelImpl.exchangeDeclare( userExchangeName, "fanout" );
+        channelImpl.exchangeDeclare( userExchangeName, "direct" );
       
       // Create queue and subscription
       createQueue();
@@ -92,11 +92,11 @@ public class AMQPFullInterfaceBase extends AbstractAMQPInterface
 
     createInterfaceExchangeNames( iName );
     
-    actingAsProvider = asProvider;
-    providerQueueName = interfaceName + "_" + providerID.toString() + "[P]";
-    userQueueName = interfaceName + "_" + userID.toString() + "[U]";
-    providerRoutingKey = "";
-    userRoutingKey = "";
+    actingAsProvider   = asProvider;
+    providerQueueName  = interfaceName + "_" + providerID.toString() + "[P]";
+    userQueueName      = interfaceName + "_" + userID.toString() + "[U]";
+    providerRoutingKey = "RK_" + providerID.toString();
+    userRoutingKey     = "RK_" + userID.toString();
 
     return true;
   }

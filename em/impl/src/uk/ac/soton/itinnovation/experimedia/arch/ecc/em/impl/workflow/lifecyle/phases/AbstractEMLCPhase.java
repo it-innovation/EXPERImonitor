@@ -104,7 +104,7 @@ public abstract class AbstractEMLCPhase
     
     phaseMsgPump =
             new AMQPMessageDispatchPump( phaseType + " message pump",
-                                         IAMQPMessageDispatchPump.ePumpPriority.NORMAL );
+                                         IAMQPMessageDispatchPump.ePumpPriority.MINIMUM );
     
     phaseMsgPump.startPump();
   }
