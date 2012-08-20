@@ -42,7 +42,6 @@ public class MeasurementSet implements Serializable
     private UUID metricGroupUUID;
     private Metric metric;
     private Set<Measurement> measurements;
-    private Report report;
     
     /**
      * Default constructor which sets a random UUID for the object instance.
@@ -73,8 +72,6 @@ public class MeasurementSet implements Serializable
             for (Measurement m : ms.getMeasurements())
                 this.measurements.add(new Measurement(m));
         }
-        
-        this.report = ms.getReport();
     }
     
     /**
@@ -93,21 +90,6 @@ public class MeasurementSet implements Serializable
         this.metricGroupUUID = metricGroupUUID;
         this.metric = metric;
         this.measurements = measurements;
-    }
-    
-    /**
-     * Constructor to set all the attributes of the Measurement Set.
-     * @param uuid The UUID used to uniquely identify a measurement set in this framework.
-     * @param attributeUUID The UUID of the attribute this measurement set defines measurements of.
-     * @param metricGroupUUID The UUID of the metric group this measurement set is a part of.
-     * @param metric The metric of the measurements.
-     * @param measurements The set of measurements.
-     * @param report The report, with derived information about the measurement set.
-     */
-    public MeasurementSet(UUID uuid, UUID attributeUUID, UUID metricGroupUUID, Metric metric, Set<Measurement> measurements, Report report)
-    {
-        this(uuid, attributeUUID, metricGroupUUID, metric, measurements);
-        this.report = report;
     }
     
     /**
@@ -218,21 +200,5 @@ public class MeasurementSet implements Serializable
             this.measurements = new HashSet<Measurement>();
         
         this.measurements.addAll(measurements);
-    }    
-
-    /**
-     * @return the report
-     */
-    public Report getReport()
-    {
-        return report;
-    }
-
-    /**
-     * @param report the report to set
-     */
-    public void setReport(Report report)
-    {
-        this.report = report;
     }
 }

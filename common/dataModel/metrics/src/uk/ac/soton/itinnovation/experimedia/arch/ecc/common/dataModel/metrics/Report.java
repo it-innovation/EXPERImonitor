@@ -24,10 +24,13 @@
 /////////////////////////////////////////////////////////////////////////
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics;
 
+import java.util.Date;
 import java.util.UUID;
 
 /**
- * A report class, which contains derived information about a measurement set.
+ * A report class, which contains meta-information about a measurement set.
+ * 
+ * Currently only the number of measurements is supported.
  * 
  * @author Vegard Engen
  */
@@ -35,6 +38,7 @@ public class Report
 {
     private UUID uuid;
     private UUID measurementSetUUID;
+    private Date timeStamp;
     private int numberOfMeasurements;
     
     /**
@@ -60,15 +64,28 @@ public class Report
     }
     
     /**
-     * Constructor to set all the attributes of the class.
+     * Constructor to set the "administrative" attributes of the class.
      * @param uuid The UUID of the Report, to uniquely identify it.
      * @param measurementSetUUID The UUID of the measurement set that this is a report for.
-     * @param numMeasurements The number of measurements in the measurement set this is a report for.
+     * @param timeStamp The time stamp of the report.
      */
-    public Report(UUID uuid, UUID measurementSetUUID, int numMeasurements)
+    public Report(UUID uuid, UUID measurementSetUUID, Date timeStamp)
     {
         this.uuid = uuid;
         this.measurementSetUUID = measurementSetUUID;
+        this.timeStamp = timeStamp;
+    }
+    
+    /**
+     * Constructor to set all the attributes of the class.
+     * @param uuid The UUID of the Report, to uniquely identify it.
+     * @param measurementSetUUID The UUID of the measurement set that this is a report for.
+     * @param timeStamp The time stamp of the report.
+     * @param numMeasurements The number of measurements in the measurement set this is a report for.
+     */
+    public Report(UUID uuid, UUID measurementSetUUID, Date timeStamp, int numMeasurements)
+    {
+        this(uuid, measurementSetUUID, timeStamp);
         this.numberOfMeasurements = numMeasurements;
     }
     
@@ -103,7 +120,23 @@ public class Report
     {
         this.measurementSetUUID = measurementSetUUID;
     }
+    
+    /**
+     * @return the timeStamp
+     */
+    public Date getTimeStamp()
+    {
+        return timeStamp;
+    }
 
+    /**
+     * @param timeStamp the timeStamp to set
+     */
+    public void setTimeStamp(Date timeStamp)
+    {
+        this.timeStamp = timeStamp;
+    }
+    
     /**
      * @return the number of measurements
      */
