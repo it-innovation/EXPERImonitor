@@ -246,6 +246,8 @@ public interface IExperimentDataManager
     //---------------------------- REPORT ------------------------------------//
     
     
+    // OBS: perhaps a set will have different reports at different points in time?
+    
     /**
      * Saves a report, which must have a unique UUID and refer to an existing
      * measurement set (by its UUID).
@@ -302,6 +304,8 @@ public interface IExperimentDataManager
     //------------------------- MEASUREMENT ----------------------------------//
     
     
+    // OBS: or should these return a MeasurementSet object, so we get a report?
+    
     /**
      * Saves a measurement, which must have a unique UUID and refer to an existing
      * measurement set (by its UUID).
@@ -316,7 +320,7 @@ public interface IExperimentDataManager
      * @return A measurement object, if it exists.
      * @throws Exception If there's a technical issue or there is no measurement with the given UUID.
      */
-    public Measurement geMeasurement(UUID measurementUUID) throws Exception;
+    public Measurement getMeasurement(UUID measurementUUID) throws Exception;
     
     /**
      * Get the latest measurement for a particular measurement set.

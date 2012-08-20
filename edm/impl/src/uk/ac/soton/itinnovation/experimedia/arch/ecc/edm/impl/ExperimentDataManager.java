@@ -208,7 +208,7 @@ public class ExperimentDataManager implements IExperimentDataManager
     }
 
     @Override
-    public Measurement geMeasurement(UUID measurementUUID) throws Exception
+    public Measurement getMeasurement(UUID measurementUUID) throws Exception
     {
         throw new UnsupportedOperationException("Not supported yet.");
     }
