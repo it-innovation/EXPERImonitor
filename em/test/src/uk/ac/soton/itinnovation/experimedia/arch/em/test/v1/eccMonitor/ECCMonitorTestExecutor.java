@@ -73,8 +73,8 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Me
  * @author sgc
  */
 public class ECCMonitorTestExecutor implements Runnable,
-                                               IEMMonitor_ProviderListener,
-                                               IEMMonitor_UserListener,
+                                               IEMDiscovery_ProviderListener,
+                                               IEMDiscovery_UserListener,
                                                IEMTest_Listener
         
 {
@@ -83,8 +83,8 @@ public class ECCMonitorTestExecutor implements Runnable,
   
   IAMQPMessageDispatchPump dispatchPump;
   
-  private IEMMonitor providerMonitor;
-  private IEMMonitor userMonitor;
+  private IEMDiscovery providerDiscovery;
+  private IEMDiscovery userDiscovery;
   
   private IEMTest providerTest;
   private IEMTest userTest;
@@ -170,7 +170,7 @@ public class ECCMonitorTestExecutor implements Runnable,
       providerTest.setListener( this );
 
       // Tell user to create a test interface
-      providerMonitor.createInterface( EMInterfaceType.eECCTestInterface );
+      providerDiscovery.createInterface( EMInterfaceType.eEMTestInterface );
     }
   }
   
@@ -209,7 +209,7 @@ public class ECCMonitorTestExecutor implements Runnable,
     // Make sure event is from the correct sender
     if ( senderID.equals( ECCMonitorEntryPointTest.EMProviderUUID) )
     {
-      if ( type == EMInterfaceType.eECCTestInterface )
+      if ( type == EMInterfaceType.eEMTestInterface )
       userGotCreateTestFaceCommand = true;
     
       // Create a test interface here
@@ -233,7 +233,7 @@ public class ECCMonitorTestExecutor implements Runnable,
       userTest.sendData( testDataSize, testDataBody );
 
       // And immediately send a dis-connection notice (will it arrive before end of data?)
-      userMonitor.clientDisconnecting();
+      userDiscovery.clientDisconnecting();
     }
   }
   
@@ -246,7 +246,7 @@ public class ECCMonitorTestExecutor implements Runnable,
       userGotRegistrationConfirmed = true; // Don't really care about the result
     
       // Send provider notice that user is ready to initialise
-      userMonitor.readyToInitialise();
+      userDiscovery.readyToInitialise();
     }
   }
   
@@ -289,19 +289,19 @@ public class ECCMonitorTestExecutor implements Runnable,
     dispatchPump.addDispatch( userDispatch );
     dispatchPump.startPump();
     
-    providerMonitor = providerFactory.createMonitor( ECCMonitorEntryPointTest.EMProviderUUID,
+    providerDiscovery = providerFactory.createMonitor( ECCMonitorEntryPointTest.EMProviderUUID,
                                                      ECCMonitorEntryPointTest.EMUserUUID,
                                                      providerDispatch );
     
-    userMonitor = userFactory.createMonitor( ECCMonitorEntryPointTest.EMProviderUUID,
+    userDiscovery = userFactory.createMonitor( ECCMonitorEntryPointTest.EMProviderUUID,
                                              ECCMonitorEntryPointTest.EMUserUUID,
                                              userDispatch );
     
     // This class acts as BOTH provider and user
-    providerMonitor.setProviderListener( this );
-    userMonitor.setUserListener( this );
+    providerDiscovery.setProviderListener( this );
+    userDiscovery.setUserListener( this );
     
     // Start simulation from point of registration confirmation from provider
-    providerMonitor.registrationConfirmed( true );
+    providerDiscovery.registrationConfirmed( true );
   }
 }

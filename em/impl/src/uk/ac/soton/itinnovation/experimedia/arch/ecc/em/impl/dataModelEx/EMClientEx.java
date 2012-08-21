@@ -38,7 +38,7 @@ import java.util.*;
 
 public class EMClientEx extends EMClient
 { 
-  private IEMMonitor monitorFace;
+  private IEMDiscovery monitorFace;
   
  
   public EMClientEx( UUID id, String name )
@@ -46,14 +46,26 @@ public class EMClientEx extends EMClient
     super( id, name );
   }
   
-  public IEMMonitor getEMMonitorInterface()
+  public void destroyAllInterfaces()
+  {
+    monitorFace = null;
+  }
+  
+  public IEMDiscovery getEMMonitorInterface()
   { return monitorFace; }
   
-  public void setEMMonitorInterface( IEMMonitor face )
+  public void setEMMonitorInterface( IEMDiscovery face )
   { monitorFace = face; }
+  
+  // Discovery phase state -----------------------------------------------------
+  public void setIsConnected( boolean connected )
+  { clientConnected = connected; }
   
   public void setSupportedPhases( EnumSet<EMPhase> phases )
   { supportedPhases = phases; }
+  
+  public void setGeneratorDiscoveryResult( boolean discovered )
+  { discoveredGenerators = discovered; }
   
   public void setMetricGenerators( Set<MetricGenerator> generators )
   {

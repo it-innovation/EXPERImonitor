@@ -40,7 +40,7 @@ import java.util.*;
  * 
  * @author sgc
  */
-public interface IEMMonitor_ProviderListener
+public interface IEMDiscovery_ProviderListener
 {
   /**
    * Notification of a user who is now ready to initialise.

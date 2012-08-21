@@ -18,40 +18,25 @@
 // the software.
 //
 //      Created By :            Simon Crowle
-//      Created Date :          09-Aug-2012
+//      Created Date :          14-Aug-2012
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow;
+
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMClient;
 
 
 
 
-public interface IEMMonitorControl
+public interface IEMLifecycleListener
 {
-  // Listeners -----------------------------------------------------------------
+  void onClientConnected( EMClient client );
   
+  void onClientDisconnected( EMClient client );
   
-  // Provider methods ----------------------------------------------------------
-  void startPushing();
+  void onFoundClientWithMetricGenerators( EMClient client );
   
-  void stopPushing();
-  
-  void pullMetric( /* data model here */ );
-  
-  void pullMetricTimeOut( /* data model here */ );
-  
-  void pullingStopped();
-  
-  // User methods --------------------------------------------------------------
-  void notifyReadyToPush();
-  
-  void pushMetric( /* data model here */ );
-  
-  void notifyPushingCompleted();
-  
-  void notifyReadyForPull();
-  
-  void sendPulledMetric( /* data model here */ );
+  void onDiscoveryPhaseCompleted();
 }

@@ -25,8 +25,8 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEMMonitor_UserListener;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEMMonitor_ProviderListener;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEMDiscovery_UserListener;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEMDiscovery_ProviderListener;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
@@ -41,14 +41,14 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Me
 
 
 
-public class EMMonitor extends EMBaseInterface
-                       implements IEMMonitor
+public class EMDiscovery extends EMBaseInterface
+                         implements IEMDiscovery
 {
-  private IEMMonitor_ProviderListener providerListener;
-  private IEMMonitor_UserListener     userListener;
+  private IEMDiscovery_ProviderListener providerListener;
+  private IEMDiscovery_UserListener     userListener;
     
   
-  public EMMonitor( AMQPBasicChannel    channel,
+  public EMDiscovery( AMQPBasicChannel    channel,
                     AMQPMessageDispatch dispatch,
                     UUID                providerID,
                     UUID                userID,
@@ -67,11 +67,11 @@ public class EMMonitor extends EMBaseInterface
   
   // IECCMonitor ---------------------------------------------------------------
   @Override
-  public void setProviderListener( IEMMonitor_ProviderListener listener )
+  public void setProviderListener( IEMDiscovery_ProviderListener listener )
   { providerListener = listener; }
   
   @Override
-  public void setUserListener( IEMMonitor_UserListener listener)
+  public void setUserListener( IEMDiscovery_UserListener listener)
   { userListener = listener; }
   
   // Provider ------------------------------------------------------------------

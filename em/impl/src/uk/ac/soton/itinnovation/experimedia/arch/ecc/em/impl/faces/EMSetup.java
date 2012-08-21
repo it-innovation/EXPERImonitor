@@ -39,13 +39,13 @@ import java.util.*;
 
 
 
-public class EMMonitorSetup extends EMBaseInterface
+public class EMSetup extends EMBaseInterface
                             implements IEMMonitorSetup
 {
-  private IEMMonitorSetup_ProviderListener providerListener;
-  private IEMMonitorSetup_UserListener     userListener;
+  private IEMSetup_ProviderListener providerListener;
+  private IEMSetup_UserListener     userListener;
   
-  public EMMonitorSetup( AMQPBasicChannel channel,
+  public EMSetup( AMQPBasicChannel channel,
                          AMQPMessageDispatch dispatch,
                          UUID providerID,
                          UUID userID,
@@ -65,11 +65,11 @@ public class EMMonitorSetup extends EMBaseInterface
   
   // IEMMonitorSetup -----------------------------------------------------------
   @Override
-  public void setProviderListener( IEMMonitorSetup_ProviderListener listener )
+  public void setProviderListener( IEMSetup_ProviderListener listener )
   { providerListener = listener; }
   
   @Override
-  public void setUserListener( IEMMonitorSetup_UserListener listener)
+  public void setUserListener( IEMSetup_UserListener listener)
   { userListener = listener; }
   
   // Provider methods ----------------------------------------------------------

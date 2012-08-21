@@ -30,9 +30,15 @@ import java.util.UUID;
 
 
 
-public interface IEMMonitorSetup_UserListener
+public interface IEMLiveMonitor_ProviderListener
 {
-  void onSetupMetricGenerator( UUID senderID, UUID genID );
+  void onNotifyReadyToPush( UUID senderID );
   
-  void onSetupTimeOut( UUID senderID, UUID genID );
+  void onPushMetric( UUID senderID /*data model here*/ );
+  
+  void onNotifyPushingComplete( UUID senderID );
+  
+  void onNotifyReadyForPull( UUID senderID );
+  
+  void onSendPulledMetric( UUID senderID /*data model here*/ );
 }

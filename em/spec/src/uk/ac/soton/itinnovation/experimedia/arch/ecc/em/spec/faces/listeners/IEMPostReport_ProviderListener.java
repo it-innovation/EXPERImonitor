@@ -23,36 +23,20 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEMReport_UserListener;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEMReport_ProviderListener;
-
+import java.util.UUID;
 
 
 
-public interface IEMReport
+
+public interface IEMPostReport_ProviderListener
 {
-  // Listeners -----------------------------------------------------------------
-  void setProviderListener( IEMReport_ProviderListener listener );
+  void onNotifyReadyToReport( UUID senderID );
   
-  void setUserListener( IEMReport_UserListener listener );
+  void onSendReportSummary( UUID senderID /*data model here */ );
   
-  // Provider methods ----------------------------------------------------------
-  void requestReportSummary();
+  void onSendReportMetaData( UUID senderID /* data model here */ );
   
-  void requestNextReportMetadata();
-  
-  void requestDataPart( /* data model */ );
-  
-  void notifyReportTimeOut( /* data model */ );
-  
-  // User methods --------------------------------------------------------------
-  void notifyReadyToReport();
-  
-  void sendReportSummary( /* data model here */ );
-  
-  void sendReportMetaData( /* data model here */ );
-  
-  void sendDataPart( /* data model here */ );
+  void onSendDataPart( UUID senderID /* data model here */ );
 }

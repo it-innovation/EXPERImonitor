@@ -71,11 +71,11 @@ public class EMInterfaceFactory
                                     generateProviders );
   }
   
-  public IEMMonitor createMonitor( UUID providerID,
+  public IEMDiscovery createMonitor( UUID providerID,
                                    UUID userID,
                                    IAMQPMessageDispatch dispatch )
   {
-    return new EMMonitor( amqpChannel,
+    return new EMDiscovery( amqpChannel,
                           (AMQPMessageDispatch) dispatch,
                           providerID,
                           userID,
@@ -86,7 +86,7 @@ public class EMInterfaceFactory
                                       UUID userID,
                                       IAMQPMessageDispatch dispatch )
   {
-    return new EMMonitorSetup( amqpChannel,
+    return new EMSetup( amqpChannel,
                               (AMQPMessageDispatch) dispatch,
                               providerID,
                               userID,

@@ -39,16 +39,18 @@ public interface IExperimentMonitor
                  ENTRY_POINT_OPEN,
                  LIFECYCLE_STARTED,
                  LIFECYCLE_ENDED };
-  
+    
   eStatus getStatus();
   
   void openEntryPoint( String rabbitServerIP, UUID entryPointID ) throws Exception;
   
   Set<EMClient> getConnectedClients();
   
+  void addLifecyleListener( IEMLifecycleListener listener );
+  
+  void removeLifecycleListener( IEMLifecycleListener listener );
+  
   void startLifecycle() throws Exception;
   
   void endLifecycle() throws Exception;
-  
-  void setListener( IExperimentMonitorListener listener );
 }

@@ -18,19 +18,40 @@
 // the software.
 //
 //      Created By :            Simon Crowle
-//      Created Date :          14-Aug-2012
+//      Created Date :          09-Aug-2012
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecyle;
-
-import java.util.UUID;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces;
 
 
 
 
-public interface EMLifecycleManagerListener
+public interface IEMLiveMonitor
 {
-  void onFoundClientWithMetricGenerators( UUID clientID );
+  // Listeners -----------------------------------------------------------------
+  
+  
+  // Provider methods ----------------------------------------------------------
+  void startPushing();
+  
+  void stopPushing();
+  
+  void pullMetric( /* data model here */ );
+  
+  void pullMetricTimeOut( /* data model here */ );
+  
+  void pullingStopped();
+  
+  // User methods --------------------------------------------------------------
+  void notifyReadyToPush();
+  
+  void pushMetric( /* data model here */ );
+  
+  void notifyPushingCompleted();
+  
+  void notifyReadyForPull();
+  
+  void sendPulledMetric( /* data model here */ );
 }

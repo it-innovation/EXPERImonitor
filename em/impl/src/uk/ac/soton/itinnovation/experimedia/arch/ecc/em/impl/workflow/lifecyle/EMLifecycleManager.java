@@ -25,6 +25,7 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecyle;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.IEMLifecycleListener;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
@@ -51,7 +52,7 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   private EnumMap<EMPhase, AbstractEMLCPhase> lifecyclePhases;
   private EMPhase currentPhase = EMPhase.eEMUnknownPhase;
   
-  private EMLifecycleManagerListener lifecycleListener;
+  private IEMLifecycleListener lifecycleListener;
   
   
   public EMLifecycleManager() 
@@ -61,7 +62,7 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   
   public void initialise( AMQPBasicChannel channel, 
                           UUID providerID,
-                          EMLifecycleManagerListener listener )
+                          IEMLifecycleListener listener )
   {
     emChannel         = channel;
     emProviderID      = providerID;
@@ -113,7 +114,9 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
       AbstractEMLCPhase discovery = 
           lifecyclePhases.get( EMPhase.eEMDiscoverMetricGenerators );
       
-      if ( discovery != null ) discovery.addClient( client );
+      if ( discovery != null )
+        if ( discovery.addClient( client ) )
+          lifecycleListener.onClientConnected( client );
     }
   }
   
@@ -133,14 +136,36 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   }
   
   @Override
-  public void onClientMetricGeneratorsFound( UUID clientID )
+  public void onClientDiscoveryResult( EMClientEx client )
   {
-    lifecycleListener.onFoundClientWithMetricGenerators( clientID );
+    // If not metric generators are available, remove client from appropriate phases
+    if ( client.getGeneratorDiscoveryResult() == false )
+    {
+      UUID clientID = client.getID();
+      
+      AbstractEMLCPhase phase = lifecyclePhases.get( EMPhase.eEMLiveMonitoring );
+      phase.removeClient( clientID );
+      
+      phase = lifecyclePhases.get( EMPhase.eEMPostMonitoringReport );
+      phase.removeClient( clientID );
+    }
+  }
+  
+  @Override
+  public void onClientMetricGeneratorsFound( EMClientEx client )
+  {
+    lifecycleListener.onFoundClientWithMetricGenerators( client );
+  }
+  
+  @Override
+  public void onClientIsDisconnected( EMClientEx client )
+  {
+    lifecycleListener.onClientDisconnected( client );
   }
   
   @Override
   public void onDiscoveryPhaseCompleted()
   {
-    
+    lifecycleListener.onDiscoveryPhaseCompleted();
   }
 }

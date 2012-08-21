@@ -40,7 +40,7 @@ import java.util.*;
 
 
 
-public class EMController implements IExperimentMonitorListener
+public class EMController implements IEMLifecycleListener
 {
   private IExperimentMonitor expMonitor;
   private EMView             mainView;
@@ -48,7 +48,7 @@ public class EMController implements IExperimentMonitorListener
   public EMController()
   {    
     expMonitor = EMInterfaceFactory.createEM();
-    expMonitor.setListener( this );
+    expMonitor.addLifecyleListener( this );
   }
   
   public void start( String rabbitIP, UUID emID )
@@ -62,16 +62,22 @@ public class EMController implements IExperimentMonitorListener
     catch (Exception e) {}
   }
   
-  // IEMClientListener ---------------------------------------------------------
+  // IEMLifecycleListener ------------------------------------------------------
   @Override
-  public void onClientRegistered( EMClient client )
+  public void onClientConnected( EMClient client )
   {
     if ( mainView != null )
       mainView.addConnectedClient( client.getID(), client.getName() );
   }
   
   @Override
-  public void onClientHasMetricGenerators( EMClient client )
+  public void onClientDisconnected( EMClient client )
+  {
+
+  }
+  
+  @Override
+  public void onFoundClientWithMetricGenerators( EMClient client )
   {
     if ( client != null )
     {
@@ -85,6 +91,12 @@ public class EMController implements IExperimentMonitorListener
         mainView.addLogText( client.getName() + " has metric generator: " + mg.getName() );
       }
     }
+  }
+  
+  @Override
+  public void onDiscoveryPhaseCompleted()
+  {
+
   }
   
   // Private methods -----------------------------------------------------------

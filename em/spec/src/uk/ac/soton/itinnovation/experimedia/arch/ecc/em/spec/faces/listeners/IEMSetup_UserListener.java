@@ -17,7 +17,7 @@
 // PURPOSE, except where stated in the Licence Agreement supplied with
 // the software.
 //
-//      Created By :            sgc
+//      Created By :            Simon Crowle
 //      Created Date :          09-Aug-2012
 //      Created for Project :   EXPERIMEDIA
 //
@@ -30,13 +30,9 @@ import java.util.UUID;
 
 
 
-public interface IEMReport_UserListener
+public interface IEMSetup_UserListener
 {
-  void onRequestReportSummary( UUID senderID );
+  void onSetupMetricGenerator( UUID senderID, UUID genID );
   
-  void onRequestNextReportMetadata( UUID senderID );
-  
-  void onRequestDataPart( UUID senderID /* data model */ );
-  
-  void onNotifyReportTimeOut( UUID senderID );
+  void onSetupTimeOut( UUID senderID, UUID genID );
 }

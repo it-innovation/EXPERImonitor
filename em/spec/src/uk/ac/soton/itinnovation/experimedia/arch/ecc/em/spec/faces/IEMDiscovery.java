@@ -25,8 +25,8 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEMMonitor_UserListener;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEMMonitor_ProviderListener;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEMDiscovery_UserListener;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEMDiscovery_ProviderListener;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
@@ -42,7 +42,7 @@ import java.util.*;
  * 
  * @author sgc
  */
-public interface IEMMonitor
+public interface IEMDiscovery
 {  
   // Listeners -----------------------------------------------------------------
   /**
@@ -51,7 +51,7 @@ public interface IEMMonitor
    * 
    * @param listener - Listener interface for provider actors
    */
-  void setProviderListener( IEMMonitor_ProviderListener listener );
+  void setProviderListener( IEMDiscovery_ProviderListener listener );
   
   /**
    * If you are acting as a 'user' of this interface (a client of the EM) then
@@ -59,7 +59,7 @@ public interface IEMMonitor
    * 
    * @param listener - Listener interface for listener actors
    */
-  void setUserListener( IEMMonitor_UserListener listener);
+  void setUserListener( IEMDiscovery_UserListener listener);
   
   // Provider methods ----------------------------------------------------------
   /**

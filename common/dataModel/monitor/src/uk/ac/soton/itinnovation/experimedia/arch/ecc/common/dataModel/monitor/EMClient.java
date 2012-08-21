@@ -34,9 +34,13 @@ import java.util.*;
 
 public class EMClient
 {
-  protected UUID                     clientID;
-  protected String                   clientName;
+  protected UUID    clientID;
+  protected String  clientName;
+  protected boolean clientConnected = false;
+  
+  // Discovery phase states
   protected EnumSet<EMPhase>         supportedPhases;
+  protected boolean                  discoveredGenerators = false;
   protected HashSet<MetricGenerator> metricGenerators;
   
   
@@ -55,6 +59,9 @@ public class EMClient
   public String getName()
   { return clientName; }
   
+  public boolean isConnected()
+  { return clientConnected; }
+  
   public EnumSet<EMPhase> getCopyOfSupportedPhases()
   {
     EnumSet<EMPhase> phaseCopy = EnumSet.noneOf( EMPhase.class );
@@ -62,6 +69,9 @@ public class EMClient
     
     return phaseCopy;
   }
+  
+  public boolean getGeneratorDiscoveryResult()
+  { return discoveredGenerators; }
   
   public Set<MetricGenerator> getCopyOfMetricGenerators()
   {

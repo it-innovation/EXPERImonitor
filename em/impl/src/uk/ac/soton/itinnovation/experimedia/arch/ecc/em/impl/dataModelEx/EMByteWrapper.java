@@ -25,28 +25,19 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx;
 
-import sun.misc.*;
+import net.iharder.Base64;
 
 
 
 
 public class EMByteWrapper
 {
-  private BASE64Encoder base64Encoder;
-  private BASE64Decoder base64Decoder;
-  
-  public EMByteWrapper()
-  {
-    base64Encoder  = new BASE64Encoder();
-    base64Decoder = new BASE64Decoder();
-  }
-  
   public String encode( byte[] data )
   {
     String code = null;
     
     if ( data != null && data.length > 0 )
-      code = base64Encoder.encodeBuffer( data );
+      code = Base64.encodeBytes( data );
     
     return code;
   }
@@ -56,8 +47,8 @@ public class EMByteWrapper
     byte[] dataBytes = null;
     
     if ( data != null && !data.isEmpty() )
-      try { dataBytes = base64Decoder.decodeBuffer( data ); }
-      catch (Exception e) { dataBytes = null; }
+      try { dataBytes = Base64.decode( data ); }
+      catch ( Exception e ) {}
     
     return dataBytes;
   }

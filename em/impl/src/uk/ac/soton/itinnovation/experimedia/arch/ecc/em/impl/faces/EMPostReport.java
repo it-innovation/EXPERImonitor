@@ -25,9 +25,9 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEMReport_UserListener;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEMReport_ProviderListener;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.IEMReport;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEMPostReport_UserListener;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEMPostReport_ProviderListener;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.IEMPostReport;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasicChannel;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPMessageDispatch;
@@ -41,13 +41,13 @@ import java.util.*;
 
 
 
-public class EMReport extends EMBaseInterface
-                      implements IEMReport
+public class EMPostReport extends EMBaseInterface
+                      implements IEMPostReport
 {
-  private IEMReport_ProviderListener providerListener;
-  private IEMReport_UserListener     userListener;
+  private IEMPostReport_ProviderListener providerListener;
+  private IEMPostReport_UserListener     userListener;
   
-  public EMReport( AMQPBasicChannel channel,
+  public EMPostReport( AMQPBasicChannel channel,
                    AMQPMessageDispatch dispatch,
                    UUID providerID,
                    UUID userID,
@@ -66,11 +66,11 @@ public class EMReport extends EMBaseInterface
   
   // IECCReport ----------------------------------------------------------------
   @Override
-  public void setProviderListener( IEMReport_ProviderListener listener )
+  public void setProviderListener( IEMPostReport_ProviderListener listener )
   { providerListener = listener; }
   
   @Override
-  public void setUserListener( IEMReport_UserListener listener )
+  public void setUserListener( IEMPostReport_UserListener listener )
   { userListener = listener; }
   
   // Provider methods ----------------------------------------------------------

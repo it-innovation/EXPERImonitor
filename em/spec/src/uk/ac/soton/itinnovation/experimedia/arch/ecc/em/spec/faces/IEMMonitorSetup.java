@@ -41,7 +41,7 @@ public interface IEMMonitorSetup
    * 
    * @param listener - Listener interface for provider actors
    */
-  void setProviderListener( IEMMonitorSetup_ProviderListener listener );
+  void setProviderListener( IEMSetup_ProviderListener listener );
   
   /**
    * If you are acting as a 'user' of this interface (a client of the EM) then
@@ -49,7 +49,7 @@ public interface IEMMonitorSetup
    * 
    * @param listener - Listener interface for listener actors
    */
-  void setUserListener( IEMMonitorSetup_UserListener listener);
+  void setUserListener( IEMSetup_UserListener listener);
   
   // Provider methods ----------------------------------------------------------
   void setupMetricGenerator( UUID genID );

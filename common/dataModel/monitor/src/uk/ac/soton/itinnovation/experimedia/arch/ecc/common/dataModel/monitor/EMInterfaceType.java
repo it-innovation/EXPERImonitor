@@ -31,9 +31,9 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor;
 public enum EMInterfaceType
 {
   eEMUnknownInface,
-  eEMMonitorSetup,
-  eEMMonitorControl,
-  eECCReport,
-  eECCTearDown,
-  eECCTestInterface;
+  eEMSetup,
+  eEMLiveMonitor,
+  eEMPostReport,
+  eEMTearDown,
+  eEMTestInterface;
 }

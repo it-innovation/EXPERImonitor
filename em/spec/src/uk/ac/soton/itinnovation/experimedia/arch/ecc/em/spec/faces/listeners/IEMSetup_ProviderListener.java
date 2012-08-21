@@ -30,13 +30,11 @@ import java.util.UUID;
 
 
 
-public interface IEMReport_ProviderListener
+public interface IEMSetup_ProviderListener
 {
-  void onNotifyReadyToReport( UUID senderID );
+  void onNotifyReadyToSetup( UUID senderID );
   
-  void onSendReportSummary( UUID senderID /*data model here */ );
-  
-  void onSendReportMetaData( UUID senderID /* data model here */ );
-  
-  void onSendDataPart( UUID senderID /* data model here */ );
+  void onNotifyMetricGeneratorSetupResult( UUID senderID,
+                                           UUID genID,
+                                           Boolean success );
 }

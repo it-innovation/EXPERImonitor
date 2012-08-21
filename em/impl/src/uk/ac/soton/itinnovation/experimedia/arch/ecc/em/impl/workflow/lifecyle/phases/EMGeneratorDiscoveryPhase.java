@@ -25,18 +25,15 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecyle.phases;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.IEMMonitor;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.IEMDiscovery;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.*;
-
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces.EMMonitor;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces.EMDiscovery;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMPhase;
-
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
-        
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
 
 import java.util.*;
@@ -47,9 +44,11 @@ import java.util.*;
 
 
 public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
-                                       implements IEMMonitor_ProviderListener
+                                       implements IEMDiscovery_ProviderListener
 {
   private GeneratorDiscoveryPhaseListener phaseListener;
+  
+  private HashSet<UUID> clientsExpectingGeneratorInfo;
   
   
   public EMGeneratorDiscoveryPhase( AMQPBasicChannel channel,
@@ -59,6 +58,8 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
     super( EMPhase.eEMDiscoverMetricGenerators, channel, providerID );
     
     phaseListener = listener;
+    
+    clientsExpectingGeneratorInfo = new HashSet<UUID>();
     
     phaseState = "Waiting for clients";
   }
@@ -73,16 +74,17 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
       AMQPMessageDispatch dispatch = new AMQPMessageDispatch();
       phaseMsgPump.addDispatch( dispatch );
       
-      EMMonitor monitorFace = new EMMonitor( emChannel,
+      EMDiscovery monitorFace = new EMDiscovery( emChannel,
                                              dispatch,
                                              emProviderID,
                                              client.getID(),
                                              true );
       monitorFace.setProviderListener( this );
-      
       client.setEMMonitorInterface( monitorFace );
       
       phaseState = "Waiting to start phase";
+      
+      return true;
     }
     
     return false;
@@ -94,49 +96,66 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
     if ( phaseActive ) throw new Exception( "Phase already active" );
     if ( phaseClients.isEmpty() ) throw new Exception( "No clients available for this phase" );
   
+    phaseActive = true;
+    
     // Confirm registration with clients...
     for ( EMClientEx client : phaseClients.values() )
     {
-      IEMMonitor monFace = client.getEMMonitorInterface();
+      IEMDiscovery monFace = client.getEMMonitorInterface();
       monFace.registrationConfirmed( true );
-    }    
+      client.setIsConnected( true );
+      
+      // Initially assume all clients will offer metric generators
+      clientsExpectingGeneratorInfo.add( client.getID() );
+    }
+    
+    phaseState = "Getting client information";
     //... remainder of protocol implemented through events
   }
   
   @Override
   public void stop() throws Exception
   {
-    if ( phaseActive )
-    {
-      
-    }
+    phaseActive = false;
+    
+    //TODO: Tidy up clients?
   }
   
   // IEMMonitor_ProviderListener -----------------------------------------------
   @Override
   public void onReadyToInitialise( UUID senderID )
   {
-    EMClientEx client = phaseClients.get( senderID );
-    if ( client != null )
-      client.getEMMonitorInterface().requestActivityPhases();
+    if ( phaseActive )
+    {
+      EMClientEx client = phaseClients.get( senderID );
+      
+      if ( client != null )
+        client.getEMMonitorInterface().requestActivityPhases();
+    }
   }
   
   @Override
   public void onSendActivityPhases( UUID senderID, 
                                     EnumSet<EMPhase> supportedPhases )
   {
-    EMClientEx client = phaseClients.get( senderID );
-    
-    if ( client != null && supportedPhases != null )
+    if ( phaseActive )
     {
-      // Tell Lifecycle manager about supported phases by client
-      client.setSupportedPhases( supportedPhases );
-      phaseListener.onClientPhaseSupportReceived( client );
-      
-      // If we have relevant phases, go get metric generators
-      if ( supportedPhases.contains( EMPhase.eEMSetUpMetricGenerators ) ||
-           supportedPhases.contains( EMPhase.eEMLiveMonitoring ) )
-        client.getEMMonitorInterface().discoverMetricGenerators();
+      EMClientEx client = phaseClients.get( senderID );
+    
+      if ( client != null && supportedPhases != null )
+      {
+        // Tell Lifecycle manager about supported phases by client
+        client.setSupportedPhases( supportedPhases );
+        phaseListener.onClientPhaseSupportReceived( client );
+
+        // If we have relevant phases, go get metric generator info
+        if ( supportedPhases.contains( EMPhase.eEMLiveMonitoring )        ||
+             supportedPhases.contains( EMPhase.eEMPostMonitoringReport) )
+          client.getEMMonitorInterface().discoverMetricGenerators();
+        else
+          clientsExpectingGeneratorInfo.remove( senderID );
+          // Otherise, don't expect generator info
+      }
     }
   }
   
@@ -144,28 +163,62 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
   public void onSendDiscoveryResult( UUID senderID,
                                      Boolean discoveredGenerators )
   {
-    EMClientEx client = phaseClients.get( senderID );
+    if ( phaseActive )
+    {
+      EMClientEx client = phaseClients.get( senderID );
     
-    if ( client != null && discoveredGenerators == true )
-      client.getEMMonitorInterface().requestMetricGeneratorInfo();
+      if ( client != null )
+      {
+        client.setGeneratorDiscoveryResult( discoveredGenerators );
+        phaseListener.onClientDiscoveryResult( client );
+
+        // Find out about metric generators if some have been found
+        if ( discoveredGenerators )
+          client.getEMMonitorInterface().requestMetricGeneratorInfo();
+        else
+          clientsExpectingGeneratorInfo.remove( senderID );
+          // Otherwise don't expect any metric generator info
+      }
+    }
   }
   
   @Override
   public void onSendMetricGeneratorInfo( UUID senderID,
                                          Set<MetricGenerator> generators )
   {
-    EMClientEx client = phaseClients.get( senderID );
-    
-    if ( client != null )
+    if ( phaseActive )
     {
-      client.setMetricGenerators( generators );
-      phaseListener.onClientMetricGeneratorsFound( client.getID() );
+      EMClientEx client = phaseClients.get( senderID );
+    
+      if ( client != null )
+      {
+        client.setMetricGenerators( generators );
+        phaseListener.onClientMetricGeneratorsFound( client );
+        
+        // Remove from the list of expected generators
+        clientsExpectingGeneratorInfo.remove( senderID );
+      }
+      
+      // If we've got all the metric generator info we need, finish this phase
+      if ( clientsExpectingGeneratorInfo.isEmpty() )
+        phaseListener.onDiscoveryPhaseCompleted();
     }
   }
   
   @Override
   public void onClientDisconnecting( UUID senderID )
   {
-    //TODO
+    EMClientEx client = phaseClients.get( senderID );
+    
+    if ( client != null )
+    {
+      clientsExpectingGeneratorInfo.remove( senderID );
+      
+      client.destroyAllInterfaces();
+      client.setIsConnected( false );
+      
+      phaseListener.onClientIsDisconnected( client );
+    }
+        
   }
 }

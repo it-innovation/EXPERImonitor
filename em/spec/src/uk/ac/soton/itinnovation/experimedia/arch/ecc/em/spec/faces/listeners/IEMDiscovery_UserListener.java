@@ -39,7 +39,7 @@ import java.util.UUID;
  * 
  * @author sgc
  */
-public interface IEMMonitor_UserListener
+public interface IEMDiscovery_UserListener
 {
   /**
    * Request by the provider for the user to create a (user) interface instance

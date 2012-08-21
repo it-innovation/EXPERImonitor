@@ -50,14 +50,13 @@ public class EMConnectionManager implements IEMMonitorEntryPoint_ProviderListene
   
   private boolean entryPointOpen = false;
   
-  private HashMap<UUID, EMClientEx>        connectedClients;
-  private Set<EMConnectionManagerListener> connectionListeners;
+  private HashMap<UUID, EMClientEx>   connectedClients;
+  private EMConnectionManagerListener connectionListener;
   
   
   public EMConnectionManager()
   {
     connectedClients    = new HashMap<UUID, EMClientEx>();
-    connectionListeners = new HashSet<EMConnectionManagerListener>();
   }
   
   public boolean initialise( UUID epID, 
@@ -92,8 +91,8 @@ public class EMConnectionManager implements IEMMonitorEntryPoint_ProviderListene
     return entryPointOpen;
   }
   
-  public void addConnectionListener( EMConnectionManagerListener listener )
-  { connectionListeners.add( listener ); }
+  public void setListener( EMConnectionManagerListener listener )
+  { connectionListener = listener; }
   
   public boolean isEntryPointOpen()
   { return entryPointOpen; }
@@ -125,9 +124,7 @@ public class EMConnectionManager implements IEMMonitorEntryPoint_ProviderListene
         EMClientEx client = new EMClientEx( userID, userName );
         connectedClients.put( userID, client );
         
-        Iterator<EMConnectionManagerListener> listeners = connectionListeners.iterator();
-        while ( listeners.hasNext() )
-          listeners.next().onClientRegistered( client );
+        connectionListener.onClientRegistered( client );
       }
   }
 }

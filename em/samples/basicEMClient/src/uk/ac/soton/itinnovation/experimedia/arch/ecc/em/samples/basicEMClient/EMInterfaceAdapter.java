@@ -39,8 +39,8 @@ import java.util.*;
 
 
 
-public class EMInterfaceAdapter implements IEMMonitor_UserListener,
-                                           IEMMonitorSetup_UserListener
+public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
+                                           IEMSetup_UserListener
 {
   private EMIAdapterListener emiListener;
   private String             clientName;
@@ -53,10 +53,10 @@ public class EMInterfaceAdapter implements IEMMonitor_UserListener,
   
   // EM Interfaces
   private IEMMonitorEntryPoint entryPointFace;
-  private IEMMonitor           monitorFace;
+  private IEMDiscovery         discoveryFace;
   private IEMMonitorSetup      setupFace;
-  private IEMMonitorControl    controlFace;
-  private IEMReport            reportFace;
+  private IEMLiveMonitor       liveMonitorFace;
+  private IEMPostReport        postReportFace;
   private IEMTearDown          tearDownFace;
   
 
@@ -99,11 +99,11 @@ public class EMInterfaceAdapter implements IEMMonitor_UserListener,
     // Create the principal interface (IEMMonitor ahead of time)
     IAMQPMessageDispatch monDispatch = interfaceFactory.createDispatch();
     dispatchPump.addDispatch( monDispatch );
-    monitorFace = interfaceFactory.createMonitor( expMonitorID, 
+    discoveryFace = interfaceFactory.createMonitor( expMonitorID, 
                                                   clientID, 
                                                   monDispatch );
     
-    monitorFace.setUserListener( this );
+    discoveryFace.setUserListener( this );
       
     //.. and finally, try registering with the EM!
     entryPointFace.registerAsEMClient( clientID, "Simple EM Client" );
@@ -117,7 +117,7 @@ public class EMInterfaceAdapter implements IEMMonitor_UserListener,
     {      
       switch (type)
       {
-        case eEMMonitorSetup :
+        case eEMSetup :
         {
           if ( setupFace == null )
           {
@@ -132,17 +132,17 @@ public class EMInterfaceAdapter implements IEMMonitor_UserListener,
           }
         } break;
           
-        case eEMMonitorControl :
+        case eEMLiveMonitor :
         {
           //TODO
         } break;
           
-        case eECCReport :
+        case eEMPostReport :
         {
           //TODO
         } break;
           
-        case eECCTearDown :
+        case eEMTearDown :
         {
           //TODO
         } break;
@@ -156,7 +156,7 @@ public class EMInterfaceAdapter implements IEMMonitor_UserListener,
     if ( senderID.equals(expMonitorID) && emiListener != null )
     {
       emiListener.onEMConnectionResult( confirmed );
-      monitorFace.readyToInitialise();
+      discoveryFace.readyToInitialise();
     }
   }
   
@@ -173,7 +173,7 @@ public class EMInterfaceAdapter implements IEMMonitor_UserListener,
       phases.add( EMPhase.eEMPostMonitoringReport );
       phases.add( EMPhase.eEMTearDown );
 
-      monitorFace.sendActivePhases( phases );
+      discoveryFace.sendActivePhases( phases );
     }
   }
   
@@ -182,7 +182,7 @@ public class EMInterfaceAdapter implements IEMMonitor_UserListener,
   {
     // Just assume that all metric generators have been discovered
     if ( senderID.equals(expMonitorID) )
-      monitorFace.sendDiscoveryResult( true );
+      discoveryFace.sendDiscoveryResult( true );
   }
   
   @Override
@@ -193,7 +193,7 @@ public class EMInterfaceAdapter implements IEMMonitor_UserListener,
       HashSet<MetricGenerator> genSet = new HashSet<MetricGenerator>();
       emiListener.updateMetricGenerators( genSet );
       
-      monitorFace.sendMetricGeneratorInfo( genSet );
+      discoveryFace.sendMetricGeneratorInfo( genSet );
     }
   }
   

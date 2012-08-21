@@ -25,6 +25,7 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.IEMLifecycleListener;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
@@ -41,8 +42,7 @@ import java.util.*;
 
 
 public class ExperimentMonitor implements IExperimentMonitor,
-                                          EMConnectionManagerListener,
-                                          EMLifecycleManagerListener
+                                          IEMLifecycleListener
 {
   private IExperimentMonitor.eStatus monitorStatus = IExperimentMonitor.eStatus.NOT_YET_INITIALISED;
   private AMQPBasicChannel           amqpChannel;
@@ -50,11 +50,12 @@ public class ExperimentMonitor implements IExperimentMonitor,
   private EMConnectionManager connectionManager;
   private EMLifecycleManager  lifecycleManager;
   
-  private IExperimentMonitorListener emClientListener;
+  private HashSet<IEMLifecycleListener> lifecycleListeners;
   
   
   public ExperimentMonitor()
   {
+    lifecycleListeners = new HashSet<IEMLifecycleListener>();
   }
  
   // IExperimentMonitor --------------------------------------------------------
@@ -83,9 +84,8 @@ public class ExperimentMonitor implements IExperimentMonitor,
     if ( !connectionManager.initialise( epID, amqpChannel ) )
       throw new Exception( "Could not open entry point interface!" );
     
-    // Add client listeners
-    connectionManager.addConnectionListener( this );
-    connectionManager.addConnectionListener( lifecycleManager );
+    // Link connection manager to lifecycle manager
+    connectionManager.setListener( lifecycleManager );
     
     // Initialise lifecycle manager
     lifecycleManager.initialise( amqpChannel, epID, this );
@@ -98,6 +98,14 @@ public class ExperimentMonitor implements IExperimentMonitor,
   {    
     return getSimpleClientSet( connectionManager.getConnectedClients() );
   }
+  
+  @Override
+  public void addLifecyleListener( IEMLifecycleListener listener )
+  { lifecycleListeners.add(listener); }
+  
+  @Override
+  public void removeLifecycleListener( IEMLifecycleListener listener )
+  { lifecycleListeners.remove(listener); }
   
   @Override
   public void startLifecycle() throws Exception
@@ -122,26 +130,37 @@ public class ExperimentMonitor implements IExperimentMonitor,
     if ( amqpChannel != null ) amqpChannel.close();
   }
   
+  // IEMLifecycleListener ------------------------------------------------------
   @Override
-  public void setListener( IExperimentMonitorListener listener )
-  { if ( listener != null ) emClientListener = listener; }
-  
-  // EMConnectionManagerListener -----------------------------------------------
-  @Override
-  public void onClientRegistered( EMClientEx client )
+  public void onClientConnected( EMClient client )
   {
-    if ( emClientListener != null )
-      emClientListener.onClientRegistered( (EMClient) client );
+    Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
+    while ( listIt.hasNext() )
+      listIt.next().onClientConnected( client );
   }
   
-  // EMLifecycleManagerListener ------------------------------------------------
   @Override
-  public void onFoundClientWithMetricGenerators( UUID clientID )
+  public void onClientDisconnected( EMClient client )
   {
-    EMClient client = connectionManager.getClient( clientID );
-    
-    if ( client != null && emClientListener != null )
-      emClientListener.onClientHasMetricGenerators( client );
+    Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
+    while ( listIt.hasNext() )
+      listIt.next().onClientDisconnected( client );
+  }
+  
+  @Override
+  public void onFoundClientWithMetricGenerators( EMClient client )
+  {
+    Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
+    while ( listIt.hasNext() )
+      listIt.next().onFoundClientWithMetricGenerators( client );
+  }
+  
+  @Override
+  public void onDiscoveryPhaseCompleted()
+  {
+    Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
+    while ( listIt.hasNext() )
+      listIt.next().onDiscoveryPhaseCompleted();
   }
   
   // Private methods -----------------------------------------------------------
