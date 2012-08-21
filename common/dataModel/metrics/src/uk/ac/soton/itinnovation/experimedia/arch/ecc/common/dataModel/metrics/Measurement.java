@@ -61,9 +61,12 @@ public class Measurement implements Serializable
         if (m == null)
             return;
         
-        this.uuid = UUID.fromString(m.getUUID().toString());
-        this.measurementSetUUID = UUID.fromString(m.getMeasurementSetUUID().toString());
-        this.timeStamp = new Date(m.getTimeStamp().getTime());
+        if (m.getUUID() != null)
+            this.uuid = UUID.fromString(m.getUUID().toString());
+        if (m.getMeasurementSetUUID() != null)
+            this.measurementSetUUID = UUID.fromString(m.getMeasurementSetUUID().toString());
+        if (m.getTimeStamp() != null)
+            this.timeStamp = new Date(m.getTimeStamp().getTime());
         this.value = m.getValue();
     }
     

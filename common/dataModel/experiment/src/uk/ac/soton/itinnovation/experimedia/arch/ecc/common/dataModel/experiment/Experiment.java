@@ -72,18 +72,24 @@ public class Experiment implements Serializable
         if (ex == null)
             return;
         
-        this.uuid = UUID.fromString(ex.getUUID().toString());
+        if (ex.getUUID() != null)
+            this.uuid = UUID.fromString(ex.getUUID().toString());
         this.experimentID = ex.getExperimentID();
         this.name = ex.getName();
         this.description = ex.getDescription();
-        this.startTime = new Date(ex.getStartTime().getTime());
-        this.endTime = new Date(ex.getEndTime().getTime());
+        if (ex.getStartTime() != null)
+            this.startTime = new Date(ex.getStartTime().getTime());
+        if (ex.getEndTime() != null)
+            this.endTime = new Date(ex.getEndTime().getTime());
         
         this.metricGenerators = new HashSet<MetricGenerator>();
         if (ex.getMetricGenerators() != null)
         {
             for (MetricGenerator mg: ex.getMetricGenerators())
-                this.metricGenerators.add(new MetricGenerator(mg));
+            {
+                if (mg != null)
+                    this.metricGenerators.add(new MetricGenerator(mg));
+            }
         }
     }
     

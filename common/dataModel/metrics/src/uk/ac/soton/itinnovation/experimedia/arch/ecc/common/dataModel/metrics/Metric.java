@@ -73,7 +73,7 @@ public class Metric implements Serializable
     }
     
     /**
-     * Copy constructor; does a shallow copy of the unit.
+     * Copy constructor; OBS: does a shallow copy of the unit.
      * @param m The metric object a copy is made of.
      */
     public Metric(Metric m)
@@ -81,9 +81,12 @@ public class Metric implements Serializable
         if (m == null)
             return;
         
-        this.uuid = UUID.fromString(m.getUUID().toString());
-        this.metricType = m.getMetricType();
-        this.unit = m.getUnit();
+        if (m.getUUID() != null)
+            this.uuid = UUID.fromString(m.getUUID().toString());
+        if (m.getMetricType() != null)
+            this.metricType = m.getMetricType();
+        if (m.getUnit() != null)
+            this.unit = m.getUnit();
     }
     
     /**

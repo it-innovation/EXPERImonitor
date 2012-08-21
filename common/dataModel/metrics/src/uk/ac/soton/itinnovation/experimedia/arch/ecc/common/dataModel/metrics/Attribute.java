@@ -60,8 +60,10 @@ public class Attribute implements Serializable
         if (a == null)
             return;
         
-        this.uuid = UUID.fromString(a.getUUID().toString());
-        this.entityUUID = UUID.fromString(a.getEntityUUID().toString());
+        if (a.getUUID() != null)
+            this.uuid = UUID.fromString(a.getUUID().toString());
+        if (a.getEntityUUID() != null)
+            this.entityUUID = UUID.fromString(a.getEntityUUID().toString());
         this.name = a.getName();
         this.description = a.getDescription();
     }

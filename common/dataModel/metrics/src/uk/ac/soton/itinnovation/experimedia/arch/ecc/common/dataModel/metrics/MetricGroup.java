@@ -65,8 +65,10 @@ public class MetricGroup implements Serializable
         if (mg == null)
             return;
         
-        this.uuid = UUID.fromString(mg.getUUID().toString());
-        this.metricGeneratorUUID = UUID.fromString(mg.getMetricGeneratorUUID().toString());
+        if (mg.getUUID() != null)
+            this.uuid = UUID.fromString(mg.getUUID().toString());
+        if (mg.getMetricGeneratorUUID() != null)
+            this.metricGeneratorUUID = UUID.fromString(mg.getMetricGeneratorUUID().toString());
         this.name = mg.getName();
         this.description = mg.getDescription();
         
@@ -74,7 +76,10 @@ public class MetricGroup implements Serializable
         if (mg.getMeasurementSets() != null)
         {
             for (MeasurementSet ms : mg.getMeasurementSets())
-                this.measurementSets.add(new MeasurementSet(ms));
+            {
+                if (ms != null)
+                    this.measurementSets.add(new MeasurementSet(ms));
+            }
         }
     }
     

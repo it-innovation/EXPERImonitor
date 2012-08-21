@@ -70,7 +70,9 @@ public class MetricGenerator implements Serializable
         if (mg == null)
             return;
         
-        this.uuid = UUID.fromString(mg.getUUID().toString());
+        if (mg.getUUID() != null)
+            this.uuid = UUID.fromString(mg.getUUID().toString());
+        
         this.name = mg.getName();
         this.description = mg.getDescription();
         
@@ -78,14 +80,20 @@ public class MetricGenerator implements Serializable
         if (mg.getMetricGroups() != null)
         {
             for (MetricGroup mgroup : mg.getMetricGroups())
-                this.metricGroups.add(new MetricGroup(mgroup));
+            {
+                if (mgroup != null)
+                    this.metricGroups.add(new MetricGroup(mgroup));
+            }
         }
         
         this.entities = new HashSet<UUID>();
         if (mg.getEntities() != null)
         {
             for (UUID e : mg.getEntities())
-                this.entities.add(UUID.fromString(e.toString()));
+            {
+                if (e != null)
+                    this.entities.add(UUID.fromString(e.toString()));
+            }
         }
     }
     

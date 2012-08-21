@@ -37,8 +37,9 @@ import java.util.UUID;
 public class Report
 {
     private UUID uuid;
-    private UUID measurementSetUUID;
-    private Date timeStamp;
+    private MeasurementSet measurementSet;
+    private Date fromDate;
+    private Date toDate;
     private int numberOfMeasurements;
     
     /**
@@ -50,7 +51,7 @@ public class Report
     }
     
     /**
-     * Copy constructor for the Report class.
+     * Copy constructor for the Report class, which takes a deep copy of any objects.
      * @param report The report object a copy is made of.
      */
     public Report(Report report)
@@ -58,34 +59,43 @@ public class Report
         if (report == null)
             return;
         
-        this.uuid = report.getUUID();
-        this.measurementSetUUID = report.getMeasurementSetUUID();
+        if (report.getUUID() != null)
+            this.uuid = UUID.fromString(report.getUUID().toString());
+        if (report.getMeasurementSet() != null)
+            this.measurementSet = new MeasurementSet(report.getMeasurementSet());
+        if (report.getFromDate() != null)
+            this.fromDate = new Date(report.getFromDate().getTime());
+        if (report.getToDate() != null)
+            this.toDate = new Date(report.getToDate().getTime());
         this.numberOfMeasurements = report.getNumberOfMeasurements();
     }
     
     /**
      * Constructor to set the "administrative" attributes of the class.
      * @param uuid The UUID of the Report, to uniquely identify it.
-     * @param measurementSetUUID The UUID of the measurement set that this is a report for.
-     * @param timeStamp The time stamp of the report.
+     * @param measurementSet The measurement set that this is a report for.
+     * @param fromDate The time stamp for the start of the report period.
+     * @param toDate The time stamp for the end of the report period.
      */
-    public Report(UUID uuid, UUID measurementSetUUID, Date timeStamp)
+    public Report(UUID uuid, MeasurementSet measurementSet, Date fromDate, Date toDate)
     {
         this.uuid = uuid;
-        this.measurementSetUUID = measurementSetUUID;
-        this.timeStamp = timeStamp;
+        this.measurementSet = measurementSet;
+        this.fromDate = fromDate;
+        this.toDate = toDate;
     }
     
     /**
      * Constructor to set all the attributes of the class.
      * @param uuid The UUID of the Report, to uniquely identify it.
-     * @param measurementSetUUID The UUID of the measurement set that this is a report for.
-     * @param timeStamp The time stamp of the report.
-     * @param numMeasurements The number of measurements in the measurement set this is a report for.
+     * @param measurementSet The measurement set that this is a report for.
+     * @param fromDate The time stamp for the start of the report period.
+     * @param toDate The time stamp for the end of the report period.
+     * @param numMeasurements The number of measurements in the reporting period.
      */
-    public Report(UUID uuid, UUID measurementSetUUID, Date timeStamp, int numMeasurements)
+    public Report(UUID uuid, MeasurementSet measurementSet, Date fromDate, Date toDate, int numMeasurements)
     {
-        this(uuid, measurementSetUUID, timeStamp);
+        this(uuid, measurementSet, fromDate, toDate);
         this.numberOfMeasurements = numMeasurements;
     }
     
@@ -106,35 +116,51 @@ public class Report
     }
 
     /**
-     * @return the measurementSetUUID
+     * @return the measurementSet
      */
-    public UUID getMeasurementSetUUID()
+    public MeasurementSet getMeasurementSet()
     {
-        return measurementSetUUID;
+        return measurementSet;
     }
 
     /**
-     * @param measurementSetUUID the measurementSetUUID to set
+     * @param measurementSet the measurementSet to set
      */
-    public void setMeasurementSetUUID(UUID measurementSetUUID)
+    public void setMeasurementSet(MeasurementSet measurementSet)
     {
-        this.measurementSetUUID = measurementSetUUID;
-    }
-    
-    /**
-     * @return the timeStamp
-     */
-    public Date getTimeStamp()
-    {
-        return timeStamp;
+        this.measurementSet = measurementSet;
     }
 
     /**
-     * @param timeStamp the timeStamp to set
+     * @return the fromDate
      */
-    public void setTimeStamp(Date timeStamp)
+    public Date getFromDate()
     {
-        this.timeStamp = timeStamp;
+        return fromDate;
+    }
+
+    /**
+     * @param fromDate the fromDate to set
+     */
+    public void setFromDate(Date fromDate)
+    {
+        this.fromDate = fromDate;
+    }
+
+    /**
+     * @return the toDate
+     */
+    public Date getToDate()
+    {
+        return toDate;
+    }
+
+    /**
+     * @param toDate the toDate to set
+     */
+    public void setToDate(Date toDate)
+    {
+        this.toDate = toDate;
     }
     
     /**

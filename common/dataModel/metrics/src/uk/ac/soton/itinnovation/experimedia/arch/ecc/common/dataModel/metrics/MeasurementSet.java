@@ -61,16 +61,23 @@ public class MeasurementSet implements Serializable
         if (ms == null)
             return;
         
-        this.uuid = UUID.fromString(ms.getUUID().toString());
-        this.attributeUUID = UUID.fromString(ms.getAttributeUUID().toString());
-        this.metricGroupUUID = UUID.fromString(ms.getMetricGroupUUID().toString());
-        this.metric = new Metric(ms.getMetric());
+        if (ms.getUUID() != null)
+            this.uuid = UUID.fromString(ms.getUUID().toString());
+        if (ms.getAttributeUUID() != null)
+            this.attributeUUID = UUID.fromString(ms.getAttributeUUID().toString());
+        if (ms.getMetricGroupUUID() != null)
+            this.metricGroupUUID = UUID.fromString(ms.getMetricGroupUUID().toString());
+        if (ms.getMetric() != null)
+            this.metric = new Metric(ms.getMetric());
         
         this.measurements = new HashSet<Measurement>();
         if (ms.getMeasurements() != null)
         {
             for (Measurement m : ms.getMeasurements())
-                this.measurements.add(new Measurement(m));
+            {
+                if (m != null)
+                    this.measurements.add(new Measurement(m));
+            }
         }
     }
     

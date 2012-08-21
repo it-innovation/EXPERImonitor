@@ -49,7 +49,7 @@ import java.util.UUID;
 public class Entity implements Serializable
 {
     private UUID uuid; // used to uniquely identify an entity in our framework
-    //private String entityID; // may need this, to capture resource IDs in BonFIRE; http://doc.bonfire-project.eu/R3/api/notifications.html
+    //private String entityID; // may need this, e.g., to capture resource IDs in BonFIRE; http://doc.bonfire-project.eu/R3/api/notifications.html
     private String name;
     private String description;
     private Set<Attribute> attributes;
@@ -81,7 +81,8 @@ public class Entity implements Serializable
         if (e == null)
             return;
         
-        this.uuid = UUID.fromString(e.getUUID().toString());
+        if (e.getUUID() != null)
+            this.uuid = UUID.fromString(e.getUUID().toString());
         this.name = e.getName();
         this.description = e.getDescription();
         
@@ -89,7 +90,10 @@ public class Entity implements Serializable
         if (e.getAttributes() != null)
         {
             for (Attribute a : e.getAttributes())
-                this.attributes.add(new Attribute(a));
+            {
+                if (a != null)
+                    this.attributes.add(new Attribute(a));
+            }
         }
         
         /*this.experimentUUIDs = new HashSet<UUID>();
