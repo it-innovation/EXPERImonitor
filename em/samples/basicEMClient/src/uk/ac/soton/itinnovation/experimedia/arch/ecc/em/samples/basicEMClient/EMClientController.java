@@ -91,7 +91,7 @@ public class EMClientController implements EMIAdapterListener
   }
   
   @Override
-  public void updateMetricGenerators( Set<MetricGenerator> genSetOUT )
+  public void populateMetricGeneratorInfo( Set<MetricGenerator> genSetOUT )
   {
     clientView.setStatus( "Sending metric meta-data to EM" );
     
@@ -104,5 +104,12 @@ public class EMClientController implements EMIAdapterListener
     //TODO: Entities & Attributes
     
     //TODO: Metric sets, metric types & units 
+  }
+  
+  @Override
+  public void setupMetricGenerator( MetricGenerator genOut, Boolean[] resultOUT )
+  {
+    // Just signal that the metric generator is ready
+    resultOUT[0] = true;
   }
 }

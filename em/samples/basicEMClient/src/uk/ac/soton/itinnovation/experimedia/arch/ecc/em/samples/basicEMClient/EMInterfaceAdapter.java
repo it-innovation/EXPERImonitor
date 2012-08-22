@@ -40,7 +40,10 @@ import java.util.*;
 
 
 public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
-                                           IEMSetup_UserListener
+                                           IEMSetup_UserListener,
+                                           IEMLiveMonitor_UserListener,
+                                           IEMPostReport_UserListener,
+                                           IEMTearDown_UserListener
 {
   private EMIAdapterListener emiListener;
   private String             clientName;
@@ -54,15 +57,20 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
   // EM Interfaces
   private IEMMonitorEntryPoint entryPointFace;
   private IEMDiscovery         discoveryFace;
-  private IEMMonitorSetup      setupFace;
+  private IEMMetricGenSetup    setupFace;
   private IEMLiveMonitor       liveMonitorFace;
   private IEMPostReport        postReportFace;
   private IEMTearDown          tearDownFace;
+  
+  // Metric Generators
+  private HashMap<UUID, MetricGenerator> metricGenerators;
   
 
   public EMInterfaceAdapter( EMIAdapterListener listener )
   {
     emiListener = listener;
+    
+    metricGenerators = new HashMap<UUID, MetricGenerator>();
   }
   
   public void registerWithEM( String name,
@@ -96,12 +104,12 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
     // Crate our entry point interface
     entryPointFace = interfaceFactory.createEntryPoint( expMonitorID, epDispatch );
     
-    // Create the principal interface (IEMMonitor ahead of time)
+    // Create the principal interface (IEMDiscovery ahead of time)
     IAMQPMessageDispatch monDispatch = interfaceFactory.createDispatch();
     dispatchPump.addDispatch( monDispatch );
-    discoveryFace = interfaceFactory.createMonitor( expMonitorID, 
-                                                  clientID, 
-                                                  monDispatch );
+    discoveryFace = interfaceFactory.createDiscovery( expMonitorID, 
+                                                      clientID, 
+                                                      monDispatch );
     
     discoveryFace.setUserListener( this );
       
@@ -129,22 +137,60 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
                                                       monDispatch );
             
             setupFace.setUserListener( this );
+            setupFace.notifyReadyToSetup();
           }
+          
         } break;
           
         case eEMLiveMonitor :
         {
-          //TODO
+          if ( setupFace == null )
+          {
+            IAMQPMessageDispatch monDispatch = interfaceFactory.createDispatch();
+            dispatchPump.addDispatch( monDispatch );
+            
+            liveMonitorFace = interfaceFactory.createLiveMonitor( expMonitorID, 
+                                                                  clientID, 
+                                                                  monDispatch );
+            
+            liveMonitorFace.setUserListener( this );
+            //TODO: Decide on push/pull
+          }
+          
         } break;
           
         case eEMPostReport :
         {
-          //TODO
+          if ( setupFace == null )
+          {
+            IAMQPMessageDispatch monDispatch = interfaceFactory.createDispatch();
+            dispatchPump.addDispatch( monDispatch );
+            
+            postReportFace = interfaceFactory.createPostReport( expMonitorID, 
+                                                                clientID, 
+                                                                monDispatch );
+            
+            postReportFace.setUserListener( this );
+            postReportFace.notifyReadyToReport();
+          }
+          
         } break;
           
         case eEMTearDown :
         {
-          //TODO
+          if ( setupFace == null )
+          {
+            IAMQPMessageDispatch monDispatch = interfaceFactory.createDispatch();
+            dispatchPump.addDispatch( monDispatch );
+            
+            tearDownFace = interfaceFactory.createTearDown( expMonitorID, 
+                                                            clientID, 
+                                                            monDispatch );
+            
+            tearDownFace.setUserListener( this );
+            tearDownFace.notifyReadyToTearDown();
+          }
+          
         } break;
       }
     }
@@ -191,8 +237,9 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
     if ( senderID.equals(expMonitorID) && emiListener != null )
     {
       HashSet<MetricGenerator> genSet = new HashSet<MetricGenerator>();
-      emiListener.updateMetricGenerators( genSet );
+      genSet.addAll( metricGenerators.values() );
       
+      emiListener.populateMetricGeneratorInfo( genSet );
       discoveryFace.sendMetricGeneratorInfo( genSet );
     }
   }
@@ -210,12 +257,90 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
   @Override
   public void onSetupMetricGenerator( UUID senderID, UUID genID )
   {
-    // Just assume metrics are ready to go for this demo
     if ( senderID.equals(expMonitorID) && setupFace != null )
-      setupFace.notifyMetricGeneratorSetupResult(genID, true );
+    {
+      MetricGenerator mg = metricGenerators.get( genID );
+      if ( mg != null )
+      {
+        Boolean[] result = new Boolean[1];
+        result[0] = false;
+        emiListener.setupMetricGenerator( mg, result );
+        
+        setupFace.notifyMetricGeneratorSetupResult( genID, result[0] );
+      }
+    }
   }
   
   @Override
   public void onSetupTimeOut( UUID senderID, UUID genID )
   { /* Not imeplemented in this demo */ }
+  
+  // IEMLiveMonitor_UserListener -----------------------------------------------
+  @Override
+  public void onStartPushing( UUID senderID )
+  {
+    
+  }
+  
+  @Override
+  public void onReceivedPush( UUID senderID, UUID lastReportID )
+  {
+    
+  }
+  
+  @Override
+  public void onStopPushing( UUID senderID )
+  {
+    
+  }
+  
+  @Override
+  public void onPullMetric( UUID senderID, UUID measurementSetID )
+  {
+    
+  }
+  
+  @Override
+  public void onPullMetricTimeOut( UUID senderID, UUID measurementSetID )
+  {
+    
+  }
+  
+  @Override
+  public void onPullingStopped( UUID senderID )
+  {
+    
+  }
+  
+  // IEMPostReport_UserListener ------------------------------------------------
+  @Override
+  public void onRequestPostReportSummary( UUID senderID )
+  {
+    
+  }
+  
+  @Override
+  public void onRequestDataBatch( UUID senderID, EMDataBatch reqBatch )
+  {
+    
+  }
+  
+  @Override
+  public void notifyReportBatchTimeOut( UUID senderID, UUID batchID )
+  {
+    
+  }
+  
+  // IEMTearDown_UserListener --------------------------------------------------
+  @Override
+  public void onTearDownMetricGenerators( UUID senderID )       
+  {
+    
+  }
+  
+  @Override
+  public void onTearDownTimeOut( UUID senderID )
+  {
+    
+  }
 }

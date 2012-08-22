@@ -33,28 +33,27 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasic
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPMessageDispatch;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.faces.AMQPFullInterfaceBase;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMMethodPayload;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
 
 import java.util.*;
 
 
 
 
-
 public class EMPostReport extends EMBaseInterface
-                      implements IEMPostReport
+                          implements IEMPostReport
 {
   private IEMPostReport_ProviderListener providerListener;
   private IEMPostReport_UserListener     userListener;
   
   public EMPostReport( AMQPBasicChannel channel,
-                   AMQPMessageDispatch dispatch,
-                   UUID providerID,
-                   UUID userID,
-                   boolean isProvider )
+                       AMQPMessageDispatch dispatch,
+                       UUID providerID,
+                       UUID userID,
+                       boolean isProvider )
   {
     super( channel, isProvider );
-    interfaceName = "IECCReport";
+    interfaceName = "IEMPostReport";
     interfaceVersion = "0.1";
             
     interfaceProviderID = providerID;
@@ -76,64 +75,48 @@ public class EMPostReport extends EMBaseInterface
   // Provider methods ----------------------------------------------------------
   // Method ID = 1
   @Override
-  public void requestReportSummary()
+  public void requestPostReportSummary()
   {
     executeMethod( 1, null );
   }
   
   // Method ID = 2
   @Override
-  public void requestNextReportMetadata()
+  public void requestDataBatch( EMDataBatch reqBatch )
   {
     executeMethod( 2, null );
   }
   
   // Method ID = 3
   @Override
-  public void requestDataPart( /* data model */ )
+  public void notifyReportBatchTimeOut( UUID batchID )
   {
     //TODO: Data model
     executeMethod( 3, null );
   }
   
-  // Method ID = 4
-  @Override
-  public void notifyReportTimeOut( /* data model */ ) 
-  {
-    //TODO: Data model
-    executeMethod( 4, null );
-  }
-  
   // User methods --------------------------------------------------------------
-  // Method ID = 5
+  // Method ID = 4
   @Override
   public void notifyReadyToReport()
   {
+    executeMethod( 4, null );
+  }
+  
+  // Method ID = 5
+  @Override
+  public void sendReportSummary( EMPostReportSummary summary )
+  {
+    //TODO: Data model
     executeMethod( 5, null );
   }
   
   // Method ID = 6
   @Override
-  public void sendReportSummary( /* data model here */ )
+  public void sendDataBatch( EMDataBatch populatedBatch )
   {
     //TODO: Data model
     executeMethod( 6, null );
-  }
-  
-  // Method ID = 7
-  @Override
-  public void sendReportMetaData( /* data model here */ )
-  {
-    //TODO: Data model
-    executeMethod( 7, null );
-  }
-  
-  // Method ID = 8
-  @Override
-  public void sendDataPart( /* data model here */ )
-  {
-    //TODO: Data model
-    executeMethod( 8, null );
   }
   
   // Protected methods ---------------------------------------------------------
@@ -147,64 +130,61 @@ public class EMPostReport extends EMBaseInterface
       case ( 1 ) :
       {
         if ( userListener != null )
-          userListener.onRequestReportSummary( interfaceProviderID );
+          userListener.onRequestPostReportSummary( interfaceProviderID );
         
       } break;
         
       case ( 2 ) :
       {
         if ( userListener != null )
-          userListener.onRequestNextReportMetadata( interfaceProviderID );
+        {
+          EMDataBatch batch = (EMDataBatch) payload.getParameters().get(0);
+          
+          userListener.onRequestDataBatch( interfaceProviderID, batch );
+        }
         
       } break;
         
       case ( 3 ) :
       {
-        //TODO: Data model
         if ( userListener != null )
-          userListener.onRequestDataPart( interfaceProviderID );
+        {
+          UUID id = UUID.fromString( (String) payload.getParameters().get(0) );
+          
+          userListener.notifyReportBatchTimeOut( interfaceProviderID, id );
+        }
         
       } break;
         
       case ( 4 ) :
-      {
-        //TODO: Data model
-        if ( userListener != null )
-          userListener.onNotifyReportTimeOut( interfaceProviderID );
-        
-      } break;
-        
-      case ( 5 ) :
       {
         if ( providerListener != null )
           providerListener.onNotifyReadyToReport( interfaceUserID );
         
       } break;
         
+      case ( 5 ) :
+      {
+        if ( providerListener != null )
+        {
+          EMPostReportSummary summary = 
+              (EMPostReportSummary) payload.getParameters().get(0);
+          
+          providerListener.onSendReportSummary( interfaceUserID, summary );
+        }
+        
+      } break;
+        
       case ( 6 ) :
       {
-        //TODO: Data model
         if ( providerListener != null )
-          providerListener.onSendReportSummary( interfaceUserID );
+        {
+          EMDataBatch batch = (EMDataBatch) payload.getParameters().get(0);
+          
+          providerListener.onSendDataBatch( interfaceUserID, batch );
+        }
         
-      } break;
-        
-      case ( 7 ) :
-      {
-        //TODO: Data model
-        if ( providerListener != null )
-          providerListener.onSendReportMetaData( interfaceUserID );
-        
-      } break;
-        
-      case ( 8 ) :
-      {
-        //TODO: Data model
-        if ( providerListener != null )
-          providerListener.onSendDataPart( interfaceUserID );
-        
-      } break;
-        
+      } break;   
     }
   }
 }

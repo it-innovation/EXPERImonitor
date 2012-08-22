@@ -289,13 +289,13 @@ public class ECCMonitorTestExecutor implements Runnable,
     dispatchPump.addDispatch( userDispatch );
     dispatchPump.startPump();
     
-    providerDiscovery = providerFactory.createMonitor( ECCMonitorEntryPointTest.EMProviderUUID,
-                                                     ECCMonitorEntryPointTest.EMUserUUID,
-                                                     providerDispatch );
+    providerDiscovery = providerFactory.createDiscovery( ECCMonitorEntryPointTest.EMProviderUUID,
+                                                         ECCMonitorEntryPointTest.EMUserUUID,
+                                                         providerDispatch );
     
-    userDiscovery = userFactory.createMonitor( ECCMonitorEntryPointTest.EMProviderUUID,
-                                             ECCMonitorEntryPointTest.EMUserUUID,
-                                             userDispatch );
+    userDiscovery = userFactory.createDiscovery( ECCMonitorEntryPointTest.EMProviderUUID,
+                                                 ECCMonitorEntryPointTest.EMUserUUID,
+                                                 userDispatch );
     
     // This class acts as BOTH provider and user
     providerDiscovery.setProviderListener( this );

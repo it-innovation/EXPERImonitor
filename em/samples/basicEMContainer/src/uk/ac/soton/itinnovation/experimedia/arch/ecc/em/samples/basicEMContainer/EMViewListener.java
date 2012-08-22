@@ -31,4 +31,6 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.samples.basicEMContaine
 public interface EMViewListener
 {
   void onStartPhasesButtonClicked();
+  
+  void onNextPhaseButtonClicked();
 }

@@ -71,26 +71,59 @@ public class EMInterfaceFactory
                                     generateProviders );
   }
   
-  public IEMDiscovery createMonitor( UUID providerID,
-                                   UUID userID,
-                                   IAMQPMessageDispatch dispatch )
+  public IEMDiscovery createDiscovery( UUID providerID,
+                                       UUID userID,
+                                       IAMQPMessageDispatch dispatch )
   {
     return new EMDiscovery( amqpChannel,
-                          (AMQPMessageDispatch) dispatch,
-                          providerID,
-                          userID,
-                          generateProviders );
+                            (AMQPMessageDispatch) dispatch,
+                            providerID,
+                            userID,
+                            generateProviders );
   }
   
-  public IEMMonitorSetup createSetup( UUID providerID,
-                                      UUID userID,
-                                      IAMQPMessageDispatch dispatch )
+  public IEMMetricGenSetup createSetup( UUID providerID,
+                                        UUID userID,
+                                        IAMQPMessageDispatch dispatch )
   {
-    return new EMSetup( amqpChannel,
+    return new EMMetricGenSetup( amqpChannel,
+                                 (AMQPMessageDispatch) dispatch,
+                                 providerID,
+                                 userID,
+                                 generateProviders );
+  }
+  
+  public IEMLiveMonitor createLiveMonitor( UUID providerID,
+                                           UUID userID,
+                                           IAMQPMessageDispatch dispatch )
+  {
+    return new EMLiveMonitor( amqpChannel,
                               (AMQPMessageDispatch) dispatch,
                               providerID,
                               userID,
                               generateProviders );
+  }
+  
+  public IEMPostReport createPostReport( UUID providerID,
+                                         UUID userID,
+                                         IAMQPMessageDispatch dispatch )
+  {
+    return new EMPostReport( amqpChannel,
+                             (AMQPMessageDispatch) dispatch,
+                             providerID,
+                             userID,
+                             generateProviders );
+  }
+  
+  public IEMTearDown createTearDown( UUID providerID,
+                                     UUID userID,
+                                     IAMQPMessageDispatch dispatch )
+  {
+    return new EMTearDown( amqpChannel,
+                           (AMQPMessageDispatch) dispatch,
+                           providerID,
+                           userID,
+                           generateProviders );
   }
   
   public IEMTest createTest( UUID providerID,

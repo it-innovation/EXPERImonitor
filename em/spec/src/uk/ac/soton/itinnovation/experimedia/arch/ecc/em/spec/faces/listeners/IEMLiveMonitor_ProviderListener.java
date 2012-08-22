@@ -25,6 +25,8 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
+
 import java.util.UUID;
 
 
@@ -34,11 +36,11 @@ public interface IEMLiveMonitor_ProviderListener
 {
   void onNotifyReadyToPush( UUID senderID );
   
-  void onPushMetric( UUID senderID /*data model here*/ );
+  void onPushMetric( UUID senderID, Report report );
   
-  void onNotifyPushingComplete( UUID senderID );
+  void onNotifyPushingCompleted( UUID senderID );
   
   void onNotifyReadyForPull( UUID senderID );
   
-  void onSendPulledMetric( UUID senderID /*data model here*/ );
+  void onSendPulledMetric( UUID senderID, Report report );
 }

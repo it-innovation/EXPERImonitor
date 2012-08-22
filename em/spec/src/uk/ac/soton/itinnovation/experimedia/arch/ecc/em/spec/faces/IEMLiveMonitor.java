@@ -25,33 +25,44 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.*;
+
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
+
+import java.util.UUID;
+
+
 
 
 
 public interface IEMLiveMonitor
 {
   // Listeners -----------------------------------------------------------------
+  void setProviderListener( IEMLiveMonitor_ProviderListener listener );
   
+  void setUserListener( IEMLiveMonitor_UserListener listener );
   
   // Provider methods ----------------------------------------------------------
   void startPushing();
   
+  void receivedPush( UUID lastReportID );
+  
   void stopPushing();
   
-  void pullMetric( /* data model here */ );
+  void pullMetric( UUID measurementSetID );
   
-  void pullMetricTimeOut( /* data model here */ );
+  void pullMetricTimeOut( UUID measurementSetID );
   
   void pullingStopped();
   
   // User methods --------------------------------------------------------------
   void notifyReadyToPush();
   
-  void pushMetric( /* data model here */ );
+  void pushMetric( Report report );
   
   void notifyPushingCompleted();
   
   void notifyReadyForPull();
   
-  void sendPulledMetric( /* data model here */ );
+  void sendPulledMetric( Report report );
 }

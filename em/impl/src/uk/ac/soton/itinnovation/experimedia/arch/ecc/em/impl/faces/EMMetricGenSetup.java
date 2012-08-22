@@ -25,7 +25,7 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.IEMMonitorSetup;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.IEMMetricGenSetup;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
@@ -39,21 +39,21 @@ import java.util.*;
 
 
 
-public class EMSetup extends EMBaseInterface
-                            implements IEMMonitorSetup
+public class EMMetricGenSetup extends EMBaseInterface
+                              implements IEMMetricGenSetup
 {
   private IEMSetup_ProviderListener providerListener;
   private IEMSetup_UserListener     userListener;
   
-  public EMSetup( AMQPBasicChannel channel,
-                         AMQPMessageDispatch dispatch,
-                         UUID providerID,
-                         UUID userID,
-                         boolean isProvider )
+  public EMMetricGenSetup( AMQPBasicChannel channel,
+                           AMQPMessageDispatch dispatch,
+                           UUID providerID,
+                           UUID userID,
+                           boolean isProvider )
   {
     super( channel, isProvider );
     
-    interfaceName = "IECCSetup";
+    interfaceName = "IEMMetricGenSetup";
     interfaceVersion = "0.1";
             
     interfaceProviderID = providerID;

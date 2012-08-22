@@ -40,7 +40,7 @@ import java.util.*;
 
 
 public class EMTearDown extends EMBaseInterface
-                         implements IEMTearDown
+                        implements IEMTearDown
 {
   private IEMTearDown_ProviderListener providerListener;
   private IEMTearDown_UserListener     userListener;
@@ -53,7 +53,7 @@ public class EMTearDown extends EMBaseInterface
                      boolean isProvider )
   {
     super( channel, isProvider );
-    interfaceName = "IECCTearDown";
+    interfaceName = "IEMTearDown";
     interfaceVersion = "0.1";
             
     interfaceProviderID = providerID;

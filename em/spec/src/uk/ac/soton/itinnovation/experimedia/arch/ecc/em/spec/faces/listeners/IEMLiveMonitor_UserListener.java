@@ -34,9 +34,13 @@ public interface IEMLiveMonitor_UserListener
 {
   void onStartPushing( UUID senderID );
   
-  void onPullMetric( UUID senderID /*data model here*/ );
+  void onReceivedPush( UUID senderID, UUID lastReportID );
   
-  void onPullMetricTimeOut( UUID senderID /*data model here */ );
+  void onStopPushing( UUID senderID );
+  
+  void onPullMetric( UUID senderID, UUID measurementSetID );
+  
+  void onPullMetricTimeOut( UUID senderID, UUID measurementSetID );
   
   void onPullingStopped( UUID senderID );
 }

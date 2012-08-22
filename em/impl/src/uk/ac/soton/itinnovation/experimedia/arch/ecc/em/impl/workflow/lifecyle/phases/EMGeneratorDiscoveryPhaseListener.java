@@ -17,26 +17,28 @@
 // PURPOSE, except where stated in the Licence Agreement supplied with
 // the software.
 //
-//      Created By :            sgc
-//      Created Date :          09-Aug-2012
+//      Created By :            Simon Crowle
+//      Created Date :          14-Aug-2012
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecyle.phases;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMDataBatch;
-
-import java.util.UUID;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
 
 
 
 
-public interface IEMPostReport_UserListener
+public interface EMGeneratorDiscoveryPhaseListener
 {
-  void onRequestPostReportSummary( UUID senderID );
+  void onClientPhaseSupportReceived( EMClientEx client );
   
-  void onRequestDataBatch( UUID senderID, EMDataBatch reqBatch );
+  void onClientDiscoveryResult( EMClientEx client );
   
-  void notifyReportBatchTimeOut( UUID senderID, UUID batchID );
+  void onClientMetricGeneratorsFound( EMClientEx client );
+  
+  void onClientIsDisconnected( EMClientEx client );
+  
+  void onDiscoveryPhaseCompleted();
 }

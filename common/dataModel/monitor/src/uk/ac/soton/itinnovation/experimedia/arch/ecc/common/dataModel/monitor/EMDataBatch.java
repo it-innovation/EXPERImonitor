@@ -17,26 +17,57 @@
 // PURPOSE, except where stated in the Licence Agreement supplied with
 // the software.
 //
-//      Created By :            sgc
-//      Created Date :          09-Aug-2012
+//      Created By :            Simon Crowle
+//      Created Date :          22-Aug-2012
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMDataBatch;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
 
-import java.util.UUID;
-
-
+import java.util.*;
 
 
-public interface IEMPostReport_UserListener
+
+
+
+public class EMDataBatch
 {
-  void onRequestPostReportSummary( UUID senderID );
+  private UUID batchID;
+  private Date dataStart;
+  private Date dateEnd;
   
-  void onRequestDataBatch( UUID senderID, EMDataBatch reqBatch );
+  private MeasurementSet measurementSet;
   
-  void notifyReportBatchTimeOut( UUID senderID, UUID batchID );
+  
+  public EMDataBatch()
+  {
+    batchID = UUID.randomUUID();
+  }
+  
+  public UUID getID()
+  { return batchID; }
+  
+  public void setDataRange( Date start, Date end )
+  {
+    if ( start != null && end != null )
+    {
+      dataStart = start;
+      dateEnd   = end;
+    }
+  }
+  
+  public Date getDataStart()
+  { return dataStart; }
+  
+  public Date getDataEnd()
+  { return dateEnd; }
+  
+  public MeasurementSet getMeasurementSet()
+  { return measurementSet; }
+  
+  public void setMeasurementSet( MeasurementSet set )
+  { if ( set != null ) measurementSet = set; }
 }

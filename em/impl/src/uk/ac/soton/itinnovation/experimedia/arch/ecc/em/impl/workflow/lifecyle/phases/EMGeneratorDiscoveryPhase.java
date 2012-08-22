@@ -46,14 +46,14 @@ import java.util.*;
 public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
                                        implements IEMDiscovery_ProviderListener
 {
-  private GeneratorDiscoveryPhaseListener phaseListener;
+  private EMGeneratorDiscoveryPhaseListener phaseListener;
   
   private HashSet<UUID> clientsExpectingGeneratorInfo;
   
   
   public EMGeneratorDiscoveryPhase( AMQPBasicChannel channel,
                                     UUID providerID,
-                                    GeneratorDiscoveryPhaseListener listener )
+                                    EMGeneratorDiscoveryPhaseListener listener )
   {
     super( EMPhase.eEMDiscoverMetricGenerators, channel, providerID );
     
@@ -75,12 +75,12 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
       phaseMsgPump.addDispatch( dispatch );
       
       EMDiscovery monitorFace = new EMDiscovery( emChannel,
-                                             dispatch,
-                                             emProviderID,
-                                             client.getID(),
-                                             true );
+                                                 dispatch,
+                                                 emProviderID,
+                                                 client.getID(),
+                                                 true );
       monitorFace.setProviderListener( this );
-      client.setEMMonitorInterface( monitorFace );
+      client.setDiscoveryInterface( monitorFace );
       
       phaseState = "Waiting to start phase";
       
@@ -101,7 +101,7 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
     // Confirm registration with clients...
     for ( EMClientEx client : phaseClients.values() )
     {
-      IEMDiscovery monFace = client.getEMMonitorInterface();
+      IEMDiscovery monFace = client.getDiscoveryInterface();
       monFace.registrationConfirmed( true );
       client.setIsConnected( true );
       
@@ -117,8 +117,6 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
   public void stop() throws Exception
   {
     phaseActive = false;
-    
-    //TODO: Tidy up clients?
   }
   
   // IEMMonitor_ProviderListener -----------------------------------------------
@@ -130,7 +128,7 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
       EMClientEx client = phaseClients.get( senderID );
       
       if ( client != null )
-        client.getEMMonitorInterface().requestActivityPhases();
+        client.getDiscoveryInterface().requestActivityPhases();
     }
   }
   
@@ -151,7 +149,7 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
         // If we have relevant phases, go get metric generator info
         if ( supportedPhases.contains( EMPhase.eEMLiveMonitoring )        ||
              supportedPhases.contains( EMPhase.eEMPostMonitoringReport) )
-          client.getEMMonitorInterface().discoverMetricGenerators();
+          client.getDiscoveryInterface().discoverMetricGenerators();
         else
           clientsExpectingGeneratorInfo.remove( senderID );
           // Otherise, don't expect generator info
@@ -174,7 +172,7 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
 
         // Find out about metric generators if some have been found
         if ( discoveredGenerators )
-          client.getEMMonitorInterface().requestMetricGeneratorInfo();
+          client.getDiscoveryInterface().requestMetricGeneratorInfo();
         else
           clientsExpectingGeneratorInfo.remove( senderID );
           // Otherwise don't expect any metric generator info

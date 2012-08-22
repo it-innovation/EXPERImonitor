@@ -18,44 +18,53 @@
 // the software.
 //
 //      Created By :            Simon Crowle
-//      Created Date :          13-Aug-2012
+//      Created Date :          22-Aug-2012
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
 
 import java.util.*;
 
 
 
 
-
-public interface IExperimentMonitor
+public class EMPostReportSummary
 {
-  enum eStatus { NOT_YET_INITIALISED,
-                 INITIALISED,
-                 ENTRY_POINT_OPEN,
-                 LIFECYCLE_STARTED,
-                 LIFECYCLE_ENDED };
+  private HashMap<UUID, Report> reportsByMeasurementSetID;
+  
+  
+  public EMPostReportSummary()
+  {
+    reportsByMeasurementSetID = new HashMap<UUID, Report>();
+  }
+  
+  public Set<UUID> getReportedMeasurementSetIDs()
+  { return reportsByMeasurementSetID.keySet(); }
+  
+  public void addReport( Report report )
+  {
+    if ( report != null )
+     reportsByMeasurementSetID.put( report.getMeasurementSet().getUUID(), 
+                                    report );
+  }
+  
+  public void removeReport( UUID measurementSetID )
+  {
+    if ( measurementSetID != null )
+      reportsByMeasurementSetID.remove( measurementSetID );
+  }
+  
+  public Report getReport( UUID measurementID )
+  {
+    Report report = null;
     
-  eStatus getStatus();
-  
-  void openEntryPoint( String rabbitServerIP, UUID entryPointID ) throws Exception;
-  
-  Set<EMClient> getConnectedClients();
-  
-  void addLifecyleListener( IEMLifecycleListener listener );
-  
-  void removeLifecycleListener( IEMLifecycleListener listener );
-  
-  EMPhase startLifecycle() throws Exception;
-  
-  EMPhase getNextPhase();
-  
-  EMPhase goToNextPhase();
-  
-  void endLifecycle() throws Exception;
+    if ( measurementID != null )
+      report = reportsByMeasurementSetID.get( measurementID );
+    
+    return report;
+  }
 }

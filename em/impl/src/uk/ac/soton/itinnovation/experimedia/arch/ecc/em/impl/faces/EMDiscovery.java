@@ -33,10 +33,10 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.faces.AMQPFullInterfaceBase;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
+
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
 
 import java.util.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
 
 
 
@@ -49,13 +49,13 @@ public class EMDiscovery extends EMBaseInterface
     
   
   public EMDiscovery( AMQPBasicChannel    channel,
-                    AMQPMessageDispatch dispatch,
-                    UUID                providerID,
-                    UUID                userID,
-                    boolean             isProvider )
+                      AMQPMessageDispatch dispatch,
+                      UUID                providerID,
+                      UUID                userID,
+                      boolean             isProvider )
   {
     super( channel, isProvider );
-    interfaceName = "IECCMonitor";
+    interfaceName = "IEMDiscovery";
     interfaceVersion = "0.1";
             
     interfaceProviderID = providerID;

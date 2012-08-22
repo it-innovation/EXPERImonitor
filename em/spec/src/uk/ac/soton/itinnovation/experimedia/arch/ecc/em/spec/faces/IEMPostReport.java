@@ -25,8 +25,11 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEMPostReport_UserListener;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEMPostReport_ProviderListener;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
+
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.*;
+
+import java.util.UUID;
 
 
 
@@ -39,20 +42,16 @@ public interface IEMPostReport
   void setUserListener( IEMPostReport_UserListener listener );
   
   // Provider methods ----------------------------------------------------------
-  void requestReportSummary();
+  void requestPostReportSummary();
   
-  void requestNextReportMetadata();
+  void requestDataBatch( EMDataBatch reqBatch );
   
-  void requestDataPart( /* data model */ );
-  
-  void notifyReportTimeOut( /* data model */ );
+  void notifyReportBatchTimeOut( UUID batchID );
   
   // User methods --------------------------------------------------------------
   void notifyReadyToReport();
   
-  void sendReportSummary( /* data model here */ );
+  void sendReportSummary( EMPostReportSummary summary );
   
-  void sendReportMetaData( /* data model here */ );
-  
-  void sendDataPart( /* data model here */ );
+  void sendDataBatch( EMDataBatch populatedBatch );
 }

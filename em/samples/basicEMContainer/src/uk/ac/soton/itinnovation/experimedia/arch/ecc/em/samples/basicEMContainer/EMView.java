@@ -53,9 +53,24 @@ public class EMView extends javax.swing.JFrame
     currentClientList.setModel( clientListModel );
   }
   
-  public void setMonitoringPhaseValue( String phase )
+  public void setMonitoringPhaseValue( String phase, String nextPhase )
   {
     phaseLabel.setText( phase );
+    setNextPhaseValue( nextPhase );
+  }
+  
+  public void setNextPhaseValue( String phase )
+  {
+    if ( phase != null )
+    {
+      nextPhaseLabel.setText( phase );
+      nextPhaseButton.setEnabled( true );
+    }
+    else
+    {
+      nextPhaseLabel.setText( "Not yet available" );
+      nextPhaseButton.setEnabled( false );
+    }
   }
   
   public void addLogText( String text )
@@ -103,6 +118,7 @@ public class EMView extends javax.swing.JFrame
         jLabel8 = new javax.swing.JLabel();
         phaseLabel = new javax.swing.JLabel();
         nextPhaseButton = new javax.swing.JButton();
+        nextPhaseLabel = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -127,7 +143,7 @@ public class EMView extends javax.swing.JFrame
         jLabel6.setText("Entities under observation:");
 
         jList1.setModel(new javax.swing.AbstractListModel() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            String[] strings = { "<Entities here>" };
             public int getSize() { return strings.length; }
             public Object getElementAt(int i) { return strings[i]; }
         });
@@ -136,7 +152,7 @@ public class EMView extends javax.swing.JFrame
         jLabel7.setText("Entity's observable attibutes:");
 
         jList2.setModel(new javax.swing.AbstractListModel() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            String[] strings = { "<Attributes here>" };
             public int getSize() { return strings.length; }
             public Object getElementAt(int i) { return strings[i]; }
         });
@@ -234,10 +250,10 @@ public class EMView extends javax.swing.JFrame
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 386, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 429, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 429, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 441, Short.MAX_VALUE))
                 .addGap(82, 82, 82))
         );
 
@@ -283,6 +299,13 @@ public class EMView extends javax.swing.JFrame
 
         nextPhaseButton.setText("Next phase");
         nextPhaseButton.setEnabled(false);
+        nextPhaseButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                onNextPhaseClicked(evt);
+            }
+        });
+
+        nextPhaseLabel.setText("Not available");
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
@@ -291,12 +314,17 @@ public class EMView extends javax.swing.JFrame
             .addGroup(jPanel4Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(beginMonitoringProcButton, javax.swing.GroupLayout.PREFERRED_SIZE, 167, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jLabel8)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(phaseLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(nextPhaseButton, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addComponent(nextPhaseButton, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(nextPhaseLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 267, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addComponent(jLabel8)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(phaseLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -305,11 +333,13 @@ public class EMView extends javax.swing.JFrame
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(beginMonitoringProcButton, javax.swing.GroupLayout.DEFAULT_SIZE, 50, Short.MAX_VALUE)
                     .addGroup(jPanel4Layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
                         .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel8)
-                            .addComponent(phaseLabel)
-                            .addComponent(nextPhaseButton))))
+                            .addComponent(phaseLabel))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(nextPhaseButton)
+                            .addComponent(nextPhaseLabel))))
                 .addContainerGap())
         );
 
@@ -341,6 +371,11 @@ public class EMView extends javax.swing.JFrame
     
   }//GEN-LAST:event_onBeginMonitoringButtonClicked
 
+  private void onNextPhaseClicked(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_onNextPhaseClicked
+    if ( viewListener != null )
+      viewListener.onNextPhaseButtonClicked();
+  }//GEN-LAST:event_onNextPhaseClicked
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton beginMonitoringProcButton;
     private javax.swing.JList currentClientList;
@@ -367,6 +402,7 @@ public class EMView extends javax.swing.JFrame
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JTextArea loggingText;
     private javax.swing.JButton nextPhaseButton;
+    private javax.swing.JLabel nextPhaseLabel;
     private javax.swing.JLabel phaseLabel;
     // End of variables declaration//GEN-END:variables
 }

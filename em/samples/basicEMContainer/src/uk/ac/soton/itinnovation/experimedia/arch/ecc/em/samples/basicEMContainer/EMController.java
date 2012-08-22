@@ -29,7 +29,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.factory.EMInterfaceFactory;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMClient;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
 
@@ -94,9 +94,9 @@ public class EMController implements IEMLifecycleListener
   }
   
   @Override
-  public void onDiscoveryPhaseCompleted()
+  public void onLifecyclePhaseCompleted( EMPhase phase )
   {
-
+    mainView.setNextPhaseValue( expMonitor.getNextPhase().toString() );
   }
   
   // Private methods -----------------------------------------------------------
@@ -111,10 +111,21 @@ public class EMController implements IEMLifecycleListener
     if ( expMonitor != null )
       try
       { 
-        expMonitor.startLifecycle();
-        mainView.setMonitoringPhaseValue( "Discovering metric providers" );
+        EMPhase phase = expMonitor.startLifecycle();
+        mainView.setMonitoringPhaseValue( phase.toString(), null );
       }
       catch ( Exception e ) {}
+  }
+  
+  private void moveToNextPhase()
+  {
+    if ( expMonitor != null )
+    {
+      EMPhase thisPhase = expMonitor.goToNextPhase();
+      EMPhase nextPhase  = expMonitor.getNextPhase();
+      
+      mainView.setMonitoringPhaseValue( thisPhase.toString(), nextPhase.toString() );
+    }
   }
   
   // Internal event handling ---------------------------------------------------
@@ -130,5 +141,9 @@ public class EMController implements IEMLifecycleListener
     @Override
     public void onStartPhasesButtonClicked()
     { startMonitoringProcess(); }
+    
+    @Override
+    public void onNextPhaseButtonClicked()
+    { moveToNextPhase(); }
   }
 }

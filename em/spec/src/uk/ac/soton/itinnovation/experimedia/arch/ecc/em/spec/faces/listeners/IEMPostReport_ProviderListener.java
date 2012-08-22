@@ -25,6 +25,8 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
+
 import java.util.UUID;
 
 
@@ -34,9 +36,7 @@ public interface IEMPostReport_ProviderListener
 {
   void onNotifyReadyToReport( UUID senderID );
   
-  void onSendReportSummary( UUID senderID /*data model here */ );
+  void onSendReportSummary( UUID senderID, EMPostReportSummary summary );
   
-  void onSendReportMetaData( UUID senderID /* data model here */ );
-  
-  void onSendDataPart( UUID senderID /* data model here */ );
+  void onSendDataBatch( UUID senderID, EMDataBatch populatedBatch );
 }

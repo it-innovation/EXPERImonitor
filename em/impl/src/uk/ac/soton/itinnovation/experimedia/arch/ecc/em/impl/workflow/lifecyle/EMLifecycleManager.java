@@ -44,7 +44,8 @@ import java.util.*;
 
 
 public class EMLifecycleManager implements EMConnectionManagerListener,
-                                           GeneratorDiscoveryPhaseListener
+                                           EMGeneratorDiscoveryPhaseListener,
+                                           EMNMetricGenSetupPhaseListener
 {
   private AMQPBasicChannel emChannel;
   private UUID             emProviderID;
@@ -73,12 +74,19 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
                                                                    emProviderID,
                                                                    this );
     lifecyclePhases.put( EMPhase.eEMDiscoverMetricGenerators, gdp );
+    
+    EMMetricGenSetupPhase sup = new EMMetricGenSetupPhase( emChannel, emProviderID, this );
+    lifecyclePhases.put( EMPhase.eEMSetUpMetricGenerators, sup );
+    
   }
   
   public boolean isLifecycleStarted()
   { return (currentPhase.getIndex() > 0); }
   
-  public void iterateLifecycle()
+  public EMPhase getCurrentPhase()
+  { return currentPhase; }
+  
+  public EMPhase iterateLifecycle()
   {
     if ( currentPhase != EMPhase.eEMProtocolComplete && !lifecyclePhases.isEmpty() )
     {
@@ -93,6 +101,8 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
           System.out.println("Life-cycle exception: " + e.getMessage() );
         }
     }
+    
+    return currentPhase;
   }
   
   public void endLifecycle()
@@ -166,6 +176,8 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   @Override
   public void onDiscoveryPhaseCompleted()
   {
-    lifecycleListener.onDiscoveryPhaseCompleted();
+    lifecycleListener.onLifecyclePhaseCompleted( EMPhase.eEMDiscoverMetricGenerators );
   }
+  
+  // EMNMetricGenSetupPhaseListener --------------------------------------------
 }

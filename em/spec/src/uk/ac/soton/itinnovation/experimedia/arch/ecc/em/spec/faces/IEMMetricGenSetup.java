@@ -32,7 +32,7 @@ import java.util.UUID;
 
 
 
-public interface IEMMonitorSetup
+public interface IEMMetricGenSetup
 {
   // Listeners -----------------------------------------------------------------
   /**

@@ -29,13 +29,12 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.IEMLifecyc
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMClient;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecyle.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
 
 import java.util.*;
-
 
 
 
@@ -108,7 +107,7 @@ public class ExperimentMonitor implements IExperimentMonitor,
   { lifecycleListeners.remove(listener); }
   
   @Override
-  public void startLifecycle() throws Exception
+  public EMPhase startLifecycle() throws Exception
   {
     if ( monitorStatus != IExperimentMonitor.eStatus.ENTRY_POINT_OPEN )
       throw new Exception( "Not in a state ready to start lifecycle" );
@@ -119,7 +118,18 @@ public class ExperimentMonitor implements IExperimentMonitor,
     if ( lifecycleManager.isLifecycleStarted() )
       throw new Exception( "Lifecycle has already started" );
     
+    return lifecycleManager.iterateLifecycle();
+  }
+  
+  @Override
+  public EMPhase getNextPhase()
+  { return lifecycleManager.getCurrentPhase().nextPhase(); }
+  
+  @Override
+  public EMPhase goToNextPhase()
+  { 
     lifecycleManager.iterateLifecycle();
+    return lifecycleManager.getCurrentPhase();
   }
   
   @Override
@@ -156,11 +166,11 @@ public class ExperimentMonitor implements IExperimentMonitor,
   }
   
   @Override
-  public void onDiscoveryPhaseCompleted()
+  public void onLifecyclePhaseCompleted( EMPhase phase )
   {
     Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
     while ( listIt.hasNext() )
-      listIt.next().onDiscoveryPhaseCompleted();
+      listIt.next().onLifecyclePhaseCompleted( phase );
   }
   
   // Private methods -----------------------------------------------------------

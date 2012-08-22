@@ -25,7 +25,7 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMClient;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
 
 
 
@@ -38,5 +38,5 @@ public interface IEMLifecycleListener
   
   void onFoundClientWithMetricGenerators( EMClient client );
   
-  void onDiscoveryPhaseCompleted();
+  void onLifecyclePhaseCompleted( EMPhase phase );
 }

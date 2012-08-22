@@ -36,5 +36,7 @@ public interface EMIAdapterListener
 {
   void onEMConnectionResult( boolean connected );
   
-  void updateMetricGenerators( Set<MetricGenerator> genSetOUT );
+  void populateMetricGeneratorInfo( Set<MetricGenerator> genSetOUT );
+  
+  void setupMetricGenerator( MetricGenerator genOut, Boolean[] resultOUT );
 }
