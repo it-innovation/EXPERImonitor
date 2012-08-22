@@ -18,34 +18,31 @@
 // the software.
 //
 //      Created By :            Vegard Engen
-//      Created Date :          2012-08-13
-//      Created for Project :   BonFIRE
+//      Created Date :          2012-08-22
+//      Created for Project :   
 //
 /////////////////////////////////////////////////////////////////////////
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.dao;
 
-package uk.ac.soton.itinnovation.experimedia.arch.edm.test.v1;
-
-import junit.framework.*;
-
-
-public class RandomTest extends TestCase
+/**
+ *
+ * @author Vegard Engen
+ */
+public class ValidationReturnObject
 {
-  public static void main( String[] args )
-  {
-    junit.textui.TestRunner.run( getEMEntryPointSuite() );
+    public boolean valid;
+    public Exception exception;
     
-    System.out.println( "Basic protocol test completed." );
-    System.exit( 0 );
-  }
-  
-  // Private methods -----------------------------------------------------------
-  private static Test getEMEntryPointSuite()
-  {
-    TestSuite suite = new TestSuite( "EM EntryPoint Tests" );
+    public ValidationReturnObject(){}
     
+    public ValidationReturnObject(boolean valid)
+    {
+        this.valid = valid;
+    }
     
-    //suite.addTestSuite( ECCMonitorTest.class );
-    
-    return suite;
-  }
+    public ValidationReturnObject(boolean valid, Exception ex)
+    {
+        this (valid);
+        this.exception = ex;
+    }
 }

@@ -19,24 +19,22 @@
 //
 //      Created By :            Vegard Engen
 //      Created Date :          2012-08-13
-//      Created for Project :   ROBUST
+//      Created for Project :   BonFIRE
 //
 /////////////////////////////////////////////////////////////////////////
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl;
 
-import java.util.Date;
-import java.util.Set;
-import java.util.UUID;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Attribute;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Entity;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Measurement;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Metric;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGroup;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
+import org.apache.log4j.Logger;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.dao.ExperimentDataManagerDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IExperimentDataManager;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IEntityDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IExperimentDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IMeasurementDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IMeasurementSetDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IMetricDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IMetricGeneratorDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IMetricGroupDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IReportDAO;
 
 /**
  *
@@ -44,197 +42,65 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IExperimentDataMan
  */
 public class ExperimentDataManager implements IExperimentDataManager
 {
-
-    @Override
-    public void saveExperiment(Experiment exp) throws Exception
+    private ExperimentDataManagerDAO edmDAO;
+    
+    static Logger log = Logger.getLogger(ExperimentDataManager.class);
+    
+    public ExperimentDataManager()
     {
-        throw new UnsupportedOperationException("Not supported yet.");
+        log.info("EDM STARTING UP :)");
+        try {
+            edmDAO = new ExperimentDataManagerDAO();
+        } catch (Exception ex) {
+            log.error("Failed to create ExperimentDataManagerDAO object: " + ex.getMessage(), ex);
+        }
+    }
+    
+    @Override
+    public IExperimentDAO getExperimentDAO() throws Exception
+    {
+        return edmDAO;
     }
 
     @Override
-    public Experiment getExperiment(UUID expUUID) throws Exception
+    public IEntityDAO getEntityDAO() throws Exception
     {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return edmDAO;
     }
 
     @Override
-    public Set<Experiment> getExperiments() throws Exception
+    public IMetricGeneratorDAO getMetricGeneratorDAO() throws Exception
     {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return edmDAO;
     }
 
     @Override
-    public void saveEntity(Entity ent) throws Exception
+    public IMetricGroupDAO getMetricGroupDAO() throws Exception
     {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return edmDAO;
     }
 
     @Override
-    public Entity getEntity(UUID entityUUID) throws Exception
+    public IMeasurementSetDAO getMeasurementSetDAO() throws Exception
     {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return edmDAO;
     }
 
     @Override
-    public Set<Entity> getEntities() throws Exception
+    public IMetricDAO getMetricDAO() throws Exception
     {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return edmDAO;
+    }
+    
+    @Override
+    public IReportDAO getReportDAO() throws Exception
+    {
+        return edmDAO;
     }
 
     @Override
-    public Set<Entity> getEntitiesForExperiment(UUID expUUID) throws Exception
+    public IMeasurementDAO getMeasurementDAO() throws Exception
     {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return edmDAO;
     }
-
-    @Override
-    public void saveAttribute(Attribute attrib) throws Exception
-    {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public Attribute getAttribute(UUID attribUUID) throws Exception
-    {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public Set<Attribute> getAttributesForEntity(UUID entityUUID) throws Exception
-    {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void saveMetricGenerator(MetricGenerator metricGen, UUID experimentUUID) throws Exception
-    {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public MetricGenerator getMetricGenerator(UUID metricGenUUID) throws Exception
-    {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public Set<MetricGenerator> getMetricGenerators() throws Exception
-    {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public Set<MetricGenerator> getMetricGeneratorsForExperiment(UUID expUUID) throws Exception
-    {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void saveMetricGroup(MetricGroup metricGroup) throws Exception
-    {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public MetricGroup getMetricGroup(UUID metricGroupUUID) throws Exception
-    {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public Set<MetricGroup> getMetricGroupsForMetricGenerator(UUID metricGenUUID) throws Exception
-    {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void saveMeasurementSet(MeasurementSet measurementSet) throws Exception
-    {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public MeasurementSet getMeasurementSet(UUID measurementSetUUID) throws Exception
-    {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public Set<MeasurementSet> getMeasurementSetForMetricGroup(UUID metricGroupUUID) throws Exception
-    {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void saveReport(Report report) throws Exception
-    {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public Report getReport(UUID reportUUID) throws Exception
-    {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public Report getReportForMeasurementSet(UUID measurementSetUUID) throws Exception
-    {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void saveMetric(Metric metric) throws Exception
-    {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public Metric getMetric(UUID metricUUID) throws Exception
-    {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public Metric getMetricForMeasurementSet(UUID measurementSetUUID) throws Exception
-    {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void saveMeasurement(Measurement measurement) throws Exception
-    {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public Measurement getMeasurement(UUID measurementUUID) throws Exception
-    {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public Measurement getLatestMeasurementForMeasurementSet(UUID measurementSetUUID) throws Exception
-    {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public Set<Measurement> getAllMeasurementsForMeasurementSet(UUID measurementSetUUID) throws Exception
-    {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public Set<Measurement> getMeasurementsForMeasurementSetAfterDate(UUID measurementSetUUID, Date fromDate) throws Exception
-    {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public Set<Measurement> getMeasurementsForMeasurementSetForTimePeriod(UUID measurementSetUUID, Date fromDate, Date toDate) throws Exception
-    {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
 }

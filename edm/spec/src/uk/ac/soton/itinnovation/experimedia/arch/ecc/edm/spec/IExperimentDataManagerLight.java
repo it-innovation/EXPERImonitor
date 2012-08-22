@@ -18,27 +18,24 @@
 // the software.
 //
 //      Created By :            Vegard Engen
-//      Created Date :          2012-08-13
-//      Created for Project :   BonFIRE
+//      Created Date :          2012-08-22
+//      Created for Project :   
 //
 /////////////////////////////////////////////////////////////////////////
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IEntityDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IExperimentDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IMeasurementDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IMeasurementSetDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IMetricDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IMetricGeneratorDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IMetricGroupDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IReportDAO;
 
 /**
- * Interface for the Experiment Data Manager.
+ * Interface to the Experiment Data Manager :: the Light version, intended to live
+ * on the clients that generate metrics.
  * 
  * @author Vegard Engen
  */
-public interface IExperimentDataManager
+public interface IExperimentDataManagerLight
 {
     /**
      * Get the experiment DAO, allowing saving and getting Experiment objects.
@@ -62,37 +59,9 @@ public interface IExperimentDataManager
     public IMetricGeneratorDAO getMetricGeneratorDAO() throws Exception;
     
     /**
-     * Get the metric group DAO, allowing saving and getting MetricGroup objects.
-     * @return MetricGroup DAO interface.
-     * @throws Exception 
-     */
-    public IMetricGroupDAO getMetricGroupDAO() throws Exception;
-    
-    /**
-     * Get the measurement set DAO, allowing saving and getting MeasurementSet objects.
-     * @return MeasurementSet DAO interface.
-     * @throws Exception 
-     */
-    public IMeasurementSetDAO getMeasurementSetDAO() throws Exception;
-    
-    /**
-     * Get the metric DAO, allowing saving and getting Metric objects.
-     * @return Metric DAO interface.
-     * @throws Exception 
-     */
-    public IMetricDAO getMetricDAO() throws Exception;
-    
-    /**
      * Get the report DAO, allowing saving and getting Report objects.
      * @return Report DAO interface.
      * @throws Exception 
      */
     public IReportDAO getReportDAO() throws Exception;
-    
-    /**
-     * Get the measurement DAO, allowing saving and getting Measurement objects.
-     * @return Measurement DAO interface.
-     * @throws Exception 
-     */
-    public IMeasurementDAO getMeasurementDAO() throws Exception;
 }
