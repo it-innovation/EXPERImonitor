@@ -40,7 +40,7 @@ public class Report
     private MeasurementSet measurementSet;
     private Date fromDate;
     private Date toDate;
-    private int numberOfMeasurements;
+    private Integer numberOfMeasurements;
     
     /**
      * Default constructor which generates a random UUID for the Report object.
@@ -67,6 +67,9 @@ public class Report
             this.fromDate = new Date(report.getFromDate().getTime());
         if (report.getToDate() != null)
             this.toDate = new Date(report.getToDate().getTime());
+        if (report.getNumberOfMeasurements() != null)
+            this.numberOfMeasurements = new Integer(report.getNumberOfMeasurements());
+        
         this.numberOfMeasurements = report.getNumberOfMeasurements();
     }
     
@@ -93,7 +96,7 @@ public class Report
      * @param toDate The time stamp for the end of the report period.
      * @param numMeasurements The number of measurements in the reporting period.
      */
-    public Report(UUID uuid, MeasurementSet measurementSet, Date fromDate, Date toDate, int numMeasurements)
+    public Report(UUID uuid, MeasurementSet measurementSet, Date fromDate, Date toDate, Integer numMeasurements)
     {
         this(uuid, measurementSet, fromDate, toDate);
         this.numberOfMeasurements = numMeasurements;
@@ -166,7 +169,7 @@ public class Report
     /**
      * @return the number of measurements
      */
-    public int getNumberOfMeasurements()
+    public Integer getNumberOfMeasurements()
     {
         return numberOfMeasurements;
     }
@@ -174,7 +177,7 @@ public class Report
     /**
      * @param num the number of measurements to set
      */
-    public void setNumberOfMeasurements(int num)
+    public void setNumberOfMeasurements(Integer num)
     {
         this.numberOfMeasurements = num;
     }
