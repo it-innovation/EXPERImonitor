@@ -28,6 +28,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -111,7 +112,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             
             String query = DBUtil.getInsertIntoQuery("Experiment", valueNames, values);
             ResultSet rs = dbCon.executeQuery(query, Statement.RETURN_GENERATED_KEYS);
-
+            
             // check if the result set got the generated table key
             if (rs.next()) {
                 String key = rs.getString(1);
@@ -136,9 +137,22 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             }
         }
     }
-
+    
     @Override
     public Experiment getExperiment(UUID expUUID) throws Exception
+    {
+        return getExperiment(expUUID, true);
+    }
+    
+    /**
+     * Overloaded method, with the option to set a flag whether to close the
+     * DB connection or not.
+     * @param expUUID
+     * @param closeDBcon
+     * @return
+     * @throws Exception 
+     */
+    private Experiment getExperiment(UUID expUUID, boolean closeDBcon) throws Exception
     {
         if (expUUID == null)
         {
@@ -159,25 +173,83 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             
             String query = "SELECT * FROM Experiment WHERE expUUID = '" + expUUID + "'";
             ResultSet rs = dbCon.executeQuery(query);
-
+            
             // check if anything got returned (connection closed in finalise method)
             if (rs.next())
             {
-                //UUID expUUID = UUID.fromString(rs.getString("expUUID"));
                 String name = rs.getString("name");
 				String description = rs.getString("description");
 				String startTimeStr = rs.getString("startTime");
                 String endTimeStr = rs.getString("endTime");
                 String expID = rs.getString("expID");
                 
-                exp = new Experiment(expUUID, expID, name, description, new Date(Long.parseLong(startTimeStr)), new Date(Long.parseLong(endTimeStr)));
+                Date startTime = null;
+                Date endTime = null;
+                
+                if (startTimeStr != null)
+                    startTime = new Date(Long.parseLong(startTimeStr));
+                
+                if (endTimeStr != null)
+                    endTime = new Date(Long.parseLong(endTimeStr));
+                
+                exp = new Experiment(expUUID, expID, name, description, startTime, endTime);
             }
             else // nothing in the result set
             {
                 log.error("There is no experiment with the given UUID: " + expUUID.toString());
                 throw new RuntimeException("There is no experiment with the given UUID: " + expUUID.toString());
             }
+        } catch (Exception ex) {
+            log.error("Error while quering the database: " + ex.getMessage(), ex);
+            throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
+        } finally {
+            if (closeDBcon)
+                dbCon.close();
+        }
+        
+        // check if there's any metric generators
+        Set<MetricGenerator> metricGenerators = null;
+        
+        try {
+            metricGenerators = getMetricGeneratorsForExperiment(expUUID, closeDBcon);
+        } catch (Exception ex) {
+            log.error("Caught an exception when getting metric generators for experiment (UUID: " + expUUID.toString() + "): " + ex.getMessage());
+        }
+        
+        exp.setMetricGenerators(metricGenerators);
+        
+        return exp;
+    }
+    
+    @Override
+    public Set<Experiment> getExperiments() throws Exception
+    {
+        Set<Experiment> experiments = new HashSet<Experiment>();
+        
+        try {
+            if (dbCon.isClosed())
+                dbCon.connect();
+            
+            String query = "SELECT expUUID FROM Experiment";
+            ResultSet rs = dbCon.executeQuery(query);
+            
+            // iterate over all returned records
+            while (rs.next())
+            {
+                String uuidStr = rs.getString("expUUID");
+                
+                if (uuidStr != null)
+                {
+                    try {
+                        Experiment exp = this.getExperiment(UUID.fromString(uuidStr), true);
+                        if (exp != null)
+                            experiments.add(exp);
 
+                    } catch (Exception ex) {
+                        log.debug("Failed to get experiment with UUID: " + uuidStr);
+                    }
+                }
+            }
         } catch (Exception ex) {
             log.error("Error while quering the database: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
@@ -185,17 +257,9 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             dbCon.close();
         }
         
-        // TODO: check if there's any metric generators
-        
-        return exp;
+        return experiments;
     }
-
-    @Override
-    public Set<Experiment> getExperiments() throws Exception
-    {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
+    
     
     //--------------------------- ENTITY -------------------------------------//
     
@@ -271,7 +335,23 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     @Override
     public Set<MetricGenerator> getMetricGeneratorsForExperiment(UUID expUUID) throws Exception
     {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return getMetricGeneratorsForExperiment(expUUID, true);
+    }
+    
+    /**
+     * Overloaded method, with the option to set a flag whether to close the
+     * DB connection or not.
+     * @param expUUID
+     * @param closeDBcon
+     * @return
+     * @throws Exception 
+     */
+    private Set<MetricGenerator> getMetricGeneratorsForExperiment(UUID expUUID, boolean closeDBcon) throws Exception
+    {
+        Set<MetricGenerator> generators = new HashSet<MetricGenerator>();
+        
+        
+        return generators;
     }
     
     

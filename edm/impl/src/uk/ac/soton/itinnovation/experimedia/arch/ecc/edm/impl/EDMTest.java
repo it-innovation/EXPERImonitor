@@ -25,6 +25,7 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl;
 
 import java.util.Date;
+import java.util.Set;
 import java.util.UUID;
 import javax.measure.quantity.Duration;
 import javax.measure.quantity.Mass;
@@ -41,8 +42,10 @@ import static javax.measure.unit.Dimension.*;
 
 import static javax.measure.unit.SystemOfUnits.*;
 import static javax.measure.unit.UnitFormat.*;
+import org.apache.log4j.Logger;
 import org.jscience.physics.amount.Amount;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.dao.ExperimentDataManagerDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IExperimentDAO;
 
 /**
@@ -51,6 +54,8 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IExperimentDAO
  */
 public class EDMTest
 {
+    static Logger log = Logger.getLogger(EDMTest.class);
+    
     public static void main(String[] args) throws Exception
     {
         Metric m = new Metric();
@@ -90,6 +95,73 @@ public class EDMTest
         
         
         
+        ExperimentDataManager edm = new ExperimentDataManager();
+        IExperimentDAO expDAO = null;
+        try {
+            expDAO = edm.getExperimentDAO();
+        } catch (Exception ex) {
+            log.error ("Unable to get Experiment DAO: " + ex.getMessage(), ex);
+            System.exit(1);
+        }
         
+        Experiment exp = new Experiment();
+        exp.setUUID(UUID.fromString("bfe4c710-61ba-46f8-a519-be2f7808192e"));
+        exp.setName("Strawberry Experiment Extravagansa");
+        exp.setDescription("A very boring description...");
+        exp.setStartTime(new Date(Long.parseLong("1345642421005")));
+        exp.setEndTime(new Date());
+        exp.setExperimentID("3543");
+        try {
+            expDAO.saveExperiment(exp);
+        } catch (Exception ex) {
+            log.error("Unable to save experiment: " + ex.getMessage());
+        }
+        
+        log.info("Getting experiment object");
+        Experiment exp2 = null;
+        try {
+            //exp2 = expDAO.getExperiment(UUID.fromString("bfe4c710-61ba-46f8-a519-be2f7808192e"));
+            //exp2 = expDAO.getExperiment(UUID.fromString("5718cd67-4310-4b2c-aeb9-9b72314630ca"));
+            exp2 = expDAO.getExperiment(UUID.fromString("3fe0769d-ffae-4173-9c24-07ff7819b5cb"));
+        } catch (Exception ex) {
+            log.error("Unable to get experiment: " + ex.getMessage());
+        }
+        
+        log.info("Experiment details:");
+        if (exp2.getUUID() != null) log.info("  - UUID:  " + exp2.getUUID());
+        if (exp2.getName() != null) log.info("  - Name:  " + exp2.getName());
+        if (exp2.getDescription() != null) log.info("  - Desc:  " + exp2.getDescription());
+        if (exp2.getStartTime() != null) log.info("  - Start: " + exp2.getStartTime() + " (" + exp2.getStartTime().getTime() + ")");
+        if (exp2.getEndTime() != null) log.info("  - End:   " + exp2.getEndTime() + " (" + exp2.getEndTime().getTime() + ")");
+        if (exp2.getExperimentID() != null) log.info("  - ID:    " + exp2.getExperimentID());
+        
+        if ((exp2.getMetricGenerators() == null) || exp2.getMetricGenerators().isEmpty())
+            log.info("  - There are NO metric generators");
+        else
+            log.info("  - There are " + exp.getMetricGenerators().size() + " metric generators");
+        
+        log.info("Getting all experiments");
+        Set<Experiment> experiments = null;
+        
+        try {
+            experiments = expDAO.getExperiments();
+            
+            if (experiments != null)
+            {
+                log.info("Got " + experiments.size() + " experiments:");
+                for (Experiment exp3 : experiments)
+                {
+                    log.info(" * Experiment details:");
+                    if (exp3.getUUID() != null) log.info("  - UUID:  " + exp3.getUUID());
+                    if (exp3.getName() != null) log.info("  - Name:  " + exp3.getName());
+                    if (exp3.getDescription() != null) log.info("  - Desc:  " + exp3.getDescription());
+                    if (exp3.getStartTime() != null) log.info("  - Start: " + exp3.getStartTime() + " (" + exp3.getStartTime().getTime() + ")");
+                    if (exp3.getEndTime() != null) log.info("  - End:   " + exp3.getEndTime() + " (" + exp3.getEndTime().getTime() + ")");
+                    if (exp3.getExperimentID() != null) log.info("  - ID:    " + exp3.getExperimentID());
+                }
+            }
+        } catch (Exception ex) {
+            log.error("");
+        }
     }
 }

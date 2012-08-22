@@ -25,6 +25,7 @@
 package uk.ac.soton.itinnovation.experimedia.arch.edm.test.v1;
 
 import java.util.Date;
+import java.util.Set;
 import java.util.UUID;
 import junit.framework.*;
 import org.junit.Test;
@@ -34,6 +35,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IExperimentDAO
 
 public class ExperimentTest extends TestCase
 {
+    
     public static void main(String[] args)
     {
         junit.textui.TestRunner.run(ExperimentTest.class);
@@ -48,7 +50,7 @@ public class ExperimentTest extends TestCase
     }
     
     @Test
-    public void testSaveExperiment()
+    public void testSaveExperiment_valid()
     {
         ExperimentDataManager edm = new ExperimentDataManager();
         IExperimentDAO expDAO = null;
@@ -58,18 +60,66 @@ public class ExperimentTest extends TestCase
             fail ("Unable to get Experiment DAO");
         }
         
-        Experiment exp = new Experiment();
-        exp.setUUID(UUID.fromString("bfe4c710-61ba-46f8-a519-be2f7808192e"));
-        exp.setName("Strawberry Experiment Extravagansa");
-        exp.setDescription("A very boring description...");
-        exp.setStartTime(new Date(Long.parseLong("1345642421005")));
-        exp.setEndTime(new Date());
-        exp.setExperimentID("3543");
+        Experiment exp1 = new Experiment();
+        exp1.setName("Test 1");
+        exp1.setDescription("A very boring description...");
+        exp1.setStartTime(new Date(Long.parseLong("1345642421005")));
+        exp1.setEndTime(new Date());
+        exp1.setExperimentID("3543");
         try {
-            expDAO.saveExperiment(exp);
+            expDAO.saveExperiment(exp1);
         } catch (Exception ex) {
             fail("Unable to save experiment");
         }
+        assertTrue(true);
+    }
+    
+    @Test
+    public void testSaveExperiment_duplicateUUID()
+    {
+        ExperimentDataManager edm = new ExperimentDataManager();
+        IExperimentDAO expDAO = null;
+        try {
+            expDAO = edm.getExperimentDAO();
+        } catch (Exception ex) {
+            fail ("Unable to get Experiment DAO");
+        }
+        
+        Experiment exp2 = new Experiment();
+        exp2.setName("Test 2");
+        try {
+            expDAO.saveExperiment(exp2);
+        } catch (Exception ex) {
+            fail("Unable to save experiment");
+        }
+        
+        // should not save because of identical UUID
+        Experiment exp3 = new Experiment();
+        exp3.setUUID(exp2.getUUID());
+        exp3.setName("Test 3");
+        try {
+            expDAO.saveExperiment(exp3);
+            fail("Experiment should not have saved, it had a duplicate UUID");
+        } catch (Exception ex) { }
+    }
+    
+    @Test
+    public void testSaveExperiment_noName()
+    {
+        ExperimentDataManager edm = new ExperimentDataManager();
+        IExperimentDAO expDAO = null;
+        try {
+            expDAO = edm.getExperimentDAO();
+        } catch (Exception ex) {
+            fail ("Unable to get Experiment DAO");
+        }
+        
+        // should not save because of missinng information (UUID generated, but name not set)
+        Experiment exp4 = new Experiment();
+        try {
+            expDAO.saveExperiment(exp4);
+            fail("Experiment should not have saved, it did not have a name set");
+        } catch (Exception ex) { }
     }
     
     @Test
@@ -83,16 +133,54 @@ public class ExperimentTest extends TestCase
             fail ("Unable to get Experiment DAO");
         }
         
-        Experiment exp = null;
+        Experiment exp1 = new Experiment();
+        exp1.setName("Test 1");
+        exp1.setDescription("A very boring description...");
+        exp1.setStartTime(new Date(Long.parseLong("1345642421005")));
+        exp1.setEndTime(new Date());
+        exp1.setExperimentID("3543");
         try {
-            //exp = expDAO.getExperiment(UUID.fromString("bfe4c710-61ba-46f8-a519-be2f7808192e"));
-            exp = expDAO.getExperiment(UUID.fromString("791a3fa9-edd1-4f11-b7ce-22c06a47107f"));
+            expDAO.saveExperiment(exp1);
         } catch (Exception ex) {
-            fail("Unable to get experiment");
+            fail("Unable to save experiment");
         }
         
-        assertTrue(exp != null);
-        assertTrue(exp.getUUID() != null);
-        assertTrue(exp.getName() != null);
+        Experiment exp = null;
+        try {
+            exp = expDAO.getExperiment(exp1.getUUID());
+        } catch (Exception ex) {
+            fail("Unable to get experiment due to an exception: " + ex.getMessage());
+        }
+        
+        assertNotNull(exp);
+        assertNotNull(exp.getUUID());
+        assertNotNull(exp.getName());
+        assertNotNull(exp.getDescription());
+        assertNotNull(exp.getStartTime());
+        assertNotNull(exp.getEndTime());
+        assertNotNull(exp.getExperimentID());
+    }
+    
+    @Test
+    public void testGetExperiments()
+    {
+        ExperimentDataManager edm = new ExperimentDataManager();
+        IExperimentDAO expDAO = null;
+        try {
+            expDAO = edm.getExperimentDAO();
+        } catch (Exception ex) {
+            fail ("Unable to get Experiment DAO");
+        }
+        
+        Set<Experiment> experiments = null;
+        
+        try {
+            experiments = expDAO.getExperiments();
+            
+            assertNotNull(experiments);
+            assertFalse(experiments.isEmpty());
+        } catch (Exception ex) {
+            fail("Unable to get experiments from DB");
+        }
     }
 }
