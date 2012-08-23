@@ -24,7 +24,10 @@
 /////////////////////////////////////////////////////////////////////////
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db;
 
+import java.sql.ResultSet;
 import java.util.List;
+import java.util.UUID;
+import org.apache.log4j.Logger;
 
 /**
  *
@@ -32,6 +35,8 @@ import java.util.List;
  */
 public class DBUtil
 {
+    static Logger log = Logger.getLogger(DBUtil.class);
+    
     public static String getInsertIntoQuery(String tableName, List<String> valueNames, List<String> values)
     {
         String query = "INSERT INTO " + tableName + " (";
@@ -57,5 +62,30 @@ public class DBUtil
         query += ")";
         
         return query;
+    }
+    
+    // check if a object exists in the DB
+    public static boolean objectExistsByUUID(String tableName, String keyName, UUID uuid, DatabaseConnector dbCon) throws Exception
+    {
+        try {
+            if (dbCon.isClosed())
+                dbCon.connect();
+            
+            String query = "SELECT " + keyName + " FROM " + tableName + " WHERE " + keyName + " = '" + uuid + "'";
+            ResultSet rs = dbCon.executeQuery(query);
+
+            // check if anything got returned (connection closed in finalise method)
+            if (rs.next()) {
+                return true;
+            } else {
+                return false;
+            }
+
+        } catch (Exception ex) {
+            log.error("Error while quering the database: " + ex.getMessage(), ex);
+            throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
+        } finally {
+            dbCon.close();
+        }
     }
 }

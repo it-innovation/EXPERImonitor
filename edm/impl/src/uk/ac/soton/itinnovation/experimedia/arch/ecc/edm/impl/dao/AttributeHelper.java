@@ -18,17 +18,16 @@
 // the software.
 //
 //      Created By :            Vegard Engen
-//      Created Date :          2012-08-22
-//      Created for Project :   BonFIRE
+//      Created Date :          2012-08-23
+//      Created for Project :   
 //
 /////////////////////////////////////////////////////////////////////////
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.dao;
 
-import java.sql.ResultSet;
 import java.util.List;
 import java.util.UUID;
 import org.apache.log4j.Logger;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Attribute;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DBUtil;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DatabaseConnector;
 
@@ -36,37 +35,51 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DatabaseConnect
  *
  * @author Vegard Engen
  */
-public class ExperimentHelper
+public class AttributeHelper
 {
-    static Logger log = Logger.getLogger(ExperimentHelper.class);
+    static Logger log = Logger.getLogger(AttributeHelper.class);
     
-    public static ValidationReturnObject isObjectValidForSave(Experiment exp, DatabaseConnector dbCon) throws Exception
+    public static ValidationReturnObject isObjectValidForSave(Attribute attrib, DatabaseConnector dbCon, boolean checkForEntity) throws Exception
     {
-        if (exp == null)
+        if (attrib == null)
         {
-            return new ValidationReturnObject(false, new NullPointerException("The Experiment object is NULL - cannot save that..."));
+            return new ValidationReturnObject(false, new NullPointerException("The Attribute object is NULL - cannot save that..."));
         }
         
         // check if all the required information is given; uuid, name
         
-        if (exp.getUUID() == null)
+        if (attrib.getUUID() == null)
         {
-            return new ValidationReturnObject(false, new NullPointerException("The Experiment UUID is NULL"));
+            return new ValidationReturnObject(false, new NullPointerException("The Attribute UUID is NULL"));
         }
         
-        if (exp.getName() == null)
+        if (attrib.getName() == null)
         {
-            return new ValidationReturnObject(false, new NullPointerException("The Experiment name is NULL"));
+            return new ValidationReturnObject(false, new NullPointerException("The Attribute name is NULL"));
         }
         
         // check if it exists in the DB already
         try {
-            if (objectExists(exp.getUUID(), dbCon))
+            if (objectExists(attrib.getUUID(), dbCon))
             {
-                return new ValidationReturnObject(false, new RuntimeException("The Experiment already exists; the UUID is not unique"));
+                return new ValidationReturnObject(false, new RuntimeException("The Attribute already exists; the UUID is not unique"));
             }
         } catch (Exception ex) {
             throw ex;
+        }
+        
+        if (attrib.getEntityUUID() == null)
+        {
+            return new ValidationReturnObject(false, new RuntimeException("The Attribute's Entity UUID is NULL"));
+        }
+        
+        // if checking for entity; may be false if this is called from the saveEntity method
+        if (checkForEntity)
+        {
+            if (!EntityHelper.objectExists(attrib.getEntityUUID(), dbCon))
+            {
+                return new ValidationReturnObject(false, new RuntimeException("The Attribute's Entity does not exist"));
+            }
         }
         
         return new ValidationReturnObject(true);
@@ -79,51 +92,36 @@ public class ExperimentHelper
      * OBS: it is assumed that the object has been validated to have at least the
      * minimum information.
      * 
-     * @param exp
+     * @param attrib
      * @param valueNames
      * @param values 
      */
-    public static void getTableNamesAndValues(Experiment exp, List<String> valueNames, List<String> values)
+    public static void getTableNamesAndValues(Attribute attrib, List<String> valueNames, List<String> values)
     {
-        if (exp == null)
+        if (attrib == null)
             return;
         
         if ((valueNames == null) || (values == null))
             return;
         
-        valueNames.add("expUUID");
-        values.add("'" + exp.getUUID().toString() + "'");
+        valueNames.add("attribUUID");
+        values.add("'" + attrib.getUUID().toString() + "'");
+        
+        valueNames.add("entityUUID");
+        values.add("'" + attrib.getEntityUUID().toString() + "'");
         
         valueNames.add("name");
-        values.add("'" + exp.getName() + "'");
+        values.add("'" + attrib.getName() + "'");
         
-        if (exp.getDescription() != null)
+        if (attrib.getDescription() != null)
         {
             valueNames.add("description");
-            values.add("'" + exp.getDescription() + "'");
-        }
-        
-        if (exp.getStartTime() != null)
-        {
-            valueNames.add("startTime");
-            values.add(String.valueOf(exp.getStartTime().getTime()));
-        }
-        
-        if (exp.getEndTime() != null)
-        {
-            valueNames.add("endTime");
-            values.add(String.valueOf(exp.getEndTime().getTime()));
-        }
-        
-        if (exp.getExperimentID() != null)
-        {
-            valueNames.add("expID");
-            values.add("'" + exp.getExperimentID() + "'");
+            values.add("'" + attrib.getDescription() + "'");
         }
     }
     
     public static boolean objectExists(UUID uuid, DatabaseConnector dbCon) throws Exception
     {
-        return DBUtil.objectExistsByUUID("Experiment", "expUUID", uuid, dbCon);
+        return DBUtil.objectExistsByUUID("Attribute", "attribUUID", uuid, dbCon);
     }
 }

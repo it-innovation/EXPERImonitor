@@ -105,6 +105,19 @@ public class Entity implements Serializable
     }
     
     /**
+     * A constructor to set all the fields of the entity class except for the attributes.
+     * @param uuid A UUID used to uniquely identify an entity in this framework.
+     * @param name The name of the Entity.
+     * @param description A description of the entity.
+     */
+    public Entity(UUID uuid, String name, String description)
+    {
+        this.uuid = uuid;
+        this.name = name;
+        this.description = description;
+    }
+    
+    /**
      * A constructor to set all the fields of the entity class.
      * @param uuid A UUID used to uniquely identify an entity in this framework.
      * @param name The name of the Entity.
@@ -113,9 +126,7 @@ public class Entity implements Serializable
      */
     public Entity(UUID uuid, String name, String description, Set<Attribute> attributes)
     {
-        this.uuid = uuid;
-        this.name = name;
-        this.description = description;
+        this(uuid, name, description);
         this.attributes = attributes;
     }
     

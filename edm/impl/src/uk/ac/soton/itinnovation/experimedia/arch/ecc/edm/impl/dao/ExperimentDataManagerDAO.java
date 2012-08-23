@@ -102,7 +102,8 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
         }
         
         try {
-            dbCon.connect();
+            if (dbCon.isClosed())
+                dbCon.connect();
             
             // get the table names and values according to what's available in the
             // object
@@ -167,6 +168,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
         }
         
         Experiment exp = null;
+        boolean exception = false;
         try {
             if (dbCon.isClosed())
                 dbCon.connect();
@@ -200,10 +202,11 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
                 throw new RuntimeException("There is no experiment with the given UUID: " + expUUID.toString());
             }
         } catch (Exception ex) {
+            exception = true;
             log.error("Error while quering the database: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
         } finally {
-            if (closeDBcon)
+            if (exception)
                 dbCon.close();
         }
         
@@ -211,9 +214,12 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
         Set<MetricGenerator> metricGenerators = null;
         
         try {
-            metricGenerators = getMetricGeneratorsForExperiment(expUUID, closeDBcon);
+            metricGenerators = getMetricGeneratorsForExperiment(expUUID, false);
         } catch (Exception ex) {
             log.error("Caught an exception when getting metric generators for experiment (UUID: " + expUUID.toString() + "): " + ex.getMessage());
+        } finally {
+            if (closeDBcon)
+                dbCon.close();
         }
         
         exp.setMetricGenerators(metricGenerators);
@@ -230,25 +236,35 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             if (dbCon.isClosed())
                 dbCon.connect();
             
-            String query = "SELECT expUUID FROM Experiment";
+            String query = "SELECT * FROM Experiment";
             ResultSet rs = dbCon.executeQuery(query);
             
             // iterate over all returned records
             while (rs.next())
             {
                 String uuidStr = rs.getString("expUUID");
+                String name = rs.getString("name");
+				String description = rs.getString("description");
+				String startTimeStr = rs.getString("startTime");
+                String endTimeStr = rs.getString("endTime");
+                String expID = rs.getString("expID");
                 
-                if (uuidStr != null)
+                if (uuidStr == null)
                 {
-                    try {
-                        Experiment exp = this.getExperiment(UUID.fromString(uuidStr), true);
-                        if (exp != null)
-                            experiments.add(exp);
-
-                    } catch (Exception ex) {
-                        log.debug("Failed to get experiment with UUID: " + uuidStr);
-                    }
+                    log.error("Skipping an experiment, which does not have a UUID in the DB");
+                    continue;
                 }
+                
+                Date startTime = null;
+                Date endTime = null;
+                
+                if (startTimeStr != null)
+                    startTime = new Date(Long.parseLong(startTimeStr));
+                
+                if (endTimeStr != null)
+                    endTime = new Date(Long.parseLong(endTimeStr));
+                
+                experiments.add(new Experiment(UUID.fromString(uuidStr), expID, name, description, startTime, endTime));
             }
         } catch (Exception ex) {
             log.error("Error while quering the database: " + ex.getMessage(), ex);
@@ -265,21 +281,165 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     
     
     @Override
-    public void saveEntity(Entity ent) throws Exception
+    public void saveEntity(Entity entity) throws Exception
     {
-        throw new UnsupportedOperationException("Not supported yet.");
+        // this validation will check if all the required parameters are set and if
+        // there isn't already a duplicate instance in the DB
+        // will validate the attributes too, if any are given
+        ValidationReturnObject returnObj = EntityHelper.isObjectValidForSave(entity, dbCon);
+        if (!returnObj.valid)
+        {
+            log.error("Cannot save the Entity object: " + returnObj.exception.getMessage(), returnObj.exception);
+            throw returnObj.exception;
+        }
+        
+        try {
+            if (dbCon.isClosed())
+                dbCon.connect();
+            
+            // get the table names and values according to what's available in the
+            // object
+            List<String> valueNames = new ArrayList<String>();
+            List<String> values = new ArrayList<String>();
+            EntityHelper.getTableNamesAndValues(entity, valueNames, values);
+            
+            String query = DBUtil.getInsertIntoQuery("Entity", valueNames, values);
+            ResultSet rs = dbCon.executeQuery(query, Statement.RETURN_GENERATED_KEYS);
+            
+            // check if the result set got the generated table key
+            if (rs.next()) {
+                String key = rs.getString(1);
+                log.debug("Saved entity " + entity.getName() + ", with key: " + key);
+            } else {
+                throw new RuntimeException("No index returned after saving entity " + entity.getName());
+            }//end of debugging
+        } catch (Exception ex) {
+            log.error("Error while saving entity: " + ex.getMessage(), ex);
+            throw new RuntimeException("Error while saving entity: " + ex.getMessage(), ex);
+        } finally {
+            if ((entity.getAttributes() == null) || entity.getAttributes().isEmpty())
+                dbCon.close();
+        }
+        
+        try {
+            // save any attributes if not NULL
+            if ((entity.getAttributes() != null) && !entity.getAttributes().isEmpty())
+            {
+                for (Attribute attrib : entity.getAttributes())
+                {
+                    if (attrib != null)
+                        this.saveAttribute(attrib, false); // flag not to close the DB connection
+                }
+            }
+        } catch (Exception ex) {
+            
+        } finally {
+            dbCon.close();
+        }
     }
 
     @Override
     public Entity getEntity(UUID entityUUID) throws Exception
     {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return getEntity(entityUUID, true);
+    }
+    
+    private Entity getEntity(UUID entityUUID, boolean closeDBcon) throws Exception
+    {
+        if (entityUUID == null)
+        {
+            log.error("Cannot get an Entity object with the given UUID because it is NULL!");
+            throw new NullPointerException("Cannot get an Entity object with the given UUID because it is NULL!");
+        }
+        
+        if (!EntityHelper.objectExists(entityUUID, dbCon))
+        {
+            log.error("There is no entity with the given UUID: " + entityUUID.toString());
+            throw new RuntimeException("There is no entity with the given UUID: " + entityUUID.toString());
+        }
+        
+        Entity entity = null;
+        boolean exception = false;
+        try {
+            if (dbCon.isClosed())
+                dbCon.connect();
+            
+            String query = "SELECT * FROM Entity WHERE entityUUID = '" + entityUUID + "'";
+            ResultSet rs = dbCon.executeQuery(query);
+            
+            // check if anything got returned (connection closed in finalise method)
+            if (rs.next())
+            {
+                String name = rs.getString("name");
+				String description = rs.getString("description");
+                
+                entity = new Entity(entityUUID, name, description);
+            }
+            else // nothing in the result set
+            {
+                log.error("There is no entity with the given UUID: " + entityUUID.toString());
+                throw new RuntimeException("There is no entity with the given UUID: " + entityUUID.toString());
+            }
+        } catch (Exception ex) {
+            exception = true;
+            log.error("Error while quering the database: " + ex.getMessage(), ex);
+            throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
+        } finally {
+            if (exception)
+                dbCon.close();
+        }
+        
+        // check if there's any metric generators
+        Set<Attribute> attributes = null;
+        
+        try {
+            attributes = this.getAttributesForEntity(entityUUID, false); // don't close the connection
+        } catch (Exception ex) {
+            log.error("Caught an exception when getting attributes for entity (UUID: " + entityUUID.toString() + "): " + ex.getMessage());
+            throw new RuntimeException("Unable to get Entity object due to an issue with getting its attributes: " + ex.getMessage(), ex);
+        } finally {
+            if (closeDBcon)
+                dbCon.close();
+        }
+        
+        entity.setAttributes(attributes);
+        
+        return entity;
     }
 
     @Override
     public Set<Entity> getEntities() throws Exception
     {
-        throw new UnsupportedOperationException("Not supported yet.");
+        Set<Entity> entities = new HashSet<Entity>();
+        try {
+            if (dbCon.isClosed())
+                dbCon.connect();
+            
+            String query = "SELECT entityUUID FROM Entity";
+            ResultSet rs = dbCon.executeQuery(query);
+            
+            // check if anything got returned (connection closed in finalise method)
+            while (rs.next())
+            {
+                String uuidStr = rs.getString("entityUUID");
+                
+                if (uuidStr == null)
+                {
+                    log.error("Skipping an entity, which does not have a UUID in the DB");
+                    continue;
+                }
+                
+                entities.add(getEntity(UUID.fromString(uuidStr), false));
+            }
+
+        } catch (Exception ex) {
+            log.error("Error while quering the database: " + ex.getMessage(), ex);
+            throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
+        } finally {
+            dbCon.close();
+        }
+        
+        return entities;
     }
 
     @Override
@@ -291,23 +451,168 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     
     //------------------------- ATTRIBUTE ------------------------------------//
     
-    
     @Override
     public void saveAttribute(Attribute attrib) throws Exception
     {
-        throw new UnsupportedOperationException("Not supported yet.");
+        saveAttribute(attrib, true);
+    }
+    
+    private void saveAttribute(Attribute attrib, boolean closeDBcon) throws Exception
+    {
+        // this validation will check if all the required parameters are set and if
+        // there isn't already a duplicate instance in the DB
+        ValidationReturnObject returnObj = AttributeHelper.isObjectValidForSave(attrib, dbCon, true);
+        if (!returnObj.valid)
+        {
+            log.error("Cannot save the Attribute object: " + returnObj.exception.getMessage(), returnObj.exception);
+            throw returnObj.exception;
+        }
+        
+        try {
+            if (dbCon.isClosed())
+                dbCon.connect();
+            
+            // get the table names and values according to what's available in the
+            // object
+            List<String> valueNames = new ArrayList<String>();
+            List<String> values = new ArrayList<String>();
+            AttributeHelper.getTableNamesAndValues(attrib, valueNames, values);
+            
+            String query = DBUtil.getInsertIntoQuery("Attribute", valueNames, values);
+            ResultSet rs = dbCon.executeQuery(query, Statement.RETURN_GENERATED_KEYS);
+            
+            // check if the result set got the generated table key
+            if (rs.next()) {
+                String key = rs.getString(1);
+                log.debug("Saved attribute " + attrib.getName() + ", with key: " + key);
+            } else {
+                throw new RuntimeException("No index returned after saving attribute " + attrib.getName());
+            }//end of debugging
+        } catch (Exception ex) {
+            log.error("Error while saving entity: " + ex.getMessage(), ex);
+            throw new RuntimeException("Error while saving attribute: " + ex.getMessage(), ex);
+        } finally {
+            if (closeDBcon)
+                dbCon.close();
+        }
     }
 
     @Override
     public Attribute getAttribute(UUID attribUUID) throws Exception
     {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return getAttribute(attribUUID, true);
+    }
+    
+    private Attribute getAttribute(UUID attribUUID, boolean closeDBcon) throws Exception
+    {
+        if (attribUUID == null)
+        {
+            log.error("Cannot get an Attribute object with the given UUID because it is NULL!");
+            throw new NullPointerException("Cannot get an Attribute object with the given UUID because it is NULL!");
+        }
+        
+        if (!AttributeHelper.objectExists(attribUUID, dbCon))
+        {
+            log.error("There is no attribute with the given UUID: " + attribUUID.toString());
+            throw new RuntimeException("There is no attribute with the given UUID: " + attribUUID.toString());
+        }
+        
+        Attribute attribute = null;
+        try {
+            if (dbCon.isClosed())
+                dbCon.connect();
+            
+            String query = "SELECT * FROM Attribute WHERE attribUUID = '" + attribUUID + "'";
+            ResultSet rs = dbCon.executeQuery(query);
+            
+            // check if anything got returned (connection closed in finalise method)
+            if (rs.next())
+            {
+                String name = rs.getString("name");
+				String description = rs.getString("description");
+                String entityUUIDstr = rs.getString("entityUUID");
+                
+                if (entityUUIDstr == null)
+                {
+                    throw new RuntimeException("The attribute instance doesn't have an entity UUID");
+                }
+                
+                attribute = new Attribute(attribUUID, UUID.fromString(entityUUIDstr), name, description);
+            }
+            else // nothing in the result set
+            {
+                log.error("There is no attribute with the given UUID: " + attribUUID.toString());
+                throw new RuntimeException("There is no attribute with the given UUID: " + attribUUID.toString());
+            }
+        } catch (Exception ex) {
+            log.error("Error while quering the database: " + ex.getMessage(), ex);
+            throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
+        } finally {
+            if (closeDBcon)
+                dbCon.close();
+        }
+        
+        return attribute;
     }
 
     @Override
     public Set<Attribute> getAttributesForEntity(UUID entityUUID) throws Exception
     {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return getAttributesForEntity(entityUUID, true);
+    }
+    
+    private Set<Attribute> getAttributesForEntity(UUID entityUUID, boolean closeDBcon) throws Exception
+    {
+        if (entityUUID == null)
+        {
+            log.error("Cannot get any Attribute objects for an Entity with the given UUID because it is NULL!");
+            throw new NullPointerException("Cannot get any Attribute objects for an Entity with the given UUID because it is NULL!");
+        }
+        
+        if (!EntityHelper.objectExists(entityUUID, dbCon))
+        {
+            log.error("There is no entity with the given UUID: " + entityUUID.toString());
+            throw new RuntimeException("There is no entity with the given UUID: " + entityUUID.toString());
+        }
+        
+        Set<Attribute> attributes = new HashSet<Attribute>();;
+        try {
+            if (dbCon.isClosed())
+                dbCon.connect();
+            
+            String query = "SELECT * FROM Attribute WHERE entityUUID = '" + entityUUID + "'";
+            ResultSet rs = dbCon.executeQuery(query);
+            
+            // check if anything got returned (connection closed in finalise method)
+            while (rs.next())
+            {
+                String attribUUIDstr = rs.getString("attribUUID");
+                String entityUUIDstr = rs.getString("entityUUID");
+                String name = rs.getString("name");
+				String description = rs.getString("description");
+                
+                if (attribUUIDstr == null)
+                {
+                    throw new RuntimeException("The attribute instance doesn't have a UUID");
+                }
+                
+                if (entityUUIDstr == null)
+                {
+                    throw new RuntimeException("The attribute instance doesn't have an entity UUID");
+                }
+                
+                attributes.add(new Attribute(UUID.fromString(attribUUIDstr), UUID.fromString(entityUUIDstr), name, description));
+            }
+            
+        } catch (Exception ex) {
+            log.error("Error while quering the database: " + ex.getMessage(), ex);
+            throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
+        } finally {
+            if (closeDBcon)
+                dbCon.close();
+        }
+        
+        return attributes;
     }
     
     
@@ -318,10 +623,25 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     public void saveMetricGenerator(MetricGenerator metricGen, UUID experimentUUID) throws Exception
     {
         throw new UnsupportedOperationException("Not supported yet.");
+        // validate with helper
+        
+        // check that the experiment UUID is valid
+        
+        // check that the metric generator UUID given is valid/unique
+        
+        // check if the UUIDs for entities given are valid
+        
+        
+        
     }
 
     @Override
     public MetricGenerator getMetricGenerator(UUID metricGenUUID) throws Exception
+    {
+        return getMetricGenerator(metricGenUUID, true);
+    }
+    
+    private MetricGenerator getMetricGenerator(UUID metricGenUUID, boolean closeDBcon) throws Exception
     {
         throw new UnsupportedOperationException("Not supported yet.");
     }
@@ -367,11 +687,21 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     @Override
     public MetricGroup getMetricGroup(UUID metricGroupUUID) throws Exception
     {
+        return getMetricGroup(metricGroupUUID, true);
+    }
+    
+    private MetricGroup getMetricGroup(UUID metricGroupUUID, boolean closeDBcon) throws Exception
+    {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public Set<MetricGroup> getMetricGroupsForMetricGenerator(UUID metricGenUUID) throws Exception
+    {
+        return getMetricGroupsForMetricGenerator(metricGenUUID, true);
+    }
+    
+    private Set<MetricGroup> getMetricGroupsForMetricGenerator(UUID metricGenUUID, boolean closeDBcon) throws Exception
     {
         throw new UnsupportedOperationException("Not supported yet.");
     }
@@ -389,11 +719,21 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     @Override
     public MeasurementSet getMeasurementSet(UUID measurementSetUUID) throws Exception
     {
+        return getMeasurementSet(measurementSetUUID, true);
+    }
+    
+    private MeasurementSet getMeasurementSet(UUID measurementSetUUID, boolean closeDBcon) throws Exception
+    {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public Set<MeasurementSet> getMeasurementSetForMetricGroup(UUID metricGroupUUID) throws Exception
+    {
+        return getMeasurementSetForMetricGroup(metricGroupUUID, true);
+    }
+    
+    private Set<MeasurementSet> getMeasurementSetForMetricGroup(UUID metricGroupUUID, boolean closeDBcon) throws Exception
     {
         throw new UnsupportedOperationException("Not supported yet.");
     }
@@ -411,11 +751,21 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     @Override
     public Metric getMetric(UUID metricUUID) throws Exception
     {
+        return getMetric(metricUUID, true);
+    }
+    
+    private Metric getMetric(UUID metricUUID, boolean closeDBcon) throws Exception
+    {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public Metric getMetricForMeasurementSet(UUID measurementSetUUID) throws Exception
+    {
+        return getMetricForMeasurementSet(measurementSetUUID, true);
+    }
+    
+    private Metric getMetricForMeasurementSet(UUID measurementSetUUID, boolean closeDBcon) throws Exception
     {
         throw new UnsupportedOperationException("Not supported yet.");
     }
@@ -432,6 +782,11 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
 
     @Override
     public Measurement getMeasurement(UUID measurementUUID) throws Exception
+    {
+        return getMeasurement(measurementUUID, true);
+    }
+    
+    private Measurement getMeasurement(UUID measurementUUID, boolean closeDBcon) throws Exception
     {
         throw new UnsupportedOperationException("Not supported yet.");
     }
