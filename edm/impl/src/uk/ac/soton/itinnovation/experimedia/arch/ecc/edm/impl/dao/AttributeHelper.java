@@ -78,7 +78,7 @@ public class AttributeHelper
         {
             if (!EntityHelper.objectExists(attrib.getEntityUUID(), dbCon))
             {
-                return new ValidationReturnObject(false, new RuntimeException("The Attribute's Entity does not exist"));
+                return new ValidationReturnObject(false, new RuntimeException("The Attribute's Entity does not exist (UUID: " + attrib.getEntityUUID().toString() + ")"));
             }
         }
         

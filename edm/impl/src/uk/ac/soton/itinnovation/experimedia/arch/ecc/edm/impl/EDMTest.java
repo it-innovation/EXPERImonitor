@@ -47,9 +47,14 @@ import org.jscience.physics.amount.Amount;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Attribute;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Entity;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricType;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.dao.ExperimentDataManagerDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IEntityDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IExperimentDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IMetricDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IMetricGeneratorDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IMetricGroupDAO;
 
 /**
  *
@@ -100,11 +105,16 @@ public class EDMTest
         UUID expUUID = UUID.fromString("bfe4c710-61ba-46f8-a519-be2f7808192e");
         UUID entityUUID = UUID.fromString("5718cd67-4310-4b2c-aeb9-9b72314630ca");
         UUID attributeUUID = UUID.fromString("4f2817b5-603a-4d02-a032-62cfca314962");
+        UUID mGenUUID = UUID.fromString("782e5097-2e29-4219-a984-bf48dfcd7f63");
         
         //-- Create and get experiments --//
-        experiments(edm, expUUID);
+        //experiments(edm, expUUID);
         
-        entities(edm, entityUUID, attributeUUID);
+        //entities(edm, entityUUID, attributeUUID);
+        
+        //metrics(edm);
+        
+        metricGenerator(edm, expUUID, entityUUID, mGenUUID);
     }
     
     public static void experiments(ExperimentDataManager edm, UUID expUUID) throws Exception
@@ -299,5 +309,94 @@ public class EDMTest
                 } // end else there are attributes
             } // end for all entities
         } // end if entities == null
+    }
+    
+    public static void metrics(ExperimentDataManager edm) throws Exception
+    {
+        IMetricDAO metricDAO = null;
+        try {
+            metricDAO = edm.getMetricDAO();
+        } catch (Exception ex) {
+            log.error ("Unable to get Metric DAO: " + ex.getMessage(), ex);
+            throw ex;
+        }
+        
+        log.info("Saving metric");
+        Metric metric = new Metric();
+        metric.setMetricType(MetricType.RATIO);
+        metric.setUnit(METRES_PER_SECOND);
+        log.info("Unit set to: " + metric.getUnit());
+        
+        try {
+            metricDAO.saveMetric(metric);
+            log.info("Metric saved successfully!");
+        } catch (Exception ex) {
+            log.error("Unable to save metric: " + ex.getMessage());
+        }
+        
+        Metric metricFromDB = null;
+        
+        try {
+            metricFromDB = metricDAO.getMetric(metric.getUUID());
+        } catch (Exception ex) {
+            log.error("Unable to get metric from the DB");
+        }
+        
+        if (metricFromDB != null)
+        {
+            log.info("Metric details:");
+            log.info("  - UUID: " + metric.getUUID());
+            log.info("  - Type: " + metric.getMetricType());
+            log.info("  - Unit: " + metric.getUnit());
+        }
+    }
+
+    public static void metricGenerator(ExperimentDataManager edm, UUID expUUID, UUID entityUUID, UUID mGenUUID) throws Exception
+    {
+        IMetricGeneratorDAO metricGeneratorDAO = null;
+        try {
+            metricGeneratorDAO = edm.getMetricGeneratorDAO();
+        } catch (Exception ex) {
+            log.error ("Unable to get MetricGenerator DAO: " + ex.getMessage(), ex);
+            throw ex;
+        }
+        
+        log.info("Saving MetricGenerator");
+        MetricGenerator metricGenerator = new MetricGenerator(mGenUUID, "MetricGenerator", "A description");
+        metricGenerator.addEntity(entityUUID);
+        
+        try {
+            metricGeneratorDAO.saveMetricGenerator(metricGenerator, expUUID);
+            log.info("MetricGenerator saved successfully!");
+        } catch (Exception ex) {
+            log.error("Unable to save MetricGenerator: " + ex.getMessage());
+        }
+        
+        log.info("Saving a random MetricGenerator");
+        MetricGenerator randomMetricGenerator = new MetricGenerator(UUID.randomUUID(), "Random MetricGenerator", "A random description");
+        randomMetricGenerator.addEntity(entityUUID);
+        
+        try {
+            metricGeneratorDAO.saveMetricGenerator(randomMetricGenerator, expUUID);
+            log.info("MetricGenerator saved successfully!");
+        } catch (Exception ex) {
+            log.error("Unable to save MetricGenerator: " + ex.getMessage());
+        }
+        
+        MetricGenerator metricGeneratorFromDB = null;
+        
+        try {
+            metricGeneratorFromDB = metricGeneratorDAO.getMetricGenerator(mGenUUID);
+        } catch (Exception ex) {
+            log.error("Unable to get MetricGenerator from the DB");
+        }
+        
+        if (metricGeneratorFromDB != null)
+        {
+            log.info("MetricGenerator details:");
+            log.info("  - UUID: " + metricGeneratorFromDB.getUUID());
+            log.info("  - Name: " + metricGeneratorFromDB.getName());
+            log.info("  - Desc: " + metricGeneratorFromDB.getDescription());
+        }
     }
 }

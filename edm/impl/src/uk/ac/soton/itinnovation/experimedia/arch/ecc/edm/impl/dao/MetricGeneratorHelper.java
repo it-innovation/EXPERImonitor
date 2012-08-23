@@ -24,11 +24,11 @@
 /////////////////////////////////////////////////////////////////////////
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.dao;
 
-import java.sql.ResultSet;
 import java.util.List;
 import java.util.UUID;
 import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGroup;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DBUtil;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DatabaseConnector;
 
@@ -40,7 +40,7 @@ public class MetricGeneratorHelper
 {
     static Logger log = Logger.getLogger(MetricGeneratorHelper.class);
     
-    public static ValidationReturnObject isObjectValidForSave(MetricGenerator mg, DatabaseConnector dbCon) throws Exception
+    public static ValidationReturnObject isObjectValidForSave(MetricGenerator mg, UUID expUUID, DatabaseConnector dbCon) throws Exception
     {
         if (mg == null)
         {
@@ -59,13 +59,30 @@ public class MetricGeneratorHelper
             return new ValidationReturnObject(false, new NullPointerException("The MetricGenerator name is NULL"));
         }
         
-        if (mg.getEntities() == null)
+        // check if it exists in the DB already
+        try {
+            if (objectExists(mg.getUUID(), dbCon))
+            {
+                return new ValidationReturnObject(false, new RuntimeException("The MetricGenerator already exists; the UUID is not unique"));
+            }
+        } catch (Exception ex) {
+            throw ex;
+        }
+        
+        // check if the experiment exists in the DB
+        try {
+            if (!ExperimentHelper.objectExists(expUUID, dbCon))
+            {
+                return new ValidationReturnObject(false, new RuntimeException("The Experiment specified for the MetricGenerator does not exist! UUID not found: " + expUUID.toString()));
+            }
+        } catch (Exception ex) {
+            throw ex;
+        }
+        
+        // check the entities
+        if ((mg.getEntities() == null) || mg.getEntities().isEmpty())
         {
             return new ValidationReturnObject(false, new NullPointerException("The MetricGenerator does not have any entities defined"));
-        }
-        else if (mg.getEntities().isEmpty())
-        {
-            return new ValidationReturnObject(false, new RuntimeException("The MetricGenerator does not have any entities defined"));
         }
         else
         {
@@ -80,24 +97,28 @@ public class MetricGeneratorHelper
                 }
                 else if (!EntityHelper.objectExists(entityUUID, dbCon))
                 {
-                    return new ValidationReturnObject(false, new RuntimeException("The Entity the Metric Generator points to does not exist in the DB (entity UUID: " + entityUUID.toString() + ")"));
+                    return new ValidationReturnObject(false, new RuntimeException("An Entity the Metric Generator points to does not exist in the DB (entity UUID: " + entityUUID.toString() + ")"));
                 }
             }
         }
         
-        if (mg.getUUID() == null)
+        // if any metric groups, check if they are valid
+        if ((mg.getMetricGroups() != null) || !mg.getMetricGroups().isEmpty())
         {
-            return new ValidationReturnObject(false, new NullPointerException("The MetricGenerator UUID is NULL"));
-        }
-        
-        // check if it exists in the DB already
-        try {
-            if (objectExists(mg.getUUID(), dbCon))
+            for (MetricGroup mGrp : mg.getMetricGroups())
             {
-                return new ValidationReturnObject(false, new RuntimeException("The MetricGenerator already exists; the UUID is not unique"));
+                if (mGrp == null)
+                {
+                    if (mg.getMetricGroups().size() > 0)
+                        return new ValidationReturnObject(false, new NullPointerException("One or more MetricGroup objects are NULL"));
+                    else
+                        return new ValidationReturnObject(false, new NullPointerException("The MetricGenerator's MetricGroup is NULL"));
+                }
+                else if (!MetricGroupHelper.objectExists(mGrp.getUUID(), dbCon))
+                {
+                    return new ValidationReturnObject(false, new RuntimeException("A MetricGroup the Metric Generator points to does not exist in the DB (UUID: " + mGrp.toString() + ")"));
+                }
             }
-        } catch (Exception ex) {
-            throw ex;
         }
         
         return new ValidationReturnObject(true);
@@ -114,16 +135,19 @@ public class MetricGeneratorHelper
      * @param valueNames
      * @param values 
      */
-    public static void getTableNamesAndValues(MetricGenerator mg, List<String> valueNames, List<String> values)
+    public static void getTableNamesAndValues(MetricGenerator mg, UUID expUUID, List<String> valueNames, List<String> values)
     {
         if (mg == null)
             return;
         
         if ((valueNames == null) || (values == null))
             return;
+
+        valueNames.add("mGenUUID");
+        values.add("'" + mg.getUUID().toString() + "'");
         
         valueNames.add("expUUID");
-        values.add("'" + mg.getUUID().toString() + "'");
+        values.add("'" + expUUID.toString() + "'");
         
         valueNames.add("name");
         values.add("'" + mg.getName() + "'");

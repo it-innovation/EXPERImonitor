@@ -26,6 +26,7 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -275,6 +276,19 @@ public class DatabaseConnector
             logger.error("SQLException caught when check if the connection was open: " + ex.getMessage(), ex);
             return true;
         }
+    }
+    
+    /**
+     * Get a connection object to the database.
+     * @return A Connection object if connected to the database.
+     * @throws Exception Throws an exception if not connected to the database, or any other technical exception.
+     */
+    public Connection getConnection() throws Exception
+    {
+        if (isClosed())
+            throw new RuntimeException("Cannot give a connection that's not been established yet - use the connect method first!");
+        
+        return this.connection;
     }
 
     /**

@@ -81,7 +81,7 @@ public class EntityHelper
                 }
                 else if (!attrib.getEntityUUID().equals(entity.getUUID()))
                 {
-                    return new ValidationReturnObject(false, new RuntimeException("The Entity UUID of an Attribute is not equal to the Entity that it's supposed to be saved with (attribute UUID " + attrib.getUUID() + ")"));
+                    return new ValidationReturnObject(false, new RuntimeException("The Entity UUID of an Attribute is not equal to the Entity that it's supposed to be saved with (attribute UUID " + attrib.getUUID().toString() + ")"));
                 }
             }
         }

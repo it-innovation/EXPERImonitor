@@ -24,6 +24,11 @@
 /////////////////////////////////////////////////////////////////////////
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.dao;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -33,6 +38,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.Vector;
+import javax.measure.unit.Unit;
 import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Attribute;
@@ -42,6 +49,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Me
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Metric;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGroup;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricType;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.EDMUtil;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DBUtil;
@@ -332,7 +340,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
                 }
             }
         } catch (Exception ex) {
-            
+            throw ex;
         } finally {
             dbCon.close();
         }
@@ -622,17 +630,114 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     @Override
     public void saveMetricGenerator(MetricGenerator metricGen, UUID experimentUUID) throws Exception
     {
-        throw new UnsupportedOperationException("Not supported yet.");
-        // validate with helper
+        // this validation will check if all the required parameters are set and if
+        // there isn't already a duplicate instance in the DB
+        // will validate the attributes too, if any are given
+        ValidationReturnObject returnObj = MetricGeneratorHelper.isObjectValidForSave(metricGen, experimentUUID, dbCon);
+        if (!returnObj.valid)
+        {
+            log.error("Cannot save the MetricGenerator object: " + returnObj.exception.getMessage(), returnObj.exception);
+            throw returnObj.exception;
+        }
         
-        // check that the experiment UUID is valid
+        boolean exception = false;
+        try {
+            if (dbCon.isClosed())
+                dbCon.connect();
+            
+            // get the table names and values according to what's available in the
+            // object
+            List<String> valueNames = new ArrayList<String>();
+            List<String> values = new ArrayList<String>();
+            MetricGeneratorHelper.getTableNamesAndValues(metricGen, experimentUUID, valueNames, values);
+            
+            String query = DBUtil.getInsertIntoQuery("MetricGenerator", valueNames, values);
+            ResultSet rs = dbCon.executeQuery(query, Statement.RETURN_GENERATED_KEYS);
+            
+            // check if the result set got the generated table key
+            if (rs.next()) {
+                String key = rs.getString(1);
+                log.debug("Saved MetricGenerator " + metricGen.getName() + " with key: " + key);
+            } else {
+                throw new RuntimeException("No index returned after saving MetricGenerator " + metricGen.getName());
+            }
+        } catch (Exception ex) {
+            exception = true;
+            log.error("Error while saving MetricGenerator: " + ex.getMessage(), ex);
+            throw new RuntimeException("Error while saving MetricGenerator: " + ex.getMessage(), ex);
+        } finally {
+            if (exception || (metricGen.getMetricGroups() == null) || metricGen.getMetricGroups().isEmpty())
+                dbCon.close();
+        }
         
-        // check that the metric generator UUID given is valid/unique
+        try {
+            // save any metric groups if not NULL
+            if ((metricGen.getMetricGroups() != null) || !metricGen.getMetricGroups().isEmpty())
+            {
+                for (MetricGroup mGrp : metricGen.getMetricGroups())
+                {
+                    if (mGrp != null)
+                        this.saveMetricGroup(mGrp, false); // flag not to close the DB connection
+                }
+            }
+        } catch (Exception ex) {
+            exception = true;
+            throw ex;
+        } finally {
+            if (exception)
+                dbCon.close();
+        }
         
-        // check if the UUIDs for entities given are valid
+        try {
+            // make link between MG and Entity in MetricGenerator_Entity table
+            for (UUID entityUUID : metricGen.getEntities())
+            {
+                linkMetricGeneratorAndEntity(metricGen.getUUID(), entityUUID, false);
+            }
+        } catch (Exception ex) {
+            exception = true;
+            throw ex;
+        } finally {
+            dbCon.close();
+        }
+    }
+    
+    private void linkMetricGeneratorAndEntity(UUID mGenUUID, UUID entityUUID, boolean closeDBcon) throws Exception
+    {
+        if (mGenUUID == null)
+        {
+            log.error("Cannot link metric generator and entity because the metric generator UUID is NULL!");
+            throw new NullPointerException("Cannot link metric generator and entity because the metric generator UUID is NULL!");
+        }
         
+        if (entityUUID == null)
+        {
+            log.error("Cannot link metric generator and entity because the entity UUID is NULL!");
+            throw new NullPointerException("Cannot link metric generator and entity because the entity UUID is NULL!");
+        }
         
-        
+        try {
+            if (dbCon.isClosed())
+                dbCon.connect();
+            
+            String query = "INSERT INTO MetricGenerator_Entity (mGenUUID, entityUUID) VALUES ("
+                    + "'" + mGenUUID.toString() + "', '" + entityUUID.toString() + "')";
+            ResultSet rs = dbCon.executeQuery(query, Statement.RETURN_GENERATED_KEYS);
+            
+            // check if the result set got the generated table key
+            if (rs.next()) {
+                String key = rs.getString(1);
+                log.debug("Saved MetricGenerator - Entity link");
+            } else {
+                throw new RuntimeException("No index returned after saving MetricGenerator - Entity link");
+            }
+        } catch (Exception ex) {
+            log.error("Error while saving MetricGenerator - Entity link: " + ex.getMessage(), ex);
+            throw new RuntimeException("Error while saving MetricGenerator - Entity link: " + ex.getMessage(), ex);
+        } finally {
+            if (closeDBcon)
+                dbCon.close();
+        }
     }
 
     @Override
@@ -643,7 +748,102 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     
     private MetricGenerator getMetricGenerator(UUID metricGenUUID, boolean closeDBcon) throws Exception
     {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (metricGenUUID == null)
+        {
+            log.error("Cannot get a MetricGenerator object with the given UUID because it is NULL!");
+            throw new NullPointerException("Cannot get a MetricGenerator object with the given UUID because it is NULL!");
+        }
+        
+        if (!MetricGeneratorHelper.objectExists(metricGenUUID, dbCon))
+        {
+            log.error("There is no MetricGenerator with the given UUID: " + metricGenUUID.toString());
+            throw new RuntimeException("There is no MetricGenerator with the given UUID: " + metricGenUUID.toString());
+        }
+        
+        MetricGenerator metricGenerator = null;
+        boolean exception = false;
+        try {
+            if (dbCon.isClosed())
+                dbCon.connect();
+            
+            String query = "SELECT * FROM MetricGenerator WHERE mGenUUID = '" + metricGenUUID + "'";
+            ResultSet rs = dbCon.executeQuery(query);
+            
+            // check if anything got returned (connection closed in finalise method)
+            if (rs.next())
+            {
+                String name = rs.getString("name");
+				String description = rs.getString("description");
+                
+                metricGenerator = new MetricGenerator(metricGenUUID, name, description);
+            }
+            else // nothing in the result set
+            {
+                log.error("There is no MetricGenerator with the given UUID: " + metricGenUUID.toString());
+                throw new RuntimeException("There is no MetricGenerator with the given UUID: " + metricGenUUID.toString());
+            }
+        } catch (Exception ex) {
+            exception = true;
+            log.error("Error while quering the database: " + ex.getMessage(), ex);
+            throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
+        } finally {
+            if (exception)
+                dbCon.close();
+        }
+        
+        // check if there's any metric groups
+        Set<MetricGroup> metricGroups = null;
+        
+        try {
+            metricGroups = this.getMetricGroupsForMetricGenerator(metricGenUUID, false); // don't close the connection
+        } catch (Exception ex) {
+            log.error("Caught an exception when getting metric groups for MetricGenerator (UUID: " + metricGenUUID.toString() + "): " + ex.getMessage());
+            throw new RuntimeException("Unable to get MetricGenerator object due to an issue with getting its metric groups: " + ex.getMessage(), ex);
+        } finally {
+            if (closeDBcon)
+                dbCon.close();
+        }
+        
+        metricGenerator.setMetricGroups(metricGroups);
+        
+        // get any entityUUID links
+        Set<UUID> entities = new HashSet<UUID>();
+        
+        try {
+            if (dbCon.isClosed())
+                dbCon.connect();
+            
+            String query = "SELECT entityUUID FROM MetricGenerator_Entity WHERE mGenUUID = '" + metricGenUUID + "'";
+            ResultSet rs = dbCon.executeQuery(query);
+            
+            // check if anything got returned (connection closed in finalise method)
+            if (rs.next())
+            {
+                String entityUUIDstr = rs.getString("entityUUID");
+                if (entityUUIDstr == null)
+                {
+                    log.error("Unable to get Entity UUID from the DB for the MetricGenerator");
+                    throw new RuntimeException("Unable to get Entity UUID from the DB for the MetricGenerator");
+                }
+                
+                entities.add(metricGenUUID);
+            }
+            else // nothing in the result set
+            {
+                log.error("There is no Entitis found that are linked to the MetricGenerator with the given UUID: " + metricGenUUID.toString());
+                throw new RuntimeException("There is no Entitis found that are linked to the MetricGenerator with the given UUID: " + metricGenUUID.toString());
+            }
+        } catch (Exception ex) {
+            exception = true;
+            log.error("Error while quering the database: " + ex.getMessage(), ex);
+            throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
+        } finally {
+            dbCon.close();
+        }
+        
+        metricGenerator.setEntities(entities);
+        
+        return metricGenerator;
     }
 
     @Override
@@ -681,6 +881,11 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     @Override
     public void saveMetricGroup(MetricGroup metricGroup) throws Exception
     {
+        saveMetricGroup(metricGroup, true);
+    }
+    
+    public void saveMetricGroup(MetricGroup metricGroup, boolean closeDBcon) throws Exception
+    {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -703,7 +908,9 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     
     private Set<MetricGroup> getMetricGroupsForMetricGenerator(UUID metricGenUUID, boolean closeDBcon) throws Exception
     {
-        throw new UnsupportedOperationException("Not supported yet.");
+        Set<MetricGroup> metricGroups = new HashSet<MetricGroup>();
+        
+        return metricGroups;
     }
     
     
@@ -714,6 +921,14 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     public void saveMeasurementSet(MeasurementSet measurementSet) throws Exception
     {
         throw new UnsupportedOperationException("Not supported yet.");
+        
+        // validate object
+        //   what to do about metric validation??
+        
+        // save metric
+        //    what to do if metric exists already?
+        
+        // save measurement set
     }
 
     @Override
@@ -745,7 +960,58 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     @Override
     public void saveMetric(Metric metric) throws Exception
     {
-        throw new UnsupportedOperationException("Not supported yet.");
+        saveMetric(metric, true);
+    }
+    
+    public void saveMetric(Metric metric, boolean closeDBcon) throws Exception
+    {
+        log.info("Saving metric");
+        
+        // this validation will check if all the required parameters are set and if
+        // there isn't already a duplicate instance in the DB
+        ValidationReturnObject returnObj = MetricHelper.isObjectValidForSave(metric, dbCon);
+        if (!returnObj.valid)
+        {
+            log.error("Cannot save the Metric object: " + returnObj.exception.getMessage(), returnObj.exception);
+            throw returnObj.exception;
+        }
+        
+        try {
+            if (dbCon.isClosed())
+                dbCon.connect();
+            
+            // serialising unit
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(bos);
+
+            oos.writeObject(metric.getUnit());
+            oos.flush();
+            oos.close();
+            bos.close();
+
+            byte[] unitBytes = bos.toByteArray();
+        
+            String query = "INSERT INTO Metric (metricUUID, mType, unit) VALUES (?, ?, ?)";
+            PreparedStatement pstmt = dbCon.getConnection().prepareStatement(query);
+            pstmt.setObject(1, metric.getUUID(), java.sql.Types.OTHER);
+            pstmt.setString(2, metric.getMetricType().name());
+            pstmt.setObject(3, unitBytes);
+            
+            int rowCount = pstmt.executeUpdate();
+            
+            // check if the result set got the generated table key
+            if (rowCount > 0) {
+                log.debug("Saved metric with uuid: " + metric.getUUID().toString());
+            } else {
+                throw new RuntimeException("Metric did not get saved in the database (PreparedStatement returned 0 rows)");
+            }//end of debugging
+        } catch (Exception ex) {
+            log.error("Error while saving metric: " + ex.getMessage(), ex);
+            throw new RuntimeException("Error while saving metric: " + ex.getMessage(), ex);
+        } finally {
+            if (closeDBcon)
+                dbCon.close();
+        }
     }
 
     @Override
@@ -756,7 +1022,68 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     
     private Metric getMetric(UUID metricUUID, boolean closeDBcon) throws Exception
     {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (metricUUID == null)
+        {
+            log.error("Cannot get a Metric object with the given UUID because it is NULL!");
+            throw new NullPointerException("Cannot get a Metric object with the given UUID because it is NULL!");
+        }
+        
+        if (!ExperimentHelper.objectExists(metricUUID, dbCon))
+        {
+            log.error("There is no metric with the given UUID: " + metricUUID.toString());
+            throw new RuntimeException("There is no metric with the given UUID: " + metricUUID.toString());
+        }
+        
+        Metric metric = null;
+        
+        try {
+            if (dbCon.isClosed())
+                dbCon.connect();
+        
+            String query = "SELECT * FROM Metric WHERE metricUUID = '" + metricUUID.toString() + "'";
+            ResultSet rs = dbCon.executeQuery(query);
+            
+            // check if anything got returned (connection closed in finalise method)
+            if (rs.next())
+            {
+                ByteArrayInputStream bais;
+                ObjectInputStream ins;
+                Unit unit;
+
+                try {
+                    bais = new ByteArrayInputStream(rs.getBytes("unit"));
+                    ins = new ObjectInputStream(bais);
+                    unit =(Unit)ins.readObject();
+                    ins.close();
+                }
+                catch (Exception e) {
+                    log.error("Unable to read the unit from the database");
+                    throw new RuntimeException("Unable to read the unit from the database");
+                }
+                
+                String metricTypeStr = rs.getString("mType");
+                if (metricTypeStr == null)
+                {
+                    log.error("Unable to get the metric type from the database");
+                    throw new RuntimeException("Unable to get the metric type from the database");
+                }
+                
+                metric = new Metric(metricUUID, MetricType.fromValue(metricTypeStr), unit);
+            }
+            else // nothing in the result set
+            {
+                log.error("There is no metric with the given UUID: " + metricUUID.toString());
+                throw new RuntimeException("There is no metric with the given UUID: " + metricUUID.toString());
+            }
+        } catch (Exception ex) {
+            log.error("Error while getting metric: " + ex.getMessage(), ex);
+            throw new RuntimeException("Error while getting metric: " + ex.getMessage(), ex);
+        } finally {
+            if (closeDBcon)
+                dbCon.close();
+        }
+        
+        return metric;
     }
 
     @Override
@@ -767,7 +1094,75 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     
     private Metric getMetricForMeasurementSet(UUID measurementSetUUID, boolean closeDBcon) throws Exception
     {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (measurementSetUUID == null)
+        {
+            log.error("Cannot get a Metric object for the given measurement set, because its given UUID is NULL!");
+            throw new NullPointerException("Cannot get a Metric object for the given measurement set, because its given UUID is NULL!");
+        }
+        
+        if (!MeasurementSetHelper.objectExists(measurementSetUUID, dbCon))
+        {
+            log.error("There is no measurement set with the given UUID: " + measurementSetUUID.toString());
+            throw new RuntimeException("There is no measurement set with the given UUID: " + measurementSetUUID.toString());
+        }
+        
+        Metric metric = null;
+        
+        try {
+            if (dbCon.isClosed())
+                dbCon.connect();
+        
+            // TODO: validate that this is correct!
+            String query = "SELECT * FROM Metric WHERE metricUUID = (SELECT metricUUID FROM MeasurementSet WHERE mSetUUID = '" + measurementSetUUID + "')";
+            ResultSet rs = dbCon.executeQuery(query);
+            
+            // check if anything got returned (connection closed in finalise method)
+            if (rs.next())
+            {
+                String uuidStr = rs.getString("metricUUID");
+                if (uuidStr == null)
+                {
+                    log.error("Unable to get the metric UUID from the database");
+                    throw new RuntimeException("Unable to get the metric UUID from the database");
+                }
+                
+                String metricTypeStr = rs.getString("mType");
+                if (metricTypeStr == null)
+                {
+                    log.error("Unable to get the metric type from the database");
+                    throw new RuntimeException("Unable to get the metric type from the database");
+                }
+                ByteArrayInputStream bais;
+                ObjectInputStream ins;
+                Unit unit;
+
+                try {
+                    bais = new ByteArrayInputStream(rs.getBytes("unit"));
+                    ins = new ObjectInputStream(bais);
+                    unit =(Unit)ins.readObject();
+                    ins.close();
+                }
+                catch (Exception e) {
+                    log.error("Unable to read the unit from the database");
+                    throw new RuntimeException("Unable to read the unit from the database");
+                }
+                
+                metric = new Metric(UUID.fromString(uuidStr), MetricType.fromValue(metricTypeStr), unit);
+            }
+            else // nothing in the result set
+            {
+                log.error("Didn't find any metric for measurement set with the given UUID: " + measurementSetUUID.toString());
+                throw new RuntimeException("Didn't find any metric for measurement set with the given UUID: " + measurementSetUUID.toString());
+            }
+        } catch (Exception ex) {
+            log.error("Error while getting metric for measurement set: " + ex.getMessage(), ex);
+            throw new RuntimeException("Error while getting metric for measurement set: " + ex.getMessage(), ex);
+        } finally {
+            if (closeDBcon)
+                dbCon.close();
+        }
+        
+        return metric;
     }
     
     
