@@ -82,6 +82,22 @@ public class MeasurementSet implements Serializable
     }
     
     /**
+     * Constructor to set the attributes of the Measurement Set except for measurements.
+     * @param uuid The UUID used to uniquely identify a measurement set in this framework.
+     * @param attributeUUID The UUID of the attribute this measurement set defines measurements of.
+     * @param metricGroupUUID The UUID of the metric group this measurement set is a part of.
+     * @param metric The metric of the measurements.
+     */
+    public MeasurementSet(UUID uuid, UUID attributeUUID, UUID metricGroupUUID, Metric metric)
+    {
+        this();
+        this.uuid = uuid;
+        this.attributeUUID = attributeUUID;
+        this.metricGroupUUID = metricGroupUUID;
+        this.metric = metric;
+    }
+    
+    /**
      * Constructor to set all the attributes of the Measurement Set.
      * @param uuid The UUID used to uniquely identify a measurement set in this framework.
      * @param attributeUUID The UUID of the attribute this measurement set defines measurements of.
@@ -183,7 +199,7 @@ public class MeasurementSet implements Serializable
      * Add a measurement to the set.
      * @param measurement the measurement to add.
      */
-    public void addMeasurements(Measurement measurement)
+    public void addMeasurement(Measurement measurement)
     {
         if (measurement == null)
             return;
