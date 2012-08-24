@@ -38,6 +38,7 @@ public class Report
 {
     private UUID uuid;
     private MeasurementSet measurementSet;
+    private Date reportDate;
     private Date fromDate;
     private Date toDate;
     private Integer numberOfMeasurements;
@@ -63,6 +64,8 @@ public class Report
             this.uuid = UUID.fromString(report.getUUID().toString());
         if (report.getMeasurementSet() != null)
             this.measurementSet = new MeasurementSet(report.getMeasurementSet());
+        if (report.getReportDate() != null)
+            this.reportDate = new Date(report.getReportDate().getTime());
         if (report.getFromDate() != null)
             this.fromDate = new Date(report.getFromDate().getTime());
         if (report.getToDate() != null)
@@ -77,13 +80,15 @@ public class Report
      * Constructor to set the "administrative" attributes of the class.
      * @param uuid The UUID of the Report, to uniquely identify it.
      * @param measurementSet The measurement set that this is a report for.
+     * @param reportDate The time stamp for when the report was made.
      * @param fromDate The time stamp for the start of the report period.
      * @param toDate The time stamp for the end of the report period.
      */
-    public Report(UUID uuid, MeasurementSet measurementSet, Date fromDate, Date toDate)
+    public Report(UUID uuid, MeasurementSet measurementSet, Date reportDate, Date fromDate, Date toDate)
     {
         this.uuid = uuid;
         this.measurementSet = measurementSet;
+        this.reportDate = reportDate;
         this.fromDate = fromDate;
         this.toDate = toDate;
     }
@@ -92,13 +97,14 @@ public class Report
      * Constructor to set all the attributes of the class.
      * @param uuid The UUID of the Report, to uniquely identify it.
      * @param measurementSet The measurement set that this is a report for.
+     * @param reportDate The time stamp for when the report was made.
      * @param fromDate The time stamp for the start of the report period.
      * @param toDate The time stamp for the end of the report period.
      * @param numMeasurements The number of measurements in the reporting period.
      */
-    public Report(UUID uuid, MeasurementSet measurementSet, Date fromDate, Date toDate, Integer numMeasurements)
+    public Report(UUID uuid, MeasurementSet measurementSet, Date reportDate, Date fromDate, Date toDate, Integer numMeasurements)
     {
-        this(uuid, measurementSet, fromDate, toDate);
+        this(uuid, measurementSet, reportDate, fromDate, toDate);
         this.numberOfMeasurements = numMeasurements;
     }
     
@@ -132,6 +138,22 @@ public class Report
     public void setMeasurementSet(MeasurementSet measurementSet)
     {
         this.measurementSet = measurementSet;
+    }
+    
+    /**
+     * @return the reportDate
+     */
+    public Date getReportDate()
+    {
+        return reportDate;
+    }
+
+    /**
+     * @param reportDate the reportDate to set
+     */
+    public void setReportDate(Date reportDate)
+    {
+        this.reportDate = reportDate;
     }
 
     /**
