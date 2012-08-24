@@ -25,6 +25,7 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl;
 
 import java.util.Date;
+import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import javax.measure.quantity.Duration;
@@ -47,14 +48,21 @@ import org.jscience.physics.amount.Amount;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Attribute;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Entity;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Measurement;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGroup;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricType;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.dao.ExperimentDataManagerDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IEntityDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IExperimentDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IMeasurementDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IMeasurementSetDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IMetricDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IMetricGeneratorDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IMetricGroupDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IReportDAO;
 
 /**
  *
@@ -106,15 +114,32 @@ public class EDMTest
         UUID entityUUID = UUID.fromString("5718cd67-4310-4b2c-aeb9-9b72314630ca");
         UUID attributeUUID = UUID.fromString("4f2817b5-603a-4d02-a032-62cfca314962");
         UUID mGenUUID = UUID.fromString("782e5097-2e29-4219-a984-bf48dfcd7f63");
+        UUID mGrpUUID = UUID.fromString("189064a5-f1d8-41f2-b2c1-b88776841009");
+        UUID mSetUUID = UUID.fromString("2b915932-41b1-45d7-b4f6-2de4f30020b8");
+        UUID reportUUID = UUID.fromString("165c8058-5c67-4f92-ae34-df7ee2129821");
         
         //-- Create and get experiments --//
         //experiments(edm, expUUID);
         
-        //entities(edm, entityUUID, attributeUUID);
+        entities(edm, entityUUID, attributeUUID, expUUID);
         
         //metrics(edm);
         
-        metricGenerator(edm, expUUID, entityUUID, mGenUUID);
+        //metricGenerator(edm, expUUID, entityUUID, mGenUUID);
+        
+        //metricGroup(edm, mGenUUID, mGrpUUID);
+        
+        //measurementSet(edm, attributeUUID, mGrpUUID, mSetUUID);
+        
+        //measurement(edm, mSetUUID);
+        
+        experimentCompleteChain(edm, expUUID, entityUUID, attributeUUID, mGenUUID, mGrpUUID, mSetUUID);
+        
+        printDetailsForExperiment(edm, expUUID);
+        
+        saveReport(edm, mSetUUID, reportUUID);
+        
+        getReport(edm, mSetUUID, reportUUID);
     }
     
     public static void experiments(ExperimentDataManager edm, UUID expUUID) throws Exception
@@ -127,14 +152,14 @@ public class EDMTest
             throw ex;
         }
         
-        log.info("Saving Banana experiment");
+        log.info("Saving experiment");
         Experiment exp = new Experiment();
         exp.setUUID(expUUID);
-        exp.setName("Banana Experiment");
-        exp.setDescription("A very boring description...");
+        exp.setName("Experiment");
+        exp.setDescription("An experiment description...");
         exp.setStartTime(new Date(Long.parseLong("1345642421005")));
-        exp.setEndTime(new Date());
-        exp.setExperimentID("3543");
+        exp.setEndTime(new Date(Long.parseLong("1440413831014")));
+        exp.setExperimentID("/locations/experiment/1337");
         try {
             expDAO.saveExperiment(exp);
             log.info("Experiment '" + exp.getName() + "' saved successfully!");
@@ -147,7 +172,7 @@ public class EDMTest
         Experiment expRand = new Experiment();
         expRand.setName("Random Experiment");
         expRand.setDescription("A very boring description...");
-        expRand.setStartTime(new Date(Long.parseLong("1345642421005")));
+        expRand.setStartTime(new Date());
         try {
             expDAO.saveExperiment(expRand);
             log.info("Experiment '" + expRand.getName() + "' saved successfully!");
@@ -155,7 +180,7 @@ public class EDMTest
             log.error("Unable to save experiment: " + ex.getMessage());
         }
         
-        log.info("Getting Banana experiment object");
+        log.info("Getting experiment object");
         Experiment expFromDB = null;
         try {
             expFromDB = expDAO.getExperiment(expUUID);
@@ -203,7 +228,7 @@ public class EDMTest
         }
     }
     
-    public static void entities(ExperimentDataManager edm, UUID entityUUID, UUID attributeUUID) throws Exception
+    public static void entities(ExperimentDataManager edm, UUID entityUUID, UUID attributeUUID, UUID expUUID) throws Exception
     {
         IEntityDAO entityDAO = null;
         try {
@@ -213,12 +238,14 @@ public class EDMTest
             throw ex;
         }
         
-        log.info("Saving banana entity");
+        log.info("Saving VM entity");
         Entity entity = new Entity();
         entity.setUUID(entityUUID);
-        entity.setName("Banana");
-        entity.setDescription("A yellow, edible, herb... yes, herb!");
-        entity.addtAttribute(new Attribute(attributeUUID, entityUUID, "skin colour", "Colour of the slippery outer part of the banana that can be left on floors as a risk to health and safety"));
+        entity.setName("VM");
+        entity.setDescription("A Virtual Machine");
+        entity.addtAttribute(new Attribute(attributeUUID, entityUUID, "CPU", "CPU performance"));
+        entity.addtAttribute(new Attribute(UUID.randomUUID(), entityUUID, "Network", "Network performance"));
+        entity.addtAttribute(new Attribute(UUID.randomUUID(), entityUUID, "Disk", "Disk performance"));
         
         try {
             entityDAO.saveEntity(entity);
@@ -227,9 +254,9 @@ public class EDMTest
             log.error("Unable to save entity: " + ex.getMessage());
         }
         
-        log.info("Saving an extra attribute for the Banana Entity");
+        log.info("Saving an extra attribute for the VM Entity");
         try {
-            Attribute attrib = new Attribute(UUID.randomUUID(), entityUUID, "random attribute", "A random attribute for debugging");
+            Attribute attrib = new Attribute(UUID.randomUUID(), entityUUID, "Another attribute", "A random attribute for debugging");
             entityDAO.saveAttribute(attrib);
             log.info("Attribute '" + attrib.getName() + "' saved successfully!");
         } catch (Exception ex) {
@@ -309,48 +336,42 @@ public class EDMTest
                 } // end else there are attributes
             } // end for all entities
         } // end if entities == null
+        
+        log.info("Getting all entities for experiment " + expUUID.toString());
+        entities = null;
+        try {
+            entities = entityDAO.getEntitiesForExperiment(expUUID);
+        } catch (Exception ex) {
+            log.error("Unable to get entities: " + ex.getMessage());
+        }
+        
+        if (entities != null)
+        {
+            log.info("Got " + entities.size() + " entities:");
+            for (Entity ent : entities)
+            {
+                log.info(" * Entity details:");
+                if (ent.getUUID() != null) log.info("   - UUID:  " + ent.getUUID());
+                if (ent.getName() != null) log.info("   - Name:  " + ent.getName());
+                if (ent.getDescription() != null) log.info("   - Desc:  " + ent.getDescription());
+                if ((ent.getAttributes() == null) || ent.getAttributes().isEmpty()) {
+                    log.info("   - There are NO attributes");
+                } else {
+                    log.info("   - There are " + ent.getAttributes().size() + " attributes");
+                    for (Attribute attrib : ent.getAttributes())
+                    {
+                        if (attrib != null) {
+                            log.info("     - Attribute details:");
+                            if (attrib.getUUID() != null) log.info("       - UUID:  " + attrib.getUUID());
+                            if (attrib.getName() != null) log.info("       - Name:  " + attrib.getName());
+                            if (attrib.getDescription() != null) log.info("       - Desc:  " + attrib.getDescription());
+                        }
+                    }
+                } // end else there are attributes
+            } // end for all entities
+        } // end if entities == null
     }
     
-    public static void metrics(ExperimentDataManager edm) throws Exception
-    {
-        IMetricDAO metricDAO = null;
-        try {
-            metricDAO = edm.getMetricDAO();
-        } catch (Exception ex) {
-            log.error ("Unable to get Metric DAO: " + ex.getMessage(), ex);
-            throw ex;
-        }
-        
-        log.info("Saving metric");
-        Metric metric = new Metric();
-        metric.setMetricType(MetricType.RATIO);
-        metric.setUnit(METRES_PER_SECOND);
-        log.info("Unit set to: " + metric.getUnit());
-        
-        try {
-            metricDAO.saveMetric(metric);
-            log.info("Metric saved successfully!");
-        } catch (Exception ex) {
-            log.error("Unable to save metric: " + ex.getMessage());
-        }
-        
-        Metric metricFromDB = null;
-        
-        try {
-            metricFromDB = metricDAO.getMetric(metric.getUUID());
-        } catch (Exception ex) {
-            log.error("Unable to get metric from the DB");
-        }
-        
-        if (metricFromDB != null)
-        {
-            log.info("Metric details:");
-            log.info("  - UUID: " + metric.getUUID());
-            log.info("  - Type: " + metric.getMetricType());
-            log.info("  - Unit: " + metric.getUnit());
-        }
-    }
-
     public static void metricGenerator(ExperimentDataManager edm, UUID expUUID, UUID entityUUID, UUID mGenUUID) throws Exception
     {
         IMetricGeneratorDAO metricGeneratorDAO = null;
@@ -361,8 +382,8 @@ public class EDMTest
             throw ex;
         }
         
-        log.info("Saving MetricGenerator");
-        MetricGenerator metricGenerator = new MetricGenerator(mGenUUID, "MetricGenerator", "A description");
+        log.info("Saving Experiment MetricGenerator");
+        MetricGenerator metricGenerator = new MetricGenerator(mGenUUID, "Experiment MetricGenerator", "A description");
         metricGenerator.addEntity(entityUUID);
         
         try {
@@ -383,6 +404,7 @@ public class EDMTest
             log.error("Unable to save MetricGenerator: " + ex.getMessage());
         }
         
+        log.info("Getting metric generator by uuid: " + mGenUUID.toString());
         MetricGenerator metricGeneratorFromDB = null;
         
         try {
@@ -397,6 +419,451 @@ public class EDMTest
             log.info("  - UUID: " + metricGeneratorFromDB.getUUID());
             log.info("  - Name: " + metricGeneratorFromDB.getName());
             log.info("  - Desc: " + metricGeneratorFromDB.getDescription());
+        }
+        
+        log.info("Getting all metric generators");
+        Set<MetricGenerator> metricGeneratorsFromDB = null;
+        
+        try {
+            metricGeneratorsFromDB = metricGeneratorDAO.getMetricGenerators();
+        } catch (Exception ex) {
+            log.error("Unable to get MetricGenerator set from the DB");
+        }
+        
+        if (metricGeneratorsFromDB != null)
+        {
+            log.info("Got " + metricGeneratorsFromDB.size() + " metric generator(s):");
+            
+            for (MetricGenerator mGen : metricGeneratorsFromDB)
+            {
+                log.info("  * MetricGenerator details:");
+                log.info("    - UUID: " + mGen.getUUID());
+                log.info("    - Name: " + mGen.getName());
+                log.info("    - Desc: " + mGen.getDescription());
+            }
+        }
+        
+        UUID randomExpUUID = UUID.fromString("bd6a9cea-c69f-44c3-b89b-6a96b1f9538f");
+        log.info("Saving a random MetricGenerator for random experiment");
+        MetricGenerator randomMetricGenerator2 = new MetricGenerator(UUID.randomUUID(), "Random MetricGenerator", "A random description");
+        randomMetricGenerator2.addEntity(entityUUID);
+        
+        try {
+            metricGeneratorDAO.saveMetricGenerator(randomMetricGenerator2, randomExpUUID);
+            log.info("MetricGenerator saved successfully!");
+        } catch (Exception ex) {
+            log.error("Unable to save MetricGenerator: " + ex.getMessage());
+        }
+        
+        log.info("Getting all metric generators for experiment: " + randomExpUUID.toString());
+        metricGeneratorsFromDB = null;
+        
+        try {
+            metricGeneratorsFromDB = metricGeneratorDAO.getMetricGeneratorsForExperiment(randomExpUUID);
+        } catch (Exception ex) {
+            log.error("Unable to get MetricGenerator set from the DB");
+        }
+        
+        if (metricGeneratorsFromDB != null)
+        {
+            log.info("Got " + metricGeneratorsFromDB.size() + " metric generator(s):");
+            
+            for (MetricGenerator mGen : metricGeneratorsFromDB)
+            {
+                log.info("  * MetricGenerator details:");
+                log.info("    - UUID: " + mGen.getUUID());
+                log.info("    - Name: " + mGen.getName());
+                log.info("    - Desc: " + mGen.getDescription());
+            }
+        }
+    }
+    
+    public static void metricGroup(ExperimentDataManager edm, UUID mGenUUID, UUID mGrpUUID) throws Exception
+    {
+        IMetricGroupDAO metricGroupDAO = null;
+        try {
+            metricGroupDAO = edm.getMetricGroupDAO();
+        } catch (Exception ex) {
+            log.error ("Unable to get MetricGroup DAO: " + ex.getMessage(), ex);
+            throw ex;
+        }
+        
+        log.info("Saving QoS MetricGroup");
+        MetricGroup metricGroup = new MetricGroup(mGrpUUID, mGenUUID, "Quality of Service", "A group of QoS metrics");
+        
+        try {
+            metricGroupDAO.saveMetricGroup(metricGroup);
+            log.info("MetricGroup saved successfully!");
+        } catch (Exception ex) {
+            log.error("Unable to save MetricGroup: " + ex.getMessage(), ex);
+        }
+        
+        log.info("Saving Random MetricGroup");
+        MetricGroup randomGroup = new MetricGroup(UUID.randomUUID(), mGenUUID, "Random Metric Group", "A random group of metrics");
+        
+        try {
+            metricGroupDAO.saveMetricGroup(randomGroup);
+            log.info("MetricGroup saved successfully!");
+        } catch (Exception ex) {
+            log.error("Unable to save MetricGroup: " + ex.getMessage(), ex);
+        }
+    }
+    
+    public static void measurementSet(ExperimentDataManager edm, UUID attribUUID, UUID mGrpUUID, UUID mSetUUID) throws Exception
+    {
+        IMeasurementSetDAO mSetDAO = null;
+        try {
+            mSetDAO = edm.getMeasurementSetDAO();
+        } catch (Exception ex) {
+            log.error ("Unable to get MeasurementSet DAO: " + ex.getMessage(), ex);
+            throw ex;
+        }
+        
+        log.info("Saving QoS Measurement set");
+        Metric metric = new Metric(UUID.randomUUID(), MetricType.RATIO, MILLI(SECOND));
+        MeasurementSet mSet = new MeasurementSet(mSetUUID, attribUUID, mGrpUUID, metric);
+        
+        try {
+            mSetDAO.saveMeasurementSet(mSet);
+            log.info("MeasurementSet saved successfully!");
+        } catch (Exception ex) {
+            log.error("Unable to save MeasurementSet: " + ex.getMessage(), ex);
+        }
+        
+        log.info("Saving Random Measurement set");
+        Metric randomMetric = new Metric(UUID.randomUUID(), MetricType.INTERVAL, METRES_PER_SECOND);
+        MeasurementSet randomMSet = new MeasurementSet(UUID.randomUUID(), attribUUID, mGrpUUID, randomMetric);
+        
+        try {
+            mSetDAO.saveMeasurementSet(randomMSet);
+            log.info("MeasurementSet saved successfully!");
+        } catch (Exception ex) {
+            log.error("Unable to save MeasurementSet: " + ex.getMessage(), ex);
+        }
+    }
+    
+    public static void measurement(ExperimentDataManager edm, UUID mSetUUID) throws Exception
+    {
+        IMeasurementDAO measurementDAO = null;
+        try {
+            measurementDAO = edm.getMeasurementDAO();
+        } catch (Exception ex) {
+            log.error ("Unable to get Measurement DAO: " + ex.getMessage(), ex);
+            throw ex;
+        }
+        
+        log.info("Saving random measurement for QoS measurement set");
+        Random rand = new Random();
+        rand.setSeed(new Date().getTime());
+        Measurement measurement = new Measurement(UUID.randomUUID(), mSetUUID, new Date(), String.valueOf(rand.nextLong()));
+        
+        try {
+            measurementDAO.saveMeasurement(measurement);
+            log.info("Measurement saved successfully!");
+        } catch (Exception ex) {
+            log.error("Unable to save Measurement: " + ex.getMessage(), ex);
+        }
+    }
+
+    public static void experimentCompleteChain(ExperimentDataManager edm, UUID expUUID, UUID entityUUID, UUID attribUUID, UUID mGenUUID, UUID mGrpUUID, UUID mSetUUID) throws Exception
+    {
+//----- EXPERIMENT
+        
+        IExperimentDAO expDAO = null;
+        try {
+            expDAO = edm.getExperimentDAO();
+        } catch (Exception ex) {
+            log.error ("Unable to get Experiment DAO: " + ex.getMessage(), ex);
+            throw ex;
+        }
+        
+        log.info("Creating experiment");
+        Experiment exp = new Experiment();
+        exp.setUUID(expUUID);
+        exp.setName("Experiment");
+        exp.setDescription("An experiment description...");
+        exp.setStartTime(new Date(Long.parseLong("1345642421005")));
+        exp.setEndTime(new Date(Long.parseLong("1440413831014")));
+        exp.setExperimentID("/locations/experiment/1337");
+        
+//----- METRIC GENERATOR
+        
+        IMetricGeneratorDAO metricGeneratorDAO = null;
+        try {
+            metricGeneratorDAO = edm.getMetricGeneratorDAO();
+        } catch (Exception ex) {
+            log.error ("Unable to get MetricGenerator DAO: " + ex.getMessage(), ex);
+            throw ex;
+        }
+        
+        log.info("Creating Experiment MetricGenerator");
+        MetricGenerator metricGenerator = new MetricGenerator(mGenUUID, "Experiment MetricGenerator", "A description");
+        metricGenerator.addEntity(entityUUID);
+        exp.addMetricGenerator(metricGenerator);
+        
+//----- METRIC GROUP
+        log.info("Creating QoS MetricGroup");
+        MetricGroup metricGroup = new MetricGroup(mGrpUUID, mGenUUID, "Quality of Service", "A group of QoS metrics");
+        metricGenerator.addMetricGroup(metricGroup);
+        
+//----- MEASUREMENT SET
+        log.info("Creating QoS Measurement set");
+        Metric metric = new Metric(UUID.randomUUID(), MetricType.RATIO, MILLI(SECOND));
+        MeasurementSet mSet = new MeasurementSet(mSetUUID, attribUUID, mGrpUUID, metric);
+        metricGroup.addMeasurementSets(mSet);
+        
+//----- MEASUREMENTS
+        log.info("Creating random measurements for QoS measurement set");
+        int numMeasurements = 5;
+        Random rand = new Random();
+        rand.setSeed(new Date().getTime());
+        for (int i = 0; i < numMeasurements; i++)
+        {
+            long timeStamp = new Date().getTime() - (1000 * (numMeasurements-i));
+            Measurement measurement = new Measurement(UUID.randomUUID(), mSetUUID, new Date(timeStamp), String.valueOf(rand.nextInt(500)));
+            mSet.addMeasurement(measurement);
+        }
+        
+        log.info("Saving experiment (with all sub-classes)");
+        try {
+            expDAO.saveExperiment(exp);
+            log.info("Experiment '" + exp.getName() + "' saved successfully!");
+        } catch (Exception ex) {
+            log.error("Unable to save experiment: " + ex.getMessage());
+        }
+    }
+    
+    public static void printDetailsForExperiment(ExperimentDataManager edm, UUID expUUID) throws Exception
+    {
+        IExperimentDAO expDAO = null;
+        try {
+            expDAO = edm.getExperimentDAO();
+        } catch (Exception ex) {
+            log.error ("Unable to get Experiment DAO: " + ex.getMessage(), ex);
+            throw ex;
+        }
+        
+        IEntityDAO entityDAO = null;
+        try {
+            entityDAO = edm.getEntityDAO();
+        } catch (Exception ex) {
+            log.error ("Unable to get Entity DAO: " + ex.getMessage(), ex);
+            throw ex;
+        }
+        
+        log.info("Getting experiment object");
+        Experiment expFromDB = null;
+        try {
+            expFromDB = expDAO.getExperiment(expUUID);
+        } catch (Exception ex) {
+            log.error("Unable to get experiment: " + ex.getMessage());
+        }
+        
+        log.info("Experiment details:");
+        log.info("  * Basic info");
+        if (expFromDB.getUUID() != null) log.info("    - UUID:  " + expFromDB.getUUID());
+        if (expFromDB.getName() != null) log.info("    - Name:  " + expFromDB.getName());
+        if (expFromDB.getDescription() != null) log.info("    - Desc:  " + expFromDB.getDescription());
+        if (expFromDB.getStartTime() != null) log.info("    - Start: " + expFromDB.getStartTime() + " (" + expFromDB.getStartTime().getTime() + ")");
+        if (expFromDB.getEndTime() != null) log.info("    - End:   " + expFromDB.getEndTime() + " (" + expFromDB.getEndTime().getTime() + ")");
+        if (expFromDB.getExperimentID() != null) log.info("    - ID:    " + expFromDB.getExperimentID());
+        
+        if ((expFromDB.getMetricGenerators() == null) || expFromDB.getMetricGenerators().isEmpty()) {
+            log.info("  * There are NO metric generators");
+        } else {
+            log.info("  * There's " + expFromDB.getMetricGenerators().size() + " metric generator(s)");
+            
+            for (MetricGenerator mGen : expFromDB.getMetricGenerators())
+            {
+                log.info("    - MetricGenerator details:");
+                log.info("      - UUID: " + mGen.getUUID());
+                log.info("      - Name: " + mGen.getName());
+                if (mGen.getDescription() != null)
+                    log.info("      - Desc: " + mGen.getDescription());
+                
+                if ((mGen.getMetricGroups() == null) || mGen.getMetricGroups().isEmpty()){
+                    log.info("      * There are NO metric groups");
+                } else {
+                    log.info("      * There's " + mGen.getMetricGroups().size() + " metric group(s)");
+                    
+                    for (MetricGroup mGrp : mGen.getMetricGroups())
+                    {
+                        log.info("        - MetricGroup details:");
+                        log.info("          - UUID: " + mGrp.getUUID());
+                        log.info("          - Name: " + mGrp.getName());
+                        if (mGrp.getDescription() != null)
+                            log.info("          - Desc: " + mGrp.getDescription());
+                        
+                        if ((mGrp.getMeasurementSets() == null) || mGrp.getMeasurementSets().isEmpty()){
+                            log.info("          * There are NO measurement sets");
+                        } else {
+                            log.info("          * There's " + mGrp.getMeasurementSets().size() + " measurement set(s)");
+                            
+                            for (MeasurementSet mSet : mGrp.getMeasurementSets())
+                            {
+                                // get attribute
+                                Attribute attrib = null;
+                                try {
+                                    attrib = entityDAO.getAttribute(mSet.getAttributeUUID());
+                                } catch (Exception ex) {
+                                    log.error("Unable to get attribute instance according to the UUID: " + mSet.getAttributeUUID().toString());
+                                }
+                                
+                                log.info("            - MeasurementSet details:");
+                                log.info("              - UUID: " + mSet.getUUID());
+                                log.info("              - Attribute:");
+                                if (attrib != null) {
+                                    log.info("                - Attribute:");
+                                    if (attrib.getUUID() != null) log.info("                  - UUID:  " + attrib.getUUID());
+                                    if (attrib.getName() != null) log.info("                  - Name:  " + attrib.getName());
+                                    if (attrib.getDescription() != null) log.info("                  - Desc:  " + attrib.getDescription());
+                                } else {
+                                    log.info("                - ERROR: got NULL Attribute from the DB!");
+                                }
+                                log.info("              - Metric:");
+                                if (mSet.getMetric().getUUID() != null) log.info("                  - UUID:  " + mSet.getMetric().getUUID());
+                                if (mSet.getMetric().getMetricType() != null) log.info("                  - Type:  " + mSet.getMetric().getMetricType());
+                                if (mSet.getMetric().getUnit() != null) log.info("                  - Unit:  " + mSet.getMetric().getUnit());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    public static void saveReport(ExperimentDataManager edm, UUID mSetUUID, UUID reportUUID) throws Exception
+    {
+        IReportDAO reportDAO = null;
+        try {
+            reportDAO = edm.getReportDAO();
+        } catch (Exception ex) {
+            log.error ("Unable to get Report DAO: " + ex.getMessage(), ex);
+            throw ex;
+        }
+        
+        log.info("Saving Report for measurement set " + mSetUUID.toString());
+        
+        MeasurementSet mSet = new MeasurementSet(mSetUUID);
+        int numMeasurements = 5;
+        Random rand = new Random();
+        rand.setSeed(new Date().getTime());
+        long timeStampFrom = 0;
+        long timeStampTo = 0;
+        for (int i = 0; i < numMeasurements; i++)
+        {
+            long timeStamp = new Date().getTime() - (1000 * (numMeasurements-i));
+            Measurement measurement = new Measurement(UUID.randomUUID(), mSetUUID, new Date(timeStamp), String.valueOf(rand.nextInt(500)));
+            mSet.addMeasurement(measurement);
+            
+            if (i == 0)
+            {
+                timeStampFrom = timeStamp;
+                timeStampTo = timeStamp;
+            }
+            else
+            {
+                if (timeStamp > timeStampTo)
+                    timeStampTo = timeStamp;
+                else if (timeStamp < timeStampFrom)
+                    timeStampFrom = timeStamp;
+            }
+        }
+        
+        Report report = new Report(reportUUID, mSet, new Date(), new Date(timeStampFrom), new Date(timeStampTo), mSet.getMeasurements().size());
+        
+        try {
+            reportDAO.saveReport(report);
+            log.info("Report saved successfully!");
+        } catch (Exception ex) {
+            log.error("Unable to save Report: " + ex.getMessage(), ex);
+            
+            // save the report with a random UUID...
+            report.setUUID(UUID.randomUUID());
+            try {
+                reportDAO.saveReport(report);
+                log.info("Report saved successfully!");
+            } catch (Exception ex2) {
+                log.error("Unable to save Report: " + ex2.getMessage(), ex2);
+
+                report.setUUID(UUID.randomUUID());
+            }
+        }
+    }
+    
+    public static void getReport(ExperimentDataManager edm, UUID mSetUUID, UUID reportUUID) throws Exception
+    {
+        IReportDAO reportDAO = null;
+        try {
+            reportDAO = edm.getReportDAO();
+        } catch (Exception ex) {
+            log.error ("Unable to get Report DAO: " + ex.getMessage(), ex);
+            throw ex;
+        }
+        
+        log.info("Getting report by UUID - no data");
+        Report report = null;
+        try {
+            report = reportDAO.getReport(reportUUID);
+        } catch (Exception ex) {
+            log.error("Unable to get Report: " + ex.getMessage(), ex);
+        }
+        
+        printReportDetails(report);
+        
+        log.info("Getting report by UUID - WITH DATA");
+        report = null;
+        try {
+            report = reportDAO.getReportWithData(reportUUID);
+        } catch (Exception ex) {
+            log.error("Unable to get Report: " + ex.getMessage(), ex);
+        }
+        
+        printReportDetails(report);
+        
+        log.info("Getting report for latest value - no data");
+        report = null;
+        try {
+            report = reportDAO.getReportForLatestMeasurement(mSetUUID);
+        } catch (Exception ex) {
+            log.error("Unable to get Report: " + ex.getMessage(), ex);
+        }
+        
+        printReportDetails(report);
+        
+        log.info("Getting report for latest value - WITH DATA");
+        report = null;
+        try {
+            report = reportDAO.getReportForLatestMeasurementWithData(mSetUUID);
+        } catch (Exception ex) {
+            log.error("Unable to get Report: " + ex.getMessage(), ex);
+        }
+        
+        printReportDetails(report);
+    }
+    
+    public static void printReportDetails(Report report)
+    {
+        if (report != null)
+        {
+            log.info(" * Report details");
+            log.info("    - Report UUID:  " + report.getUUID().toString());
+            log.info("    - MSet   UUID:  " + report.getMeasurementSet().getUUID().toString());
+            log.info("    - Report date:  " + report.getReportDate() + " (" + report.getReportDate().getTime() + ")");
+            log.info("    - From date:    " + report.getFromDate() + " (" + report.getFromDate().getTime() + ")");
+            log.info("    - To date:      " + report.getToDate() + " (" + report.getToDate().getTime() + ")");
+            log.info("    - Num measures: " + report.getNumberOfMeasurements());
+            
+            if ((report.getMeasurementSet().getMeasurements() == null) || report.getMeasurementSet().getMeasurements().isEmpty()) {
+                log.info("    * No measurements data!");
+            } else {
+                log.info("    * Got " + report.getMeasurementSet().getMeasurements().size() + " measurements:");
+                
+                for (Measurement m : report.getMeasurementSet().getMeasurements())
+                {
+                    log.info("      - " + m.getValue());
+                }
+            }
         }
     }
 }

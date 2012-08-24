@@ -24,7 +24,12 @@
 /////////////////////////////////////////////////////////////////////////
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.dao;
 
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Attribute;
@@ -123,5 +128,151 @@ public class AttributeHelper
     public static boolean objectExists(UUID uuid, DatabaseConnector dbCon) throws Exception
     {
         return DBUtil.objectExistsByUUID("Attribute", "attribUUID", uuid, dbCon);
+    }
+    
+    public static void saveAttribute(DatabaseConnector dbCon, Attribute attrib, boolean closeDBcon) throws Exception
+    {
+        // this validation will check if all the required parameters are set and if
+        // there isn't already a duplicate instance in the DB
+        ValidationReturnObject returnObj = AttributeHelper.isObjectValidForSave(attrib, dbCon, true);
+        if (!returnObj.valid)
+        {
+            log.error("Cannot save the Attribute object: " + returnObj.exception.getMessage(), returnObj.exception);
+            throw returnObj.exception;
+        }
+        
+        try {
+            if (dbCon.isClosed())
+                dbCon.connect();
+            
+            // get the table names and values according to what's available in the
+            // object
+            List<String> valueNames = new ArrayList<String>();
+            List<String> values = new ArrayList<String>();
+            AttributeHelper.getTableNamesAndValues(attrib, valueNames, values);
+            
+            String query = DBUtil.getInsertIntoQuery("Attribute", valueNames, values);
+            ResultSet rs = dbCon.executeQuery(query, Statement.RETURN_GENERATED_KEYS);
+            
+            // check if the result set got the generated table key
+            if (rs.next()) {
+                String key = rs.getString(1);
+                log.debug("Saved attribute " + attrib.getName() + ", with key: " + key);
+            } else {
+                throw new RuntimeException("No index returned after saving attribute " + attrib.getName());
+            }//end of debugging
+        } catch (Exception ex) {
+            log.error("Error while saving entity: " + ex.getMessage(), ex);
+            throw new RuntimeException("Error while saving attribute: " + ex.getMessage(), ex);
+        } finally {
+            if (closeDBcon)
+                dbCon.close();
+        }
+    }
+    
+    public static Attribute getAttribute(DatabaseConnector dbCon, UUID attribUUID, boolean closeDBcon) throws Exception
+    {
+        if (attribUUID == null)
+        {
+            log.error("Cannot get an Attribute object with the given UUID because it is NULL!");
+            throw new NullPointerException("Cannot get an Attribute object with the given UUID because it is NULL!");
+        }
+        
+        if (!AttributeHelper.objectExists(attribUUID, dbCon))
+        {
+            log.error("There is no attribute with the given UUID: " + attribUUID.toString());
+            throw new RuntimeException("There is no attribute with the given UUID: " + attribUUID.toString());
+        }
+        
+        Attribute attribute = null;
+        try {
+            if (dbCon.isClosed())
+                dbCon.connect();
+            
+            String query = "SELECT * FROM Attribute WHERE attribUUID = '" + attribUUID + "'";
+            ResultSet rs = dbCon.executeQuery(query);
+            
+            // check if anything got returned (connection closed in finalise method)
+            if (rs.next())
+            {
+                String name = rs.getString("name");
+				String description = rs.getString("description");
+                String entityUUIDstr = rs.getString("entityUUID");
+                
+                if (entityUUIDstr == null)
+                {
+                    throw new RuntimeException("The attribute instance doesn't have an entity UUID");
+                }
+                
+                attribute = new Attribute(attribUUID, UUID.fromString(entityUUIDstr), name, description);
+            }
+            else // nothing in the result set
+            {
+                log.error("There is no attribute with the given UUID: " + attribUUID.toString());
+                throw new RuntimeException("There is no attribute with the given UUID: " + attribUUID.toString());
+            }
+        } catch (Exception ex) {
+            log.error("Error while quering the database: " + ex.getMessage(), ex);
+            throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
+        } finally {
+            if (closeDBcon)
+                dbCon.close();
+        }
+        
+        return attribute;
+    }
+    
+    public static Set<Attribute> getAttributesForEntity(DatabaseConnector dbCon, UUID entityUUID, boolean closeDBcon) throws Exception
+    {
+        if (entityUUID == null)
+        {
+            log.error("Cannot get any Attribute objects for an Entity with the given UUID because it is NULL!");
+            throw new NullPointerException("Cannot get any Attribute objects for an Entity with the given UUID because it is NULL!");
+        }
+        
+        if (!EntityHelper.objectExists(entityUUID, dbCon))
+        {
+            log.error("There is no entity with the given UUID: " + entityUUID.toString());
+            throw new RuntimeException("There is no entity with the given UUID: " + entityUUID.toString());
+        }
+        
+        Set<Attribute> attributes = new HashSet<Attribute>();;
+        try {
+            if (dbCon.isClosed())
+                dbCon.connect();
+            
+            String query = "SELECT * FROM Attribute WHERE entityUUID = '" + entityUUID + "'";
+            ResultSet rs = dbCon.executeQuery(query);
+            
+            // check if anything got returned (connection closed in finalise method)
+            while (rs.next())
+            {
+                String attribUUIDstr = rs.getString("attribUUID");
+                String entityUUIDstr = rs.getString("entityUUID");
+                String name = rs.getString("name");
+				String description = rs.getString("description");
+                
+                if (attribUUIDstr == null)
+                {
+                    throw new RuntimeException("The attribute instance doesn't have a UUID");
+                }
+                
+                if (entityUUIDstr == null)
+                {
+                    throw new RuntimeException("The attribute instance doesn't have an entity UUID");
+                }
+                
+                attributes.add(new Attribute(UUID.fromString(attribUUIDstr), UUID.fromString(entityUUIDstr), name, description));
+            }
+            
+        } catch (Exception ex) {
+            log.error("Error while quering the database: " + ex.getMessage(), ex);
+            throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
+        } finally {
+            if (closeDBcon)
+                dbCon.close();
+        }
+        
+        return attributes;
     }
 }

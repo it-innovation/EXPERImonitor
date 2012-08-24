@@ -24,7 +24,12 @@
 /////////////////////////////////////////////////////////////////////////
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.dao;
 
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Attribute;
@@ -124,5 +129,201 @@ public class EntityHelper
     public static boolean objectExists(UUID uuid, DatabaseConnector dbCon) throws Exception
     {
         return DBUtil.objectExistsByUUID("Entity", "entityUUID", uuid, dbCon);
+    }
+    
+    public static void saveEntity(DatabaseConnector dbCon, Entity entity) throws Exception
+    {
+        // this validation will check if all the required parameters are set and if
+        // there isn't already a duplicate instance in the DB
+        // will validate the attributes too, if any are given
+        ValidationReturnObject returnObj = EntityHelper.isObjectValidForSave(entity, dbCon);
+        if (!returnObj.valid)
+        {
+            log.error("Cannot save the Entity object: " + returnObj.exception.getMessage(), returnObj.exception);
+            throw returnObj.exception;
+        }
+        
+        try {
+            if (dbCon.isClosed())
+                dbCon.connect();
+            
+            // get the table names and values according to what's available in the
+            // object
+            List<String> valueNames = new ArrayList<String>();
+            List<String> values = new ArrayList<String>();
+            EntityHelper.getTableNamesAndValues(entity, valueNames, values);
+            
+            String query = DBUtil.getInsertIntoQuery("Entity", valueNames, values);
+            ResultSet rs = dbCon.executeQuery(query, Statement.RETURN_GENERATED_KEYS);
+            
+            // check if the result set got the generated table key
+            if (rs.next()) {
+                String key = rs.getString(1);
+                log.debug("Saved entity " + entity.getName() + ", with key: " + key);
+            } else {
+                throw new RuntimeException("No index returned after saving entity " + entity.getName());
+            }//end of debugging
+        } catch (Exception ex) {
+            log.error("Error while saving entity: " + ex.getMessage(), ex);
+            throw new RuntimeException("Error while saving entity: " + ex.getMessage(), ex);
+        } finally {
+            if ((entity.getAttributes() == null) || entity.getAttributes().isEmpty())
+                dbCon.close();
+        }
+        
+        try {
+            // save any attributes if not NULL
+            if ((entity.getAttributes() != null) && !entity.getAttributes().isEmpty())
+            {
+                for (Attribute attrib : entity.getAttributes())
+                {
+                    if (attrib != null)
+                        AttributeHelper.saveAttribute(dbCon, attrib, false); // flag not to close the DB connection
+                }
+            }
+        } catch (Exception ex) {
+            throw ex;
+        } finally {
+            dbCon.close();
+        }
+    }
+    
+    public static Entity getEntity(DatabaseConnector dbCon, UUID entityUUID, boolean closeDBcon) throws Exception
+    {
+        if (entityUUID == null)
+        {
+            log.error("Cannot get an Entity object with the given UUID because it is NULL!");
+            throw new NullPointerException("Cannot get an Entity object with the given UUID because it is NULL!");
+        }
+        
+        if (!EntityHelper.objectExists(entityUUID, dbCon))
+        {
+            log.error("There is no entity with the given UUID: " + entityUUID.toString());
+            throw new RuntimeException("There is no entity with the given UUID: " + entityUUID.toString());
+        }
+        
+        Entity entity = null;
+        boolean exception = false;
+        try {
+            if (dbCon.isClosed())
+                dbCon.connect();
+            
+            String query = "SELECT * FROM Entity WHERE entityUUID = '" + entityUUID + "'";
+            ResultSet rs = dbCon.executeQuery(query);
+            
+            // check if anything got returned (connection closed in finalise method)
+            if (rs.next())
+            {
+                String name = rs.getString("name");
+				String description = rs.getString("description");
+                
+                entity = new Entity(entityUUID, name, description);
+            }
+            else // nothing in the result set
+            {
+                log.error("There is no entity with the given UUID: " + entityUUID.toString());
+                throw new RuntimeException("There is no entity with the given UUID: " + entityUUID.toString());
+            }
+        } catch (Exception ex) {
+            exception = true;
+            log.error("Error while quering the database: " + ex.getMessage(), ex);
+            throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
+        } finally {
+            if (exception)
+                dbCon.close();
+        }
+        
+        // check if there's any metric generators
+        Set<Attribute> attributes = null;
+        
+        try {
+            attributes = AttributeHelper.getAttributesForEntity(dbCon, entityUUID, false); // don't close the connection
+        } catch (Exception ex) {
+            log.error("Caught an exception when getting attributes for entity (UUID: " + entityUUID.toString() + "): " + ex.getMessage());
+            throw new RuntimeException("Unable to get Entity object due to an issue with getting its attributes: " + ex.getMessage(), ex);
+        } finally {
+            if (closeDBcon)
+                dbCon.close();
+        }
+        
+        entity.setAttributes(attributes);
+        
+        return entity;
+    }
+
+    public static Set<Entity> getEntities(DatabaseConnector dbCon) throws Exception
+    {
+        Set<Entity> entities = new HashSet<Entity>();
+        try {
+            if (dbCon.isClosed())
+                dbCon.connect();
+            
+            String query = "SELECT entityUUID FROM Entity";
+            ResultSet rs = dbCon.executeQuery(query);
+            
+            // check if anything got returned (connection closed in finalise method)
+            while (rs.next())
+            {
+                String uuidStr = rs.getString("entityUUID");
+                
+                if (uuidStr == null)
+                {
+                    log.error("Skipping an entity, which does not have a UUID in the DB");
+                    continue;
+                }
+                
+                entities.add(getEntity(dbCon, UUID.fromString(uuidStr), false));
+            }
+
+        } catch (Exception ex) {
+            log.error("Error while quering the database: " + ex.getMessage(), ex);
+            throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
+        } finally {
+            dbCon.close();
+        }
+        
+        return entities;
+    }
+    
+    public static Set<Entity> getEntitiesForExperiment(DatabaseConnector dbCon, UUID expUUID) throws Exception
+    {
+        if (expUUID == null)
+        {
+            log.error("Cannot get Entity objects for the given experiment, because the UUID provided is NULL!");
+            throw new NullPointerException("Cannot get Entity objects for the given experiment, because the UUID provided is NULL!");
+        }
+        
+        Set<Entity> entities = new HashSet<Entity>();
+        
+        try {
+            if (dbCon.isClosed())
+                dbCon.connect();
+            
+            String query = "SELECT entityUUID FROM MetricGenerator_Entity "
+                    + "WHERE mGenUUID = (SELECT mGenUUID FROM MetricGenerator WHERE expUUID = '" + expUUID.toString() + "')";
+            ResultSet rs = dbCon.executeQuery(query);
+            
+            // check if anything got returned (connection closed in finalise method)
+            while (rs.next())
+            {
+                String uuidStr = rs.getString("entityUUID");
+                
+                if (uuidStr == null)
+                {
+                    log.error("Skipping an entity, which does not have a UUID in the DB");
+                    continue;
+                }
+                
+                entities.add(getEntity(dbCon, UUID.fromString(uuidStr), false));
+            }
+
+        } catch (Exception ex) {
+            log.error("Error while quering the database: " + ex.getMessage(), ex);
+            throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
+        } finally {
+            dbCon.close();
+        }
+        
+        return entities;
     }
 }

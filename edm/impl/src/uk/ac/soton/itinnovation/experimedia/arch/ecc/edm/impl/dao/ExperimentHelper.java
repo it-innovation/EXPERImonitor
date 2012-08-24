@@ -25,10 +25,16 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.dao;
 
 import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DBUtil;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DatabaseConnector;
 
@@ -125,5 +131,179 @@ public class ExperimentHelper
     public static boolean objectExists(UUID uuid, DatabaseConnector dbCon) throws Exception
     {
         return DBUtil.objectExistsByUUID("Experiment", "expUUID", uuid, dbCon);
+    }
+    
+    public static void saveExperiment(DatabaseConnector dbCon, Experiment exp) throws Exception
+    {
+        // this validation will check if all the required parameters are set and if
+        // there isn't already a duplicate instance in the DB
+        ValidationReturnObject returnObj = ExperimentHelper.isObjectValidForSave(exp, dbCon);
+        if (!returnObj.valid)
+        {
+            log.error("Cannot save the Experiment object: " + returnObj.exception.getMessage(), returnObj.exception);
+            throw returnObj.exception;
+        }
+        
+        boolean exception = false;
+        try {
+            if (dbCon.isClosed())
+                dbCon.connect();
+            
+            // get the table names and values according to what's available in the
+            // object
+            List<String> valueNames = new ArrayList<String>();
+            List<String> values = new ArrayList<String>();
+            ExperimentHelper.getTableNamesAndValues(exp, valueNames, values);
+            
+            String query = DBUtil.getInsertIntoQuery("Experiment", valueNames, values);
+            ResultSet rs = dbCon.executeQuery(query, Statement.RETURN_GENERATED_KEYS);
+            
+            // check if the result set got the generated table key
+            if (rs.next()) {
+                String key = rs.getString(1);
+                log.debug("Saved experiment " + exp.getName() + ", with key: " + key);
+            } else {
+                throw new RuntimeException("No index returned after saving experiment " + exp.getName());
+            }//end of debugging
+        } catch (Exception ex) {
+            exception = true;
+            log.error("Error while saving experiment: " + ex.getMessage(), ex);
+            throw new RuntimeException("Error while saving experiment: " + ex.getMessage(), ex);
+        } finally {
+            if (exception || (exp.getMetricGenerators() == null) || exp.getMetricGenerators().isEmpty())
+                dbCon.close();
+        }
+        
+        try {
+        // save any metric generators if not NULL
+        if ((exp.getMetricGenerators() != null) && !exp.getMetricGenerators().isEmpty())
+        {
+            for (MetricGenerator mg : exp.getMetricGenerators())
+            {
+                if (mg != null)
+                    MetricGeneratorHelper.saveMetricGenerator(dbCon, mg, exp.getUUID(), false); // don't close the DB con
+            }
+        }
+        } catch (Exception ex) {
+            throw ex;
+        } finally {
+            dbCon.close();
+        }
+    }
+    
+    /**
+     * Overloaded method, with the option to set a flag whether to close the
+     * DB connection or not.
+     * @param expUUID
+     * @param closeDBcon
+     * @return
+     * @throws Exception 
+     */
+    public static Experiment getExperiment(DatabaseConnector dbCon, UUID expUUID, boolean closeDBcon) throws Exception
+    {
+        if (expUUID == null)
+        {
+            log.error("Cannot get an Experiment object with the given UUID because it is NULL!");
+            throw new NullPointerException("Cannot get an Experiment object with the given UUID because it is NULL!");
+        }
+        
+        if (!ExperimentHelper.objectExists(expUUID, dbCon))
+        {
+            log.error("There is no experiment with the given UUID: " + expUUID.toString());
+            throw new RuntimeException("There is no experiment with the given UUID: " + expUUID.toString());
+        }
+        
+        Experiment exp = null;
+        boolean exception = false;
+        try {
+            if (dbCon.isClosed())
+                dbCon.connect();
+            
+            String query = "SELECT * FROM Experiment WHERE expUUID = '" + expUUID + "'";
+            ResultSet rs = dbCon.executeQuery(query);
+            
+            // check if anything got returned (connection closed in finalise method)
+            if (rs.next())
+            {
+                String name = rs.getString("name");
+				String description = rs.getString("description");
+				String startTimeStr = rs.getString("startTime");
+                String endTimeStr = rs.getString("endTime");
+                String expID = rs.getString("expID");
+                
+                Date startTime = null;
+                Date endTime = null;
+                
+                if (startTimeStr != null)
+                    startTime = new Date(Long.parseLong(startTimeStr));
+                
+                if (endTimeStr != null)
+                    endTime = new Date(Long.parseLong(endTimeStr));
+                
+                exp = new Experiment(expUUID, expID, name, description, startTime, endTime);
+            }
+            else // nothing in the result set
+            {
+                log.error("There is no experiment with the given UUID: " + expUUID.toString());
+                throw new RuntimeException("There is no experiment with the given UUID: " + expUUID.toString());
+            }
+        } catch (Exception ex) {
+            exception = true;
+            log.error("Error while quering the database: " + ex.getMessage(), ex);
+            throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
+        } finally {
+            if (exception)
+                dbCon.close();
+        }
+        
+        // check if there's any metric generators
+        Set<MetricGenerator> metricGenerators = null;
+        
+        try {
+            metricGenerators = MetricGeneratorHelper.getMetricGeneratorsForExperiment(dbCon, expUUID, false);
+        } catch (Exception ex) {
+            log.error("Caught an exception when getting metric generators for experiment (UUID: " + expUUID.toString() + "): " + ex.getMessage());
+        } finally {
+            if (closeDBcon)
+                dbCon.close();
+        }
+        
+        exp.setMetricGenerators(metricGenerators);
+        
+        return exp;
+    }
+    
+    public static Set<Experiment> getExperiments(DatabaseConnector dbCon) throws Exception
+    {
+        Set<Experiment> experiments = new HashSet<Experiment>();
+        
+        try {
+            if (dbCon.isClosed())
+                dbCon.connect();
+            
+            String query = "SELECT expUUID FROM Experiment";
+            ResultSet rs = dbCon.executeQuery(query);
+            
+            // iterate over all returned records
+            while (rs.next())
+            {
+                String uuidStr = rs.getString("expUUID");
+                
+                if (uuidStr == null)
+                {
+                    log.error("Skipping an Experiment, which does not have a UUID in the DB");
+                    continue;
+                }
+                
+                experiments.add(getExperiment(dbCon, UUID.fromString(uuidStr), false));
+            }
+        } catch (Exception ex) {
+            log.error("Error while quering the database: " + ex.getMessage(), ex);
+            throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
+        } finally {
+            dbCon.close();
+        }
+        
+        return experiments;
     }
 }

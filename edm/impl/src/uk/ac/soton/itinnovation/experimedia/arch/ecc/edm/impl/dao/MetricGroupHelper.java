@@ -24,7 +24,12 @@
 /////////////////////////////////////////////////////////////////////////
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.dao;
 
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
@@ -77,7 +82,7 @@ public class MetricGroupHelper
         // check if the metric generator exists, if it should be checked...
         if (checkForMetricGenerator)
         {
-            if (!MetricGeneratorHelper.objectExists(mGroup.getUUID(), dbCon))
+            if (!MetricGeneratorHelper.objectExists(mGroup.getMetricGeneratorUUID(), dbCon))
             {
                 return new ValidationReturnObject(false, new RuntimeException("The MetricGenerator for the MetricGroup doesn't exit"));
             }
@@ -141,5 +146,169 @@ public class MetricGroupHelper
     public static boolean objectExists(UUID uuid, DatabaseConnector dbCon) throws Exception
     {
         return DBUtil.objectExistsByUUID("MetricGroup", "mGrpUUID", uuid, dbCon);
+    }
+    
+    public static void saveMetricGroup(DatabaseConnector dbCon, MetricGroup metricGroup, boolean closeDBcon) throws Exception
+    {
+        // this validation will check if all the required parameters are set and if
+        // there isn't already a duplicate instance in the DB
+        // will validate the measurement sets too, if any are given
+        ValidationReturnObject returnObj = MetricGroupHelper.isObjectValidForSave(metricGroup, dbCon, true);
+        if (!returnObj.valid)
+        {
+            log.error("Cannot save the MetricGroup object: " + returnObj.exception.getMessage(), returnObj.exception);
+            throw returnObj.exception;
+        }
+        
+        boolean exception = false;
+        try {
+            if (dbCon.isClosed())
+                dbCon.connect();
+            
+            // get the table names and values according to what's available in the
+            // object
+            List<String> valueNames = new ArrayList<String>();
+            List<String> values = new ArrayList<String>();
+            MetricGroupHelper.getTableNamesAndValues(metricGroup, valueNames, values);
+            
+            String query = DBUtil.getInsertIntoQuery("MetricGroup", valueNames, values);
+            ResultSet rs = dbCon.executeQuery(query, Statement.RETURN_GENERATED_KEYS);
+            
+            // check if the result set got the generated table key
+            if (rs.next()) {
+                String key = rs.getString(1);
+                log.debug("Saved MetricGroup " + metricGroup.getName() + " with key: " + key);
+            } else {
+                throw new RuntimeException("No index returned after saving MetricGroup " + metricGroup.getName());
+            }
+        } catch (Exception ex) {
+            exception = true;
+            log.error("Error while saving MetricGroup: " + ex.getMessage(), ex);
+            throw new RuntimeException("Error while saving MetricGroup: " + ex.getMessage(), ex);
+        } finally {
+            if ((exception || (metricGroup.getMeasurementSets() == null) || metricGroup.getMeasurementSets().isEmpty()) && closeDBcon)
+                dbCon.close();
+        }
+        
+        try {
+            // save any measurement sets if not NULL
+            if ((metricGroup.getMeasurementSets() != null) && !metricGroup.getMeasurementSets().isEmpty())
+            {
+                for (MeasurementSet mSet : metricGroup.getMeasurementSets())
+                {
+                    if (mSet != null)
+                        MeasurementSetHelper.saveMeasurementSet(dbCon, mSet, false); // flag not to close the DB connection
+                }
+            }
+        } catch (Exception ex) {
+            throw ex;
+        } finally {
+            if (closeDBcon)
+                dbCon.close();
+        }
+    }
+    
+    public static MetricGroup getMetricGroup(DatabaseConnector dbCon, UUID metricGroupUUID, boolean closeDBcon) throws Exception
+    {
+        if (metricGroupUUID == null)
+        {
+            log.error("Cannot get a MetricGroup object with the given UUID because it is NULL!");
+            throw new NullPointerException("Cannot get a MetricGroup object with the given UUID because it is NULL!");
+        }
+        
+        if (!MetricGroupHelper.objectExists(metricGroupUUID, dbCon))
+        {
+            log.error("There is no MetricGroup with the given UUID: " + metricGroupUUID.toString());
+            throw new RuntimeException("There is no MetricGroup with the given UUID: " + metricGroupUUID.toString());
+        }
+        
+        MetricGroup metricGroup = null;
+        boolean exception = false;
+        try {
+            if (dbCon.isClosed())
+                dbCon.connect();
+            
+            String query = "SELECT * FROM MetricGroup WHERE mGrpUUID = '" + metricGroupUUID + "'";
+            ResultSet rs = dbCon.executeQuery(query);
+            
+            // check if anything got returned (connection closed in finalise method)
+            if (rs.next())
+            {
+                String mGenUUID = rs.getString("mGenUUID");
+                String name = rs.getString("name");
+				String description = rs.getString("description");
+                
+                metricGroup = new MetricGroup(metricGroupUUID, UUID.fromString(mGenUUID), name, description);
+            }
+            else // nothing in the result set
+            {
+                log.error("There is no MetricGroup with the given UUID: " + metricGroupUUID.toString());
+                throw new RuntimeException("There is no MetricGroup with the given UUID: " + metricGroupUUID.toString());
+            }
+        } catch (Exception ex) {
+            exception = true;
+            log.error("Error while quering the database: " + ex.getMessage(), ex);
+            throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
+        } finally {
+            if (exception)
+                dbCon.close();
+        }
+        
+        // check if there's any measurement sets
+        Set<MeasurementSet> measurementSets = null;
+        
+        try {
+            measurementSets = MeasurementSetHelper.getMeasurementSetForMetricGroup(dbCon, metricGroupUUID, false); // don't close the connection
+        } catch (Exception ex) {
+            log.error("Caught an exception when getting measurement sets for MetricGroup (UUID: " + metricGroupUUID.toString() + "): " + ex.getMessage());
+            throw new RuntimeException("Caught an exception when getting measurement sets for MetricGroup (UUID: " + metricGroupUUID.toString() + "): " + ex.getMessage(), ex);
+        } finally {
+            if (closeDBcon)
+                dbCon.close();
+        }
+        
+        metricGroup.setMeasurementSets(measurementSets);
+        
+        return metricGroup;
+    }
+    
+    public static Set<MetricGroup> getMetricGroupsForMetricGenerator(DatabaseConnector dbCon, UUID metricGenUUID, boolean closeDBcon) throws Exception
+    {
+        if (metricGenUUID == null)
+        {
+            log.error("Cannot get any MetricGroup objects for a MetricGenerator with the given UUID because it is NULL!");
+            throw new NullPointerException("Cannot get any MetricGroup objects for a MetricGenerator with the given UUID because it is NULL!");
+        }
+        
+        Set<MetricGroup> metricGroups = new HashSet<MetricGroup>();
+        
+        try {
+            if (dbCon.isClosed())
+                dbCon.connect();
+            
+            String query = "SELECT mGrpUUID FROM MetricGroup WHERE mGenUUID = '" + metricGenUUID.toString() + "'";
+            ResultSet rs = dbCon.executeQuery(query);
+            
+            // check if anything got returned (connection closed in finalise method)
+            while (rs.next())
+            {
+                String uuidStr = rs.getString("mGrpUUID");
+                
+                if (uuidStr == null)
+                {
+                    log.error("Skipping a MetricGroup, which does not have a UUID in the DB");
+                    continue;
+                }
+                
+                metricGroups.add(getMetricGroup(dbCon, UUID.fromString(uuidStr), false));
+            }
+        } catch (Exception ex) {
+            log.error("Error while quering the database: " + ex.getMessage(), ex);
+            throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
+        } finally {
+            dbCon.close();
+        }
+        
+        return metricGroups;
     }
 }
