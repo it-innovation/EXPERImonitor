@@ -58,4 +58,13 @@ public interface IExperimentMonitor
   EMPhase goToNextPhase();
   
   void endLifecycle() throws Exception;
+  
+  /**
+   * Only call this during the live monitoring phase
+   * 
+   * @param client
+   * @param measurementSetID
+   * @throws Exception 
+   */
+  void pullMetric( EMClient client, UUID measurementSetID ) throws Exception;
 }

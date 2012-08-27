@@ -30,19 +30,28 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 
 import java.util.*;
+import javax.measure.unit.Unit;
 
 
 
 
 
-public class EMClientController implements EMIAdapterListener
+public class EMClientController implements EMIAdapterListener,
+                                           EMClientViewListener
 {
   private AMQPBasicChannel   amqpChannel;
   private EMInterfaceAdapter emiAdapter;
   private EMClientView       clientView;
+  private String             clientName;
+ 
+  private Entity                        entityBeingObserved;
+  private Attribute                     entityAttribute;
+  private HashMap<UUID,MetricGenerator> metricGenerators;
+  
   
   public EMClientController()
   {
+    metricGenerators = new HashMap<UUID,MetricGenerator>();
   }
   
   public void start( String rabbitServerIP,
@@ -64,15 +73,17 @@ public class EMClientController implements EMIAdapterListener
       catch (Exception e ) { throw e; }
       
       // Set up a simple view --------------------------------------------------
-      clientView = new EMClientView();
+      Date date = new Date();
+      clientName = date.toString();
+      clientView = new EMClientView( clientName, this );
       clientView.setVisible( true );
       
       // Create EM interface adapter, listen to it...
       emiAdapter = new EMInterfaceAdapter( this );
       
       // ... and try registering with the EM.
-      Date date = new Date();
-      try { emiAdapter.registerWithEM( "Test Client (" + date.toString() + ")",
+      
+      try { emiAdapter.registerWithEM( clientName,
                                        amqpChannel, 
                                        expMonitorID, clientID ); }
       catch ( Exception e ) 
@@ -91,25 +102,111 @@ public class EMClientController implements EMIAdapterListener
   }
   
   @Override
-  public void populateMetricGeneratorInfo( Set<MetricGenerator> genSetOUT )
+  public void onPopulateMetricGeneratorInfo()
   {
-    clientView.setStatus( "Sending metric meta-data to EM" );
+    clientView.setStatus( "Sending metric gen info to EM" );
+    
+    entityBeingObserved = new Entity();
+    entityBeingObserved.setName( "EM Client host" );
+    
+    entityAttribute = new Attribute();
+    entityAttribute.setName( "Client RAM usage" );
+    entityAttribute.setDescription( "Very simple measurement of total bytes used" );
+    entityBeingObserved.addtAttribute( entityAttribute );
     
     // Mock up some metric generators
-    MetricGenerator mg = new MetricGenerator();
-    mg.setName( "Demo metric generator" );
-    mg.setDescription( "Metric generator demonstration" );
-    genSetOUT.add( mg );
+    MetricGenerator metricGen = new MetricGenerator();
+    metricGen.setName( "MGEN " + clientName );
+    metricGen.setDescription( "Metric generator demonstration" );
+    metricGen.addEntity( entityBeingObserved.getUUID() );         // NEED TO ADD INSTANCE HERE
+    metricGenerators.put( metricGen.getUUID(), metricGen );
     
-    //TODO: Entities & Attributes
+    MetricGroup mg = new MetricGroup();
+    metricGen.addMetricGroup( mg );
     
-    //TODO: Metric sets, metric types & units 
+    MeasurementSet ms = new MeasurementSet();
+    ms.setAttributeUUID( entityAttribute.getUUID() );             // NEED TO ADD INSTANCE HERE
+    mg.addMeasurementSets( ms );                                  // SINGULAR?
+    
+    //TODO: Get this right!
+    Metric memMetric = new Metric();
+    //TODO: Unit set-up for mem usage
+    ms.setMetric( memMetric );
+    
+    clientView.addLogMessage( "Discovered generator: " + metricGen.getName() );
+    
+    // Send metric generators (just one) to the EM
+    HashSet mgSet = new HashSet<MetricGenerator>();
+    mgSet.addAll( metricGenerators.values() );
+    emiAdapter.setMetricGenerators( mgSet );
   }
   
   @Override
-  public void setupMetricGenerator( MetricGenerator genOut, Boolean[] resultOUT )
+  public void onSetupMetricGenerator( UUID genID, Boolean[] resultOUT )
   {
+    clientView.setStatus( "Setting up generators" );
+    
     // Just signal that the metric generator is ready
     resultOUT[0] = true;
+    
+    clientView.addLogMessage( "Completed generator set-up" );
+  }
+  
+  @Override
+  public void onStartPushingMetricData()
+  {
+    clientView.addLogMessage( "Enabling metric push" );
+    clientView.enablePush( true );
+  }
+  
+  @Override
+  public void onLastPushProcessed( UUID lastReportID )
+  {
+    // Got the last push, so allow another
+    clientView.enablePush( true );
+  }
+  
+  @Override
+  public void onStopPushingMetricData()
+  {
+    clientView.addLogMessage( "Disabling metric push" );
+    clientView.enablePush( false );
+  }
+  
+  @Override
+  public void onGetTearDownResult( Boolean[] resultOUT )
+  {
+    clientView.setStatus( "Tearing down" );
+    clientView.addLogMessage( "Tearing down metric generators" );
+    
+    // Signal we've successfully torn-down
+    resultOUT[0] = true;
+  }
+  
+  // EMClientViewListener ------------------------------------------------------
+  @Override
+  public void onPushDataClicked()
+  {
+    // Get our only metric generator
+    MetricGenerator metGen = metricGenerators.values().iterator().next();
+    metGen.getMetricGroups().iterator().next();
+    
+    // Get our only metric group
+    MetricGroup mg = metGen.getMetricGroups().iterator().next();
+    MeasurementSet ms = mg.getMeasurementSets().iterator().next();
+    
+    // Create a sample measurement
+    Measurement measurement = new Measurement();
+    measurement.setTimeStamp( new Date() );
+    measurement.setValue( "" );
+    
+    MeasurementSet sampleSet = new MeasurementSet( ms );
+    sampleSet.addMeasurement( measurement );
+    
+    Report randomReport = new Report();
+    randomReport.setMeasurementSet( sampleSet );
+    
+    // ... and report!
+    emiAdapter.pushMetric( randomReport );
   }
 }

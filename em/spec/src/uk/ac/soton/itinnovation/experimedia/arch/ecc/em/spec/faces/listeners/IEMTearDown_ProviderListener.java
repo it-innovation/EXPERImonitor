@@ -34,5 +34,5 @@ public interface IEMTearDown_ProviderListener
 {
   void onNotifyReadyToTearDown( UUID senderID );
   
-  void onNotifyTearDownResult( UUID senderID );
+  void onNotifyTearDownResult( UUID senderID, Boolean success );
 }

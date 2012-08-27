@@ -46,5 +46,5 @@ public interface IEMTearDown
   // User methods --------------------------------------------------------------
   void notifyReadyToTearDown();
   
-  void sendTearDownResult( /* data model */ );
+  void sendTearDownResult( Boolean success );
 }

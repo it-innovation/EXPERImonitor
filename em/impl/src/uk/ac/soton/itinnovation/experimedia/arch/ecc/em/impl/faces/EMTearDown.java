@@ -97,10 +97,12 @@ public class EMTearDown extends EMBaseInterface
   
   @Override
   // Method ID = 4
-  public void sendTearDownResult( /* data model */ )
+  public void sendTearDownResult( Boolean success )
   {
-    //TODO: Data model
-    executeMethod( 4, null );
+    ArrayList<Object> params = new ArrayList<Object>();
+    params.add( success );
+    
+    executeMethod( 4, params );
   }
   
   // Protected methods ---------------------------------------------------------
@@ -136,9 +138,12 @@ public class EMTearDown extends EMBaseInterface
         
       case ( 4 ) :
       {
-        //TODO: Data model
         if ( providerListener != null )
-          providerListener.onNotifyTearDownResult( interfaceUserID );
+        {
+          Boolean success = (Boolean) params.get( 0 );
+          
+          providerListener.onNotifyTearDownResult( interfaceUserID, success );
+        }
         
       } break;
     }

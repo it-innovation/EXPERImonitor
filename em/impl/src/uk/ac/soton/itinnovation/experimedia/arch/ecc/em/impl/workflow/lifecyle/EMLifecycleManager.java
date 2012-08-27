@@ -26,6 +26,8 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecyle;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.IEMLifecycleListener;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.IEMLiveMonitor;
+
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
@@ -36,22 +38,26 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClien
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecyle.phases.*;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
+
 import java.util.*;
-
-
 
 
 
 
 public class EMLifecycleManager implements EMConnectionManagerListener,
                                            EMGeneratorDiscoveryPhaseListener,
-                                           EMNMetricGenSetupPhaseListener
+                                           EMNMetricGenSetupPhaseListener,
+                                           EMLiveMonitorPhaseListener,
+                                           EMTearDownPhaseListener
 {
   private AMQPBasicChannel emChannel;
   private UUID             emProviderID;
   
   private EnumMap<EMPhase, AbstractEMLCPhase> lifecyclePhases;
   private EMPhase currentPhase = EMPhase.eEMUnknownPhase;
+  
+  private final Object clientLock = new Object();
   
   private IEMLifecycleListener lifecycleListener;
   
@@ -78,6 +84,12 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
     EMMetricGenSetupPhase sup = new EMMetricGenSetupPhase( emChannel, emProviderID, this );
     lifecyclePhases.put( EMPhase.eEMSetUpMetricGenerators, sup );
     
+    EMLiveMonitorPhase lmp = new EMLiveMonitorPhase( emChannel, emProviderID, this );
+    lifecyclePhases.put( EMPhase.eEMLiveMonitoring, lmp );
+    
+    EMTearDownPhase tdp = new EMTearDownPhase( emChannel, emProviderID, this );
+    lifecyclePhases.put( EMPhase.eEMTearDown, tdp );
+    
   }
   
   public boolean isLifecycleStarted()
@@ -90,6 +102,16 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   {
     if ( currentPhase != EMPhase.eEMProtocolComplete && !lifecyclePhases.isEmpty() )
     {
+      // Stop current phase
+      AbstractEMLCPhase killPhase = lifecyclePhases.get( currentPhase );
+      
+      if ( killPhase != null )
+        try { killPhase.stop(); }
+        catch ( Exception e )
+        {
+          System.out.println( "Could cleanly stop life-cycle phase " + killPhase.getPhaseType() );
+        }
+      
       currentPhase = currentPhase.nextPhase();
       
       AbstractEMLCPhase lcPhase = lifecyclePhases.get( currentPhase );
@@ -110,6 +132,23 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
     currentPhase = EMPhase.eEMUnknownPhase;
     
     //TODO: Tidy up
+  }
+  
+  public void tryPullMetric( EMClient client, UUID measurementSetID ) throws Exception
+  {
+    if ( client == null || measurementSetID == null ) throw new Exception( "Pull parameters are invalid" );
+    if ( currentPhase != EMPhase.eEMLiveMonitoring ) throw new Exception( "Not in metric pulling compatible phase" );
+      
+    synchronized ( clientLock )
+    {
+      EMClientEx clientEx = (EMClientEx) client;
+      if ( clientEx == null ) throw new Exception( "Client is invalid" );
+      
+      IEMLiveMonitor monitor = clientEx.getLiveMonitorInterface();
+      if ( monitor == null ) throw new Exception( "Could not get client live monitor interface" );
+      
+      monitor.pullMetric( measurementSetID );
+    }
   }
   
   // EMConnectionManagerListener -----------------------------------------------
@@ -180,4 +219,35 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   }
   
   // EMNMetricGenSetupPhaseListener --------------------------------------------
+  @Override
+  public void onMetricGenSetupResult( EMClient client, boolean success )
+  {
+    lifecycleListener.onClientSetupResult( client, success );
+  }
+  
+  @Override
+  public void onSetupPhaseCompleted()
+  {
+    lifecycleListener.onLifecyclePhaseCompleted( EMPhase.eEMSetUpMetricGenerators );
+  }
+  
+  // EMLiveMonitorPhaseListener ------------------------------------------------
+  @Override
+  public void onGotMetricData( EMClientEx client, Report report )
+  {
+    lifecycleListener.onGotMetricData( client, report );
+  }
+  
+  // EMTearDownPhaseListener ---------------------------------------------------
+  @Override
+  public void onClientTearDownResult( EMClientEx client, boolean success )
+  {
+    lifecycleListener.onClientTearDownResult( client, success );
+  }
+
+  @Override
+  public void onTearDownPhaseCompleted()
+  {
+    lifecycleListener.onLifecyclePhaseCompleted( EMPhase.eEMTearDown );
+  }
 }

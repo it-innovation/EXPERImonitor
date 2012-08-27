@@ -63,12 +63,10 @@ public class EMMetricGenSetupPhase extends AbstractEMLCPhase
   public void start() throws Exception
   {
     if ( phaseActive ) throw new Exception( "Phase already active" );
-    if ( phaseClients.isEmpty() ) throw new Exception( "No clients available for this phase" );
+    if ( !hasClients()  ) throw new Exception( "No clients available for this phase" );
   
-    phaseActive = true;
-    
     // Create the set-up interface
-    for ( EMClientEx client : phaseClients.values() )
+    for ( EMClientEx client : getCopySetOfCurrentClients() )
     {
       AMQPMessageDispatch dispatch = new AMQPMessageDispatch();
       phaseMsgPump.addDispatch( dispatch );
@@ -78,13 +76,15 @@ public class EMMetricGenSetupPhase extends AbstractEMLCPhase
                                                     emProviderID,
                                                     client.getID(),
                                                     true );
-      
       face.setProviderListener( this );
       client.setSetupInterface( face );             
     }
     
+    phaseMsgPump.startPump();
+    phaseActive = true;
+    
     // Request clients do the same (and wait to start set-up process)
-    for ( EMClientEx client : phaseClients.values() )
+    for ( EMClientEx client : getCopySetOfCurrentClients() )
       client.getDiscoveryInterface().createInterface( EMInterfaceType.eEMSetup );
     
     phaseState = "Wait for clients to signal ready to set-up";
@@ -94,6 +94,7 @@ public class EMMetricGenSetupPhase extends AbstractEMLCPhase
   public void stop() throws Exception
   {
     phaseActive = false;
+    phaseMsgPump.stopPump();
   }
   
   
@@ -103,11 +104,18 @@ public class EMMetricGenSetupPhase extends AbstractEMLCPhase
   {
     if ( phaseActive )
     {
-      EMClientEx client = phaseClients.get( senderID );
+      EMClientEx client = getClient( senderID );
       
       if ( client != null )
       {
-        System.out.println("Client " + client.getName() + " ready to setup" );
+        if ( client.hasGeneratorToSetup() )
+        {
+          UUID genID = client.getNextGeneratorToSetup();
+          client.getSetupInterface().setupMetricGenerator( genID );
+        }
+        else 
+          if ( phaseListener != null ) 
+            phaseListener.onMetricGenSetupResult( client, false );
       }
     }
   }
@@ -119,12 +127,35 @@ public class EMMetricGenSetupPhase extends AbstractEMLCPhase
   {
     if ( phaseActive )
     {
-      EMClientEx client = phaseClients.get( senderID );
+      EMClientEx client = getClient( senderID );
       
-      if ( client != null )
+      if ( client != null && genID != null )
       {
-        System.out.println("Client " + client.getName() + " has set up MG " + genID.toString() + (success ? "OK" : "FAILED") );
+        if ( success ) client.addSuccessfulSetup( genID );
+        
+        if ( client.hasGeneratorToSetup() )
+        {
+          UUID nextGen = client.getNextGeneratorToSetup();
+          client.getSetupInterface().setupMetricGenerator( nextGen );
+        }
+        else
+          if ( phaseListener != null )
+            phaseListener.onMetricGenSetupResult( client, 
+                                                  client.metricGeneratorsSetupOK() );
       }
+      
+      // Check to see if we've finished trying to set up all clients
+      boolean allAttemptsMade = true;
+      Iterator<EMClientEx> clientIt = getCopySetOfCurrentClients().iterator();
+      while ( clientIt.hasNext() )
+        if ( clientIt.next().hasGeneratorToSetup() )
+        {
+          allAttemptsMade = false;
+          break;
+        }
+      
+      if ( allAttemptsMade && phaseListener != null )
+        phaseListener.onSetupPhaseCompleted();
     }
   }
 }

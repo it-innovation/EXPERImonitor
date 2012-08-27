@@ -8,17 +8,31 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.samples.basicEMClient;
  *
  * @author sgc
  */
-public class EMClientView extends javax.swing.JFrame {
+public class EMClientView extends javax.swing.JFrame
+{
+  private EMClientViewListener viewListener;
 
   /**
    * Creates new form EMClientView
    */
-  public EMClientView() {
+  public EMClientView( String clientName,
+                       EMClientViewListener listener) 
+  {
     initComponents();
+    
+    clientNameLabel.setText( clientName );
+    viewListener = listener;
   }
+  
   
   public void setStatus( String statusValue )
   { statusLabel.setText( statusValue ); }
+  
+  public void addLogMessage( String message )
+  { clientMessages.append( message + "\n" ); }
+  
+  public void enablePush( boolean enabled)
+  { actionButton.setEnabled(enabled); }
 
   /**
    * This method is called from within the constructor to initialize the form.
@@ -30,7 +44,7 @@ public class EMClientView extends javax.swing.JFrame {
     private void initComponents() {
 
         jLabel2 = new javax.swing.JLabel();
-        jLabel1 = new javax.swing.JLabel();
+        clientNameLabel = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         statusLabel = new javax.swing.JLabel();
         jSeparator1 = new javax.swing.JSeparator();
@@ -43,8 +57,9 @@ public class EMClientView extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(165, 174, 204));
 
-        jLabel1.setFont(new java.awt.Font("Verdana", 0, 18)); // NOI18N
-        jLabel1.setText("EM Client");
+        clientNameLabel.setFont(new java.awt.Font("Verdana", 0, 12)); // NOI18N
+        clientNameLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        clientNameLabel.setText("EM Client");
 
         jLabel3.setText("Current status:");
 
@@ -55,16 +70,25 @@ public class EMClientView extends javax.swing.JFrame {
         clientMessages.setRows(5);
         jScrollPane1.setViewportView(clientMessages);
 
-        actionButton.setText("Next action");
+        actionButton.setText("Push data");
+        actionButton.setActionCommand("");
         actionButton.setEnabled(false);
+        actionButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                onPushDataClicked(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(clientNameLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                         .addContainerGap()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
@@ -73,14 +97,9 @@ public class EMClientView extends javax.swing.JFrame {
                                 .addComponent(statusLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                             .addComponent(jSeparator1)
                             .addComponent(jScrollPane1)))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(77, 77, 77)
-                                .addComponent(jLabel1))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(44, 44, 44)
-                                .addComponent(actionButton, javax.swing.GroupLayout.PREFERRED_SIZE, 151, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                        .addGap(44, 44, 44)
+                        .addComponent(actionButton, javax.swing.GroupLayout.PREFERRED_SIZE, 151, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 40, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -88,7 +107,7 @@ public class EMClientView extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel1)
+                .addComponent(clientNameLabel)
                 .addGap(27, 27, 27)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
@@ -97,7 +116,7 @@ public class EMClientView extends javax.swing.JFrame {
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 7, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 14, Short.MAX_VALUE)
                 .addComponent(actionButton)
                 .addContainerGap())
         );
@@ -105,10 +124,17 @@ public class EMClientView extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+  private void onPushDataClicked(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_onPushDataClicked
+    
+    // Wait until we have definitely sent the data before allowing another push
+    actionButton.setEnabled( false );
+    viewListener.onPushDataClicked();
+  }//GEN-LAST:event_onPushDataClicked
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton actionButton;
     private javax.swing.JTextArea clientMessages;
-    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel clientNameLabel;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JScrollPane jScrollPane1;

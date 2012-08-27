@@ -36,6 +36,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Me
 import java.awt.event.*;
 
 import java.util.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
 
 
 
@@ -73,7 +74,13 @@ public class EMController implements IEMLifecycleListener
   @Override
   public void onClientDisconnected( EMClient client )
   {
-
+    //TODO
+  }
+  
+  @Override
+  public void onLifecyclePhaseCompleted( EMPhase phase )
+  {
+    mainView.setNextPhaseValue( expMonitor.getNextPhase().toString() );
   }
   
   @Override
@@ -94,9 +101,28 @@ public class EMController implements IEMLifecycleListener
   }
   
   @Override
-  public void onLifecyclePhaseCompleted( EMPhase phase )
+  public void onClientSetupResult( EMClient client, boolean success )
   {
-    mainView.setNextPhaseValue( expMonitor.getNextPhase().toString() );
+    if ( client != null )
+      mainView.addLogText( client.getName() + ( success ? " setup SUCCEEDED" : " setup FAILED") );
+  }
+  
+  @Override
+  public void onGotMetricData( EMClient client, Report report )
+  {
+    if ( client != null && report != null )
+    {   
+      mainView.addLogText( client.getName() + 
+                           " got metric data, ID = " + 
+                           report.getUUID().toString() );
+    }
+  }
+  
+  @Override
+  public void onClientTearDownResult( EMClient client, boolean success )
+  {
+    if ( client != null )
+      mainView.addLogText( client.getName() + ( success ? " tear-down SUCCEEDED" : " tear-down FAILED") );
   }
   
   // Private methods -----------------------------------------------------------

@@ -40,11 +40,16 @@ public class EMClientEx extends EMClient
 { 
   private IEMDiscovery      discoveryFace;
   private IEMMetricGenSetup setupFace;
+  private IEMLiveMonitor    liveFace;
+  private IEMTearDown       tearDownFace;
   
+  private ArrayList<UUID> generatorsToSetup;
  
   public EMClientEx( UUID id, String name )
   {
     super( id, name );
+    
+    generatorsToSetup = new ArrayList<UUID>();
   }
   
   public void destroyAllInterfaces()
@@ -64,6 +69,18 @@ public class EMClientEx extends EMClient
   public void setSetupInterface( IEMMetricGenSetup face )
   { setupFace = face; }
   
+  public void setLiveMonitorInterface( IEMLiveMonitor face )
+  { liveFace = face; }
+  
+  public IEMLiveMonitor getLiveMonitorInterface()
+  { return liveFace; }
+  
+  public IEMTearDown getTearDownInterface()
+  { return tearDownFace; }
+  
+  public void setTearDownInterface( IEMTearDown face )
+  { tearDownFace = face; }
+  
   // Discovery phase state -----------------------------------------------------
   public void setIsConnected( boolean connected )
   { clientConnected = connected; }
@@ -78,5 +95,31 @@ public class EMClientEx extends EMClient
   {
     if ( generators != null ) metricGenerators = 
             (HashSet<MetricGenerator>) generators;
+    
+    generatorsToSetup.clear();
+    
+    // Copy UUIDs of generators into set-up set
+    Iterator<MetricGenerator> genIt = metricGenerators.iterator();
+    while ( genIt.hasNext() )
+      generatorsToSetup.add( genIt.next().getUUID() );
   }
+  
+  // Setup phase state ---------------------------------------------------------
+  public boolean hasGeneratorToSetup()
+  { return ( !generatorsToSetup.isEmpty() ); }
+  
+  public UUID getNextGeneratorToSetup()
+  { 
+    if ( !generatorsToSetup.isEmpty() )
+      return generatorsToSetup.remove( 0 );
+    
+    return null;
+  }
+  
+  public void addSuccessfulSetup( UUID genID )
+  { if ( genID != null ) generatorsSetupOK.add( genID ); }
+  
+  // Tear-down phase state -----------------------------------------------------
+  public void setTearDownResult( boolean success )
+  { tearDownSuccessful = success; }
 }

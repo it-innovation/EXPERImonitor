@@ -42,7 +42,6 @@ import java.util.*;
 
 
 
-
 public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
                                        implements IEMDiscovery_ProviderListener
 {
@@ -61,6 +60,9 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
     
     clientsExpectingGeneratorInfo = new HashSet<UUID>();
     
+    // Start pump early as clients connect in this phase
+    phaseMsgPump.startPump();
+    
     phaseState = "Waiting for clients";
   }
   
@@ -69,18 +71,18 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
   public boolean addClient( EMClientEx client )
   {
     if ( super.addClient(client) )
-    {   
+    {
       // Create a new IEMMonitor interface for the client
       AMQPMessageDispatch dispatch = new AMQPMessageDispatch();
       phaseMsgPump.addDispatch( dispatch );
       
-      EMDiscovery monitorFace = new EMDiscovery( emChannel,
-                                                 dispatch,
-                                                 emProviderID,
-                                                 client.getID(),
-                                                 true );
-      monitorFace.setProviderListener( this );
-      client.setDiscoveryInterface( monitorFace );
+      EMDiscovery discoverFace = new EMDiscovery( emChannel,
+                                                  dispatch,
+                                                  emProviderID,
+                                                  client.getID(),
+                                                  true );
+      discoverFace.setProviderListener( this );
+      client.setDiscoveryInterface( discoverFace );
       
       phaseState = "Waiting to start phase";
       
@@ -94,17 +96,17 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
   public void start() throws Exception
   {
     if ( phaseActive ) throw new Exception( "Phase already active" );
-    if ( phaseClients.isEmpty() ) throw new Exception( "No clients available for this phase" );
+    if ( !hasClients() ) throw new Exception( "No clients available for this phase" );
   
     phaseActive = true;
     
     // Confirm registration with clients...
-    for ( EMClientEx client : phaseClients.values() )
+    for ( EMClientEx client : getCopySetOfCurrentClients() )
     {
       IEMDiscovery monFace = client.getDiscoveryInterface();
       monFace.registrationConfirmed( true );
       client.setIsConnected( true );
-      
+
       // Initially assume all clients will offer metric generators
       clientsExpectingGeneratorInfo.add( client.getID() );
     }
@@ -116,6 +118,8 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
   @Override
   public void stop() throws Exception
   {
+    // Don't stop this message pump as continuously listen for disconnecting clients here
+    
     phaseActive = false;
   }
   
@@ -125,8 +129,8 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
   {
     if ( phaseActive )
     {
-      EMClientEx client = phaseClients.get( senderID );
-      
+      EMClientEx client = getClient( senderID );
+
       if ( client != null )
         client.getDiscoveryInterface().requestActivityPhases();
     }
@@ -138,8 +142,8 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
   {
     if ( phaseActive )
     {
-      EMClientEx client = phaseClients.get( senderID );
-    
+      EMClientEx client = getClient( senderID );
+
       if ( client != null && supportedPhases != null )
       {
         // Tell Lifecycle manager about supported phases by client
@@ -148,11 +152,10 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
 
         // If we have relevant phases, go get metric generator info
         if ( supportedPhases.contains( EMPhase.eEMLiveMonitoring )        ||
-             supportedPhases.contains( EMPhase.eEMPostMonitoringReport) )
+              supportedPhases.contains( EMPhase.eEMPostMonitoringReport) )
           client.getDiscoveryInterface().discoverMetricGenerators();
         else
           clientsExpectingGeneratorInfo.remove( senderID );
-          // Otherise, don't expect generator info
       }
     }
   }
@@ -163,8 +166,8 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
   {
     if ( phaseActive )
     {
-      EMClientEx client = phaseClients.get( senderID );
-    
+      EMClientEx client = getClient( senderID );
+
       if ( client != null )
       {
         client.setGeneratorDiscoveryResult( discoveredGenerators );
@@ -186,37 +189,36 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
   {
     if ( phaseActive )
     {
-      EMClientEx client = phaseClients.get( senderID );
-    
-      if ( client != null )
-      {
-        client.setMetricGenerators( generators );
-        phaseListener.onClientMetricGeneratorsFound( client );
+        EMClientEx client = getClient( senderID );
+
+        if ( client != null )
+        {
+          client.setMetricGenerators( generators );
+          phaseListener.onClientMetricGeneratorsFound( client );
+          
+          // Remove from the list of expected generators
+          clientsExpectingGeneratorInfo.remove( senderID );
+        }
         
-        // Remove from the list of expected generators
-        clientsExpectingGeneratorInfo.remove( senderID );
-      }
-      
-      // If we've got all the metric generator info we need, finish this phase
-      if ( clientsExpectingGeneratorInfo.isEmpty() )
-        phaseListener.onDiscoveryPhaseCompleted();
+        // If we've got all the metric generator info we need, finish this phase
+        if ( clientsExpectingGeneratorInfo.isEmpty() )
+          phaseListener.onDiscoveryPhaseCompleted();
     }
   }
   
   @Override
   public void onClientDisconnecting( UUID senderID )
   {
-    EMClientEx client = phaseClients.get( senderID );
-    
+    EMClientEx client = getClient( senderID );
+
     if ( client != null )
     {
       clientsExpectingGeneratorInfo.remove( senderID );
-      
+
       client.destroyAllInterfaces();
       client.setIsConnected( false );
-      
+
       phaseListener.onClientIsDisconnected( client );
     }
-        
   }
 }

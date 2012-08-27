@@ -33,9 +33,10 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasic
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.factory.EMInterfaceFactory;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 
 import java.util.*;
+
 
 
 
@@ -63,14 +64,12 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
   private IEMTearDown          tearDownFace;
   
   // Metric Generators
-  private HashMap<UUID, MetricGenerator> metricGenerators;
+  private HashSet<MetricGenerator> clientGenerators;
   
 
   public EMInterfaceAdapter( EMIAdapterListener listener )
   {
     emiListener = listener;
-    
-    metricGenerators = new HashMap<UUID, MetricGenerator>();
   }
   
   public void registerWithEM( String name,
@@ -98,23 +97,32 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
     dispatchPump.startPump();
       
     // Create a dispatch (for entry point interface) and add to the pump
-    IAMQPMessageDispatch epDispatch = interfaceFactory.createDispatch();
-    dispatchPump.addDispatch( epDispatch );
+    IAMQPMessageDispatch dispatch = interfaceFactory.createDispatch();
+    dispatchPump.addDispatch( dispatch );
       
     // Crate our entry point interface
-    entryPointFace = interfaceFactory.createEntryPoint( expMonitorID, epDispatch );
+    entryPointFace = interfaceFactory.createEntryPoint( expMonitorID, dispatch );
     
     // Create the principal interface (IEMDiscovery ahead of time)
-    IAMQPMessageDispatch monDispatch = interfaceFactory.createDispatch();
-    dispatchPump.addDispatch( monDispatch );
+    dispatch = interfaceFactory.createDispatch();
+    dispatchPump.addDispatch( dispatch );
     discoveryFace = interfaceFactory.createDiscovery( expMonitorID, 
                                                       clientID, 
-                                                      monDispatch );
+                                                      dispatch );
     
     discoveryFace.setUserListener( this );
       
     //.. and finally, try registering with the EM!
-    entryPointFace.registerAsEMClient( clientID, "Simple EM Client" );
+    entryPointFace.registerAsEMClient( clientID, clientName );
+  }
+  
+  public void setMetricGenerators( HashSet<MetricGenerator> generators )
+  { clientGenerators = generators; }
+  
+  public void pushMetric( Report report )
+  {
+    if ( report != null && liveMonitorFace != null )
+      liveMonitorFace.pushMetric( report );
   }
   
   // IEMMonitor_UserListener ---------------------------------------------------
@@ -129,12 +137,12 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
         {
           if ( setupFace == null )
           {
-            IAMQPMessageDispatch monDispatch = interfaceFactory.createDispatch();
-            dispatchPump.addDispatch( monDispatch );
+            IAMQPMessageDispatch dispatch = interfaceFactory.createDispatch();
+            dispatchPump.addDispatch( dispatch );
             
             setupFace = interfaceFactory.createSetup( expMonitorID, 
                                                       clientID, 
-                                                      monDispatch );
+                                                      dispatch );
             
             setupFace.setUserListener( this );
             setupFace.notifyReadyToSetup();
@@ -144,31 +152,33 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
           
         case eEMLiveMonitor :
         {
-          if ( setupFace == null )
+          if ( liveMonitorFace == null )
           {
-            IAMQPMessageDispatch monDispatch = interfaceFactory.createDispatch();
-            dispatchPump.addDispatch( monDispatch );
+            IAMQPMessageDispatch dispatch = interfaceFactory.createDispatch();
+            dispatchPump.addDispatch( dispatch );
             
             liveMonitorFace = interfaceFactory.createLiveMonitor( expMonitorID, 
                                                                   clientID, 
-                                                                  monDispatch );
+                                                                  dispatch );
             
             liveMonitorFace.setUserListener( this );
-            //TODO: Decide on push/pull
+            
+            // Notify we can push (TODO: Pull support)
+            liveMonitorFace.notifyReadyToPush();
           }
           
         } break;
           
         case eEMPostReport :
         {
-          if ( setupFace == null )
+          if ( postReportFace == null )
           {
-            IAMQPMessageDispatch monDispatch = interfaceFactory.createDispatch();
-            dispatchPump.addDispatch( monDispatch );
+            IAMQPMessageDispatch dispatch = interfaceFactory.createDispatch();
+            dispatchPump.addDispatch( dispatch );
             
             postReportFace = interfaceFactory.createPostReport( expMonitorID, 
                                                                 clientID, 
-                                                                monDispatch );
+                                                                dispatch );
             
             postReportFace.setUserListener( this );
             postReportFace.notifyReadyToReport();
@@ -178,14 +188,14 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
           
         case eEMTearDown :
         {
-          if ( setupFace == null )
+          if ( tearDownFace == null )
           {
-            IAMQPMessageDispatch monDispatch = interfaceFactory.createDispatch();
-            dispatchPump.addDispatch( monDispatch );
+            IAMQPMessageDispatch dispatch = interfaceFactory.createDispatch();
+            dispatchPump.addDispatch( dispatch );
             
             tearDownFace = interfaceFactory.createTearDown( expMonitorID, 
                                                             clientID, 
-                                                            monDispatch );
+                                                            dispatch );
             
             tearDownFace.setUserListener( this );
             tearDownFace.notifyReadyToTearDown();
@@ -236,11 +246,8 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
   {
     if ( senderID.equals(expMonitorID) && emiListener != null )
     {
-      HashSet<MetricGenerator> genSet = new HashSet<MetricGenerator>();
-      genSet.addAll( metricGenerators.values() );
-      
-      emiListener.populateMetricGeneratorInfo( genSet );
-      discoveryFace.sendMetricGeneratorInfo( genSet );
+      emiListener.onPopulateMetricGeneratorInfo();
+      discoveryFace.sendMetricGeneratorInfo( clientGenerators );
     }
   }
   
@@ -259,15 +266,11 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
   {
     if ( senderID.equals(expMonitorID) && setupFace != null )
     {
-      MetricGenerator mg = metricGenerators.get( genID );
-      if ( mg != null )
-      {
-        Boolean[] result = new Boolean[1];
-        result[0] = false;
-        emiListener.setupMetricGenerator( mg, result );
-        
-        setupFace.notifyMetricGeneratorSetupResult( genID, result[0] );
-      }
+      Boolean[] result = new Boolean[1];
+      result[0] = false;
+      
+      emiListener.onSetupMetricGenerator( genID, result );
+      setupFace.notifyMetricGeneratorSetupResult( genID, result[0] );
     }
   }
   
@@ -279,37 +282,38 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
   @Override
   public void onStartPushing( UUID senderID )
   {
-    
+    if ( senderID.equals(expMonitorID) )
+      emiListener.onStartPushingMetricData();
   }
   
   @Override
   public void onReceivedPush( UUID senderID, UUID lastReportID )
   {
-    
+    if ( senderID.equals(expMonitorID) )
+      emiListener.onLastPushProcessed( lastReportID );
   }
   
   @Override
   public void onStopPushing( UUID senderID )
   {
-    
+    if ( senderID.equals(expMonitorID) )
+      emiListener.onStopPushingMetricData();
   }
   
   @Override
   public void onPullMetric( UUID senderID, UUID measurementSetID )
   {
-    
+    //TODO
   }
   
   @Override
   public void onPullMetricTimeOut( UUID senderID, UUID measurementSetID )
-  {
-    
-  }
+  { /* Not implemented in this demo */  }
   
   @Override
   public void onPullingStopped( UUID senderID )
   {
-    
+    //TODO
   }
   
   // IEMPostReport_UserListener ------------------------------------------------
@@ -327,20 +331,22 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
   
   @Override
   public void notifyReportBatchTimeOut( UUID senderID, UUID batchID )
-  {
-    
-  }
+  { /* Not implemented in this demo */ }
   
   // IEMTearDown_UserListener --------------------------------------------------
   @Override
   public void onTearDownMetricGenerators( UUID senderID )       
   {
-    
+    if ( senderID.equals(expMonitorID) && emiListener != null )
+    {
+      Boolean[] result = new Boolean[1];
+      emiListener.onGetTearDownResult( result );
+      
+      tearDownFace.sendTearDownResult( result[0] );
+    }
   }
   
   @Override
   public void onTearDownTimeOut( UUID senderID )
-  {
-    
-  }
+  { /* Not implemented in this demo */ }
 }

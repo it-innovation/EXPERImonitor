@@ -35,6 +35,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecyle.*
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
 
 import java.util.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
 
 
 
@@ -140,6 +141,13 @@ public class ExperimentMonitor implements IExperimentMonitor,
     if ( amqpChannel != null ) amqpChannel.close();
   }
   
+  @Override
+  public void pullMetric( EMClient client, UUID measurementSetID ) throws Exception
+  {
+    try { lifecycleManager.tryPullMetric(client, measurementSetID); }
+    catch ( Exception e ) { throw e; }
+  }
+  
   // IEMLifecycleListener ------------------------------------------------------
   @Override
   public void onClientConnected( EMClient client )
@@ -158,6 +166,14 @@ public class ExperimentMonitor implements IExperimentMonitor,
   }
   
   @Override
+  public void onLifecyclePhaseCompleted( EMPhase phase )
+  {
+    Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
+    while ( listIt.hasNext() )
+      listIt.next().onLifecyclePhaseCompleted( phase );
+  }
+  
+  @Override
   public void onFoundClientWithMetricGenerators( EMClient client )
   {
     Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
@@ -166,11 +182,27 @@ public class ExperimentMonitor implements IExperimentMonitor,
   }
   
   @Override
-  public void onLifecyclePhaseCompleted( EMPhase phase )
+  public void onClientSetupResult( EMClient client, boolean success )
   {
     Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
     while ( listIt.hasNext() )
-      listIt.next().onLifecyclePhaseCompleted( phase );
+      listIt.next().onClientSetupResult( client, success );
+  }
+  
+  @Override
+  public void onGotMetricData( EMClient client, Report report )
+  {
+    Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
+    while ( listIt.hasNext() )
+      listIt.next().onGotMetricData( client, report );
+  }
+  
+  @Override
+  public void onClientTearDownResult( EMClient client, boolean success )
+  {
+    Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
+    while ( listIt.hasNext() )
+      listIt.next().onClientTearDownResult( client, success );
   }
   
   // Private methods -----------------------------------------------------------

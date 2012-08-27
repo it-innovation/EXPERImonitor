@@ -65,6 +65,9 @@ public abstract class EMBaseInterface implements IAMQPMessageDispatchListener
     try { empl = (EMMethodPayload) jsonMapper.readValue( data, EMMethodPayload.class ); }
     catch( Exception e ) {}
     
+    // DEBUG ----------------------------------------------------------------------------------------------------------------
+    System.out.println("BaseFACE:Msg: [" +empl.getMethodID()+ "] " + (isProvider ? interfaceUserID: interfaceProviderID ) );
+    
     if ( empl != null ) onInterpretMessage( empl );
   }
   
@@ -125,6 +128,9 @@ public abstract class EMBaseInterface implements IAMQPMessageDispatchListener
       
       if ( baos != null )
       {
+        // DEBUG ------------------------------------------------------------------------------------------------------
+        System.out.println("BaseFACE:Exe: [" +methodID+ "] " + (isProvider ? interfaceUserID : interfaceProviderID ) );
+        
         amqpInterface.sendBasicMessage( baos );
         try { baos.close(); }
         catch (IOException ioe) {}

@@ -41,16 +41,17 @@ import java.util.*;
 
 public abstract class AbstractEMLCPhase
 {
-  protected EMPhase                   phaseType;
-  protected String                    phaseState;
-  protected HashMap<UUID, EMClientEx> phaseClients;
+  private HashMap<UUID, EMClientEx> phaseClients;
+  private final Object              clientLock = new Object();
   
+  protected EMPhase phaseType;
+  protected String  phaseState;
+ 
   protected AMQPBasicChannel        emChannel;
   protected UUID                    emProviderID;
   protected AMQPMessageDispatchPump phaseMsgPump;
+  protected boolean                 phaseActive = false;
   
-  protected boolean phaseActive = false;
-
   
   public EMPhase getPhaseType()
   { return phaseType; }
@@ -60,29 +61,61 @@ public abstract class AbstractEMLCPhase
   
   public boolean addClient( EMClientEx client )
   {
+    // Safety first
     if ( client == null ) return false;
-    if ( phaseActive    ) return false;
+    if ( phaseActive )    return false;
     
-    if ( phaseClients.containsKey(client.getID()) ) return true;
+    synchronized ( clientLock )
+    {
+      if ( !phaseClients.containsKey(client.getID()) )
+        phaseClients.put( client.getID(), client );
+    }
     
-    phaseClients.put( client.getID(), client );
     return true;
+  }
+  
+  public EMClientEx getClient( UUID id )
+  {
+    EMClientEx client = null;
+    
+    synchronized ( clientLock )
+    { client = phaseClients.get( id ); }
+    
+    return client;
+  }
+  
+  public boolean hasClients()
+  {
+    boolean result = false;
+    
+    synchronized( clientLock )
+    { result = !phaseClients.isEmpty(); }
+    
+    return result;
   }
   
   public boolean removeClient( UUID id )
   {
     if ( id == null ) return false;
-    if ( !phaseClients.containsKey(id) ) return false;
     if ( phaseActive ) return false;
     
-    phaseClients.remove( id );
-    return true;
+    boolean result = false;
+    
+    synchronized ( clientLock )
+    {
+      if ( phaseClients.remove( id ) != null )
+        result = true;
+    }
+   
+    return result;
   }
   
   public Set<EMClientEx> getCopySetOfCurrentClients()
   {
     HashSet<EMClientEx> clientSet = new HashSet<EMClientEx>();
-    clientSet.addAll( phaseClients.values() );
+    
+    synchronized ( clientLock )
+    { clientSet.addAll( phaseClients.values() ); }
     
     return clientSet;
   }
@@ -105,7 +138,5 @@ public abstract class AbstractEMLCPhase
     phaseMsgPump =
             new AMQPMessageDispatchPump( phaseType + " message pump",
                                          IAMQPMessageDispatchPump.ePumpPriority.MINIMUM );
-    
-    phaseMsgPump.startPump();
   }
 }

@@ -43,14 +43,21 @@ public class EMClient
   protected boolean                  discoveredGenerators = false;
   protected HashSet<MetricGenerator> metricGenerators;
   
+  // Setup phase states
+  protected HashSet<UUID> generatorsSetupOK;
+  
+  // Tear-down phase
+  protected boolean tearDownSuccessful = false;
+  
   
   public EMClient( UUID id, String name )
   {
     clientID = id;
     clientName = name;
     
-    supportedPhases  = EnumSet.noneOf( EMPhase.class );
-    metricGenerators = new HashSet<MetricGenerator>();
+    supportedPhases   = EnumSet.noneOf( EMPhase.class );
+    metricGenerators  = new HashSet<MetricGenerator>();
+    generatorsSetupOK = new HashSet<UUID>();
   }
   
   public UUID getID()
@@ -86,4 +93,19 @@ public class EMClient
     
     return mgCopies;
   }
+  
+  public boolean metricGeneratorsSetupOK()
+  {
+    if ( metricGenerators.isEmpty() )  return false;
+    if ( generatorsSetupOK.isEmpty() ) return false;
+    
+    Iterator<MetricGenerator> genIt = metricGenerators.iterator();
+    while ( genIt.hasNext() )
+      if ( !generatorsSetupOK.contains( genIt.next().getUUID() ) ) return false;
+    
+    return true;
+  }
+  
+  public boolean getTearDownResult()
+  { return tearDownSuccessful; }
 }

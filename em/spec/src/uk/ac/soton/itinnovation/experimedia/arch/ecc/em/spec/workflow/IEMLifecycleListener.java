@@ -25,6 +25,7 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
 
 
@@ -36,7 +37,19 @@ public interface IEMLifecycleListener
   
   void onClientDisconnected( EMClient client );
   
+  void onLifecyclePhaseCompleted( EMPhase phase );
+  
   void onFoundClientWithMetricGenerators( EMClient client );
   
-  void onLifecyclePhaseCompleted( EMPhase phase );
+  void onClientSetupResult( EMClient client, boolean success );
+  
+  /**
+   * Do not block on this event
+   * 
+   * @param client
+   * @param report 
+   */
+  void onGotMetricData( EMClient client, Report report );
+  
+  void onClientTearDownResult( EMClient client, boolean success );
 }

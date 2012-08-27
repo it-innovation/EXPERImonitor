@@ -49,7 +49,7 @@ public class EMView extends javax.swing.JFrame
     
     initComponents();
     
-    clientListModel = new DefaultListModel();
+    clientListModel = new DefaultListModel();    
     currentClientList.setModel( clientListModel );
   }
   
