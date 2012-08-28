@@ -46,3 +46,12 @@ This usage scenario assumes you will run a RabbitMQ server on your local machine
 	rabbitmq-service stop
 
 
+Experiment Data Manager
+-----------------------
+The Experiment Data Manager (EDM) manages the data, such as monitoring information,
+which is stored via the Experiment Monitor (EM) and displayed via the UI.
+
+The EDM depends on a PostgreSQL database in the back-end, which needs to be set up
+before the EDM can be used. Installation instructions can be found in a separate
+README: ./edm/resources/README.txt
+

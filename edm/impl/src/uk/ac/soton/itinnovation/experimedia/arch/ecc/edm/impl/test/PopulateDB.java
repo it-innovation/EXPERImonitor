@@ -45,40 +45,63 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IExperimentDAO
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IReportDAO;
 
 /**
- *
+ * A helper class to populate the metrics database with testdata.
+ * 
  * @author Vegard Engen
  */
 public class PopulateDB
 {
-    static UUID expUUID = UUID.fromString("bfe4c710-61ba-46f8-a519-be2f7808192e");
-    static UUID entityUUID = UUID.fromString("5718cd67-4310-4b2c-aeb9-9b72314630ca");
-    static UUID attributeUUID = UUID.fromString("4f2817b5-603a-4d02-a032-62cfca314962");
-    static UUID mGenUUID = UUID.fromString("782e5097-2e29-4219-a984-bf48dfcd7f63");
-    static UUID mGrpUUID = UUID.fromString("189064a5-f1d8-41f2-b2c1-b88776841009");
-    static UUID cpuMSetUUID = UUID.fromString("2b915932-41b1-45d7-b4f6-2de4f30020b8");
-    static UUID networkMSetUUID = UUID.fromString("3b915932-41b1-45d7-b4f6-2de4f30020b7");
-    static UUID diskMSetUUID = UUID.fromString("4b915932-41b1-45d7-b4f6-2de4f30020b6");
+    public static UUID expUUID = UUID.fromString("bfe4c710-61ba-46f8-a519-be2f7808192e");
+    public static UUID entityUUID = UUID.fromString("5718cd67-4310-4b2c-aeb9-9b72314630ca");
+    public static UUID cpuAttributeUUID = UUID.fromString("4f2817b5-603a-4d02-a032-62cfca314962");
+    public static UUID networkAttributeUUID = UUID.fromString("cd42b215-5235-4591-8be5-2d403911cb59");
+    public static UUID diskAttributeUUID = UUID.fromString("a460987f-2ef8-4519-91f2-4a23954b16bd");
+    public static UUID mGenUUID = UUID.fromString("782e5097-2e29-4219-a984-bf48dfcd7f63");
+    public static UUID mGrpUUID = UUID.fromString("189064a5-f1d8-41f2-b2c1-b88776841009");
+    public static UUID cpuMSetUUID = UUID.fromString("2b915932-41b1-45d7-b4f6-2de4f30020b8");
+    public static UUID networkMSetUUID = UUID.fromString("3b915932-41b1-45d7-b4f6-2de4f30020b7");
+    public static UUID diskMSetUUID = UUID.fromString("4b915932-41b1-45d7-b4f6-2de4f30020b6");
     
     static Logger log = Logger.getLogger(PopulateDB.class);
     
+    /**
+     * Main method that makes a call to the populateWithTestData() method.
+     * @param args
+     * @throws Exception 
+     */
     public static void main(String[] args) throws Exception
     {
         populateWithTestData();
     }
     
+    /**
+     * A method to populate the database with an entity, experiment, metric generator,
+     * metric group, measurement sets and reports with measurements for each of the
+     * measurement sets.
+     * @throws Exception 
+     */
     public static void populateWithTestData() throws Exception
     {
         ExperimentDataManager edm = new ExperimentDataManager();
         
-        saveEntities(edm, entityUUID, attributeUUID, expUUID);
-        saveExperimentCompleteChain(edm, expUUID, entityUUID, attributeUUID, mGenUUID, mGrpUUID, cpuMSetUUID, networkMSetUUID, diskMSetUUID);
+        saveEntities(edm, entityUUID, cpuAttributeUUID, networkAttributeUUID, diskAttributeUUID);
+        saveExperimentCompleteChain(edm, expUUID, entityUUID, cpuAttributeUUID, networkAttributeUUID, diskAttributeUUID, mGenUUID, mGrpUUID, cpuMSetUUID, networkMSetUUID, diskMSetUUID);
         
         saveReportWithRandomMeasurements(edm, cpuMSetUUID, 50, 2000, 6000);
         saveReportWithRandomMeasurements(edm, networkMSetUUID, 50, 500000, 1000000);
         saveReportWithRandomMeasurements(edm, diskMSetUUID, 50, 100, 400);
     }
     
-    public static void saveEntities(ExperimentDataManager edm, UUID entityUUID, UUID attributeUUID, UUID expUUID) throws Exception
+    /**
+     * Saves an entity (VM) with three attributes (CPU, Network, Disk).
+     * @param edm Experiment Data Manager object to save the data with.
+     * @param entityUUID The UUID of the Entity.
+     * @param cpuAttributeUUID The UUID of the CPU attribute of the entity.
+     * @param networkAttributeUUID The UUID of the Network attribute of the entity.
+     * @param diskAttributeUUID The UUID of the Disk attribute of the entity.
+     * @throws Exception 
+     */
+    public static void saveEntities(ExperimentDataManager edm, UUID entityUUID, UUID cpuAttributeUUID, UUID networkAttributeUUID, UUID diskAttributeUUID) throws Exception
     {
         IEntityDAO entityDAO = null;
         try {
@@ -93,9 +116,9 @@ public class PopulateDB
         entity.setUUID(entityUUID);
         entity.setName("VM");
         entity.setDescription("A Virtual Machine");
-        entity.addtAttribute(new Attribute(attributeUUID, entityUUID, "CPU", "CPU performance"));
-        entity.addtAttribute(new Attribute(UUID.randomUUID(), entityUUID, "Network", "Network performance"));
-        entity.addtAttribute(new Attribute(UUID.randomUUID(), entityUUID, "Disk", "Disk performance"));
+        entity.addtAttribute(new Attribute(cpuAttributeUUID, entityUUID, "CPU", "CPU performance"));
+        entity.addtAttribute(new Attribute(networkAttributeUUID, entityUUID, "Network", "Network performance"));
+        entity.addtAttribute(new Attribute(diskAttributeUUID, entityUUID, "Disk", "Disk performance"));
         
         try {
             entityDAO.saveEntity(entity);
@@ -132,7 +155,25 @@ public class PopulateDB
         }
     }
     
-    public static void saveExperimentCompleteChain(ExperimentDataManager edm, UUID expUUID, UUID entityUUID, UUID attribUUID, UUID mGenUUID, UUID mGrpUUID, UUID cpuMSetUUID, UUID networkMSetUUID, UUID diskMSetUUID) throws Exception
+    /**
+     * Saves an experiment with a complete chain of a metric generator, a metric
+     * group, three measurement sets (one for each of the attributes of the entity
+     * created in the saveEntities() method) and reports with 50 measurements for
+     * each of the measurement sets.
+     * @param edm Experiment Data Manager object to save the data with.
+     * @param expUUID The Experiment UUID.
+     * @param entityUUID The Entity UUID.
+     * @param cpuAttribUUID The UUID of the CPU attribute of the entity.
+     * @param networkAttribUUID The UUID of the Network attribute of the entity.
+     * @param diskAttribUUID The UUID of the Disk attribute of the entity.
+     * @param mGenUUID The UUID of the metric generator
+     * @param mGrpUUID The UUID of the metric group.
+     * @param cpuMSetUUID The UUID of the CPU measurement set.
+     * @param networkMSetUUID The UUID of the Network measurement set.
+     * @param diskMSetUUID The UUID of the Disk measurement set.
+     * @throws Exception 
+     */
+    public static void saveExperimentCompleteChain(ExperimentDataManager edm, UUID expUUID, UUID entityUUID, UUID cpuAttribUUID, UUID networkAttribUUID, UUID diskAttribUUID, UUID mGenUUID, UUID mGrpUUID, UUID cpuMSetUUID, UUID networkMSetUUID, UUID diskMSetUUID) throws Exception
     {
 //----- EXPERIMENT
         IExperimentDAO expDAO = null;
@@ -166,17 +207,17 @@ public class PopulateDB
 //----- MEASUREMENT SETS
         log.info("Creating CPU QoS Measurement set");
         Metric metric1 = new Metric(UUID.randomUUID(), MetricType.RATIO, MILLI(SECOND));
-        MeasurementSet mSet1 = new MeasurementSet(cpuMSetUUID, attribUUID, mGrpUUID, metric1);
+        MeasurementSet mSet1 = new MeasurementSet(cpuMSetUUID, cpuAttribUUID, mGrpUUID, metric1);
         metricGroup.addMeasurementSets(mSet1);
         
         log.info("Creating Network QoS Measurement set");
         Metric metric2 = new Metric(UUID.randomUUID(), MetricType.RATIO, BIT.divide(SECOND));
-        MeasurementSet mSet2 = new MeasurementSet(networkMSetUUID, attribUUID, mGrpUUID, metric2);
+        MeasurementSet mSet2 = new MeasurementSet(networkMSetUUID, networkAttribUUID, mGrpUUID, metric2);
         metricGroup.addMeasurementSets(mSet2);
         
         log.info("Creating Disk QoS Measurement set");
         Metric metric3 = new Metric(UUID.randomUUID(), MetricType.RATIO, MILLI(SECOND));
-        MeasurementSet mSet3 = new MeasurementSet(diskMSetUUID, attribUUID, mGrpUUID, metric3);
+        MeasurementSet mSet3 = new MeasurementSet(diskMSetUUID, diskAttribUUID, mGrpUUID, metric3);
         metricGroup.addMeasurementSets(mSet3);
         
         log.info("Saving experiment (with all sub-classes)");
@@ -190,6 +231,14 @@ public class PopulateDB
         printDetailsForExperiment(edm, expUUID);
     }
     
+    /**
+     * Print the details for the experiment (to log file). Will use the EDM to get
+     * the experiment from the storage.
+     * 
+     * @param edm Experiment Data Manager object to save the data with.
+     * @param expUUID The experiment UUID.
+     * @throws Exception 
+     */
     public static void printDetailsForExperiment(ExperimentDataManager edm, UUID expUUID) throws Exception
     {
         IExperimentDAO expDAO = null;
@@ -288,7 +337,29 @@ public class PopulateDB
         }
     }
     
-    
+    /**
+     * Save a report with random measurements for a particular measurement set,
+     * given the number of measurements to create and min/max range for the
+     * random numbers.
+     * 
+     * The timestamps of the measurements are calculated to be in the past,
+     * 1/10 second apart starting from the current time the value is calculated:
+     * 
+     * long timeStamp = new Date().getTime() - (10000 * (numMeasurements-i));
+     * 
+     * Therefore, the greater the number of measurements calculated, the further
+     * back in time the timestamps will be generated. Therefore, be careful not 
+     * to call this method too often with a too great number of measurements to
+     * generate, else you'll create measurements with timestamps before measurements
+     * already generated.
+     * 
+     * @param edm Experiment Data Manager object.
+     * @param mSetUUID The measurement set that the report is for.
+     * @param numMeasurements The number of measurements to create (randomly).
+     * @param min The minimum value of the range for the random measurement values.
+     * @param max The maximum value of the range for the random measurement values.
+     * @throws Exception 
+     */
     public static void saveReportWithRandomMeasurements(ExperimentDataManager edm, UUID mSetUUID, int numMeasurements, int min, int max) throws Exception
     {
         IReportDAO reportDAO = null;
@@ -308,8 +379,8 @@ public class PopulateDB
         long timeStampTo = 0;
         for (int i = 0; i < numMeasurements; i++)
         {
-            long timeStamp = new Date().getTime() - (1000 * (numMeasurements-i));
-            int value = (int)Math.round(scale (rand.nextDouble(), 0., 1.0, min, max));
+            long timeStamp = new Date().getTime() - (10000 * (numMeasurements-i));
+            int value = (int)Math.round(scale (rand.nextDouble(), 0, 1, min, max));
             Measurement measurement = new Measurement(UUID.randomUUID(), mSetUUID, new Date(timeStamp), String.valueOf(value));
             mSet.addMeasurement(measurement);
             
@@ -338,6 +409,15 @@ public class PopulateDB
         }
     }
     
+    /**
+     * Scales a number from one range to another.
+     * @param num The number to be scaled.
+     * @param oldMin The minimum value of the old/original range.
+     * @param oldMax The maximum value of the old/original range.
+     * @param newMin The minimum value of the new range.
+     * @param newMax The maximum value of the new range.
+     * @return 
+     */
     private static double scale (double num, double oldMin, double oldMax, double newMin, double newMax)
     {
        return (((num - oldMin) * (newMax - newMin)) / (oldMax - oldMin)) + newMin;

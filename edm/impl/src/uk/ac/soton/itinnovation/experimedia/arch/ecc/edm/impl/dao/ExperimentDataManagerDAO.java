@@ -62,6 +62,13 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     
     static Logger log = Logger.getLogger(ExperimentDataManagerDAO.class);
     
+    /**
+     * Experiment Data Manager DAO constructor, which reads the configuration file
+     * and sets up a DatabaseConnector object to access the database for
+     * storing and retrieving data.
+     * 
+     * @throws Exception 
+     */
     public ExperimentDataManagerDAO() throws Exception
     {
         try {
