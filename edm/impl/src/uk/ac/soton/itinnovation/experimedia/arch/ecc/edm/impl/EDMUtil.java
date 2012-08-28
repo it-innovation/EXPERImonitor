@@ -25,7 +25,6 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import org.apache.log4j.Logger;

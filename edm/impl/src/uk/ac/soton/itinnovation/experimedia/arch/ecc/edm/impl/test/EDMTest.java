@@ -22,7 +22,7 @@
 //      Created for Project :   BonFIRE
 //
 /////////////////////////////////////////////////////////////////////////
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.test;
 
 import java.util.Date;
 import java.util.Random;
@@ -54,6 +54,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Me
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGroup;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricType;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.ExperimentDataManager;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.dao.ExperimentDataManagerDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IEntityDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IExperimentDAO;
@@ -100,6 +101,8 @@ public class EDMTest
         
         Amount<Length> x = Amount.valueOf(100, NonSI.INCH);
         
+        System.out.println("bps? " + BIT.divide(SECOND));
+        
         
         // tweets per second
         
@@ -121,7 +124,7 @@ public class EDMTest
         //-- Create and get experiments --//
         //experiments(edm, expUUID);
         
-        entities(edm, entityUUID, attributeUUID, expUUID);
+        //entities(edm, entityUUID, attributeUUID, expUUID);
         
         //metrics(edm);
         
@@ -133,13 +136,13 @@ public class EDMTest
         
         //measurement(edm, mSetUUID);
         
-        experimentCompleteChain(edm, expUUID, entityUUID, attributeUUID, mGenUUID, mGrpUUID, mSetUUID);
+        //experimentCompleteChain(edm, expUUID, entityUUID, attributeUUID, mGenUUID, mGrpUUID, mSetUUID);
         
-        printDetailsForExperiment(edm, expUUID);
+        //printDetailsForExperiment(edm, expUUID);
         
-        saveReport(edm, mSetUUID, reportUUID);
+        //saveReport(edm, mSetUUID, reportUUID);
         
-        getReport(edm, mSetUUID, reportUUID);
+        //getReport(edm, mSetUUID, reportUUID);
     }
     
     public static void experiments(ExperimentDataManager edm, UUID expUUID) throws Exception
