@@ -45,7 +45,7 @@ public class MetricGenerator implements Serializable
     private String name;
     private String description;
     private Set<MetricGroup> metricGroups; // change if the ordering is important
-    private Set<UUID> entities; // a set of UUIDs of the entities being observed
+    private Set<Entity> entities; // a set of entities being observed
     
     // other things needed?
     //   - identifier such as URI?
@@ -58,7 +58,7 @@ public class MetricGenerator implements Serializable
     {
         this.uuid = UUID.randomUUID();
         this.metricGroups = new HashSet<MetricGroup>();
-        this.entities = new HashSet<UUID>();
+        this.entities = new HashSet<Entity>();
     }
     
     /**
@@ -86,13 +86,13 @@ public class MetricGenerator implements Serializable
             }
         }
         
-        this.entities = new HashSet<UUID>();
+        this.entities = new HashSet<Entity>();
         if (mg.getEntities() != null)
         {
-            for (UUID e : mg.getEntities())
+            for (Entity e : mg.getEntities())
             {
                 if (e != null)
-                    this.entities.add(UUID.fromString(e.toString()));
+                    this.entities.add(new Entity(e));
             }
         }
     }
@@ -117,9 +117,9 @@ public class MetricGenerator implements Serializable
      * @param name The name of the metric generator.
      * @param description A description of the metric generator.
      * @param metricGroups A set of metric groups.
-     * @param entities A set UUIDs of entities being observed.
+     * @param entities A set entities being observed.
      */
-    public MetricGenerator(UUID uuid, String name, String description, Set<MetricGroup> metricGroups, Set<UUID> entities)
+    public MetricGenerator(UUID uuid, String name, String description, Set<MetricGroup> metricGroups, Set<Entity> entities)
     {
         this(uuid, name, description);
         this.metricGroups = metricGroups;
@@ -221,7 +221,7 @@ public class MetricGenerator implements Serializable
     /**
      * @return the entities
      */
-    public Set<UUID> getEntities()
+    public Set<Entity> getEntities()
     {
         return entities;
     }
@@ -229,35 +229,35 @@ public class MetricGenerator implements Serializable
     /**
      * @param entities the entities to set
      */
-    public void setEntities(Set<UUID> entities)
+    public void setEntities(Set<Entity> entities)
     {
         this.entities = entities;
     }
     
     /**
-     * @param entityUUID the entity to add
+     * @param entity the entity to add
      */
-    public void addEntity(UUID entityUUID)
+    public void addEntity(Entity entity)
     {
-        if (entityUUID == null)
+        if (entity == null)
             return;
         
         if (this.entities == null)
-            this.entities = new HashSet<UUID>();
+            this.entities = new HashSet<Entity>();
         
-        this.entities.add(entityUUID);
+        this.entities.add(entity);
     }
     
     /**
      * @param entities the entities to add
      */
-    public void addEntities(Set<UUID> entities)
+    public void addEntities(Set<Entity> entities)
     {
         if ((entities == null) || entities.isEmpty())
             return;
         
         if (this.entities == null)
-            this.entities = new HashSet<UUID>();
+            this.entities = new HashSet<Entity>();
         
         this.entities.addAll(entities);
     }

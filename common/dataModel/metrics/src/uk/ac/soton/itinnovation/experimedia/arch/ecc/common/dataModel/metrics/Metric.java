@@ -41,12 +41,14 @@ import javax.measure.unit.Unit;
  * 
  * Examples of units are:
  * 
- *   Unit<Duration> min = MINUTE;
- *   Unit<Duration> ms = MILLI(SECOND);
+ *   Unit min = MINUTE;
+ *   Unit ms = MILLI(SECOND);
  * 
- *   Unit<Length> metre = METRE;
- *   Unit<Length> cm = CENTI(METER);
- *   Unit<Length> FOOT = METER.times(3048).divide(10000); // Exact
+ *   Unit metre = METRE;
+ *   Unit cm = CENTI(METER);
+ *   Unit foot = METER.times(3048).divide(10000);
+ * 
+ *   Unit bps = BIT.divide(SECOND);
  * 
  * Setting a unit:
  * 
