@@ -115,7 +115,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     @Override
     public void saveEntity(Entity entity) throws Exception
     {
-        EntityHelper.saveEntity(dbCon, entity);
+        EntityHelper.saveEntity(dbCon, entity, true);
     }
 
     @Override
@@ -134,6 +134,12 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     public Set<Entity> getEntitiesForExperiment(UUID expUUID) throws Exception
     {
         return EntityHelper.getEntitiesForExperiment(dbCon, expUUID);
+    }
+    
+    @Override
+    public Set<Entity> getEntitiesForMetricGenerator(UUID mGenUUID) throws Exception
+    {
+        return EntityHelper.getEntitiesForMetricGenerator(dbCon, mGenUUID, true);
     }
 
     

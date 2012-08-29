@@ -78,11 +78,11 @@ public class EDMTest
         Metric m = new Metric();
         m.setUnit(MINUTE);
         //Unit<Mass> unit = GRAM;
-        Unit<Duration> min = MINUTE;//SECONDS.times(60);
+        Unit min = MINUTE;//SECONDS.times(60);
         Unit<Duration> sec = SECOND;
         Unit<Duration> ms = MILLI(SECOND);
         
-        Unit<Length> metre = METRE;
+        Unit metre = METRE;
         Unit<Length> cm = CENTI(METER);
         Unit<Length> FOOT = METER.times(3048).divide(10000); // Exact.
         
@@ -102,6 +102,11 @@ public class EDMTest
         Amount<Length> x = Amount.valueOf(100, NonSI.INCH);
         
         System.out.println("bps? " + BIT.divide(SECOND));
+        
+        Unit bps = BIT.divide(SECOND);
+        m.setUnit(BIT.divide(SECOND));
+        System.out.println(m.getUnit().getClass());
+        
         
         
         // tweets per second
@@ -142,7 +147,7 @@ public class EDMTest
         
         //saveReport(edm, mSetUUID, reportUUID);
         
-        getReport(edm, mSetUUID, reportUUID);
+        //getReport(edm, mSetUUID, reportUUID);
     }
     
     public static void experiments(ExperimentDataManager edm, UUID expUUID) throws Exception
@@ -387,7 +392,7 @@ public class EDMTest
         
         log.info("Saving Experiment MetricGenerator");
         MetricGenerator metricGenerator = new MetricGenerator(mGenUUID, "Experiment MetricGenerator", "A description");
-        metricGenerator.addEntity(entityUUID);
+        metricGenerator.addEntity(new Entity(entityUUID));
         
         try {
             metricGeneratorDAO.saveMetricGenerator(metricGenerator, expUUID);
@@ -398,7 +403,7 @@ public class EDMTest
         
         log.info("Saving a random MetricGenerator");
         MetricGenerator randomMetricGenerator = new MetricGenerator(UUID.randomUUID(), "Random MetricGenerator", "A random description");
-        randomMetricGenerator.addEntity(entityUUID);
+        randomMetricGenerator.addEntity(new Entity(entityUUID));
         
         try {
             metricGeneratorDAO.saveMetricGenerator(randomMetricGenerator, expUUID);
@@ -449,7 +454,7 @@ public class EDMTest
         UUID randomExpUUID = UUID.fromString("bd6a9cea-c69f-44c3-b89b-6a96b1f9538f");
         log.info("Saving a random MetricGenerator for random experiment");
         MetricGenerator randomMetricGenerator2 = new MetricGenerator(UUID.randomUUID(), "Random MetricGenerator", "A random description");
-        randomMetricGenerator2.addEntity(entityUUID);
+        randomMetricGenerator2.addEntity(new Entity(entityUUID));
         
         try {
             metricGeneratorDAO.saveMetricGenerator(randomMetricGenerator2, randomExpUUID);
@@ -601,7 +606,7 @@ public class EDMTest
         
         log.info("Creating Experiment MetricGenerator");
         MetricGenerator metricGenerator = new MetricGenerator(mGenUUID, "Experiment MetricGenerator", "A description");
-        metricGenerator.addEntity(entityUUID);
+        metricGenerator.addEntity(new Entity(entityUUID));
         exp.addMetricGenerator(metricGenerator);
         
 //----- METRIC GROUP

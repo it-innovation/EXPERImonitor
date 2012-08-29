@@ -196,7 +196,7 @@ public class PopulateDB
 //----- METRIC GENERATOR
         log.info("Creating Experiment MetricGenerator");
         MetricGenerator metricGenerator = new MetricGenerator(mGenUUID, "Experiment MetricGenerator", "A metric generator");
-        metricGenerator.addEntity(entityUUID);
+        metricGenerator.addEntity(new Entity(entityUUID));
         exp.addMetricGenerator(metricGenerator);
         
 //----- METRIC GROUP
@@ -330,11 +330,40 @@ public class PopulateDB
                                 if (mSet.getMetric().getMetricType() != null) log.info("                  - Type:  " + mSet.getMetric().getMetricType());
                                 if (mSet.getMetric().getUnit() != null) log.info("                  - Unit:  " + mSet.getMetric().getUnit());
                             }
+                        } // end else there's measurement sets
+                    } // end for each metric group
+                    
+                    if ((mGen.getEntities() == null) || mGen.getEntities().isEmpty()){
+                        log.info("      * There are NO entities in the metric generator");
+                    } else {
+                        log.info("      * There's " + mGen.getMetricGroups().size() + " entity/entities in the metric generator");
+
+                        for (Entity entity : mGen.getEntities())
+                        {
+                            if (entity.getUUID() != null) log.info("        - UUID:  " + entity.getUUID());
+                            if (entity.getName() != null) log.info("        - Name:  " + entity.getName());
+                            if (entity.getDescription() != null) log.info("        - Desc:  " + entity.getDescription());
+                            if ((entity.getAttributes() == null) || entity.getAttributes().isEmpty()) {
+                                log.info("        - There are NO attributes");
+                            } else {
+                                log.info("        - There are " + entity.getAttributes().size() + " attributes");
+                                for (Attribute attrib : entity.getAttributes())
+                                {
+                                    if (attrib != null) {
+                                        log.info("          - Attribute details:");
+                                        if (attrib.getUUID() != null) log.info("            - UUID:  " + attrib.getUUID());
+                                        if (attrib.getName() != null) log.info("            - Name:  " + attrib.getName());
+                                        if (attrib.getDescription() != null) log.info("            - Desc:  " + attrib.getDescription());
+                                    }
+                                }
+                            }
                         }
-                    }
-                }
-            }
-        }
+                    } // end else there's one or more entities
+                } // end else there's one or more metric groups
+            } // end for each metric generator
+        } // end else there's one or more metric generators
+        
+        
     }
     
     /**

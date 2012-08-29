@@ -49,11 +49,9 @@ import java.util.UUID;
 public class Entity implements Serializable
 {
     private UUID uuid; // used to uniquely identify an entity in our framework
-    //private String entityID; // may need this, e.g., to capture resource IDs in BonFIRE; http://doc.bonfire-project.eu/R3/api/notifications.html
     private String name;
     private String description;
     private Set<Attribute> attributes;
-    //private Set<UUID> experimentUUIDs; // an entity can take part in many experiments; may include this later
     
     // other attributes needed?
     //   - identifier such as URI? 
@@ -69,7 +67,6 @@ public class Entity implements Serializable
     {
         this.uuid = UUID.randomUUID();
         this.attributes = new HashSet<Attribute>();
-        //this.experimentUUIDs = new HashSet<UUID>();
     }
     
     /**
@@ -95,13 +92,16 @@ public class Entity implements Serializable
                     this.attributes.add(new Attribute(a));
             }
         }
-        
-        /*this.experimentUUIDs = new HashSet<UUID>();
-        if (e.getExperimentUUIDs() != null)
-        {
-            for (UUID u : e.getExperimentUUIDs())
-                this.experimentUUIDs.add(UUID.fromString(u.toString()));
-        }*/
+    }
+    
+    /**
+     * A constructor to set all the fields of the entity class except for the attributes.
+     * @param uuid A UUID used to uniquely identify an entity in this framework.
+     */
+    public Entity(UUID uuid)
+    {
+        this();
+        this.uuid = uuid;
     }
     
     /**

@@ -75,7 +75,14 @@ public interface IEntityDAO
      * @throws Exception If there's a technical issue or there is no experiment with the given UUID.
      */
     public Set<Entity> getEntitiesForExperiment(UUID expUUID) throws Exception;
-    // *** nice to have
+    
+    /**
+     * Get all the entities for a specific metric generator, if any.
+     * @param mGenUUID The metric generator UUID.
+     * @return An empty set if no entities monitored by the given metric generator exists.
+     * @throws Exception If there's a technical issue or there is no metric generator with the given UUID.
+     */
+    public Set<Entity> getEntitiesForMetricGenerator(UUID mGenUUID) throws Exception;
     
     
     //--------------------------- ATTRIBUTE ----------------------------------//

@@ -131,7 +131,7 @@ public class EntityHelper
         return DBUtil.objectExistsByUUID("Entity", "entityUUID", uuid, dbCon);
     }
     
-    public static void saveEntity(DatabaseConnector dbCon, Entity entity) throws Exception
+    public static void saveEntity(DatabaseConnector dbCon, Entity entity, boolean closeDBcon) throws Exception
     {
         // this validation will check if all the required parameters are set and if
         // there isn't already a duplicate instance in the DB
@@ -143,6 +143,7 @@ public class EntityHelper
             throw returnObj.exception;
         }
         
+        boolean exception = false;
         try {
             if (dbCon.isClosed())
                 dbCon.connect();
@@ -164,10 +165,11 @@ public class EntityHelper
                 throw new RuntimeException("No index returned after saving entity " + entity.getName());
             }//end of debugging
         } catch (Exception ex) {
+            exception = true;
             log.error("Error while saving entity: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while saving entity: " + ex.getMessage(), ex);
         } finally {
-            if ((entity.getAttributes() == null) || entity.getAttributes().isEmpty())
+            if (closeDBcon && (exception || (entity.getAttributes() == null) || entity.getAttributes().isEmpty()))
                 dbCon.close();
         }
         
@@ -184,7 +186,8 @@ public class EntityHelper
         } catch (Exception ex) {
             throw ex;
         } finally {
-            dbCon.close();
+            if (closeDBcon)
+                dbCon.close();
         }
     }
     
@@ -322,6 +325,46 @@ public class EntityHelper
             throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
         } finally {
             dbCon.close();
+        }
+        
+        return entities;
+    }
+    
+    public static Set<Entity> getEntitiesForMetricGenerator(DatabaseConnector dbCon, UUID mGenUUID, boolean closeDBcon) throws Exception
+    {
+        if (mGenUUID == null)
+        {
+            log.error("Cannot get Entity objects for the given metric generator, because the UUID provided is NULL!");
+            throw new NullPointerException("Cannot get Entity objects for the given metric generator, because the UUID provided is NULL!");
+        }
+        
+        Set<Entity> entities = new HashSet<Entity>();
+        
+        try {
+            if (dbCon.isClosed())
+                dbCon.connect();
+            
+            String query = "SELECT entityUUID FROM MetricGenerator_Entity WHERE mGenUUID = '" + mGenUUID + "'";
+            ResultSet rs = dbCon.executeQuery(query);
+            
+            // check if anything got returned (connection closed in finalise method)
+            while (rs.next())
+            {
+                String entityUUIDstr = rs.getString("entityUUID");
+                if (entityUUIDstr == null)
+                {
+                    log.error("Unable to get Entity UUID from the DB for the MetricGenerator");
+                    throw new RuntimeException("Unable to get Entity UUID from the DB for the MetricGenerator");
+                }
+                
+                entities.add(getEntity(dbCon, UUID.fromString(entityUUIDstr), false));
+            }
+        } catch (Exception ex) {
+            log.error("Error while quering the database: " + ex.getMessage(), ex);
+            throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
+        } finally {
+            if (closeDBcon)
+                dbCon.close();
         }
         
         return entities;
