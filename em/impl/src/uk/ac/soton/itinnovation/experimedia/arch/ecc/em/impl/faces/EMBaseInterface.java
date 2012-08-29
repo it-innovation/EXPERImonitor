@@ -25,30 +25,28 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces;
 
-
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.spec.IAMQPMessageDispatchListener;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.faces.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMMethodPayload;
-
-import org.codehaus.jackson.map.ObjectMapper;
-
-import java.io.*;
+import org.apache.log4j.Logger;
+import com.google.gson.*;
+import java.io.UnsupportedEncodingException;
 import java.util.*;
-
-
 
 
 
 
 public abstract class EMBaseInterface implements IAMQPMessageDispatchListener
 {
-  protected String       interfaceName;
-  protected String       interfaceVersion;
-  protected boolean      isProvider;
-  protected ObjectMapper jsonMapper;
+  protected final static Logger faceDebugLogger = Logger.getLogger( EMBaseInterface.class );
+  
+  protected String     interfaceName;
+  protected String     interfaceVersion;
+  protected boolean    isProvider;
+  protected Gson       jsonMapper;
+  protected JsonParser jsonParser;
   
   protected AMQPBasicChannel      amqpChannel;
   protected AbstractAMQPInterface amqpInterface;
@@ -59,16 +57,23 @@ public abstract class EMBaseInterface implements IAMQPMessageDispatchListener
   // IAMQPMessageDispatchListener ----------------------------------------------
   @Override
   public void onSimpleMessageDispatched( String queueName, byte[] data )
-  {        
-    EMMethodPayload empl = null;
-    
-    try { empl = (EMMethodPayload) jsonMapper.readValue( data, EMMethodPayload.class ); }
-    catch( Exception e ) {}
-    
-    // DEBUG ----------------------------------------------------------------------------------------------------------------
-    System.out.println("BaseFACE:Msg: [" +empl.getMethodID()+ "] " + (isProvider ? interfaceUserID: interfaceProviderID ) );
-    
-    if ( empl != null ) onInterpretMessage( empl );
+  {
+    if ( queueName != null && data != null )
+    {
+      try
+      { 
+        String jsonData = new String( data, "UTF8" );
+        
+        JsonArray jsonItems = jsonParser.parse( jsonData ).getAsJsonArray();
+        int methodID        = jsonMapper.fromJson( jsonItems.get(0), int.class );
+
+        // DEBUG ---------------------------------------------------------------
+        faceDebugLogger.debug( "BaseFACE:Msg: [" +methodID+ "] " + (isProvider ? interfaceUserID: interfaceProviderID) );
+
+        onInterpretMessage( methodID, jsonItems );
+      }
+      catch (UnsupportedEncodingException e) {}
+    } 
   }
   
   // Protected methods ---------------------------------------------------------
@@ -77,7 +82,8 @@ public abstract class EMBaseInterface implements IAMQPMessageDispatchListener
   {
     amqpChannel = channel;
     isProvider  = asProvider;
-    jsonMapper  = new ObjectMapper();
+    jsonMapper  = new Gson();
+    jsonParser  = new JsonParser();
   }
   
   protected void initialiseAMQP( AbstractAMQPInterface eccIFace,
@@ -114,33 +120,22 @@ public abstract class EMBaseInterface implements IAMQPMessageDispatchListener
     {
       if ( parameters == null ) parameters = new ArrayList<Object>();
       
-      EMMethodPayload empl = new EMMethodPayload();
-      empl.setMethodID( methodID );
-      empl.setParameters( parameters );
+      Collection methodList = new ArrayList();
+      methodList.add( methodID );
+      methodList.addAll( parameters );
+   
+      // DEBUG -----------------------------------------------------------------
+      faceDebugLogger.debug( "BaseFACE:Exe: [" +methodID+ "] " + (isProvider ? interfaceUserID : interfaceProviderID ) );
       
-      ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      try { jsonMapper.writeValue( baos, empl ); }
-      catch ( IOException ioe )
-      { 
-        try { baos.close(); } catch (IOException ioe2) {}
-        baos = null;
-      }
-      
-      if ( baos != null )
-      {
-        // DEBUG ------------------------------------------------------------------------------------------------------
-        System.out.println("BaseFACE:Exe: [" +methodID+ "] " + (isProvider ? interfaceUserID : interfaceProviderID ) );
-        
-        amqpInterface.sendBasicMessage( baos );
-        try { baos.close(); }
-        catch (IOException ioe) {}
-        result = true;
-      }
+      String payloadData = jsonMapper.toJson( methodList );
+      amqpInterface.sendBasicMessage( payloadData );
+
+      result = true;
     }
     
     return result;
   }
   
   // Derriving classes must implement
-  protected abstract void onInterpretMessage( EMMethodPayload payload );
+  protected abstract void onInterpretMessage( int methodID, JsonArray methodData );
 }

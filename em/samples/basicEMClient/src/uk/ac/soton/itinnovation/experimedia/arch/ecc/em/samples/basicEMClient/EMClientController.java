@@ -30,7 +30,6 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 
 import java.util.*;
-import javax.measure.unit.Unit;
 
 
 
@@ -112,21 +111,25 @@ public class EMClientController implements EMIAdapterListener,
     entityAttribute = new Attribute();
     entityAttribute.setName( "Client RAM usage" );
     entityAttribute.setDescription( "Very simple measurement of total bytes used" );
+    entityAttribute.setEntityUUID( entityBeingObserved.getUUID() );
     entityBeingObserved.addtAttribute( entityAttribute );
     
     // Mock up some metric generators
     MetricGenerator metricGen = new MetricGenerator();
     metricGen.setName( "MGEN " + clientName );
     metricGen.setDescription( "Metric generator demonstration" );
-    metricGen.addEntity( entityBeingObserved.getUUID() );         // NEED TO ADD INSTANCE HERE
+    metricGen.addEntity( entityBeingObserved );         
     metricGenerators.put( metricGen.getUUID(), metricGen );
     
     MetricGroup mg = new MetricGroup();
+    mg.setName( "Demo group" );
+    mg.setDescription( "A single group to contain metrics" );
+    mg.setMetricGeneratorUUID( metricGen.getUUID() );
     metricGen.addMetricGroup( mg );
     
     MeasurementSet ms = new MeasurementSet();
-    ms.setAttributeUUID( entityAttribute.getUUID() );             // NEED TO ADD INSTANCE HERE
-    mg.addMeasurementSets( ms );                                  // SINGULAR?
+    ms.setAttributeUUID( entityAttribute.getUUID() );             
+    mg.addMeasurementSets( ms );                              
     
     //TODO: Get this right!
     Metric memMetric = new Metric();

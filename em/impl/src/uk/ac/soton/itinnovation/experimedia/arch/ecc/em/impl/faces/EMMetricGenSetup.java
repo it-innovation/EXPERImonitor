@@ -31,11 +31,8 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.faces.AMQPFullInterfaceBase;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMMethodPayload;
-
+import com.google.gson.JsonArray;
 import java.util.*;
-
-
 
 
 
@@ -114,17 +111,15 @@ public class EMMetricGenSetup extends EMBaseInterface
   
   // Protected methods ---------------------------------------------------------
   @Override
-  protected void onInterpretMessage( EMMethodPayload payload )
-  {
-    List<Object> params = payload.getParameters();
-    
-    switch ( payload.getMethodID() )
+  protected void onInterpretMessage( int methodID, JsonArray methodData )
+  {   
+    switch ( methodID )
     {
       case ( 1 ) :
       { 
         if ( userListener != null )
         {
-          UUID genID = UUID.fromString( (String) params.get(0) );
+          UUID genID = jsonMapper.fromJson( methodData.get(1), UUID.class );
           userListener.onSetupMetricGenerator( interfaceProviderID, genID );
         }
         
@@ -134,7 +129,7 @@ public class EMMetricGenSetup extends EMBaseInterface
       {
         if ( userListener != null )
         {
-          UUID genID = UUID.fromString( (String) params.get(0) );
+          UUID genID = jsonMapper.fromJson( methodData.get(1), UUID.class );
           userListener.onSetupTimeOut( interfaceProviderID, genID );
         }
         
@@ -151,8 +146,8 @@ public class EMMetricGenSetup extends EMBaseInterface
       {
         if ( providerListener != null )
         {
-          UUID genID      = UUID.fromString( (String) params.get(0) );
-          Boolean success = (Boolean) params.get(1);
+          UUID genID      = jsonMapper.fromJson( methodData.get(1), UUID.class );
+          Boolean success = jsonMapper.fromJson( methodData.get(2), Boolean.class );
           
           providerListener.onNotifyMetricGeneratorSetupResult( interfaceUserID, 
                                                                genID, 

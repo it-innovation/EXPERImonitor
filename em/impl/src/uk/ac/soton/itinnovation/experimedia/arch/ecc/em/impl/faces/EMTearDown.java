@@ -32,8 +32,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.IEMTearDown;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.faces.AMQPFullInterfaceBase;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMMethodPayload;
-
+import com.google.gson.JsonArray;
 import java.util.*;
 
 
@@ -107,11 +106,9 @@ public class EMTearDown extends EMBaseInterface
   
   // Protected methods ---------------------------------------------------------
   @Override
-  protected void onInterpretMessage( EMMethodPayload payload )
+  protected void onInterpretMessage( int methodID, JsonArray methodData )
   {
-    List<Object> params = payload.getParameters();
-    
-    switch ( payload.getMethodID() )
+    switch ( methodID )
     {
       case ( 1 ) :
       {
@@ -140,7 +137,7 @@ public class EMTearDown extends EMBaseInterface
       {
         if ( providerListener != null )
         {
-          Boolean success = (Boolean) params.get( 0 );
+          Boolean success = (Boolean) jsonMapper.fromJson( methodData.get(1), Boolean.class );
           
           providerListener.onNotifyTearDownResult( interfaceUserID, success );
         }

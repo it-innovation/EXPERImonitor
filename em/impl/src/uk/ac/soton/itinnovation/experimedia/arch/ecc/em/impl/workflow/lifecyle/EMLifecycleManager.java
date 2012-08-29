@@ -41,6 +41,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecyle.p
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
 
 import java.util.*;
+import org.apache.log4j.Logger;
 
 
 
@@ -51,6 +52,8 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
                                            EMLiveMonitorPhaseListener,
                                            EMTearDownPhaseListener
 {
+  private final Logger lmLogger = Logger.getLogger( EMLifecycleManager.class );
+  
   private AMQPBasicChannel emChannel;
   private UUID             emProviderID;
   
@@ -108,9 +111,7 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
       if ( killPhase != null )
         try { killPhase.stop(); }
         catch ( Exception e )
-        {
-          System.out.println( "Could cleanly stop life-cycle phase " + killPhase.getPhaseType() );
-        }
+        { lmLogger.warn( "Could cleanly stop life-cycle phase " + killPhase.getPhaseType() ); }
       
       currentPhase = currentPhase.nextPhase();
       
@@ -118,9 +119,11 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
       if ( lcPhase != null )
         try { lcPhase.start(); }
         catch( Exception e ) 
-        { 
-          System.out.println("Could not start lifecycle phase: " + lcPhase.getPhaseType() );
-          System.out.println("Life-cycle exception: " + e.getMessage() );
+        {
+          String errorMsg = "Could not start lifecycle phase: " + lcPhase.getPhaseType() + "\n";
+          errorMsg       += "Life-cycle exception: " + e.getMessage();
+          
+          lmLogger.error( errorMsg );
         }
     }
     

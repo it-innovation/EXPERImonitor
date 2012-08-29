@@ -36,8 +36,8 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
 
+import com.google.gson.*;
 import java.util.*;
-
 
 
 
@@ -180,17 +180,15 @@ public class EMDiscovery extends EMBaseInterface
   
   // Protected methods ---------------------------------------------------------
   @Override
-  protected void onInterpretMessage( EMMethodPayload payload )
+  protected void onInterpretMessage( int methodID, JsonArray methodData )
   {
-    List<Object> params = payload.getParameters();
-    
-    switch ( payload.getMethodID() )
+    switch ( methodID )
     {
       case ( 1 ) :
       {
         if ( userListener != null )
         {
-          EMInterfaceType type = EMInterfaceType.valueOf( (String) params.get( 0 ) );
+          EMInterfaceType type = jsonMapper.fromJson( methodData.get(1), EMInterfaceType.class );
           userListener.onCreateInterface( interfaceProviderID, type );
         }
         
@@ -200,7 +198,7 @@ public class EMDiscovery extends EMBaseInterface
       {
         if ( userListener != null )
         {
-          boolean confirmed = (Boolean) params.get( 0 );
+          boolean confirmed = jsonMapper.fromJson( methodData.get(1), Boolean.class );
           userListener.onRegistrationConfirmed( interfaceProviderID, confirmed );
         }
       } break;
@@ -237,7 +235,7 @@ public class EMDiscovery extends EMBaseInterface
       {
         if ( userListener != null )
         {
-          String endPoint = (String) params.get( 0 );
+          String endPoint = jsonMapper.fromJson( methodData.get(1), String.class );
           userListener.onSetStatusMonitorEndpoint( interfaceProviderID, endPoint );
         } 
         
@@ -254,11 +252,14 @@ public class EMDiscovery extends EMBaseInterface
       {
         if ( providerListener != null )
         {
-          ArrayList<String> stringPhases = (ArrayList<String>) params.get(0);
           EnumSet<EMPhase> phases = EnumSet.noneOf( EMPhase.class );
+          JsonArray phaseArray    = (JsonArray) methodData.get(1);
           
-          for ( String phaseString : stringPhases )
-            phases.add( EMPhase.valueOf(phaseString) );
+          for ( JsonElement el : phaseArray )
+          {
+            String enumVal = jsonMapper.fromJson( el, String.class );
+            phases.add( EMPhase.valueOf(enumVal) );
+          }
                 
           providerListener.onSendActivityPhases( interfaceUserID, phases );
         }
@@ -269,7 +270,7 @@ public class EMDiscovery extends EMBaseInterface
       {
         if ( providerListener != null )
         {
-          Boolean result = (Boolean) params.get( 0 );
+          Boolean result = jsonMapper.fromJson( methodData.get(1), Boolean.class );
           providerListener.onSendDiscoveryResult( interfaceUserID, result );
         }
           
@@ -278,21 +279,16 @@ public class EMDiscovery extends EMBaseInterface
       case ( 11 ) :
       {
         if ( providerListener != null )
-        {
-          //TODO: Write jolly MetricGenerator de-serializer :(
-          ArrayList<LinkedHashMap> serialGens
-             = new ArrayList<LinkedHashMap>( (ArrayList<LinkedHashMap>) params.get(0) );
-          
+        {          
           Set<MetricGenerator> generators = new HashSet<MetricGenerator>();
           
-          for ( LinkedHashMap lhm : serialGens )
+          JsonArray genArray = (JsonArray) methodData.get(1);
+          for ( JsonElement el : genArray )
           {
-            MetricGenerator mg = new MetricGenerator( UUID.fromString( (String) lhm.get("uuid") ),
-                                                      (String) lhm.get("name"),
-                                                      (String) lhm.get("description") );
+            MetricGenerator mg = jsonMapper.fromJson( el, MetricGenerator.class );
             generators.add( mg );
           }
-          
+         
           providerListener.onSendMetricGeneratorInfo( interfaceUserID, generators );
         }
         

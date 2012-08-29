@@ -14,6 +14,7 @@
         <ecc.java.version>1.6</ecc.java.version>
         <ecc.junit.version>4.10</ecc.junit.version>
         <ecc.log4j.version>1.2.17</ecc.log4j.version>
+        <ecc.jacksonJSON.version>1.9.9</ecc.jacksonJSON.version>
     </properties>
   
     <build>

@@ -25,6 +25,7 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces;
 
+
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEMPostReport_UserListener;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEMPostReport_ProviderListener;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.IEMPostReport;
@@ -35,6 +36,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.faces.AMQPFull
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
 
+import com.google.gson.JsonArray;
 import java.util.*;
 
 
@@ -121,11 +123,9 @@ public class EMPostReport extends EMBaseInterface
   
   // Protected methods ---------------------------------------------------------
   @Override
-  protected void onInterpretMessage( EMMethodPayload payload )
+  protected void onInterpretMessage( int methodID, JsonArray methodData )
   {
-    List<Object> params = payload.getParameters();
-    
-    switch ( payload.getMethodID() )
+    switch ( methodID )
     {
       case ( 1 ) :
       {
@@ -138,7 +138,7 @@ public class EMPostReport extends EMBaseInterface
       {
         if ( userListener != null )
         {
-          EMDataBatch batch = (EMDataBatch) payload.getParameters().get(0);
+          EMDataBatch batch = (EMDataBatch) jsonMapper.fromJson( methodData.get(1), EMDataBatch.class );
           
           userListener.onRequestDataBatch( interfaceProviderID, batch );
         }
@@ -149,7 +149,7 @@ public class EMPostReport extends EMBaseInterface
       {
         if ( userListener != null )
         {
-          UUID id = UUID.fromString( (String) payload.getParameters().get(0) );
+          UUID id = jsonMapper.fromJson( methodData.get(1), UUID.class );
           
           userListener.notifyReportBatchTimeOut( interfaceProviderID, id );
         }
@@ -168,7 +168,7 @@ public class EMPostReport extends EMBaseInterface
         if ( providerListener != null )
         {
           EMPostReportSummary summary = 
-              (EMPostReportSummary) payload.getParameters().get(0);
+              (EMPostReportSummary) jsonMapper.fromJson( methodData.get(1), EMPostReportSummary.class );
           
           providerListener.onSendReportSummary( interfaceUserID, summary );
         }
@@ -179,7 +179,8 @@ public class EMPostReport extends EMBaseInterface
       {
         if ( providerListener != null )
         {
-          EMDataBatch batch = (EMDataBatch) payload.getParameters().get(0);
+          EMDataBatch batch = 
+              (EMDataBatch) jsonMapper.fromJson( methodData.get(1), EMDataBatch.class );
           
           providerListener.onSendDataBatch( interfaceUserID, batch );
         }

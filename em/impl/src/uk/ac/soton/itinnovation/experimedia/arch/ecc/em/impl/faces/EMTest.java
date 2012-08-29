@@ -31,10 +31,9 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.faces.AMQPFullInterfaceBase;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMMethodPayload;
-
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMByteWrapper;
 
+import com.google.gson.JsonArray;
 import java.util.*;
 
 
@@ -92,20 +91,18 @@ public class EMTest extends EMBaseInterface
   
   // Protected methods ---------------------------------------------------------
   @Override
-  protected void onInterpretMessage( EMMethodPayload payload )
+  protected void onInterpretMessage( int methodID, JsonArray methodData )
   {
-    List<Object> params = payload.getParameters();
-    
-    switch ( payload.getMethodID() )
+    switch ( methodID )
     {
       case ( 1 ) :
       {
         if ( testListener != null )
         {
-          int dataSize    = (Integer) params.get(0);
+          int dataSize = jsonMapper.fromJson( methodData.get(1), int.class );
           
           // De-encode Base64
-          String encodedData = (String) params.get(1);          
+          String encodedData = jsonMapper.fromJson( methodData.get(2), String.class )  ;      
           byte[] dataBody = byteWrapper.decode( encodedData );
           
           testListener.onReceivedData( dataSize, dataBody );

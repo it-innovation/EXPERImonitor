@@ -5,7 +5,7 @@
   <!--
   /////////////////////////////////////////////////////////////////////////
   //
-  // © University of Southampton IT Innovation Centre, 2011
+  // ï¿½ University of Southampton IT Innovation Centre, 2011
   //
   // Copyright in this software belongs to University of Southampton
   // IT Innovation Centre of Gamma House, Enterprise Road, 
@@ -80,6 +80,12 @@
             <groupId>org.jscience</groupId>
             <artifactId>jscience</artifactId>
             <version>4.3.1</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-mapper-asl</artifactId>
+            <version>${ecc.jacksonJSON.version}</version>
         </dependency>
     </dependencies>
     

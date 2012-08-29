@@ -32,8 +32,8 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.faces.AMQPFullInterfaceBase;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
 
+import com.google.gson.JsonArray;
 import java.util.*;
 
 
@@ -169,11 +169,9 @@ public class EMLiveMonitor extends EMBaseInterface
   
   // Protected methods ---------------------------------------------------------
   @Override
-  protected void onInterpretMessage( EMMethodPayload payload )
-  {
-    List<Object> params = payload.getParameters();
-    
-    switch ( payload.getMethodID() )
+  protected void onInterpretMessage( int methodID, JsonArray methodData )
+  {    
+    switch ( methodID )
     {
       case ( 1 ) :
       {
@@ -186,7 +184,7 @@ public class EMLiveMonitor extends EMBaseInterface
       {
         if ( userListener != null )
         {
-          UUID reportID = UUID.fromString( (String) payload.getParameters().get(0) );
+          UUID reportID = jsonMapper.fromJson( methodData.get(1), UUID.class );
           userListener.onReceivedPush( interfaceProviderID, reportID );
         }
         
@@ -203,7 +201,7 @@ public class EMLiveMonitor extends EMBaseInterface
       {
         if ( userListener != null )
         {
-          UUID msID = UUID.fromString( (String) payload.getParameters().get(0) );
+          UUID msID = jsonMapper.fromJson( methodData.get(1), UUID.class );
           userListener.onPullMetric( interfaceProviderID, msID );
         }
         
@@ -213,7 +211,7 @@ public class EMLiveMonitor extends EMBaseInterface
       {
         if ( userListener != null )
         {
-          UUID msID = UUID.fromString( (String) payload.getParameters().get(0) );
+          UUID msID = jsonMapper.fromJson( methodData.get(1), UUID.class );
           userListener.onPullMetricTimeOut( interfaceProviderID, msID );
         }
         
@@ -237,7 +235,7 @@ public class EMLiveMonitor extends EMBaseInterface
       {
         if ( providerListener != null )
         {
-          Report report = (Report) payload.getParameters().get(0);
+          Report report = jsonMapper.fromJson( methodData.get(1), Report.class );
           providerListener.onPushMetric( interfaceUserID, report );
         }
         
@@ -261,7 +259,7 @@ public class EMLiveMonitor extends EMBaseInterface
       {
         if ( providerListener != null )
         {
-          Report report = (Report) payload.getParameters().get(0);
+          Report report = jsonMapper.fromJson( methodData.get(1), Report.class );
           providerListener.onSendPulledMetric( interfaceUserID, report );
         }
         

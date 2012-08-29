@@ -31,8 +31,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.faces.AMQPHalfInterfaceBase;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMMethodPayload;
-
+import com.google.gson.JsonArray;
 import java.util.*;
 
 
@@ -78,15 +77,13 @@ public class EMMonitorEntryPoint extends EMBaseInterface
   
   // Protected methods ---------------------------------------------------------
   @Override
-  protected void onInterpretMessage( EMMethodPayload payload )
+  protected void onInterpretMessage( int methodID, JsonArray methodData )
   {
     // 'RegisterAsEMClient' method (ID = 1) ------------------------------------
-    if ( payload.getMethodID() == 1 && providerListener != null )
-    {
-      List<Object> params = payload.getParameters();
-      
-      UUID userID = UUID.fromString( (String) params.get(0) );
-      String userName = (String) params.get(1);
+    if ( methodID == 1 && providerListener != null )
+    {      
+      UUID userID = jsonMapper.fromJson( methodData.get(1), UUID.class );
+      String userName = jsonMapper.fromJson( methodData.get(2), String.class );
       
       providerListener.onRegisterAsEMClient( userID, userName );
     }

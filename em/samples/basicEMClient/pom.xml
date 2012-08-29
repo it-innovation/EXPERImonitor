@@ -68,7 +68,11 @@
     </dependency>
     
     <!-- 3rd party dependencies ____________________________________________ -->
-            
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <version>${ecc.log4j.version}</version>
+    </dependency>        
 	
   </dependencies>
     

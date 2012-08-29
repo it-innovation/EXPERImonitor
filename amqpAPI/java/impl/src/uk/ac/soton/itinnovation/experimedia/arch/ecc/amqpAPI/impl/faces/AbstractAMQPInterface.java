@@ -50,7 +50,7 @@ public abstract class AbstractAMQPInterface
   protected boolean actingAsProvider;
   
   
-  public boolean sendBasicMessage( ByteArrayOutputStream message )
+  public boolean sendBasicMessage( String message )
   {
     // Safety first
     if ( !interfaceReady        || 
@@ -61,12 +61,12 @@ public abstract class AbstractAMQPInterface
     // Make sure producer sends to user (or other way around) - targets are reversed
     String targetExchange = actingAsProvider ? userExchangeName : providerExchangeName;
     String targetRouteKey = actingAsProvider ? userRoutingKey   : providerRoutingKey;
-    
-    byte[] messageBody = message.toByteArray();
-    
+   
     try
     {
       Channel channelImpl = (Channel) amqpChannel.getChannelImpl();
+      
+      byte[] messageBody = message.getBytes( "UTF-8" );
       
       channelImpl.basicPublish( targetExchange,
                                 targetRouteKey,
