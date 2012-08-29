@@ -93,7 +93,11 @@ public class EMTearDownPhase extends AbstractEMLCPhase
   }
   
   @Override
-  public void stop() throws Exception
+  public void controlledStop() throws Exception
+  { throw new Exception( "Not yet supported for this phase"); }
+  
+  @Override
+  public void hardStop()
   {
     phaseMsgPump.stopPump();
     phaseActive = false;
@@ -131,7 +135,10 @@ public class EMTearDownPhase extends AbstractEMLCPhase
       // Notify phase completion if all results are in
       if ( clientsStillToTearDown.isEmpty() )
         if ( phaseListener != null )
+        {
+          hardStop();
           phaseListener.onTearDownPhaseCompleted();
+        }
     }
   }
 }

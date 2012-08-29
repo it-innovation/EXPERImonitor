@@ -30,13 +30,13 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecyle.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
 
 import java.util.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
-
+import org.apache.log4j.Logger;
 
 
 
@@ -44,6 +44,8 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Re
 public class ExperimentMonitor implements IExperimentMonitor,
                                           IEMLifecycleListener
 {
+  private final Logger emLogger = Logger.getLogger( ExperimentMonitor.class );
+  
   private IExperimentMonitor.eStatus monitorStatus = IExperimentMonitor.eStatus.NOT_YET_INITIALISED;
   private AMQPBasicChannel           amqpChannel;
   
@@ -127,10 +129,27 @@ public class ExperimentMonitor implements IExperimentMonitor,
   { return lifecycleManager.getCurrentPhase().nextPhase(); }
   
   @Override
-  public EMPhase goToNextPhase()
-  { 
+  public boolean isCurrentPhaseActive()
+  { return lifecycleManager.isCurrentPhaseActive(); }
+  
+  @Override
+  public void stopCurrentPhase() throws Exception
+  {
+    if ( lifecycleManager.isWindingCurrentPhaseDown() )
+      throw new Exception( "Current winding down phase: " 
+                           + lifecycleManager.getCurrentPhase().toString() );
+    
+    lifecycleManager.windCurrentPhaseDown();
+  }
+  
+  @Override
+  public void goToNextPhase() throws Exception
+  {
+    if ( lifecycleManager.isWindingCurrentPhaseDown() )
+      throw new Exception( "Current winding down phase: " 
+                           + lifecycleManager.getCurrentPhase().toString() );
+    
     lifecycleManager.iterateLifecycle();
-    return lifecycleManager.getCurrentPhase();
   }
   
   @Override
@@ -163,6 +182,14 @@ public class ExperimentMonitor implements IExperimentMonitor,
     Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
     while ( listIt.hasNext() )
       listIt.next().onClientDisconnected( client );
+  }
+  
+  @Override
+  public void onLifecyclePhaseStarted( EMPhase phase )
+  {
+    Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
+    while ( listIt.hasNext() )
+      listIt.next().onLifecyclePhaseStarted( phase );
   }
   
   @Override

@@ -59,6 +59,9 @@ public abstract class AbstractEMLCPhase
   public String getState()
   { return phaseState; }
   
+  public boolean isActive()
+  { return phaseActive; }
+  
   public boolean addClient( EMClientEx client )
   {
     // Safety first
@@ -123,7 +126,9 @@ public abstract class AbstractEMLCPhase
   // Deriving classes must implement phase start/stopping behaviour ------------
   public abstract void start() throws Exception;
   
-  public abstract void stop() throws Exception;
+  public abstract void controlledStop() throws Exception;
+  
+  public abstract void hardStop();
   
   // Protected methods ---------------------------------------------------------
   protected AbstractEMLCPhase( EMPhase phase,

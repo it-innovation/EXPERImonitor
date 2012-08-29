@@ -48,8 +48,9 @@ import org.apache.log4j.Logger;
 
 public class EMLifecycleManager implements EMConnectionManagerListener,
                                            EMGeneratorDiscoveryPhaseListener,
-                                           EMNMetricGenSetupPhaseListener,
+                                           EMMetricGenSetupPhaseListener,
                                            EMLiveMonitorPhaseListener,
+                                           EMPostReportPhaseListener,
                                            EMTearDownPhaseListener
 {
   private final Logger lmLogger = Logger.getLogger( EMLifecycleManager.class );
@@ -59,6 +60,7 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   
   private EnumMap<EMPhase, AbstractEMLCPhase> lifecyclePhases;
   private EMPhase currentPhase = EMPhase.eEMUnknownPhase;
+  private boolean windingCurrPhaseDown = false;
   
   private final Object clientLock = new Object();
   
@@ -90,6 +92,9 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
     EMLiveMonitorPhase lmp = new EMLiveMonitorPhase( emChannel, emProviderID, this );
     lifecyclePhases.put( EMPhase.eEMLiveMonitoring, lmp );
     
+    EMPostReportPhase prp = new EMPostReportPhase( emChannel, emProviderID, this );
+    lifecyclePhases.put( EMPhase.eEMPostMonitoringReport, prp );
+    
     EMTearDownPhase tdp = new EMTearDownPhase( emChannel, emProviderID, this );
     lifecyclePhases.put( EMPhase.eEMTearDown, tdp );
     
@@ -101,6 +106,19 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   public EMPhase getCurrentPhase()
   { return currentPhase; }
   
+  public boolean isWindingCurrentPhaseDown()
+  { return windingCurrPhaseDown; }
+  
+  public boolean isCurrentPhaseActive()
+  {
+    AbstractEMLCPhase currPhase = lifecyclePhases.get( currentPhase );
+    
+    if ( currPhase != null )
+      return currPhase.isActive();
+    
+    return false;
+  }
+  
   public EMPhase iterateLifecycle()
   {
     if ( currentPhase != EMPhase.eEMProtocolComplete && !lifecyclePhases.isEmpty() )
@@ -108,16 +126,19 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
       // Stop current phase
       AbstractEMLCPhase killPhase = lifecyclePhases.get( currentPhase );
       
-      if ( killPhase != null )
-        try { killPhase.stop(); }
-        catch ( Exception e )
-        { lmLogger.warn( "Could cleanly stop life-cycle phase " + killPhase.getPhaseType() ); }
+      if ( killPhase != null ) killPhase.hardStop();
       
       currentPhase = currentPhase.nextPhase();
       
       AbstractEMLCPhase lcPhase = lifecyclePhases.get( currentPhase );
       if ( lcPhase != null )
-        try { lcPhase.start(); }
+        try
+        { 
+          lcPhase.start();
+          
+          // Notify listener
+          lifecycleListener.onLifecyclePhaseStarted( lcPhase.getPhaseType() );
+        }
         catch( Exception e ) 
         {
           String errorMsg = "Could not start lifecycle phase: " + lcPhase.getPhaseType() + "\n";
@@ -128,6 +149,28 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
     }
     
     return currentPhase;
+  }
+  
+  public void windCurrentPhaseDown()
+  {
+    AbstractEMLCPhase windDownPhase = lifecyclePhases.get( currentPhase );
+    windingCurrPhaseDown            = false;
+    
+    if ( windDownPhase != null )
+      try 
+      { 
+        windDownPhase.controlledStop();
+        windingCurrPhaseDown = true;
+      }
+      catch ( Exception e )
+      {
+        String msg = "Did not wind-down this phase: " + windDownPhase.toString() + e.getMessage();
+        lmLogger.info( msg );
+        
+        try { windDownPhase.hardStop(); }
+        catch ( Exception hs )
+        { lmLogger.error( "Could not stop phase " + windDownPhase.toString() ); }
+      }
   }
   
   public void endLifecycle()
@@ -218,6 +261,7 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   @Override
   public void onDiscoveryPhaseCompleted()
   {
+    windingCurrPhaseDown = false;
     lifecycleListener.onLifecyclePhaseCompleted( EMPhase.eEMDiscoverMetricGenerators );
   }
   
@@ -231,6 +275,7 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   @Override
   public void onSetupPhaseCompleted()
   {
+    windingCurrPhaseDown = false;
     lifecycleListener.onLifecyclePhaseCompleted( EMPhase.eEMSetUpMetricGenerators );
   }
   
@@ -240,6 +285,16 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   {
     lifecycleListener.onGotMetricData( client, report );
   }
+  
+  @Override
+  public void onLiveMonitorPhaseCompleted()
+  {
+    windingCurrPhaseDown = false;
+    lifecycleListener.onLifecyclePhaseCompleted( EMPhase.eEMLiveMonitoring );
+  }
+  
+  // EMPostReportPhaseListener -------------------------------------------------
+  
   
   // EMTearDownPhaseListener ---------------------------------------------------
   @Override
@@ -251,6 +306,7 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   @Override
   public void onTearDownPhaseCompleted()
   {
+    windingCurrPhaseDown = false;
     lifecycleListener.onLifecyclePhaseCompleted( EMPhase.eEMTearDown );
   }
 }

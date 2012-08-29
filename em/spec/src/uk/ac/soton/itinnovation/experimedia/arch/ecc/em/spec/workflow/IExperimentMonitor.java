@@ -55,7 +55,11 @@ public interface IExperimentMonitor
   
   EMPhase getNextPhase();
   
-  EMPhase goToNextPhase();
+  boolean isCurrentPhaseActive();
+  
+  void stopCurrentPhase() throws Exception;
+  
+  void goToNextPhase() throws Exception;
   
   void endLifecycle() throws Exception;
   

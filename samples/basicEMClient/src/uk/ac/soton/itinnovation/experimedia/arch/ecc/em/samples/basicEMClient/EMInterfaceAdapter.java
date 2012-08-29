@@ -297,7 +297,10 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
   public void onStopPushing( UUID senderID )
   {
     if ( senderID.equals(expMonitorID) )
+    {
       emiListener.onStopPushingMetricData();
+      liveMonitorFace.notifyPushingCompleted();
+    }
   }
   
   @Override

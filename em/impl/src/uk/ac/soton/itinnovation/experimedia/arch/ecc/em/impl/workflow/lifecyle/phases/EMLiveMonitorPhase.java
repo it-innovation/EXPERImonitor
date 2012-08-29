@@ -47,6 +47,9 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
   
   private HashSet<UUID> clientsStillPushing;
   private HashSet<UUID> clientsStillPulling;
+  private boolean       monitorStopping = false;
+  
+  private final Object  controlledStopLock = new Object();
   
   
   public EMLiveMonitorPhase( AMQPBasicChannel channel,
@@ -94,7 +97,50 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
   }
   
   @Override
-  public void stop() throws Exception
+  public void controlledStop() throws Exception
+  {
+    monitorStopping = true;
+    
+    // Get a copy of pushers and pullers
+    HashSet<UUID> copyOfPushers = new HashSet<UUID>();
+    HashSet<UUID> copyOfPullers = new HashSet<UUID>();
+    synchronized ( controlledStopLock )
+    {
+      copyOfPushers.addAll( clientsStillPushing );
+      copyOfPullers.addAll( clientsStillPulling );
+    }
+    
+    // Stop pushing clients
+    if ( !copyOfPushers.isEmpty() )
+    {
+      Iterator<UUID> pushIt = copyOfPushers.iterator();
+      while ( pushIt.hasNext() )
+      {
+        EMClientEx client = getClient( pushIt.next() );
+        client.getLiveMonitorInterface().stopPushing();
+      }
+      
+      // We'll need to wait on confirmation of clients finishing their push
+    }
+    
+    // Stop pulling clients
+    if ( !copyOfPullers.isEmpty() )
+    {
+      Iterator<UUID> pullIt = copyOfPullers.iterator();
+      while ( pullIt.hasNext() )
+      {
+        EMClientEx client = getClient( pullIt.next() );
+        client.getLiveMonitorInterface().pullingStopped();
+      }
+      
+      // We can clear the pulling list immediately
+      synchronized( controlledStopLock )
+      { clientsStillPulling.clear(); }
+    }
+  }
+  
+  @Override
+  public void hardStop()
   {
     phaseMsgPump.stopPump();
     phaseActive = false;
@@ -104,7 +150,7 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
   @Override
   public void onNotifyReadyToPush( UUID senderID )
   {
-    if ( phaseActive )
+    if ( phaseActive && !monitorStopping )
     {
       EMClientEx client = getClient( senderID );
       
@@ -144,13 +190,21 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
       
       if ( client != null )
         clientsStillPushing.remove( client.getID() );
+      
+      // If we have no more clients pulling or pushing, phase is over
+      if ( clientsStillPushing.isEmpty() && clientsStillPulling.isEmpty() )
+        if ( phaseListener != null )
+        {
+          hardStop();
+          phaseListener.onLiveMonitorPhaseCompleted();
+        }
     }
   }
   
   @Override
   public void onNotifyReadyForPull( UUID senderID )
   {
-    if ( phaseActive )
+    if ( phaseActive && !monitorStopping )
     {
       EMClientEx client = getClient( senderID );
       

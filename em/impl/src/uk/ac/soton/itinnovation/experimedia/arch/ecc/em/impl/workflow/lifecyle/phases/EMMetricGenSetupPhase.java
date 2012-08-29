@@ -44,12 +44,12 @@ import java.util.*;
 public class EMMetricGenSetupPhase extends AbstractEMLCPhase
                                    implements IEMSetup_ProviderListener
 {
-  private EMNMetricGenSetupPhaseListener phaseListener;
+  private EMMetricGenSetupPhaseListener phaseListener;
   
   
   public EMMetricGenSetupPhase( AMQPBasicChannel channel,
                                 UUID providerID,
-                                EMNMetricGenSetupPhaseListener listener )
+                                EMMetricGenSetupPhaseListener listener )
   {
     super( EMPhase.eEMSetUpMetricGenerators, channel, providerID );
     
@@ -91,12 +91,15 @@ public class EMMetricGenSetupPhase extends AbstractEMLCPhase
   }
   
   @Override
-  public void stop() throws Exception
+  public void controlledStop() throws Exception
+  { throw new Exception( "Not yet supported for this phase"); }
+  
+  @Override
+  public void hardStop()
   {
     phaseActive = false;
     phaseMsgPump.stopPump();
   }
-  
   
   // IEMSetup_ProviderListener -------------------------------------------------
   @Override
@@ -155,7 +158,10 @@ public class EMMetricGenSetupPhase extends AbstractEMLCPhase
         }
       
       if ( allAttemptsMade && phaseListener != null )
+      {
+        hardStop();
         phaseListener.onSetupPhaseCompleted();
+      }
     }
   }
 }

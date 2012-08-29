@@ -45,6 +45,8 @@ public class EMController implements IEMLifecycleListener
 {
   private IExperimentMonitor expMonitor;
   private EMView             mainView;
+  private boolean            waitingToStartNextPhase = false;
+  
   
   public EMController()
   {    
@@ -78,9 +80,25 @@ public class EMController implements IEMLifecycleListener
   }
   
   @Override
+  public void onLifecyclePhaseStarted( EMPhase phase )
+  {
+    EMPhase nextPhase  = expMonitor.getNextPhase();
+    mainView.setMonitoringPhaseValue( phase.toString(), nextPhase.toString() );
+  }
+  
+  @Override
   public void onLifecyclePhaseCompleted( EMPhase phase )
   {
     mainView.setNextPhaseValue( expMonitor.getNextPhase().toString() );
+    
+    if ( waitingToStartNextPhase )
+    {
+      waitingToStartNextPhase = false;
+      try 
+      { expMonitor.goToNextPhase(); }
+      catch ( Exception e )
+      {}
+    }
   }
   
   @Override
@@ -143,15 +161,26 @@ public class EMController implements IEMLifecycleListener
       catch ( Exception e ) {}
   }
   
-  private void moveToNextPhase()
+  private void startUpNextPhase()
   {
-    if ( expMonitor != null )
+    if ( expMonitor != null && !waitingToStartNextPhase )
     {
-      EMPhase thisPhase = expMonitor.goToNextPhase();
-      EMPhase nextPhase  = expMonitor.getNextPhase();
-      
-      mainView.setMonitoringPhaseValue( thisPhase.toString(), nextPhase.toString() );
+      if ( expMonitor.isCurrentPhaseActive() )
+      {
+        try
+        {
+          waitingToStartNextPhase = true;
+          expMonitor.stopCurrentPhase();
+        }
+        catch ( Exception e )
+        {}
+      }
+      else
+        try { expMonitor.goToNextPhase(); }
+        catch ( Exception e )
+        {}
     }
+      
   }
   
   // Internal event handling ---------------------------------------------------
@@ -170,6 +199,6 @@ public class EMController implements IEMLifecycleListener
     
     @Override
     public void onNextPhaseButtonClicked()
-    { moveToNextPhase(); }
+    { startUpNextPhase(); }
   }
 }

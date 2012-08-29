@@ -41,6 +41,7 @@ public class EMClientEx extends EMClient
   private IEMDiscovery      discoveryFace;
   private IEMMetricGenSetup setupFace;
   private IEMLiveMonitor    liveFace;
+  private IEMPostReport     postFace;
   private IEMTearDown       tearDownFace;
   
   private ArrayList<UUID> generatorsToSetup;
@@ -74,6 +75,12 @@ public class EMClientEx extends EMClient
   
   public IEMLiveMonitor getLiveMonitorInterface()
   { return liveFace; }
+  
+  public void setPostReportInterface( IEMPostReport face )
+  { postFace = face; }
+  
+  public IEMPostReport getPostReportInterface()
+  { return postFace; }
   
   public IEMTearDown getTearDownInterface()
   { return tearDownFace; }
