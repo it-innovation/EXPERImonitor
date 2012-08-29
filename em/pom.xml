@@ -20,7 +20,6 @@
     <module>impl</module>
     <module>factory</module>
     <module>test</module>
-    <module>samples</module>
   </modules>
     
 </project>

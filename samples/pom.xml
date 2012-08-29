@@ -4,13 +4,14 @@
     
   <modelVersion>4.0.0</modelVersion>
   <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
-  <artifactId>experimedia-arch-ecc-em-samples</artifactId>
+  <artifactId>experimedia-arch-ecc-samples</artifactId>
   <version>0.1-SNAPSHOT</version>
+  <name>ECC Samples</name> 
   <packaging>pom</packaging>
   
   <parent>
     <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
-    <artifactId>experimedia-arch-ecc-em</artifactId>
+    <artifactId>experimedia-arch-ecc</artifactId>
     <version>0.1-SNAPSHOT</version>
   </parent>
 

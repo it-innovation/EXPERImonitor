@@ -44,6 +44,7 @@
         <module>amqpAPI</module>
         <module>em</module>
         <module>edm</module>
+		<module>samples</module>
     </modules>
     
 </project>
