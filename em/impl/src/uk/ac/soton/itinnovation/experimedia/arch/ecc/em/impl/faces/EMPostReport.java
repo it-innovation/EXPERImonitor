@@ -86,15 +86,20 @@ public class EMPostReport extends EMBaseInterface
   @Override
   public void requestDataBatch( EMDataBatch reqBatch )
   {
-    executeMethod( 2, null );
+    ArrayList<Object> params = new ArrayList<Object>();
+    params.add( reqBatch );
+    
+    executeMethod( 2, params );
   }
   
   // Method ID = 3
   @Override
   public void notifyReportBatchTimeOut( UUID batchID )
   {
-    //TODO: Data model
-    executeMethod( 3, null );
+    ArrayList<Object> params = new ArrayList<Object>();
+    params.add( batchID );
+    
+    executeMethod( 3, params );
   }
   
   // User methods --------------------------------------------------------------
@@ -109,7 +114,9 @@ public class EMPostReport extends EMBaseInterface
   @Override
   public void sendReportSummary( EMPostReportSummary summary )
   {
-    //TODO: Data model
+    ArrayList<Object> params = new ArrayList<Object>();
+    params.add( summary );
+    
     executeMethod( 5, null );
   }
   
@@ -117,7 +124,9 @@ public class EMPostReport extends EMBaseInterface
   @Override
   public void sendDataBatch( EMDataBatch populatedBatch )
   {
-    //TODO: Data model
+    ArrayList<Object> params = new ArrayList<Object>();
+    params.add( populatedBatch );
+    
     executeMethod( 6, null );
   }
   
@@ -167,8 +176,8 @@ public class EMPostReport extends EMBaseInterface
       {
         if ( providerListener != null )
         {
-          EMPostReportSummary summary = 
-              (EMPostReportSummary) jsonMapper.fromJson( methodData.get(1), EMPostReportSummary.class );
+          EMPostReportSummary summary =
+              jsonMapper.fromJson( methodData.get(1), EMPostReportSummary.class );
           
           providerListener.onSendReportSummary( interfaceUserID, summary );
         }
@@ -180,7 +189,7 @@ public class EMPostReport extends EMBaseInterface
         if ( providerListener != null )
         {
           EMDataBatch batch = 
-              (EMDataBatch) jsonMapper.fromJson( methodData.get(1), EMDataBatch.class );
+              jsonMapper.fromJson( methodData.get(1), EMDataBatch.class );
           
           providerListener.onSendDataBatch( interfaceUserID, batch );
         }

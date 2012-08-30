@@ -33,4 +33,6 @@ public interface EMViewListener
   void onStartPhasesButtonClicked();
   
   void onNextPhaseButtonClicked();
+  
+  void onPullMetricButtonClicked();
 }

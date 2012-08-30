@@ -31,12 +31,11 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.factory.EMInterfaceFacto
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 
 import java.awt.event.*;
 
 import java.util.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
 
 
 
@@ -82,6 +81,11 @@ public class EMController implements IEMLifecycleListener
   @Override
   public void onLifecyclePhaseStarted( EMPhase phase )
   {
+    if ( phase.equals(EMPhase.eEMLiveMonitoring) )
+      mainView.enablePulling( true );
+    else
+      mainView.enablePulling( false );
+    
     EMPhase nextPhase  = expMonitor.getNextPhase();
     mainView.setMonitoringPhaseValue( phase.toString(), nextPhase.toString() );
   }
@@ -129,10 +133,16 @@ public class EMController implements IEMLifecycleListener
   public void onGotMetricData( EMClient client, Report report )
   {
     if ( client != null && report != null )
-    {   
-      mainView.addLogText( client.getName() + 
-                           " got metric data, ID = " + 
-                           report.getUUID().toString() );
+    {
+      MeasurementSet ms = report.getMeasurementSet();   
+      if ( ms != null )
+      {
+        Set<Measurement> measures = ms.getMeasurements();
+        if ( measures != null && !measures.isEmpty() )
+          mainView.addLogText( client.getName() + 
+                               " got metric data: " + 
+                                measures.iterator().next().getValue() );
+      }
     }
   }
   
@@ -179,8 +189,38 @@ public class EMController implements IEMLifecycleListener
         try { expMonitor.goToNextPhase(); }
         catch ( Exception e )
         {}
-    }
+    }  
+  }
+  
+  private void pullMetrics()
+  {
+    if ( expMonitor != null )
+    {
+      Set<EMClient> clients = expMonitor.getCurrentPhaseClients();
+      Iterator<EMClient> cIt = clients.iterator();
       
+      while ( cIt.hasNext() )
+      {
+        EMClient client = cIt.next();
+        
+        Iterator<MetricGenerator> mgIt = client.getCopyOfMetricGenerators().iterator();
+        while ( mgIt.hasNext() )
+        {
+          Iterator<MetricGroup> groupIt = mgIt.next().getMetricGroups().iterator();
+          while ( groupIt.hasNext() )
+          {
+            Iterator<MeasurementSet> setIt = groupIt.next().getMeasurementSets().iterator();
+            while( setIt.hasNext() )
+            {
+              MeasurementSet ms = setIt.next();
+              if ( ms != null )
+                try { expMonitor.pullMetric( client, ms.getUUID() ); }
+                catch (Exception e ) {}
+            }
+          }
+        }
+      }
+    }
   }
   
   // Internal event handling ---------------------------------------------------
@@ -200,5 +240,9 @@ public class EMController implements IEMLifecycleListener
     @Override
     public void onNextPhaseButtonClicked()
     { startUpNextPhase(); }
+    
+    @Override
+    public void onPullMetricButtonClicked()
+    { pullMetrics(); }
   }
 }

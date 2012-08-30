@@ -25,6 +25,8 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.samples.basicEMClient;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
+
 import java.util.*;
 
 
@@ -43,6 +45,8 @@ public interface EMIAdapterListener
   void onLastPushProcessed( UUID lastReportID );
   
   void onStopPushingMetricData();
+  
+  void onPullMetric( UUID measurementSetID, Report reportOUT );
   
   void onGetTearDownResult( Boolean[] resultOUT );
 }

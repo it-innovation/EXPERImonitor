@@ -96,9 +96,23 @@ public class ExperimentMonitor implements IExperimentMonitor,
   }
   
   @Override
-  public Set<EMClient> getConnectedClients()
+  public Set<EMClient> getAllConnectedClients()
   {    
     return getSimpleClientSet( connectionManager.getConnectedClients() );
+  }
+  
+  @Override
+  public Set<EMClient> getCurrentPhaseClients()
+  {
+    HashSet<EMClient> clients = new HashSet<EMClient>();
+    
+    Set<EMClientEx> exClients = lifecycleManager.getCopySetOfCurrentPhaseClients();
+    Iterator<EMClientEx> exIt = exClients.iterator();
+    
+    while ( exIt.hasNext() )
+      clients.add( exIt.next() );
+    
+    return clients;
   }
   
   @Override

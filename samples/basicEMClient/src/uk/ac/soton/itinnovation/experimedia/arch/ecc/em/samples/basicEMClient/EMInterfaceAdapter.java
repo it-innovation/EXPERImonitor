@@ -163,8 +163,9 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
             
             liveMonitorFace.setUserListener( this );
             
-            // Notify we can push (TODO: Pull support)
+            // Report that we can both push and be pulled
             liveMonitorFace.notifyReadyToPush();
+            liveMonitorFace.notifyReadyForPull();
           }
           
         } break;
@@ -306,7 +307,14 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
   @Override
   public void onPullMetric( UUID senderID, UUID measurementSetID )
   {
-    //TODO
+    if ( senderID.equals(expMonitorID) && liveMonitorFace != null )
+    {
+      Report reportOut = new Report();
+      
+      emiListener.onPullMetric( measurementSetID, reportOut );
+      
+      liveMonitorFace.sendPulledMetric( reportOut );
+    }
   }
   
   @Override
@@ -315,9 +323,7 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
   
   @Override
   public void onPullingStopped( UUID senderID )
-  {
-    //TODO
-  }
+  { /* Not implemented in this demo */ }
   
   // IEMPostReport_UserListener ------------------------------------------------
   @Override

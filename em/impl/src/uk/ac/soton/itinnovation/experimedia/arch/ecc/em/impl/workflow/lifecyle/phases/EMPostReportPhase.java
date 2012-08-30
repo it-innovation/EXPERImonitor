@@ -22,24 +22,25 @@
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
-
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecyle.phases;
 
-import java.util.UUID;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasicChannel;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPMessageDispatch;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMDataBatch;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMPhase;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMPostReportSummary;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces.EMPostReport;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEMPostReport_ProviderListener;
+
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
+
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
+
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces.EMPostReport;
+
+
+import java.util.UUID;
 
 
 
 
 public class EMPostReportPhase extends AbstractEMLCPhase
-                                      implements IEMPostReport_ProviderListener
+                               implements IEMPostReport_ProviderListener
 {
   private EMPostReportPhaseListener phaseListener;
   
@@ -94,6 +95,8 @@ public class EMPostReportPhase extends AbstractEMLCPhase
   {
     phaseMsgPump.stopPump();
     phaseActive = false;
+    
+    if ( phaseListener != null ) phaseListener.onPostReportPhaseCompleted();
   }
   
   // IEMPostReport_ProviderListener --------------------------------------------

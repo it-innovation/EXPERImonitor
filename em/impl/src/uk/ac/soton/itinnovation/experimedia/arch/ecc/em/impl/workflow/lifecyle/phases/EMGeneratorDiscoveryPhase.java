@@ -123,8 +123,9 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
   public void hardStop()
   {
     // Don't stop this message pump as continuously listen for disconnecting clients here
-    
     phaseActive = false;
+    
+    if ( phaseListener != null ) phaseListener.onDiscoveryPhaseCompleted();
   }
   
   // IEMMonitor_ProviderListener -----------------------------------------------
@@ -205,11 +206,7 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
         }
         
         // If we've got all the metric generator info we need, finish this phase
-        if ( clientsExpectingGeneratorInfo.isEmpty() )
-        {
-          hardStop();
-          phaseListener.onDiscoveryPhaseCompleted();
-        }
+        if ( clientsExpectingGeneratorInfo.isEmpty() ) hardStop();
     }
   }
   

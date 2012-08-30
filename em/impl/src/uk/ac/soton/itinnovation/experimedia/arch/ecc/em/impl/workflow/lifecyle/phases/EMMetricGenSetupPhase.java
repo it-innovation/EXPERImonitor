@@ -99,6 +99,8 @@ public class EMMetricGenSetupPhase extends AbstractEMLCPhase
   {
     phaseActive = false;
     phaseMsgPump.stopPump();
+    
+    if ( phaseListener != null ) phaseListener.onSetupPhaseCompleted();
   }
   
   // IEMSetup_ProviderListener -------------------------------------------------
@@ -157,11 +159,7 @@ public class EMMetricGenSetupPhase extends AbstractEMLCPhase
           break;
         }
       
-      if ( allAttemptsMade && phaseListener != null )
-      {
-        hardStop();
-        phaseListener.onSetupPhaseCompleted();
-      }
+      if ( allAttemptsMade ) hardStop();
     }
   }
 }

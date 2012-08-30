@@ -63,7 +63,7 @@ public class Report
         if (report.getUUID() != null)
             this.uuid = UUID.fromString(report.getUUID().toString());
         if (report.getMeasurementSet() != null)
-            this.measurementSet = new MeasurementSet(report.getMeasurementSet());
+            this.measurementSet = new MeasurementSet(report.getMeasurementSet(), true);
         if (report.getReportDate() != null)
             this.reportDate = new Date(report.getReportDate().getTime());
         if (report.getFromDate() != null)

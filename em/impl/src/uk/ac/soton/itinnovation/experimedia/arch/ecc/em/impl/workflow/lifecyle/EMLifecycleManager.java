@@ -106,6 +106,17 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   public EMPhase getCurrentPhase()
   { return currentPhase; }
   
+  public Set<EMClientEx> getCopySetOfCurrentPhaseClients()
+  {
+    Set<EMClientEx> clients = new HashSet<EMClientEx>();
+    
+    AbstractEMLCPhase currPhase = lifecyclePhases.get( currentPhase );
+    if ( currPhase != null )
+      clients = currPhase.getCopySetOfCurrentClients();
+    
+    return clients;
+  }
+  
   public boolean isWindingCurrentPhaseDown()
   { return windingCurrPhaseDown; }
   
@@ -294,7 +305,12 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   }
   
   // EMPostReportPhaseListener -------------------------------------------------
-  
+  @Override
+  public void onPostReportPhaseCompleted()
+  {
+    windingCurrPhaseDown = false;
+    lifecycleListener.onLifecyclePhaseCompleted( EMPhase.eEMPostMonitoringReport );
+  }
   
   // EMTearDownPhaseListener ---------------------------------------------------
   @Override

@@ -78,7 +78,7 @@ public class MetricGroup implements Serializable
             for (MeasurementSet ms : mg.getMeasurementSets())
             {
                 if (ms != null)
-                    this.measurementSets.add(new MeasurementSet(ms));
+                    this.measurementSets.add(new MeasurementSet(ms, true));
             }
         }
     }

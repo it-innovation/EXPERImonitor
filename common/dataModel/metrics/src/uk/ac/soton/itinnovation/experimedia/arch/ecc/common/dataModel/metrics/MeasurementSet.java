@@ -55,8 +55,9 @@ public class MeasurementSet implements Serializable
     /**
      * Copy constructor; does a deep copy of the attribute, metric and measurements.
      * @param ms The metric set object from which a copy is made.
+     * @param copyMeasurements Flag indicating whether or not to copy measurements
      */
-    public MeasurementSet(MeasurementSet ms)
+    public MeasurementSet(MeasurementSet ms, boolean copyMeasurements )
     {
         if (ms == null)
             return;
@@ -71,7 +72,7 @@ public class MeasurementSet implements Serializable
             this.metric = new Metric(ms.getMetric());
         
         this.measurements = new HashSet<Measurement>();
-        if (ms.getMeasurements() != null)
+        if (copyMeasurements && ms.getMeasurements() != null)
         {
             for (Measurement m : ms.getMeasurements())
             {

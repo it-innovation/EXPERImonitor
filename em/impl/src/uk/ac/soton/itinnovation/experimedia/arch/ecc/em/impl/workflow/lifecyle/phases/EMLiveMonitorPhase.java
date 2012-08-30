@@ -144,6 +144,8 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
   {
     phaseMsgPump.stopPump();
     phaseActive = false;
+    
+    if ( phaseListener != null ) phaseListener.onLiveMonitorPhaseCompleted();
   }
   
   // IEMLiveMonitor_ProviderListener -------------------------------------------
@@ -193,11 +195,7 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
       
       // If we have no more clients pulling or pushing, phase is over
       if ( clientsStillPushing.isEmpty() && clientsStillPulling.isEmpty() )
-        if ( phaseListener != null )
-        {
-          hardStop();
-          phaseListener.onLiveMonitorPhaseCompleted();
-        }
+        hardStop();
     }
   }
   

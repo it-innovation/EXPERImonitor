@@ -82,6 +82,9 @@ public class EMView extends javax.swing.JFrame
   {
     clientListModel.addElement( (Object) new HashMap.SimpleEntry<UUID, String>(id, clientName) );
   }
+  
+  public void enablePulling( boolean enabled )
+  { pullMetricButton.setEnabled( enabled ); }
 
   /**
    * This method is called from within the constructor to initialize the form.
@@ -119,6 +122,7 @@ public class EMView extends javax.swing.JFrame
         phaseLabel = new javax.swing.JLabel();
         nextPhaseButton = new javax.swing.JButton();
         nextPhaseLabel = new javax.swing.JLabel();
+        pullMetricButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -307,6 +311,14 @@ public class EMView extends javax.swing.JFrame
 
         nextPhaseLabel.setText("Not available");
 
+        pullMetricButton.setText("Pull client metric data");
+        pullMetricButton.setEnabled(false);
+        pullMetricButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                onPullButtonClicked(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
         jPanel4Layout.setHorizontalGroup(
@@ -324,7 +336,9 @@ public class EMView extends javax.swing.JFrame
                         .addComponent(jLabel8)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(phaseLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(pullMetricButton, javax.swing.GroupLayout.PREFERRED_SIZE, 183, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -339,7 +353,8 @@ public class EMView extends javax.swing.JFrame
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(nextPhaseButton)
-                            .addComponent(nextPhaseLabel))))
+                            .addComponent(nextPhaseLabel)
+                            .addComponent(pullMetricButton))))
                 .addContainerGap())
         );
 
@@ -376,6 +391,11 @@ public class EMView extends javax.swing.JFrame
       viewListener.onNextPhaseButtonClicked();
   }//GEN-LAST:event_onNextPhaseClicked
 
+  private void onPullButtonClicked(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_onPullButtonClicked
+    if ( viewListener != null )
+      viewListener.onPullMetricButtonClicked();
+  }//GEN-LAST:event_onPullButtonClicked
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton beginMonitoringProcButton;
     private javax.swing.JList currentClientList;
@@ -404,5 +424,6 @@ public class EMView extends javax.swing.JFrame
     private javax.swing.JButton nextPhaseButton;
     private javax.swing.JLabel nextPhaseLabel;
     private javax.swing.JLabel phaseLabel;
+    private javax.swing.JButton pullMetricButton;
     // End of variables declaration//GEN-END:variables
 }

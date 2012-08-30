@@ -45,7 +45,9 @@ public interface IExperimentMonitor
   
   void openEntryPoint( String rabbitServerIP, UUID entryPointID ) throws Exception;
   
-  Set<EMClient> getConnectedClients();
+  Set<EMClient> getAllConnectedClients();
+  
+  Set<EMClient> getCurrentPhaseClients();
   
   void addLifecyleListener( IEMLifecycleListener listener );
   

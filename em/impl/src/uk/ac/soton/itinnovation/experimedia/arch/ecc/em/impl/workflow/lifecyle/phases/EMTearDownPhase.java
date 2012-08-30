@@ -101,6 +101,7 @@ public class EMTearDownPhase extends AbstractEMLCPhase
   {
     phaseMsgPump.stopPump();
     phaseActive = false;
+    if ( phaseListener != null ) phaseListener.onTearDownPhaseCompleted();
   }
   
   // IEMTearDown_ProviderListener ----------------------------------------------
@@ -133,12 +134,7 @@ public class EMTearDownPhase extends AbstractEMLCPhase
       }
       
       // Notify phase completion if all results are in
-      if ( clientsStillToTearDown.isEmpty() )
-        if ( phaseListener != null )
-        {
-          hardStop();
-          phaseListener.onTearDownPhaseCompleted();
-        }
+      if ( clientsStillToTearDown.isEmpty() ) hardStop();
     }
   }
 }

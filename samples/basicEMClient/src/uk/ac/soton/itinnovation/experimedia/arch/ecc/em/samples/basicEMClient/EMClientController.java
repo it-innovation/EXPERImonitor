@@ -177,6 +177,22 @@ public class EMClientController implements EMIAdapterListener,
   }
   
   @Override
+  public void onPullMetric( UUID measurementSetID, Report reportOut )
+  {
+    // We've only got one MeasurementSet so we don't need to search on ID
+    // Create a sample measurement
+    Measurement measurement = new Measurement();
+    measurement.setTimeStamp( new Date() );
+    measurement.setValue( takeMeasurement() );
+     
+    // Create an empty instance of our measurement set
+    MeasurementSet sampleSet = createMeasurementSetEmptySample();
+    sampleSet.addMeasurement( measurement );
+    
+    reportOut.setMeasurementSet( sampleSet );
+  }
+  
+  @Override
   public void onGetTearDownResult( Boolean[] resultOUT )
   {
     clientView.setStatus( "Tearing down" );
@@ -190,20 +206,13 @@ public class EMClientController implements EMIAdapterListener,
   @Override
   public void onPushDataClicked()
   {
-    // Get our only metric generator
-    MetricGenerator metGen = metricGenerators.values().iterator().next();
-    metGen.getMetricGroups().iterator().next();
-    
-    // Get our only metric group
-    MetricGroup mg = metGen.getMetricGroups().iterator().next();
-    MeasurementSet ms = mg.getMeasurementSets().iterator().next();
-    
     // Create a sample measurement
     Measurement measurement = new Measurement();
     measurement.setTimeStamp( new Date() );
-    measurement.setValue( "" );
-    
-    MeasurementSet sampleSet = new MeasurementSet( ms );
+    measurement.setValue( takeMeasurement() );
+     
+    // Create an empty instance of our measurement set
+    MeasurementSet sampleSet = createMeasurementSetEmptySample();
     sampleSet.addMeasurement( measurement );
     
     Report randomReport = new Report();
@@ -211,5 +220,30 @@ public class EMClientController implements EMIAdapterListener,
     
     // ... and report!
     emiAdapter.pushMetric( randomReport );
+  }
+  
+  // Private method ------------------------------------------------------------
+  private MeasurementSet createMeasurementSetEmptySample()
+  {
+    // Get our only metric generator
+    MetricGenerator metGen = metricGenerators.values().iterator().next();
+    metGen.getMetricGroups().iterator().next();
+    
+    // Get our only metric group
+    MetricGroup mg = metGen.getMetricGroups().iterator().next();
+    MeasurementSet currentMS = mg.getMeasurementSets().iterator().next();
+    
+    return new MeasurementSet( currentMS, false );
+  }
+  
+  private String takeMeasurement()
+  {
+    Runtime rt = Runtime.getRuntime();
+    
+    // Just take a very rough measurement
+    String memVal = Long.toString( rt.totalMemory() - rt.freeMemory() );
+    
+    clientView.addLogMessage( "Memory measurement (bytes): " + memVal );
+    return memVal;
   }
 }
