@@ -126,6 +126,10 @@ public class EMClientEx extends EMClient
   public void addSuccessfulSetup( UUID genID )
   { if ( genID != null ) generatorsSetupOK.add( genID ); }
   
+  // Post-report phase state ---------------------------------------------------
+  public void setPostReportSummary( EMPostReportSummary report )
+  { postReportSummary = report; }
+  
   // Tear-down phase state -----------------------------------------------------
   public void setTearDownResult( boolean success )
   { tearDownSuccessful = success; }

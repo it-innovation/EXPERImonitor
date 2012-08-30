@@ -181,6 +181,13 @@ public class ExperimentMonitor implements IExperimentMonitor,
     catch ( Exception e ) { throw e; }
   }
   
+  @Override
+  public void requestDataBatch( EMClient client, EMDataBatch batch ) throws Exception
+  {
+    try { lifecycleManager.tryRequestDataBatch( client, batch ); }
+    catch ( Exception e ) { throw e; }
+  }
+  
   // IEMLifecycleListener ------------------------------------------------------
   @Override
   public void onClientConnected( EMClient client )
@@ -236,6 +243,22 @@ public class ExperimentMonitor implements IExperimentMonitor,
     Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
     while ( listIt.hasNext() )
       listIt.next().onGotMetricData( client, report );
+  }
+  
+  @Override
+  public void onGotSummaryReport( EMClient client, EMPostReportSummary summary )
+  {
+    Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
+    while ( listIt.hasNext() )
+      listIt.next().onGotSummaryReport( client, summary );
+  }
+  
+  @Override
+  public void onGotDataBatch( EMClient client, EMDataBatch batch )
+  {
+    Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
+    while ( listIt.hasNext() )
+      listIt.next().onGotDataBatch( client, batch );
   }
   
   @Override

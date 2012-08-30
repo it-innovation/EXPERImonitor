@@ -37,7 +37,7 @@ public class EMDataBatch
 {
   private UUID batchID;
   private Date dataStart;
-  private Date dateEnd;
+  private Date dataEnd;
   
   private MeasurementSet measurementSet;
   
@@ -45,6 +45,15 @@ public class EMDataBatch
   public EMDataBatch()
   {
     batchID = UUID.randomUUID();
+  }
+  
+  public EMDataBatch( MeasurementSet mSet, Date start, Date end )
+  {
+    batchID = UUID.randomUUID();
+    
+    measurementSet = mSet;
+    dataStart = start;
+    dataEnd   = end;
   }
   
   public UUID getID()
@@ -55,7 +64,7 @@ public class EMDataBatch
     if ( start != null && end != null )
     {
       dataStart = start;
-      dateEnd   = end;
+      dataEnd   = end;
     }
   }
   
@@ -63,7 +72,7 @@ public class EMDataBatch
   { return dataStart; }
   
   public Date getDataEnd()
-  { return dateEnd; }
+  { return dataEnd; }
   
   public MeasurementSet getMeasurementSet()
   { return measurementSet; }

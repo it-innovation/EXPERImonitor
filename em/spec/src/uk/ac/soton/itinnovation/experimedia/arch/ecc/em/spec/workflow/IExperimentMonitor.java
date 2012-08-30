@@ -65,12 +65,7 @@ public interface IExperimentMonitor
   
   void endLifecycle() throws Exception;
   
-  /**
-   * Only call this during the live monitoring phase
-   * 
-   * @param client
-   * @param measurementSetID
-   * @throws Exception 
-   */
   void pullMetric( EMClient client, UUID measurementSetID ) throws Exception;
+  
+  void requestDataBatch( EMClient client, EMDataBatch batch ) throws Exception;
 }

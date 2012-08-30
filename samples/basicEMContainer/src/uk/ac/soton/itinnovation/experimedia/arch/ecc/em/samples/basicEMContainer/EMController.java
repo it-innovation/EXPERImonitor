@@ -81,10 +81,19 @@ public class EMController implements IEMLifecycleListener
   @Override
   public void onLifecyclePhaseStarted( EMPhase phase )
   {
-    if ( phase.equals(EMPhase.eEMLiveMonitoring) )
-      mainView.enablePulling( true );
-    else
-      mainView.enablePulling( false );
+    // Manage modal behaviour of the view
+    switch ( phase )
+    {
+      case eEMLiveMonitoring : mainView.enablePulling( true ); break;
+        
+      case eEMPostMonitoringReport : mainView.enabledPostReportPulling( true ); break;
+        
+      default:
+      {
+        mainView.enablePulling( false );
+        mainView.enabledPostReportPulling( false );
+      } break;
+    }
     
     EMPhase nextPhase  = expMonitor.getNextPhase();
     mainView.setMonitoringPhaseValue( phase.toString(), nextPhase.toString() );
@@ -147,6 +156,45 @@ public class EMController implements IEMLifecycleListener
   }
   
   @Override
+  public void onGotSummaryReport( EMClient client, EMPostReportSummary summary )
+  {
+    if ( client != null && summary != null )
+    {
+      Iterator<UUID> idIt = summary.getReportedMeasurementSetIDs().iterator();
+      while( idIt.hasNext() )
+      {
+        Report report = summary.getReport( idIt.next() );
+        if ( report != null )
+        {
+          mainView.addLogText( client.getName() + " got summary report from: " +
+                               report.getFromDate().toString() + " to: "       +
+                               report.getToDate().toString()                   +
+                               " count[" + report.getNumberOfMeasurements() + "]" );
+        }
+      }
+    }
+  }
+  
+  @Override
+  public void onGotDataBatch( EMClient client, EMDataBatch batch )
+  {
+    if ( client != null && batch != null )
+    {
+      int measurementCount = 0;
+      
+      MeasurementSet ms = batch.getMeasurementSet();
+      if ( ms != null )
+      {
+        Set<Measurement> measures = ms.getMeasurements();
+        if ( measures != null ) measurementCount = measures.size();
+      }
+      
+      mainView.addLogText( client.getName() + " got batch ID: " + batch.getID().toString() + 
+                           " carrying " + measurementCount + " measures" );
+    }
+  }
+  
+  @Override
   public void onClientTearDownResult( EMClient client, boolean success )
   {
     if ( client != null )
@@ -196,6 +244,7 @@ public class EMController implements IEMLifecycleListener
   {
     if ( expMonitor != null )
     {
+      //TODO: Visitor pattern!
       Set<EMClient> clients = expMonitor.getCurrentPhaseClients();
       Iterator<EMClient> cIt = clients.iterator();
       
@@ -216,6 +265,45 @@ public class EMController implements IEMLifecycleListener
               if ( ms != null )
                 try { expMonitor.pullMetric( client, ms.getUUID() ); }
                 catch (Exception e ) {}
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  private void pullPostReports()
+  {
+    if ( expMonitor != null )
+    {
+      // TODO: Visitor pattern!
+      Set<EMClient> clients = expMonitor.getCurrentPhaseClients();
+      Iterator<EMClient> cIt = clients.iterator();
+      
+      while ( cIt.hasNext() )
+      {
+        EMClient client = cIt.next();
+        EMPostReportSummary reportSummary = client.getPostReportSummary();
+        
+        if ( reportSummary != null )
+        {
+          Iterator<UUID> reportIt = reportSummary.getReportedMeasurementSetIDs().iterator();
+          while ( reportIt.hasNext() )
+          {
+            Report report = reportSummary.getReport( reportIt.next() );
+            if ( report != null )
+            {
+              // MENTAL HEALTH WARNING: We're only going to pull a small amount 
+              // of data that will be created by the client sample demo here
+              if ( report.getNumberOfMeasurements() == 2 )
+              {
+                EMDataBatch batch = new EMDataBatch( report.getMeasurementSet(),
+                                                     report.getFromDate(),
+                                                     report.getToDate() );
+                
+                try { expMonitor.requestDataBatch( client, batch ); }
+                catch ( Exception e ) {}
+              }
             }
           }
         }
@@ -244,5 +332,9 @@ public class EMController implements IEMLifecycleListener
     @Override
     public void onPullMetricButtonClicked()
     { pullMetrics(); }
+    
+    @Override
+    public void onPullPostReportButtonClicked()
+    { pullPostReports(); }
   }
 }

@@ -45,13 +45,11 @@ public interface IEMLifecycleListener
   
   void onClientSetupResult( EMClient client, boolean success );
   
-  /**
-   * Do not block on this event
-   * 
-   * @param client
-   * @param report 
-   */
   void onGotMetricData( EMClient client, Report report );
+  
+  void onGotSummaryReport( EMClient client, EMPostReportSummary summary );
+  
+  void onGotDataBatch( EMClient client, EMDataBatch batch );  
   
   void onClientTearDownResult( EMClient client, boolean success );
 }

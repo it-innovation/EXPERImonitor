@@ -47,8 +47,8 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
   
   private HashSet<UUID> clientsStillPushing;
   private HashSet<UUID> clientsStillPulling;
-  private boolean       monitorStopping = false;
   
+  private boolean       monitorStopping = false;
   private final Object  controlledStopLock = new Object();
   
   

@@ -46,6 +46,9 @@ public class EMClient
   // Setup phase states
   protected HashSet<UUID> generatorsSetupOK;
   
+  // Post-report phase states
+  protected EMPostReportSummary postReportSummary;
+  
   // Tear-down phase
   protected boolean tearDownSuccessful = false;
   
@@ -105,6 +108,9 @@ public class EMClient
     
     return true;
   }
+  
+  public EMPostReportSummary getPostReportSummary()
+  { return postReportSummary; }
   
   public boolean getTearDownResult()
   { return tearDownSuccessful; }

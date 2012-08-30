@@ -367,17 +367,20 @@
                       </Group>
                   </Group>
                   <EmptySpace max="32767" attributes="0"/>
-                  <Component id="pullMetricButton" min="-2" pref="183" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                      <Component id="pullMetricButton" pref="183" max="32767" attributes="0"/>
+                      <Component id="postReportButton" max="32767" attributes="0"/>
+                  </Group>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
         <DimensionLayout dim="1">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Group type="102" alignment="0" attributes="0">
+              <Group type="102" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="beginMonitoringProcButton" pref="50" max="32767" attributes="0"/>
+                      <Component id="beginMonitoringProcButton" max="32767" attributes="0"/>
                       <Group type="102" attributes="0">
                           <Group type="103" groupAlignment="3" attributes="0">
                               <Component id="jLabel8" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -387,11 +390,16 @@
                           <Group type="103" groupAlignment="3" attributes="0">
                               <Component id="nextPhaseButton" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="nextPhaseLabel" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="pullMetricButton" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
                       </Group>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
+              </Group>
+              <Group type="102" attributes="0">
+                  <EmptySpace min="-2" pref="22" max="-2" attributes="0"/>
+                  <Component id="pullMetricButton" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="32767" attributes="0"/>
+                  <Component id="postReportButton" min="-2" max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -442,6 +450,15 @@
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="onPullButtonClicked"/>
+          </Events>
+        </Component>
+        <Component class="javax.swing.JButton" name="postReportButton">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Pull post-report data"/>
+            <Property name="enabled" type="boolean" value="false"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="onPostReportButtonClicked"/>
           </Events>
         </Component>
       </SubComponents>

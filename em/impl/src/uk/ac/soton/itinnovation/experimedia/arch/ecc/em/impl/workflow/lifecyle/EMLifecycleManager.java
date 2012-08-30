@@ -42,6 +42,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Re
 
 import java.util.*;
 import org.apache.log4j.Logger;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.IEMPostReport;
 
 
 
@@ -208,6 +209,29 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
     }
   }
   
+  public void tryRequestDataBatch( EMClient client, EMDataBatch batch ) throws Exception
+  {
+    if ( currentPhase != EMPhase.eEMPostMonitoringReport )
+      throw new Exception( "Not in data batch requesting compatible phase" );
+    
+    if ( client == null ) throw new Exception( "Client is null" );
+    if ( batch  == null ) throw new Exception( "Batch is null" );
+    if ( batch.getMeasurementSet() == null ) throw new Exception( "Batch Measurement set is null" );
+    if ( batch.getDataStart() == null ||
+         batch.getDataEnd()   == null ) throw new Exception( "Batch date stamps are null" );
+    
+    synchronized ( clientLock )
+    {
+      EMClientEx clientEx = (EMClientEx) client;
+      if ( clientEx == null ) throw new Exception( "Client is invalid" );
+      
+      IEMPostReport postReport = clientEx.getPostReportInterface();
+      if ( postReport == null ) throw new Exception( "Could not get client post report interface" );
+      
+      postReport.requestDataBatch( batch );
+    }
+  }
+  
   // EMConnectionManagerListener -----------------------------------------------
   @Override
   public void onClientRegistered( EMClientEx client )
@@ -244,7 +268,7 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   @Override
   public void onClientDiscoveryResult( EMClientEx client )
   {
-    // If not metric generators are available, remove client from appropriate phases
+    // If no metric generators are available, remove client from appropriate phases
     if ( client.getGeneratorDiscoveryResult() == false )
     {
       UUID clientID = client.getID();
@@ -305,6 +329,18 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   }
   
   // EMPostReportPhaseListener -------------------------------------------------
+  @Override
+  public void onGotSummaryReport( EMClientEx client, EMPostReportSummary summary )
+  {
+    lifecycleListener.onGotSummaryReport( client, summary );
+  }
+  
+  @Override
+  public void onGotDataBatch( EMClientEx client, EMDataBatch batch )       
+  {
+    lifecycleListener.onGotDataBatch( client, batch );
+  }
+  
   @Override
   public void onPostReportPhaseCompleted()
   {

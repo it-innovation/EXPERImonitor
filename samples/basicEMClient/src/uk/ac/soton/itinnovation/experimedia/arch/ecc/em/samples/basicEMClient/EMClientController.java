@@ -30,6 +30,8 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 
 import java.util.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMDataBatch;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMPostReportSummary;
 
 
 
@@ -46,6 +48,10 @@ public class EMClientController implements EMIAdapterListener,
   private Entity                        entityBeingObserved;
   private Attribute                     entityAttribute;
   private HashMap<UUID,MetricGenerator> metricGenerators;
+  
+  private Measurement firstMeasurement;
+  private Measurement currentMeasurement;
+  
   
   
   public EMClientController()
@@ -179,17 +185,45 @@ public class EMClientController implements EMIAdapterListener,
   @Override
   public void onPullMetric( UUID measurementSetID, Report reportOut )
   {
-    // We've only got one MeasurementSet so we don't need to search on ID
-    // Create a sample measurement
-    Measurement measurement = new Measurement();
-    measurement.setTimeStamp( new Date() );
-    measurement.setValue( takeMeasurement() );
-     
     // Create an empty instance of our measurement set
     MeasurementSet sampleSet = createMeasurementSetEmptySample();
-    sampleSet.addMeasurement( measurement );
+   
+    // Add a snapshot measurement to it
+    snapshotMeasurement();
+    sampleSet.addMeasurement( currentMeasurement );
     
     reportOut.setMeasurementSet( sampleSet );
+  }
+  
+  @Override
+  public void onPopulateSummaryReport( EMPostReportSummary summaryOUT )
+  {
+    // We've only got one MeasurementSet so we'll create a demo summary report
+    // and just two measurements.. so we'll use these to create a demo summary
+    
+    Report report = new Report();
+    report.setReportDate( new Date() );
+    report.setFromDate( firstMeasurement.getTimeStamp() );
+    report.setToDate( currentMeasurement.getTimeStamp() );
+    report.setNumberOfMeasurements( 2 );
+    
+    // We've only got one of each...
+    MetricGenerator mGen = metricGenerators.values().iterator().next();
+    MetricGroup mGroup = mGen.getMetricGroups().iterator().next();
+    MeasurementSet mSet = mGroup.getMeasurementSets().iterator().next();
+    
+    report.setMeasurementSet( mSet );
+    summaryOUT.addReport( report );
+  }
+  
+  @Override
+  public void onPopulateDataBatch( EMDataBatch batchOut )
+  {
+    // We've only stored the first and the last measurements of a single
+    // MeasurementSet, so just send that
+    MeasurementSet ms = batchOut.getMeasurementSet();
+    ms.addMeasurement( firstMeasurement );
+    ms.addMeasurement( currentMeasurement );
   }
   
   @Override
@@ -206,14 +240,12 @@ public class EMClientController implements EMIAdapterListener,
   @Override
   public void onPushDataClicked()
   {
-    // Create a sample measurement
-    Measurement measurement = new Measurement();
-    measurement.setTimeStamp( new Date() );
-    measurement.setValue( takeMeasurement() );
-     
     // Create an empty instance of our measurement set
     MeasurementSet sampleSet = createMeasurementSetEmptySample();
-    sampleSet.addMeasurement( measurement );
+    
+    // Take a current measurement
+    snapshotMeasurement();
+    sampleSet.addMeasurement( currentMeasurement );
     
     Report randomReport = new Report();
     randomReport.setMeasurementSet( sampleSet );
@@ -236,14 +268,19 @@ public class EMClientController implements EMIAdapterListener,
     return new MeasurementSet( currentMS, false );
   }
   
-  private String takeMeasurement()
+  private void snapshotMeasurement()
   {
     Runtime rt = Runtime.getRuntime();
     
     // Just take a very rough measurement
     String memVal = Long.toString( rt.totalMemory() - rt.freeMemory() );
     
+    currentMeasurement = new Measurement();
+    currentMeasurement.setTimeStamp( new Date() );
+    currentMeasurement.setValue( memVal );
+    
+    if ( firstMeasurement == null ) firstMeasurement = currentMeasurement;
+    
     clientView.addLogMessage( "Memory measurement (bytes): " + memVal );
-    return memVal;
   }
 }

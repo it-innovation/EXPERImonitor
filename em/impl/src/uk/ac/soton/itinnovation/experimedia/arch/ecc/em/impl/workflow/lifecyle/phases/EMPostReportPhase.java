@@ -78,7 +78,9 @@ public class EMPostReportPhase extends AbstractEMLCPhase
     phaseMsgPump.startPump();
     phaseActive = true;
     
-    // TODO: Start reporting process
+    // Request clients create post-report interface
+    for ( EMClientEx client : getCopySetOfCurrentClients() )
+      client.getDiscoveryInterface().createInterface( EMInterfaceType.eEMPostReport );
     
     phaseState = "Waiting for client to signal ready to report";
   }
@@ -103,18 +105,37 @@ public class EMPostReportPhase extends AbstractEMLCPhase
   @Override
   public void onNotifyReadyToReport( UUID senderID )
   {
-    //TODO
+    if ( phaseActive )
+    {
+      EMClientEx client = getClient( senderID );
+      
+      if ( client != null )
+        client.getPostReportInterface().requestPostReportSummary();
+    }
   }
   
   @Override
   public void onSendReportSummary( UUID senderID, EMPostReportSummary summary )
   {
-    //TODO
+    if ( phaseActive )
+    {
+      EMClientEx client = getClient( senderID );
+      client.setPostReportSummary( summary );
+      
+      if ( client != null && phaseListener != null )
+        phaseListener.onGotSummaryReport( client, summary );
+    }
   }
   
   @Override
   public void onSendDataBatch( UUID senderID, EMDataBatch populatedBatch )
   {
-    //TODO
+    if ( phaseActive )
+    {
+      EMClientEx client = getClient( senderID );
+      
+      if ( client != null && phaseListener != null )
+        phaseListener.onGotDataBatch( client, populatedBatch );
+    }
   }
 }

@@ -329,13 +329,24 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
   @Override
   public void onRequestPostReportSummary( UUID senderID )
   {
-    
+    if ( senderID.equals(expMonitorID) && postReportFace != null )
+    {
+      EMPostReportSummary summary = new EMPostReportSummary();
+      emiListener.onPopulateSummaryReport( summary );
+      
+      postReportFace.sendReportSummary( summary );
+    }
   }
   
   @Override
   public void onRequestDataBatch( UUID senderID, EMDataBatch reqBatch )
   {
-    
+    if ( senderID.equals(expMonitorID) && reqBatch != null && postReportFace != null )
+    {
+      emiListener.onPopulateDataBatch( reqBatch );
+      
+      postReportFace.sendDataBatch( reqBatch );
+    }
   }
   
   @Override

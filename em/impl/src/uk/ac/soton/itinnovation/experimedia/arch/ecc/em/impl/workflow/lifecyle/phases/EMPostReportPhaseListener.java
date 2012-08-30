@@ -25,10 +25,17 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecyle.phases;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
+
 
 
 
 public interface EMPostReportPhaseListener
 {
+  void onGotSummaryReport( EMClientEx client, EMPostReportSummary summary );
+  
+  void onGotDataBatch( EMClientEx client, EMDataBatch batch );
+  
   void onPostReportPhaseCompleted();
 }

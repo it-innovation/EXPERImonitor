@@ -117,7 +117,7 @@ public class EMPostReport extends EMBaseInterface
     ArrayList<Object> params = new ArrayList<Object>();
     params.add( summary );
     
-    executeMethod( 5, null );
+    executeMethod( 5, params );
   }
   
   // Method ID = 6
@@ -127,7 +127,7 @@ public class EMPostReport extends EMBaseInterface
     ArrayList<Object> params = new ArrayList<Object>();
     params.add( populatedBatch );
     
-    executeMethod( 6, null );
+    executeMethod( 6, params );
   }
   
   // Protected methods ---------------------------------------------------------
