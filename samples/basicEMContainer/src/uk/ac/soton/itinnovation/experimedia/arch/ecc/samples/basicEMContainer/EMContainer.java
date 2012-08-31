@@ -34,7 +34,17 @@ public class EMContainer
 {
   public static void main( String args[] )
   {
+    String rabbitServerIP = "127.0.0.1";
+    if ( args.length == 1 ) rabbitServerIP = args[0];   
+    
     EMController ctrl = new EMController();
-    ctrl.start( "127.0.0.1", UUID.fromString("00000000-0000-0000-0000-000000000000") );
+   
+    try
+    {
+      ctrl.start( rabbitServerIP, 
+                  UUID.fromString("00000000-0000-0000-0000-000000000000") );
+    }
+    catch ( Exception e )
+    { System.out.println("Serious problem trying to start EM: " + e.getMessage()); }
   }
 }

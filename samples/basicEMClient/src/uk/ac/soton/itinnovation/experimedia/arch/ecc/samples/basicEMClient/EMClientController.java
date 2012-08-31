@@ -29,17 +29,18 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
+
+import org.apache.log4j.Logger;
 import java.util.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMDataBatch;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMPostReportSummary;
-
-
 
 
 
 public class EMClientController implements EMIAdapterListener,
                                            EMClientViewListener
 {
+  private final Logger clientLogger = Logger.getLogger( EMClientController.class );
+  
   private AMQPBasicChannel   amqpChannel;
   private EMInterfaceAdapter emiAdapter;
   private EMClientView       clientView;
@@ -67,6 +68,8 @@ public class EMClientController implements EMIAdapterListener,
          expMonitorID   != null &&
          clientID       != null )
     {
+      clientLogger.info( "Trying to connect to Rabbit server on " + rabbitServerIP );
+      
       // Create connection to Rabbit server ------------------------------------
       AMQPConnectionFactory amqpFactory = new AMQPConnectionFactory();
       amqpFactory.setAMQPHostIPAddress( rabbitServerIP );
@@ -75,7 +78,11 @@ public class EMClientController implements EMIAdapterListener,
         amqpFactory.connectToAMQPHost();
         amqpChannel = amqpFactory.createNewChannel();
       }
-      catch (Exception e ) { throw e; }
+      catch (Exception e ) 
+      {
+        clientLogger.error( "Could not connect to Rabbit server" );
+        throw e; 
+      }
       
       // Set up a simple view --------------------------------------------------
       Date date = new Date();
@@ -92,7 +99,10 @@ public class EMClientController implements EMIAdapterListener,
                                        amqpChannel, 
                                        expMonitorID, clientID ); }
       catch ( Exception e ) 
-      { throw e; }
+      {
+        clientLogger.error( "Could not attempt registration with EM" );
+        throw e; 
+      }
     }
   }
   

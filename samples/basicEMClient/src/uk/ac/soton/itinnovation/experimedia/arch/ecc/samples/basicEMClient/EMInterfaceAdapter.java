@@ -100,7 +100,7 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
     IAMQPMessageDispatch dispatch = interfaceFactory.createDispatch();
     dispatchPump.addDispatch( dispatch );
       
-    // Crate our entry point interface
+    // Create our entry point interface
     entryPointFace = interfaceFactory.createEntryPoint( expMonitorID, dispatch );
     
     // Create the principal interface (IEMDiscovery ahead of time)
@@ -210,7 +210,7 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
   @Override
   public void onRegistrationConfirmed( UUID senderID, Boolean confirmed )
   {
-    if ( senderID.equals(expMonitorID) && emiListener != null )
+    if ( senderID.equals(expMonitorID) )
     {
       emiListener.onEMConnectionResult( confirmed );
       discoveryFace.readyToInitialise();
@@ -222,7 +222,7 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
   {
     if ( senderID.equals(expMonitorID) )
     {
-      // Notify EM of all the phases supported by this adapter
+      // Notify EM that ALL the phases are supported by this adapter
       EnumSet<EMPhase> phases = EnumSet.noneOf( EMPhase.class );
       phases.add( EMPhase.eEMDiscoverMetricGenerators );
       phases.add( EMPhase.eEMSetUpMetricGenerators );
@@ -245,7 +245,7 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
   @Override
   public void onRequestMetricGeneratorInfo( UUID senderID )
   {
-    if ( senderID.equals(expMonitorID) && emiListener != null )
+    if ( senderID.equals(expMonitorID) )
     {
       emiListener.onPopulateMetricGeneratorInfo();
       discoveryFace.sendMetricGeneratorInfo( clientGenerators );
@@ -265,7 +265,7 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
   @Override
   public void onSetupMetricGenerator( UUID senderID, UUID genID )
   {
-    if ( senderID.equals(expMonitorID) && setupFace != null )
+    if ( senderID.equals(expMonitorID) && genID != null && setupFace != null )
     {
       Boolean[] result = new Boolean[1];
       result[0] = false;
@@ -357,7 +357,7 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
   @Override
   public void onTearDownMetricGenerators( UUID senderID )       
   {
-    if ( senderID.equals(expMonitorID) && emiListener != null )
+    if ( senderID.equals(expMonitorID) )
     {
       Boolean[] result = new Boolean[1];
       emiListener.onGetTearDownResult( result );

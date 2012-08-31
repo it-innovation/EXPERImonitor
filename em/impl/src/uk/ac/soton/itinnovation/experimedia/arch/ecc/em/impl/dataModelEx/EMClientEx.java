@@ -56,6 +56,10 @@ public class EMClientEx extends EMClient
   public void destroyAllInterfaces()
   {
     discoveryFace = null;
+    setupFace     = null;
+    liveFace      = null;
+    postFace      = null;
+    tearDownFace  = null;
   }
   
   public IEMDiscovery getDiscoveryInterface()

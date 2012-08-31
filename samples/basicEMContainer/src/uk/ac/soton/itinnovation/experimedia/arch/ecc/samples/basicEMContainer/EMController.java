@@ -35,6 +35,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 
 import java.awt.event.*;
 
+import org.apache.log4j.Logger;
 import java.util.*;
 
 
@@ -42,6 +43,8 @@ import java.util.*;
 
 public class EMController implements IEMLifecycleListener
 {
+  private final Logger emCtrlLogger = Logger.getLogger( EMController.class );
+  
   private IExperimentMonitor expMonitor;
   private EMView             mainView;
   private boolean            waitingToStartNextPhase = false;
@@ -53,15 +56,21 @@ public class EMController implements IEMLifecycleListener
     expMonitor.addLifecyleListener( this );
   }
   
-  public void start( String rabbitIP, UUID emID )
+  public void start( String rabbitIP, UUID emID ) throws Exception
   {
+    emCtrlLogger.info( "Trying to connect to Rabbit server on " + rabbitIP );
+    
     mainView = new EMView( new MonitorViewListener() );
     mainView.setVisible( true );
     mainView.addWindowListener( new ViewWindowListener() );
     
     try
     { expMonitor.openEntryPoint( rabbitIP, emID ); }
-    catch (Exception e) {}
+    catch (Exception e)
+    {
+      emCtrlLogger.error( "Could not open entry point on Rabbit server" );
+      throw e; 
+    }
   }
   
   // IEMLifecycleListener ------------------------------------------------------
@@ -84,9 +93,17 @@ public class EMController implements IEMLifecycleListener
     // Manage modal behaviour of the view
     switch ( phase )
     {
-      case eEMLiveMonitoring : mainView.enablePulling( true ); break;
+      case eEMLiveMonitoring : 
+      {
+        mainView.enablePulling( true );
+        mainView.enabledPostReportPulling( false );
+      } break;
         
-      case eEMPostMonitoringReport : mainView.enabledPostReportPulling( true ); break;
+      case eEMPostMonitoringReport : 
+      {
+        mainView.enablePulling( false );
+        mainView.enabledPostReportPulling( true );
+      } break;
         
       default:
       {

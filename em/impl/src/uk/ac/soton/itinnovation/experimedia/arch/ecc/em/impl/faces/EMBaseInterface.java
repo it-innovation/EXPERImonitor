@@ -40,7 +40,7 @@ import java.util.*;
 
 public abstract class EMBaseInterface implements IAMQPMessageDispatchListener
 {
-  protected final static Logger faceDebugLogger = Logger.getLogger( EMBaseInterface.class );
+  protected final static Logger faceLogger = Logger.getLogger( EMBaseInterface.class );
   
   protected String     interfaceName;
   protected String     interfaceVersion;
@@ -66,13 +66,14 @@ public abstract class EMBaseInterface implements IAMQPMessageDispatchListener
         
         JsonArray jsonItems = jsonParser.parse( jsonData ).getAsJsonArray();
         int methodID        = jsonMapper.fromJson( jsonItems.get(0), int.class );
-
-        // DEBUG ---------------------------------------------------------------
-        faceDebugLogger.debug( "BaseFACE:Msg: [" +methodID+ "] " + (isProvider ? interfaceUserID: interfaceProviderID) );
-
+        
         onInterpretMessage( methodID, jsonItems );
+        
+        // DEBUG ---------------------------------------------------------------
+        faceLogger.debug( "BaseFACE:Msg: [" +methodID+ "] " + (isProvider ? interfaceUserID: interfaceProviderID) );
       }
-      catch (UnsupportedEncodingException e) {}
+      catch (UnsupportedEncodingException e) 
+      { faceLogger.error( "Could not re-encode Rabbit data"); }
     } 
   }
   
@@ -123,12 +124,12 @@ public abstract class EMBaseInterface implements IAMQPMessageDispatchListener
       Collection methodList = new ArrayList();
       methodList.add( methodID );
       methodList.addAll( parameters );
-   
-      // DEBUG -----------------------------------------------------------------
-      faceDebugLogger.debug( "BaseFACE:Exe: [" +methodID+ "] " + (isProvider ? interfaceUserID : interfaceProviderID ) );
       
       String payloadData = jsonMapper.toJson( methodList );
       amqpInterface.sendBasicMessage( payloadData );
+      
+      // DEBUG -----------------------------------------------------------------
+      faceLogger.debug( "BaseFACE:Exe: [" +methodID+ "] " + (isProvider ? interfaceUserID : interfaceProviderID ) );
 
       result = true;
     }

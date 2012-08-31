@@ -41,9 +41,12 @@ public class EMClientContainer
     
     try
     {
+      String rabbitServerIP = "127.0.0.1";
+      if ( args.length == 1 ) rabbitServerIP = args[0];     
+      
       clientLogger = Logger.getLogger( EMClientContainer.class );
       
-      ctrl.start( "127.0.0.1",
+      ctrl.start( rabbitServerIP,
                   UUID.fromString("00000000-0000-0000-0000-000000000000"), // EM ID
                   UUID.randomUUID() );                                     // ID of this client
     }

@@ -160,7 +160,7 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
               supportedPhases.contains( EMPhase.eEMPostMonitoringReport) )
           client.getDiscoveryInterface().discoverMetricGenerators();
         else
-          clientsExpectingGeneratorInfo.remove( senderID );
+          clientsExpectingGeneratorInfo.remove( client.getID() );
       }
     }
   }
@@ -182,7 +182,7 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
         if ( discoveredGenerators )
           client.getDiscoveryInterface().requestMetricGeneratorInfo();
         else
-          clientsExpectingGeneratorInfo.remove( senderID );
+          clientsExpectingGeneratorInfo.remove( client.getID() );
           // Otherwise don't expect any metric generator info
       }
     }
@@ -202,7 +202,7 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
           phaseListener.onClientMetricGeneratorsFound( client );
           
           // Remove from the list of expected generators
-          clientsExpectingGeneratorInfo.remove( senderID );
+          clientsExpectingGeneratorInfo.remove( client.getID() );
         }
         
         // If we've got all the metric generator info we need, finish this phase
@@ -217,7 +217,7 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
 
     if ( client != null )
     {
-      clientsExpectingGeneratorInfo.remove( senderID );
+      clientsExpectingGeneratorInfo.remove( client.getID() );
 
       client.destroyAllInterfaces();
       client.setIsConnected( false );

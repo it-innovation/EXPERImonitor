@@ -120,10 +120,14 @@ public class EMPostReportPhase extends AbstractEMLCPhase
     if ( phaseActive )
     {
       EMClientEx client = getClient( senderID );
-      client.setPostReportSummary( summary );
       
-      if ( client != null && phaseListener != null )
-        phaseListener.onGotSummaryReport( client, summary );
+      if ( client != null )
+      {
+        client.setPostReportSummary( summary );
+        
+        if ( phaseListener != null )
+          phaseListener.onGotSummaryReport( client, summary );
+      }
     }
   }
   
