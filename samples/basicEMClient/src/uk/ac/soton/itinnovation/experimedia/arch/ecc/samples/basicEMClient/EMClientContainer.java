@@ -23,18 +23,31 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.samples.basicEMContainer;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.basicEMClient;
 
 import java.util.UUID;
+import org.apache.log4j.Logger;
 
 
 
 
-public class EMContainer
+public class EMClientContainer
 {
+  public static Logger clientLogger;
+  
   public static void main( String args[] )
   {
-    EMController ctrl = new EMController();
-    ctrl.start( "127.0.0.1", UUID.fromString("00000000-0000-0000-0000-000000000000") );
+    EMClientController ctrl = new EMClientController();
+    
+    try
+    {
+      clientLogger = Logger.getLogger( EMClientContainer.class );
+      
+      ctrl.start( "127.0.0.1",
+                  UUID.fromString("00000000-0000-0000-0000-000000000000"), // EM ID
+                  UUID.randomUUID() );                                     // ID of this client
+    }
+    catch (Exception e )
+    { clientLogger.error( "Had a problem connecting to the EM:\n" + e.getMessage() ); }
   }
 }

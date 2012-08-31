@@ -23,7 +23,7 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.samples.basicEMContainer;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.basicEMContainer;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.*;
 

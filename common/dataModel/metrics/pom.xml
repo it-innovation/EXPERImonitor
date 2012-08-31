@@ -81,12 +81,6 @@
             <artifactId>jscience</artifactId>
             <version>4.3.1</version>
         </dependency>
-        
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-mapper-asl</artifactId>
-            <version>${ecc.jacksonJSON.version}</version>
-        </dependency>
     </dependencies>
     
 </project>

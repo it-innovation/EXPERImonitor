@@ -23,18 +23,36 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.samples.basicEMContainer;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.basicEMClient;
+
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
+
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
+
+import java.util.*;
 
 
 
 
-public interface EMViewListener
+public interface EMIAdapterListener
 {
-  void onStartPhasesButtonClicked();
+  void onEMConnectionResult( boolean connected );
   
-  void onNextPhaseButtonClicked();
+  void onPopulateMetricGeneratorInfo();
   
-  void onPullMetricButtonClicked();
+  void onSetupMetricGenerator( UUID generatorSetID, Boolean[] resultOUT );
   
-  void onPullPostReportButtonClicked();
+  void onStartPushingMetricData();
+  
+  void onLastPushProcessed( UUID lastReportID );
+  
+  void onStopPushingMetricData();
+  
+  void onPullMetric( UUID measurementSetID, Report reportOUT );
+  
+  void onPopulateSummaryReport( EMPostReportSummary summaryOUT );
+  
+  void onPopulateDataBatch( EMDataBatch batchOut );
+  
+  void onGetTearDownResult( Boolean[] resultOUT );
 }

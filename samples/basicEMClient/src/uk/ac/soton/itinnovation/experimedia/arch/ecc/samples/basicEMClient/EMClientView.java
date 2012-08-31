@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.samples.basicEMClient;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.basicEMClient;
 
 /**
  *

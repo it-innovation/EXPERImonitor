@@ -36,6 +36,7 @@ public class AMQPMessageDispatch implements IAMQPMessageDispatch
 {
   private final Object dispatchLock = new Object();
   
+  private AMQPMessageDispatchPump          dispatchPump;
   private LinkedList<Entry<String,byte[]>> dispatchList;
   private IAMQPMessageDispatchListener     dispatchListener;
   
@@ -45,25 +46,33 @@ public class AMQPMessageDispatch implements IAMQPMessageDispatch
     dispatchList = new LinkedList<Entry<String,byte[]>>();
   }
   
-  public boolean addMessage( String queueName, byte[] data )
+  // Protected methods ---------------------------------------------------------
+  protected void setPump( AMQPMessageDispatchPump pump )
+  { dispatchPump = pump; }
+  
+  protected boolean addMessage( String queueName, byte[] data )
   {
     boolean addResult = false;
     
     if ( queueName != null && data != null )
     {
       synchronized( dispatchLock )
-      { dispatchList.addLast(
+      { 
+        dispatchList.addLast(
             new HashMap.SimpleEntry<String, byte[]>( queueName, data ) ); 
           
-          addResult = true;
+        addResult = true;
+        dispatchPump.notifyDispatchWaiting();
       }
     }
     
     return addResult;
   }
   
-  public void iterateDispatch()
+  protected boolean iterateDispatch()
   {
+    boolean hasDispatches;
+    
     synchronized( dispatchLock )
     {
       if ( !dispatchList.isEmpty() && dispatchListener != null )
@@ -72,8 +81,12 @@ public class AMQPMessageDispatch implements IAMQPMessageDispatch
 
         dispatchListener.onSimpleMessageDispatched( nextMessage.getKey(),
                                                     nextMessage.getValue() );
-      }  
+      }
+      
+      hasDispatches = !dispatchList.isEmpty();
     }
+    
+    return hasDispatches;
   }
   
   // IAMQPMessageDispatch ------------------------------------------------------

@@ -37,11 +37,13 @@ public class AMQPMessageDispatchPump implements Runnable,
                                                 IAMQPMessageDispatchPump
                                                 
 {
-  private final Object pumpLock = new Object();
+  private final Object listLock    = new Object();
+  private final Object waitingLock = new Object();
   
   private String  pumpName;
   private Thread  pumpThread;
-  private boolean isPumping = false;
+  private boolean isPumping         = false;
+  private boolean dispatchesWaiting = false;
   
   private LinkedList<AMQPMessageDispatch> dispatchList;
   
@@ -81,14 +83,11 @@ public class AMQPMessageDispatchPump implements Runnable,
   }
   
   @Override
-  public void stopPump()
-  {
-    synchronized( pumpLock ) 
-    { isPumping = false; }
-  }
+  public synchronized void stopPump()
+  { isPumping = false; }
   
   @Override
-  public boolean isPumping()
+  public synchronized boolean isPumping()
   { return isPumping; }
   
   @Override
@@ -97,16 +96,20 @@ public class AMQPMessageDispatchPump implements Runnable,
     AMQPMessageDispatch amqpDisp = (AMQPMessageDispatch) dispatch;
     
     if ( amqpDisp != null )
-      synchronized (pumpLock)
-        { dispatchList.addLast( amqpDisp ); }
+    {
+      amqpDisp.setPump( this );
+      
+      synchronized ( listLock )
+      { dispatchList.addLast( amqpDisp ); }
+    }  
   }
   
   @Override
   public void removeDispatch( IAMQPMessageDispatch dispatch )
   {
     if ( dispatch != null )
-      synchronized (pumpLock)
-        { dispatchList.removeFirstOccurrence(dispatch); }
+      synchronized( listLock )
+      { dispatchList.removeFirstOccurrence(dispatch); }
   }
   
   // Runnable ------------------------------------------------------------------
@@ -115,16 +118,32 @@ public class AMQPMessageDispatchPump implements Runnable,
   {
     while ( isPumping )
     {
+      // If we don't have any dispatches waiting, cool it for a bit
+      while ( !dispatchesWaiting )
+        try { Thread.sleep(50); } catch (InterruptedException ie) { break; }
+      
       // Make a safe copy of the current list for processing (this may change at run-time)
       LinkedList<AMQPMessageDispatch> currentDispatches = new LinkedList<AMQPMessageDispatch>();
       
-      synchronized (pumpLock)
+      synchronized ( listLock )
       { currentDispatches.addAll( dispatchList ); }
       
       // Run through all dispatchers, iterating one dispatch
+      boolean outstandingDispatches = false;
       Iterator<AMQPMessageDispatch> dispIt = currentDispatches.iterator();
+      
       while ( dispIt.hasNext() )
-      { dispIt.next().iterateDispatch(); }
+      { 
+        if ( dispIt.next().iterateDispatch() )
+            outstandingDispatches = true;
+      }
+      
+      synchronized ( waitingLock )
+      { dispatchesWaiting = outstandingDispatches; }
     }
   }
+  
+  // Protected methods ---------------------------------------------------------
+  protected void notifyDispatchWaiting()
+  { synchronized ( waitingLock ) {dispatchesWaiting = true;} }
 }

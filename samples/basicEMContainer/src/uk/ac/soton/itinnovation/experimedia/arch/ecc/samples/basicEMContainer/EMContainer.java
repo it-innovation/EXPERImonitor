@@ -18,17 +18,23 @@
 // the software.
 //
 //      Created By :            Simon Crowle
-//      Created Date :          27-Aug-2012
+//      Created Date :          15-Aug-2012
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.samples.basicEMClient;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.basicEMContainer;
+
+import java.util.UUID;
 
 
 
 
-public interface EMClientViewListener
+public class EMContainer
 {
-  void onPushDataClicked();
+  public static void main( String args[] )
+  {
+    EMController ctrl = new EMController();
+    ctrl.start( "127.0.0.1", UUID.fromString("00000000-0000-0000-0000-000000000000") );
+  }
 }
