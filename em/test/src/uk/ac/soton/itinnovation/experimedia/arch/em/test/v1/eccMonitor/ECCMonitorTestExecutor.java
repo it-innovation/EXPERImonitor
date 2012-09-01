@@ -81,7 +81,8 @@ public class ECCMonitorTestExecutor implements Runnable,
   private AMQPBasicChannel providerChannel;
   private AMQPBasicChannel userChannel;
   
-  IAMQPMessageDispatchPump dispatchPump;
+  IAMQPMessageDispatchPump providerPump;
+  IAMQPMessageDispatchPump userPump;
   
   private IEMDiscovery providerDiscovery;
   private IEMDiscovery userDiscovery;
@@ -143,12 +144,12 @@ public class ECCMonitorTestExecutor implements Runnable,
     }
   }
   
-  // IECCMonitor_ProviderListener ----------------------------------------------
+  // IEMDiscovery_ProviderListener ---------------------------------------------
   @Override
   public void onReadyToInitialise( UUID senderID )
-  {
+  {    
     // Make sure event is from the correct sender
-    if ( senderID.equals( ECCMonitorEntryPointTest.EMUserUUID) )
+    if ( senderID.equals(ECCMonitorEntryPointTest.EMUserUUID) )
     {
       providerGotReadyToInit = true;
     
@@ -157,7 +158,7 @@ public class ECCMonitorTestExecutor implements Runnable,
       
       // Create dispatcher & attach dispatcher to (shared) pump
       IAMQPMessageDispatch providerDispatch = providerFactory.createDispatch();
-      dispatchPump.addDispatch( providerDispatch );
+      providerPump.addDispatch( providerDispatch );
 
       userTest = providerFactory.createTest( ECCMonitorEntryPointTest.EMProviderUUID,
                                              ECCMonitorEntryPointTest.EMUserUUID,
@@ -196,13 +197,13 @@ public class ECCMonitorTestExecutor implements Runnable,
     if ( senderID.equals( ECCMonitorEntryPointTest.EMUserUUID) )
     {
       if ( !providerGotTestBytes )
-        System.out.println( "Disconnecting client before send bytes ended!" );
+        System.out.println( "Client disconnect message received; waiting to receive bytes" );
     
       providerGotDisconnectNotice = true;
     }
   }
   
-  // IECCMonitor_UserListener --------------------------------------------------
+  // IEMDiscovery_UserListener -------------------------------------------------
   @Override
   public void onCreateInterface( UUID senderID, EMInterfaceType type )
   {
@@ -217,7 +218,7 @@ public class ECCMonitorTestExecutor implements Runnable,
       
       // Create dispatcher & attach dispatcher to (shared) pump
       IAMQPMessageDispatch userDispatch = userFactory.createDispatch();
-      dispatchPump.addDispatch( userDispatch );
+      providerPump.addDispatch( userDispatch );
 
       userTest = userFactory.createTest( ECCMonitorEntryPointTest.EMProviderUUID,
                                          ECCMonitorEntryPointTest.EMUserUUID,
@@ -278,17 +279,24 @@ public class ECCMonitorTestExecutor implements Runnable,
     EMInterfaceFactory providerFactory = new EMInterfaceFactory( providerChannel, true );
     EMInterfaceFactory userFactory     = new EMInterfaceFactory( userChannel, false );
     
-    // Share a dispatch message pump
-    dispatchPump = providerFactory.createDispatchPump( "Shared pump", 
+    // Create pump/dispatchers for provider
+    providerPump = providerFactory.createDispatchPump( "Provider pump", 
                                                        IAMQPMessageDispatchPump.ePumpPriority.MINIMUM );
     
-    // Create dispatchers for both provider and user
     IAMQPMessageDispatch providerDispatch = providerFactory.createDispatch();
-    IAMQPMessageDispatch userDispatch     = userFactory.createDispatch();
-    dispatchPump.addDispatch( providerDispatch );
-    dispatchPump.addDispatch( userDispatch );
-    dispatchPump.startPump();
+    providerPump.addDispatch( providerDispatch );
+    providerPump.startPump();
     
+    // Create pump/dispatchers for user
+    userPump = providerFactory.createDispatchPump( "User pump", 
+                                                   IAMQPMessageDispatchPump.ePumpPriority.MINIMUM );
+    
+    IAMQPMessageDispatch userDispatch = userFactory.createDispatch();
+    
+    userPump.addDispatch( userDispatch );
+    userPump.startPump();
+    
+    // Create discovery interfaces for both provider and user
     providerDiscovery = providerFactory.createDiscovery( ECCMonitorEntryPointTest.EMProviderUUID,
                                                          ECCMonitorEntryPointTest.EMUserUUID,
                                                          providerDispatch );

@@ -126,7 +126,8 @@ public abstract class EMBaseInterface implements IAMQPMessageDispatchListener
       methodList.addAll( parameters );
       
       String payloadData = jsonMapper.toJson( methodList );
-      amqpInterface.sendBasicMessage( payloadData );
+      if ( !amqpInterface.sendBasicMessage( payloadData ) )
+        faceLogger.error( "Could not execute method " + methodID );
       
       // DEBUG -----------------------------------------------------------------
       faceLogger.debug( "BaseFACE:Exe: [" +methodID+ "] " + (isProvider ? interfaceUserID : interfaceProviderID ) );

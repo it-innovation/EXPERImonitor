@@ -26,24 +26,28 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.spec.*;
+
 import java.util.*;
 import java.util.Map.*;
+import java.util.concurrent.LinkedBlockingQueue;
+import org.apache.log4j.Logger;
 
 
 
 
 public class AMQPMessageDispatch implements IAMQPMessageDispatch
 {
+  private final Logger dispatchLogger = Logger.getLogger( AMQPMessageDispatch.class );  
   private final Object dispatchLock = new Object();
   
-  private AMQPMessageDispatchPump          dispatchPump;
-  private LinkedList<Entry<String,byte[]>> dispatchList;
-  private IAMQPMessageDispatchListener     dispatchListener;
+  private AMQPMessageDispatchPump                   dispatchPump;
+  private LinkedBlockingQueue<Entry<String,byte[]>> dispatchQueue;
+  private IAMQPMessageDispatchListener              dispatchListener;
   
   
   public AMQPMessageDispatch()
   {
-    dispatchList = new LinkedList<Entry<String,byte[]>>();
+    dispatchQueue = new LinkedBlockingQueue<Entry<String,byte[]>>();
   }
   
   // Protected methods ---------------------------------------------------------
@@ -58,10 +62,14 @@ public class AMQPMessageDispatch implements IAMQPMessageDispatch
     {
       synchronized( dispatchLock )
       { 
-        dispatchList.addLast(
-            new HashMap.SimpleEntry<String, byte[]>( queueName, data ) ); 
+        try
+        { 
+          dispatchQueue.put( new HashMap.SimpleEntry<String, byte[]>( queueName, data ) );
+          addResult = true;
+        }
+        catch ( InterruptedException ie ) 
+        { dispatchLogger.error( "Could not add AMQP message"); }
           
-        addResult = true;
         dispatchPump.notifyDispatchWaiting();
       }
     }
@@ -75,15 +83,20 @@ public class AMQPMessageDispatch implements IAMQPMessageDispatch
     
     synchronized( dispatchLock )
     {
-      if ( !dispatchList.isEmpty() && dispatchListener != null )
+      if ( !dispatchQueue.isEmpty() && dispatchListener != null )
       {
-        Entry<String,byte[]> nextMessage = dispatchList.pop();
-
-        dispatchListener.onSimpleMessageDispatched( nextMessage.getKey(),
-                                                    nextMessage.getValue() );
+        try
+        { 
+          Entry<String,byte[]> nextMessage = dispatchQueue.take();
+          
+          dispatchListener.onSimpleMessageDispatched( nextMessage.getKey(),
+                                                      nextMessage.getValue() );
+        }
+        catch ( InterruptedException ie )
+        { dispatchLogger.error( "Could not dispatch AMQP message"); }
       }
       
-      hasDispatches = !dispatchList.isEmpty();
+      hasDispatches = !dispatchQueue.isEmpty();
     }
     
     return hasDispatches;

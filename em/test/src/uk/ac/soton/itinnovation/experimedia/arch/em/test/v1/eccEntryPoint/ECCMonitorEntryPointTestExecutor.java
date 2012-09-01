@@ -53,7 +53,8 @@ public class ECCMonitorEntryPointTestExecutor implements Runnable,
   private AMQPBasicChannel providerChannel;
   private AMQPBasicChannel userChannel;
   
-  IAMQPMessageDispatchPump dispatchPump;
+  IAMQPMessageDispatchPump providerPump;
+  IAMQPMessageDispatchPump userPump;
   
   IEMMonitorEntryPoint providerEP;
   IEMMonitorEntryPoint userEP;
@@ -96,16 +97,22 @@ public class ECCMonitorEntryPointTestExecutor implements Runnable,
     // User factory
     EMInterfaceFactory userFactory     = new EMInterfaceFactory( userChannel, false );
     
-    // Share a dispatch message pump
-    dispatchPump = providerFactory.createDispatchPump( "Shared pump", 
+    // Create pump/dispatchers for provider
+    providerPump = providerFactory.createDispatchPump( "Provider pump", 
                                                        IAMQPMessageDispatchPump.ePumpPriority.MINIMUM );
     
-    // Create dispatchers for both provider and user
     IAMQPMessageDispatch providerDispatch = providerFactory.createDispatch();
-    IAMQPMessageDispatch userDispatch     = userFactory.createDispatch();
-    dispatchPump.addDispatch( providerDispatch );
-    dispatchPump.addDispatch( userDispatch );
-    dispatchPump.startPump();
+    providerPump.addDispatch( providerDispatch );
+    providerPump.startPump();
+    
+    // Create pump/dispatchers for user
+    userPump = providerFactory.createDispatchPump( "User pump", 
+                                                   IAMQPMessageDispatchPump.ePumpPriority.MINIMUM );
+    
+    IAMQPMessageDispatch userDispatch = userFactory.createDispatch();
+    
+    userPump.addDispatch( userDispatch );
+    userPump.startPump();
     
     // Set up the provider interface (and listen for in-coming user connections)
     providerEP = providerFactory.createEntryPoint( ECCMonitorEntryPointTest.EMProviderUUID,

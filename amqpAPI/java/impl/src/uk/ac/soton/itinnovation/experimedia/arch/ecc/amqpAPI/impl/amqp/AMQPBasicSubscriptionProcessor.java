@@ -27,12 +27,15 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp;
 
 import com.rabbitmq.client.*;
 import java.io.IOException;
+import org.apache.log4j.Logger;
 
 
 
 
 public class AMQPBasicSubscriptionProcessor extends DefaultConsumer
 {
+  private final Logger subProcLogger = Logger.getLogger( AMQPBasicSubscriptionProcessor.class );
+  
   private String              queueName;
   private AMQPMessageDispatch messageDispatch;
 
@@ -56,6 +59,7 @@ public class AMQPBasicSubscriptionProcessor extends DefaultConsumer
     messageDispatch.addMessage( queueName, body );
     
     try { getChannel().basicAck( envelope.getDeliveryTag(), true ); }
-    catch (IOException ioe) {}
+    catch (IOException ioe)
+    { subProcLogger.error( "Could not send AMQP acknowledgement" ); }
   }
 }
