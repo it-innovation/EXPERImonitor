@@ -171,7 +171,7 @@ public class MeasurementHelper
         return DBUtil.objectExistsByUUID("Measurement", "measurementUUID", uuid, dbCon);
     }
     
-    public static void saveMeasurement(DatabaseConnector dbCon, Measurement measurement, boolean closeDBcon) throws Exception
+    public static void saveMeasurement(Measurement measurement, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
     {
         // this validation will check if all the required parameters are set and if
         // there isn't already a duplicate instance in the DB
@@ -205,7 +205,7 @@ public class MeasurementHelper
         }
     }
     
-    public static void saveMeasurementsForSet(DatabaseConnector dbCon, Set<Measurement> measurements, UUID mSetUUID, boolean closeDBcon) throws Exception
+    public static void saveMeasurementsForSet(Set<Measurement> measurements, UUID mSetUUID, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
     {
         // this validation will check if all the required parameters are set and if
         // there isn't already a duplicate instance in the DB
@@ -243,7 +243,7 @@ public class MeasurementHelper
         }
     }
     
-    public static Measurement getMeasurement(DatabaseConnector dbCon, UUID measurementUUID, boolean closeDBcon) throws Exception
+    public static Measurement getMeasurement(UUID measurementUUID, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
     {
         if (measurementUUID == null)
         {
@@ -251,11 +251,11 @@ public class MeasurementHelper
             throw new NullPointerException("Cannot get a Measurement object with the given UUID because it is NULL!");
         }
         
-        if (!MeasurementHelper.objectExists(measurementUUID, dbCon))
+        /*if (!MeasurementHelper.objectExists(measurementUUID, dbCon))
         {
             log.error("There is no Measurement with the given UUID: " + measurementUUID.toString());
             throw new RuntimeException("There is no Measurement with the given UUID: " + measurementUUID.toString());
-        }
+        }*/
         
         Measurement measurement = null;
         try {
@@ -314,7 +314,7 @@ public class MeasurementHelper
         return measurement;
     }
 
-    public static Set<Measurement> getMeasurementsForTimePeriod(DatabaseConnector dbCon, UUID mSetUUID, Date fromDate, Date toDate, boolean closeDBcon) throws Exception
+    public static Set<Measurement> getMeasurementsForTimePeriod(UUID mSetUUID, Date fromDate, Date toDate, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
     {
         if (mSetUUID == null)
         {
@@ -322,11 +322,11 @@ public class MeasurementHelper
             throw new NullPointerException("Cannot get Measurement objects for the MeasurementSet with the given UUID because it is NULL!");
         }
         
-        if (!MeasurementSetHelper.objectExists(mSetUUID, dbCon))
+        /*if (!MeasurementSetHelper.objectExists(mSetUUID, dbCon))
         {
             log.error("There is no MeasurementSet with the given UUID: " + mSetUUID.toString());
             throw new RuntimeException("There is no MeasurementSet with the given UUID: " + mSetUUID.toString());
-        }
+        }*/
         
         Set<Measurement> measurements = new HashSet<Measurement>();
         try {

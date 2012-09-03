@@ -53,8 +53,8 @@ public interface IReportDAO
     public void saveReport(Report report) throws Exception;
     
     /**
-     * Get a report object from its UUID, which will contain sub-classes except
-     * for measurements.
+     * Get a report object from its UUID. Will contain a MeasurementSet with
+     * the UUID to identify it, but no other data.
      * @param reportUUID The report UUID.
      * @return A report object, if it exists.
      * @throws Exception If there's a technical issue or there is no report with the given UUID.
@@ -62,7 +62,8 @@ public interface IReportDAO
     public Report getReport(UUID reportUUID) throws Exception;
     
     /**
-     * Get a report object from its UUID, with any measurements that may exist.
+     * Get a report object from its UUID. Will contain a MeasurementSet with the
+     * UUID to identify it, and actual measurements.
      * @param reportUUID The report UUID.
      * @return A report object, if it exists.
      * @throws Exception If there's a technical issue or there is no report with the given UUID.
@@ -71,7 +72,7 @@ public interface IReportDAO
     
     /**
      * Get a report for the latest measurement for a particular measurement set.
-     * Will contain sub-classes, except for measurements.
+     * Will contain a MeasurementSet with the UUID to identify it, but no other data.
      * @param measurementSetUUID The measurement set UUID.
      * @return A report object, if the measurement set exists, and there are measurements.
      * @throws Exception If there's a technical issue, if there is no measurement set with the given UUID or there are no measurements.
@@ -80,7 +81,8 @@ public interface IReportDAO
     
     /**
      * Get a report for the latest measurement for a particular measurement set.
-     * Will contain the measurements.
+     * Will contain a MeasurementSet with the UUID to identify it, and
+     * actual measurements.
      * @param measurementSetUUID The measurement set UUID.
      * @return A report object, if the measurement set exists, and there are measurements.
      * @throws Exception If there's a technical issue, if there is no measurement set with the given UUID or there are no measurements.
@@ -89,7 +91,7 @@ public interface IReportDAO
     
     /**
      * Get a report for all measurements for a particular measurement set.
-     * Will contain sub-classes, except for measurements.
+     * Will contain a MeasurementSet with the UUID to identify it, but no other data.
      * @param measurementSetUUID The measurement set UUID.
      * @return Empty set if there are no measurements.
      * @throws Exception If there's a technical issue or there is no measurement set with the given UUID.
@@ -98,7 +100,8 @@ public interface IReportDAO
     
     /**
      * Get a report for all measurements for a particular measurement set.
-     * Will contain the measurements.
+     * Will contain a MeasurementSet with the UUID to identify it, and
+     * actual measurements.
      * @param measurementSetUUID The measurement set UUID.
      * @return Empty set if there are no measurements.
      * @throws Exception If there's a technical issue or there is no measurement set with the given UUID.
@@ -107,7 +110,7 @@ public interface IReportDAO
     
     /**
      * Get a report for all measurements for a particular measurement set after a given date.
-     * Will contain sub-classes, except for measurements.
+     * Will contain a MeasurementSet with the UUID to identify it, but no other data.
      * @param measurementSetUUID The measurement set UUID.
      * @param fromDate The date from which measurements should be given.
      * @return Empty set if there are no measurements.
@@ -117,7 +120,8 @@ public interface IReportDAO
     
     /**
      * Get a report for all measurements for a particular measurement set after a given date.
-     * Will contain the measurements.
+     * Will contain a MeasurementSet with the UUID to identify it, and
+     * actual measurements.
      * @param measurementSetUUID The measurement set UUID.
      * @param fromDate The date from which measurements should be given.
      * @return Empty set if there are no measurements.
@@ -127,7 +131,7 @@ public interface IReportDAO
     
     /**
      * Get a report for the measurements for a particular measurement set within a given time
-     * period. Will contain sub-classes, except for measurements.
+     * period. Will contain a MeasurementSet with the UUID to identify it, but no other data.
      * @param measurementSetUUID The measurement set UUID.
      * @param fromDate The from date of the time period.
      * @param toDate The to date of the time period.
@@ -138,7 +142,8 @@ public interface IReportDAO
     
     /**
      * Get a report for the measurements for a particular measurement set within a given time
-     * period. Will contain the measurements.
+     * period. Will contain a MeasurementSet with the UUID to identify it, and
+     * actual measurements.
      * @param measurementSetUUID The measurement set UUID.
      * @param fromDate The from date of the time period.
      * @param toDate The to date of the time period.

@@ -60,25 +60,28 @@ public interface IMetricGeneratorDAO
      * Get a metric generator instance from a UUID. Will include all sub-classes
      * except for measurements, if available.
      * @param metricGenUUID The metric generator UUID.
+     * @param withSubClasses Flag to say whether to return subclasses too; MetricGroup and Entity, as well as sub-classes below that.
      * @return A metric generator instance if it exists.
      * @throws Exception If there's a technical issue or there is no metric generator with the given UUID.
      */
-    public MetricGenerator getMetricGenerator(UUID metricGenUUID) throws Exception;
+    public MetricGenerator getMetricGenerator(UUID metricGenUUID, boolean withSubClasses) throws Exception;
     
     /**
      * Get all metric generators. Will include all sub-classes except for measurements,
      * if available.
+     * @param withSubClasses Flag to say whether to return subclasses too; MetricGroup and Entity, as well as sub-classes below that.
      * @return Empty set if there are no metric generators.
      * @throws Exception If there's a technical issue.
      */
-    public Set<MetricGenerator> getMetricGenerators() throws Exception;
+    public Set<MetricGenerator> getMetricGenerators(boolean withSubClasses) throws Exception;
     
     /**
      * Get all metric generators for an experiment. Will include all sub-classes
      * except for measurements, if available.
      * @param expUUID The experiment UUID.
+     * @param withSubClasses Flag to say whether to return subclasses too; MetricGroup and Entity, as well as sub-classes below that.
      * @return Empty set if no metric generators exist for the experiment.
      * @throws Exception If there's a technical issue or there is no experiment with the given UUID.
      */
-    public Set<MetricGenerator> getMetricGeneratorsForExperiment(UUID expUUID) throws Exception;
+    public Set<MetricGenerator> getMetricGeneratorsForExperiment(UUID expUUID, boolean withSubClasses) throws Exception;
 }

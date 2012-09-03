@@ -66,6 +66,7 @@ public class MetricGeneratorHelper
         }
         
         // check if it exists in the DB already
+        /*
         try {
             if (objectExists(mg.getUUID(), dbCon))
             {
@@ -74,6 +75,7 @@ public class MetricGeneratorHelper
         } catch (Exception ex) {
             throw ex;
         }
+        */
         
         // check if the experiment exists in the DB, if flagged to do so
         if (checkForExperiment)
@@ -173,7 +175,7 @@ public class MetricGeneratorHelper
         return DBUtil.objectExistsByUUID("MetricGenerator", "mGenUUID", uuid, dbCon);
     }
     
-    public static void saveMetricGenerator(DatabaseConnector dbCon, MetricGenerator metricGen, UUID experimentUUID, boolean closeDBcon) throws Exception
+    public static void saveMetricGenerator(MetricGenerator metricGen, UUID experimentUUID, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
     {
         // this validation will check if all the required parameters are set and if
         // there isn't already a duplicate instance in the DB
@@ -223,7 +225,7 @@ public class MetricGeneratorHelper
                 for (MetricGroup mGrp : metricGen.getMetricGroups())
                 {
                     if (mGrp != null)
-                        MetricGroupHelper.saveMetricGroup(dbCon, mGrp, false); // flag not to close the DB connection
+                        MetricGroupHelper.saveMetricGroup(mGrp, dbCon, false); // flag not to close the DB connection
                 }
             }
         } catch (Exception ex) {
@@ -241,7 +243,7 @@ public class MetricGeneratorHelper
                 // check if the entity exists; if not, then save it
                 if (!EntityHelper.objectExists(entity.getUUID(), dbCon))
                 {
-                    EntityHelper.saveEntity(dbCon, entity, false);
+                    EntityHelper.saveEntity(entity, dbCon, false);
                 }
             }
         } catch (Exception ex) {
@@ -256,7 +258,7 @@ public class MetricGeneratorHelper
             // make link between MG and Entity in MetricGenerator_Entity table
             for (Entity entity : metricGen.getEntities())
             {
-                linkMetricGeneratorAndEntity(dbCon, metricGen.getUUID(), entity.getUUID(), false);
+                linkMetricGeneratorAndEntity(metricGen.getUUID(), entity.getUUID(), dbCon, false);
             }
         } catch (Exception ex) {
             exception = true;
@@ -267,7 +269,7 @@ public class MetricGeneratorHelper
         }
     }
     
-    public static void linkMetricGeneratorAndEntity(DatabaseConnector dbCon, UUID mGenUUID, UUID entityUUID, boolean closeDBcon) throws Exception
+    public static void linkMetricGeneratorAndEntity(UUID mGenUUID, UUID entityUUID, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
     {
         if (mGenUUID == null)
         {
@@ -305,7 +307,7 @@ public class MetricGeneratorHelper
         }
     }
     
-    public static MetricGenerator getMetricGenerator(DatabaseConnector dbCon, UUID metricGenUUID, boolean closeDBcon) throws Exception
+    public static MetricGenerator getMetricGenerator(UUID metricGenUUID, boolean withSubClasses, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
     {
         if (metricGenUUID == null)
         {
@@ -313,11 +315,11 @@ public class MetricGeneratorHelper
             throw new NullPointerException("Cannot get a MetricGenerator object with the given UUID because it is NULL!");
         }
         
-        if (!MetricGeneratorHelper.objectExists(metricGenUUID, dbCon))
+        /*if (!MetricGeneratorHelper.objectExists(metricGenUUID, dbCon))
         {
             log.error("There is no MetricGenerator with the given UUID: " + metricGenUUID.toString());
             throw new RuntimeException("There is no MetricGenerator with the given UUID: " + metricGenUUID.toString());
-        }
+        }*/
         
         MetricGenerator metricGenerator = null;
         boolean exception = false;
@@ -346,44 +348,48 @@ public class MetricGeneratorHelper
             log.error("Error while quering the database: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
         } finally {
-            if (exception)
+            if (exception || (closeDBcon && !withSubClasses))
                 dbCon.close();
         }
         
         // check if there's any metric groups
-        Set<MetricGroup> metricGroups = null;
-        
-        try {
-            metricGroups = MetricGroupHelper.getMetricGroupsForMetricGenerator(dbCon, metricGenUUID, false); // don't close the connection
-        } catch (Exception ex) {
-            log.error("Caught an exception when getting metric groups for MetricGenerator (UUID: " + metricGenUUID.toString() + "): " + ex.getMessage());
-            throw new RuntimeException("Unable to get MetricGenerator object due to an issue with getting its metric groups: " + ex.getMessage(), ex);
-        } finally {
-            if (exception)
-                dbCon.close();
+        if (withSubClasses)
+        {
+            Set<MetricGroup> metricGroups = null;
+
+            try {
+                metricGroups = MetricGroupHelper.getMetricGroupsForMetricGenerator(metricGenUUID, withSubClasses, dbCon, false); // don't close the connection
+            } catch (Exception ex) {
+                exception = true;
+                log.error("Caught an exception when getting metric groups for MetricGenerator (UUID: " + metricGenUUID.toString() + "): " + ex.getMessage());
+                throw new RuntimeException("Unable to get MetricGenerator object due to an issue with getting its metric groups: " + ex.getMessage(), ex);
+            } finally {
+                if (exception)
+                    dbCon.close();
+            }
+
+            metricGenerator.setMetricGroups(metricGroups);
+
+            // get any Entities
+            Set<Entity> entities = new HashSet<Entity>();
+
+            try {
+                entities = EntityHelper.getEntitiesForMetricGenerator(metricGenUUID, withSubClasses, dbCon, false); // don't close the connection
+            } catch (Exception ex) {
+                log.error("Caught an exception when getting metric groups for MetricGenerator (UUID: " + metricGenUUID.toString() + "): " + ex.getMessage());
+                throw new RuntimeException("Unable to get MetricGenerator object due to an issue with getting its metric groups: " + ex.getMessage(), ex);
+            } finally {
+                if (closeDBcon)
+                    dbCon.close();
+            }
+
+            metricGenerator.setEntities(entities);
         }
-        
-        metricGenerator.setMetricGroups(metricGroups);
-        
-        // get any Entities
-        Set<Entity> entities = new HashSet<Entity>();
-        
-        try {
-            entities = EntityHelper.getEntitiesForMetricGenerator(dbCon, metricGenUUID, false); // don't close the connection
-        } catch (Exception ex) {
-            log.error("Caught an exception when getting metric groups for MetricGenerator (UUID: " + metricGenUUID.toString() + "): " + ex.getMessage());
-            throw new RuntimeException("Unable to get MetricGenerator object due to an issue with getting its metric groups: " + ex.getMessage(), ex);
-        } finally {
-            if (exception)
-                dbCon.close();
-        }
-        
-        metricGenerator.setEntities(entities);
         
         return metricGenerator;
     }
 
-    public static Set<MetricGenerator> getMetricGenerators(DatabaseConnector dbCon) throws Exception
+    public static Set<MetricGenerator> getMetricGenerators(boolean withSubClasses, DatabaseConnector dbCon) throws Exception
     {
         Set<MetricGenerator> metricGenerators = new HashSet<MetricGenerator>();
         try {
@@ -404,7 +410,7 @@ public class MetricGeneratorHelper
                     continue;
                 }
                 
-                metricGenerators.add(getMetricGenerator(dbCon, UUID.fromString(uuidStr), false));
+                metricGenerators.add(getMetricGenerator(UUID.fromString(uuidStr), withSubClasses, dbCon, false));
             }
         } catch (Exception ex) {
             log.error("Error while quering the database: " + ex.getMessage(), ex);
@@ -424,7 +430,7 @@ public class MetricGeneratorHelper
      * @return
      * @throws Exception 
      */
-    public static Set<MetricGenerator> getMetricGeneratorsForExperiment(DatabaseConnector dbCon, UUID expUUID, boolean closeDBcon) throws Exception
+    public static Set<MetricGenerator> getMetricGeneratorsForExperiment(UUID expUUID, boolean withSubClasses, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
     {
         if (expUUID == null)
         {
@@ -451,7 +457,7 @@ public class MetricGeneratorHelper
                     continue;
                 }
                 
-                metricGenerators.add(getMetricGenerator(dbCon, UUID.fromString(uuidStr), false));
+                metricGenerators.add(getMetricGenerator(UUID.fromString(uuidStr), withSubClasses, dbCon, false));
             }
         } catch (Exception ex) {
             log.error("Error while quering the database: " + ex.getMessage(), ex);

@@ -331,7 +331,7 @@ public class DatabaseConnector
                 rs = s.getGeneratedKeys();
             }
         } catch (Exception ex) {
-            throw new RuntimeException("DatabaseConnector: error while executing query: " + query, ex);
+            throw new RuntimeException("Error while executing query: " + query, ex);
         }
 
         return rs;

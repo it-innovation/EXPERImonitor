@@ -53,15 +53,17 @@ public interface IExperimentDAO
     /**
      * Get an experiment instance according to an experiment UUID.
      * @param expUUID The UUID of the experiment.
+     * @param withSubClasses Flag to say whether to return subclasses too; MetricGenerator and sub-classes below that.
      * @return An experiment instance with all sub-classes except for measurements.
      * @throws Exception If there's a technical issue or there is no experiment with the given UUID.
      */
-    public Experiment getExperiment(UUID expUUID) throws Exception;
+    public Experiment getExperiment(UUID expUUID, boolean withSubClasses) throws Exception;
     
     /**
      * Get all existing experiments.
+     * @param withSubClasses Flag to say whether to return subclasses too; MetricGenerator and sub-classes below that.
      * @return Empty set if no experiments exist.
      * @throws Exception If there's a technical issue.
      */
-    public Set<Experiment> getExperiments() throws Exception;
+    public Set<Experiment> getExperiments(boolean withSubClasses) throws Exception;
 }

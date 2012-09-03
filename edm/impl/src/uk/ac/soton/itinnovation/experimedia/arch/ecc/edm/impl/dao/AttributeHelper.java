@@ -64,14 +64,14 @@ public class AttributeHelper
         }
         
         // check if it exists in the DB already
-        try {
+        /*try {
             if (objectExists(attrib.getUUID(), dbCon))
             {
                 return new ValidationReturnObject(false, new RuntimeException("The Attribute already exists; the UUID is not unique"));
             }
         } catch (Exception ex) {
             throw ex;
-        }
+        }*/
         
         if (attrib.getEntityUUID() == null)
         {
@@ -130,7 +130,7 @@ public class AttributeHelper
         return DBUtil.objectExistsByUUID("Attribute", "attribUUID", uuid, dbCon);
     }
     
-    public static void saveAttribute(DatabaseConnector dbCon, Attribute attrib, boolean closeDBcon) throws Exception
+    public static void saveAttribute(Attribute attrib, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
     {
         // this validation will check if all the required parameters are set and if
         // there isn't already a duplicate instance in the DB
@@ -170,7 +170,7 @@ public class AttributeHelper
         }
     }
     
-    public static Attribute getAttribute(DatabaseConnector dbCon, UUID attribUUID, boolean closeDBcon) throws Exception
+    public static Attribute getAttribute(UUID attribUUID, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
     {
         if (attribUUID == null)
         {
@@ -178,11 +178,11 @@ public class AttributeHelper
             throw new NullPointerException("Cannot get an Attribute object with the given UUID because it is NULL!");
         }
         
-        if (!AttributeHelper.objectExists(attribUUID, dbCon))
+        /*if (!AttributeHelper.objectExists(attribUUID, dbCon))
         {
             log.error("There is no attribute with the given UUID: " + attribUUID.toString());
             throw new RuntimeException("There is no attribute with the given UUID: " + attribUUID.toString());
-        }
+        }*/
         
         Attribute attribute = null;
         try {
@@ -222,7 +222,7 @@ public class AttributeHelper
         return attribute;
     }
     
-    public static Set<Attribute> getAttributesForEntity(DatabaseConnector dbCon, UUID entityUUID, boolean closeDBcon) throws Exception
+    public static Set<Attribute> getAttributesForEntity(UUID entityUUID, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
     {
         if (entityUUID == null)
         {
@@ -230,11 +230,11 @@ public class AttributeHelper
             throw new NullPointerException("Cannot get any Attribute objects for an Entity with the given UUID because it is NULL!");
         }
         
-        if (!EntityHelper.objectExists(entityUUID, dbCon))
+        /*if (!EntityHelper.objectExists(entityUUID, dbCon))
         {
             log.error("There is no entity with the given UUID: " + entityUUID.toString());
             throw new RuntimeException("There is no entity with the given UUID: " + entityUUID.toString());
-        }
+        }*/
         
         Set<Attribute> attributes = new HashSet<Attribute>();;
         try {

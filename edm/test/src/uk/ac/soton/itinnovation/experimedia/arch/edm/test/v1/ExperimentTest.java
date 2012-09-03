@@ -147,7 +147,7 @@ public class ExperimentTest extends TestCase
         
         Experiment exp = null;
         try {
-            exp = expDAO.getExperiment(exp1.getUUID());
+            exp = expDAO.getExperiment(exp1.getUUID(), false);
         } catch (Exception ex) {
             fail("Unable to get experiment due to an exception: " + ex.getMessage());
         }
@@ -175,7 +175,7 @@ public class ExperimentTest extends TestCase
         Set<Experiment> experiments = null;
         
         try {
-            experiments = expDAO.getExperiments();
+            experiments = expDAO.getExperiments(false);
             
             assertNotNull(experiments);
             assertFalse(experiments.isEmpty());

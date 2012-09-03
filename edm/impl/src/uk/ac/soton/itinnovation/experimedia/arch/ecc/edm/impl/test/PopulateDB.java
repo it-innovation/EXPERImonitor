@@ -130,7 +130,7 @@ public class PopulateDB
         log.info("Getting Entity from the DB");
         Entity entityFromDB = null;
         try {
-            entityFromDB = entityDAO.getEntity(entityUUID);
+            entityFromDB = entityDAO.getEntity(entityUUID, true);
         } catch (Exception ex) {
             log.error("Unable to get entity: " + ex.getMessage());
         }
@@ -260,7 +260,7 @@ public class PopulateDB
         log.info("Getting experiment object");
         Experiment expFromDB = null;
         try {
-            expFromDB = expDAO.getExperiment(expUUID);
+            expFromDB = expDAO.getExperiment(expUUID, true);
         } catch (Exception ex) {
             log.error("Unable to get experiment: " + ex.getMessage());
         }

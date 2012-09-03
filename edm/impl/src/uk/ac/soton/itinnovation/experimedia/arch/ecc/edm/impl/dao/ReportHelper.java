@@ -81,7 +81,7 @@ public class ReportHelper
         {
             return new ValidationReturnObject(false, new NullPointerException("The Report's number of measurements value is NULL"));
         }
-        
+        /*
         // check if it exists in the DB already
         try {
             if (objectExists(report.getUUID(), dbCon))
@@ -91,13 +91,14 @@ public class ReportHelper
         } catch (Exception ex) {
             throw ex;
         }
-        
+        */
         // if checking for measurement set
+        /*
         if (!MeasurementSetHelper.objectExists(report.getMeasurementSet().getUUID(), dbCon))
         {
             return new ValidationReturnObject(false, new RuntimeException("The Reports's MeasurementSet does not exist (UUID: " + report.getMeasurementSet().getUUID().toString() + ")"));
         }
-        
+        */
         return new ValidationReturnObject(true);
     }
     
@@ -160,7 +161,7 @@ public class ReportHelper
             // save any measurements if not NULL
             if ((report.getMeasurementSet().getMeasurements() != null) && !report.getMeasurementSet().getMeasurements().isEmpty())
             {
-                MeasurementHelper.saveMeasurementsForSet(dbCon, report.getMeasurementSet().getMeasurements(), report.getMeasurementSet().getUUID(), false); // flag not to close the DB connection
+                MeasurementHelper.saveMeasurementsForSet(report.getMeasurementSet().getMeasurements(), report.getMeasurementSet().getUUID(), dbCon, false); // flag not to close the DB connection
             }
         } catch (Exception ex) {
             throw ex;
@@ -201,7 +202,8 @@ public class ReportHelper
             log.error("Error while saving Report: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while saving Report: " + ex.getMessage(), ex);
         } finally {
-            dbCon.close();
+            if (closeDBcon)
+                dbCon.close();
         }
     }
 
@@ -213,11 +215,11 @@ public class ReportHelper
             throw new NullPointerException("Cannot get a Report object with the given UUID because it is NULL!");
         }
         
-        if (!ReportHelper.objectExists(reportUUID, dbCon))
+        /*if (!ReportHelper.objectExists(reportUUID, dbCon))
         {
             log.error("There is no Report with the given UUID: " + reportUUID.toString());
             throw new RuntimeException("There is no Report with the given UUID: " + reportUUID.toString());
-        }
+        }*/
         
         Report report = null;
         try {
@@ -300,7 +302,7 @@ public class ReportHelper
         
         // get the measurements
         try {
-            report.getMeasurementSet().setMeasurements(MeasurementHelper.getMeasurementsForTimePeriod(dbCon, report.getMeasurementSet().getUUID(), report.getFromDate(), report.getToDate(), false));
+            report.getMeasurementSet().setMeasurements(MeasurementHelper.getMeasurementsForTimePeriod(report.getMeasurementSet().getUUID(), report.getFromDate(), report.getToDate(), dbCon, false));
         } catch (Exception ex) {
             log.error("Caught an exception when getting measurements for report: " + ex.getMessage());
             throw new RuntimeException("Failed to get the report when getting the measurements: " + ex.getMessage(), ex);
@@ -319,11 +321,11 @@ public class ReportHelper
             throw new NullPointerException("Cannot generate a Report object for the MeasurementSet with the given UUID because it is NULL!");
         }
         
-        if (!MeasurementSetHelper.objectExists(mSetUUID, dbCon))
+        /*if (!MeasurementSetHelper.objectExists(mSetUUID, dbCon))
         {
             log.error("There is no MeasurementSet with the given UUID: " + mSetUUID.toString());
             throw new RuntimeException("There is no MeasurementSet with the given UUID: " + mSetUUID.toString());
-        }
+        }*/
         
         Report report = new Report();
         Date reportDate = new Date();
@@ -331,14 +333,15 @@ public class ReportHelper
         Date toDate = null;
         Integer numberOfMeasurements = null;
         
-        // get the measurement set (won't have values)
+        MeasurementSet mSet = new MeasurementSet(mSetUUID);
+        /* get the measurement set (won't have values)
         MeasurementSet mSet = null;
         try {
-            mSet = MeasurementSetHelper.getMeasurementSet(dbCon, mSetUUID, false);
+            mSet = MeasurementSetHelper.getMeasurementSet(mSetUUID, false, dbCon, false);
         } catch (Exception ex) {
             log.error("Failed to generate report, because the MeasurementSet couldn't be retrieved from the database: " + ex.getMessage(), ex);
             throw new RuntimeException("Failed to generate report, because the MeasurementSet couldn't be retrieved from the database: " + ex.getMessage(), ex);
-        }
+        }*/
         report.setMeasurementSet(mSet);
         
         // get measurements, which will allow the calculation of the other values for the Report object
@@ -402,11 +405,11 @@ public class ReportHelper
             throw new NullPointerException("Cannot generate a Report object for the MeasurementSet with the given UUID because it is NULL!");
         }
         
-        if (!MeasurementSetHelper.objectExists(mSetUUID, dbCon))
+        /*if (!MeasurementSetHelper.objectExists(mSetUUID, dbCon))
         {
             log.error("There is no MeasurementSet with the given UUID: " + mSetUUID.toString());
             throw new RuntimeException("There is no MeasurementSet with the given UUID: " + mSetUUID.toString());
-        }
+        }*/
         
         Report report = new Report();
         Date reportDate = new Date();
@@ -414,14 +417,15 @@ public class ReportHelper
         Date toDate = null;
         Integer numberOfMeasurements = null;
         
-        // get the measurement set (won't have values)
+        MeasurementSet mSet = new MeasurementSet(mSetUUID);
+        /* get the measurement set (won't have values)
         MeasurementSet mSet = null;
         try {
-            mSet = MeasurementSetHelper.getMeasurementSet(dbCon, mSetUUID, false);
+            mSet = MeasurementSetHelper.getMeasurementSet(mSetUUID, false, dbCon, false);
         } catch (Exception ex) {
             log.error("Failed to generate report, because the MeasurementSet couldn't be retrieved from the database: " + ex.getMessage(), ex);
             throw new RuntimeException("Failed to generate report, because the MeasurementSet couldn't be retrieved from the database: " + ex.getMessage(), ex);
-        }
+        }*/
         report.setMeasurementSet(mSet);
         
         // get measurements, which will allow the calculation of the other values for the Report object
@@ -491,11 +495,11 @@ public class ReportHelper
             throw new NullPointerException("Cannot generate a Report object for the MeasurementSet with the given UUID because it is NULL!");
         }
         
-        if (!MeasurementSetHelper.objectExists(mSetUUID, dbCon))
+        /*if (!MeasurementSetHelper.objectExists(mSetUUID, dbCon))
         {
             log.error("There is no MeasurementSet with the given UUID: " + mSetUUID.toString());
             throw new RuntimeException("There is no MeasurementSet with the given UUID: " + mSetUUID.toString());
-        }
+        }*/
         
         Report report = new Report();
         Date reportDate = new Date();
@@ -503,14 +507,15 @@ public class ReportHelper
         Date toDate = null;
         Integer numberOfMeasurements = null;
         
-        // get the measurement set (won't have values)
+        MeasurementSet mSet = new MeasurementSet(mSetUUID);
+        /* get the measurement set (won't have values)
         MeasurementSet mSet = null;
         try {
-            mSet = MeasurementSetHelper.getMeasurementSet(dbCon, mSetUUID, false);
+            mSet = MeasurementSetHelper.getMeasurementSet(mSetUUID, false, dbCon, false);
         } catch (Exception ex) {
             log.error("Failed to generate report, because the MeasurementSet couldn't be retrieved from the database: " + ex.getMessage(), ex);
             throw new RuntimeException("Failed to generate report, because the MeasurementSet couldn't be retrieved from the database: " + ex.getMessage(), ex);
-        }
+        }*/
         report.setMeasurementSet(mSet);
         
         // get measurements, which will allow the calculation of the other values for the Report object
@@ -593,7 +598,7 @@ public class ReportHelper
         
         // get the actual measurements for the report
         try {
-            report.getMeasurementSet().setMeasurements(MeasurementHelper.getMeasurementsForTimePeriod(dbCon, report.getMeasurementSet().getUUID(), report.getFromDate(), report.getToDate(), false));
+            report.getMeasurementSet().setMeasurements(MeasurementHelper.getMeasurementsForTimePeriod(report.getMeasurementSet().getUUID(), report.getFromDate(), report.getToDate(), dbCon, false));
         } catch (Exception ex) {
             log.error("Caught an exception when getting measurements for report: " + ex.getMessage());
             throw new RuntimeException("Failed to get the report when getting the measurements: " + ex.getMessage(), ex);
@@ -618,25 +623,26 @@ public class ReportHelper
             throw new NullPointerException("Cannot generate a Report object for the MeasurementSet from the given date because it is NULL!");
         }
         
-        if (!MeasurementSetHelper.objectExists(mSetUUID, dbCon))
+        /*if (!MeasurementSetHelper.objectExists(mSetUUID, dbCon))
         {
             log.error("There is no MeasurementSet with the given UUID: " + mSetUUID.toString());
             throw new RuntimeException("There is no MeasurementSet with the given UUID: " + mSetUUID.toString());
-        }
+        }*/
         
         Report report = new Report();
         Date reportDate = new Date();
         Date toDate = null;
         Integer numberOfMeasurements = null;
         
-        // get the measurement set (won't have values)
+        MeasurementSet mSet = new MeasurementSet(mSetUUID);
+        /* get the measurement set (won't have values)
         MeasurementSet mSet = null;
         try {
-            mSet = MeasurementSetHelper.getMeasurementSet(dbCon, mSetUUID, false);
+            mSet = MeasurementSetHelper.getMeasurementSet(mSetUUID, false, dbCon, false);
         } catch (Exception ex) {
             log.error("Failed to generate report, because the MeasurementSet couldn't be retrieved from the database: " + ex.getMessage(), ex);
             throw new RuntimeException("Failed to generate report, because the MeasurementSet couldn't be retrieved from the database: " + ex.getMessage(), ex);
-        }
+        }*/
         report.setMeasurementSet(mSet);
         
         // get measurements, which will allow the calculation of the other values for the Report object
@@ -712,7 +718,7 @@ public class ReportHelper
         
         // get the actual measurements for the report
         try {
-            report.getMeasurementSet().setMeasurements(MeasurementHelper.getMeasurementsForTimePeriod(dbCon, report.getMeasurementSet().getUUID(), report.getFromDate(), report.getToDate(), false));
+            report.getMeasurementSet().setMeasurements(MeasurementHelper.getMeasurementsForTimePeriod(report.getMeasurementSet().getUUID(), report.getFromDate(), report.getToDate(), dbCon, false));
         } catch (Exception ex) {
             log.error("Caught an exception when getting measurements for report: " + ex.getMessage());
             throw new RuntimeException("Failed to get the report when getting the measurements: " + ex.getMessage(), ex);
@@ -737,24 +743,25 @@ public class ReportHelper
             throw new NullPointerException("Cannot generate a Report object for the MeasurementSet from the given date because it is NULL!");
         }
         
-        if (!MeasurementSetHelper.objectExists(mSetUUID, dbCon))
+        /*if (!MeasurementSetHelper.objectExists(mSetUUID, dbCon))
         {
             log.error("There is no MeasurementSet with the given UUID: " + mSetUUID.toString());
             throw new RuntimeException("There is no MeasurementSet with the given UUID: " + mSetUUID.toString());
-        }
+        }*/
         
         Report report = new Report();
         Date reportDate = new Date();
         Integer numberOfMeasurements = null;
         
-        // get the measurement set (won't have values)
+        MeasurementSet mSet = new MeasurementSet(mSetUUID);
+        /* get the measurement set (won't have values)
         MeasurementSet mSet = null;
         try {
-            mSet = MeasurementSetHelper.getMeasurementSet(dbCon, mSetUUID, false);
+            mSet = MeasurementSetHelper.getMeasurementSet(mSetUUID, false, dbCon, false);
         } catch (Exception ex) {
             log.error("Failed to generate report, because the MeasurementSet couldn't be retrieved from the database: " + ex.getMessage(), ex);
             throw new RuntimeException("Failed to generate report, because the MeasurementSet couldn't be retrieved from the database: " + ex.getMessage(), ex);
-        }
+        }*/
         report.setMeasurementSet(mSet);
         
         // get measurements, which will allow the calculation of the other values for the Report object
@@ -816,7 +823,7 @@ public class ReportHelper
         
         // get the actual measurements for the report
         try {
-            report.getMeasurementSet().setMeasurements(MeasurementHelper.getMeasurementsForTimePeriod(dbCon, report.getMeasurementSet().getUUID(), report.getFromDate(), report.getToDate(), false));
+            report.getMeasurementSet().setMeasurements(MeasurementHelper.getMeasurementsForTimePeriod(report.getMeasurementSet().getUUID(), report.getFromDate(), report.getToDate(), dbCon, false));
         } catch (Exception ex) {
             log.error("Caught an exception when getting measurements for report: " + ex.getMessage());
             throw new RuntimeException("Failed to get the report when getting the measurements: " + ex.getMessage(), ex);

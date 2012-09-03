@@ -63,7 +63,7 @@ public class EntityHelper
         {
             return new ValidationReturnObject(false, new NullPointerException("The Entity name is NULL"));
         }
-        
+        /*
         // check if it exists in the DB already
         try {
             if (objectExists(entity.getUUID(), dbCon))
@@ -73,7 +73,7 @@ public class EntityHelper
         } catch (Exception ex) {
             throw ex;
         }
-        
+        */
         // validate attributes if there are any
         if ((entity.getAttributes() != null) && !entity.getAttributes().isEmpty())
         {
@@ -131,7 +131,7 @@ public class EntityHelper
         return DBUtil.objectExistsByUUID("Entity", "entityUUID", uuid, dbCon);
     }
     
-    public static void saveEntity(DatabaseConnector dbCon, Entity entity, boolean closeDBcon) throws Exception
+    public static void saveEntity(Entity entity, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
     {
         // this validation will check if all the required parameters are set and if
         // there isn't already a duplicate instance in the DB
@@ -180,7 +180,7 @@ public class EntityHelper
                 for (Attribute attrib : entity.getAttributes())
                 {
                     if (attrib != null)
-                        AttributeHelper.saveAttribute(dbCon, attrib, false); // flag not to close the DB connection
+                        AttributeHelper.saveAttribute(attrib, dbCon, false); // flag not to close the DB connection
                 }
             }
         } catch (Exception ex) {
@@ -191,7 +191,7 @@ public class EntityHelper
         }
     }
     
-    public static Entity getEntity(DatabaseConnector dbCon, UUID entityUUID, boolean closeDBcon) throws Exception
+    public static Entity getEntity(UUID entityUUID, boolean withAttributes, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
     {
         if (entityUUID == null)
         {
@@ -199,11 +199,11 @@ public class EntityHelper
             throw new NullPointerException("Cannot get an Entity object with the given UUID because it is NULL!");
         }
         
-        if (!EntityHelper.objectExists(entityUUID, dbCon))
+        /*if (!EntityHelper.objectExists(entityUUID, dbCon))
         {
             log.error("There is no entity with the given UUID: " + entityUUID.toString());
             throw new RuntimeException("There is no entity with the given UUID: " + entityUUID.toString());
-        }
+        }*/
         
         Entity entity = null;
         boolean exception = false;
@@ -232,29 +232,32 @@ public class EntityHelper
             log.error("Error while quering the database: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
         } finally {
-            if (exception)
+            if (exception || (closeDBcon && !withAttributes))
                 dbCon.close();
         }
         
         // check if there's any metric generators
-        Set<Attribute> attributes = null;
-        
-        try {
-            attributes = AttributeHelper.getAttributesForEntity(dbCon, entityUUID, false); // don't close the connection
-        } catch (Exception ex) {
-            log.error("Caught an exception when getting attributes for entity (UUID: " + entityUUID.toString() + "): " + ex.getMessage());
-            throw new RuntimeException("Unable to get Entity object due to an issue with getting its attributes: " + ex.getMessage(), ex);
-        } finally {
-            if (closeDBcon)
-                dbCon.close();
+        if (withAttributes)
+        {
+            Set<Attribute> attributes = null;
+
+            try {
+                attributes = AttributeHelper.getAttributesForEntity(entityUUID, dbCon, false); // don't close the connection
+            } catch (Exception ex) {
+                log.error("Caught an exception when getting attributes for entity (UUID: " + entityUUID.toString() + "): " + ex.getMessage());
+                throw new RuntimeException("Unable to get Entity object due to an issue with getting its attributes: " + ex.getMessage(), ex);
+            } finally {
+                if (closeDBcon)
+                    dbCon.close();
+            }
+
+            entity.setAttributes(attributes);
         }
-        
-        entity.setAttributes(attributes);
         
         return entity;
     }
 
-    public static Set<Entity> getEntities(DatabaseConnector dbCon) throws Exception
+    public static Set<Entity> getEntities(boolean withAttributes, DatabaseConnector dbCon) throws Exception
     {
         Set<Entity> entities = new HashSet<Entity>();
         try {
@@ -275,7 +278,7 @@ public class EntityHelper
                     continue;
                 }
                 
-                entities.add(getEntity(dbCon, UUID.fromString(uuidStr), false));
+                entities.add(getEntity(UUID.fromString(uuidStr), withAttributes, dbCon, false));
             }
 
         } catch (Exception ex) {
@@ -288,7 +291,7 @@ public class EntityHelper
         return entities;
     }
     
-    public static Set<Entity> getEntitiesForExperiment(DatabaseConnector dbCon, UUID expUUID) throws Exception
+    public static Set<Entity> getEntitiesForExperiment(UUID expUUID, boolean withAttributes, DatabaseConnector dbCon) throws Exception
     {
         if (expUUID == null)
         {
@@ -313,11 +316,11 @@ public class EntityHelper
                 
                 if (uuidStr == null)
                 {
-                    log.error("Skipping an entity, which does not have a UUID in the DB");
+                    log.debug("Skipping an entity, which does not have a UUID in the DB");
                     continue;
                 }
                 
-                entities.add(getEntity(dbCon, UUID.fromString(uuidStr), false));
+                entities.add(getEntity(UUID.fromString(uuidStr), withAttributes, dbCon, false));
             }
 
         } catch (Exception ex) {
@@ -330,7 +333,7 @@ public class EntityHelper
         return entities;
     }
     
-    public static Set<Entity> getEntitiesForMetricGenerator(DatabaseConnector dbCon, UUID mGenUUID, boolean closeDBcon) throws Exception
+    public static Set<Entity> getEntitiesForMetricGenerator(UUID mGenUUID, boolean withAttributes, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
     {
         if (mGenUUID == null)
         {
@@ -357,7 +360,7 @@ public class EntityHelper
                     throw new RuntimeException("Unable to get Entity UUID from the DB for the MetricGenerator");
                 }
                 
-                entities.add(getEntity(dbCon, UUID.fromString(entityUUIDstr), false));
+                entities.add(getEntity(UUID.fromString(entityUUIDstr), withAttributes, dbCon, false));
             }
         } catch (Exception ex) {
             log.error("Error while quering the database: " + ex.getMessage(), ex);

@@ -57,17 +57,19 @@ public interface IMetricGroupDAO
      * Get the a metric group instance from a UUID. Will include all sub-classes
      * except for measurements, if available.
      * @param metricGroupUUID The metric group UUID.
+     * @param withSubClasses Flag to say whether to return subclasses too; MeasurementSet and sub-classes below that.
      * @return A metric group instance, if it exists.
      * @throws Exception If there's a technical issue or there is no metric group with the given UUID.
      */
-    public MetricGroup getMetricGroup(UUID metricGroupUUID) throws Exception;
+    public MetricGroup getMetricGroup(UUID metricGroupUUID, boolean withSubClasses) throws Exception;
     
     /**
      * Get all metric groups for a metric generator. Will include any sub-classes,
      * except for measurements, if available.
      * @param metricGenUUID The UUID of the metric generator.
+     * @param withSubClasses Flag to say whether to return subclasses too; MeasurementSet and sub-classes below that.
      * @return A metric group instance, if it exists.
      * @throws Exception If there's a technical issue or there is no metric generator with the given UUID.
      */
-    public Set<MetricGroup> getMetricGroupsForMetricGenerator(UUID metricGenUUID) throws Exception;
+    public Set<MetricGroup> getMetricGroupsForMetricGenerator(UUID metricGenUUID, boolean withSubClasses) throws Exception;
 }

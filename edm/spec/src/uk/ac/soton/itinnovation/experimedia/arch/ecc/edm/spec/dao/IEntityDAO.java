@@ -56,33 +56,37 @@ public interface IEntityDAO
      * Get an entity instance from a UUID, which will include any attributes the
      * entity may have.
      * @param entityUUID The UUID of the entity.
+     * @param withSubClasses Flag to say whether to return attributes too.
      * @return An Entity instance.
      * @throws Exception If there's a technical issue or there is no entity with the given UUID.
      */
-    public Entity getEntity(UUID entityUUID) throws Exception;
+    public Entity getEntity(UUID entityUUID, boolean withAttributes) throws Exception;
     
     /**
      * Get all the existing entities, if any.
+     * @param withSubClasses Flag to say whether to return attributes too.
      * @return Empty set if there are no entities.
      * @throws Exception If there's a technical issue.
      */
-    public Set<Entity> getEntities() throws Exception;
+    public Set<Entity> getEntities(boolean withAttributes) throws Exception;
     
     /**
      * Get all the entities for a specific experiment, if any.
      * @param expUUID The experiment UUID.
+     * @param withSubClasses Flag to say whether to return attributes too.
      * @return An empty set if no entities monitored in the given experiment exist.
      * @throws Exception If there's a technical issue or there is no experiment with the given UUID.
      */
-    public Set<Entity> getEntitiesForExperiment(UUID expUUID) throws Exception;
+    public Set<Entity> getEntitiesForExperiment(UUID expUUID, boolean withAttributes) throws Exception;
     
     /**
      * Get all the entities for a specific metric generator, if any.
      * @param mGenUUID The metric generator UUID.
+     * @param withSubClasses Flag to say whether to return attributes too.
      * @return An empty set if no entities monitored by the given metric generator exists.
      * @throws Exception If there's a technical issue or there is no metric generator with the given UUID.
      */
-    public Set<Entity> getEntitiesForMetricGenerator(UUID mGenUUID) throws Exception;
+    public Set<Entity> getEntitiesForMetricGenerator(UUID mGenUUID, boolean withAttributes) throws Exception;
     
     
     //--------------------------- ATTRIBUTE ----------------------------------//

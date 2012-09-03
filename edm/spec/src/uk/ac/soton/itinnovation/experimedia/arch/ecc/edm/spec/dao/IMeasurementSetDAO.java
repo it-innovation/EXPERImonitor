@@ -56,20 +56,22 @@ public interface IMeasurementSetDAO
     public void saveMeasurementSet(MeasurementSet measurementSet) throws Exception;
     
     /**
-     * Get a measurement set instance according to its UUID. Will include sub-classes
-     * except for measurements, if available.
+     * Get a measurement set instance according to its UUID. Will not include the
+     * measurements. Need to use the Report facility for that.
      * @param measurementSetUUID The UUID of the measurement set.
+     * @param withMetric Flag to say whether to return the metric too.
      * @return A measurement set object, if it exists.
      * @throws Exception If there's a technical issue or there is no measurement set with the given UUID.
      */
-    public MeasurementSet getMeasurementSet(UUID measurementSetUUID) throws Exception;
+    public MeasurementSet getMeasurementSet(UUID measurementSetUUID, boolean withMetric) throws Exception;
     
     /**
      * Get all measurement sets for a metric group. Will include any sub-classes
      * except for measurements, if available.
      * @param metricGroupUUID The UUID of the metric group.
+     * @param withMetric Flag to say whether to return the metric too.
      * @return A measurement set object, if it exists.
      * @throws Exception If there's a technical issue or there is no metric group with the given UUID.
      */
-    public Set<MeasurementSet> getMeasurementSetForMetricGroup(UUID metricGroupUUID) throws Exception;
+    public Set<MeasurementSet> getMeasurementSetForMetricGroup(UUID metricGroupUUID, boolean withMetric) throws Exception;
 }

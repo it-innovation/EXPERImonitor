@@ -64,7 +64,7 @@ public class ExperimentHelper
         {
             return new ValidationReturnObject(false, new NullPointerException("The Experiment name is NULL"));
         }
-        
+        /*
         // check if it exists in the DB already
         try {
             if (objectExists(exp.getUUID(), dbCon))
@@ -73,7 +73,7 @@ public class ExperimentHelper
             }
         } catch (Exception ex) {
             throw ex;
-        }
+        }*/
         
         return new ValidationReturnObject(true);
     }
@@ -133,7 +133,7 @@ public class ExperimentHelper
         return DBUtil.objectExistsByUUID("Experiment", "expUUID", uuid, dbCon);
     }
     
-    public static void saveExperiment(DatabaseConnector dbCon, Experiment exp) throws Exception
+    public static void saveExperiment(Experiment exp, DatabaseConnector dbCon) throws Exception
     {
         // this validation will check if all the required parameters are set and if
         // there isn't already a duplicate instance in the DB
@@ -181,7 +181,7 @@ public class ExperimentHelper
             for (MetricGenerator mg : exp.getMetricGenerators())
             {
                 if (mg != null)
-                    MetricGeneratorHelper.saveMetricGenerator(dbCon, mg, exp.getUUID(), false); // don't close the DB con
+                    MetricGeneratorHelper.saveMetricGenerator(mg, exp.getUUID(), dbCon, false); // don't close the DB con
             }
         }
         } catch (Exception ex) {
@@ -199,7 +199,7 @@ public class ExperimentHelper
      * @return
      * @throws Exception 
      */
-    public static Experiment getExperiment(DatabaseConnector dbCon, UUID expUUID, boolean closeDBcon) throws Exception
+    public static Experiment getExperiment(UUID expUUID, boolean withSubClasses, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
     {
         if (expUUID == null)
         {
@@ -207,11 +207,11 @@ public class ExperimentHelper
             throw new NullPointerException("Cannot get an Experiment object with the given UUID because it is NULL!");
         }
         
-        if (!ExperimentHelper.objectExists(expUUID, dbCon))
+        /*if (!ExperimentHelper.objectExists(expUUID, dbCon))
         {
             log.error("There is no experiment with the given UUID: " + expUUID.toString());
             throw new RuntimeException("There is no experiment with the given UUID: " + expUUID.toString());
-        }
+        }*/
         
         Experiment exp = null;
         boolean exception = false;
@@ -252,28 +252,31 @@ public class ExperimentHelper
             log.error("Error while quering the database: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
         } finally {
-            if (exception)
+            if (exception || (closeDBcon && !withSubClasses))
                 dbCon.close();
         }
         
-        // check if there's any metric generators
-        Set<MetricGenerator> metricGenerators = null;
-        
-        try {
-            metricGenerators = MetricGeneratorHelper.getMetricGeneratorsForExperiment(dbCon, expUUID, false);
-        } catch (Exception ex) {
-            log.error("Caught an exception when getting metric generators for experiment (UUID: " + expUUID.toString() + "): " + ex.getMessage());
-        } finally {
-            if (closeDBcon)
-                dbCon.close();
+        if (withSubClasses)
+        {
+            // check if there's any metric generators
+            Set<MetricGenerator> metricGenerators = null;
+
+            try {
+                metricGenerators = MetricGeneratorHelper.getMetricGeneratorsForExperiment(expUUID, withSubClasses, dbCon, false);
+            } catch (Exception ex) {
+                log.error("Caught an exception when getting metric generators for experiment (UUID: " + expUUID.toString() + "): " + ex.getMessage());
+            } finally {
+                if (closeDBcon)
+                    dbCon.close();
+            }
+
+            exp.setMetricGenerators(metricGenerators);
         }
-        
-        exp.setMetricGenerators(metricGenerators);
         
         return exp;
     }
     
-    public static Set<Experiment> getExperiments(DatabaseConnector dbCon) throws Exception
+    public static Set<Experiment> getExperiments(boolean withSubClasses, DatabaseConnector dbCon) throws Exception
     {
         Set<Experiment> experiments = new HashSet<Experiment>();
         
@@ -295,7 +298,7 @@ public class ExperimentHelper
                     continue;
                 }
                 
-                experiments.add(getExperiment(dbCon, UUID.fromString(uuidStr), false));
+                experiments.add(getExperiment(UUID.fromString(uuidStr), withSubClasses, dbCon, false));
             }
         } catch (Exception ex) {
             log.error("Error while quering the database: " + ex.getMessage(), ex);

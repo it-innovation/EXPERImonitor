@@ -93,19 +93,19 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     @Override
     public void saveExperiment(Experiment exp) throws Exception
     {
-        ExperimentHelper.saveExperiment(dbCon, exp);
+        ExperimentHelper.saveExperiment(exp, dbCon);
     }
     
     @Override
-    public Experiment getExperiment(UUID expUUID) throws Exception
+    public Experiment getExperiment(UUID expUUID, boolean withSubClasses) throws Exception
     {
-        return ExperimentHelper.getExperiment(dbCon, expUUID, true);
+        return ExperimentHelper.getExperiment(expUUID, withSubClasses, dbCon, true);
     }
     
     @Override
-    public Set<Experiment> getExperiments() throws Exception
+    public Set<Experiment> getExperiments(boolean withSubClasses) throws Exception
     {
-        return ExperimentHelper.getExperiments(dbCon);
+        return ExperimentHelper.getExperiments(withSubClasses, dbCon);
     }
     
     
@@ -115,31 +115,31 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     @Override
     public void saveEntity(Entity entity) throws Exception
     {
-        EntityHelper.saveEntity(dbCon, entity, true);
+        EntityHelper.saveEntity(entity, dbCon, true);
     }
 
     @Override
-    public Entity getEntity(UUID entityUUID) throws Exception
+    public Entity getEntity(UUID entityUUID, boolean withAttributes) throws Exception
     {
-        return EntityHelper.getEntity(dbCon, entityUUID, true);
+        return EntityHelper.getEntity(entityUUID, withAttributes, dbCon, true);
     }
 
     @Override
-    public Set<Entity> getEntities() throws Exception
+    public Set<Entity> getEntities(boolean withAttributes) throws Exception
     {
-        return EntityHelper.getEntities(dbCon);
+        return EntityHelper.getEntities(withAttributes, dbCon);
     }
 
     @Override
-    public Set<Entity> getEntitiesForExperiment(UUID expUUID) throws Exception
+    public Set<Entity> getEntitiesForExperiment(UUID expUUID, boolean withAttributes) throws Exception
     {
-        return EntityHelper.getEntitiesForExperiment(dbCon, expUUID);
+        return EntityHelper.getEntitiesForExperiment(expUUID, withAttributes, dbCon);
     }
     
     @Override
-    public Set<Entity> getEntitiesForMetricGenerator(UUID mGenUUID) throws Exception
+    public Set<Entity> getEntitiesForMetricGenerator(UUID mGenUUID, boolean withAttributes) throws Exception
     {
-        return EntityHelper.getEntitiesForMetricGenerator(dbCon, mGenUUID, true);
+        return EntityHelper.getEntitiesForMetricGenerator(mGenUUID, withAttributes, dbCon, true);
     }
 
     
@@ -148,19 +148,19 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     @Override
     public void saveAttribute(Attribute attrib) throws Exception
     {
-        AttributeHelper.saveAttribute(dbCon, attrib, true);
+        AttributeHelper.saveAttribute(attrib, dbCon, true);
     }
 
     @Override
     public Attribute getAttribute(UUID attribUUID) throws Exception
     {
-        return AttributeHelper.getAttribute(dbCon, attribUUID, true);
+        return AttributeHelper.getAttribute(attribUUID, dbCon, true);
     }
     
     @Override
     public Set<Attribute> getAttributesForEntity(UUID entityUUID) throws Exception
     {
-        return AttributeHelper.getAttributesForEntity(dbCon, entityUUID, true);
+        return AttributeHelper.getAttributesForEntity(entityUUID, dbCon, true);
     }
     
     
@@ -171,25 +171,25 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     public void saveMetricGenerator(MetricGenerator metricGen, UUID experimentUUID) throws Exception
     {
         // flag set to check for experiment in the validation process
-        MetricGeneratorHelper.saveMetricGenerator(dbCon, metricGen, experimentUUID, true);
+        MetricGeneratorHelper.saveMetricGenerator(metricGen, experimentUUID, dbCon, true);
     }
 
     @Override
-    public MetricGenerator getMetricGenerator(UUID metricGenUUID) throws Exception
+    public MetricGenerator getMetricGenerator(UUID metricGenUUID, boolean withSubClasses) throws Exception
     {
-        return MetricGeneratorHelper.getMetricGenerator(dbCon, metricGenUUID, true);
+        return MetricGeneratorHelper.getMetricGenerator(metricGenUUID, withSubClasses, dbCon, true);
     }
 
     @Override
-    public Set<MetricGenerator> getMetricGenerators() throws Exception
+    public Set<MetricGenerator> getMetricGenerators(boolean withSubClasses) throws Exception
     {
-        return MetricGeneratorHelper.getMetricGenerators(dbCon);
+        return MetricGeneratorHelper.getMetricGenerators(withSubClasses, dbCon);
     }
 
     @Override
-    public Set<MetricGenerator> getMetricGeneratorsForExperiment(UUID expUUID) throws Exception
+    public Set<MetricGenerator> getMetricGeneratorsForExperiment(UUID expUUID, boolean withSubClasses) throws Exception
     {
-        return MetricGeneratorHelper.getMetricGeneratorsForExperiment(dbCon, expUUID, true);
+        return MetricGeneratorHelper.getMetricGeneratorsForExperiment(expUUID, withSubClasses, dbCon, true);
     }
     
     
@@ -199,19 +199,19 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     @Override
     public void saveMetricGroup(MetricGroup metricGroup) throws Exception
     {
-        MetricGroupHelper.saveMetricGroup(dbCon, metricGroup, true);
+        MetricGroupHelper.saveMetricGroup(metricGroup, dbCon, true);
     }
 
     @Override
-    public MetricGroup getMetricGroup(UUID metricGroupUUID) throws Exception
+    public MetricGroup getMetricGroup(UUID metricGroupUUID, boolean withSubClasses) throws Exception
     {
-        return MetricGroupHelper.getMetricGroup(dbCon, metricGroupUUID, true);
+        return MetricGroupHelper.getMetricGroup(metricGroupUUID, withSubClasses, dbCon, true);
     }
 
     @Override
-    public Set<MetricGroup> getMetricGroupsForMetricGenerator(UUID metricGenUUID) throws Exception
+    public Set<MetricGroup> getMetricGroupsForMetricGenerator(UUID metricGenUUID, boolean withSubClasses) throws Exception
     {
-        return MetricGroupHelper.getMetricGroupsForMetricGenerator(dbCon, metricGenUUID, true);
+        return MetricGroupHelper.getMetricGroupsForMetricGenerator(metricGenUUID, withSubClasses, dbCon, true);
     }
     
     
@@ -221,19 +221,19 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     @Override
     public void saveMeasurementSet(MeasurementSet measurementSet) throws Exception
     {
-        MeasurementSetHelper.saveMeasurementSet(dbCon, measurementSet, true);
+        MeasurementSetHelper.saveMeasurementSet(measurementSet, dbCon, true);
     }
 
     @Override
-    public MeasurementSet getMeasurementSet(UUID measurementSetUUID) throws Exception
+    public MeasurementSet getMeasurementSet(UUID measurementSetUUID, boolean withMetric) throws Exception
     {
-        return MeasurementSetHelper.getMeasurementSet(dbCon, measurementSetUUID, true);
+        return MeasurementSetHelper.getMeasurementSet(measurementSetUUID, withMetric, dbCon, true);
     }
 
     @Override
-    public Set<MeasurementSet> getMeasurementSetForMetricGroup(UUID metricGroupUUID) throws Exception
+    public Set<MeasurementSet> getMeasurementSetForMetricGroup(UUID metricGroupUUID, boolean withMetric) throws Exception
     {
-        return MeasurementSetHelper.getMeasurementSetForMetricGroup(dbCon, metricGroupUUID, true);
+        return MeasurementSetHelper.getMeasurementSetForMetricGroup(metricGroupUUID, withMetric, dbCon, true);
     }
     
     
@@ -265,13 +265,13 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     @Override
     public void saveMeasurement(Measurement measurement) throws Exception
     {
-        MeasurementHelper.saveMeasurement(dbCon, measurement, true);
+        MeasurementHelper.saveMeasurement(measurement, dbCon, true);
     }
     
     @Override
     public Measurement getMeasurement(UUID measurementUUID) throws Exception
     {
-        return MeasurementHelper.getMeasurement(dbCon, measurementUUID, true);
+        return MeasurementHelper.getMeasurement(measurementUUID, dbCon, true);
     }
     
     
