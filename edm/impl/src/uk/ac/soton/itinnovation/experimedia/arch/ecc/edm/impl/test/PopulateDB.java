@@ -28,6 +28,8 @@ import java.util.Date;
 import java.util.Random;
 import java.util.UUID;
 import static javax.measure.unit.SI.*;
+import static javax.measure.unit.NonSI.*;
+import javax.measure.unit.Unit;
 import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Attribute;
@@ -42,6 +44,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Re
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.ExperimentDataManager;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IEntityDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IExperimentDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IMetricGeneratorDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IReportDAO;
 
 /**
@@ -52,15 +55,39 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IReportDAO;
 public class PopulateDB
 {
     public static UUID expUUID = UUID.fromString("bfe4c710-61ba-46f8-a519-be2f7808192e");
-    public static UUID entityUUID = UUID.fromString("5718cd67-4310-4b2c-aeb9-9b72314630ca");
-    public static UUID cpuAttributeUUID = UUID.fromString("4f2817b5-603a-4d02-a032-62cfca314962");
-    public static UUID networkAttributeUUID = UUID.fromString("cd42b215-5235-4591-8be5-2d403911cb59");
-    public static UUID diskAttributeUUID = UUID.fromString("a460987f-2ef8-4519-91f2-4a23954b16bd");
-    public static UUID mGenUUID = UUID.fromString("782e5097-2e29-4219-a984-bf48dfcd7f63");
-    public static UUID mGrpUUID = UUID.fromString("189064a5-f1d8-41f2-b2c1-b88776841009");
-    public static UUID cpuMSetUUID = UUID.fromString("2b915932-41b1-45d7-b4f6-2de4f30020b8");
-    public static UUID networkMSetUUID = UUID.fromString("3b915932-41b1-45d7-b4f6-2de4f30020b7");
-    public static UUID diskMSetUUID = UUID.fromString("4b915932-41b1-45d7-b4f6-2de4f30020b6");
+    
+    public static UUID entity1UUID = UUID.fromString("5718cd67-4310-4b2c-aeb9-9b72314630ca");
+    public static UUID entity1attribute1UUID = UUID.fromString("4f2817b5-603a-4d02-a032-62cfca314962");
+    public static UUID entity1attribute2UUID = UUID.fromString("cd42b215-5235-4591-8be5-2d403911cb59");
+    public static UUID entity1attribute3UUID = UUID.fromString("a460987f-2ef8-4519-91f2-4a23954b16bd");
+    
+    public static UUID entity2UUID = UUID.fromString("6718cd67-4310-4b2c-aeb9-9b72314630ca");
+    public static UUID entity2attribute1UUID = UUID.fromString("6f2817b5-603a-4d02-a032-62cfca314962");
+    public static UUID entity2attribute2UUID = UUID.fromString("6d42b215-5235-4591-8be5-2d403911cb59");
+    public static UUID entity2attribute3UUID = UUID.fromString("6460987f-2ef8-4519-91f2-4a23954b16bd");
+    
+    public static UUID entity3UUID = UUID.fromString("7718cd67-4310-4b2c-aeb9-9b72314630ca");
+    public static UUID entity3attribute1UUID = UUID.fromString("7f2817b5-603a-4d02-a032-62cfca314962");
+    public static UUID entity3attribute2UUID = UUID.fromString("7d42b215-5235-4591-8be5-2d403911cb59");
+    
+    public static UUID mGen1UUID = UUID.fromString("782e5097-2e29-4219-a984-bf48dfcd7f63");
+    public static UUID mGrp1UUID = UUID.fromString("189064a5-f1d8-41f2-b2c1-b88776841009");
+    public static UUID mGrp1mSet1UUID = UUID.fromString("2b915932-41b1-45d7-b4f6-2de4f30020b8");
+    public static UUID mGrp1mSet2UUID = UUID.fromString("3b915932-41b1-45d7-b4f6-2de4f30020b7");
+    public static UUID mGrp1mSet3UUID = UUID.fromString("4b915932-41b1-45d7-b4f6-2de4f30020b6");
+    
+    public static UUID mGen2UUID = UUID.fromString("882e5097-2e29-4219-a984-bf48dfcd7f63");
+    public static UUID mGrp2UUID = UUID.fromString("889064a5-f1d8-41f2-b2c1-b88776841009");
+    public static UUID mGrp2mSet1UUID = UUID.fromString("8b915932-41b1-45d7-b4f6-2de4f30020b8");
+    public static UUID mGrp2mSet2UUID = UUID.fromString("8b915932-41b1-45d7-b4f6-2de4f30020b7");
+    public static UUID mGrp2mSet3UUID = UUID.fromString("8b915932-41b1-45d7-b4f6-2de4f30020b6");
+    
+    public static UUID mGen3UUID = UUID.fromString("982e5097-2e29-4219-a984-bf48dfcd7f63");
+    public static UUID mGrp3UUID = UUID.fromString("989064a5-f1d8-41f2-b2c1-b88776841009");
+    public static UUID mGrp3mSet1UUID = UUID.fromString("9b915932-41b1-45d7-b4f6-2de4f30020b8");
+    public static UUID mGrp3mSet2UUID = UUID.fromString("9b915932-41b1-45d7-b4f6-2de4f30020b7");
+    
+    
     
     static Logger log = Logger.getLogger(PopulateDB.class);
     
@@ -84,12 +111,56 @@ public class PopulateDB
     {
         ExperimentDataManager edm = new ExperimentDataManager();
         
-        saveEntities(edm, entityUUID, cpuAttributeUUID, networkAttributeUUID, diskAttributeUUID);
-        saveExperimentCompleteChain(edm, expUUID, entityUUID, cpuAttributeUUID, networkAttributeUUID, diskAttributeUUID, mGenUUID, mGrpUUID, cpuMSetUUID, networkMSetUUID, diskMSetUUID);
+        saveExperiment(edm, expUUID);
         
-        saveReportWithRandomMeasurements(edm, cpuMSetUUID, 50, 2000, 6000);
-        saveReportWithRandomMeasurements(edm, networkMSetUUID, 50, 500000, 1000000);
-        saveReportWithRandomMeasurements(edm, diskMSetUUID, 50, 100, 400);
+        saveEntity1(edm, entity1UUID, entity1attribute1UUID, entity1attribute2UUID, entity1attribute3UUID);
+        saveEntity2(edm, entity2UUID, entity2attribute1UUID, entity2attribute2UUID, entity2attribute3UUID);
+        saveEntity3(edm, entity3UUID, entity3attribute1UUID, entity3attribute2UUID);
+        
+        saveMetricGenerator1(edm, expUUID, entity1UUID, entity1attribute1UUID, entity1attribute2UUID, entity1attribute3UUID, mGen1UUID, mGrp1UUID, mGrp1mSet1UUID, mGrp1mSet2UUID, mGrp1mSet3UUID);
+        saveMetricGenerator2(edm, expUUID, entity2UUID, entity2attribute1UUID, entity2attribute2UUID, entity2attribute3UUID, mGen2UUID, mGrp2UUID, mGrp2mSet1UUID, mGrp2mSet2UUID, mGrp2mSet3UUID);
+        saveMetricGenerator3(edm, expUUID, entity3UUID, entity3attribute1UUID, entity3attribute2UUID, mGen3UUID, mGrp3UUID, mGrp3mSet1UUID, mGrp3mSet2UUID);
+        
+        saveReportWithRandomMeasurements(edm, mGrp1mSet1UUID, 20, 2000, 6000);
+        saveReportWithRandomMeasurements(edm, mGrp1mSet2UUID, 20, 500000, 1000000);
+        saveReportWithRandomMeasurements(edm, mGrp1mSet3UUID, 20, 100, 400);
+        
+        saveReportWithRandomMeasurements(edm, mGrp2mSet1UUID, 20, 5, 20);
+        saveReportWithRandomMeasurements(edm, mGrp2mSet2UUID, 20, 5, 20);
+        saveReportWithRandomMeasurements(edm, mGrp2mSet3UUID, 20, 20, 40);
+        
+        saveReportWithRandomMeasurements(edm, mGrp3mSet1UUID, 20, 150, 300);
+        saveReportWithRandomMeasurements(edm, mGrp3mSet2UUID, 20, 100, 999);
+        
+        printDetailsForExperiment(edm, expUUID);
+    }
+    
+    public static void saveExperiment(ExperimentDataManager edm, UUID expUUID) throws Exception
+    {
+        IExperimentDAO expDAO = null;
+        try {
+            expDAO = edm.getExperimentDAO();
+        } catch (Exception ex) {
+            log.error ("Unable to get Experiment DAO: " + ex.getMessage(), ex);
+            throw ex;
+        }
+        
+        log.info("Creating experiment");
+        Experiment exp = new Experiment();
+        exp.setUUID(expUUID);
+        exp.setName("Experiment");
+        exp.setDescription("A test experiment");
+        exp.setStartTime(new Date(Long.parseLong("1345642421005")));
+        exp.setEndTime(new Date(Long.parseLong("1440413831014")));
+        exp.setExperimentID("/locations/experiment/1337");
+        
+        log.info("Saving experiment");
+        try {
+            expDAO.saveExperiment(exp);
+            log.info("Experiment '" + exp.getName() + "' saved successfully!");
+        } catch (Exception ex) {
+            log.error("Unable to save experiment: " + ex.getMessage());
+        }
     }
     
     /**
@@ -101,7 +172,7 @@ public class PopulateDB
      * @param diskAttributeUUID The UUID of the Disk attribute of the entity.
      * @throws Exception 
      */
-    public static void saveEntities(ExperimentDataManager edm, UUID entityUUID, UUID cpuAttributeUUID, UUID networkAttributeUUID, UUID diskAttributeUUID) throws Exception
+    public static void saveEntity1(ExperimentDataManager edm, UUID entityUUID, UUID cpuAttributeUUID, UUID networkAttributeUUID, UUID diskAttributeUUID) throws Exception
     {
         IEntityDAO entityDAO = null;
         try {
@@ -127,7 +198,7 @@ public class PopulateDB
             log.error("Unable to save entity: " + ex.getMessage());
         }
         
-        log.info("Getting Entity from the DB");
+        /*log.info("Getting Entity from the DB");
         Entity entityFromDB = null;
         try {
             entityFromDB = entityDAO.getEntity(entityUUID, true);
@@ -152,52 +223,165 @@ public class PopulateDB
                     if (attrib.getDescription() != null) log.info("      - Desc:  " + attrib.getDescription());
                 }
             }
-        }
+        }*/
     }
     
     /**
-     * Saves an experiment with a complete chain of a metric generator, a metric
-     * group, three measurement sets (one for each of the attributes of the entity
-     * created in the saveEntities() method) and reports with 50 measurements for
-     * each of the measurement sets.
+     * Saves an entity (VM) with three attributes (CPU, Network, Disk).
      * @param edm Experiment Data Manager object to save the data with.
-     * @param expUUID The Experiment UUID.
-     * @param entityUUID The Entity UUID.
-     * @param cpuAttribUUID The UUID of the CPU attribute of the entity.
-     * @param networkAttribUUID The UUID of the Network attribute of the entity.
-     * @param diskAttribUUID The UUID of the Disk attribute of the entity.
-     * @param mGenUUID The UUID of the metric generator
-     * @param mGrpUUID The UUID of the metric group.
-     * @param cpuMSetUUID The UUID of the CPU measurement set.
-     * @param networkMSetUUID The UUID of the Network measurement set.
-     * @param diskMSetUUID The UUID of the Disk measurement set.
+     * @param entityUUID The UUID of the Entity.
+     * @param cpuAttributeUUID The UUID of the CPU attribute of the entity.
+     * @param networkAttributeUUID The UUID of the Network attribute of the entity.
+     * @param diskAttributeUUID The UUID of the Disk attribute of the entity.
      * @throws Exception 
      */
-    public static void saveExperimentCompleteChain(ExperimentDataManager edm, UUID expUUID, UUID entityUUID, UUID cpuAttribUUID, UUID networkAttribUUID, UUID diskAttribUUID, UUID mGenUUID, UUID mGrpUUID, UUID cpuMSetUUID, UUID networkMSetUUID, UUID diskMSetUUID) throws Exception
+    public static void saveEntity2(ExperimentDataManager edm, UUID entityUUID, UUID cpuAttributeUUID, UUID networkAttributeUUID, UUID diskAttributeUUID) throws Exception
     {
-//----- EXPERIMENT
-        IExperimentDAO expDAO = null;
+        IEntityDAO entityDAO = null;
         try {
-            expDAO = edm.getExperimentDAO();
+            entityDAO = edm.getEntityDAO();
         } catch (Exception ex) {
-            log.error ("Unable to get Experiment DAO: " + ex.getMessage(), ex);
+            log.error ("Unable to get Entity DAO: " + ex.getMessage(), ex);
             throw ex;
         }
         
-        log.info("Creating experiment");
-        Experiment exp = new Experiment();
-        exp.setUUID(expUUID);
-        exp.setName("Experiment");
-        exp.setDescription("A test experiment");
-        exp.setStartTime(new Date(Long.parseLong("1345642421005")));
-        exp.setEndTime(new Date(Long.parseLong("1440413831014")));
-        exp.setExperimentID("/locations/experiment/1337");
+        log.info("Saving AVC entity");
+        Entity entity = new Entity();
+        entity.setUUID(entityUUID);
+        entity.setName("AVC");
+        entity.setDescription("Audio Visual Component");
+        entity.addtAttribute(new Attribute(cpuAttributeUUID, entityUUID, "File ingest", ""));
+        entity.addtAttribute(new Attribute(networkAttributeUUID, entityUUID, "AV streams out", ""));
+        entity.addtAttribute(new Attribute(diskAttributeUUID, entityUUID, "Frame rate", ""));
+        
+        try {
+            entityDAO.saveEntity(entity);
+            log.info("Entity '" + entity.getName() + "' saved successfully!");
+        } catch (Exception ex) {
+            log.error("Unable to save entity: " + ex.getMessage());
+        }
+        
+        /*log.info("Getting Entity from the DB");
+        Entity entityFromDB = null;
+        try {
+            entityFromDB = entityDAO.getEntity(entityUUID, true);
+        } catch (Exception ex) {
+            log.error("Unable to get entity: " + ex.getMessage());
+        }
+        
+        log.info("Entity details:");
+        if (entityFromDB.getUUID() != null) log.info("  - UUID:  " + entityFromDB.getUUID());
+        if (entityFromDB.getName() != null) log.info("  - Name:  " + entityFromDB.getName());
+        if (entityFromDB.getDescription() != null) log.info("  - Desc:  " + entityFromDB.getDescription());
+        if ((entityFromDB.getAttributes() == null) || entityFromDB.getAttributes().isEmpty()) {
+            log.info("  - There are NO attributes");
+        } else {
+            log.info("  - There are " + entityFromDB.getAttributes().size() + " attributes");
+            for (Attribute attrib : entityFromDB.getAttributes())
+            {
+                if (attrib != null) {
+                    log.info("    - Attribute details:");
+                    if (attrib.getUUID() != null) log.info("      - UUID:  " + attrib.getUUID());
+                    if (attrib.getName() != null) log.info("      - Name:  " + attrib.getName());
+                    if (attrib.getDescription() != null) log.info("      - Desc:  " + attrib.getDescription());
+                }
+            }
+        }*/
+    }
+    
+    /**
+     * Saves an entity (VM) with three attributes (CPU, Network, Disk).
+     * @param edm Experiment Data Manager object to save the data with.
+     * @param entityUUID The UUID of the Entity.
+     * @param cpuAttributeUUID The UUID of the CPU attribute of the entity.
+     * @param networkAttributeUUID The UUID of the Network attribute of the entity.
+     * @param diskAttributeUUID The UUID of the Disk attribute of the entity.
+     * @throws Exception 
+     */
+    public static void saveEntity3(ExperimentDataManager edm, UUID entityUUID, UUID cpuAttributeUUID, UUID networkAttributeUUID) throws Exception
+    {
+        IEntityDAO entityDAO = null;
+        try {
+            entityDAO = edm.getEntityDAO();
+        } catch (Exception ex) {
+            log.error ("Unable to get Entity DAO: " + ex.getMessage(), ex);
+            throw ex;
+        }
+        
+        log.info("Saving POI entity");
+        Entity entity = new Entity();
+        entity.setUUID(entityUUID);
+        entity.setName("POI Service");
+        entity.setDescription("Point Of Interest Service");
+        entity.addtAttribute(new Attribute(cpuAttributeUUID, entityUUID, "POI requests", "The number of POI requests"));
+        entity.addtAttribute(new Attribute(networkAttributeUUID, entityUUID, "POI response time", "The response time for the POI requests"));
+        
+        try {
+            entityDAO.saveEntity(entity);
+            log.info("Entity '" + entity.getName() + "' saved successfully!");
+        } catch (Exception ex) {
+            log.error("Unable to save entity: " + ex.getMessage());
+        }
+        
+        /*log.info("Getting Entity from the DB");
+        Entity entityFromDB = null;
+        try {
+            entityFromDB = entityDAO.getEntity(entityUUID, true);
+        } catch (Exception ex) {
+            log.error("Unable to get entity: " + ex.getMessage());
+        }
+        
+        log.info("Entity details:");
+        if (entityFromDB.getUUID() != null) log.info("  - UUID:  " + entityFromDB.getUUID());
+        if (entityFromDB.getName() != null) log.info("  - Name:  " + entityFromDB.getName());
+        if (entityFromDB.getDescription() != null) log.info("  - Desc:  " + entityFromDB.getDescription());
+        if ((entityFromDB.getAttributes() == null) || entityFromDB.getAttributes().isEmpty()) {
+            log.info("  - There are NO attributes");
+        } else {
+            log.info("  - There are " + entityFromDB.getAttributes().size() + " attributes");
+            for (Attribute attrib : entityFromDB.getAttributes())
+            {
+                if (attrib != null) {
+                    log.info("    - Attribute details:");
+                    if (attrib.getUUID() != null) log.info("      - UUID:  " + attrib.getUUID());
+                    if (attrib.getName() != null) log.info("      - Name:  " + attrib.getName());
+                    if (attrib.getDescription() != null) log.info("      - Desc:  " + attrib.getDescription());
+                }
+            }
+        }*/
+    }
+    
+    /**
+     * Saves a metric generator complete chain of a  metric group, three measurement 
+     * sets (one for each of the attributes of the entity created in the saveEntities() method).
+     * @param edm Experiment Data Manager object to save the data with.
+     * @param expUUID The Experiment UUID.
+     * @param entityUUID The Entity UUID.
+     * @param attrib1UUID The UUID of the 1st attribute of the entity.
+     * @param attrib2UUID The UUID of the 2nd attribute of the entity.
+     * @param attrib3UUID The UUID of the 3rd attribute of the entity.
+     * @param mGenUUID The UUID of the metric generator
+     * @param mGrpUUID The UUID of the metric group.
+     * @param mSet1UUID The UUID of the 1st measurement set.
+     * @param mSet2UUID The UUID of the 2nd measurement set.
+     * @param mSet3UUID The UUID of the 3rd measurement set.
+     * @throws Exception 
+     */
+    public static void saveMetricGenerator1(ExperimentDataManager edm, UUID expUUID, UUID entityUUID, UUID attrib1UUID, UUID attrib2UUID, UUID attrib3UUID, UUID mGenUUID, UUID mGrpUUID, UUID mSet1UUID, UUID mSet2UUID, UUID mSet3UUID) throws Exception
+    {
+//----- EXPERIMENT
+        IMetricGeneratorDAO mGenDAO = null;
+        try {
+            mGenDAO = edm.getMetricGeneratorDAO();
+        } catch (Exception ex) {
+            log.error ("Unable to get MetricGenerator DAO: " + ex.getMessage(), ex);
+            throw ex;
+        }
         
 //----- METRIC GENERATOR
-        log.info("Creating Experiment MetricGenerator");
-        MetricGenerator metricGenerator = new MetricGenerator(mGenUUID, "Experiment MetricGenerator", "A metric generator");
+        log.info("Creating VM MetricGenerator");
+        MetricGenerator metricGenerator = new MetricGenerator(mGenUUID, "VM MetricGenerator", "A metric generator");
         metricGenerator.addEntity(new Entity(entityUUID));
-        exp.addMetricGenerator(metricGenerator);
         
 //----- METRIC GROUP
         log.info("Creating QoS MetricGroup");
@@ -205,30 +389,145 @@ public class PopulateDB
         metricGenerator.addMetricGroup(metricGroup);
         
 //----- MEASUREMENT SETS
-        log.info("Creating CPU QoS Measurement set");
+        log.info("Creating 1st QoS Measurement set");
         Metric metric1 = new Metric(UUID.randomUUID(), MetricType.RATIO, MILLI(SECOND));
-        MeasurementSet mSet1 = new MeasurementSet(cpuMSetUUID, cpuAttribUUID, mGrpUUID, metric1);
+        MeasurementSet mSet1 = new MeasurementSet(mSet1UUID, attrib1UUID, mGrpUUID, metric1);
         metricGroup.addMeasurementSets(mSet1);
         
-        log.info("Creating Network QoS Measurement set");
+        log.info("Creating 2nd QoS Measurement set");
         Metric metric2 = new Metric(UUID.randomUUID(), MetricType.RATIO, BIT.divide(SECOND));
-        MeasurementSet mSet2 = new MeasurementSet(networkMSetUUID, networkAttribUUID, mGrpUUID, metric2);
+        MeasurementSet mSet2 = new MeasurementSet(mSet2UUID, attrib2UUID, mGrpUUID, metric2);
         metricGroup.addMeasurementSets(mSet2);
         
-        log.info("Creating Disk QoS Measurement set");
+        log.info("Creating 3rd QoS Measurement set");
         Metric metric3 = new Metric(UUID.randomUUID(), MetricType.RATIO, MILLI(SECOND));
-        MeasurementSet mSet3 = new MeasurementSet(diskMSetUUID, diskAttribUUID, mGrpUUID, metric3);
+        MeasurementSet mSet3 = new MeasurementSet(mSet3UUID, attrib3UUID, mGrpUUID, metric3);
         metricGroup.addMeasurementSets(mSet3);
         
-        log.info("Saving experiment (with all sub-classes)");
+        log.info("Saving metric generator (with all sub-classes)");
         try {
-            expDAO.saveExperiment(exp);
-            log.info("Experiment '" + exp.getName() + "' saved successfully!");
+            mGenDAO.saveMetricGenerator(metricGenerator, expUUID);
+            log.info("MetricGenerator '" + metricGenerator.getName() + "' saved successfully!");
         } catch (Exception ex) {
-            log.error("Unable to save experiment: " + ex.getMessage());
+            log.error("Unable to save MetricGenerator: " + ex.getMessage());
+        }
+    }
+    
+    /**
+     * Saves a metric generator complete chain of a  metric group, three measurement 
+     * sets (one for each of the attributes of the entity created in the saveEntities() method).
+     * @param edm Experiment Data Manager object to save the data with.
+     * @param expUUID The Experiment UUID.
+     * @param entityUUID The Entity UUID.
+     * @param attrib1UUID The UUID of the 1st attribute of the entity.
+     * @param attrib2UUID The UUID of the 2nd attribute of the entity.
+     * @param attrib3UUID The UUID of the 3rd attribute of the entity.
+     * @param mGenUUID The UUID of the metric generator
+     * @param mGrpUUID The UUID of the metric group.
+     * @param mSet1UUID The UUID of the 1st measurement set.
+     * @param mSet2UUID The UUID of the 2nd measurement set.
+     * @param mSet3UUID The UUID of the 3rd measurement set.
+     * @throws Exception 
+     */
+    public static void saveMetricGenerator2(ExperimentDataManager edm, UUID expUUID, UUID entityUUID, UUID attrib1UUID, UUID attrib2UUID, UUID attrib3UUID, UUID mGenUUID, UUID mGrpUUID, UUID mSet1UUID, UUID mSet2UUID, UUID mSet3UUID) throws Exception
+    {
+//----- EXPERIMENT
+        IMetricGeneratorDAO mGenDAO = null;
+        try {
+            mGenDAO = edm.getMetricGeneratorDAO();
+        } catch (Exception ex) {
+            log.error ("Unable to get MetricGenerator DAO: " + ex.getMessage(), ex);
+            throw ex;
         }
         
-        printDetailsForExperiment(edm, expUUID);
+//----- METRIC GENERATOR
+        log.info("Creating AVC MetricGenerator");
+        MetricGenerator metricGenerator = new MetricGenerator(mGenUUID, "AVC MetricGenerator", "A metric generator");
+        metricGenerator.addEntity(new Entity(entityUUID));
+        
+//----- METRIC GROUP
+        log.info("Creating QoS MetricGroup");
+        MetricGroup metricGroup = new MetricGroup(mGrpUUID, mGenUUID, "Quality of Service", "A group of QoS metrics");
+        metricGenerator.addMetricGroup(metricGroup);
+        
+//----- MEASUREMENT SETS
+        log.info("Creating 1st QoS Measurement set");
+        Metric metric1 = new Metric(UUID.randomUUID(), MetricType.RATIO, Unit.ONE.alternate("Files ingested").divide(MINUTE));
+        MeasurementSet mSet1 = new MeasurementSet(mSet1UUID, attrib1UUID, mGrpUUID, metric1);
+        metricGroup.addMeasurementSets(mSet1);
+        
+        log.info("Creating 2nd QoS Measurement set");
+        Metric metric2 = new Metric(UUID.randomUUID(), MetricType.RATIO, Unit.ONE.alternate("AV streams out").divide(MINUTE));
+        MeasurementSet mSet2 = new MeasurementSet(mSet2UUID, attrib2UUID, mGrpUUID, metric2);
+        metricGroup.addMeasurementSets(mSet2);
+        
+        log.info("Creating 3rd QoS Measurement set");
+        Metric metric3 = new Metric(UUID.randomUUID(), MetricType.RATIO, Unit.ONE.alternate("Average frame rate").divide(SECOND));
+        MeasurementSet mSet3 = new MeasurementSet(mSet3UUID, attrib3UUID, mGrpUUID, metric3);
+        metricGroup.addMeasurementSets(mSet3);
+        
+        log.info("Saving metric generator (with all sub-classes)");
+        try {
+            mGenDAO.saveMetricGenerator(metricGenerator, expUUID);
+            log.info("MetricGenerator '" + metricGenerator.getName() + "' saved successfully!");
+        } catch (Exception ex) {
+            log.error("Unable to save MetricGenerator: " + ex.getMessage());
+        }
+    }
+    
+    /**
+     * Saves a metric generator complete chain of a  metric group, two measurement 
+     * sets (one for each of the attributes of the entity created in the saveEntities() method).
+     * @param edm Experiment Data Manager object to save the data with.
+     * @param expUUID The Experiment UUID.
+     * @param entityUUID The Entity UUID.
+     * @param attrib1UUID The UUID of the 1st attribute of the entity.
+     * @param attrib2UUID The UUID of the 2nd attribute of the entity.
+     * @param mGenUUID The UUID of the metric generator
+     * @param mGrpUUID The UUID of the metric group.
+     * @param mSet1UUID The UUID of the 1st measurement set.
+     * @param mSet2UUID The UUID of the 2nd measurement set.
+     * @throws Exception 
+     */
+    public static void saveMetricGenerator3(ExperimentDataManager edm, UUID expUUID, UUID entityUUID, UUID attrib1UUID, UUID attrib2UUID, UUID mGenUUID, UUID mGrpUUID, UUID mSet1UUID, UUID mSet2UUID) throws Exception
+    {
+//----- EXPERIMENT
+        IMetricGeneratorDAO mGenDAO = null;
+        try {
+            mGenDAO = edm.getMetricGeneratorDAO();
+        } catch (Exception ex) {
+            log.error ("Unable to get MetricGenerator DAO: " + ex.getMessage(), ex);
+            throw ex;
+        }
+        
+//----- METRIC GENERATOR
+        log.info("Creating POI Service MetricGenerator");
+        MetricGenerator metricGenerator = new MetricGenerator(mGenUUID, "POI Service MetricGenerator", "A metric generator");
+        metricGenerator.addEntity(new Entity(entityUUID));
+        
+//----- METRIC GROUP
+        log.info("Creating QoS MetricGroup");
+        MetricGroup metricGroup = new MetricGroup(mGrpUUID, mGenUUID, "Quality of Service", "A group of QoS metrics");
+        metricGenerator.addMetricGroup(metricGroup);
+        
+//----- MEASUREMENT SETS
+        log.info("Creating 1st QoS Measurement set");
+        Metric metric1 = new Metric(UUID.randomUUID(), MetricType.RATIO, Unit.ONE.alternate("POI requests").divide(MINUTE));
+        MeasurementSet mSet1 = new MeasurementSet(mSet1UUID, attrib1UUID, mGrpUUID, metric1);
+        metricGroup.addMeasurementSets(mSet1);
+        
+        log.info("Creating 2nd QoS Measurement set");
+        Metric metric2 = new Metric(UUID.randomUUID(), MetricType.RATIO, MILLI(SECOND));
+        MeasurementSet mSet2 = new MeasurementSet(mSet2UUID, attrib2UUID, mGrpUUID, metric2);
+        metricGroup.addMeasurementSets(mSet2);
+        
+        log.info("Saving metric generator (with all sub-classes)");
+        try {
+            mGenDAO.saveMetricGenerator(metricGenerator, expUUID);
+            log.info("MetricGenerator '" + metricGenerator.getName() + "' saved successfully!");
+        } catch (Exception ex) {
+            log.error("Unable to save MetricGenerator: " + ex.getMessage());
+        }
     }
     
     /**

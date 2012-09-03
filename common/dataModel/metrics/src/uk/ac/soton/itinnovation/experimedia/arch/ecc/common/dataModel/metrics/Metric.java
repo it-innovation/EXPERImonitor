@@ -49,6 +49,7 @@ import javax.measure.unit.Unit;
  *   Unit foot = METER.times(3048).divide(10000);
  * 
  *   Unit bps = BIT.divide(SECOND);
+ *   Unit tps = Unit.ONE.alternate("tweet").divide(SECOND);
  * 
  * Setting a unit:
  * 

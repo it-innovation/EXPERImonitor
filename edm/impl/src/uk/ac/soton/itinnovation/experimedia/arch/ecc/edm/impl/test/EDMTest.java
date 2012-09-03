@@ -111,12 +111,16 @@ public class EDMTest
         
         
         // tweets per second
-        
+        //Unit tps = Unit.valueOf("tweet");//.divide(SECOND);
+        Unit tps = Unit.ONE.alternate("tweet").divide(SECOND);
+        System.out.println("tps = " + tps);
         
         // cpu load
         
         
         // number of VMs
+        
+        
         
         ExperimentDataManager edm = new ExperimentDataManager();
         UUID expUUID = UUID.fromString("bfe4c710-61ba-46f8-a519-be2f7808192e");
@@ -138,7 +142,7 @@ public class EDMTest
         
         //metricGroup(edm, mGenUUID, mGrpUUID);
         
-        measurementSet(edm, attributeUUID, mGrpUUID, mSetUUID);
+        //measurementSet(edm, attributeUUID, mGrpUUID, mSetUUID);
         
         //measurement(edm, mSetUUID);
         
