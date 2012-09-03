@@ -44,11 +44,32 @@ public class AMQPMessageDispatch implements IAMQPMessageDispatch
   private LinkedBlockingQueue<Entry<String,byte[]>> dispatchQueue;
   private IAMQPMessageDispatchListener              dispatchListener;
   
+  private UUID idTag;
+  
   
   public AMQPMessageDispatch()
   {
     dispatchQueue = new LinkedBlockingQueue<Entry<String,byte[]>>();
   }
+  
+  public void setIDTag( UUID tag )
+  { if ( tag != null ) idTag = tag; }
+  
+  public String getIDTagInfo()
+  {
+    if ( idTag != null ) return idTag.toString();
+    
+    return "NOTAG";
+  }
+  
+  // IAMQPMessageDispatch ------------------------------------------------------
+  @Override
+  public void setListener( IAMQPMessageDispatchListener listener )
+  { dispatchListener = listener; }
+  
+  @Override
+  public IAMQPMessageDispatchListener getListener()
+  { return dispatchListener; }
   
   // Protected methods ---------------------------------------------------------
   protected void setPump( AMQPMessageDispatchPump pump )
@@ -63,7 +84,15 @@ public class AMQPMessageDispatch implements IAMQPMessageDispatch
       synchronized( dispatchLock )
       { 
         try
-        { 
+        {
+          // DEBUG -------------------------------------------------------------
+          String quID = "";
+          if ( idTag != null ) quID = idTag.toString();
+          
+          String msg = new String( data );
+          dispatchLogger.info( "ADD (:" + quID+ ") [" + msg + "] ");
+          // -------------------------------------------------------------------
+          
           dispatchQueue.put( new HashMap.SimpleEntry<String, byte[]>( queueName, data ) );
           addResult = true;
         }
@@ -89,6 +118,14 @@ public class AMQPMessageDispatch implements IAMQPMessageDispatch
         { 
           Entry<String,byte[]> nextMessage = dispatchQueue.take();
           
+          // DEBUG -------------------------------------------------------------
+          String quID = "";
+          if ( idTag != null ) quID = idTag.toString();
+          
+          String msg = new String( nextMessage.getValue() );
+          dispatchLogger.info( "DISP (:" + quID+ ") [" + msg + "] ");
+          // -------------------------------------------------------------------
+          
           dispatchListener.onSimpleMessageDispatched( nextMessage.getKey(),
                                                       nextMessage.getValue() );
         }
@@ -101,13 +138,4 @@ public class AMQPMessageDispatch implements IAMQPMessageDispatch
     
     return hasDispatches;
   }
-  
-  // IAMQPMessageDispatch ------------------------------------------------------
-  @Override
-  public void setListener( IAMQPMessageDispatchListener listener )
-  { dispatchListener = listener; }
-  
-  @Override
-  public IAMQPMessageDispatchListener getListener()
-  { return dispatchListener; }
 }

@@ -23,7 +23,7 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecyle.phases;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecylePhases;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.spec.IAMQPMessageDispatchPump;
 
@@ -34,6 +34,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClien
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMPhase;
 
 import java.util.*;
+import org.apache.log4j.Logger;
 
 
 
@@ -44,6 +45,7 @@ public abstract class AbstractEMLCPhase
   private HashMap<UUID, EMClientEx> phaseClients;
   private final Object              clientLock = new Object();
   
+  protected final Logger phaseLogger = Logger.getLogger( AbstractEMLCPhase.class );
   protected EMPhase phaseType;
   protected String  phaseState;
  
@@ -62,26 +64,11 @@ public abstract class AbstractEMLCPhase
   public boolean isActive()
   { return phaseActive; }
   
-  public boolean addClient( EMClientEx client )
-  {
-    // Safety first
-    if ( client == null ) return false;
-    if ( phaseActive )    return false;
-    
-    synchronized ( clientLock )
-    {
-      if ( !phaseClients.containsKey(client.getID()) )
-        phaseClients.put( client.getID(), client );
-    }
-    
-    return true;
-  }
-  
   public EMClientEx getClient( UUID id )
   {
     EMClientEx client = null;
     
-    synchronized ( clientLock )
+    //synchronized ( clientLock )
     { client = phaseClients.get( id ); }
     
     return client;
@@ -94,22 +81,6 @@ public abstract class AbstractEMLCPhase
     synchronized( clientLock )
     { result = !phaseClients.isEmpty(); }
     
-    return result;
-  }
-  
-  public boolean removeClient( UUID id )
-  {
-    if ( id == null ) return false;
-    if ( phaseActive ) return false;
-    
-    boolean result = false;
-    
-    synchronized ( clientLock )
-    {
-      if ( phaseClients.remove( id ) != null )
-        result = true;
-    }
-   
     return result;
   }
   
@@ -143,5 +114,41 @@ public abstract class AbstractEMLCPhase
     phaseMsgPump =
             new AMQPMessageDispatchPump( phaseType + " message pump",
                                          IAMQPMessageDispatchPump.ePumpPriority.MINIMUM );
+  }
+  
+  protected boolean addClient( EMClientEx client )
+  {
+    // Safety first
+    if ( client == null ) return false;
+    if ( phaseActive )    return false;
+    
+    boolean result = false;
+    
+    synchronized ( clientLock )
+    {
+      if ( !phaseClients.containsKey(client.getID()) )
+      {
+        phaseClients.put( client.getID(), client );
+        result = true;
+      }
+    }
+    
+    return result;
+  }
+  
+  protected boolean removeClient( UUID id )
+  {
+    if ( id == null ) return false;
+    if ( phaseActive ) return false;
+    
+    boolean result = false;
+    
+    synchronized ( clientLock )
+    {
+      if ( phaseClients.remove( id ) != null )
+        result = true;
+    }
+   
+    return result;
   }
 }

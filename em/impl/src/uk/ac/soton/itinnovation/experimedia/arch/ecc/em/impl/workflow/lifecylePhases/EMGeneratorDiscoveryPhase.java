@@ -23,7 +23,7 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecyle.phases;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecylePhases;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.IEMDiscovery;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.*;
@@ -70,10 +70,14 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
   @Override
   public boolean addClient( EMClientEx client )
   {
+    boolean result = false;
+    
     if ( super.addClient(client) )
     {
       // Create a new IEMMonitor interface for the client
       AMQPMessageDispatch dispatch = new AMQPMessageDispatch();
+      dispatch.setIDTag( client.getID() ); //DEBUG------------------------------
+      
       phaseMsgPump.addDispatch( dispatch );
       
       EMDiscovery discoverFace = new EMDiscovery( emChannel,
@@ -86,10 +90,10 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
       
       phaseState = "Waiting to start phase";
       
-      return true;
+      result = true;
     }
     
-    return false;
+    return result;
   }
   
   @Override
@@ -157,7 +161,7 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
 
         // If we have relevant phases, go get metric generator info
         if ( supportedPhases.contains( EMPhase.eEMLiveMonitoring )        ||
-              supportedPhases.contains( EMPhase.eEMPostMonitoringReport) )
+             supportedPhases.contains( EMPhase.eEMPostMonitoringReport) )
           client.getDiscoveryInterface().discoverMetricGenerators();
         else
           clientsExpectingGeneratorInfo.remove( client.getID() );
@@ -194,35 +198,38 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
   {
     if ( phaseActive )
     {
-        EMClientEx client = getClient( senderID );
+      EMClientEx client = getClient( senderID );
 
-        if ( client != null )
-        {
-          client.setMetricGenerators( generators );
-          phaseListener.onClientMetricGeneratorsFound( client );
-          
-          // Remove from the list of expected generators
-          clientsExpectingGeneratorInfo.remove( client.getID() );
-        }
-        
-        // If we've got all the metric generator info we need, finish this phase
-        if ( clientsExpectingGeneratorInfo.isEmpty() ) hardStop();
+      if ( client != null )
+      {
+        client.setMetricGenerators( generators );
+        phaseListener.onClientMetricGeneratorsFound( client );
+
+        // Remove from the list of expected generators
+        clientsExpectingGeneratorInfo.remove( client.getID() );
+      }
+
+      // If we've got all the metric generator info we need, finish this phase
+      if ( clientsExpectingGeneratorInfo.isEmpty() ) hardStop();
     }
   }
   
   @Override
   public void onClientDisconnecting( UUID senderID )
   {
-    EMClientEx client = getClient( senderID );
-
-    if ( client != null )
+    if ( phaseActive )
     {
-      clientsExpectingGeneratorInfo.remove( client.getID() );
+      EMClientEx client = getClient( senderID );
 
-      client.destroyAllInterfaces();
-      client.setIsConnected( false );
+      if ( client != null )
+      {
+        clientsExpectingGeneratorInfo.remove( client.getID() );
 
-      phaseListener.onClientIsDisconnected( client );
+        client.destroyAllInterfaces();
+        client.setIsConnected( false );
+
+        phaseListener.onClientIsDisconnected( client );
+      }
     }
   }
 }

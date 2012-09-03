@@ -50,13 +50,15 @@ public abstract class AbstractAMQPInterface
   protected boolean actingAsProvider;
   
   
-  public boolean sendBasicMessage( String message )
+  public synchronized boolean sendBasicMessage( String message )
   {
     // Safety first
     if ( !interfaceReady        || 
           message       == null ||
           (providerRoutingKey == null && userRoutingKey == null) ) 
       return false;
+    
+    boolean result = false;
     
     // Make sure producer sends to user (or other way around) - targets are reversed
     String targetExchange = actingAsProvider ? userExchangeName : providerExchangeName;
@@ -72,10 +74,12 @@ public abstract class AbstractAMQPInterface
                                 targetRouteKey,
                                 null, // Properties
                                 messageBody );
+      
+      result = true;
     }
-    catch(IOException ioe) { return false; }
+    catch(IOException ioe) {}
     
-    return true;
+    return result;
   }
 
   public void setMessageDispatch( AMQPMessageDispatch dispatch )

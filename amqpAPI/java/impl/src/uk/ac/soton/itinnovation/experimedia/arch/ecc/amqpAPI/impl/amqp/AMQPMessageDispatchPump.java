@@ -52,7 +52,7 @@ public class AMQPMessageDispatchPump implements Runnable,
                                   IAMQPMessageDispatchPump.ePumpPriority priority )
   {
     pumpName = pName;
-    pumpThread = new Thread( this );
+    pumpThread = new Thread( this, "DispatchPump (" + pumpName + ")" );
     
     switch ( priority )
     {

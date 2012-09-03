@@ -18,45 +18,41 @@
 // the software.
 //
 //      Created By :            Simon Crowle
-//      Created Date :          22-Aug-2012
+//      Created Date :          29-Aug-2012
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecylePhases;
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecyle.phases;
-
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEMTearDown_ProviderListener;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEMPostReport_ProviderListener;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
+
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
-
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces.EMTearDown;
 
-import java.util.*;
-
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces.EMPostReport;
 
 
+import java.util.UUID;
 
-public class EMTearDownPhase extends AbstractEMLCPhase
-                                     implements IEMTearDown_ProviderListener
+
+
+
+public class EMPostReportPhase extends AbstractEMLCPhase
+                               implements IEMPostReport_ProviderListener
 {
-  private EMTearDownPhaseListener phaseListener;
+  private EMPostReportPhaseListener phaseListener;
   
-  private HashSet<UUID> clientsStillToTearDown;
-  
-  
-  public EMTearDownPhase( AMQPBasicChannel channel,
-                          UUID providerID,
-                          EMTearDownPhaseListener listener )
+  public EMPostReportPhase( AMQPBasicChannel channel,
+                            UUID providerID,
+                            EMPostReportPhaseListener listener )
   {
-    super( EMPhase.eEMTearDown, channel, providerID );
+    super( EMPhase.eEMPostMonitoringReport, channel, providerID );
     
     phaseListener = listener;
     
-    clientsStillToTearDown = new HashSet<UUID>();
-    
-    phaseState = "Ready to start tear-down process";
+    phaseState = "Ready to start post-report process";
   }
   
   // AbstractEMLCPhase ---------------------------------------------------------
@@ -66,59 +62,60 @@ public class EMTearDownPhase extends AbstractEMLCPhase
     if ( phaseActive ) throw new Exception( "Phase already active" );
     if ( !hasClients() ) throw new Exception( "No clients available for this phase" );
     
-    // Create the tear-down interface
+    // Create post-report interface
     for ( EMClientEx client : getCopySetOfCurrentClients() )
     {
       AMQPMessageDispatch dispatch = new AMQPMessageDispatch();
       phaseMsgPump.addDispatch( dispatch );
       
-      EMTearDown face = new EMTearDown( emChannel, dispatch,
-                                        emProviderID, client.getID(), true );
-      
-      // Add client to the tear-down list
-      clientsStillToTearDown.add( client.getID() );
+      EMPostReport face = new EMPostReport( emChannel, dispatch,
+                                            emProviderID, client.getID(), true );
       
       face.setProviderListener( this );
-      client.setTearDownInterface( face );
+      client.setPostReportInterface( face );
     }
     
     phaseMsgPump.startPump();
     phaseActive = true;
     
-    // Request clients do the same
+    // Request clients create post-report interface
     for ( EMClientEx client : getCopySetOfCurrentClients() )
-      client.getDiscoveryInterface().createInterface( EMInterfaceType.eEMTearDown );
+      client.getDiscoveryInterface().createInterface( EMInterfaceType.eEMPostReport );
     
-    phaseState = "Waiting for client to signal ready to tear down";
+    phaseState = "Waiting for client to signal ready to report";
   }
   
   @Override
   public void controlledStop() throws Exception
-  { throw new Exception( "Not yet supported for this phase"); }
+  {
+    //TODO
+    throw new Exception( "Not yet supported for this phase");
+  }
   
   @Override
   public void hardStop()
   {
     phaseMsgPump.stopPump();
     phaseActive = false;
-    if ( phaseListener != null ) phaseListener.onTearDownPhaseCompleted();
+    
+    if ( phaseListener != null ) phaseListener.onPostReportPhaseCompleted();
   }
   
-  // IEMTearDown_ProviderListener ----------------------------------------------
+  // IEMPostReport_ProviderListener --------------------------------------------
   @Override
-  public void onNotifyReadyToTearDown( UUID senderID )
+  public void onNotifyReadyToReport( UUID senderID )
   {
     if ( phaseActive )
     {
       EMClientEx client = getClient( senderID );
       
       if ( client != null )
-        client.getTearDownInterface().tearDownMetricGenerators();
+        client.getPostReportInterface().requestPostReportSummary();
     }
   }
   
   @Override
-  public void onNotifyTearDownResult( UUID senderID, Boolean success )
+  public void onSendReportSummary( UUID senderID, EMPostReportSummary summary )
   {
     if ( phaseActive )
     {
@@ -126,15 +123,23 @@ public class EMTearDownPhase extends AbstractEMLCPhase
       
       if ( client != null )
       {
-        client.setTearDownResult( success );
-        clientsStillToTearDown.remove( client.getID() );
+        client.setPostReportSummary( summary );
         
         if ( phaseListener != null )
-          phaseListener.onClientTearDownResult( client, success );
+          phaseListener.onGotSummaryReport( client, summary );
       }
+    }
+  }
+  
+  @Override
+  public void onSendDataBatch( UUID senderID, EMDataBatch populatedBatch )
+  {
+    if ( phaseActive )
+    {
+      EMClientEx client = getClient( senderID );
       
-      // Notify phase completion if all results are in
-      if ( clientsStillToTearDown.isEmpty() ) hardStop();
+      if ( client != null && phaseListener != null )
+        phaseListener.onGotDataBatch( client, populatedBatch );
     }
   }
 }

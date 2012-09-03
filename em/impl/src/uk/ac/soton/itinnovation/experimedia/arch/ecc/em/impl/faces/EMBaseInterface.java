@@ -63,18 +63,18 @@ public abstract class EMBaseInterface implements IAMQPMessageDispatchListener
       try
       { 
         String jsonData = new String( data, "UTF8" );
-        
+
         JsonArray jsonItems = jsonParser.parse( jsonData ).getAsJsonArray();
         int methodID        = jsonMapper.fromJson( jsonItems.get(0), int.class );
-        
+
         onInterpretMessage( methodID, jsonItems );
-        
+
         // DEBUG ---------------------------------------------------------------
         faceLogger.debug( "BaseFACE:Msg: [" +methodID+ "] " + (isProvider ? interfaceUserID: interfaceProviderID) );
       }
       catch (UnsupportedEncodingException e) 
       { faceLogger.error( "Could not re-encode Rabbit data"); }
-    } 
+    }
   }
   
   // Protected methods ---------------------------------------------------------

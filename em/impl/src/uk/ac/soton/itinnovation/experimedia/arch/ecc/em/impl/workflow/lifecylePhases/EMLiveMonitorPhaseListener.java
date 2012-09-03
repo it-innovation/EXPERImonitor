@@ -18,27 +18,22 @@
 // the software.
 //
 //      Created By :            Simon Crowle
-//      Created Date :          14-Aug-2012
+//      Created Date :          27-Aug-2012
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecyle.phases;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecylePhases;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
 
 
 
 
-public interface EMGeneratorDiscoveryPhaseListener
+public interface EMLiveMonitorPhaseListener
 {
-  void onClientPhaseSupportReceived( EMClientEx client );
+  void onGotMetricData( EMClientEx client, Report report );
   
-  void onClientDiscoveryResult( EMClientEx client );
-  
-  void onClientMetricGeneratorsFound( EMClientEx client );
-  
-  void onClientIsDisconnected( EMClientEx client );
-  
-  void onDiscoveryPhaseCompleted();
+  void onLiveMonitorPhaseCompleted();
 }
