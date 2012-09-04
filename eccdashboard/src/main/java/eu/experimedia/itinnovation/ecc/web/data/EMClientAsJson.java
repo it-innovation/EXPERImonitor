@@ -17,29 +17,33 @@
 // the software.
 //
 //	Created By :			Maxim Bashevoy
-//	Created Date :			2012-09-03
+//	Created Date :			2012-09-04
 //	Created for Project :           Experimedia
 //
 /////////////////////////////////////////////////////////////////////////
+package eu.experimedia.itinnovation.ecc.web.data;
 
-package eu.experimedia.itinnovation.ecc.web.services;
+public class EMClientAsJson {
 
-import eu.experimedia.itinnovation.ecc.web.helpers.ExperimentMonitorHelper;
-import java.util.Set;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Service;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMClient;
+    private String uuid;
+    private String name;
 
-@Service("experimentMonitorService")
-public class ExperimentMonitorService {
-    
-    @Autowired
-    @Qualifier("experimentMonitorHelper")
-    private transient ExperimentMonitorHelper emHelper;
-    
-    public EMClient[] getAllConnectedClients() throws Throwable {
-        return emHelper.getExperimentMonitor().getAllConnectedClients().toArray(new EMClient[0]);
+    public EMClientAsJson() {
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
 }

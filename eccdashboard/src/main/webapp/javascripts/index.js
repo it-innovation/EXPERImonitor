@@ -51,6 +51,19 @@ $(document).ready(function() {
                         $("#experimentStartTime").text(longToDate(theExperiment.startTime));
                         $("#experimentEndTime").text(longToDate(theExperiment.endTime));
                         
+                        // Get clients (not pulling for now)
+                        $.ajax({
+                            type: 'GET',
+                            url: "/em/getclients/do.json",
+                            contentType: "application/json; charset=utf-8",
+                            success: function(clients){
+                                console.log(clients);
+                                $.each(clients, function(indexClient, client){
+                                   $('.clientlist').append('<p class="clientitem">' + client.name + '<span>' + client.uuid + '</span></p>'); 
+                                });
+                            }
+                        });
+
                     }
                 }
             },
@@ -62,6 +75,7 @@ $(document).ready(function() {
             }
         });    
 
+/*
     $(".clientitem").click(function(){
         $(".clientlist .clientitem").removeClass('active');
         $(this).addClass('active');
@@ -99,5 +113,5 @@ $(document).ready(function() {
     });
 
     $(".clientlist .clientitem").first().trigger('click');
-
+*/
 });

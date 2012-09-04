@@ -21,13 +21,30 @@
 //	Created for Project :           Experimedia
 //
 /////////////////////////////////////////////////////////////////////////
-
 package eu.experimedia.itinnovation.ecc.web.helpers;
 
+import java.util.UUID;
 import org.springframework.stereotype.Service;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.factory.EMInterfaceFactory;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.IExperimentMonitor;
 
 @Service
 public class ExperimentMonitorHelper {
 
-    
+    private static IExperimentMonitor em;
+
+    public synchronized IExperimentMonitor getExperimentMonitor() throws Throwable {
+        return getStaticExperimentMonitor();
+    }
+
+    public IExperimentMonitor getStaticExperimentMonitor() throws Throwable {
+
+        if (em == null) {
+            em = EMInterfaceFactory.createEM();
+            em.openEntryPoint("192.9.206.199", UUID.fromString("00000000-0000-0000-0000-000000000000"));
+
+        }
+
+        return em;
+    }
 }
