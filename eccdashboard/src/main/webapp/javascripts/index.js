@@ -58,9 +58,15 @@ $(document).ready(function() {
                             contentType: "application/json; charset=utf-8",
                             success: function(clients){
                                 console.log(clients);
-                                $.each(clients, function(indexClient, client){
-                                   $('.clientlist').append('<p class="clientitem">' + client.name + '<span>' + client.uuid + '</span></p>'); 
-                                });
+                                if (clients.length == 0) {
+                                    $(".clientdetails").empty();
+                                    $(".clientdetails").append('<h6>No clients detected</h6>');
+                                    
+                                } else {
+                                    $.each(clients, function(indexClient, client){
+                                    $('.clientlist').append('<p class="clientitem">' + client.name + '<span>' + client.uuid + '</span></p>'); 
+                                    });
+                                }
                             }
                         });
 

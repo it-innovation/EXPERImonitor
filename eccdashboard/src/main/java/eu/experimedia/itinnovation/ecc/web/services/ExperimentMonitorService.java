@@ -25,7 +25,6 @@
 package eu.experimedia.itinnovation.ecc.web.services;
 
 import eu.experimedia.itinnovation.ecc.web.helpers.ExperimentMonitorHelper;
-import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
