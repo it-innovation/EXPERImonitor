@@ -53,13 +53,13 @@ public class EMView extends javax.swing.JFrame
     currentClientList.setModel( clientListModel );
   }
   
-  public void setMonitoringPhaseValue( String phase, String nextPhase )
+  public synchronized void setMonitoringPhaseValue( String phase, String nextPhase )
   {
     phaseLabel.setText( phase );
     setNextPhaseValue( nextPhase );
   }
   
-  public void setNextPhaseValue( String phase )
+  public synchronized void setNextPhaseValue( String phase )
   {
     if ( phase != null )
     {
@@ -73,20 +73,20 @@ public class EMView extends javax.swing.JFrame
     }
   }
   
-  public void addLogText( String text )
+  public synchronized void addLogText( String text )
   {
     loggingText.append( text + "\n" );
   }
   
-  public void addConnectedClient( UUID id, String clientName )
+  public synchronized void addConnectedClient( UUID id, String clientName )
   {
     clientListModel.addElement( (Object) new HashMap.SimpleEntry<UUID, String>(id, clientName) );
   }
   
-  public void enablePulling( boolean enabled )
+  public synchronized void enablePulling( boolean enabled )
   { pullMetricButton.setEnabled( enabled ); }
   
-  public void enabledPostReportPulling( boolean enabled )
+  public synchronized void enabledPostReportPulling( boolean enabled )
   { postReportButton.setEnabled( enabled ); }
 
   /**

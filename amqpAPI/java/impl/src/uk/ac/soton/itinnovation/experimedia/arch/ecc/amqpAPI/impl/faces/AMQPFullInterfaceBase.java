@@ -95,8 +95,6 @@ public class AMQPFullInterfaceBase extends AbstractAMQPInterface
     actingAsProvider   = asProvider;
     providerQueueName  = interfaceName + "_" + providerID.toString() + "[P]";
     userQueueName      = interfaceName + "_" + userID.toString() + "[U]";
-    providerRoutingKey = "RK_" + providerID.toString();
-    userRoutingKey     = "RK_" + userID.toString();
 
     return true;
   }

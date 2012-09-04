@@ -44,22 +44,10 @@ public class AMQPMessageDispatch implements IAMQPMessageDispatch
   private LinkedBlockingQueue<Entry<String,byte[]>> dispatchQueue;
   private IAMQPMessageDispatchListener              dispatchListener;
   
-  private UUID idTag;
-  
   
   public AMQPMessageDispatch()
   {
     dispatchQueue = new LinkedBlockingQueue<Entry<String,byte[]>>();
-  }
-  
-  public void setIDTag( UUID tag )
-  { if ( tag != null ) idTag = tag; }
-  
-  public String getIDTagInfo()
-  {
-    if ( idTag != null ) return idTag.toString();
-    
-    return "NOTAG";
   }
   
   // IAMQPMessageDispatch ------------------------------------------------------
@@ -85,14 +73,6 @@ public class AMQPMessageDispatch implements IAMQPMessageDispatch
       { 
         try
         {
-          // DEBUG -------------------------------------------------------------
-          String quID = "";
-          if ( idTag != null ) quID = idTag.toString();
-          
-          String msg = new String( data );
-          dispatchLogger.info( "ADD (:" + quID+ ") [" + msg + "] ");
-          // -------------------------------------------------------------------
-          
           dispatchQueue.put( new HashMap.SimpleEntry<String, byte[]>( queueName, data ) );
           addResult = true;
         }
@@ -117,14 +97,6 @@ public class AMQPMessageDispatch implements IAMQPMessageDispatch
         try
         { 
           Entry<String,byte[]> nextMessage = dispatchQueue.take();
-          
-          // DEBUG -------------------------------------------------------------
-          String quID = "";
-          if ( idTag != null ) quID = idTag.toString();
-          
-          String msg = new String( nextMessage.getValue() );
-          dispatchLogger.info( "DISP (:" + quID+ ") [" + msg + "] ");
-          // -------------------------------------------------------------------
           
           dispatchListener.onSimpleMessageDispatched( nextMessage.getKey(),
                                                       nextMessage.getValue() );

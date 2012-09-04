@@ -76,8 +76,6 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
     {
       // Create a new IEMMonitor interface for the client
       AMQPMessageDispatch dispatch = new AMQPMessageDispatch();
-      dispatch.setIDTag( client.getID() ); //DEBUG------------------------------
-      
       phaseMsgPump.addDispatch( dispatch );
       
       EMDiscovery discoverFace = new EMDiscovery( emChannel,

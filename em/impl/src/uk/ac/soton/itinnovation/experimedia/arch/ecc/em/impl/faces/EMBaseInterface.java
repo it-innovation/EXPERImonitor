@@ -68,9 +68,6 @@ public abstract class EMBaseInterface implements IAMQPMessageDispatchListener
         int methodID        = jsonMapper.fromJson( jsonItems.get(0), int.class );
 
         onInterpretMessage( methodID, jsonItems );
-
-        // DEBUG ---------------------------------------------------------------
-        faceLogger.debug( "BaseFACE:Msg: [" +methodID+ "] " + (isProvider ? interfaceUserID: interfaceProviderID) );
       }
       catch (UnsupportedEncodingException e) 
       { faceLogger.error( "Could not re-encode Rabbit data"); }
@@ -129,9 +126,6 @@ public abstract class EMBaseInterface implements IAMQPMessageDispatchListener
       if ( !amqpInterface.sendBasicMessage( payloadData ) )
         faceLogger.error( "Could not execute method " + methodID );
       
-      // DEBUG -----------------------------------------------------------------
-      faceLogger.debug( "BaseFACE:Exe: [" +methodID+ "] " + (isProvider ? interfaceUserID : interfaceProviderID ) );
-
       result = true;
     }
     

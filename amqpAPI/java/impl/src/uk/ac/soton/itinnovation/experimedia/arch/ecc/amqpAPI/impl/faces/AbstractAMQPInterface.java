@@ -45,7 +45,7 @@ public abstract class AbstractAMQPInterface
   protected String  providerExchangeName, userExchangeName;
   protected String  providerQueueName, userQueueName;
   protected String  providerRoutingKey, userRoutingKey;
-  protected String  basicMsgConsumerTag;
+  protected String  subListenQueue;
   protected boolean interfaceReady = false;
   protected boolean actingAsProvider;
   
@@ -63,7 +63,7 @@ public abstract class AbstractAMQPInterface
     // Make sure producer sends to user (or other way around) - targets are reversed
     String targetExchange = actingAsProvider ? userExchangeName : providerExchangeName;
     String targetRouteKey = actingAsProvider ? userRoutingKey   : providerRoutingKey;
-   
+    
     try
     {
       Channel channelImpl = (Channel) amqpChannel.getChannelImpl();
@@ -100,23 +100,24 @@ public abstract class AbstractAMQPInterface
 
   protected void createQueue()
   {
+    assignBindings();
+    
     String targetExchange = actingAsProvider ? providerExchangeName : userExchangeName;
-    String targetQueue    = actingAsProvider ? providerQueueName    : userQueueName;
     String targetRouteKey = actingAsProvider ? providerRoutingKey   : userRoutingKey;
     
     try
     {
       Channel channel = (Channel) amqpChannel.getChannelImpl();
       
-      channel.queueDeclare( targetQueue,
+      channel.queueDeclare( subListenQueue,
                             false,  // Durable
                             false,  // Exclusive
                             true,   // Auto-delete
                             null ); // Args
   
-      channel.queueBind( targetQueue,
+      channel.queueBind( subListenQueue,
                          targetExchange,
-                         targetRouteKey );    // Args
+                         targetRouteKey ); // Args
     }
     catch (IOException ioe) {}
     
@@ -124,14 +125,26 @@ public abstract class AbstractAMQPInterface
 
   protected void createSubscriptionComponent()
   {
-    Channel    channel = (Channel) amqpChannel.getChannelImpl();
-    String targetQueue = actingAsProvider ? providerQueueName : userQueueName;
+    Channel channel = (Channel) amqpChannel.getChannelImpl();    
     
     subProcessor = new AMQPBasicSubscriptionProcessor( channel,
-                                                       targetQueue,
+                                                       subListenQueue,
                                                        msgDispatch );
     
-    try { channel.basicConsume( targetQueue, false, subProcessor ); }
+    try { channel.basicConsume( subListenQueue, false, subProcessor ); }
     catch ( IOException ioe ) {}
+  }
+  
+  protected void assignBindings()
+  {
+    String puCompositeQueue = providerQueueName + "/" + userQueueName;
+    
+    if ( actingAsProvider )
+      subListenQueue = puCompositeQueue;
+    else
+      subListenQueue = userQueueName;
+    
+    providerRoutingKey = "RK_" + puCompositeQueue;
+    userRoutingKey     = "RK_" + userQueueName;
   }
 }

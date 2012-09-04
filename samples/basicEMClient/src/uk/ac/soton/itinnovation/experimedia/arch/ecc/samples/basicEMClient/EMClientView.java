@@ -25,13 +25,13 @@ public class EMClientView extends javax.swing.JFrame
   }
   
   
-  public void setStatus( String statusValue )
+  public synchronized void setStatus( String statusValue )
   { statusLabel.setText( statusValue ); }
   
-  public void addLogMessage( String message )
+  public synchronized void addLogMessage( String message )
   { clientMessages.append( message + "\n" ); }
   
-  public void enablePush( boolean enabled)
+  public synchronized void enablePush( boolean enabled)
   { actionButton.setEnabled(enabled); }
 
   /**

@@ -55,18 +55,17 @@ public class AMQPBasicSubscriptionProcessor extends DefaultConsumer
                               Envelope envelope,
                               AMQP.BasicProperties properties,
                               byte[] body )
+                              throws IOException
   {
     try
     {
-      // DEBUG -------------------------------------------------------------
-      String msg = new String( body );
-      subProcLogger.info( "SUB (:" +queueName+ ") [" + msg + "] \nTAG: " + messageDispatch.getIDTagInfo() );
-      // -------------------------------------------------------------------
-      
       messageDispatch.addMessage( queueName, body );
-      getChannel().basicAck( envelope.getDeliveryTag(), true );
+      getChannel().basicAck( envelope.getDeliveryTag(), false );
     }
     catch (IOException ioe)
-    { subProcLogger.error( "Could not send AMQP acknowledgement" ); }
+    { 
+      subProcLogger.error( "Could not send AMQP acknowledgement" );
+      throw ioe;
+    }
   }
 }

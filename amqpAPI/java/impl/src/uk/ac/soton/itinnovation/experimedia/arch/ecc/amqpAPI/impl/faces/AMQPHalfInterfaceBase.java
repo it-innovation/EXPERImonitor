@@ -82,6 +82,18 @@ public class AMQPHalfInterfaceBase extends AbstractAMQPInterface
     providerExchangeName = iName + " [P]";
     userExchangeName     = providerExchangeName; // Single direction of traffic only
   }
+  
+  @Override
+  protected void assignBindings()
+  {
+    subListenQueue = actingAsProvider ? providerQueueName + "/" + providerQueueName
+                                      : userQueueName     + "/" + userQueueName;
+  
+    String uniRoute = "RK_ " + (actingAsProvider ? providerQueueName : userQueueName);
+    
+    providerRoutingKey = uniRoute;
+    userRoutingKey     = uniRoute;
+  }
 
   // Private methods -----------------------------------------------------------
   private boolean setInitParams( String iName,
@@ -99,8 +111,6 @@ public class AMQPHalfInterfaceBase extends AbstractAMQPInterface
     actingAsProvider   = asProvider;
     providerQueueName  = interfaceName + "_" + targetID.toString() + "[P]";
     userQueueName      = providerQueueName; // One direct of traffic only
-    providerRoutingKey = "";
-    userRoutingKey     = "";
 
     return true;
   }
