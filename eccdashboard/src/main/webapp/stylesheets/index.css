@@ -1,0 +1,23 @@
+p.clientitem {
+    padding: 5px;
+    margin: 5px 0;
+    cursor: pointer;
+}
+
+p.clientitem span {
+    font-size: smaller;
+    display: block;
+    color: #555;
+}
+
+p.entitiesitem {
+    padding: 5px;
+    margin: 5px 0;
+    cursor: pointer;
+}
+
+div.capabilitieslistbg {
+    background-color: #fff;
+    min-height: 450px;
+    padding: 0 5px;
+}

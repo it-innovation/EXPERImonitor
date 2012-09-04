@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+
+<!-- paulirish.com/2008/conditional-stylesheets-vs-css-hacks-answer-neither/ -->
+<!--[if lt IE 7]> <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang="en"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js lt-ie9 lt-ie8" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8" />
+
+        <meta name="viewport" content="width=device-width" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="author" content="http://twitter.com/maximbashevoy">
+
+        <title>Experimedia ECC Monitoring Dashboard</title>
+
+        <link rel="stylesheet" href="stylesheets/jquery.jqplot.min.css">
+        <link rel="stylesheet" href="stylesheets/foundation.min.css">
+        <link rel="stylesheet" href="stylesheets/common.css">
+        <link rel="stylesheet" href="stylesheets/livemetricview.css">
+        
+        <script src="javascripts/modernizr.foundation.js"></script>
+
+        <!-- IE Fix for HTML5 Tags -->
+        <!--[if lt IE 9]>
+          <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+    </head>
+    <body>
+
+
+        <div class="row" id="header"><!-- Header -->
+            <div class="twelve columns extraspacebottom">
+                <div class="row">
+                    <div class="twelve columns">
+                        <h2>Experimedia Experiment Monitor</h2>
+                        <p class="noextrawhitespace">This is version <strong>0.1</strong>.</p>
+                    </div>
+                </div>
+                <div class="row experimentMetadata">
+                    <div class="six columns">
+                        <h4 id="experimentName">Experiment Name Placeholder</h4>
+                        <p class="noextrawhitespace">UUID: <span id="experimentUUID">UUID placeholder</span></p>
+                        <p class="noextrawhitespace">Description: <span id="experimentDescription">Description placeholder</span></p>
+                        <p class="noextrawhitespace">Experiment ID: <span id="experimentExperimentID">ID placeholder</span></p>
+                        <p class="noextrawhitespace">Start time: <span id="experimentStartTime">Start time</span></p>
+                        <p class="noextrawhitespace">End time: <span id="experimentEndTime">End time</span></p>
+                    </div>
+                    <div class="six columns">
+                        <div class="row">
+                            <div class="twelve columns">
+                                <h4>Monitor control</h4>
+                                <p class="noextrawhitespace">Current phase: <strong>Metric Generator Discovery Phase</strong></p>
+                                <p>Phase status: <strong>Waiting for discovery responses</strong></p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="twelve columns">
+                                <div class="medium normal button split dropdown">
+                                    <a href="#">Take action</a>
+                                    <span></span>
+                                    <ul>
+                                        <li><a href="#">Start set-up phase</a></li>
+                                        <li><a href="#">Buy more milk</a></li>
+                                        <li class="divider"></li>
+                                        <li><a href="#">Abandon monitoring</a></li>
+                                    </ul>                                
+                                </div>
+                            </div>
+                        </div>
+                    </div>                    
+                </div>
+            </div>
+
+            <hr />
+
+        </div><!-- Header End-->
+
+        <div class="row"><!-- Content Wrapper --> 
+            <div class="twelve columns nopaddingsides">                        
+                <dl class="faketabs">
+                    <dd><a href="index.html">Connected Clients</a></dd>
+                    <dd><a href="statusview.html">Status View</a></dd>
+                    <dd class="active"><a href="livemetricview.html">Live Metric View</a></dd>
+                </dl>
+                
+                <div class="three columns metricgenlist">                                        
+<!--                    <p class="metricgenitem active">Metric generator 1 <span>Performance</span></p>
+                    <p class="metricgenitem">Metric generator 1 <span>Engagement</span></p>
+                    <p class="metricgenitem">Metric generator 2 <span>Performance</span></p>
+                    <p class="metricgenitem">Metric generator 3 <span>Performance</span></p>
+                    <p class="metricgenitem">Metric generator 4 <span>Performance</span></p>
+                    <p class="metricgenitem">Metric generator 5 <span>Performance</span></p>-->
+
+<!--                    <div class="row">
+                        <div class="twelve columns">
+                            <div class="small button split dropdown inpanelbutton">
+                                <a href="#">Options</a>
+                                <span></span>
+                                <ul>
+                                    <li><a href="#">Add to Dashboard</a></li>
+                                    <li><a href="#">Remove from Dashboard</a></li>
+                                </ul>                                
+                            </div>
+                        </div>
+                    </div>-->
+                </div>
+                <div class="nine columns">
+                    <div class="panel metricgendetails">
+                        <h6>Metrics Summary</h6>
+                    </div>
+                </div>                               
+            </div>
+        </div><!-- Content Wrapper End -->
+
+        <div class="row"><!-- Footer -->
+            <div class="twelve columns nopaddingsides">
+                <hr />
+                <p>2012 &copy; IT Innovation Centre, University of Southampton</p>
+            </div>
+        </div><!-- Footer End -->
+
+        <script src="javascripts/foundation.min.js"></script>
+        
+        <script language="javascript" type="text/javascript" src="javascripts/jquery.jqplot.min.js"></script>
+        <script language="javascript" type="text/javascript" src="javascripts/jqplot.dateAxisRenderer.min.js"></script>
+        <script language="javascript" type="text/javascript" src="javascripts/date.js"></script>
+
+        <script src="javascripts/common.js"></script>
+        <script src="javascripts/livemetricview.js"></script>
+    </body>
+</html>

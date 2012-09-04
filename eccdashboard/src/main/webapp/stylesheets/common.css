@@ -1,0 +1,89 @@
+div.extraspacebottom {
+    margin-bottom: 10px;
+}
+
+p.datarow {
+    margin: 0;
+    padding: 0 0 5px 40px;
+}
+
+p.dataerror {
+    color: red;
+}
+
+p.noextrawhitespace{
+    padding: 0;
+    margin: 0;
+}
+
+p.active {
+    background-color: #2284a1;
+    color: #fff;
+    font-weight: bold;
+}
+
+p.active span {
+    color: #fff !important;
+    font-weight: normal;
+}
+
+div.nopaddingright {
+    padding-right: 0;
+}
+
+div.nopaddingsides {
+    padding-right: 0;
+    padding-left: 0;
+}
+
+dl.faketabs {
+    border-bottom: solid 1px #e6e6e6;
+    display: block;
+    height: 40px;
+    padding: 0;
+    margin-bottom: 20px;
+}
+
+dl.faketabs dd {
+    display: block;
+    float: left;
+    padding: 0;
+    margin: 0;
+}
+
+dl.faketabs dd a {
+    display: block;
+    font-size: 14px;
+    height: 40px;
+    line-height: 40px;
+    padding: 0 23.8px;
+    color: #6f6f6f;
+}
+
+dl.faketabs dd.active a {
+    cursor: default;
+    color: #3c3c3c;
+    background: #fff;
+    border-left: 1px solid #e6e6e6;
+    border-right: 1px solid #e6e6e6;
+    font-weight: bold;
+}
+
+dl.faketabs dd:first-child {
+    margin-left: 0;
+}
+
+dl.faketabs dd.active {
+    border-top: 3px solid #2ba6cb;
+    margin-top: -3px;
+}
+
+.inpanelbutton {
+    position: absolute !important;
+    top: 15px;
+    right: 30px;
+}
+
+div.experimentMetadata span {
+    font-weight: bold;
+}
