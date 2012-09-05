@@ -131,7 +131,7 @@ public class EDMTest
         UUID mSetUUID = UUID.fromString("2b915932-41b1-45d7-b4f6-2de4f30020b8");
         UUID reportUUID = UUID.fromString("165c8058-5c67-4f92-ae34-df7ee2129821");
         
-        boolean withSubClasses = false;
+        boolean withSubClasses = true;
         
         //-- Create and get experiments --//
         //experiments(edm, expUUID);
@@ -148,7 +148,7 @@ public class EDMTest
         
         experimentCompleteChain(edm, expUUID, entityUUID, attributeUUID, mGenUUID, mGrpUUID, mSetUUID);
         
-        //printDetailsForExperiment(edm, expUUID, withSubClasses);
+        printExperimentDetails(edm, expUUID, withSubClasses);
         
         //saveReport(edm, mSetUUID, reportUUID);
         
@@ -620,7 +620,6 @@ public class EDMTest
     public static void experimentCompleteChain(ExperimentDataManager edm, UUID expUUID, UUID entityUUID, UUID attribUUID, UUID mGenUUID, UUID mGrpUUID, UUID mSetUUID) throws Exception
     {
         boolean withSubClasses = true;
-//----- EXPERIMENT
         
         IExperimentDAO expDAO = null;
         try {
@@ -629,6 +628,8 @@ public class EDMTest
             log.error ("Unable to get Experiment DAO: " + ex.getMessage(), ex);
             throw ex;
         }
+        
+//----- EXPERIMENT
         
         log.info("Creating experiment");
         Experiment exp = new Experiment();
@@ -672,7 +673,7 @@ public class EDMTest
         
 //----- MEASUREMENT SET
         log.info("Creating QoS Measurement set");
-        Metric metric = new Metric(UUID.randomUUID(), MetricType.RATIO, MILLI(SECOND));
+        Metric metric = new Metric(UUID.randomUUID(), MetricType.RATIO, null);
         MeasurementSet mSet = new MeasurementSet(mSetUUID, attribUUID, mGrpUUID, metric);
         metricGroup.addMeasurementSets(mSet);
         
@@ -889,6 +890,27 @@ public class EDMTest
                 }
             }
         }
+    }
+    
+    public static void printExperimentDetails(ExperimentDataManager edm, UUID expUUID, boolean withSubClasses) throws Exception
+    {
+        IExperimentDAO expDAO = null;
+        try {
+            expDAO = edm.getExperimentDAO();
+        } catch (Exception ex) {
+            log.error ("Unable to get Experiment DAO: " + ex.getMessage(), ex);
+            throw ex;
+        }
+        
+        log.info("Getting experiment object");
+        Experiment expFromDB = null;
+        try {
+            expFromDB = expDAO.getExperiment(expUUID, withSubClasses);
+        } catch (Exception ex) {
+            log.error("Unable to get experiment: " + ex.getMessage());
+        }
+        
+        printExperimentDetails(expFromDB);
     }
 
     public static void printExperimentDetails(Experiment experiment) throws Exception

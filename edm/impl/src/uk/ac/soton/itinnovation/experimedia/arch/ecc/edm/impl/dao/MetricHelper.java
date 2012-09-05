@@ -65,12 +65,14 @@ static Logger log = Logger.getLogger(MetricHelper.class);
             return new ValidationReturnObject(false, new NullPointerException("The Metric type is NULL"));
         }
         
-        if (metric.getUnit() == null)
+        // TOOD: include check for unit again when serialisation issue has been sorted by SGC
+        /*if (metric.getUnit() == null)
         {
             return new ValidationReturnObject(false, new NullPointerException("The Metric unit is NULL"));
-        }
+        }*/
         
         // check if it exists in the DB already
+        /*
         try {
             if (objectExists(metric.getUUID(), dbCon))
             {
@@ -78,7 +80,7 @@ static Logger log = Logger.getLogger(MetricHelper.class);
             }
         } catch (Exception ex) {
             throw ex;
-        }
+        }*/
         
         return new ValidationReturnObject(true);
     }
@@ -104,6 +106,10 @@ static Logger log = Logger.getLogger(MetricHelper.class);
         try {
             if (dbCon.isClosed())
                 dbCon.connect();
+            
+            // TODO: change this later - just a quick hack until serialisation of Unit is sorted
+            if (metric.getUnit() == null)
+                metric.setUnit(Unit.ONE);
             
             // serialising unit
             ByteArrayOutputStream bos = new ByteArrayOutputStream();

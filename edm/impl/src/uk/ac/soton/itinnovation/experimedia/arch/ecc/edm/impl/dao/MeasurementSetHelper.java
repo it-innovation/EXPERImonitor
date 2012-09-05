@@ -105,10 +105,10 @@ public class MeasurementSetHelper
         }
         
         // check that the attribute exists
-        if (!AttributeHelper.objectExists(mSet.getAttributeUUID(), dbCon))
+        /*if (!AttributeHelper.objectExists(mSet.getAttributeUUID(), dbCon))
         {
             return new ValidationReturnObject(false, new RuntimeException("The Attribute for the MeasurementSet doesn't exit (UUID: " + mSet.getAttributeUUID().toString() + ")"));
-        }
+        }*/
         
         // if any measurements, validate them too!
         if ((mSet.getMeasurements() != null) && !mSet.getMeasurements().isEmpty())
@@ -151,7 +151,7 @@ public class MeasurementSetHelper
         // this validation will check if all the required parameters are set and if
         // there isn't already a duplicate instance in the DB
         // will validate the metric and measurements too, if any are given
-        ValidationReturnObject returnObj = MeasurementSetHelper.isObjectValidForSave(measurementSet, dbCon, true);
+        ValidationReturnObject returnObj = MeasurementSetHelper.isObjectValidForSave(measurementSet, dbCon, false);
         if (!returnObj.valid)
         {
             log.error("Cannot save the MeasurementSet object: " + returnObj.exception.getMessage(), returnObj.exception);

@@ -134,7 +134,7 @@ public class AttributeHelper
     {
         // this validation will check if all the required parameters are set and if
         // there isn't already a duplicate instance in the DB
-        ValidationReturnObject returnObj = AttributeHelper.isObjectValidForSave(attrib, dbCon, true);
+        ValidationReturnObject returnObj = AttributeHelper.isObjectValidForSave(attrib, dbCon, false);
         if (!returnObj.valid)
         {
             log.error("Cannot save the Attribute object: " + returnObj.exception.getMessage(), returnObj.exception);

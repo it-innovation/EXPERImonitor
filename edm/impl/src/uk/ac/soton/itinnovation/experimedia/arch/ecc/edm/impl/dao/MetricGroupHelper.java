@@ -154,7 +154,7 @@ public class MetricGroupHelper
         // this validation will check if all the required parameters are set and if
         // there isn't already a duplicate instance in the DB
         // will validate the measurement sets too, if any are given
-        ValidationReturnObject returnObj = MetricGroupHelper.isObjectValidForSave(metricGroup, dbCon, true);
+        ValidationReturnObject returnObj = MetricGroupHelper.isObjectValidForSave(metricGroup, dbCon, false);
         if (!returnObj.valid)
         {
             log.error("Cannot save the MetricGroup object: " + returnObj.exception.getMessage(), returnObj.exception);
