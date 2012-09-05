@@ -25,13 +25,21 @@
 package eu.experimedia.itinnovation.ecc.web.controllers;
 
 import eu.experimedia.itinnovation.ecc.web.data.EMClientAsJson;
+import eu.experimedia.itinnovation.ecc.web.data.MeasurementSetAsJson;
+import eu.experimedia.itinnovation.ecc.web.data.MetricGroupAsJson;
 import eu.experimedia.itinnovation.ecc.web.services.ExperimentMonitorService;
+import net.sf.json.JSONObject;
+import net.sf.json.JSONSerializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Attribute;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGroup;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMClient;
 
 @Controller
@@ -44,28 +52,28 @@ public class ExperimentMonitorController {
     @RequestMapping(method = RequestMethod.GET, value = "/getclients/do.json")
     public @ResponseBody EMClientAsJson[] getConnectedClients() throws Throwable {
         try {
-            
+
             EMClient[] clients = emService.getAllConnectedClients();
             int numClients = clients.length;
-            
+
             EMClientAsJson tempClient = new EMClientAsJson();
             EMClientAsJson[] resultingListOfClients = new EMClientAsJson[numClients];
-            
+
             int i = 0;
             for (EMClient e : clients) {
                 tempClient.setUuid(e.getID().toString());
                 tempClient.setName(e.getName());
                 resultingListOfClients[i] = tempClient;
-                
+
                 tempClient = new EMClientAsJson();
                 i++;
             }
-            
+
             return resultingListOfClients;
         } catch (Throwable ex) {
             ex.printStackTrace();
             return null;
         }
-    }    
-    
+    }       
+
 }

@@ -23,6 +23,7 @@
 /////////////////////////////////////////////////////////////////////////
 
 var counter = 0;
+var currentClientsUuids = [];
 
 $(document).ready(function() {
     
@@ -49,26 +50,7 @@ $(document).ready(function() {
                         $("#experimentDescription").text(theExperiment.description);
                         $("#experimentExperimentID").text(theExperiment.experimentID);
                         $("#experimentStartTime").text(longToDate(theExperiment.startTime));
-                        $("#experimentEndTime").text(longToDate(theExperiment.endTime));
-                        
-                        // Get clients (not pulling for now)
-                        $.ajax({
-                            type: 'GET',
-                            url: "/em/getclients/do.json",
-                            contentType: "application/json; charset=utf-8",
-                            success: function(clients){
-                                console.log(clients);
-                                if (clients.length == 0) {
-                                    $(".clientdetails").empty();
-                                    $(".clientdetails").append('<h6>No clients detected</h6>');
-                                    
-                                } else {
-                                    $.each(clients, function(indexClient, client){
-                                    $('.clientlist').append('<p class="clientitem">' + client.name + '<span>' + client.uuid + '</span></p>'); 
-                                    });
-                                }
-                            }
-                        });
+                        $("#experimentEndTime").text(longToDate(theExperiment.endTime));                        
 
                     }
                 }
@@ -80,6 +62,10 @@ $(document).ready(function() {
                 console.error(xhr.status);
             }
         });    
+        
+        // Get clients
+        getClients();
+        setInterval("getClients()", 3000);
 
 /*
     $(".clientitem").click(function(){
@@ -121,3 +107,47 @@ $(document).ready(function() {
     $(".clientlist .clientitem").first().trigger('click');
 */
 });
+
+function getClients() {
+    $.ajax({
+        type: 'GET',
+        url: "/em/getclients/do.json",
+        contentType: "application/json; charset=utf-8",
+        success: function(clients){
+//            console.log(clients);
+            if (clients.length == 0) {
+                $(".clientdetails").empty();
+                $(".clientdetails").append('<h6>No clients detected</h6>');
+
+            } else {
+                var theClient;
+                $.each(clients, function(indexClient, client){
+                    if (jQuery.inArray(client.uuid, currentClientsUuids) < 0) {
+                        console.log("New client: " + client.uuid);
+                        currentClientsUuids.push(client.uuid);
+                        theClient = $('<p class="clientitem">' + client.name + '<span>' + client.uuid + '</span></p>').appendTo($('.clientlist'));
+                        theClient.data('client', client);
+                        
+                        theClient.click(function(){
+                            $(".clientlist .clientitem").removeClass('active');
+                            $(this).addClass('active');
+                            
+                            var clientData = $(this).data().client;
+                            
+                            var cd = $(".clientdetails");
+                            cd.empty();
+                            cd.append('<p class="clientHeader">' + clientData.name + '</p>');
+                            cd.append('<p class="clientDescription">UUID: ' + clientData.uuid + '</p>');
+                            
+                        });
+                        
+                        // If no clients selected, select the first one
+                        if ($(".clientlist .active").size() < 1)
+                            $(".clientlist .clientitem").first().trigger('click');
+                            
+                    }
+                });
+            }
+        }
+    });    
+}

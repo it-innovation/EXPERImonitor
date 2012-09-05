@@ -21,3 +21,17 @@ div.capabilitieslistbg {
     min-height: 450px;
     padding: 0 5px;
 }
+
+p.clientHeader {
+    margin: 0;
+    padding: 0;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+p.clientDescription {
+    margin: 0;
+    padding: 0;
+    font-size: 12px;
+    color: #555;
+}
