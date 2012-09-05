@@ -146,7 +146,7 @@ public class EDMTest
         
         //measurement(edm, mSetUUID);
         
-        //experimentCompleteChain(edm, expUUID, entityUUID, attributeUUID, mGenUUID, mGrpUUID, mSetUUID);
+        experimentCompleteChain(edm, expUUID, entityUUID, attributeUUID, mGenUUID, mGrpUUID, mSetUUID);
         
         //printDetailsForExperiment(edm, expUUID, withSubClasses);
         
@@ -653,6 +653,17 @@ public class EDMTest
         MetricGenerator metricGenerator = new MetricGenerator(mGenUUID, "Experiment MetricGenerator", "A description");
         metricGenerator.addEntity(new Entity(entityUUID));
         exp.addMetricGenerator(metricGenerator);
+        
+//----- ENTITY
+        log.info("Creating VM entity");
+        Entity entity = new Entity();
+        entity.setUUID(entityUUID);
+        entity.setName("VM");
+        entity.setDescription("A Virtual Machine");
+        entity.addtAttribute(new Attribute(attribUUID, entityUUID, "CPU", "CPU performance"));
+        entity.addtAttribute(new Attribute(UUID.randomUUID(), entityUUID, "Network", "Network performance"));
+        entity.addtAttribute(new Attribute(UUID.randomUUID(), entityUUID, "Disk", "Disk performance"));
+        metricGenerator.addEntity(entity);
         
 //----- METRIC GROUP
         log.info("Creating QoS MetricGroup");

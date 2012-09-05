@@ -189,6 +189,30 @@ public class MetricGeneratorHelper
         }
         
         boolean exception = false;
+        // save any entities if not NULL and if not already existing
+        if ((metricGen.getEntities() != null) && !metricGen.getEntities().isEmpty())
+        {
+            try {
+                if (dbCon.isClosed())
+                    dbCon.connect();
+                
+                for (Entity entity : metricGen.getEntities())
+                {
+                    // check if the entity exists; if not, then save it
+                    if (!EntityHelper.objectExists(entity.getUUID(), dbCon))
+                    {
+                        EntityHelper.saveEntity(entity, dbCon, false);
+                    }
+                }
+            } catch (Exception ex) {
+                exception = true;
+                throw ex;
+            } finally {
+                if (exception && closeDBcon)
+                    dbCon.close();
+            }
+        }
+        
         try {
             if (dbCon.isClosed())
                 dbCon.connect();
@@ -226,24 +250,6 @@ public class MetricGeneratorHelper
                 {
                     if (mGrp != null)
                         MetricGroupHelper.saveMetricGroup(mGrp, dbCon, false); // flag not to close the DB connection
-                }
-            }
-        } catch (Exception ex) {
-            exception = true;
-            throw ex;
-        } finally {
-            if (exception && closeDBcon)
-                dbCon.close();
-        }
-        
-        // save any entities if not NULL and if not already existing
-        try {
-            for (Entity entity : metricGen.getEntities())
-            {
-                // check if the entity exists; if not, then save it
-                if (!EntityHelper.objectExists(entity.getUUID(), dbCon))
-                {
-                    EntityHelper.saveEntity(entity, dbCon, false);
                 }
             }
         } catch (Exception ex) {
