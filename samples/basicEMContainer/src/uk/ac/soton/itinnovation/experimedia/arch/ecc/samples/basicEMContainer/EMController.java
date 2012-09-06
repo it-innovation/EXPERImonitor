@@ -26,6 +26,8 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.basicEMContainer;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.factory.EMInterfaceFactory;
 
@@ -33,8 +35,11 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 
-import java.awt.event.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.ExperimentDataManager;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.*;
+
+import java.awt.event.*;
 import org.apache.log4j.Logger;
 import java.util.*;
 
@@ -49,11 +54,19 @@ public class EMController implements IEMLifecycleListener
   private EMView             mainView;
   private boolean            waitingToStartNextPhase = false;
   
+  private IExperimentDataManager expDataMgr;
+  private IMetricGeneratorDAO    expMGAccessor;
+  private IReportDAO             expReportAccessor;
+  private IMeasurementSetDAO     expMSAccessor;
+  private Experiment             expInstance;
+  
   
   public EMController()
   {    
     expMonitor = EMInterfaceFactory.createEM();
     expMonitor.addLifecyleListener( this );
+    
+    expDataMgr = new ExperimentDataManager();
   }
   
   public void start( String rabbitIP, UUID emID ) throws Exception
@@ -70,6 +83,14 @@ public class EMController implements IEMLifecycleListener
     {
       emCtrlLogger.error( "Could not open entry point on Rabbit server" );
       throw e; 
+    }
+    
+    boolean dmOK = createExperiment();
+    
+    if ( !dmOK )
+    {
+      emCtrlLogger.error( "Had problems setting up the EDM" );
+      throw new Exception( "Could not set up EDM" );
     }
   }
   
@@ -139,10 +160,25 @@ public class EMController implements IEMLifecycleListener
       Set<MetricGenerator> generators = client.getCopyOfMetricGenerators();
       Iterator<MetricGenerator> mgIt = generators.iterator();
       
+      // Pass to EDM
+      if ( expMGAccessor != null && expInstance != null )
+      {
+        UUID expID = expInstance.getUUID();
+        
+        while ( mgIt.hasNext() )
+        {
+          MetricGenerator mg = mgIt.next();
+          try { expMGAccessor.saveMetricGenerator( mg, expID ); }
+          catch ( Exception e )
+          { emCtrlLogger.error( "Failed to store metric generator" ); }
+        }
+      }
+      
+      // Update UI
+      mgIt = generators.iterator();
       while ( mgIt.hasNext() )
       {
         MetricGenerator mg = mgIt.next();
-        
         mainView.addLogText( client.getName() + " has metric generator: " + mg.getName() );
       }
     }
@@ -159,15 +195,24 @@ public class EMController implements IEMLifecycleListener
   public void onGotMetricData( EMClient client, Report report )
   {
     if ( client != null && report != null )
-    {
+    {        
       MeasurementSet ms = report.getMeasurementSet();   
       if ( ms != null )
       {
         Set<Measurement> measures = ms.getMeasurements();
         if ( measures != null && !measures.isEmpty() )
+        {
+          // Notify EDM
+          if ( expReportAccessor != null )
+            try { expReportAccessor.saveReport(report); }
+              catch ( Exception e )
+              { emCtrlLogger.error( "Failed to store report data" ); }
+          
+          // Notify UI
           mainView.addLogText( client.getName() + 
                                " got metric data: " + 
                                 measures.iterator().next().getValue() );
+        }
       }
     }
   }
@@ -177,6 +222,7 @@ public class EMController implements IEMLifecycleListener
   {
     if ( client != null && summary != null )
     {
+      // Just notify UI
       Iterator<UUID> idIt = summary.getReportedMeasurementSetIDs().iterator();
       while( idIt.hasNext() )
       {
@@ -206,6 +252,13 @@ public class EMController implements IEMLifecycleListener
         if ( measures != null ) measurementCount = measures.size();
       }
       
+      // Notify EDM of batch data
+      if ( expMSAccessor != null )
+        try { expMSAccessor.saveMeasurementSet(ms); }
+        catch ( Exception e )
+        { emCtrlLogger.error("Couldn't store batch data (is this a duplicate?)"); }
+      
+      // Notify UI with summary of batch
       mainView.addLogText( client.getName() + " got batch ID: " + batch.getID().toString() + 
                            " carrying " + measurementCount + " measures" );
     }
@@ -326,6 +379,33 @@ public class EMController implements IEMLifecycleListener
         }
       }
     }
+  }
+  
+  private boolean createExperiment()
+  {
+    boolean result = false;
+    
+    try
+    {
+      expMGAccessor     = expDataMgr.getMetricGeneratorDAO();
+      expReportAccessor = expDataMgr.getReportDAO();
+      expMSAccessor     = expDataMgr.getMeasurementSetDAO();
+
+      Date expDate = new Date();
+      expInstance  = new Experiment();
+      expInstance.setName( UUID.randomUUID().toString() );
+      expInstance.setDescription( "Sample ExperimentMonitor based experiment" );
+      expInstance.setStartTime( expDate );
+      expInstance.setExperimentID( expDate.toString() );
+
+      IExperimentDAO expDAO = expDataMgr.getExperimentDAO();
+      expDAO.saveExperiment( expInstance );
+      result = true;
+    }
+    catch ( Exception e )
+    { emCtrlLogger.error( "Could not initialise experiment"); }
+    
+    return result;
   }
   
   // Internal event handling ---------------------------------------------------

@@ -32,6 +32,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
 
 import org.apache.log4j.Logger;
+
 import java.util.*;
 
 
@@ -144,12 +145,13 @@ public class EMClientController implements EMIAdapterListener,
     metricGen.addMetricGroup( mg );
     
     MeasurementSet ms = new MeasurementSet();
-    ms.setAttributeUUID( entityAttribute.getUUID() );             
+    ms.setMetricGroupUUID( mg.getUUID() );
+    ms.setAttributeUUID( entityAttribute.getUUID() );
     mg.addMeasurementSets( ms );                              
     
-    //TODO: Get this right!
     Metric memMetric = new Metric();
-    //TODO: Unit set-up for mem usage
+    memMetric.setMetricType( MetricType.RATIO );
+    //TODO: Metric Unit (serialisation to resolve here)
     ms.setMetric( memMetric );
     
     clientView.addLogMessage( "Discovered generator: " + metricGen.getName() );
@@ -202,7 +204,13 @@ public class EMClientController implements EMIAdapterListener,
     snapshotMeasurement();
     sampleSet.addMeasurement( currentMeasurement );
     
+    // Set up report (has only a single measure)
+    Date date = new Date();
+    reportOut.setReportDate( date );
+    reportOut.setFromDate( date );
+    reportOut.setToDate( date );
     reportOut.setMeasurementSet( sampleSet );
+    reportOut.setNumberOfMeasurements( 1 );
   }
   
   @Override
@@ -210,6 +218,10 @@ public class EMClientController implements EMIAdapterListener,
   {
     // We've only got one MeasurementSet so we'll create a demo summary report
     // and just two measurements.. so we'll use these to create a demo summary
+    
+    // If we don't have any measurements, make some up!
+    if ( firstMeasurement   ==  null ) snapshotMeasurement();
+    if ( currentMeasurement ==  null ) snapshotMeasurement();
     
     Report report = new Report();
     report.setReportDate( new Date() );
@@ -257,11 +269,19 @@ public class EMClientController implements EMIAdapterListener,
     snapshotMeasurement();
     sampleSet.addMeasurement( currentMeasurement );
     
-    Report randomReport = new Report();
-    randomReport.setMeasurementSet( sampleSet );
+    // Set up report (has only a single measure)
+    Date date           = new Date();
+    Report sampleReport = new Report();
+    
+    sampleReport.setMeasurementSet( sampleSet );
+    sampleReport.setReportDate(date );
+    sampleReport.setFromDate( date );
+    sampleReport.setToDate( date );
+    sampleReport.setMeasurementSet( sampleSet );
+    sampleReport.setNumberOfMeasurements( 1 );
     
     // ... and report!
-    emiAdapter.pushMetric( randomReport );
+    emiAdapter.pushMetric( sampleReport );
   }
   
   // Private method ------------------------------------------------------------
@@ -285,7 +305,11 @@ public class EMClientController implements EMIAdapterListener,
     // Just take a very rough measurement
     String memVal = Long.toString( rt.totalMemory() - rt.freeMemory() );
     
+    // Get the (single) measurement set for this snapshot (just to get ID)
+    MeasurementSet snapshotMS = createMeasurementSetEmptySample();
+    
     currentMeasurement = new Measurement();
+    currentMeasurement.setMeasurementSetUUID( snapshotMS.getUUID() );
     currentMeasurement.setTimeStamp( new Date() );
     currentMeasurement.setValue( memVal );
     

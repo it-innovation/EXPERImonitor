@@ -134,9 +134,9 @@ public class EMMetricGenSetupPhase extends AbstractEMLCPhase
     {
       EMClientEx client = getClient( senderID );
       
-      if ( client != null && genID != null && success != null )
+      if ( client != null )
       {
-        if ( success ) client.addSuccessfulSetup( genID );
+        if ( genID != null && success ) client.addSuccessfulSetup( genID );
         
         if ( client.hasGeneratorToSetup() )
         {
@@ -144,23 +144,25 @@ public class EMMetricGenSetupPhase extends AbstractEMLCPhase
           client.getSetupInterface().setupMetricGenerator( nextGen );
         }
         else
+        {
           if ( phaseListener != null )
             phaseListener.onMetricGenSetupResult( client, 
                                                   client.metricGeneratorsSetupOK() );
-      }
-      
-      // Check to see if we've finished trying to set up all clients
-      boolean allAttemptsMade       = true;
-      Iterator<EMClientEx> clientIt = getCopySetOfCurrentClients().iterator();
-      
-      while ( clientIt.hasNext() )
-        if ( clientIt.next().hasGeneratorToSetup() )
-        {
-          allAttemptsMade = false;
-          break;
+          
+          // Check to see if we've finished trying to set up all clients
+          boolean allAttemptsMade       = true;
+          Iterator<EMClientEx> clientIt = getCopySetOfCurrentClients().iterator();
+
+          while ( clientIt.hasNext() )
+            if ( clientIt.next().hasGeneratorToSetup() )
+            {
+              allAttemptsMade = false;
+              break;
+            }
+
+          if ( allAttemptsMade ) hardStop();
         }
-      
-      if ( allAttemptsMade ) hardStop();
+      }
     }
   }
 }
