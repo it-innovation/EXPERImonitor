@@ -34,30 +34,48 @@ import java.util.UUID;
 
 public interface IEMMetricGenSetup
 {
-  // Listeners -----------------------------------------------------------------
-  /**
-   * If you are acting as a 'provider' of this interface (the EM does this) then
-   * use this method to set your listener to incoming methods called by the user.
-   * 
-   * @param listener - Listener interface for provider actors
-   */
-  void setProviderListener( IEMSetup_ProviderListener listener );
-  
-  /**
-   * If you are acting as a 'user' of this interface (a client of the EM) then
-   * use this method to set your listener to incoming methods called by the provider
-   * 
-   * @param listener - Listener interface for listener actors
-   */
-  void setUserListener( IEMSetup_UserListener listener);
-  
-  // Provider methods ----------------------------------------------------------
-  void setupMetricGenerator( UUID genID );
-  
-  void setupTimeOut( UUID genID );
-  
-  // User methods --------------------------------------------------------------
-  void notifyReadyToSetup();
-  
-  void notifyMetricGeneratorSetupResult( UUID genID, Boolean success );
+    // Listeners -----------------------------------------------------------------
+    /**
+     * Sets the provider listener for this interface
+     * 
+     * @param listener - Implementation of the 'provider' side listener
+     */
+    void setProviderListener( IEMSetup_ProviderListener listener );
+
+    /**
+     * Sets the user listener for this interface
+     * 
+     * @param listener - Implementation of the 'user' side listener
+     */
+    void setUserListener( IEMSetup_UserListener listener);
+
+    // Provider methods ----------------------------------------------------------
+    /**
+     * Requests the user sets up the metric generator specified by the ID.
+     * 
+     * @param genID - ID identifying the metric generator to be set up by the user.
+     */
+    void setupMetricGenerator( UUID genID );
+
+    /**
+     * Tells the user that time has run out to set up the metric generator
+     * specified by the ID.
+     * 
+     * @param genID - ID identifying the metric generator to be set up by the user.
+     */
+    void setupTimeOut( UUID genID );
+
+    // User methods --------------------------------------------------------------
+    /**
+     * Notifies the EM that the user is ready to set up its MetricGenerators
+     */
+    void notifyReadyToSetup();
+
+    /**
+     * Notifies the EM of the MetricGenerator (identified by the ID) set-up result
+     * 
+     * @param genID   - ID of the MetricGenerator
+     * @param success - Success or failure of the set-up attempt
+     */
+    void notifyMetricGeneratorSetupResult( UUID genID, Boolean success );
 }

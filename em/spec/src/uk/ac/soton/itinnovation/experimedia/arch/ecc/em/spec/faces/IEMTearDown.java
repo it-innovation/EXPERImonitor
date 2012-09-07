@@ -30,21 +30,51 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEM
 
 
 
-
+/**
+ * IEMTearDown supports a basic tear-down control and reporting procedure controlled
+ * by the EM.
+ * 
+ * @author sgc
+ */
 public interface IEMTearDown
 {
-  // Listeners -----------------------------------------------------------------
-  void setProviderListener( IEMTearDown_ProviderListener listener );
-  
-  void setUserListener( IEMTearDown_UserListener listener );
-  
-  // Provider methods ----------------------------------------------------------
-  void tearDownMetricGenerators();
-  
-  void tearDownTimeOut();
-  
-  // User methods --------------------------------------------------------------
-  void notifyReadyToTearDown();
-  
-  void sendTearDownResult( Boolean success );
+    // Listeners -----------------------------------------------------------------
+    /**
+     * Sets the provider listener for this interface
+     * 
+     * @param listener - Implementation of the 'provider' side listener
+     */
+    void setProviderListener( IEMTearDown_ProviderListener listener );
+
+    /**
+     * Sets the user listener for this interface
+     * 
+     * @param listener - Implementation of the 'user' side listener
+     */
+    void setUserListener( IEMTearDown_UserListener listener );
+
+    // Provider methods ----------------------------------------------------------
+    /**
+     * Requests that the user of this interface start tearing down their monitoring
+     * resources.
+     */
+    void tearDownMetricGenerators();
+
+    /**
+     * Tell user that it has run out of time to report on its tear-down process.
+     */
+    void tearDownTimeOut();
+
+    // User methods --------------------------------------------------------------
+    /**
+     * Notify the EM that this client is ready to start its tear-down process.
+     */
+    void notifyReadyToTearDown();
+
+    /**
+     * Send the EM the result of this user's tear-down process.
+     * 
+     * @param success 
+     */
+    void sendTearDownResult( Boolean success );
 }

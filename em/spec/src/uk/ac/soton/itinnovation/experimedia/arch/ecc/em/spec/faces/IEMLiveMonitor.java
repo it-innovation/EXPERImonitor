@@ -37,32 +37,96 @@ import java.util.UUID;
 
 public interface IEMLiveMonitor
 {
-  // Listeners -----------------------------------------------------------------
-  void setProviderListener( IEMLiveMonitor_ProviderListener listener );
-  
-  void setUserListener( IEMLiveMonitor_UserListener listener );
-  
-  // Provider methods ----------------------------------------------------------
-  void startPushing();
-  
-  void receivedPush( UUID lastReportID );
-  
-  void stopPushing();
-  
-  void pullMetric( UUID measurementSetID );
-  
-  void pullMetricTimeOut( UUID measurementSetID );
-  
-  void pullingStopped();
-  
-  // User methods --------------------------------------------------------------
-  void notifyReadyToPush();
-  
-  void pushMetric( Report report );
-  
-  void notifyPushingCompleted();
-  
-  void notifyReadyForPull();
-  
-  void sendPulledMetric( Report report );
+    // Listeners -----------------------------------------------------------------
+    /**
+     * Sets the provider listener for this interface
+     * 
+     * @param listener - Implementation of the 'provider' side listener
+     */
+    void setProviderListener( IEMLiveMonitor_ProviderListener listener );
+
+    /**
+     * Sets the user listener for this interface
+     * 
+     * @param listener - Implementation of the 'user' side listener
+     */
+    void setUserListener( IEMLiveMonitor_UserListener listener );
+
+    // Provider methods ----------------------------------------------------------
+    /**
+     * Tell the user to start pushing metric data to the EM.
+     */
+    void startPushing();
+
+    /**
+     * Tell the user that a push report has been received by the EM.
+     * 
+     * @param lastReportID - UUID of the last push report received by the EM from
+     * this client.
+     */
+    void receivedPush( UUID lastReportID );
+
+    /**
+     * Tells the user to stop pushing data to the EM.
+     */
+    void stopPushing();
+
+    /**
+     * Tells the client to generate a Report with data for the supplied 
+     * MeasurementSet ID
+     * 
+     * @param measurementSetID - ID of the measurement set data is required for.
+     */
+    void pullMetric( UUID measurementSetID );
+
+    /**
+     * Tells the user that time has run out to generate data for the MeasurementSet
+     * specified.
+     * 
+     * @param measurementSetID - ID of the measurement set data is required for.
+     */
+    void pullMetricTimeOut( UUID measurementSetID );
+
+    /**
+     * Tells the user that no more pulling requests will be issued.
+     */
+    void pullingStopped();
+
+    // User methods --------------------------------------------------------------
+    /**
+     * Notifies the EM that this user is ready to start pushing metric data.
+     */
+    void notifyReadyToPush();
+
+    /**
+     * Sends a Report instance to the EM. IMPORTANT NOTE: users MUST pair this
+     * method call with the IEMLiveMonitor_UserListener.onReceivedPush(..) event
+     * issued to the user by the EM. Users MUST NOT attempt to push data to the 
+     * EM on an ad-hoc basis - they must wait for the onReceivedPush(..) response
+     * from the EM before attempting another push.
+     * 
+     * @param report - Instance of a Report containing measurement data (for now,
+     * for a single time frame).
+     */
+    void pushMetric( Report report );
+
+    /**
+     * Tells the EM that this user has finished pushing Reports.
+     * 
+     */
+    void notifyPushingCompleted();
+
+    /**
+     * Notifies the EM that this user is ready to respond to pull requests from
+     * the EM. 
+     */
+    void notifyReadyForPull();
+
+    /**
+     * Sends a pulled Report (in response to a request from the EM) to the EM.
+     * 
+     * @param report  - Instance of a Report containing measurement data (for now,
+     * for a single time frame).
+     */
+    void sendPulledMetric( Report report );
 }

@@ -31,12 +31,36 @@ import java.util.UUID;
 
 
 
-
+/**
+ * IEMPostReport_UserListener is a user client listener that listens to the EM
+ * for post-report data generation requests.
+ * 
+ * @author sgc
+ */
 public interface IEMPostReport_UserListener
 {
-  void onRequestPostReportSummary( UUID senderID );
+    /**
+     * Request from the EM to generate a post-report summary
+     * 
+     * @param senderID - ID of the EM
+     */
+    void onRequestPostReportSummary( UUID senderID );
   
-  void onRequestDataBatch( UUID senderID, EMDataBatch reqBatch );
+    /**
+     * Request from the EM for the user client to generate metric data based
+     * on the specification of the EMDataBatch instance.
+     * 
+     * @param senderID  - ID of the EM
+     * @param reqBatch  - Instance of the data batch required by the EM
+     */
+    void onRequestDataBatch( UUID senderID, EMDataBatch reqBatch );
   
-  void notifyReportBatchTimeOut( UUID senderID, UUID batchID );
+    /**
+     * Notification by the EM that time has run out for the client user to
+     * send the batched data requested (identified by the ID) by the EM.
+     * 
+     * @param senderID  - ID of the EM
+     * @param batchID   - ID of the batch data requested
+     */
+    void notifyReportBatchTimeOut( UUID senderID, UUID batchID );
 }

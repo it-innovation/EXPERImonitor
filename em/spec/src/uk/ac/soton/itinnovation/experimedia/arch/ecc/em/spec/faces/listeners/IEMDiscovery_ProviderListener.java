@@ -42,32 +42,45 @@ import java.util.*;
  */
 public interface IEMDiscovery_ProviderListener
 {
-  /**
-   * Notification of a user who is now ready to initialise.
-   */
-  void onReadyToInitialise( UUID senderID );
-  
-  /**
-   * Notification of a user's declaration of which activity phases it supports.
-   * 
-   * @param supportedPhases - a list of enumerated phases supported by the user.
-   */
-  void onSendActivityPhases( UUID senderID, 
-                             EnumSet<EMPhase> supportedPhases );
-  
-  /**
-   * Notification that the user has finished their discovery process and is
-   * reporting on which metric generators they currently have available.
-   */
-  void onSendDiscoveryResult( UUID senderID,
-                              Boolean discoveredGenerators );
-  
-  void onSendMetricGeneratorInfo( UUID senderID,
-                                  Set<MetricGenerator> generators );
-  
-  /**
-   * Notification that the user is disconnecting from the EM.
-   * 
-   */
-  void onClientDisconnecting( UUID senderID );
+    /**
+    * Notification of a user who is now ready to initialise.
+    */
+    void onReadyToInitialise( UUID senderID );
+
+    /**
+    * Notification of a user's declaration of which activity phases it supports.
+    * 
+    * @param senderID        - ID of the client user
+    * @param supportedPhases - A list of enumerated phases supported by the user.
+    */
+    void onSendActivityPhases( UUID senderID, 
+                               EnumSet<EMPhase> supportedPhases );
+
+    /**
+    * Notification that the user has finished their discovery process and is
+    * reporting on which metric generators they currently have available.
+    * 
+    * @param senderID             - ID of the client user
+    * @param discoveredGenerators - Result of the discovery process by the user client
+    */
+    void onSendDiscoveryResult( UUID senderID,
+                                Boolean discoveredGenerators );
+
+    /**
+    * Notification from the user of the MetricGenerators is has available to
+    * send metric data during the Live Monitoring process.
+    * 
+    * @param senderID   - ID of the client user
+    * @param generators - Non-empty set of MetricGenerators.
+    */
+    void onSendMetricGeneratorInfo( UUID senderID,
+                                    Set<MetricGenerator> generators );
+
+    /**
+    * Notification that the user is disconnecting from the EM.
+    * 
+    * @param senderID - ID of the user client
+    * 
+    */
+    void onClientDisconnecting( UUID senderID );
 }

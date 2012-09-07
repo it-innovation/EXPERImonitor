@@ -42,20 +42,20 @@ import java.util.UUID;
  */
 public interface IEMMonitorEntryPoint
 {
-  /**
-   * Listen to the messages sent to the provider (EM) part of this interface.
-   * 
-   * @param listener - IECCMonitorEntryPoint_ProviderListener listener
-   */
-  void setListener( IEMMonitorEntryPoint_ProviderListener listener );
-  
-  // Provider methods ----------------------------------------------------------
-  /**
-   * As a user of the interface, use this method to register yourself with the
-   * provider (the EM).
-   * 
-   * @param userID    -- UUID that uniquely identifies the user connecting
-   * @param userName  -- Informal label identifying the connecting user
-   */
-  void registerAsEMClient( UUID userID, String userName );
+    /**
+     * Sets the provider listener for this interface
+     * 
+     * @param listener - Implementation of the 'provider' side listener
+     */
+    void setListener( IEMMonitorEntryPoint_ProviderListener listener );
+
+    // Provider methods ----------------------------------------------------------
+    /**
+    * As a user of the interface, use this method to register yourself with the
+    * provider (the EM).
+    * 
+    * @param userID    -- UUID that uniquely identifies the user connecting
+    * @param userName  -- Informal label identifying the connecting user
+    */
+    void registerAsEMClient( UUID userID, String userName );
 }

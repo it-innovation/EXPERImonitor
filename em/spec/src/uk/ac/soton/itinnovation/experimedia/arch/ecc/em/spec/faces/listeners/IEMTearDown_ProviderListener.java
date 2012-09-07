@@ -29,10 +29,28 @@ import java.util.UUID;
 
 
 
-
+/**
+ * IEMTearDown_ProviderListener is for EM providers wishing to hear about
+ * user clients' tear-down results
+ * 
+ * @author sgc
+ */
 public interface IEMTearDown_ProviderListener
 {
-  void onNotifyReadyToTearDown( UUID senderID );
+    /**
+     * Notifies the provider that a user client is ready to start the tear-down
+     * process.
+     * 
+     * @param senderID 
+     */
+    void onNotifyReadyToTearDown( UUID senderID );
   
-  void onNotifyTearDownResult( UUID senderID, Boolean success );
+    /**
+     * Notification from the user client that its tear-down process has completed
+     * and the result of the tear-down.
+     * 
+     * @param senderID
+     * @param success 
+     */
+    void onNotifyTearDownResult( UUID senderID, Boolean success );
 }

@@ -29,10 +29,27 @@ import java.util.UUID;
 
 
 
-
+/**
+ * IEMTearDown_UserListener is a listener for user clients to enact tear-down
+ * operations under the coordination of the EM.
+ * 
+ * @author sgc
+ */
 public interface IEMTearDown_UserListener
 {
-  void onTearDownMetricGenerators( UUID senderID );
+    /**
+     * Notification from the EM that it is time to tear-down experiment based
+     * resources.
+     * 
+     * @param senderID - ID of the EM
+     */
+    void onTearDownMetricGenerators( UUID senderID );
   
-  void onTearDownTimeOut( UUID senderID );
+    /**
+     * Notification from the EM that time has run-out for reporting the result
+     * of the tear-down process to the EM.
+     * 
+     * @param senderID 
+     */
+    void onTearDownTimeOut( UUID senderID );
 }

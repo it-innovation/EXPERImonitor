@@ -27,10 +27,27 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.spec;
 
 
 
-
+/**
+ * IAMQPMessageDispatch acts as a dispatching service for AMQP subscribers -
+ * add instances of this dispatch to the IAMQPMessageDispatchPump to enable
+ * message processing
+ * 
+ * @author sgc
+ */
 public interface IAMQPMessageDispatch
 {
-  void setListener( IAMQPMessageDispatchListener listener );
-  
-  IAMQPMessageDispatchListener getListener();
+    /**
+     * The IAMQPMessageDispatchListener is called when a message targeted at
+     * the dispatch arrives.
+     * 
+     * @param listener - class implementing the listener interface
+     */
+    void setListener( IAMQPMessageDispatchListener listener );
+    
+    /**
+     * Returns the current listener for this dispatch.
+     * 
+     * @return - class implementing the listener
+     */
+    IAMQPMessageDispatchListener getListener();
 }

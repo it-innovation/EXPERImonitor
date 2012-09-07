@@ -31,16 +31,50 @@ import java.util.UUID;
 
 
 
-
+/**
+ * IEMLiveMonitor_ProviderListener is a provider client listener that EM implementations
+ * use to listen for client users sending metric data during the Live Monitoring phase.
+ * 
+ * @author sgc
+ */
 public interface IEMLiveMonitor_ProviderListener
 {
-  void onNotifyReadyToPush( UUID senderID );
-  
-  void onPushMetric( UUID senderID, Report report );
-  
-  void onNotifyPushingCompleted( UUID senderID );
-  
-  void onNotifyReadyForPull( UUID senderID );
-  
-  void onSendPulledMetric( UUID senderID, Report report );
+    /**
+     * Notification by the user client that it is ready to starting pushing metric data.
+     * 
+     * @param senderID - ID of the user client
+     */
+    void onNotifyReadyToPush( UUID senderID );
+
+    /**
+     * Notification of a metric push report by the user client.
+     * 
+     * @param senderID  - ID of the user client
+     * @param report    - Report sent by the client
+     */
+    void onPushMetric( UUID senderID, Report report );
+
+    /**
+     * Notification by the user client that it has stopped pushing metric data to
+     * the EM.
+     * 
+     * @param senderID - ID of the user client.
+     */
+    void onNotifyPushingCompleted( UUID senderID );
+
+    /**
+     * Notification by the user client that it is ready to receive pull requests
+     * from the EM.
+     * 
+     * @param senderID 
+     */
+    void onNotifyReadyForPull( UUID senderID );
+
+    /**
+     * Notification of a pulled metric sent from the user client to the EM.
+     * 
+     * @param senderID  - ID of the user client.
+     * @param report    - Report sent as a result of a pull request from the EM.
+     */
+    void onSendPulledMetric( UUID senderID, Report report );
 }

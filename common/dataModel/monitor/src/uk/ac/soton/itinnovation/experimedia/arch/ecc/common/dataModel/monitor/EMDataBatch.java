@@ -32,7 +32,12 @@ import java.util.*;
 
 
 
-
+/**
+ * EMDataBatch encapsulates metric data between a start and end date for a particular
+ * MeasurementSet.
+ * 
+ * @author sgc
+ */
 public class EMDataBatch
 {
   private UUID batchID;
@@ -47,6 +52,13 @@ public class EMDataBatch
     batchID = UUID.randomUUID();
   }
   
+  /**
+   * Creates a new batch instance for the associated MeasurementSet, start and end date.
+   * 
+   * @param mSet  - MeasurementSet this batch refers to
+   * @param start - The starting date of the first measurement in this set
+   * @param end   - The end date of the last measurement in this set (measurements encapsulated are expected to be complete and contiguous)
+   */
   public EMDataBatch( MeasurementSet mSet, Date start, Date end )
   {
     batchID = UUID.randomUUID();
@@ -56,9 +68,21 @@ public class EMDataBatch
     dataEnd   = end;
   }
   
+  /**
+   * Returns the ID of this batch
+   * 
+   * @return - ID of the batch.
+   */
   public UUID getID()
   { return batchID; }
   
+  /**
+   * Sets the start and the end date of the measurements expected to tbe contained
+   * within this batch. Measurements are expected to be complete and contiguous.
+   * 
+   * @param start - The start date
+   * @param end   - The end date
+   */
   public void setDataRange( Date start, Date end )
   {
     if ( start != null && end != null )
@@ -68,15 +92,37 @@ public class EMDataBatch
     }
   }
   
+  /**
+   * Gets the start date of the first measurement in this set
+   * 
+   * @return - Start date of the first measurement
+   */
   public Date getDataStart()
   { return dataStart; }
   
+  /**
+   * Returns the date of the last measurement in this batch
+   * 
+   * @return - Date of the last measurement in this batch.
+   */
   public Date getDataEnd()
   { return dataEnd; }
   
+  /**
+   * Returns the associated MeasurementSet for this batch. This instance
+   * should contain all the measurements within the range indicated by the start
+   * and the end date
+   * 
+   * @return - Instance of the MeasurementSet
+   */
   public MeasurementSet getMeasurementSet()
   { return measurementSet; }
   
+  /**
+   * Set the MeasurementSet associated with this batch. This instance
+   * should contain all the measurements within the range indicated by the start
+   * and the end date
+   */
   public void setMeasurementSet( MeasurementSet set )
   { if ( set != null ) measurementSet = set; }
 }

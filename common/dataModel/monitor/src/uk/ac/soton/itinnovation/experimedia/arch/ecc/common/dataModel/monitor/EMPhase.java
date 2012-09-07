@@ -54,6 +54,11 @@ public enum EMPhase implements Comparator
     phaseIndex       = ind;
   }
   
+  /**
+   * Returns the phase that follows the current enumeration.
+   * 
+   * @return - the next phase.
+   */
   public EMPhase nextPhase()
   {
     EMPhase nextPhase = eEMUnknownPhase;

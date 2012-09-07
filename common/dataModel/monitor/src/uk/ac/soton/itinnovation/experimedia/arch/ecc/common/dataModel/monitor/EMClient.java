@@ -52,7 +52,12 @@ public class EMClient
   // Tear-down phase
   protected boolean tearDownSuccessful = false;
   
-  
+  /**
+   * Constructor of the client representing a user of the EM. ID must be random.
+   * 
+   * @param id    - Random UUID of the client
+   * @param name  - Human recognisable name of the client
+   */
   public EMClient( UUID id, String name )
   {
     clientID = id;
@@ -63,15 +68,35 @@ public class EMClient
     generatorsSetupOK = new HashSet<UUID>();
   }
   
+  /**
+   * Gets the ID of the client.
+   * 
+   * @return - ID of the client.
+   */
   public UUID getID()
   { return clientID; }
   
+  /**
+   * Gets the name of the client.
+   * 
+   * @return - Name of the client.
+   */
   public String getName()
   { return clientName; }
   
+  /**
+   * Specifies whether the client is connected to the EM.
+   * 
+   * @return - True if connected.
+   */
   public boolean isConnected()
   { return clientConnected; }
   
+  /**
+   * Returns the client's support for the phases the EM executes.
+   * 
+   * @return - A set of supported phases.
+   */
   public EnumSet<EMPhase> getCopyOfSupportedPhases()
   {
     EnumSet<EMPhase> phaseCopy = EnumSet.noneOf( EMPhase.class );
@@ -80,9 +105,20 @@ public class EMClient
     return phaseCopy;
   }
   
+  /**
+   * Returns the result of the discovery process this client reported to the EM during
+   * the discovery phase.
+   * 
+   * @return 
+   */
   public boolean getGeneratorDiscoveryResult()
   { return discoveredGenerators; }
   
+  /**
+   * Returns the MetricGenerators the client reported to the EM during the discovery phase.
+   * 
+   * @return 
+   */
   public Set<MetricGenerator> getCopyOfMetricGenerators()
   {
     HashSet<MetricGenerator> mgCopies = new HashSet<MetricGenerator>();
@@ -97,6 +133,12 @@ public class EMClient
     return mgCopies;
   }
   
+  /**
+   * Returns the set-up result the client reported (if supported) during the the
+   * set-up phase.
+   * 
+   * @return 
+   */
   public boolean metricGeneratorsSetupOK()
   {
     if ( metricGenerators.isEmpty() )  return false;
@@ -109,9 +151,21 @@ public class EMClient
     return true;
   }
   
+  /**
+   * Returns the post report summary the client reported (if supported) during the
+   * post-reporting phase.
+   * 
+   * @return 
+   */
   public EMPostReportSummary getPostReportSummary()
   { return postReportSummary; }
   
+  /**
+   * Returns the result of the tear-down process the client executed (if it supports it)
+   * during the tear-down phase.
+   * 
+   * @return 
+   */
   public boolean getTearDownResult()
   { return tearDownSuccessful; }
 }

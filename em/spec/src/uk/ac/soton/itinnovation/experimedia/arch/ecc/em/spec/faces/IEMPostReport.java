@@ -36,22 +36,61 @@ import java.util.UUID;
 
 public interface IEMPostReport
 {
-  // Listeners -----------------------------------------------------------------
-  void setProviderListener( IEMPostReport_ProviderListener listener );
-  
-  void setUserListener( IEMPostReport_UserListener listener );
-  
-  // Provider methods ----------------------------------------------------------
-  void requestPostReportSummary();
-  
-  void requestDataBatch( EMDataBatch reqBatch );
-  
-  void notifyReportBatchTimeOut( UUID batchID );
-  
-  // User methods --------------------------------------------------------------
-  void notifyReadyToReport();
-  
-  void sendReportSummary( EMPostReportSummary summary );
-  
-  void sendDataBatch( EMDataBatch populatedBatch );
+    // Listeners -----------------------------------------------------------------
+    /**
+     * Sets the provider listener for this interface
+     * 
+     * @param listener - Implementation of the 'provider' side listener
+     */
+    void setProviderListener( IEMPostReport_ProviderListener listener );
+    
+    /**
+     * Sets the user listener for this interface
+     * 
+     * @param listener - Implementation of the 'user' side listener
+     */
+    void setUserListener( IEMPostReport_UserListener listener );
+
+    // Provider methods ----------------------------------------------------------
+    /**
+     * Requests the user send a post-report summary to the EM
+     */
+    void requestPostReportSummary();
+
+    /**
+     * Requests the user provide metric data for the samples specified by the
+     * EMDataBatch instance
+     * 
+     * @param reqBatch - Specification of the metric data required by the EM
+     */
+    void requestDataBatch( EMDataBatch reqBatch );
+
+    /**
+     * Notifies the user that the time has run out to generate and send the
+     * EMDataBatch requested (identified by the batchID) by the EM
+     * 
+     * @param batchID - ID of the timed-out data batch report. Fields must not be null.
+     */
+    void notifyReportBatchTimeOut( UUID batchID );
+
+    // User methods --------------------------------------------------------------
+    /**
+     * Notifies the EM that this user is ready to report.
+     */
+    void notifyReadyToReport();
+
+    /**
+     * Sends a post report summary instance to the EM.
+     * 
+     * @param summary - summary instance of the report. Fields must not be null.
+     */
+    void sendReportSummary( EMPostReportSummary summary );
+
+    /**
+     * Sends a data batch (based on the specification provided by the EM from the
+     * requestDataBatch(..) method.
+     * 
+     * @param populatedBatch - data batch with metric data. Fields must not be null.
+     */
+    void sendDataBatch( EMDataBatch populatedBatch );
 }

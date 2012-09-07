@@ -122,41 +122,48 @@ public class EMClientController implements EMIAdapterListener,
   {
     clientView.setStatus( "Sending metric gen info to EM" );
     
+    // Create a new entity to be observed (this Java VM)
     entityBeingObserved = new Entity();
     entityBeingObserved.setName( "EM Client host" );
     
+    // Create an attribute to observe
     entityAttribute = new Attribute();
     entityAttribute.setName( "Client RAM usage" );
     entityAttribute.setDescription( "Very simple measurement of total bytes used" );
     entityAttribute.setEntityUUID( entityBeingObserved.getUUID() );
     entityBeingObserved.addtAttribute( entityAttribute );
     
-    // Mock up some metric generators
+    // Create a single metric generator that will represent this metric data generation
     MetricGenerator metricGen = new MetricGenerator();
     metricGen.setName( "MGEN " + clientName );
     metricGen.setDescription( "Metric generator demonstration" );
-    metricGen.addEntity( entityBeingObserved );         
+    metricGen.addEntity( entityBeingObserved );
+    
+    // Add our generator to a collection - obviously we only actually have one generator here though
     metricGenerators.put( metricGen.getUUID(), metricGen );
     
+    // Create a single group which will contain...
     MetricGroup mg = new MetricGroup();
     mg.setName( "Demo group" );
     mg.setDescription( "A single group to contain metrics" );
     mg.setMetricGeneratorUUID( metricGen.getUUID() );
     metricGen.addMetricGroup( mg );
     
+    // ... a single MeasurementSet (representing the measures for the attibute)
     MeasurementSet ms = new MeasurementSet();
     ms.setMetricGroupUUID( mg.getUUID() );
-    ms.setAttributeUUID( entityAttribute.getUUID() );
+    ms.setAttributeUUID( entityAttribute.getUUID() ); // Link the measurement set to the attribute here
     mg.addMeasurementSets( ms );                              
     
+    // Define the metric for this MeasurementSet
     Metric memMetric = new Metric();
     memMetric.setMetricType( MetricType.RATIO );
-    //TODO: Metric Unit (serialisation to resolve here)
+    //TODO: Metric Unit: some API refactoring required here due to JSON serialization issues
     ms.setMetric( memMetric );
     
     clientView.addLogMessage( "Discovered generator: " + metricGen.getName() );
     
-    // Send metric generators (just one) to the EM
+    // Send our metric generator to the EM
     HashSet mgSet = new HashSet<MetricGenerator>();
     mgSet.addAll( metricGenerators.values() );
     emiAdapter.setMetricGenerators( mgSet );
@@ -176,6 +183,7 @@ public class EMClientController implements EMIAdapterListener,
   @Override
   public void onStartPushingMetricData()
   {
+    // Allow the human user to manually push some data
     clientView.addLogMessage( "Enabling metric push" );
     clientView.enablePush( true );
   }
@@ -183,18 +191,22 @@ public class EMClientController implements EMIAdapterListener,
   @Override
   public void onLastPushProcessed( UUID lastReportID )
   {
-    // Got the last push, so allow another
+    // Got the last push, so allow another manual push
     clientView.enablePush( true );
   }
   
   @Override
   public void onStopPushingMetricData()
   {
+    // Stop manual pushing of data by the human user
     clientView.addLogMessage( "Disabling metric push" );
     clientView.enablePush( false );
   }
   
   @Override
+  /*
+   * Note that 'reportOut' is an OUT parameter provided by the adapter
+   */
   public void onPullMetric( UUID measurementSetID, Report reportOut )
   {
     // Create an empty instance of our measurement set
@@ -214,6 +226,10 @@ public class EMClientController implements EMIAdapterListener,
   }
   
   @Override
+  /*
+   * Note that the summaryOUT parameter is an OUT parameter supplied by the
+   * adapter
+   */
   public void onPopulateSummaryReport( EMPostReportSummary summaryOUT )
   {
     // We've only got one MeasurementSet so we'll create a demo summary report
@@ -223,6 +239,7 @@ public class EMClientController implements EMIAdapterListener,
     if ( firstMeasurement   ==  null ) snapshotMeasurement();
     if ( currentMeasurement ==  null ) snapshotMeasurement();
     
+    // Create a new report for this summary
     Report report = new Report();
     report.setReportDate( new Date() );
     report.setFromDate( firstMeasurement.getTimeStamp() );
@@ -234,6 +251,7 @@ public class EMClientController implements EMIAdapterListener,
     MetricGroup mGroup = mGen.getMetricGroups().iterator().next();
     MeasurementSet mSet = mGroup.getMeasurementSets().iterator().next();
     
+    // Add our one MeasurementSet data to the report and add that to the summary report
     report.setMeasurementSet( mSet );
     summaryOUT.addReport( report );
   }
@@ -300,19 +318,20 @@ public class EMClientController implements EMIAdapterListener,
   
   private void snapshotMeasurement()
   {
-    Runtime rt = Runtime.getRuntime();
-    
     // Just take a very rough measurement
+    Runtime rt = Runtime.getRuntime();
     String memVal = Long.toString( rt.totalMemory() - rt.freeMemory() );
     
-    // Get the (single) measurement set for this snapshot (just to get ID)
+    // Get the (single) measurement set for this snapshot (just to get the ID actually)
     MeasurementSet snapshotMS = createMeasurementSetEmptySample();
     
+    // Update the latest measurement
     currentMeasurement = new Measurement();
     currentMeasurement.setMeasurementSetUUID( snapshotMS.getUUID() );
     currentMeasurement.setTimeStamp( new Date() );
     currentMeasurement.setValue( memVal );
     
+    // Store this if it is the first ever measurement
     if ( firstMeasurement == null ) firstMeasurement = currentMeasurement;
     
     clientView.addLogMessage( "Memory measurement (bytes): " + memVal );

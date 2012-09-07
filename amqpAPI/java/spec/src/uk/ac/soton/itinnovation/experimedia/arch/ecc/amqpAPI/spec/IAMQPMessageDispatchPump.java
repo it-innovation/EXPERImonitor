@@ -27,20 +27,52 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.spec;
 
 
 
-
+/**
+ * IAMQPMessageDispatchPump controls the distribution of messages (through
+ * dispatches) to clients listening to the AMQP bus.
+ * 
+ * @author sgc
+ */
 public interface IAMQPMessageDispatchPump
 {
-  public enum ePumpPriority { MINIMUM,
-                              NORMAL,
-                              HIGH };
-  
-  boolean startPump();
-  
-  void stopPump();
-  
-  boolean isPumping();
-  
-  void addDispatch( IAMQPMessageDispatch dispatch );
-  
-  void removeDispatch( IAMQPMessageDispatch dispatch );
+    // This enum is currently used internally and controls processing resource
+    // for the pump - you will be able to access this behaviour using this enum
+    // in later versions of this API.
+    public enum ePumpPriority { MINIMUM,
+                                NORMAL,
+                                HIGH };
+    /**
+     * Starts the 'round-robin' distribution of messages queues in IAMQPMessageDispatch
+     * instances added to the pump.
+     * 
+     * @return - Returns false if the pump was unable to start.
+     */
+    boolean startPump();
+    
+    /**
+     * Stops the pump issuing messages through the  IAMQPMessageDispatch instances
+     * added to it.
+     */
+    void stopPump();
+    
+    /**
+     * Returns the state of the pump.
+     * 
+     * @return - Returns true if the pump is active.
+     */
+    boolean isPumping();
+    
+    /**
+     * Adds a message dispatch to the pump.
+     * 
+     * @param dispatch - instance of a dispatch.
+     */
+    void addDispatch( IAMQPMessageDispatch dispatch );
+    
+    /**
+     * Removes a dispatch instance from the pump.
+     * 
+     * @param dispatch - instance of the dispatch to be removed.
+     */
+    void removeDispatch( IAMQPMessageDispatch dispatch );
 }

@@ -29,10 +29,29 @@ import java.util.UUID;
 
 
 
-
+/**
+ * IEMSetup_UserListener is a user client listener that listens to instruction
+ * from the EM regarding setting up their metric generators.
+ * 
+ * @author sgc
+ */
 public interface IEMSetup_UserListener
 {
-  void onSetupMetricGenerator( UUID senderID, UUID genID );
+    /**
+     * Notification from the EM that the user client should attempt to set-up
+     * the MetricGenerator identified by the generator ID
+     * 
+     * @param senderID - ID of the EM
+     * @param genID    - ID of the MetricGenerator that requires setting up
+     */
+    void onSetupMetricGenerator( UUID senderID, UUID genID );
   
-  void onSetupTimeOut( UUID senderID, UUID genID );
+    /**
+     * Notifies the user client that time has run out to set-up the MetricGenerator
+     * set up by
+     * 
+     * @param senderID - ID of the EM
+     * @param genID    - ID of the MetricGenerator that required setting up
+     */
+    void onSetupTimeOut( UUID senderID, UUID genID );
 }

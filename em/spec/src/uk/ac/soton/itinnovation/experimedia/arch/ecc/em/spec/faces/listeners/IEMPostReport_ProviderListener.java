@@ -31,12 +31,35 @@ import java.util.UUID;
 
 
 
-
+/**
+ * IEMPostReport_ProviderListener is a provider client listener for use by the EM
+ * implementation to listen to post-reporting user clients.
+ * 
+ * @author sgc
+ */
 public interface IEMPostReport_ProviderListener
 {
-  void onNotifyReadyToReport( UUID senderID );
+    /**
+     * Notifies the EM that a user client is ready to provide a 'post report'.
+     * 
+     * @param senderID 
+     */
+    void onNotifyReadyToReport( UUID senderID );
+    
+    /**
+     * Notification to the EM a report summary has been provided by a user client
+     * to the EM.
+     * 
+     * @param senderID  - ID of the user client
+     * @param summary   - Summary data for the client. Summary should have at least one report.
+     */
+    void onSendReportSummary( UUID senderID, EMPostReportSummary summary );
   
-  void onSendReportSummary( UUID senderID, EMPostReportSummary summary );
-  
-  void onSendDataBatch( UUID senderID, EMDataBatch populatedBatch );
+    /**
+     * Notification to the EM that a data batch has arrived from a user client.
+     * 
+     * @param senderID          - ID of the user client.
+     * @param populatedBatch    - Data batch populated with metric data. Fields must not be null.
+     */
+    void onSendDataBatch( UUID senderID, EMDataBatch populatedBatch );
 }

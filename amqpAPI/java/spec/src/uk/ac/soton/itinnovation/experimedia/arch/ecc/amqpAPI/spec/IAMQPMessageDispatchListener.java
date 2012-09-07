@@ -27,8 +27,20 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.spec;
 
 
 
-
+/**
+ * The IAMQPMessageDispatchListener interface must be used to receive messages
+ * distributed by the IAMQPMessageDispatch.
+ * 
+ * @author sgc
+ */
 public interface IAMQPMessageDispatchListener
 {
-  void onSimpleMessageDispatched( String queueName, byte[] data );
+    /**
+     * onSimpleMessageDispatched offers an data event from the AMQP bus that
+     * encapsulates a block of data and the queue through which it was sent.
+     * 
+     * @param queueName - Name of the queue in which the data travelled
+     * @param data      - The data itself
+     */
+    void onSimpleMessageDispatched( String queueName, byte[] data );
 }
