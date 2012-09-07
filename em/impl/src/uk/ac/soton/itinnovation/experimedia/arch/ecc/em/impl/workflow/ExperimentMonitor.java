@@ -139,6 +139,17 @@ public class ExperimentMonitor implements IExperimentMonitor,
   }
   
   @Override
+  public EMPhase getCurrentPhase()
+  {
+    EMPhase currentPhase = EMPhase.eEMUnknownPhase;
+    
+    if ( lifecycleManager != null )
+        currentPhase = lifecycleManager.getCurrentPhase();
+    
+    return currentPhase;
+  }
+  
+  @Override
   public EMPhase getNextPhase()
   { return lifecycleManager.getCurrentPhase().nextPhase(); }
   

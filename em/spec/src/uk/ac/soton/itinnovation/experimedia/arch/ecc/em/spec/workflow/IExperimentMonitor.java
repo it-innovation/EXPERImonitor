@@ -55,6 +55,8 @@ public interface IExperimentMonitor
   
   EMPhase startLifecycle() throws Exception;
   
+  EMPhase getCurrentPhase();
+  
   EMPhase getNextPhase();
   
   boolean isCurrentPhaseActive();
