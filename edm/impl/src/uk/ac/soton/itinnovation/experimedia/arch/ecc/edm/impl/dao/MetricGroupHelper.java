@@ -45,7 +45,7 @@ public class MetricGroupHelper
 {
     static Logger log = Logger.getLogger(MetricGroupHelper.class);
     
-    public static ValidationReturnObject isObjectValidForSave(MetricGroup mGroup, DatabaseConnector dbCon, boolean checkForMetricGenerator) throws Exception
+    public static ValidationReturnObject isObjectValidForSave(MetricGroup mGroup, boolean checkForMetricGenerator, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
     {
         if (mGroup == null)
         {
@@ -66,7 +66,7 @@ public class MetricGroupHelper
         
         if (mGroup.getName() == null)
         {
-            return new ValidationReturnObject(false, new NullPointerException("The MetricGrou name is NULL"));
+            return new ValidationReturnObject(false, new NullPointerException("The MetricGroup name is NULL"));
         }
         
         /*
@@ -83,7 +83,7 @@ public class MetricGroupHelper
         // check if the metric generator exists, if it should be checked...
         if (checkForMetricGenerator)
         {
-            if (!MetricGeneratorHelper.objectExists(mGroup.getMetricGeneratorUUID(), dbCon))
+            if (!MetricGeneratorHelper.objectExists(mGroup.getMetricGeneratorUUID(), dbCon, closeDBcon))
             {
                 return new ValidationReturnObject(false, new RuntimeException("The MetricGenerator for the MetricGroup doesn't exit"));
             }
@@ -94,7 +94,7 @@ public class MetricGroupHelper
         {
             for (MeasurementSet mSet : mGroup.getMeasurementSets())
             {
-                ValidationReturnObject validationReturn = MeasurementSetHelper.isObjectValidForSave(mSet, dbCon, false); // false = don't check for measurement set existing as this won't be saved yet!
+                ValidationReturnObject validationReturn = MeasurementSetHelper.isObjectValidForSave(mSet, false, dbCon, closeDBcon); // false = don't check for measurement set existing as this won't be saved yet!
                 if (!validationReturn.valid)
                 {
                     return validationReturn;
@@ -144,9 +144,9 @@ public class MetricGroupHelper
         }
     }
     
-    public static boolean objectExists(UUID uuid, DatabaseConnector dbCon) throws Exception
+    public static boolean objectExists(UUID uuid, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
     {
-        return DBUtil.objectExistsByUUID("MetricGroup", "mGrpUUID", uuid, dbCon);
+        return DBUtil.objectExistsByUUID("MetricGroup", "mGrpUUID", uuid, dbCon, closeDBcon);
     }
     
     public static void saveMetricGroup(MetricGroup metricGroup, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
@@ -154,7 +154,7 @@ public class MetricGroupHelper
         // this validation will check if all the required parameters are set and if
         // there isn't already a duplicate instance in the DB
         // will validate the measurement sets too, if any are given
-        ValidationReturnObject returnObj = MetricGroupHelper.isObjectValidForSave(metricGroup, dbCon, false);
+        ValidationReturnObject returnObj = MetricGroupHelper.isObjectValidForSave(metricGroup, false, dbCon, closeDBcon);
         if (!returnObj.valid)
         {
             log.error("Cannot save the MetricGroup object: " + returnObj.exception.getMessage(), returnObj.exception);
@@ -164,7 +164,14 @@ public class MetricGroupHelper
         boolean exception = false;
         try {
             if (dbCon.isClosed())
+            {
                 dbCon.connect();
+                
+                if (closeDBcon)
+                {
+                    dbCon.beginTransaction();
+                }
+            }
             
             // get the table names and values according to what's available in the
             // object
@@ -180,6 +187,7 @@ public class MetricGroupHelper
                 String key = rs.getString(1);
                 log.debug("Saved MetricGroup " + metricGroup.getName() + " with key: " + key);
             } else {
+                exception = true;
                 throw new RuntimeException("No index returned after saving MetricGroup " + metricGroup.getName());
             }
         } catch (Exception ex) {
@@ -187,14 +195,18 @@ public class MetricGroupHelper
             log.error("Error while saving MetricGroup: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while saving MetricGroup: " + ex.getMessage(), ex);
         } finally {
-            if ((exception || (metricGroup.getMeasurementSets() == null) || metricGroup.getMeasurementSets().isEmpty()) && closeDBcon)
+            if (exception && closeDBcon)
+            {
+                dbCon.rollback();
                 dbCon.close();
+            }
         }
         
         try {
             // save any measurement sets if not NULL
             if ((metricGroup.getMeasurementSets() != null) && !metricGroup.getMeasurementSets().isEmpty())
             {
+                log.debug("Saving " + metricGroup.getMeasurementSets().size() + " measurement set(s) for the metric group");
                 for (MeasurementSet mSet : metricGroup.getMeasurementSets())
                 {
                     if (mSet != null)
@@ -202,10 +214,19 @@ public class MetricGroupHelper
                 }
             }
         } catch (Exception ex) {
+            exception = true;
             throw ex;
         } finally {
             if (closeDBcon)
+            {
+                if (exception) {
+                    dbCon.rollback();
+                }
+                else {
+                    dbCon.commit();
+                }
                 dbCon.close();
+            }
         }
     }
     
@@ -227,7 +248,9 @@ public class MetricGroupHelper
         boolean exception = false;
         try {
             if (dbCon.isClosed())
+            {
                 dbCon.connect();
+            }
             
             String query = "SELECT * FROM MetricGroup WHERE mGrpUUID = '" + metricGroupUUID + "'";
             ResultSet rs = dbCon.executeQuery(query);
@@ -252,7 +275,9 @@ public class MetricGroupHelper
             throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
         } finally {
             if (exception || (closeDBcon && !withSubClasses))
+            {
                 dbCon.close();
+            }
         }
         
         // check if there's any measurement sets
@@ -267,7 +292,9 @@ public class MetricGroupHelper
                 throw new RuntimeException("Caught an exception when getting measurement sets for MetricGroup (UUID: " + metricGroupUUID.toString() + "): " + ex.getMessage(), ex);
             } finally {
                 if (closeDBcon)
+                {
                     dbCon.close();
+                }
             }
 
             metricGroup.setMeasurementSets(measurementSets);
@@ -288,7 +315,9 @@ public class MetricGroupHelper
         
         try {
             if (dbCon.isClosed())
+            {
                 dbCon.connect();
+            }
             
             String query = "SELECT mGrpUUID FROM MetricGroup WHERE mGenUUID = '" + metricGenUUID.toString() + "'";
             ResultSet rs = dbCon.executeQuery(query);
@@ -310,7 +339,10 @@ public class MetricGroupHelper
             log.error("Error while quering the database: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
         } finally {
-            dbCon.close();
+            if (closeDBcon)
+            {
+                dbCon.close();
+            }
         }
         
         return metricGroups;

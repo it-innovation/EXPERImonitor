@@ -45,7 +45,7 @@ public class EntityHelper
 {
     static Logger log = Logger.getLogger(EntityHelper.class);
     
-    public static ValidationReturnObject isObjectValidForSave(Entity entity, DatabaseConnector dbCon) throws Exception
+    public static ValidationReturnObject isObjectValidForSave(Entity entity, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
     {
         if (entity == null)
         {
@@ -79,7 +79,7 @@ public class EntityHelper
         {
             for (Attribute attrib : entity.getAttributes())
             {
-                ValidationReturnObject validationReturn = AttributeHelper.isObjectValidForSave(attrib, dbCon, false); // false = don't check for entity existing as this won't be saved yet!
+                /*ValidationReturnObject validationReturn = AttributeHelper.isObjectValidForSave(attrib, dbCon, false); // false = don't check for entity existing as this won't be saved yet!
                 if (!validationReturn.valid)
                 {
                     return validationReturn;
@@ -87,6 +87,14 @@ public class EntityHelper
                 else if (!attrib.getEntityUUID().equals(entity.getUUID()))
                 {
                     return new ValidationReturnObject(false, new RuntimeException("The Entity UUID of an Attribute is not equal to the Entity that it's supposed to be saved with (attribute UUID " + attrib.getUUID().toString() + ")"));
+                }*/
+                
+                if (attrib == null)
+                {
+                    if (entity.getAttributes().size() > 0)
+                        return new ValidationReturnObject(false, new NullPointerException("One or more the Entity's attributes are NULL"));
+                    else
+                        return new ValidationReturnObject(false, new NullPointerException("The Entity's attribute is NULL"));
                 }
             }
         }
@@ -126,9 +134,9 @@ public class EntityHelper
         }
     }
     
-    public static boolean objectExists(UUID uuid, DatabaseConnector dbCon) throws Exception
+    public static boolean objectExists(UUID uuid, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
     {
-        return DBUtil.objectExistsByUUID("Entity", "entityUUID", uuid, dbCon);
+        return DBUtil.objectExistsByUUID("Entity", "entityUUID", uuid, dbCon, closeDBcon);
     }
     
     public static void saveEntity(Entity entity, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
@@ -136,7 +144,7 @@ public class EntityHelper
         // this validation will check if all the required parameters are set and if
         // there isn't already a duplicate instance in the DB
         // will validate the attributes too, if any are given
-        ValidationReturnObject returnObj = EntityHelper.isObjectValidForSave(entity, dbCon);
+        ValidationReturnObject returnObj = EntityHelper.isObjectValidForSave(entity, dbCon, closeDBcon);
         if (!returnObj.valid)
         {
             log.error("Cannot save the Entity object: " + returnObj.exception.getMessage(), returnObj.exception);
@@ -146,7 +154,14 @@ public class EntityHelper
         boolean exception = false;
         try {
             if (dbCon.isClosed())
+            {
                 dbCon.connect();
+                
+                if (closeDBcon)
+                {
+                    dbCon.beginTransaction();
+                }
+            }
             
             // get the table names and values according to what's available in the
             // object
@@ -160,8 +175,9 @@ public class EntityHelper
             // check if the result set got the generated table key
             if (rs.next()) {
                 String key = rs.getString(1);
-                log.debug("Saved entity " + entity.getName() + ", with key: " + key);
+                log.debug("Saved entity " + entity.getName() + " with key: " + key);
             } else {
+                exception = true;
                 throw new RuntimeException("No index returned after saving entity " + entity.getName());
             }//end of debugging
         } catch (Exception ex) {
@@ -169,14 +185,18 @@ public class EntityHelper
             log.error("Error while saving entity: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while saving entity: " + ex.getMessage(), ex);
         } finally {
-            if (closeDBcon && (exception || (entity.getAttributes() == null) || entity.getAttributes().isEmpty()))
+            if (exception && closeDBcon)
+            {
+                dbCon.rollback();
                 dbCon.close();
+            }
         }
         
         try {
             // save any attributes if not NULL
             if ((entity.getAttributes() != null) && !entity.getAttributes().isEmpty())
             {
+                log.debug("Saving " + entity.getAttributes().size() + " attribute(s) for the entity");
                 for (Attribute attrib : entity.getAttributes())
                 {
                     if (attrib != null)
@@ -187,7 +207,15 @@ public class EntityHelper
             throw ex;
         } finally {
             if (closeDBcon)
+            {
+                if (exception) {
+                    dbCon.rollback();
+                } else {
+                    dbCon.commit();
+                }
+
                 dbCon.close();
+            }
         }
     }
     

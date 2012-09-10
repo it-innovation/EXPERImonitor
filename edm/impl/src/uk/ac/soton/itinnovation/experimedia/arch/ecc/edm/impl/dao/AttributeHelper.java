@@ -44,7 +44,7 @@ public class AttributeHelper
 {
     static Logger log = Logger.getLogger(AttributeHelper.class);
     
-    public static ValidationReturnObject isObjectValidForSave(Attribute attrib, DatabaseConnector dbCon, boolean checkForEntity) throws Exception
+    public static ValidationReturnObject isObjectValidForSave(Attribute attrib, boolean checkForEntity, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
     {
         if (attrib == null)
         {
@@ -81,7 +81,7 @@ public class AttributeHelper
         // if checking for entity; may be false if this is called from the saveEntity method
         if (checkForEntity)
         {
-            if (!EntityHelper.objectExists(attrib.getEntityUUID(), dbCon))
+            if (!EntityHelper.objectExists(attrib.getEntityUUID(), dbCon, closeDBcon))
             {
                 return new ValidationReturnObject(false, new RuntimeException("The Attribute's Entity does not exist (UUID: " + attrib.getEntityUUID().toString() + ")"));
             }
@@ -125,16 +125,16 @@ public class AttributeHelper
         }
     }
     
-    public static boolean objectExists(UUID uuid, DatabaseConnector dbCon) throws Exception
+    public static boolean objectExists(UUID uuid, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
     {
-        return DBUtil.objectExistsByUUID("Attribute", "attribUUID", uuid, dbCon);
+        return DBUtil.objectExistsByUUID("Attribute", "attribUUID", uuid, dbCon, closeDBcon);
     }
     
     public static void saveAttribute(Attribute attrib, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
     {
         // this validation will check if all the required parameters are set and if
         // there isn't already a duplicate instance in the DB
-        ValidationReturnObject returnObj = AttributeHelper.isObjectValidForSave(attrib, dbCon, false);
+        ValidationReturnObject returnObj = AttributeHelper.isObjectValidForSave(attrib, false, dbCon, closeDBcon);
         if (!returnObj.valid)
         {
             log.error("Cannot save the Attribute object: " + returnObj.exception.getMessage(), returnObj.exception);
@@ -157,7 +157,7 @@ public class AttributeHelper
             // check if the result set got the generated table key
             if (rs.next()) {
                 String key = rs.getString(1);
-                log.debug("Saved attribute " + attrib.getName() + ", with key: " + key);
+                log.debug("Saved attribute " + attrib.getName() + " with key: " + key);
             } else {
                 throw new RuntimeException("No index returned after saving attribute " + attrib.getName());
             }//end of debugging

@@ -44,7 +44,7 @@ public class MeasurementSetHelper
 {
     static Logger log = Logger.getLogger(MeasurementSetHelper.class);
     
-    public static ValidationReturnObject isObjectValidForSave(MeasurementSet mSet, DatabaseConnector dbCon, boolean checkForMetricGroup) throws Exception
+    public static ValidationReturnObject isObjectValidForSave(MeasurementSet mSet, boolean checkForMetricGroup, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
     {
         if (mSet == null)
         {
@@ -98,7 +98,7 @@ public class MeasurementSetHelper
         // check that the metric group exists, if flagged to check
         if (checkForMetricGroup)
         {
-            if (!MetricGroupHelper.objectExists(mSet.getMetricGroupUUID(), dbCon))
+            if (!MetricGroupHelper.objectExists(mSet.getMetricGroupUUID(), dbCon, closeDBcon))
             {
                 return new ValidationReturnObject(false, new RuntimeException("The MetricGroup for the MeasurementSet doesn't exit (UUID: " + mSet.getMetricGroupUUID().toString() + ")"));
             }
@@ -115,7 +115,7 @@ public class MeasurementSetHelper
         {
             for (Measurement measurement : mSet.getMeasurements())
             {
-                ValidationReturnObject validationReturn = MeasurementHelper.isObjectValidForSave(measurement, dbCon, false); // false = don't check for measurement set existing as this won't be saved yet!
+                ValidationReturnObject validationReturn = MeasurementHelper.isObjectValidForSave(measurement, false, dbCon, closeDBcon); // false = don't check for measurement set existing as this won't be saved yet!
                 if (!validationReturn.valid)
                 {
                     return validationReturn;
@@ -141,9 +141,9 @@ public class MeasurementSetHelper
         return query;
     }
     
-    public static boolean objectExists(UUID uuid, DatabaseConnector dbCon) throws Exception
+    public static boolean objectExists(UUID uuid, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
     {
-        return DBUtil.objectExistsByUUID("MeasurementSet", "mSetUUID", uuid, dbCon);
+        return DBUtil.objectExistsByUUID("MeasurementSet", "mSetUUID", uuid, dbCon, closeDBcon);
     }
     
     public static void saveMeasurementSet(MeasurementSet measurementSet, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
@@ -151,26 +151,41 @@ public class MeasurementSetHelper
         // this validation will check if all the required parameters are set and if
         // there isn't already a duplicate instance in the DB
         // will validate the metric and measurements too, if any are given
-        ValidationReturnObject returnObj = MeasurementSetHelper.isObjectValidForSave(measurementSet, dbCon, false);
+        ValidationReturnObject returnObj = MeasurementSetHelper.isObjectValidForSave(measurementSet, false, dbCon, closeDBcon);
         if (!returnObj.valid)
         {
             log.error("Cannot save the MeasurementSet object: " + returnObj.exception.getMessage(), returnObj.exception);
             throw returnObj.exception;
         }
         
-        // save the metric
-        try {
-            MetricHelper.saveMetric(dbCon, measurementSet.getMetric(), closeDBcon);
-        } catch (Exception ex) {
-            log.error("Cannot save the MeasurementSet object because of an error in saving the metric! " + ex.getMessage());
-            throw new RuntimeException("Cannot save the MeasurementSet object because of an error in saving the metric! " + ex.getMessage(), ex);
+        if (dbCon.isClosed())
+        {
+            dbCon.connect();
+
+            if (closeDBcon)
+            {
+                dbCon.beginTransaction();
+            }
         }
         
         boolean exception = false;
+        // save the metric
         try {
-            if (dbCon.isClosed())
-                dbCon.connect();
-            
+            MetricHelper.saveMetric(dbCon, measurementSet.getMetric(), false);
+        } catch (Exception ex) {
+            exception = true;
+            log.error("Cannot save the MeasurementSet object because of an error in saving the metric! " + ex.getMessage());
+            throw new RuntimeException("Cannot save the MeasurementSet object because of an error in saving the metric! " + ex.getMessage(), ex);
+        } finally {
+            if (exception && closeDBcon)
+            {
+                dbCon.rollback();
+                dbCon.close();
+            }
+        }
+        
+        // saving the measurement set
+        try {
             String query = MeasurementSetHelper.getSqlInsertQuery(measurementSet);
             ResultSet rs = dbCon.executeQuery(query, Statement.RETURN_GENERATED_KEYS);
             
@@ -179,6 +194,7 @@ public class MeasurementSetHelper
                 String key = rs.getString(1);
                 log.debug("Saved MeasurementSet with key: " + key);
             } else {
+                exception = true;
                 throw new RuntimeException("No index returned after saving MeasurementSet");
             }
         } catch (Exception ex) {
@@ -186,14 +202,18 @@ public class MeasurementSetHelper
             log.error("Error while saving MeasurementSet: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while saving MeasurementSet: " + ex.getMessage(), ex);
         } finally {
-            if ((exception || (measurementSet.getMeasurements() == null) || measurementSet.getMeasurements().isEmpty()) && closeDBcon)
+            if (exception && closeDBcon)
+            {
+                dbCon.rollback();
                 dbCon.close();
+            }
         }
         
         try {
             // save any measurements if not NULL
             if ((measurementSet.getMeasurements() != null) && !measurementSet.getMeasurements().isEmpty())
             {
+                log.debug("Saving " + measurementSet.getMeasurements().size() + " measurements for the measurement set");
                 // saving as part of a report (to be created).
                 // flags to (1) validate measurements and (2) save measurements
                 ReportHelper.saveReportForMeasurements(measurementSet.getMeasurements(), measurementSet.getUUID(), true, true, dbCon, closeDBcon);
@@ -202,7 +222,15 @@ public class MeasurementSetHelper
             throw ex;
         } finally {
             if (closeDBcon)
+            {
+                if (exception) {
+                    dbCon.rollback();
+                }
+                else {
+                    dbCon.commit();
+                }
                 dbCon.close();
+            }
         }
     }
     

@@ -46,7 +46,7 @@ public class ExperimentHelper
 {
     static Logger log = Logger.getLogger(ExperimentHelper.class);
     
-    public static ValidationReturnObject isObjectValidForSave(Experiment exp, DatabaseConnector dbCon) throws Exception
+    public static ValidationReturnObject isObjectValidForSave(Experiment exp/*, DatabaseConnector dbCon, boolean closeDBcon*/) throws Exception
     {
         if (exp == null)
         {
@@ -128,16 +128,16 @@ public class ExperimentHelper
         }
     }
     
-    public static boolean objectExists(UUID uuid, DatabaseConnector dbCon) throws Exception
+    public static boolean objectExists(UUID uuid, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
     {
-        return DBUtil.objectExistsByUUID("Experiment", "expUUID", uuid, dbCon);
+        return DBUtil.objectExistsByUUID("Experiment", "expUUID", uuid, dbCon, closeDBcon);
     }
     
     public static void saveExperiment(Experiment exp, DatabaseConnector dbCon) throws Exception
     {
         // this validation will check if all the required parameters are set and if
         // there isn't already a duplicate instance in the DB
-        ValidationReturnObject returnObj = ExperimentHelper.isObjectValidForSave(exp, dbCon);
+        ValidationReturnObject returnObj = ExperimentHelper.isObjectValidForSave(exp/*, dbCon*/);
         if (!returnObj.valid)
         {
             log.error("Cannot save the Experiment object: " + returnObj.exception.getMessage(), returnObj.exception);
@@ -147,7 +147,10 @@ public class ExperimentHelper
         boolean exception = false;
         try {
             if (dbCon.isClosed())
+            {
                 dbCon.connect();
+                dbCon.beginTransaction();
+            }
             
             // get the table names and values according to what's available in the
             // object
@@ -161,8 +164,9 @@ public class ExperimentHelper
             // check if the result set got the generated table key
             if (rs.next()) {
                 String key = rs.getString(1);
-                log.debug("Saved experiment " + exp.getName() + ", with key: " + key);
+                log.debug("Saved experiment " + exp.getName() + " with key: " + key);
             } else {
+                exception = true;
                 throw new RuntimeException("No index returned after saving experiment " + exp.getName());
             }//end of debugging
         } catch (Exception ex) {
@@ -170,23 +174,34 @@ public class ExperimentHelper
             log.error("Error while saving experiment: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while saving experiment: " + ex.getMessage(), ex);
         } finally {
-            if (exception || (exp.getMetricGenerators() == null) || exp.getMetricGenerators().isEmpty())
+            if (exception)
+            {
+                dbCon.rollback();
                 dbCon.close();
+            }
         }
         
         try {
-        // save any metric generators if not NULL
-        if ((exp.getMetricGenerators() != null) && !exp.getMetricGenerators().isEmpty())
-        {
-            for (MetricGenerator mg : exp.getMetricGenerators())
+            // save any metric generators if not NULL
+            if ((exp.getMetricGenerators() != null) && !exp.getMetricGenerators().isEmpty())
             {
-                if (mg != null)
-                    MetricGeneratorHelper.saveMetricGenerator(mg, exp.getUUID(), dbCon, false); // don't close the DB con
+                log.debug("Saving " + exp.getMetricGenerators().size() + " metric generator(s) for the experiment");
+                for (MetricGenerator mg : exp.getMetricGenerators())
+                {
+                    if (mg != null)
+                        MetricGeneratorHelper.saveMetricGenerator(mg, exp.getUUID(), dbCon, false); // don't close the DB con
+                }
             }
-        }
         } catch (Exception ex) {
-            throw ex;
+            exception = true;
+            throw new RuntimeException ("Unable to save experiment, because there were errors in saving sub-classes: " + ex.getMessage(), ex);
         } finally {
+            if (exception) {
+                dbCon.rollback();
+            } else {
+                dbCon.commit();
+            }
+            
             dbCon.close();
         }
     }
@@ -253,7 +268,9 @@ public class ExperimentHelper
             throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
         } finally {
             if (exception || (closeDBcon && !withSubClasses))
+            {
                 dbCon.close();
+            }
         }
         
         if (withSubClasses)
@@ -267,7 +284,9 @@ public class ExperimentHelper
                 log.error("Caught an exception when getting metric generators for experiment (UUID: " + expUUID.toString() + "): " + ex.getMessage());
             } finally {
                 if (closeDBcon)
+                {
                     dbCon.close();
+                }
             }
 
             exp.setMetricGenerators(metricGenerators);

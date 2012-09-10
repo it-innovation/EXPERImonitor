@@ -44,7 +44,7 @@ public class ReportHelper
 {
     static Logger log = Logger.getLogger(ReportHelper.class);
     
-    public static ValidationReturnObject isObjectValidForSave(Report report, DatabaseConnector dbCon) throws Exception
+    public static ValidationReturnObject isObjectValidForSave(Report report, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
     {
         if (report == null)
         {
@@ -116,9 +116,9 @@ public class ReportHelper
         return query;
     }
     
-    public static boolean objectExists(UUID uuid, DatabaseConnector dbCon) throws Exception
+    public static boolean objectExists(UUID uuid, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
     {
-        return DBUtil.objectExistsByUUID("Report", "reportUUID", uuid, dbCon);
+        return DBUtil.objectExistsByUUID("Report", "reportUUID", uuid, dbCon, closeDBcon);
     }
     
     public static void saveReport(Report report, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
@@ -127,7 +127,7 @@ public class ReportHelper
         // this validation will check if all the required parameters are set and if
         // there isn't already a duplicate instance in the DB
         // also checks that the MeasurementSet exists (by it's UUID)
-        ValidationReturnObject returnObj = ReportHelper.isObjectValidForSave(report, dbCon);
+        ValidationReturnObject returnObj = ReportHelper.isObjectValidForSave(report, dbCon, closeDBcon);
         if (!returnObj.valid)
         {
             log.error("Cannot save the Report object: " + returnObj.exception.getMessage(), returnObj.exception);
@@ -137,7 +137,14 @@ public class ReportHelper
         boolean exception = false;
         try {
             if (dbCon.isClosed())
+            {
                 dbCon.connect();
+                
+                if (closeDBcon)
+                {
+                    dbCon.beginTransaction();
+                }
+            }
             
             String query = ReportHelper.getSqlInsertQuery(report);
             ResultSet rs = dbCon.executeQuery(query, Statement.RETURN_GENERATED_KEYS);
@@ -147,6 +154,7 @@ public class ReportHelper
                 String key = rs.getString(1);
                 log.debug("Saved Report with key: " + key);
             } else {
+                exception = true;
                 throw new RuntimeException("No index returned after saving Report");
             }
         } catch (Exception ex) {
@@ -154,21 +162,34 @@ public class ReportHelper
             log.error("Error while saving Report: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while saving Report: " + ex.getMessage(), ex);
         } finally {
-            if (closeDBcon && ((exception || (report.getMeasurementSet().getMeasurements() == null) || report.getMeasurementSet().getMeasurements().isEmpty())))
+            if (exception && closeDBcon)
+            {
+                dbCon.rollback();
                 dbCon.close();
+            }
         }
         
         try {
             // save any measurements if not NULL
             if ((report.getMeasurementSet().getMeasurements() != null) && !report.getMeasurementSet().getMeasurements().isEmpty())
             {
+                log.debug("Saving " + report.getMeasurementSet().getMeasurements().size() + " measurements for the report");
                 MeasurementHelper.saveMeasurementsForSet(report.getMeasurementSet().getMeasurements(), report.getMeasurementSet().getUUID(), dbCon, false); // flag not to close the DB connection
             }
         } catch (Exception ex) {
+            exception = true;
             throw ex;
         } finally {
             if (closeDBcon)
+            {
+                if (exception) {
+                    dbCon.rollback();
+                }
+                else {
+                    dbCon.commit();
+                }
                 dbCon.close();
+            }
         }
     }
     
@@ -179,7 +200,7 @@ public class ReportHelper
         // this validation will check if all the required parameters are set and if
         // there isn't already a duplicate instance in the DB
         // also checks that the MeasurementSet exists (by it's UUID)
-        ValidationReturnObject returnObj = ReportHelper.isObjectValidForSave(report, dbCon);
+        ValidationReturnObject returnObj = ReportHelper.isObjectValidForSave(report, dbCon, closeDBcon);
         if (!returnObj.valid)
         {
             log.error("Cannot save the Report object: " + returnObj.exception.getMessage(), returnObj.exception);
@@ -224,7 +245,7 @@ public class ReportHelper
         log.debug("Generating and saving a report for measurements.");
         if (validateMeasurements && saveMeasurements)
         {
-            ValidationReturnObject returnObj = MeasurementHelper.areObjectsValidForSave(measurements, mSetUUID, dbCon, false);
+            ValidationReturnObject returnObj = MeasurementHelper.areObjectsValidForSave(measurements, mSetUUID, false, dbCon, closeDBcon);
             if (!returnObj.valid)
             {
                 log.error("Unable to save report for measurements: " + returnObj.exception.getMessage(), returnObj.exception);

@@ -46,7 +46,7 @@ public class MetricHelper
 {
 static Logger log = Logger.getLogger(MetricHelper.class);
     
-    public static ValidationReturnObject isObjectValidForSave(Metric metric, DatabaseConnector dbCon) throws Exception
+    public static ValidationReturnObject isObjectValidForSave(Metric metric, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
     {
         if (metric == null)
         {
@@ -85,9 +85,9 @@ static Logger log = Logger.getLogger(MetricHelper.class);
         return new ValidationReturnObject(true);
     }
     
-    public static boolean objectExists(UUID uuid, DatabaseConnector dbCon) throws Exception
+    public static boolean objectExists(UUID uuid, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
     {
-        return DBUtil.objectExistsByUUID("Metric", "metricUUID", uuid, dbCon);
+        return DBUtil.objectExistsByUUID("Metric", "metricUUID", uuid, dbCon, closeDBcon);
     }
     
     public static void saveMetric(DatabaseConnector dbCon, Metric metric, boolean closeDBcon) throws Exception
@@ -96,7 +96,7 @@ static Logger log = Logger.getLogger(MetricHelper.class);
         
         // this validation will check if all the required parameters are set and if
         // there isn't already a duplicate instance in the DB
-        ValidationReturnObject returnObj = MetricHelper.isObjectValidForSave(metric, dbCon);
+        ValidationReturnObject returnObj = MetricHelper.isObjectValidForSave(metric, dbCon, closeDBcon);
         if (!returnObj.valid)
         {
             log.error("Cannot save the Metric object: " + returnObj.exception.getMessage(), returnObj.exception);
@@ -107,20 +107,23 @@ static Logger log = Logger.getLogger(MetricHelper.class);
             if (dbCon.isClosed())
                 dbCon.connect();
             
-            // TODO: change this later - just a quick hack until serialisation of Unit is sorted
-            if (metric.getUnit() == null)
-                metric.setUnit(Unit.ONE);
+            byte[] unitBytes = null;
             
-            // serialising unit
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            ObjectOutputStream oos = new ObjectOutputStream(bos);
+            if (metric.getUnit() != null)
+            {
+                //metric.setUnit(Unit.ONE);
+            
+                // serialising unit
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                ObjectOutputStream oos = new ObjectOutputStream(bos);
 
-            oos.writeObject(metric.getUnit());
-            oos.flush();
-            oos.close();
-            bos.close();
+                oos.writeObject(metric.getUnit());
+                oos.flush();
+                oos.close();
+                bos.close();
 
-            byte[] unitBytes = bos.toByteArray();
+                unitBytes = bos.toByteArray();
+            }
         
             String query = "INSERT INTO Metric (metricUUID, mType, unit) VALUES (?, ?, ?)";
             PreparedStatement pstmt = dbCon.getConnection().prepareStatement(query);
@@ -153,7 +156,7 @@ static Logger log = Logger.getLogger(MetricHelper.class);
             throw new NullPointerException("Cannot get a Metric object with the given UUID because it is NULL!");
         }
         
-        if (!MetricHelper.objectExists(metricUUID, dbCon))
+        if (!MetricHelper.objectExists(metricUUID, dbCon, closeDBcon))
         {
             log.error("There is no metric with the given UUID: " + metricUUID.toString());
             throw new RuntimeException("There is no metric with the given UUID: " + metricUUID.toString());
@@ -173,17 +176,20 @@ static Logger log = Logger.getLogger(MetricHelper.class);
             {
                 ByteArrayInputStream bais;
                 ObjectInputStream ins;
-                Unit unit;
+                Unit unit = null;
 
-                try {
-                    bais = new ByteArrayInputStream(rs.getBytes("unit"));
-                    ins = new ObjectInputStream(bais);
-                    unit =(Unit)ins.readObject();
-                    ins.close();
-                }
-                catch (Exception e) {
-                    log.error("Unable to read the unit from the database");
-                    throw new RuntimeException("Unable to read the unit from the database");
+                if (rs.getBytes("unit") != null)
+                {
+                    try {
+                        bais = new ByteArrayInputStream(rs.getBytes("unit"));
+                        ins = new ObjectInputStream(bais);
+                        unit =(Unit)ins.readObject();
+                        ins.close();
+                    }
+                    catch (Exception e) {
+                        log.error("Unable to read the unit from the database: " + e.getMessage());
+                        throw new RuntimeException("Unable to read the unit from the database", e);
+                    }
                 }
                 
                 String metricTypeStr = rs.getString("mType");
@@ -219,7 +225,7 @@ static Logger log = Logger.getLogger(MetricHelper.class);
             throw new NullPointerException("Cannot get a Metric object for the given measurement set, because its given UUID is NULL!");
         }
         
-        if (!MeasurementSetHelper.objectExists(measurementSetUUID, dbCon))
+        if (!MeasurementSetHelper.objectExists(measurementSetUUID, dbCon, closeDBcon))
         {
             log.error("There is no measurement set with the given UUID: " + measurementSetUUID.toString());
             throw new RuntimeException("There is no measurement set with the given UUID: " + measurementSetUUID.toString());

@@ -141,8 +141,10 @@ public class EDMTest
         //entities(edm, entityUUID, attributeUUID, expUUID);
         
         //metricGenerator(edm, expUUID, entityUUID, mGenUUID);
+        //metricGeneratorCompleteChain(edm, expUUID, entityUUID, attributeUUID, mGenUUID, mGrpUUID, mSetUUID);
         
         //metricGroup(edm, mGenUUID, mGrpUUID);
+        //metricGroupCompleteChain(edm, attributeUUID, mGenUUID, mGrpUUID, mSetUUID);
         
         //measurementSet(edm, attributeUUID, mGrpUUID, mSetUUID);
         //measurementSetViolation(edm, attributeUUID, mGrpUUID, mSetUUID);
@@ -151,7 +153,7 @@ public class EDMTest
         
         //experimentCompleteChain(edm, expUUID, entityUUID, attributeUUID, mGenUUID, mGrpUUID, mSetUUID);
         
-        //printExperimentDetails(edm, expUUID, withSubClasses);
+        printExperimentDetails(edm, expUUID, withSubClasses);
         
         //saveReport(edm, mSetUUID, reportUUID);
         
@@ -488,6 +490,68 @@ public class EDMTest
         }
     }
     
+    public static void metricGeneratorCompleteChain(ExperimentDataManager edm, UUID expUUID, UUID entityUUID, UUID attribUUID, UUID mGenUUID, UUID mGrpUUID, UUID mSetUUID) throws Exception
+    {
+        IMetricGeneratorDAO metricGeneratorDAO = null;
+        try {
+            metricGeneratorDAO = edm.getMetricGeneratorDAO();
+        } catch (Exception ex) {
+            log.error ("Unable to get MetricGenerator DAO: " + ex.getMessage(), ex);
+            throw ex;
+        }
+        
+//----- METRIC GENERATOR
+        log.info("Creating Experiment MetricGenerator");
+        MetricGenerator metricGenerator = new MetricGenerator(mGenUUID, "Experiment MetricGenerator", "A description");
+        //MetricGenerator metricGenerator = new MetricGenerator(mGenUUID, null, "A description");
+        metricGenerator.addEntity(new Entity(entityUUID));
+        
+//----- ENTITY
+        log.info("Creating VM entity");
+        Entity entity = new Entity(entityUUID, "VM", "A Virtual Machine");
+        //Entity entity = new Entity(entityUUID, null, "A Virtual Machine");
+        entity.addtAttribute(new Attribute(attribUUID, entityUUID, "CPU", "CPU performance"));
+        entity.addtAttribute(new Attribute(UUID.randomUUID(), entityUUID, "Network", "Network performance"));
+        entity.addtAttribute(new Attribute(UUID.randomUUID(), entityUUID, "Disk", "Disk performance"));
+        metricGenerator.addEntity(entity);
+        
+//----- METRIC GROUP
+        log.info("Creating QoS MetricGroup");
+        MetricGroup metricGroup = new MetricGroup(mGrpUUID, mGenUUID, "Quality of Service", "A group of QoS metrics");
+        //MetricGroup metricGroup = new MetricGroup(mGrpUUID, mGenUUID, null, "A group of QoS metrics");
+        metricGenerator.addMetricGroup(metricGroup);
+        
+//----- MEASUREMENT SET
+        log.info("Creating QoS Measurement set");
+        Metric metric = new Metric(UUID.randomUUID(), MetricType.RATIO, null);
+        //Metric metric = new Metric(UUID.randomUUID(), null, null);
+        MeasurementSet mSet = new MeasurementSet(mSetUUID, attribUUID, mGrpUUID, metric);
+        //MeasurementSet mSet = new MeasurementSet(mSetUUID, attribUUID, mGrpUUID, null);
+        metricGroup.addMeasurementSets(mSet);
+        
+//----- MEASUREMENTS
+        log.info("Creating random measurements for QoS measurement set");
+        int numMeasurements = 5;
+        Random rand = new Random();
+        rand.setSeed(new Date().getTime());
+        for (int i = 0; i < numMeasurements; i++)
+        {
+            long timeStamp = new Date().getTime() - (1000 * (numMeasurements-i));
+            Measurement measurement = new Measurement(UUID.randomUUID(), mSetUUID, new Date(timeStamp), String.valueOf(rand.nextInt(500)));
+            //Measurement measurement = new Measurement(UUID.randomUUID(), mSetUUID, new Date(timeStamp), null);
+            mSet.addMeasurement(measurement);
+        }
+        
+        log.info("Saving metric generator (with all sub-classes)");
+        try {
+            metricGeneratorDAO.saveMetricGenerator(metricGenerator, expUUID);
+            log.info("Metric generator '" + metricGenerator.getName() + "' saved successfully!");
+        } catch (Exception ex) {
+            log.error("Unable to save Metric generator: " + ex.getMessage());
+        }
+    }
+    
+    
     public static void metricGroup(ExperimentDataManager edm, UUID mGenUUID, UUID mGrpUUID) throws Exception
     {
         boolean withSubClasses = false;
@@ -542,6 +606,51 @@ public class EDMTest
         }
     }
     
+    public static void metricGroupCompleteChain(ExperimentDataManager edm, UUID attribUUID, UUID mGenUUID, UUID mGrpUUID, UUID mSetUUID) throws Exception
+    {
+        IMetricGroupDAO metricGroupDAO = null;
+        try {
+            metricGroupDAO = edm.getMetricGroupDAO();
+        } catch (Exception ex) {
+            log.error ("Unable to get MetricGroup DAO: " + ex.getMessage(), ex);
+            throw ex;
+        }
+        
+//----- METRIC GROUP
+        log.info("Creating QoS MetricGroup");
+        MetricGroup metricGroup = new MetricGroup(mGrpUUID, mGenUUID, "Quality of Service", "A group of QoS metrics");
+        //MetricGroup metricGroup = new MetricGroup(mGrpUUID, mGenUUID, null, "A group of QoS metrics");
+        
+//----- MEASUREMENT SET
+        log.info("Creating QoS Measurement set");
+        Metric metric = new Metric(UUID.randomUUID(), MetricType.RATIO, null);
+        //Metric metric = new Metric(UUID.randomUUID(), null, null);
+        MeasurementSet mSet = new MeasurementSet(mSetUUID, attribUUID, mGrpUUID, metric);
+        //MeasurementSet mSet = new MeasurementSet(mSetUUID, attribUUID, mGrpUUID, null);
+        metricGroup.addMeasurementSets(mSet);
+        
+//----- MEASUREMENTS
+        log.info("Creating random measurements for QoS measurement set");
+        int numMeasurements = 5;
+        Random rand = new Random();
+        rand.setSeed(new Date().getTime());
+        for (int i = 0; i < numMeasurements; i++)
+        {
+            long timeStamp = new Date().getTime() - (1000 * (numMeasurements-i));
+            Measurement measurement = new Measurement(UUID.randomUUID(), mSetUUID, new Date(timeStamp), String.valueOf(rand.nextInt(500)));
+            //Measurement measurement = new Measurement(UUID.randomUUID(), mSetUUID, new Date(timeStamp), null);
+            mSet.addMeasurement(measurement);
+        }
+        
+        log.info("Saving metric group (with all sub-classes)");
+        try {
+            metricGroupDAO.saveMetricGroup(metricGroup);
+            log.info("Metric group '" + metricGroup.getName() + "' saved successfully!");
+        } catch (Exception ex) {
+            log.error("Unable to save Metric Group: " + ex.getMessage());
+        }
+    }
+    
     public static void measurementSet(ExperimentDataManager edm, UUID attribUUID, UUID mGrpUUID, UUID mSetUUID) throws Exception
     {
         boolean withSubClasses = false;
@@ -556,6 +665,7 @@ public class EDMTest
         log.info("Saving QoS Measurement set");
         Metric metric = new Metric(UUID.randomUUID(), MetricType.RATIO, MILLI(SECOND));
         MeasurementSet mSet = new MeasurementSet(mSetUUID, attribUUID, mGrpUUID, metric);
+        //MeasurementSet mSet = new MeasurementSet(mSetUUID, attribUUID, mGrpUUID, null);
         
         try {
             mSetDAO.saveMeasurementSet(mSet);
@@ -565,7 +675,8 @@ public class EDMTest
         }
         
         log.info("Saving Random Measurement set");
-        Metric randomMetric = new Metric(UUID.randomUUID(), MetricType.INTERVAL, METRES_PER_SECOND);
+        //Metric randomMetric = new Metric(UUID.randomUUID(), MetricType.INTERVAL, METRES_PER_SECOND);
+        Metric randomMetric = new Metric(UUID.randomUUID(), null, METRES_PER_SECOND);
         MeasurementSet randomMSet = new MeasurementSet(UUID.randomUUID(), attribUUID, mGrpUUID, randomMetric);
         
         try {
@@ -667,7 +778,6 @@ public class EDMTest
         }
         
 //----- EXPERIMENT
-        
         log.info("Creating experiment");
         Experiment exp = new Experiment();
         exp.setUUID(expUUID);
@@ -678,26 +788,16 @@ public class EDMTest
         exp.setExperimentID("/locations/experiment/1337");
         
 //----- METRIC GENERATOR
-        
-        IMetricGeneratorDAO metricGeneratorDAO = null;
-        try {
-            metricGeneratorDAO = edm.getMetricGeneratorDAO();
-        } catch (Exception ex) {
-            log.error ("Unable to get MetricGenerator DAO: " + ex.getMessage(), ex);
-            throw ex;
-        }
-        
         log.info("Creating Experiment MetricGenerator");
         MetricGenerator metricGenerator = new MetricGenerator(mGenUUID, "Experiment MetricGenerator", "A description");
+        //MetricGenerator metricGenerator = new MetricGenerator(mGenUUID, null, "A description");
         metricGenerator.addEntity(new Entity(entityUUID));
         exp.addMetricGenerator(metricGenerator);
         
 //----- ENTITY
         log.info("Creating VM entity");
-        Entity entity = new Entity();
-        entity.setUUID(entityUUID);
-        entity.setName("VM");
-        entity.setDescription("A Virtual Machine");
+        Entity entity = new Entity(entityUUID, "VM", "A Virtual Machine");
+        //Entity entity = new Entity(entityUUID, null, "A Virtual Machine");
         entity.addtAttribute(new Attribute(attribUUID, entityUUID, "CPU", "CPU performance"));
         entity.addtAttribute(new Attribute(UUID.randomUUID(), entityUUID, "Network", "Network performance"));
         entity.addtAttribute(new Attribute(UUID.randomUUID(), entityUUID, "Disk", "Disk performance"));
@@ -706,12 +806,15 @@ public class EDMTest
 //----- METRIC GROUP
         log.info("Creating QoS MetricGroup");
         MetricGroup metricGroup = new MetricGroup(mGrpUUID, mGenUUID, "Quality of Service", "A group of QoS metrics");
+        //MetricGroup metricGroup = new MetricGroup(mGrpUUID, mGenUUID, null, "A group of QoS metrics");
         metricGenerator.addMetricGroup(metricGroup);
         
 //----- MEASUREMENT SET
         log.info("Creating QoS Measurement set");
         Metric metric = new Metric(UUID.randomUUID(), MetricType.RATIO, null);
+        //Metric metric = new Metric(UUID.randomUUID(), null, null);
         MeasurementSet mSet = new MeasurementSet(mSetUUID, attribUUID, mGrpUUID, metric);
+        //MeasurementSet mSet = new MeasurementSet(mSetUUID, attribUUID, mGrpUUID, null);
         metricGroup.addMeasurementSets(mSet);
         
 //----- MEASUREMENTS
@@ -723,6 +826,7 @@ public class EDMTest
         {
             long timeStamp = new Date().getTime() - (1000 * (numMeasurements-i));
             Measurement measurement = new Measurement(UUID.randomUUID(), mSetUUID, new Date(timeStamp), String.valueOf(rand.nextInt(500)));
+            //Measurement measurement = new Measurement(UUID.randomUUID(), mSetUUID, new Date(timeStamp), null);
             mSet.addMeasurement(measurement);
         }
         
@@ -758,6 +862,7 @@ public class EDMTest
         {
             long timeStamp = new Date().getTime() - (1000 * (numMeasurements-i));
             Measurement measurement = new Measurement(UUID.randomUUID(), mSetUUID, new Date(timeStamp), String.valueOf(rand.nextInt(500)));
+            //Measurement measurement = new Measurement(UUID.randomUUID(), mSetUUID, new Date(timeStamp), null);
             mSet.addMeasurement(measurement);
             
             if (i == 0)
@@ -783,6 +888,7 @@ public class EDMTest
             log.error("Unable to save Report: " + ex.getMessage(), ex);
             
             // save the report with a random UUID...
+            log.info("Trying to save the same report, but with a random UUID");
             report.setUUID(UUID.randomUUID());
             try {
                 reportDAO.saveReport(report);
@@ -952,6 +1058,9 @@ public class EDMTest
 
     public static void printExperimentDetails(Experiment experiment) throws Exception
     {
+        if (experiment == null)
+            return;
+        
         log.info("Experiment details:");
         log.info("  * Basic info");
         if (experiment.getUUID() != null) log.info("    - UUID:  " + experiment.getUUID());

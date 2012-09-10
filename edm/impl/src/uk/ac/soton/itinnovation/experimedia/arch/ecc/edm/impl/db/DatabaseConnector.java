@@ -168,6 +168,8 @@ public class DatabaseConnector
      */
     public void connect(String dbURL, String dbName, String userName, String password, DatabaseType type) throws Exception
     {
+        logger.debug("Connecting to the database");
+        
         // check if already connected
         if (isConnected())
         {
@@ -219,6 +221,50 @@ public class DatabaseConnector
         
         initialised = true;
     }
+    
+    /**
+     * Starts a transaction on the current DB connection.
+     * @throws Exception If a connection to the DB has not been made, or any SQL exceptions with starting the transaction.
+     */
+    public void beginTransaction() throws Exception
+    {
+        if (connection == null) {
+            throw new RuntimeException("Call to begin transaction when no connection to the database has been made");
+        }
+        
+        logger.debug("Starting transaction");
+        connection.setAutoCommit(false);
+    }
+    
+    /**
+     * Commits the data in a transaction, which assumes a transaction on the
+     * current DB connection has been started in the first place.
+     * @throws Exception If a connection to the DB has not been made, or any SQL exceptions with committing the transaction.
+     */
+    public void commit() throws Exception
+    {
+        if (connection == null) {
+            throw new RuntimeException("Call to commit when no connection to the database has been made");
+        }
+        
+        logger.debug("Committing transaction");
+        connection.commit();
+    }
+    
+    /**
+     * Rolls back any changes made to the DB in the current transaction, assuming
+     * that a transaction has been started in the first place.
+     * @throws Exception If a connection to the DB has not been made, or any SQL exceptions with rolling back the transaction.
+     */
+    public void rollback() throws Exception
+    {
+        if (connection == null) {
+            throw new RuntimeException("Call to rollback transaction when no connection to the database has been made");
+        }
+        
+        logger.debug("Rolling back transaction");
+        connection.rollback();
+    }
 
     /**
      * Close the connection to the database.
@@ -226,6 +272,8 @@ public class DatabaseConnector
      */
     public void close()
     {
+        logger.debug("Closing the connection to the database");
+        
         if (connection != null) {
             try {
                 connection.close();

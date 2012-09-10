@@ -41,9 +41,9 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DatabaseConnect
  */
 public class MeasurementHelper
 {
-    static Logger log = Logger.getLogger(AttributeHelper.class);
+    static Logger log = Logger.getLogger(MeasurementHelper.class);
     
-    public static ValidationReturnObject isObjectValidForSave(Measurement measurement, DatabaseConnector dbCon, boolean checkForMeasurementSet) throws Exception
+    public static ValidationReturnObject isObjectValidForSave(Measurement measurement, boolean checkForMeasurementSet, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
     {
         if (measurement == null)
         {
@@ -64,12 +64,12 @@ public class MeasurementHelper
         
         if (measurement.getTimeStamp() == null)
         {
-            return new ValidationReturnObject(false, new NullPointerException("The MeasurementSet timestamp is NULL"));
+            return new ValidationReturnObject(false, new NullPointerException("The Measurement timestamp is NULL"));
         }
         
         if (measurement.getValue() == null)
         {
-            return new ValidationReturnObject(false, new NullPointerException("The MeasurementSet value is NULL"));
+            return new ValidationReturnObject(false, new NullPointerException("The Measurement value is NULL"));
         }
         
         // check if it exists in the DB already
@@ -86,7 +86,7 @@ public class MeasurementHelper
         // if checking for measurement set, if flag is set
         if (checkForMeasurementSet)
         {
-            if (!MeasurementSetHelper.objectExists(measurement.getMeasurementSetUUID(), dbCon))
+            if (!MeasurementSetHelper.objectExists(measurement.getMeasurementSetUUID(), dbCon, closeDBcon))
             {
                 return new ValidationReturnObject(false, new RuntimeException("The Measurements's MeasurementSet does not exist (UUID: " + measurement.getMeasurementSetUUID().toString() + ")"));
             }
@@ -95,7 +95,7 @@ public class MeasurementHelper
         return new ValidationReturnObject(true);
     }
     
-    public static ValidationReturnObject areObjectsValidForSave(Set<Measurement> measurements, UUID mSetUUID, DatabaseConnector dbCon, boolean checkForMeasurementSet) throws Exception
+    public static ValidationReturnObject areObjectsValidForSave(Set<Measurement> measurements, UUID mSetUUID, boolean checkForMeasurementSet, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
     {
         if (measurements == null)
         {
@@ -122,12 +122,12 @@ public class MeasurementHelper
 
             if (measurement.getTimeStamp() == null)
             {
-                return new ValidationReturnObject(false, new NullPointerException("The MeasurementSet timestamp is NULL"));
+                return new ValidationReturnObject(false, new NullPointerException("The Measurement timestamp is NULL"));
             }
 
             if (measurement.getValue() == null)
             {
-                return new ValidationReturnObject(false, new NullPointerException("The MeasurementSet value is NULL"));
+                return new ValidationReturnObject(false, new NullPointerException("The Measurement value is NULL"));
             }
             
             // check if it exists in the DB already
@@ -146,7 +146,7 @@ public class MeasurementHelper
         // if checking for measurement set, if flag is set
         if (checkForMeasurementSet)
         {
-            if (!MeasurementSetHelper.objectExists(mSetUUID, dbCon))
+            if (!MeasurementSetHelper.objectExists(mSetUUID, dbCon, closeDBcon))
             {
                 return new ValidationReturnObject(false, new RuntimeException("The Measurements's MeasurementSet does not exist (UUID: " + mSetUUID.toString() + ")"));
             }
@@ -166,16 +166,16 @@ public class MeasurementHelper
         return query;
     }
     
-    public static boolean objectExists(UUID uuid, DatabaseConnector dbCon) throws Exception
+    public static boolean objectExists(UUID uuid, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
     {
-        return DBUtil.objectExistsByUUID("Measurement", "measurementUUID", uuid, dbCon);
+        return DBUtil.objectExistsByUUID("Measurement", "measurementUUID", uuid, dbCon, closeDBcon);
     }
     
     public static void saveMeasurement(Measurement measurement, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
     {
         // this validation will check if all the required parameters are set and if
         // there isn't already a duplicate instance in the DB
-        ValidationReturnObject returnObj = MeasurementHelper.isObjectValidForSave(measurement, dbCon, true);
+        ValidationReturnObject returnObj = MeasurementHelper.isObjectValidForSave(measurement, true, dbCon, closeDBcon);
         if (!returnObj.valid)
         {
             log.error("Cannot save the Measurement object: " + returnObj.exception.getMessage(), returnObj.exception);
@@ -192,7 +192,7 @@ public class MeasurementHelper
             // check if the result set got the generated table key
             if (rs.next()) {
                 String key = rs.getString(1);
-                log.debug("Saved Measurement with key: " + key);
+                //log.debug("Saved Measurement with key: " + key);
             } else {
                 throw new RuntimeException("No index returned after saving Measurement");
             }
@@ -209,16 +209,22 @@ public class MeasurementHelper
     {
         // this validation will check if all the required parameters are set and if
         // there isn't already a duplicate instance in the DB
-        ValidationReturnObject returnObj = MeasurementHelper.areObjectsValidForSave(measurements, mSetUUID, dbCon, true);
+        ValidationReturnObject returnObj = MeasurementHelper.areObjectsValidForSave(measurements, mSetUUID, true, dbCon, closeDBcon);
         if (!returnObj.valid)
         {
             log.error("Cannot save the Measurement objects: " + returnObj.exception.getMessage(), returnObj.exception);
             throw returnObj.exception;
         }
         
+        boolean exception = false;
         try {
             if (dbCon.isClosed())
+            {
                 dbCon.connect();
+                
+                if (closeDBcon)
+                    dbCon.beginTransaction();
+            }
             
             // iterate over each measurement and save
             for (Measurement measurement : measurements)
@@ -229,17 +235,25 @@ public class MeasurementHelper
                 // check if the result set got the generated table key
                 if (rs.next()) {
                     String key = rs.getString(1);
-                    log.debug("Saved Measurement with key: " + key);
+                    //log.debug("Saved Measurement with key: " + key);
                 } else {
                     throw new RuntimeException("No index returned after saving Measurement");
                 }
             }
         } catch (Exception ex) {
+            exception = true;
             log.error("Error while saving Measurement: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while saving Measurement: " + ex.getMessage(), ex);
         } finally {
             if (closeDBcon)
+            {
+                if (exception)
+                    dbCon.rollback();
+                else
+                    dbCon.commit();
+                
                 dbCon.close();
+            }
         }
     }
     

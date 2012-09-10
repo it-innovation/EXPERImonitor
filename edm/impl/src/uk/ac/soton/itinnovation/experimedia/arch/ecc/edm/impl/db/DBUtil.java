@@ -65,7 +65,7 @@ public class DBUtil
     }
     
     // check if a object exists in the DB
-    public static boolean objectExistsByUUID(String tableName, String keyName, UUID uuid, DatabaseConnector dbCon) throws Exception
+    public static boolean objectExistsByUUID(String tableName, String keyName, UUID uuid, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
     {
         try {
             if (dbCon.isClosed())
@@ -85,7 +85,8 @@ public class DBUtil
             log.error("Error while quering the database: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
         } finally {
-            dbCon.close();
+            if (closeDBcon)
+                dbCon.close();
         }
     }
 }

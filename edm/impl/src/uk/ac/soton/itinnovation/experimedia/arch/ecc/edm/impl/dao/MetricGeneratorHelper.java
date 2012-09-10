@@ -46,7 +46,7 @@ public class MetricGeneratorHelper
 {
     static Logger log = Logger.getLogger(MetricGeneratorHelper.class);
     
-    public static ValidationReturnObject isObjectValidForSave(MetricGenerator mg, UUID expUUID, DatabaseConnector dbCon, boolean checkForExperiment) throws Exception
+    public static ValidationReturnObject isObjectValidForSave(MetricGenerator mg, UUID expUUID, boolean checkForExperiment, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
     {
         if (mg == null)
         {
@@ -80,11 +80,13 @@ public class MetricGeneratorHelper
         // check if the experiment exists in the DB, if flagged to do so
         if (checkForExperiment)
         {
+            log.debug("Checking if experiment exists (UUID " + expUUID.toString() + ")");
             try {
-                if (!ExperimentHelper.objectExists(expUUID, dbCon))
+                if (!ExperimentHelper.objectExists(expUUID, dbCon, closeDBcon))
                 {
                     return new ValidationReturnObject(false, new RuntimeException("The Experiment specified for the MetricGenerator does not exist! UUID not found: " + expUUID.toString()));
                 }
+                log.debug("The experiment exists");
             } catch (Exception ex) {
                 throw ex;
             }
@@ -170,9 +172,9 @@ public class MetricGeneratorHelper
         }
     }
     
-    public static boolean objectExists(UUID uuid, DatabaseConnector dbCon) throws Exception
+    public static boolean objectExists(UUID uuid, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
     {
-        return DBUtil.objectExistsByUUID("MetricGenerator", "mGenUUID", uuid, dbCon);
+        return DBUtil.objectExistsByUUID("MetricGenerator", "mGenUUID", uuid, dbCon, closeDBcon);
     }
     
     public static void saveMetricGenerator(MetricGenerator metricGen, UUID experimentUUID, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
@@ -181,25 +183,33 @@ public class MetricGeneratorHelper
         // there isn't already a duplicate instance in the DB
         // will validate the metric groups too, if any are given
         // final flag is to check that the experiment is in the DB already
-        ValidationReturnObject returnObj = MetricGeneratorHelper.isObjectValidForSave(metricGen, experimentUUID, dbCon, true);
+        ValidationReturnObject returnObj = MetricGeneratorHelper.isObjectValidForSave(metricGen, experimentUUID, true, dbCon, closeDBcon);
         if (!returnObj.valid)
         {
             log.error("Cannot save the MetricGenerator object: " + returnObj.exception.getMessage(), returnObj.exception);
             throw returnObj.exception;
         }
         
+        if (dbCon.isClosed())
+        {
+            dbCon.connect();
+
+            if (closeDBcon)
+            {
+                dbCon.beginTransaction();
+            }
+        }
+        
         boolean exception = false;
         // save any entities if not NULL and if not already existing
         if ((metricGen.getEntities() != null) && !metricGen.getEntities().isEmpty())
         {
+            log.debug("The metric generator has got " + metricGen.getEntities().size() + " entities, which will now be saved (hopefully...)");
             try {
-                if (dbCon.isClosed())
-                    dbCon.connect();
-                
                 for (Entity entity : metricGen.getEntities())
                 {
                     // check if the entity exists; if not, then save it
-                    if (!EntityHelper.objectExists(entity.getUUID(), dbCon))
+                    if (!EntityHelper.objectExists(entity.getUUID(), dbCon, false))
                     {
                         EntityHelper.saveEntity(entity, dbCon, false);
                     }
@@ -209,13 +219,14 @@ public class MetricGeneratorHelper
                 throw ex;
             } finally {
                 if (exception && closeDBcon)
+                {
+                    dbCon.rollback();
                     dbCon.close();
+                }
             }
         }
         
         try {
-            if (dbCon.isClosed())
-                dbCon.connect();
             
             // get the table names and values according to what's available in the
             // object
@@ -231,6 +242,7 @@ public class MetricGeneratorHelper
                 String key = rs.getString(1);
                 log.debug("Saved MetricGenerator " + metricGen.getName() + " with key: " + key);
             } else {
+                exception = true;
                 throw new RuntimeException("No index returned after saving MetricGenerator " + metricGen.getName());
             }
         } catch (Exception ex) {
@@ -238,14 +250,18 @@ public class MetricGeneratorHelper
             log.error("Error while saving MetricGenerator: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while saving MetricGenerator: " + ex.getMessage(), ex);
         } finally {
-            if ((exception || (metricGen.getMetricGroups() == null) || metricGen.getMetricGroups().isEmpty()) && closeDBcon)
+            if (exception && closeDBcon)
+            {
+                dbCon.rollback();
                 dbCon.close();
+            }
         }
         
         // save any metric groups if not NULL
         try {
             if ((metricGen.getMetricGroups() != null) || !metricGen.getMetricGroups().isEmpty())
             {
+                log.debug("Saving " + metricGen.getMetricGroups().size() + " metric group(s) for the metric generator");
                 for (MetricGroup mGrp : metricGen.getMetricGroups())
                 {
                     if (mGrp != null)
@@ -257,10 +273,14 @@ public class MetricGeneratorHelper
             throw ex;
         } finally {
             if (exception && closeDBcon)
+            {
+                dbCon.rollback();
                 dbCon.close();
+            }
         }
         
         try {
+            log.debug("Making links between MG and Entity entries in the MetricGenerator_Entity table");
             // make link between MG and Entity in MetricGenerator_Entity table
             for (Entity entity : metricGen.getEntities())
             {
@@ -271,7 +291,14 @@ public class MetricGeneratorHelper
             throw ex;
         } finally {
             if (closeDBcon)
+            {
+                if (exception) {
+                    dbCon.rollback();
+                } else {
+                    dbCon.commit();
+                }
                 dbCon.close();
+            }
         }
     }
     
@@ -331,7 +358,10 @@ public class MetricGeneratorHelper
         boolean exception = false;
         try {
             if (dbCon.isClosed())
+            {
+                log.debug("opening DB connection");
                 dbCon.connect();
+            }
             
             String query = "SELECT * FROM MetricGenerator WHERE mGenUUID = '" + metricGenUUID + "'";
             ResultSet rs = dbCon.executeQuery(query);
@@ -355,7 +385,10 @@ public class MetricGeneratorHelper
             throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
         } finally {
             if (exception || (closeDBcon && !withSubClasses))
+            {
+                log.debug("closing DB connection");
                 dbCon.close();
+            }
         }
         
         // check if there's any metric groups
@@ -371,7 +404,10 @@ public class MetricGeneratorHelper
                 throw new RuntimeException("Unable to get MetricGenerator object due to an issue with getting its metric groups: " + ex.getMessage(), ex);
             } finally {
                 if (exception)
+                {
+                    log.debug("closing DB connection");
                     dbCon.close();
+                }
             }
 
             metricGenerator.setMetricGroups(metricGroups);
@@ -386,7 +422,10 @@ public class MetricGeneratorHelper
                 throw new RuntimeException("Unable to get MetricGenerator object due to an issue with getting its metric groups: " + ex.getMessage(), ex);
             } finally {
                 if (closeDBcon)
+                {
+                    log.debug("closing DB connection");
                     dbCon.close();
+                }
             }
 
             metricGenerator.setEntities(entities);
@@ -400,7 +439,10 @@ public class MetricGeneratorHelper
         Set<MetricGenerator> metricGenerators = new HashSet<MetricGenerator>();
         try {
             if (dbCon.isClosed())
+            {
+                log.debug("opening DB connection");
                 dbCon.connect();
+            }
             
             String query = "SELECT mGenUUID FROM MetricGenerator";
             ResultSet rs = dbCon.executeQuery(query);
@@ -422,6 +464,7 @@ public class MetricGeneratorHelper
             log.error("Error while quering the database: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
         } finally {
+            log.debug("closing DB connection");
             dbCon.close();
         }
         
@@ -469,7 +512,8 @@ public class MetricGeneratorHelper
             log.error("Error while quering the database: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
         } finally {
-            dbCon.close();
+            if (closeDBcon)
+                dbCon.close();
         }
         
         return metricGenerators;
