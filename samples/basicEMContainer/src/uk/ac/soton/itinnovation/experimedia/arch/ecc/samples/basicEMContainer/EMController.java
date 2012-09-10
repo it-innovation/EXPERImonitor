@@ -252,11 +252,8 @@ public class EMController implements IEMLifecycleListener
         if ( measures != null ) measurementCount = measures.size();
       }
       
-      // Notify EDM of batch data
-      if ( expMSAccessor != null )
-        try { expMSAccessor.saveMeasurementSet(ms); }
-        catch ( Exception e )
-        { emCtrlLogger.error("Couldn't store batch data (is this a duplicate?)"); }
+      // We could notify the EDM of this batch data here, but this demo will
+      // only send duplicated data, so we won't do this.
       
       // Notify UI with summary of batch
       mainView.addLogText( client.getName() + " got batch ID: " + batch.getID().toString() + 
