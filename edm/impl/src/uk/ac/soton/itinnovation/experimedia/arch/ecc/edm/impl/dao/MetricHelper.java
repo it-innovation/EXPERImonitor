@@ -31,10 +31,11 @@ import java.io.ObjectOutputStream;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.UUID;
-import javax.measure.unit.Unit;
+//import javax.measure.unit.Unit;
 import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Metric;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricType;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Unit;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DBUtil;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DatabaseConnector;
 
@@ -92,8 +93,6 @@ static Logger log = Logger.getLogger(MetricHelper.class);
     
     public static void saveMetric(DatabaseConnector dbCon, Metric metric, boolean closeDBcon) throws Exception
     {
-        log.debug("Saving metric");
-        
         // this validation will check if all the required parameters are set and if
         // there isn't already a duplicate instance in the DB
         ValidationReturnObject returnObj = MetricHelper.isObjectValidForSave(metric, dbCon, closeDBcon);
@@ -107,12 +106,11 @@ static Logger log = Logger.getLogger(MetricHelper.class);
             if (dbCon.isClosed())
                 dbCon.connect();
             
+            /*
             byte[] unitBytes = null;
             
             if (metric.getUnit() != null)
             {
-                //metric.setUnit(Unit.ONE);
-            
                 // serialising unit
                 ByteArrayOutputStream bos = new ByteArrayOutputStream();
                 ObjectOutputStream oos = new ObjectOutputStream(bos);
@@ -124,12 +122,16 @@ static Logger log = Logger.getLogger(MetricHelper.class);
 
                 unitBytes = bos.toByteArray();
             }
-        
+            */
             String query = "INSERT INTO Metric (metricUUID, mType, unit) VALUES (?, ?, ?)";
             PreparedStatement pstmt = dbCon.getConnection().prepareStatement(query);
             pstmt.setObject(1, metric.getUUID(), java.sql.Types.OTHER);
             pstmt.setString(2, metric.getMetricType().name());
-            pstmt.setObject(3, unitBytes);
+            if (metric.getUnit() == null)
+                pstmt.setObject(3, null);
+            else
+                pstmt.setObject(3, metric.getUnit().getName());
+            //pstmt.setObject(3, unitBytes);
             
             int rowCount = pstmt.executeUpdate();
             
@@ -174,10 +176,13 @@ static Logger log = Logger.getLogger(MetricHelper.class);
             // check if anything got returned (connection closed in finalise method)
             if (rs.next())
             {
-                ByteArrayInputStream bais;
-                ObjectInputStream ins;
                 Unit unit = null;
+                String unitName = rs.getString("unit");
+                if (unitName != null)
+                    unit = new Unit(unitName);
 
+                /*ByteArrayInputStream bais;
+                /ObjectInputStream ins;
                 if (rs.getBytes("unit") != null)
                 {
                     try {
@@ -190,7 +195,7 @@ static Logger log = Logger.getLogger(MetricHelper.class);
                         log.error("Unable to read the unit from the database: " + e.getMessage());
                         throw new RuntimeException("Unable to read the unit from the database", e);
                     }
-                }
+                }*/
                 
                 String metricTypeStr = rs.getString("mType");
                 if (metricTypeStr == null)

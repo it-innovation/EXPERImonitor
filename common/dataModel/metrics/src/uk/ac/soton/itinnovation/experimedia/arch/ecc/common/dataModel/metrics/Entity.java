@@ -112,7 +112,7 @@ public class Entity implements Serializable
      */
     public Entity(UUID uuid, String name, String description)
     {
-        this.uuid = uuid;
+        this(uuid);
         this.name = name;
         this.description = description;
     }

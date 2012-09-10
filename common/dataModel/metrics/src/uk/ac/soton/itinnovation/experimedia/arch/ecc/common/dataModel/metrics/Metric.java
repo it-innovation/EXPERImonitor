@@ -26,47 +26,18 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics;
 
 import java.io.Serializable;
 import java.util.UUID;
-import javax.measure.unit.Unit;
 
 /**
  * The metric class details the measurement of an attribute (of an entity).
- * 
- * For information about using the JScience unit, have a look at these resources:
- * 
- *   http://www.javaworld.com/javaworld/jw-10-2007/jw-10-jsr275.html
- *   http://www.jscience.org/api/index.html
- *   http://www.jscience.org/api/javax/measure/unit/Unit.html
- *   http://www.jscience.org/api/javax/measure/quantity/Quantity.html
- *   http://www.jscience.org/api/javax/measure/unit/SI.html
- * 
- * Examples of units are:
- * 
- *   Unit min = MINUTE;
- *   Unit ms = MILLI(SECOND);
- * 
- *   Unit metre = METRE;
- *   Unit cm = CENTI(METER);
- *   Unit foot = METER.times(3048).divide(10000);
- * 
- *   Unit bps = BIT.divide(SECOND);
- *   Unit tps = Unit.ONE.alternate("tweet").divide(SECOND);
- * 
- * Setting a unit:
- * 
- *   Metric m = new Metric();
- *   m.setUnit(MINUTE);
  * 
  * @author Vegard Engen
  */
 public class Metric implements Serializable
 {
     private UUID uuid;
-    //private UUID mSetUUID;
+    //private UUID measurementSetUUID;
     private MetricType metricType;
-    private Unit unit; // change to String?
-    
-    // other things?
-    //   - conversion stuff?
+    private Unit unit;
 
     /**
      * Default constructor, which sets a random UUID for the object instance.
@@ -90,7 +61,7 @@ public class Metric implements Serializable
         if (m.getMetricType() != null)
             this.metricType = m.getMetricType();
         if (m.getUnit() != null)
-            this.unit = m.getUnit();
+            this.unit = new Unit(m.getUnit());
     }
     
     /**

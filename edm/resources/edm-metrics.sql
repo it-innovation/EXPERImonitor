@@ -1,8 +1,8 @@
 CREATE TABLE Experiment
 (
    expUUID uuid NOT NULL, 
-   expID character varying(256), 
-   name character varying(128) NOT NULL, 
+   expID text, 
+   name text NOT NULL, 
    description text, 
    startTime bigint, 
    endTime bigint, 
@@ -16,7 +16,7 @@ WITH (
 CREATE TABLE Entity
 (
    entityUUID uuid NOT NULL, 
-   name character varying(128) NOT NULL, 
+   name text NOT NULL, 
    description text, 
    CONSTRAINT entityUUID PRIMARY KEY (entityUUID)
 ) 
@@ -29,7 +29,7 @@ CREATE TABLE Attribute
 (
    attribUUID uuid NOT NULL, 
    entityUUID uuid NOT NULL, 
-   name character varying(128) NOT NULL, 
+   name text NOT NULL, 
    description text, 
    CONSTRAINT attribUUID PRIMARY KEY (attribUUID), 
    CONSTRAINT entityUUID FOREIGN KEY (entityUUID) REFERENCES Entity (entityUUID) ON UPDATE CASCADE ON DELETE CASCADE
@@ -43,7 +43,7 @@ CREATE TABLE MetricGenerator
 (
    mGenUUID uuid NOT NULL, 
    expUUID uuid NOT NULL, 
-   name character varying(128) NOT NULL, 
+   name text NOT NULL, 
    description text, 
    CONSTRAINT mGenUUID PRIMARY KEY (mGenUUID), 
    CONSTRAINT expUUID FOREIGN KEY (expUUID) REFERENCES Experiment (expUUID) ON UPDATE CASCADE ON DELETE CASCADE
@@ -69,7 +69,7 @@ CREATE TABLE MetricGroup
 (
    mGrpUUID uuid NOT NULL, 
    mGenUUID uuid NOT NULL, 
-   name character varying(128) NOT NULL, 
+   name text NOT NULL, 
    description text, 
    CONSTRAINT mGrpUUID PRIMARY KEY (mGrpUUID), 
    CONSTRAINT mGenUUID FOREIGN KEY (mGenUUID) REFERENCES MetricGenerator (mGenUUID) ON UPDATE CASCADE ON DELETE CASCADE
@@ -81,7 +81,7 @@ WITH (
 
 CREATE TABLE MetricType
 (
-   name character varying(10) NOT NULL, 
+   name text NOT NULL, 
    CONSTRAINT name PRIMARY KEY (name)
 ) 
 WITH (
@@ -92,8 +92,8 @@ WITH (
 CREATE TABLE Metric
 (
    metricUUID uuid NOT NULL, 
-   mType character varying(10) NOT NULL, 
-   unit bytea, 
+   mType text NOT NULL, 
+   unit text, 
    CONSTRAINT metricUUID PRIMARY KEY (metricUUID), 
    CONSTRAINT mType FOREIGN KEY (mType) REFERENCES MetricType (name) ON UPDATE NO ACTION ON DELETE NO ACTION
 ) 
@@ -124,7 +124,7 @@ CREATE TABLE Measurement
    measurementUUID uuid NOT NULL, 
    mSetUUID uuid NOT NULL, 
    timeStamp bigint NOT NULL, 
-   value character varying(56), 
+   value text, 
    CONSTRAINT measurementUUID PRIMARY KEY (measurementUUID), 
    CONSTRAINT mSetUUID FOREIGN KEY (mSetUUID) REFERENCES MeasurementSet (mSetUUID) ON UPDATE CASCADE ON DELETE CASCADE
 ) 

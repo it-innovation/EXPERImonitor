@@ -27,9 +27,6 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.test;
 import java.util.Date;
 import java.util.Random;
 import java.util.UUID;
-import static javax.measure.unit.SI.*;
-import static javax.measure.unit.NonSI.*;
-import javax.measure.unit.Unit;
 import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Attribute;
@@ -41,6 +38,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Me
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGroup;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricType;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Unit;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.ExperimentDataManager;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IEntityDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IExperimentDAO;
@@ -390,17 +388,17 @@ public class PopulateDB
         
 //----- MEASUREMENT SETS
         log.info("Creating 1st QoS Measurement set");
-        Metric metric1 = new Metric(UUID.randomUUID(), MetricType.RATIO, MILLI(SECOND));
+        Metric metric1 = new Metric(UUID.randomUUID(), MetricType.RATIO, new Unit("ms"));
         MeasurementSet mSet1 = new MeasurementSet(mSet1UUID, attrib1UUID, mGrpUUID, metric1);
         metricGroup.addMeasurementSets(mSet1);
         
         log.info("Creating 2nd QoS Measurement set");
-        Metric metric2 = new Metric(UUID.randomUUID(), MetricType.RATIO, BIT.divide(SECOND));
+        Metric metric2 = new Metric(UUID.randomUUID(), MetricType.RATIO, new Unit("bits per second"));
         MeasurementSet mSet2 = new MeasurementSet(mSet2UUID, attrib2UUID, mGrpUUID, metric2);
         metricGroup.addMeasurementSets(mSet2);
         
         log.info("Creating 3rd QoS Measurement set");
-        Metric metric3 = new Metric(UUID.randomUUID(), MetricType.RATIO, MILLI(SECOND));
+        Metric metric3 = new Metric(UUID.randomUUID(), MetricType.RATIO, new Unit("ms"));
         MeasurementSet mSet3 = new MeasurementSet(mSet3UUID, attrib3UUID, mGrpUUID, metric3);
         metricGroup.addMeasurementSets(mSet3);
         
@@ -452,17 +450,17 @@ public class PopulateDB
         
 //----- MEASUREMENT SETS
         log.info("Creating 1st QoS Measurement set");
-        Metric metric1 = new Metric(UUID.randomUUID(), MetricType.RATIO, Unit.ONE.alternate("Files ingested").divide(MINUTE));
+        Metric metric1 = new Metric(UUID.randomUUID(), MetricType.RATIO, new Unit("Files ingested per minute"));
         MeasurementSet mSet1 = new MeasurementSet(mSet1UUID, attrib1UUID, mGrpUUID, metric1);
         metricGroup.addMeasurementSets(mSet1);
         
         log.info("Creating 2nd QoS Measurement set");
-        Metric metric2 = new Metric(UUID.randomUUID(), MetricType.RATIO, Unit.ONE.alternate("AV streams out").divide(MINUTE));
+        Metric metric2 = new Metric(UUID.randomUUID(), MetricType.RATIO, new Unit("AV streams out per minute"));
         MeasurementSet mSet2 = new MeasurementSet(mSet2UUID, attrib2UUID, mGrpUUID, metric2);
         metricGroup.addMeasurementSets(mSet2);
         
         log.info("Creating 3rd QoS Measurement set");
-        Metric metric3 = new Metric(UUID.randomUUID(), MetricType.RATIO, Unit.ONE.alternate("Average frame rate").divide(SECOND));
+        Metric metric3 = new Metric(UUID.randomUUID(), MetricType.RATIO, new Unit("Average frame rate per second"));
         MeasurementSet mSet3 = new MeasurementSet(mSet3UUID, attrib3UUID, mGrpUUID, metric3);
         metricGroup.addMeasurementSets(mSet3);
         
@@ -512,12 +510,12 @@ public class PopulateDB
         
 //----- MEASUREMENT SETS
         log.info("Creating 1st QoS Measurement set");
-        Metric metric1 = new Metric(UUID.randomUUID(), MetricType.RATIO, Unit.ONE.alternate("POI requests").divide(MINUTE));
+        Metric metric1 = new Metric(UUID.randomUUID(), MetricType.RATIO, new Unit("POI requests per minute"));
         MeasurementSet mSet1 = new MeasurementSet(mSet1UUID, attrib1UUID, mGrpUUID, metric1);
         metricGroup.addMeasurementSets(mSet1);
         
         log.info("Creating 2nd QoS Measurement set");
-        Metric metric2 = new Metric(UUID.randomUUID(), MetricType.RATIO, MILLI(SECOND));
+        Metric metric2 = new Metric(UUID.randomUUID(), MetricType.RATIO, new Unit("ms"));
         MeasurementSet mSet2 = new MeasurementSet(mSet2UUID, attrib2UUID, mGrpUUID, metric2);
         metricGroup.addMeasurementSets(mSet2);
         

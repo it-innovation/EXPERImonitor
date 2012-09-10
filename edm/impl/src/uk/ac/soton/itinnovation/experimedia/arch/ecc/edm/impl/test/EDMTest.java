@@ -29,23 +29,23 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
-import javax.measure.quantity.Duration;
+/*import javax.measure.quantity.Duration;
 import javax.measure.quantity.Mass;
 import javax.measure.unit.Unit;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Metric;
-
 import javax.measure.Measure;
 import javax.measure.unit.*;
 import javax.measure.quantity.*;
 import static javax.measure.unit.SI.*;
 import static javax.measure.unit.NonSI.*;
 import static javax.measure.unit.Dimension.*;
-
-
 import static javax.measure.unit.SystemOfUnits.*;
 import static javax.measure.unit.UnitFormat.*;
-import org.apache.log4j.Logger;
 import org.jscience.physics.amount.Amount;
+*/
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Metric;
+
+
+import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Attribute;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Entity;
@@ -55,6 +55,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Me
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGroup;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricType;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Unit;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.ExperimentDataManager;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.dao.ExperimentDataManagerDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IEntityDAO;
@@ -76,7 +77,7 @@ public class EDMTest
     
     public static void main(String[] args) throws Exception
     {
-        Metric m = new Metric();
+        /*Metric m = new Metric();
         m.setUnit(MINUTE);
         //Unit<Mass> unit = GRAM;
         Unit min = MINUTE;//SECONDS.times(60);
@@ -117,11 +118,7 @@ public class EDMTest
         Unit<Quantity> tpsq = tps;
         System.out.println("tpsq = " + tpsq);
         
-        // cpu load
-        
-        
-        // number of VMs
-        
+        */
         
         
         ExperimentDataManager edm = new ExperimentDataManager();
@@ -663,7 +660,7 @@ public class EDMTest
         }
         
         log.info("Saving QoS Measurement set");
-        Metric metric = new Metric(UUID.randomUUID(), MetricType.RATIO, MILLI(SECOND));
+        Metric metric = new Metric(UUID.randomUUID(), MetricType.RATIO, new Unit("milli seconds"));
         MeasurementSet mSet = new MeasurementSet(mSetUUID, attribUUID, mGrpUUID, metric);
         //MeasurementSet mSet = new MeasurementSet(mSetUUID, attribUUID, mGrpUUID, null);
         
@@ -676,7 +673,7 @@ public class EDMTest
         
         log.info("Saving Random Measurement set");
         //Metric randomMetric = new Metric(UUID.randomUUID(), MetricType.INTERVAL, METRES_PER_SECOND);
-        Metric randomMetric = new Metric(UUID.randomUUID(), null, METRES_PER_SECOND);
+        Metric randomMetric = new Metric(UUID.randomUUID(), null, new Unit("milli seconds"));
         MeasurementSet randomMSet = new MeasurementSet(UUID.randomUUID(), attribUUID, mGrpUUID, randomMetric);
         
         try {
@@ -720,7 +717,7 @@ public class EDMTest
         }
         
         log.info("Saving Measurement set with given UUID (for the metric group | attribute combo given)");
-        Metric metric = new Metric(UUID.randomUUID(), MetricType.RATIO, MILLI(SECOND));
+        Metric metric = new Metric(UUID.randomUUID(), MetricType.RATIO, new Unit("milli seconds"));
         MeasurementSet mSet = new MeasurementSet(mSetUUID, attribUUID, mGrpUUID, metric);
         
         try {
@@ -731,7 +728,7 @@ public class EDMTest
         }
         
         log.info("Saving Measurement set with random UUID (for the metric group | attribute combo given)");
-        Metric randomMetric = new Metric(UUID.randomUUID(), MetricType.INTERVAL, METRES_PER_SECOND);
+        Metric randomMetric = new Metric(UUID.randomUUID(), MetricType.INTERVAL, new Unit("milli seconds"));
         MeasurementSet randomMSet = new MeasurementSet(UUID.randomUUID(), attribUUID, mGrpUUID, randomMetric);
         
         try {
