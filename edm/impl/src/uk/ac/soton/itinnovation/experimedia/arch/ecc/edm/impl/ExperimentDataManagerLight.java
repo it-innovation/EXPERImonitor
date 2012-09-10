@@ -18,39 +18,36 @@
 // the software.
 //
 //      Created By :            Vegard Engen
-//      Created Date :          2012-08-13
-//      Created for Project :   BonFIRE
+//      Created Date :          2012-09-07
+//      Created for Project :   
 //
 /////////////////////////////////////////////////////////////////////////
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl;
 
 import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.dao.ExperimentDataManagerDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IExperimentDataManager;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IExperimentDataManagerLight;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IEntityDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IExperimentDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IMeasurementDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IMeasurementSetDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IMetricDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IMetricGeneratorDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IMetricGroupDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IReportDAO;
 
 /**
- * The Experiment Monitoring Data Manager, which exposes all data access objects
- * for storing and retrieving monitoring data.
+ * The Light version of the Experiment Monitoring Data Manager, which exposes
+ * only the essential data access objects needed by clients to store and retrieve
+ * monitoring data.
  * 
  * This implementation relies on a PostgreSQL database to persist the data.
  * 
  * @author Vegard Engen
  */
-public class ExperimentDataManager implements IExperimentDataManager
+public class ExperimentDataManagerLight implements IExperimentDataManagerLight
 {
     private ExperimentDataManagerDAO edmDAO;
     
-    static Logger log = Logger.getLogger(ExperimentDataManager.class);
+    static Logger log = Logger.getLogger(ExperimentDataManagerLight.class);
     
-    public ExperimentDataManager()
+    public ExperimentDataManagerLight()
     {
         log.info("EDM STARTING UP :)");
         try {
@@ -79,32 +76,9 @@ public class ExperimentDataManager implements IExperimentDataManager
     }
 
     @Override
-    public IMetricGroupDAO getMetricGroupDAO() throws Exception
-    {
-        return edmDAO;
-    }
-
-    @Override
-    public IMeasurementSetDAO getMeasurementSetDAO() throws Exception
-    {
-        return edmDAO;
-    }
-
-    @Override
-    public IMetricDAO getMetricDAO() throws Exception
-    {
-        return edmDAO;
-    }
-    
-    @Override
     public IReportDAO getReportDAO() throws Exception
     {
         return edmDAO;
     }
 
-    @Override
-    public IMeasurementDAO getMeasurementDAO() throws Exception
-    {
-        return edmDAO;
-    }
 }

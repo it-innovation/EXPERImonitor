@@ -197,7 +197,7 @@ public class MeasurementHelper
                 throw new RuntimeException("No index returned after saving Measurement");
             }
         } catch (Exception ex) {
-            log.error("Error while saving Measurement: " + ex.getMessage(), ex);
+            log.error("Error while saving Measurement: " + ex.getMessage());
             throw new RuntimeException("Error while saving Measurement: " + ex.getMessage(), ex);
         } finally {
             if (closeDBcon)
@@ -212,7 +212,7 @@ public class MeasurementHelper
         ValidationReturnObject returnObj = MeasurementHelper.areObjectsValidForSave(measurements, mSetUUID, dbCon, true);
         if (!returnObj.valid)
         {
-            log.error("Cannot save the Measurement object: " + returnObj.exception.getMessage(), returnObj.exception);
+            log.error("Cannot save the Measurement objects: " + returnObj.exception.getMessage(), returnObj.exception);
             throw returnObj.exception;
         }
         

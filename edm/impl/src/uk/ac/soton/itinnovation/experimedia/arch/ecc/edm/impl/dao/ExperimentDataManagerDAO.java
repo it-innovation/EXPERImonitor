@@ -269,6 +269,12 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     }
     
     @Override
+    public void saveMeasurementsForSet(Set<Measurement> measurements, UUID mSetUUID) throws Exception
+    {
+        MeasurementHelper.saveMeasurementsForSet(measurements, mSetUUID, dbCon, true);
+    }
+    
+    @Override
     public Measurement getMeasurement(UUID measurementUUID) throws Exception
     {
         return MeasurementHelper.getMeasurement(measurementUUID, dbCon, true);
@@ -281,7 +287,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     @Override
     public void saveReport(Report report) throws Exception
     {
-        ReportHelper.saveReport(report, dbCon);
+        ReportHelper.saveReport(report, dbCon, true);
     }
 
     @Override

@@ -27,6 +27,7 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.dao;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Date;
+import java.util.Set;
 import java.util.UUID;
 import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Measurement;
@@ -120,7 +121,7 @@ public class ReportHelper
         return DBUtil.objectExistsByUUID("Report", "reportUUID", uuid, dbCon);
     }
     
-    public static void saveReport(Report report, DatabaseConnector dbCon) throws Exception
+    public static void saveReport(Report report, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
     {
         // should save any measurements that may be included
         // this validation will check if all the required parameters are set and if
@@ -153,7 +154,7 @@ public class ReportHelper
             log.error("Error while saving Report: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while saving Report: " + ex.getMessage(), ex);
         } finally {
-            if ((exception || (report.getMeasurementSet().getMeasurements() == null) || report.getMeasurementSet().getMeasurements().isEmpty()))
+            if (closeDBcon && ((exception || (report.getMeasurementSet().getMeasurements() == null) || report.getMeasurementSet().getMeasurements().isEmpty())))
                 dbCon.close();
         }
         
@@ -166,7 +167,8 @@ public class ReportHelper
         } catch (Exception ex) {
             throw ex;
         } finally {
-            dbCon.close();
+            if (closeDBcon)
+                dbCon.close();
         }
     }
     
@@ -204,6 +206,88 @@ public class ReportHelper
         } finally {
             if (closeDBcon)
                 dbCon.close();
+        }
+    }
+    
+    /**
+     * Generates a report for the measurements, which is saved.
+     * @param measurements The measurements.
+     * @param mSetUUID The UUID of the measurement set for the measurements.
+     * @param validateMeasurements A flag to say whether to validate the measurements or not.
+     * @param saveMeasurements A flag to say whether the measurements should be saved or not.
+     * @param dbCon A database connection object.
+     * @param closeDBcon A flag to say whether the database connection should be closed or not.
+     * @throws Exception 
+     */
+    public static void saveReportForMeasurements(Set<Measurement> measurements, UUID mSetUUID, boolean validateMeasurements, boolean saveMeasurements, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
+    {
+        log.debug("Generating and saving a report for measurements.");
+        if (validateMeasurements && saveMeasurements)
+        {
+            ValidationReturnObject returnObj = MeasurementHelper.areObjectsValidForSave(measurements, mSetUUID, dbCon, false);
+            if (!returnObj.valid)
+            {
+                log.error("Unable to save report for measurements: " + returnObj.exception.getMessage(), returnObj.exception);
+                throw returnObj.exception;
+            }
+        }
+        else
+        {
+            if ((measurements == null) || measurements.isEmpty())
+            {
+                log.error("Cannot save report for measurements, because the set of measurements is NULL (or empty)");
+                throw new RuntimeException("Cannot save report for measurements, because the set of measurements is NULL (or empty)");
+            }
+
+            if (mSetUUID == null)
+            {
+                log.error("Cannot save report for measurements, because the measurement set UUID is NULL");
+                throw new RuntimeException("Cannot save report for measurements, because the measurement set UUID is NULL");
+            }
+        }
+        
+        // need to get the from/to dates from the measurements
+        Long timeStampFrom = null;
+        Long timeStampTo = null;
+        
+        try {
+            for (Measurement measurement : measurements)
+            {
+                long timeStamp = measurement.getTimeStamp().getTime();
+                if (timeStampFrom == null)
+                {
+                    timeStampFrom = timeStamp;
+                    timeStampTo = timeStamp;
+                }
+                else
+                {
+                    if (timeStamp > timeStampTo)
+                        timeStampTo = timeStamp;
+                    else if (timeStamp < timeStampFrom)
+                        timeStampFrom = timeStamp;
+                }
+            }
+        } catch (Exception ex) {
+            log.error("Unable to save report for measurements because it was not possible to get the time stamp from one or more measurements (was NULL)", ex);
+            throw new RuntimeException("Unable to save report for measurements because it was not possible to get the time stamp from one or more measurements (was NULL)", ex);
+        }
+        Report report = null;
+        
+        try {
+            report = new Report(UUID.randomUUID(), new MeasurementSet(mSetUUID), new Date(), new Date(timeStampFrom), new Date(timeStampTo), measurements.size());
+        } catch (Exception ex) {
+            log.error("Unable to create and save a report for the given measurements: " + ex.getMessage(), ex);
+            throw new RuntimeException("Unable to create and save a report for the given measurements: " + ex.getMessage(), ex);
+        }
+        
+        if (saveMeasurements)
+        {
+            report.getMeasurementSet().setMeasurements(measurements);
+            saveReport(report, dbCon, closeDBcon);
+        }
+        else
+        {
+            saveReportWithoutMeasurements(report, dbCon, closeDBcon);
         }
     }
 

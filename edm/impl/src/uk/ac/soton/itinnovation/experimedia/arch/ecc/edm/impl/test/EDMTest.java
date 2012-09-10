@@ -114,6 +114,8 @@ public class EDMTest
         //Unit tps = Unit.valueOf("tweet");//.divide(SECOND);
         Unit tps = Unit.ONE.alternate("tweet").divide(SECOND);
         System.out.println("tps = " + tps);
+        Unit<Quantity> tpsq = tps;
+        System.out.println("tpsq = " + tpsq);
         
         // cpu load
         
@@ -143,12 +145,13 @@ public class EDMTest
         //metricGroup(edm, mGenUUID, mGrpUUID);
         
         //measurementSet(edm, attributeUUID, mGrpUUID, mSetUUID);
+        //measurementSetViolation(edm, attributeUUID, mGrpUUID, mSetUUID);
         
         //measurement(edm, mSetUUID);
         
-        experimentCompleteChain(edm, expUUID, entityUUID, attributeUUID, mGenUUID, mGrpUUID, mSetUUID);
+        //experimentCompleteChain(edm, expUUID, entityUUID, attributeUUID, mGenUUID, mGrpUUID, mSetUUID);
         
-        printExperimentDetails(edm, expUUID, withSubClasses);
+        //printExperimentDetails(edm, expUUID, withSubClasses);
         
         //saveReport(edm, mSetUUID, reportUUID);
         
@@ -592,6 +595,40 @@ public class EDMTest
             }
         }
         
+    }
+    
+    public static void measurementSetViolation(ExperimentDataManager edm, UUID attribUUID, UUID mGrpUUID, UUID mSetUUID) throws Exception
+    {
+        boolean withSubClasses = false;
+        IMeasurementSetDAO mSetDAO = null;
+        try {
+            mSetDAO = edm.getMeasurementSetDAO();
+        } catch (Exception ex) {
+            log.error ("Unable to get MeasurementSet DAO: " + ex.getMessage());
+            throw ex;
+        }
+        
+        log.info("Saving Measurement set with given UUID (for the metric group | attribute combo given)");
+        Metric metric = new Metric(UUID.randomUUID(), MetricType.RATIO, MILLI(SECOND));
+        MeasurementSet mSet = new MeasurementSet(mSetUUID, attribUUID, mGrpUUID, metric);
+        
+        try {
+            mSetDAO.saveMeasurementSet(mSet);
+            log.info("MeasurementSet saved successfully!");
+        } catch (Exception ex) {
+            log.error("Unable to save MeasurementSet: " + ex.getMessage());
+        }
+        
+        log.info("Saving Measurement set with random UUID (for the metric group | attribute combo given)");
+        Metric randomMetric = new Metric(UUID.randomUUID(), MetricType.INTERVAL, METRES_PER_SECOND);
+        MeasurementSet randomMSet = new MeasurementSet(UUID.randomUUID(), attribUUID, mGrpUUID, randomMetric);
+        
+        try {
+            mSetDAO.saveMeasurementSet(randomMSet);
+            log.info("MeasurementSet saved successfully!");
+        } catch (Exception ex) {
+            log.error("Unable to save MeasurementSet: " + ex.getMessage());
+        }
     }
     
     public static void measurement(ExperimentDataManager edm, UUID mSetUUID) throws Exception

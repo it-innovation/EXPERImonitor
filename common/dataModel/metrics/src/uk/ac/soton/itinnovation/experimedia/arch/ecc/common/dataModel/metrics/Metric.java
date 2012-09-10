@@ -61,8 +61,9 @@ import javax.measure.unit.Unit;
 public class Metric implements Serializable
 {
     private UUID uuid;
+    //private UUID mSetUUID;
     private MetricType metricType;
-    private Unit unit;
+    private Unit unit; // change to String?
     
     // other things?
     //   - conversion stuff?

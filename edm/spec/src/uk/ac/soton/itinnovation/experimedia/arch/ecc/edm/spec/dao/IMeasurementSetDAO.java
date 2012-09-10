@@ -45,11 +45,18 @@ public interface IMeasurementSetDAO
 {
     /**
      * Save a measurement set, which must have a unique UUID and refer to an 
-     * existing metric group (by its UUID).
+     * existing metric group (by its UUID) and an existing attribute (by its UUID).
      * 
      * Any sub-classes of the measurement set will also be saved (if not null).
      * If there are no measurements, for example, then the measurement set is still
      * saved without any exception thrown.
+     * 
+     * PS: there should be only one measurement set for an attribute in a metric
+     * group. This is not a method to use to save new measurements to an existing
+     * measurement set. Even if you create a new UUID for a measurement set with
+     * for a particular metric group and attribute combination, this is not allowed.
+     * To save measurements for an existing measurement set, use the Report facility!
+     * 
      * @param measurementSet The measurement set instance to be saved.
      * @throws Exception If there's a technical issue or a measurement set with the same UUID already exists.
      */
@@ -67,7 +74,8 @@ public interface IMeasurementSetDAO
     
     /**
      * Get all measurement sets for a metric group. Will include any sub-classes
-     * except for measurements, if available.
+     * except for measurements, if available. Need to use the Report facility for
+     * getting the measurements for a measurement set.
      * @param metricGroupUUID The UUID of the metric group.
      * @param withMetric Flag to say whether to return the metric too.
      * @return A measurement set object, if it exists.

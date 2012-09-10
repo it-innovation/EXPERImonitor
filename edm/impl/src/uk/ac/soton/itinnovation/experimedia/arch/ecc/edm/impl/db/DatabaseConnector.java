@@ -26,7 +26,6 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -331,7 +330,8 @@ public class DatabaseConnector
                 rs = s.getGeneratedKeys();
             }
         } catch (Exception ex) {
-            throw new RuntimeException("Error while executing query: " + query, ex);
+            logger.error("Error while executing query: " + query, ex);
+            throw ex;
         }
 
         return rs;

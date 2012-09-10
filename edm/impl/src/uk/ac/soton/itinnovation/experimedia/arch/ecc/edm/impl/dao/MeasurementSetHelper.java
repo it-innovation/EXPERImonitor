@@ -194,7 +194,9 @@ public class MeasurementSetHelper
             // save any measurements if not NULL
             if ((measurementSet.getMeasurements() != null) && !measurementSet.getMeasurements().isEmpty())
             {
-                MeasurementHelper.saveMeasurementsForSet(measurementSet.getMeasurements(), measurementSet.getUUID(), dbCon, false); // flag not to close the DB connection
+                // saving as part of a report (to be created).
+                // flags to (1) validate measurements and (2) save measurements
+                ReportHelper.saveReportForMeasurements(measurementSet.getMeasurements(), measurementSet.getUUID(), true, true, dbCon, closeDBcon);
             }
         } catch (Exception ex) {
             throw ex;

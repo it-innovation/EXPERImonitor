@@ -24,6 +24,7 @@
 /////////////////////////////////////////////////////////////////////////
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao;
 
+import java.util.Set;
 import java.util.UUID;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Measurement;
 
@@ -44,6 +45,15 @@ public interface IMeasurementDAO
      * @throws Exception If there's a technical issue or a measurement with the same UUID already exists.
      */
     public void saveMeasurement(Measurement measurement) throws Exception;
+    
+    /**
+     * Saves measurements for an existing measurement set, and will create a
+     * Report for them.
+     * @param measurements The measurements to save.
+     * @param mSetUUID The UUID of the measurement set.
+     * @throws Exception If there's a technical issue, if the measurement set does not exist, or a measurement with the same UUID already exists.
+     */
+    public void saveMeasurementsForSet(Set<Measurement> measurements, UUID mSetUUID) throws Exception;
     
     /**
      * Get a measurement according to its UUID.
