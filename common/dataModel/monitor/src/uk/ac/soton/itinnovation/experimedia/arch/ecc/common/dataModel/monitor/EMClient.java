@@ -68,6 +68,10 @@ public class EMClient
     generatorsSetupOK = new HashSet<UUID>();
   }
   
+  @Override
+  public String toString()
+  { return clientName; }
+  
   /**
    * Gets the ID of the client.
    * 

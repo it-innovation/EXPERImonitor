@@ -86,10 +86,18 @@ public class AMQPMessageDispatch implements IAMQPMessageDispatch
     return addResult;
   }
   
-  protected boolean iterateDispatch()
+  protected boolean hasOutstandingDispatches()
   {
-    boolean hasDispatches;
+    boolean outstanding;
     
+    synchronized( dispatchLock )
+    { outstanding = !dispatchQueue.isEmpty(); }
+    
+    return outstanding;
+  }
+  
+  protected void iterateDispatch()
+  {
     synchronized( dispatchLock )
     {
       if ( !dispatchQueue.isEmpty() && dispatchListener != null )
@@ -102,12 +110,8 @@ public class AMQPMessageDispatch implements IAMQPMessageDispatch
                                                       nextMessage.getValue() );
         }
         catch ( InterruptedException ie )
-        { dispatchLogger.error( "Could not dispatch AMQP message"); }
+        { dispatchLogger.error( "Could not dispatch AMQP message" ); }
       }
-      
-      hasDispatches = !dispatchQueue.isEmpty();
     }
-    
-    return hasDispatches;
   }
 }

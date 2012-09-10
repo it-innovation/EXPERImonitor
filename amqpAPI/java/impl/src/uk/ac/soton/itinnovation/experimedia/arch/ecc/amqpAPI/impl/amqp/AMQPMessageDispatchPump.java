@@ -28,6 +28,7 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.spec.*;
 
 import java.util.*;
+import org.apache.log4j.Logger;
 
 
 
@@ -37,6 +38,7 @@ public class AMQPMessageDispatchPump implements Runnable,
                                                 IAMQPMessageDispatchPump
                                                 
 {
+  private final Logger pumpLogger  = Logger.getLogger( AMQPMessageDispatchPump.class );
   private final Object listLock    = new Object();
   private final Object waitingLock = new Object();
   
@@ -129,21 +131,31 @@ public class AMQPMessageDispatchPump implements Runnable,
       { currentDispatches.addAll( dispatchList ); }
       
       // Run through all dispatchers, iterating one dispatch
-      boolean outstandingDispatches = false;
       Iterator<AMQPMessageDispatch> dispIt = currentDispatches.iterator();
-      
       while ( dispIt.hasNext() )
-      { 
-        if ( dispIt.next().iterateDispatch() )
-            outstandingDispatches = true;
-      }
+      { dispIt.next().iterateDispatch(); }
       
+      // Check for outstanding dispatches
       synchronized ( waitingLock )
-      { dispatchesWaiting = outstandingDispatches; }
+      {
+        dispatchesWaiting = false;
+        dispIt = currentDispatches.iterator();
+        while ( dispIt.hasNext() )
+        {
+          if ( dispIt.next().hasOutstandingDispatches() )
+          {
+            dispatchesWaiting = true;
+            break;
+          }
+        }
+      }
     }
   }
   
   // Protected methods ---------------------------------------------------------
   protected void notifyDispatchWaiting()
-  { synchronized ( waitingLock ) {dispatchesWaiting = true;} }
+  { 
+    synchronized ( waitingLock ) 
+    { dispatchesWaiting = true; } 
+  }
 }

@@ -99,7 +99,7 @@ public class EMController implements IEMLifecycleListener
   public void onClientConnected( EMClient client )
   {
     if ( mainView != null )
-      mainView.addConnectedClient( client.getID(), client.getName() );
+      mainView.addConnectedClient( client );
   }
   
   @Override

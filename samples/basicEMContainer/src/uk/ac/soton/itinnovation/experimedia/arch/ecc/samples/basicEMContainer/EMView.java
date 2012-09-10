@@ -29,9 +29,14 @@
  */
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.basicEMContainer;
 
-import javax.swing.DefaultListModel;
 
-import java.util.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMClient;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
+
+import javax.swing.DefaultListModel;
+import java.util.Iterator;
+
+
 
 
 /**
@@ -41,6 +46,10 @@ import java.util.*;
 public class EMView extends javax.swing.JFrame
 {
   private DefaultListModel clientListModel;
+  private DefaultListModel entityListModel;
+  private DefaultListModel attributeListModel;
+  private Entity           currSelectedEntity;
+  
   private EMViewListener   viewListener;
   
   public EMView( EMViewListener listener )
@@ -49,8 +58,13 @@ public class EMView extends javax.swing.JFrame
     
     initComponents();
     
-    clientListModel = new DefaultListModel();    
+    clientListModel    = new DefaultListModel();
+    entityListModel    = new DefaultListModel();
+    attributeListModel = new DefaultListModel();
+    
     currentClientList.setModel( clientListModel );
+    entityList.setModel( entityListModel );
+    attributeList.setModel( attributeListModel );
   }
   
   public synchronized void setMonitoringPhaseValue( String phase, String nextPhase )
@@ -78,9 +92,10 @@ public class EMView extends javax.swing.JFrame
     loggingText.append( text + "\n" );
   }
   
-  public synchronized void addConnectedClient( UUID id, String clientName )
+  public synchronized void addConnectedClient( EMClient client )
   {
-    clientListModel.addElement( (Object) new HashMap.SimpleEntry<UUID, String>(id, clientName) );
+    if ( client != null )
+      clientListModel.addElement( client );
   }
   
   public synchronized void enablePulling( boolean enabled )
@@ -105,16 +120,13 @@ public class EMView extends javax.swing.JFrame
         jLabel1 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
-        jLabel3 = new javax.swing.JLabel();
-        jLabel4 = new javax.swing.JLabel();
-        jLabel5 = new javax.swing.JLabel();
+        clientNameField = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
         jScrollPane2 = new javax.swing.JScrollPane();
-        jList1 = new javax.swing.JList();
+        entityList = new javax.swing.JList();
         jLabel7 = new javax.swing.JLabel();
         jScrollPane3 = new javax.swing.JScrollPane();
-        jList2 = new javax.swing.JList();
-        jPanel3 = new javax.swing.JPanel();
+        attributeList = new javax.swing.JList();
         jButton1 = new javax.swing.JButton();
         jPanel5 = new javax.swing.JPanel();
         jScrollPane4 = new javax.swing.JScrollPane();
@@ -133,51 +145,44 @@ public class EMView extends javax.swing.JFrame
         jTabbedPane1.setName("EMTabbedContainer");
 
         currentClientList.setName("connectedClientList");
+        currentClientList.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                onClientListClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(currentClientList);
 
         jLabel1.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
         jLabel1.setText("Currently connected clients");
 
-        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Client info"));
+        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Client info", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
 
         jLabel2.setText("Name:");
 
-        jLabel3.setText("<CLIENT NAME HERE>");
-
-        jLabel4.setText("Connected at:");
-
-        jLabel5.setText("<CONNECTION TIME HERE>");
+        clientNameField.setText("No information yet");
 
         jLabel6.setText("Entities under observation:");
 
-        jList1.setModel(new javax.swing.AbstractListModel() {
-            String[] strings = { "<Entities here>" };
+        entityList.setModel(new javax.swing.AbstractListModel() {
+            String[] strings = { "Currently no entities" };
             public int getSize() { return strings.length; }
             public Object getElementAt(int i) { return strings[i]; }
         });
-        jScrollPane2.setViewportView(jList1);
+        entityList.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                onEntityListClicked(evt);
+            }
+        });
+        jScrollPane2.setViewportView(entityList);
 
         jLabel7.setText("Entity's observable attibutes:");
 
-        jList2.setModel(new javax.swing.AbstractListModel() {
-            String[] strings = { "<Attributes here>" };
+        attributeList.setModel(new javax.swing.AbstractListModel() {
+            String[] strings = { "Currently no attributes" };
             public int getSize() { return strings.length; }
             public Object getElementAt(int i) { return strings[i]; }
         });
-        jScrollPane3.setViewportView(jList2);
-
-        jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder("Info"));
-
-        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
-        jPanel3.setLayout(jPanel3Layout);
-        jPanel3Layout.setHorizontalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
-        );
-        jPanel3Layout.setVerticalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 72, Short.MAX_VALUE)
-        );
+        jScrollPane3.setViewportView(attributeList);
 
         jButton1.setText("Disconnect client");
         jButton1.setEnabled(false);
@@ -186,53 +191,49 @@ public class EMView extends javax.swing.JFrame
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGap(38, 38, 38)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane2)
-                    .addComponent(jScrollPane3)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel7)
-                            .addComponent(jLabel6)
-                            .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel2)
-                                    .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(1, 1, 1)
-                                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel5)
-                                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 122, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                        .addGap(0, 71, Short.MAX_VALUE)))
-                .addContainerGap())
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap(98, Short.MAX_VALUE)
                 .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(67, 67, 67))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane2)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLabel6)
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(clientNameField, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel7)
+                .addContainerGap())
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane3)
+                .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGap(26, 26, 26)
+                .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
-                    .addComponent(jLabel3))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel4)
-                    .addComponent(jLabel5))
-                .addGap(35, 35, 35)
+                    .addComponent(clientNameField))
+                .addGap(33, 33, 33)
                 .addComponent(jLabel6)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 58, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGap(18, 18, 18)
                 .addComponent(jLabel7)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(60, 60, 60)
+                .addGap(212, 212, 212)
                 .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -419,23 +420,63 @@ public class EMView extends javax.swing.JFrame
       viewListener.onPullPostReportButtonClicked();
   }//GEN-LAST:event_onPostReportButtonClicked
 
+  private void onClientListClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_onClientListClicked
+    
+    // Update currently selected client
+    int selectIndex = currentClientList.getSelectedIndex();
+    if ( selectIndex > - 1 && clientListModel.size() > selectIndex )
+    {
+      EMClient client = (EMClient) clientListModel.get( selectIndex );
+      if ( client != null )
+      {
+        clientNameField.setText( client.getName() );
+        entityListModel.clear();
+        attributeListModel.clear();
+        
+        Iterator<MetricGenerator> genIt = client.getCopyOfMetricGenerators().iterator();
+        while ( genIt.hasNext() )
+        {
+          Iterator<Entity> entIt = genIt.next().getEntities().iterator();
+          while ( entIt.hasNext() )
+          {
+            Entity ent = entIt.next();
+            if ( ent != null )
+            {
+              currSelectedEntity = ent;
+              entityListModel.addElement( currSelectedEntity.getName() );
+            }
+          }
+        }
+      }
+    }
+    
+  }//GEN-LAST:event_onClientListClicked
+
+  private void onEntityListClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_onEntityListClicked
+    
+    // Update currently selected client's attributes
+    if ( currSelectedEntity != null )
+    {
+      Iterator<Attribute> attIt = currSelectedEntity.getAttributes().iterator();
+      while ( attIt.hasNext() )
+        attributeListModel.addElement( attIt.next().getName() );
+    }
+  }//GEN-LAST:event_onEntityListClicked
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JList attributeList;
     private javax.swing.JButton beginMonitoringProcButton;
+    private javax.swing.JLabel clientNameField;
     private javax.swing.JList currentClientList;
+    private javax.swing.JList entityList;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
-    private javax.swing.JList jList1;
-    private javax.swing.JList jList2;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
-    private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
     private javax.swing.JScrollPane jScrollPane1;
