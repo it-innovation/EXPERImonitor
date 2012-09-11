@@ -179,6 +179,7 @@ public class EMController implements IEMLifecycleListener
       while ( mgIt.hasNext() )
       {
         MetricGenerator mg = mgIt.next();
+        mainView.updateClient( client );
         mainView.addLogText( client.getName() + " has metric generator: " + mg.getName() );
       }
     }

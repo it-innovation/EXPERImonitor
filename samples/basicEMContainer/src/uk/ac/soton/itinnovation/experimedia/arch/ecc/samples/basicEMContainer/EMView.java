@@ -48,6 +48,7 @@ public class EMView extends javax.swing.JFrame
   private DefaultListModel clientListModel;
   private DefaultListModel entityListModel;
   private DefaultListModel attributeListModel;
+  private EMClient         currSelectedClient;
   private Entity           currSelectedEntity;
   
   private EMViewListener   viewListener;
@@ -96,6 +97,19 @@ public class EMView extends javax.swing.JFrame
   {
     if ( client != null )
       clientListModel.addElement( client );
+  }
+  
+  public synchronized void updateClient( EMClient client )
+  {
+    // Update the client if it is currently selected
+    if ( client == currSelectedClient )
+    {
+      clientNameField.setText( currSelectedClient.getName() );
+      entityListModel.clear();
+      attributeListModel.clear();
+        
+      updateCurrentEntities();
+    }
   }
   
   public synchronized void enablePulling( boolean enabled )
@@ -426,41 +440,50 @@ public class EMView extends javax.swing.JFrame
     int selectIndex = currentClientList.getSelectedIndex();
     if ( selectIndex > - 1 && clientListModel.size() > selectIndex )
     {
-      EMClient client = (EMClient) clientListModel.get( selectIndex );
-      if ( client != null )
-      {
-        clientNameField.setText( client.getName() );
-        entityListModel.clear();
-        attributeListModel.clear();
-        
-        Iterator<MetricGenerator> genIt = client.getCopyOfMetricGenerators().iterator();
-        while ( genIt.hasNext() )
-        {
-          Iterator<Entity> entIt = genIt.next().getEntities().iterator();
-          while ( entIt.hasNext() )
-          {
-            Entity ent = entIt.next();
-            if ( ent != null )
-            {
-              currSelectedEntity = ent;
-              entityListModel.addElement( currSelectedEntity.getName() );
-            }
-          }
-        }
-      }
+      currSelectedClient = (EMClient) clientListModel.get( selectIndex );
+      
+      if ( currSelectedClient != null ) updateClient( currSelectedClient );
     }
     
   }//GEN-LAST:event_onClientListClicked
 
-  private void onEntityListClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_onEntityListClicked
+  private void updateCurrentEntities()
+  {
+    if ( currSelectedClient != null )
+    {
+      Iterator<MetricGenerator> genIt = currSelectedClient.getCopyOfMetricGenerators().iterator();
+      while ( genIt.hasNext() )
+      {
+        Iterator<Entity> entIt = genIt.next().getEntities().iterator();
+        while ( entIt.hasNext() )
+        {
+          Entity ent = entIt.next();
+          if ( ent != null )
+          {
+            currSelectedEntity = ent;
+            entityListModel.addElement( currSelectedEntity.getName() );
+          }
+        }
+      }
+    }
+  }
+  
+  private void updateCurrentAttributes()
+  {
+    attributeListModel.clear();
     
-    // Update currently selected client's attributes
     if ( currSelectedEntity != null )
     {
       Iterator<Attribute> attIt = currSelectedEntity.getAttributes().iterator();
       while ( attIt.hasNext() )
         attributeListModel.addElement( attIt.next().getName() );
     }
+  }
+  
+  private void onEntityListClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_onEntityListClicked
+    
+    // Update currently selected client's attributes
+    updateCurrentAttributes();
   }//GEN-LAST:event_onEntityListClicked
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

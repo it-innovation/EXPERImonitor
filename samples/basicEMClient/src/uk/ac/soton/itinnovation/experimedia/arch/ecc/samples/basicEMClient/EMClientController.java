@@ -158,12 +158,12 @@ public class EMClientController implements EMIAdapterListener,
     // Define the metric for this MeasurementSet
     Metric memMetric = new Metric();
     memMetric.setMetricType( MetricType.RATIO );
-    //TODO: Metric Unit: some API refactoring required here due to JSON serialization issues
+    memMetric.setUnit( new Unit("Bytes") );
     ms.setMetric( memMetric );
     
     clientView.addLogMessage( "Discovered generator: " + metricGen.getName() );
     
-    // Send our metric generator to the EM
+    // Ready our metric generator for the EM
     HashSet mgSet = new HashSet<MetricGenerator>();
     mgSet.addAll( metricGenerators.values() );
     emiAdapter.setMetricGenerators( mgSet );
