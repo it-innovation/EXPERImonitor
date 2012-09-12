@@ -26,9 +26,7 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Properties;
@@ -41,10 +39,7 @@ import org.apache.log4j.Logger;
  */
 public class DatabaseConnector
 {
-    static Logger logger = Logger.getLogger(DatabaseConnector.class);
-    
-    // connection reference to the db
-    private Connection connection = null;
+    static Logger log = Logger.getLogger(DatabaseConnector.class);
     
     // database connection details
     private String dbURL = null;
@@ -78,24 +73,12 @@ public class DatabaseConnector
      * @param userName The username used to connect to the database.
      * @param password The password used to connect to the database.
      * @param type The type of database.
+     * @throws Throwable If there's any issues with the configuration parameters.
      */
-    public DatabaseConnector(String dbURL, String dbName, String userName, String password, DatabaseType type)
+    public DatabaseConnector(String dbURL, String dbName, String userName, String password, DatabaseType type) throws Throwable
     {
         this();
-        
-        this.dbURL = dbURL;
-        this.dbName = dbName;
-        this.userName = userName;
-        this.password = password;
-        this.dbType = type;
-        
-        if ((this.dbURL != null) && (this.dbName != null) && (this.userName != null) && (this.password != null) && (this.dbType != null)) {
-            initialised = true;
-        }
-        else {
-            initialised = false;
-            logger.error("DatabaseConnector not initialised properly, one of the config parameters were NULL");
-        }
+        initialise(dbURL, dbName, userName, password, type);
     }
 
     /**
@@ -118,281 +101,125 @@ public class DatabaseConnector
      * @param password The password used to connect to the database.
      * @param type The type of database.
      */
-    public void initialise (String dbURL, String dbName, String userName, String password, DatabaseType type)
+    public final void initialise (String dbURL, String dbName, String userName, String password, DatabaseType type) throws Throwable
     {
+        log.debug("Initialising");
         this.dbURL = dbURL;
         this.dbName = dbName;
         this.userName = userName;
         this.password = password;
         this.dbType = type;
         
-        if ((this.dbURL != null) && (this.dbName != null) && (this.userName != null) && (this.password != null) && (this.dbType != null)) {
-            initialised = true;
-        }
-        else {
+        log.debug("Checking parameters");
+        if (this.dbURL == null) {
             initialised = false;
-            logger.error("DatabaseConnector not initialised properly, one of the config parameters were NULL");
+            log.error("DatabaseConnector not initialised properly, the dbURL is NULL");
         }
-    }
-
-    /**
-     * Connect to the data base, as per parameters given either in the overloaded
-     * constructor, via the initialise method, or if the overloaded connect method
-     * has been called successfully once before.
-     * 
-     * @throws Exception If any errors occur is establishing a connection to the database.
-     */
-    public void connect() throws Exception
-    {
-        if (initialised) {
-            connect(dbURL, dbName, userName, password, dbType);
-        } else {
-            logger.error("Cannot connect to the database, because connection details have not been given. Try the overloaded connect method, or use the overloaded constructor when creating this DatabaseConnector object!");
-            throw new RuntimeException("Cannot connect to the database, because connection details have not been given. Try the overloaded connect method, or use the overloaded constructor when creating this DatabaseConnector object!");
+        if (this.dbName == null){
+            initialised = false;
+            log.error("DatabaseConnector not initialised properly, the dbName is NULL");
         }
-    }
-
-    /**
-     * Connect to the database as per the parameters given. If a connection is
-     * successfully made, the parameters are saved, so the connect() method can
-     * be called without passing on the parameters again.
-     * 
-     * If there is already a connection with the database, a new one is not made.
-     * 
-     * @param dbURL The URL of the database.
-     * @param dbName The name of the database.
-     * @param userName The username used to connect to the database.
-     * @param password The password used to connect to the database.
-     * @param type The type of database.
-     * @throws Exception If any errors occur is establishing a connection to the database.
-     */
-    public void connect(String dbURL, String dbName, String userName, String password, DatabaseType type) throws Exception
-    {
-        logger.debug("Connecting to the database");
-        
-        // check if already connected
-        if (isConnected())
-        {
-            logger.debug("Call to connect, but already connected...");
-            return;
+        if (this.userName == null){
+            initialised = false;
+            log.error("DatabaseConnector not initialised properly, the userName is NULL");
         }
-        
-        if ((this.dbURL == null) || (this.dbName == null) || (this.userName == null) || (this.password == null) || (this.dbType == null))
-        {
-            logger.error("One or more of the parameters specifying the DB connection are NULL, so cannot connect!");
-            throw new NullPointerException("One or more of the parameters specifying the DB connection are NULL, so cannot connect!");
+        if (this.password == null) {
+            initialised = false;
+            log.error("DatabaseConnector not initialised properly, the password is NULL");
+        }
+        if (this.dbType == null) {
+            initialised = false;
+            log.error("DatabaseConnector not initialised properly, the dbType is NULL");
         }
         
         try {
             if (!drivers.containsKey(type)) {
-                logger.error("The database type (" + type + ") is not supported");
+                initialised = false;
+                log.error("The database type (" + type + ") is not supported");
                 throw new RuntimeException("The database type (" + type + ") is not supported");
             }
 
             Class.forName(drivers.get(type));
         } catch (ClassNotFoundException e) {
-            logger.error("Did not find the JDBC Driver for " + type, e);
+            initialised = false;
+            log.error("Did not find the JDBC Driver for " + type, e);
             throw new RuntimeException("Did not find the JDBC Driver for " + type, e);
         }
-
-        //connect to the database
-        try {
-            Properties props = new Properties();
-            props.setProperty("user", userName);
-            props.setProperty("password", password);
-            props.setProperty("allowMultiQueries", "true"); //this will allow running scripts from files
-            connection = DriverManager.getConnection("jdbc:" + type.toString().toLowerCase() + "://" + dbURL + "/" + dbName, props);
-        } catch (SQLException e) {
-            logger.error("Failed to connect to the database: " + e.getMessage(), e);
-            throw new RuntimeException("Failed to connect to the database " + dbName + ": " + e.getMessage(), e);
-        }
-
-        if (connection == null) {
-            logger.error("Failed to connect to the database: " + dbName);
-            throw new RuntimeException("Failed to connect to the database: " + dbName);
-        }
-
-        // saving the connection details for future connections, so that the 'connect()' method can be used later
-        this.dbURL = dbURL;
-        this.dbName = dbName;
-        this.userName = userName;
-        this.password = password;
-        this.dbType = type;
         
         initialised = true;
     }
     
     /**
-     * Starts a transaction on the current DB connection.
-     * @throws Exception If a connection to the DB has not been made, or any SQL exceptions with starting the transaction.
-     */
-    public void beginTransaction() throws Exception
-    {
-        if (connection == null) {
-            throw new RuntimeException("Call to begin transaction when no connection to the database has been made");
-        }
-        
-        logger.debug("Starting transaction");
-        connection.setAutoCommit(false);
-    }
-    
-    /**
-     * Commits the data in a transaction, which assumes a transaction on the
-     * current DB connection has been started in the first place.
-     * @throws Exception If a connection to the DB has not been made, or any SQL exceptions with committing the transaction.
-     */
-    public void commit() throws Exception
-    {
-        if (connection == null) {
-            throw new RuntimeException("Call to commit when no connection to the database has been made");
-        }
-        
-        logger.debug("Committing transaction");
-        connection.commit();
-    }
-    
-    /**
-     * Rolls back any changes made to the DB in the current transaction, assuming
-     * that a transaction has been started in the first place.
-     * @throws Exception If a connection to the DB has not been made, or any SQL exceptions with rolling back the transaction.
-     */
-    public void rollback() throws Exception
-    {
-        if (connection == null) {
-            throw new RuntimeException("Call to rollback transaction when no connection to the database has been made");
-        }
-        
-        logger.debug("Rolling back transaction");
-        connection.rollback();
-    }
-
-    /**
-     * Close the connection to the database.
-     * Any SQL exception caused by this operation is caught within this method and logged.
-     */
-    public void close()
-    {
-        logger.debug("Closing the connection to the database");
-        
-        if (connection != null) {
-            try {
-                connection.close();
-            } catch (SQLException ex) {
-                logger.error("SQLException caught when trying to close the DB connection", ex);
-            }
-        }
-    }
-    
-    /**
-     * Check if the connection with the database is open.
-     * OBS: will return false if a connection object has not been created (via
-     * calling the connect method at least once), OR if an SQL exception is caught
-     * when checking of the connection is closed.
-     * 
-     * @return True if connected; false otherwise.
-     */
-    public boolean isConnected()
-    {
-        if (connection == null)
-            return false;
-        
-        try {
-            return !connection.isClosed();
-        } catch (SQLException ex) {
-            logger.error("SQLException caught when check if the connection was open: " + ex.getMessage(), ex);
-            return false;
-        }
-    }
-    
-    /**
-     * Check if the connection with the database is closed.
-     * OBS: will return true if a connection object has not been created (via
-     * calling the connect method at least once), OR if an SQL exception is caught
-     * when checking of the connection is closed.
-     * 
-     * @return True if closed; false otherwise.
-     */
-    public boolean isClosed()
-    {
-        if (connection == null)
-            return true;
-        
-        try {
-            return connection.isClosed();
-        } catch (SQLException ex) {
-            logger.error("SQLException caught when check if the connection was open: " + ex.getMessage(), ex);
-            return true;
-        }
-    }
-    
-    /**
-     * Get a connection object to the database.
-     * @return A Connection object if connected to the database.
-     * @throws Exception Throws an exception if not connected to the database, or any other technical exception.
+     * Get a connection, assuming that the DatabaseConnector has been initialised.
+     * @return Connection object.
+     * @throws Exception If not initialised or if there's any exceptions thrown from creating the connection.
      */
     public Connection getConnection() throws Exception
     {
-        if (isClosed())
-            throw new RuntimeException("Cannot give a connection that's not been established yet - use the connect method first!");
+        log.debug("Establishing and returning a connection to the database");
+        if (!initialised)
+        {
+            log.error("Cannot connect to the database, because the DatabaseConnector object has not been initialised correctly.");
+            throw new RuntimeException("Cannot connect to the database, because the DatabaseConnector object has not been initialised correctly.");
+        }
         
-        return this.connection;
-    }
+        Connection connection = null;
+        
+        try {
+            Properties props = new Properties();
+            props.setProperty("user", userName);
+            props.setProperty("password", password);
+            props.setProperty("allowMultiQueries", "true"); //this will allow running scripts from files
+            connection = DriverManager.getConnection("jdbc:" + dbType.toString().toLowerCase() + "://" + dbURL + "/" + dbName, props);
+        } catch (SQLException e) {
+            log.error("Failed to connect to the database " + dbName + ": " + e.getMessage(), e);
+            throw new RuntimeException("Failed to connect to the database " + dbName + ": " + e.getMessage(), e);
+        }
 
-    /**
-     * Execute a SQL query, as defined in the String parameter. This will execute
-     * the query with setting Statement.NO_GENERATED_KEYS.
-     * @param query The SQL query.
-     * @return ResultSet object.
-     * @throws Exception If a connection has not been made, if the query parameter is NULL or any SQLException occurring when executing the query.
-     */
-    public ResultSet executeQuery(String query) throws Exception
-    {
-        return executeQuery(query, Statement.NO_GENERATED_KEYS);
+        if (connection == null) {
+            log.error("Failed to connect to the database: " + dbName);
+            throw new RuntimeException("Failed to connect to the database: " + dbName);
+        }
+        
+        return connection;
     }
     
     /**
-     * Execute a SQL query, as defined in the String parameter, which will
-     * @param query The SQL query.
-     * @param autoGeneratedKeys a constant indicating whether auto-generated keys should be made available for retrieval using the method getGeneratedKeys; one of the following constants: Statement.RETURN_GENERATED_KEYS or Statement.NO_GENERATED_KEYS
-     * @return ResultSet object.
-     * @throws Exception If a connection has not been made, if the query parameter is NULL or any SQLException occurring when executing the query.
+     * Get a connection, with a given transaction isolation level.
+     * This assumes that the DatabaseConnector has been initialised.
+     * @param transactionIsolationLevel Should be one of the following: Connection.TRANSACTION_READ_UNCOMMITTED, Connection.TRANSACTION_READ_COMMITTED, Connection.TRANSACTION_REPEATABLE_READ, or Connection.TRANSACTION_SERIALIZABLE
+     * @return Connection object.
+     * @throws Exception If not initialised or if there's any exceptions thrown from creating the connection.
      */
-    public ResultSet executeQuery(String query, int autoGeneratedKeys) throws Exception
+    public Connection getConnection(int transactionIsolationLevel) throws Exception
     {
+        log.debug("Establishing and returning a connection to the database");
+        if (!initialised)
+        {
+            log.error("Cannot connect to the database, because the DatabaseConnector object has not been initialised correctly.");
+            throw new RuntimeException("Cannot connect to the database, because the DatabaseConnector object has not been initialised correctly.");
+        }
+        
+        Connection connection = null;
+        
+        try {
+            Properties props = new Properties();
+            props.setProperty("user", userName);
+            props.setProperty("password", password);
+            props.setProperty("allowMultiQueries", "true"); //this will allow running scripts from files
+            connection = DriverManager.getConnection("jdbc:" + dbType.toString().toLowerCase() + "://" + dbURL + "/" + dbName, props);
+        } catch (SQLException e) {
+            log.error("Failed to connect to the database " + dbName + ": " + e.getMessage(), e);
+            throw new RuntimeException("Failed to connect to the database " + dbName + ": " + e.getMessage(), e);
+        }
+
         if (connection == null) {
-            logger.error("Cannot execute the query because no connection has been made");
-            throw new RuntimeException("Cannot execute the query because no connection has been made");
+            log.error("Failed to connect to the database: " + dbName);
+            throw new RuntimeException("Failed to connect to the database: " + dbName);
         }
         
-        if (query == null) {
-            logger.error("Cannot execute the query because the query is NULL");
-            throw new NullPointerException("Cannot execute the query because the query is NULL");
-        }
+        connection.setTransactionIsolation(transactionIsolationLevel);
         
-        ResultSet rs = null;
-        try {
-            Statement s = connection.createStatement();
-            if (s.execute(query, autoGeneratedKeys)) {
-                rs = s.getResultSet();
-            } else {
-                rs = s.getGeneratedKeys();
-            }
-        } catch (Exception ex) {
-            logger.error("Error while executing query: " + query, ex);
-            throw ex;
-        }
-
-        return rs;
-    }
-
-    @Override
-    public void finalize()
-    {
-        try {
-            close();
-            super.finalize();
-        } catch (Throwable t) {
-            logger.debug("Error caught when trying to close the DB connection", t);
-        }
+        return connection;
     }
 }

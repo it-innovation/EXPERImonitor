@@ -39,11 +39,11 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Me
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricType;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Unit;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.ExperimentDataManager;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IEntityDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IExperimentDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IMetricGeneratorDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IReportDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.MonitoringEDM;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IEntityDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IExperimentDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IMetricGeneratorDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IReportDAO;
 
 /**
  * A helper class to populate the metrics database with testdata.
@@ -107,7 +107,7 @@ public class PopulateDB
      */
     public static void populateWithTestData() throws Exception
     {
-        ExperimentDataManager edm = new ExperimentDataManager();
+        MonitoringEDM edm = new MonitoringEDM();
         
         saveExperiment(edm, expUUID);
         
@@ -133,7 +133,7 @@ public class PopulateDB
         printDetailsForExperiment(edm, expUUID);
     }
     
-    public static void saveExperiment(ExperimentDataManager edm, UUID expUUID) throws Exception
+    public static void saveExperiment(MonitoringEDM edm, UUID expUUID) throws Exception
     {
         IExperimentDAO expDAO = null;
         try {
@@ -170,7 +170,7 @@ public class PopulateDB
      * @param diskAttributeUUID The UUID of the Disk attribute of the entity.
      * @throws Exception 
      */
-    public static void saveEntity1(ExperimentDataManager edm, UUID entityUUID, UUID cpuAttributeUUID, UUID networkAttributeUUID, UUID diskAttributeUUID) throws Exception
+    public static void saveEntity1(MonitoringEDM edm, UUID entityUUID, UUID cpuAttributeUUID, UUID networkAttributeUUID, UUID diskAttributeUUID) throws Exception
     {
         IEntityDAO entityDAO = null;
         try {
@@ -233,7 +233,7 @@ public class PopulateDB
      * @param diskAttributeUUID The UUID of the Disk attribute of the entity.
      * @throws Exception 
      */
-    public static void saveEntity2(ExperimentDataManager edm, UUID entityUUID, UUID cpuAttributeUUID, UUID networkAttributeUUID, UUID diskAttributeUUID) throws Exception
+    public static void saveEntity2(MonitoringEDM edm, UUID entityUUID, UUID cpuAttributeUUID, UUID networkAttributeUUID, UUID diskAttributeUUID) throws Exception
     {
         IEntityDAO entityDAO = null;
         try {
@@ -296,7 +296,7 @@ public class PopulateDB
      * @param diskAttributeUUID The UUID of the Disk attribute of the entity.
      * @throws Exception 
      */
-    public static void saveEntity3(ExperimentDataManager edm, UUID entityUUID, UUID cpuAttributeUUID, UUID networkAttributeUUID) throws Exception
+    public static void saveEntity3(MonitoringEDM edm, UUID entityUUID, UUID cpuAttributeUUID, UUID networkAttributeUUID) throws Exception
     {
         IEntityDAO entityDAO = null;
         try {
@@ -365,7 +365,7 @@ public class PopulateDB
      * @param mSet3UUID The UUID of the 3rd measurement set.
      * @throws Exception 
      */
-    public static void saveMetricGenerator1(ExperimentDataManager edm, UUID expUUID, UUID entityUUID, UUID attrib1UUID, UUID attrib2UUID, UUID attrib3UUID, UUID mGenUUID, UUID mGrpUUID, UUID mSet1UUID, UUID mSet2UUID, UUID mSet3UUID) throws Exception
+    public static void saveMetricGenerator1(MonitoringEDM edm, UUID expUUID, UUID entityUUID, UUID attrib1UUID, UUID attrib2UUID, UUID attrib3UUID, UUID mGenUUID, UUID mGrpUUID, UUID mSet1UUID, UUID mSet2UUID, UUID mSet3UUID) throws Exception
     {
 //----- EXPERIMENT
         IMetricGeneratorDAO mGenDAO = null;
@@ -427,7 +427,7 @@ public class PopulateDB
      * @param mSet3UUID The UUID of the 3rd measurement set.
      * @throws Exception 
      */
-    public static void saveMetricGenerator2(ExperimentDataManager edm, UUID expUUID, UUID entityUUID, UUID attrib1UUID, UUID attrib2UUID, UUID attrib3UUID, UUID mGenUUID, UUID mGrpUUID, UUID mSet1UUID, UUID mSet2UUID, UUID mSet3UUID) throws Exception
+    public static void saveMetricGenerator2(MonitoringEDM edm, UUID expUUID, UUID entityUUID, UUID attrib1UUID, UUID attrib2UUID, UUID attrib3UUID, UUID mGenUUID, UUID mGrpUUID, UUID mSet1UUID, UUID mSet2UUID, UUID mSet3UUID) throws Exception
     {
 //----- EXPERIMENT
         IMetricGeneratorDAO mGenDAO = null;
@@ -487,7 +487,7 @@ public class PopulateDB
      * @param mSet2UUID The UUID of the 2nd measurement set.
      * @throws Exception 
      */
-    public static void saveMetricGenerator3(ExperimentDataManager edm, UUID expUUID, UUID entityUUID, UUID attrib1UUID, UUID attrib2UUID, UUID mGenUUID, UUID mGrpUUID, UUID mSet1UUID, UUID mSet2UUID) throws Exception
+    public static void saveMetricGenerator3(MonitoringEDM edm, UUID expUUID, UUID entityUUID, UUID attrib1UUID, UUID attrib2UUID, UUID mGenUUID, UUID mGrpUUID, UUID mSet1UUID, UUID mSet2UUID) throws Exception
     {
 //----- EXPERIMENT
         IMetricGeneratorDAO mGenDAO = null;
@@ -536,7 +536,7 @@ public class PopulateDB
      * @param expUUID The experiment UUID.
      * @throws Exception 
      */
-    public static void printDetailsForExperiment(ExperimentDataManager edm, UUID expUUID) throws Exception
+    public static void printDetailsForExperiment(MonitoringEDM edm, UUID expUUID) throws Exception
     {
         IExperimentDAO expDAO = null;
         try {
@@ -686,7 +686,7 @@ public class PopulateDB
      * @param max The maximum value of the range for the random measurement values.
      * @throws Exception 
      */
-    public static void saveReportWithRandomMeasurements(ExperimentDataManager edm, UUID mSetUUID, int numMeasurements, int min, int max) throws Exception
+    public static void saveReportWithRandomMeasurements(MonitoringEDM edm, UUID mSetUUID, int numMeasurements, int min, int max) throws Exception
     {
         IReportDAO reportDAO = null;
         try {

@@ -22,7 +22,7 @@
 //      Created for Project :   BonFIRE
 //
 /////////////////////////////////////////////////////////////////////////
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao;
 
 import java.util.Date;
 import java.util.UUID;

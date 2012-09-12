@@ -30,8 +30,8 @@ import java.util.UUID;
 import junit.framework.*;
 import org.junit.Test;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.ExperimentDataManager;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IExperimentDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.MonitoringEDM;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IExperimentDAO;
 
 public class ExperimentTest extends TestCase
 {
@@ -52,7 +52,7 @@ public class ExperimentTest extends TestCase
     @Test
     public void testSaveExperiment_valid()
     {
-        ExperimentDataManager edm = new ExperimentDataManager();
+        MonitoringEDM edm = new MonitoringEDM();
         IExperimentDAO expDAO = null;
         try {
             expDAO = edm.getExperimentDAO();
@@ -77,7 +77,7 @@ public class ExperimentTest extends TestCase
     @Test
     public void testSaveExperiment_duplicateUUID()
     {
-        ExperimentDataManager edm = new ExperimentDataManager();
+        MonitoringEDM edm = new MonitoringEDM();
         IExperimentDAO expDAO = null;
         try {
             expDAO = edm.getExperimentDAO();
@@ -106,7 +106,7 @@ public class ExperimentTest extends TestCase
     @Test
     public void testSaveExperiment_noName()
     {
-        ExperimentDataManager edm = new ExperimentDataManager();
+        MonitoringEDM edm = new MonitoringEDM();
         IExperimentDAO expDAO = null;
         try {
             expDAO = edm.getExperimentDAO();
@@ -125,7 +125,7 @@ public class ExperimentTest extends TestCase
     @Test
     public void testGetExperiment()
     {
-        ExperimentDataManager edm = new ExperimentDataManager();
+        MonitoringEDM edm = new MonitoringEDM();
         IExperimentDAO expDAO = null;
         try {
             expDAO = edm.getExperimentDAO();
@@ -164,7 +164,7 @@ public class ExperimentTest extends TestCase
     @Test
     public void testGetExperiments()
     {
-        ExperimentDataManager edm = new ExperimentDataManager();
+        MonitoringEDM edm = new MonitoringEDM();
         IExperimentDAO expDAO = null;
         try {
             expDAO = edm.getExperimentDAO();

@@ -22,7 +22,7 @@
 //      Created for Project :   
 //
 /////////////////////////////////////////////////////////////////////////
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao;
 
 import java.util.UUID;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Metric;

@@ -22,8 +22,9 @@
 //      Created for Project :   
 //
 /////////////////////////////////////////////////////////////////////////
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.dao;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.mon.dao;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -35,7 +36,6 @@ import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Attribute;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Entity;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DBUtil;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DatabaseConnector;
 
 /**
  *
@@ -45,7 +45,7 @@ public class EntityHelper
 {
     static Logger log = Logger.getLogger(EntityHelper.class);
     
-    public static ValidationReturnObject isObjectValidForSave(Entity entity, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
+    public static ValidationReturnObject isObjectValidForSave(Entity entity, Connection connection, boolean closeDBcon) throws Exception
     {
         if (entity == null)
         {
@@ -134,43 +134,44 @@ public class EntityHelper
         }
     }
     
-    public static boolean objectExists(UUID uuid, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
+    public static boolean objectExists(UUID uuid, Connection connection, boolean closeDBcon) throws Exception
     {
-        return DBUtil.objectExistsByUUID("Entity", "entityUUID", uuid, dbCon, closeDBcon);
+        return DBUtil.objectExistsByUUID("Entity", "entityUUID", uuid, connection, closeDBcon);
     }
     
-    public static void saveEntity(Entity entity, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
+    public static void saveEntity(Entity entity, Connection connection, boolean closeDBcon) throws Exception
     {
         // this validation will check if all the required parameters are set and if
         // there isn't already a duplicate instance in the DB
         // will validate the attributes too, if any are given
-        ValidationReturnObject returnObj = EntityHelper.isObjectValidForSave(entity, dbCon, closeDBcon);
+        ValidationReturnObject returnObj = EntityHelper.isObjectValidForSave(entity, connection, false);
         if (!returnObj.valid)
         {
             log.error("Cannot save the Entity object: " + returnObj.exception.getMessage(), returnObj.exception);
             throw returnObj.exception;
         }
         
+        if (DBUtil.isClosed(connection))
+        {
+            log.error("Cannot save the Entity because the connection to the DB is closed");
+            throw new RuntimeException("Cannot save the Entity because the connection to the DB is closed");
+        }
+        
         boolean exception = false;
         try {
-            if (dbCon.isClosed())
+            if (closeDBcon)
             {
-                dbCon.connect();
-                
-                if (closeDBcon)
-                {
-                    dbCon.beginTransaction();
-                }
+                log.debug("Starting transaction");
+                connection.setAutoCommit(false);
             }
             
-            // get the table names and values according to what's available in the
-            // object
+            // get the table names and values according to what's available in the object
             List<String> valueNames = new ArrayList<String>();
             List<String> values = new ArrayList<String>();
             EntityHelper.getTableNamesAndValues(entity, valueNames, values);
             
             String query = DBUtil.getInsertIntoQuery("Entity", valueNames, values);
-            ResultSet rs = dbCon.executeQuery(query, Statement.RETURN_GENERATED_KEYS);
+            ResultSet rs = DBUtil.executeQuery(connection, query, Statement.RETURN_GENERATED_KEYS);
             
             // check if the result set got the generated table key
             if (rs.next()) {
@@ -187,8 +188,9 @@ public class EntityHelper
         } finally {
             if (exception && closeDBcon)
             {
-                dbCon.rollback();
-                dbCon.close();
+                log.debug("Exception thrown, so rolling back the transaction and closing the connection");
+                connection.rollback();
+                connection.close();
             }
         }
         
@@ -200,7 +202,7 @@ public class EntityHelper
                 for (Attribute attrib : entity.getAttributes())
                 {
                     if (attrib != null)
-                        AttributeHelper.saveAttribute(attrib, dbCon, false); // flag not to close the DB connection
+                        AttributeHelper.saveAttribute(attrib, connection, false); // flag not to close the DB connection
                 }
             }
         } catch (Exception ex) {
@@ -209,17 +211,19 @@ public class EntityHelper
             if (closeDBcon)
             {
                 if (exception) {
-                    dbCon.rollback();
+                    log.debug("Exception thrown, so rolling back the transaction and closing the connection");
+                    connection.rollback();
                 } else {
-                    dbCon.commit();
+                    log.debug("Committing the transaction and closing the connection");
+                    connection.commit();
                 }
 
-                dbCon.close();
+                connection.close();
             }
         }
     }
     
-    public static Entity getEntity(UUID entityUUID, boolean withAttributes, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
+    public static Entity getEntity(UUID entityUUID, boolean withAttributes, Connection connection, boolean closeDBcon) throws Exception
     {
         if (entityUUID == null)
         {
@@ -233,14 +237,18 @@ public class EntityHelper
             throw new RuntimeException("There is no entity with the given UUID: " + entityUUID.toString());
         }*/
         
+        if (DBUtil.isClosed(connection))
+        {
+            log.error("Cannot get the Entity because the connection to the DB is closed");
+            throw new RuntimeException("Cannot get the Entity because the connection to the DB is closed");
+        }
+        
         Entity entity = null;
         boolean exception = false;
         try {
-            if (dbCon.isClosed())
-                dbCon.connect();
             
             String query = "SELECT * FROM Entity WHERE entityUUID = '" + entityUUID + "'";
-            ResultSet rs = dbCon.executeQuery(query);
+            ResultSet rs = DBUtil.executeQuery(connection, query);
             
             // check if anything got returned (connection closed in finalise method)
             if (rs.next())
@@ -261,7 +269,7 @@ public class EntityHelper
             throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
         } finally {
             if (exception || (closeDBcon && !withAttributes))
-                dbCon.close();
+                connection.close();
         }
         
         // check if there's any metric generators
@@ -270,13 +278,13 @@ public class EntityHelper
             Set<Attribute> attributes = null;
 
             try {
-                attributes = AttributeHelper.getAttributesForEntity(entityUUID, dbCon, false); // don't close the connection
+                attributes = AttributeHelper.getAttributesForEntity(entityUUID, connection, false); // don't close the connection
             } catch (Exception ex) {
                 log.error("Caught an exception when getting attributes for entity (UUID: " + entityUUID.toString() + "): " + ex.getMessage());
                 throw new RuntimeException("Unable to get Entity object due to an issue with getting its attributes: " + ex.getMessage(), ex);
             } finally {
                 if (closeDBcon)
-                    dbCon.close();
+                    connection.close();
             }
 
             entity.setAttributes(attributes);
@@ -285,15 +293,18 @@ public class EntityHelper
         return entity;
     }
 
-    public static Set<Entity> getEntities(boolean withAttributes, DatabaseConnector dbCon) throws Exception
+    public static Set<Entity> getEntities(boolean withAttributes, Connection connection) throws Exception
     {
+        if (DBUtil.isClosed(connection))
+        {
+            log.error("Cannot get the Entity objects because the connection to the DB is closed");
+            throw new RuntimeException("Cannot get the Entity objects because the connection to the DB is closed");
+        }
+        
         Set<Entity> entities = new HashSet<Entity>();
         try {
-            if (dbCon.isClosed())
-                dbCon.connect();
-            
             String query = "SELECT entityUUID FROM Entity";
-            ResultSet rs = dbCon.executeQuery(query);
+            ResultSet rs = DBUtil.executeQuery(connection, query);
             
             // check if anything got returned (connection closed in finalise method)
             while (rs.next())
@@ -306,20 +317,20 @@ public class EntityHelper
                     continue;
                 }
                 
-                entities.add(getEntity(UUID.fromString(uuidStr), withAttributes, dbCon, false));
+                entities.add(getEntity(UUID.fromString(uuidStr), withAttributes, connection, false));
             }
 
         } catch (Exception ex) {
             log.error("Error while quering the database: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
         } finally {
-            dbCon.close();
+            connection.close();
         }
         
         return entities;
     }
     
-    public static Set<Entity> getEntitiesForExperiment(UUID expUUID, boolean withAttributes, DatabaseConnector dbCon) throws Exception
+    public static Set<Entity> getEntitiesForExperiment(UUID expUUID, boolean withAttributes, Connection connection, boolean closeDBcon) throws Exception
     {
         if (expUUID == null)
         {
@@ -327,15 +338,18 @@ public class EntityHelper
             throw new NullPointerException("Cannot get Entity objects for the given experiment, because the UUID provided is NULL!");
         }
         
+        if (DBUtil.isClosed(connection))
+        {
+            log.error("Cannot get the Entity objects for the experiment because the connection to the DB is closed");
+            throw new RuntimeException("Cannot get the Entity objects for the experiment because the connection to the DB is closed");
+        }
+        
         Set<Entity> entities = new HashSet<Entity>();
         
         try {
-            if (dbCon.isClosed())
-                dbCon.connect();
-            
             String query = "SELECT entityUUID FROM MetricGenerator_Entity "
                     + "WHERE mGenUUID = (SELECT mGenUUID FROM MetricGenerator WHERE expUUID = '" + expUUID.toString() + "')";
-            ResultSet rs = dbCon.executeQuery(query);
+            ResultSet rs = DBUtil.executeQuery(connection, query);
             
             // check if anything got returned (connection closed in finalise method)
             while (rs.next())
@@ -348,20 +362,20 @@ public class EntityHelper
                     continue;
                 }
                 
-                entities.add(getEntity(UUID.fromString(uuidStr), withAttributes, dbCon, false));
+                entities.add(getEntity(UUID.fromString(uuidStr), withAttributes, connection, false));
             }
 
         } catch (Exception ex) {
             log.error("Error while quering the database: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
         } finally {
-            dbCon.close();
+            connection.close();
         }
         
         return entities;
     }
     
-    public static Set<Entity> getEntitiesForMetricGenerator(UUID mGenUUID, boolean withAttributes, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
+    public static Set<Entity> getEntitiesForMetricGenerator(UUID mGenUUID, boolean withAttributes, Connection connection, boolean closeDBcon) throws Exception
     {
         if (mGenUUID == null)
         {
@@ -369,14 +383,17 @@ public class EntityHelper
             throw new NullPointerException("Cannot get Entity objects for the given metric generator, because the UUID provided is NULL!");
         }
         
+        if (DBUtil.isClosed(connection))
+        {
+            log.error("Cannot get the Entity objects for the metric generator because the connection to the DB is closed");
+            throw new RuntimeException("Cannot get the Entity objects for the metric generator because the connection to the DB is closed");
+        }
+        
         Set<Entity> entities = new HashSet<Entity>();
         
         try {
-            if (dbCon.isClosed())
-                dbCon.connect();
-            
             String query = "SELECT entityUUID FROM MetricGenerator_Entity WHERE mGenUUID = '" + mGenUUID + "'";
-            ResultSet rs = dbCon.executeQuery(query);
+            ResultSet rs = DBUtil.executeQuery(connection, query);
             
             // check if anything got returned (connection closed in finalise method)
             while (rs.next())
@@ -388,16 +405,100 @@ public class EntityHelper
                     throw new RuntimeException("Unable to get Entity UUID from the DB for the MetricGenerator");
                 }
                 
-                entities.add(getEntity(UUID.fromString(entityUUIDstr), withAttributes, dbCon, false));
+                entities.add(getEntity(UUID.fromString(entityUUIDstr), withAttributes, connection, false));
             }
         } catch (Exception ex) {
             log.error("Error while quering the database: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
         } finally {
             if (closeDBcon)
-                dbCon.close();
+                connection.close();
         }
         
         return entities;
+    }
+    
+    public static void deleteAllEntities(Connection connection, boolean closeDBcon) throws Exception
+    {
+        log.debug("Deleting all entities");
+        
+        if (DBUtil.isClosed(connection))
+        {
+            log.error("Cannot delete the entities because the connection to the DB is closed");
+            throw new RuntimeException("Cannot delete the entities because the connection to the DB is closed");
+        }
+        
+        if (closeDBcon)
+        {
+            log.debug("Starting transaction");
+            connection.setAutoCommit(false);
+        }
+        
+        boolean exception = false;
+        
+        try {
+            String query = "DELETE from Entity";
+            DBUtil.executeQuery(connection, query);
+        } catch (Exception ex) {
+            exception = true;
+            log.error("Unable to delete entities: " + ex.getMessage(), ex);
+            throw new RuntimeException("Unable to delete entities: " + ex.getMessage(), ex);
+        } finally {
+            if (closeDBcon)
+            {
+                if (exception) {
+                    log.debug("Exception thrown, so rolling back the transaction and closing the connection");
+                    connection.rollback();
+                } else {
+                    log.debug("Committing the transaction and closing the connection");
+                    connection.commit();
+                }
+            }
+        }
+    }
+    
+    public static void deleteEntity(UUID entityUUID, Connection connection, boolean closeDBcon) throws Exception
+    {
+        log.debug("Deleting entity");
+        
+        if (entityUUID == null)
+        {
+            log.error("Cannot delete entity object with the given UUID because it is NULL!");
+            throw new NullPointerException("Cannot delete entity object with the given UUID because it is NULL!");
+        }
+        
+        if (DBUtil.isClosed(connection))
+        {
+            log.error("Cannot delete the entity because the connection to the DB is closed");
+            throw new RuntimeException("Cannot delete the entity because the connection to the DB is closed");
+        }
+        
+        if (closeDBcon)
+        {
+            log.debug("Starting transaction");
+            connection.setAutoCommit(false);
+        }
+        
+        boolean exception = false;
+        
+        try {
+            String query = "DELETE from Entity where entityUUID = '" + entityUUID + "'";
+            DBUtil.executeQuery(connection, query);
+        } catch (Exception ex) {
+            exception = true;
+            log.error("Unable to delete entity: " + ex.getMessage(), ex);
+            throw new RuntimeException("Unable to delete entity: " + ex.getMessage(), ex);
+        } finally {
+            if (closeDBcon)
+            {
+                if (exception) {
+                    log.debug("Exception thrown, so rolling back the transaction and closing the connection");
+                    connection.rollback();
+                } else {
+                    log.debug("Committing the transaction and closing the connection");
+                    connection.commit();
+                }
+            }
+        }
     }
 }

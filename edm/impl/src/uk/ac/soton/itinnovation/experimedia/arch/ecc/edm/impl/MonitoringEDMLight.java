@@ -25,12 +25,12 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl;
 
 import org.apache.log4j.Logger;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.dao.ExperimentDataManagerDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IExperimentDataManagerLight;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IEntityDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IExperimentDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IMetricGeneratorDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IReportDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.mon.dao.ExperimentDataManagerDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDMLight;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IEntityDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IExperimentDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IMetricGeneratorDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IReportDAO;
 
 /**
  * The Light version of the Experiment Monitoring Data Manager, which exposes
@@ -41,13 +41,13 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IReportDAO;
  * 
  * @author Vegard Engen
  */
-public class ExperimentDataManagerLight implements IExperimentDataManagerLight
+public class MonitoringEDMLight implements IMonitoringEDMLight
 {
     private ExperimentDataManagerDAO edmDAO;
     
-    static Logger log = Logger.getLogger(ExperimentDataManagerLight.class);
+    static Logger log = Logger.getLogger(MonitoringEDMLight.class);
     
-    public ExperimentDataManagerLight()
+    public MonitoringEDMLight()
     {
         log.info("EDM STARTING UP :)");
         try {

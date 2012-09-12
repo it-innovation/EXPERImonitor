@@ -22,8 +22,9 @@
 //      Created for Project :   BonFIRE
 //
 /////////////////////////////////////////////////////////////////////////
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.dao;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.mon.dao;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -36,7 +37,6 @@ import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DBUtil;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DatabaseConnector;
 
 /**
  *
@@ -46,7 +46,7 @@ public class ExperimentHelper
 {
     static Logger log = Logger.getLogger(ExperimentHelper.class);
     
-    public static ValidationReturnObject isObjectValidForSave(Experiment exp/*, DatabaseConnector dbCon, boolean closeDBcon*/) throws Exception
+    public static ValidationReturnObject isObjectValidForSave(Experiment exp) throws Exception
     {
         if (exp == null)
         {
@@ -128,38 +128,40 @@ public class ExperimentHelper
         }
     }
     
-    public static boolean objectExists(UUID uuid, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
+    public static boolean objectExists(UUID uuid, Connection connection, boolean closeDBcon) throws Exception
     {
-        return DBUtil.objectExistsByUUID("Experiment", "expUUID", uuid, dbCon, closeDBcon);
+        return DBUtil.objectExistsByUUID("Experiment", "expUUID", uuid, connection, closeDBcon);
     }
     
-    public static void saveExperiment(Experiment exp, DatabaseConnector dbCon) throws Exception
+    public static void saveExperiment(Experiment exp, Connection connection) throws Exception
     {
         // this validation will check if all the required parameters are set and if
         // there isn't already a duplicate instance in the DB
-        ValidationReturnObject returnObj = ExperimentHelper.isObjectValidForSave(exp/*, dbCon*/);
+        ValidationReturnObject returnObj = ExperimentHelper.isObjectValidForSave(exp);
         if (!returnObj.valid)
         {
             log.error("Cannot save the Experiment object: " + returnObj.exception.getMessage(), returnObj.exception);
             throw returnObj.exception;
         }
         
+        if (DBUtil.isClosed(connection))
+        {
+            log.error("Cannot save the experiment because the connection to the DB is closed");
+            throw new RuntimeException("Cannot save the experiment because the connection to the DB is closed");
+        }
+        
         boolean exception = false;
         try {
-            if (dbCon.isClosed())
-            {
-                dbCon.connect();
-                dbCon.beginTransaction();
-            }
+            log.debug("Starting transaction");
+            connection.setAutoCommit(false);
             
-            // get the table names and values according to what's available in the
-            // object
+            // get the table names and values according to what's available in the object
             List<String> valueNames = new ArrayList<String>();
             List<String> values = new ArrayList<String>();
             ExperimentHelper.getTableNamesAndValues(exp, valueNames, values);
             
             String query = DBUtil.getInsertIntoQuery("Experiment", valueNames, values);
-            ResultSet rs = dbCon.executeQuery(query, Statement.RETURN_GENERATED_KEYS);
+            ResultSet rs = DBUtil.executeQuery(connection, query, Statement.RETURN_GENERATED_KEYS);
             
             // check if the result set got the generated table key
             if (rs.next()) {
@@ -176,8 +178,9 @@ public class ExperimentHelper
         } finally {
             if (exception)
             {
-                dbCon.rollback();
-                dbCon.close();
+                log.debug("Exception thrown, so rolling back the transaction and closing the connection");
+                connection.rollback();
+                connection.close();
             }
         }
         
@@ -189,7 +192,7 @@ public class ExperimentHelper
                 for (MetricGenerator mg : exp.getMetricGenerators())
                 {
                     if (mg != null)
-                        MetricGeneratorHelper.saveMetricGenerator(mg, exp.getUUID(), dbCon, false); // don't close the DB con
+                        MetricGeneratorHelper.saveMetricGenerator(mg, exp.getUUID(), connection, false); // don't close the DB con
                 }
             }
         } catch (Exception ex) {
@@ -197,12 +200,14 @@ public class ExperimentHelper
             throw new RuntimeException ("Unable to save experiment, because there were errors in saving sub-classes: " + ex.getMessage(), ex);
         } finally {
             if (exception) {
-                dbCon.rollback();
+                log.debug("Exception thrown, so rolling back the transaction and closing the connection");
+                connection.rollback();
             } else {
-                dbCon.commit();
+                log.debug("Committing the transaction and closing the connection");
+                connection.commit();
             }
             
-            dbCon.close();
+            connection.close();
         }
     }
     
@@ -214,7 +219,7 @@ public class ExperimentHelper
      * @return
      * @throws Exception 
      */
-    public static Experiment getExperiment(UUID expUUID, boolean withSubClasses, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
+    public static Experiment getExperiment(UUID expUUID, boolean withSubClasses, Connection connection, boolean closeDBcon) throws Exception
     {
         if (expUUID == null)
         {
@@ -228,14 +233,17 @@ public class ExperimentHelper
             throw new RuntimeException("There is no experiment with the given UUID: " + expUUID.toString());
         }*/
         
+        if (DBUtil.isClosed(connection))
+        {
+            log.error("Cannot get the experiment because the connection to the DB is closed");
+            throw new RuntimeException("Cannot get the experiment because the connection to the DB is closed");
+        }
+        
         Experiment exp = null;
         boolean exception = false;
         try {
-            if (dbCon.isClosed())
-                dbCon.connect();
-            
             String query = "SELECT * FROM Experiment WHERE expUUID = '" + expUUID + "'";
-            ResultSet rs = dbCon.executeQuery(query);
+            ResultSet rs = DBUtil.executeQuery(connection, query);
             
             // check if anything got returned (connection closed in finalise method)
             if (rs.next())
@@ -269,7 +277,7 @@ public class ExperimentHelper
         } finally {
             if (exception || (closeDBcon && !withSubClasses))
             {
-                dbCon.close();
+                connection.close();
             }
         }
         
@@ -279,13 +287,13 @@ public class ExperimentHelper
             Set<MetricGenerator> metricGenerators = null;
 
             try {
-                metricGenerators = MetricGeneratorHelper.getMetricGeneratorsForExperiment(expUUID, withSubClasses, dbCon, false);
+                metricGenerators = MetricGeneratorHelper.getMetricGeneratorsForExperiment(expUUID, withSubClasses, connection, false);
             } catch (Exception ex) {
                 log.error("Caught an exception when getting metric generators for experiment (UUID: " + expUUID.toString() + "): " + ex.getMessage());
             } finally {
                 if (closeDBcon)
                 {
-                    dbCon.close();
+                    connection.close();
                 }
             }
 
@@ -295,16 +303,19 @@ public class ExperimentHelper
         return exp;
     }
     
-    public static Set<Experiment> getExperiments(boolean withSubClasses, DatabaseConnector dbCon) throws Exception
+    public static Set<Experiment> getExperiments(boolean withSubClasses, Connection connection) throws Exception
     {
         Set<Experiment> experiments = new HashSet<Experiment>();
         
+        if (DBUtil.isClosed(connection))
+        {
+            log.error("Cannot get the experiments because the connection to the DB is closed");
+            throw new RuntimeException("Cannot get the experiments because the connection to the DB is closed");
+        }
+        
         try {
-            if (dbCon.isClosed())
-                dbCon.connect();
-            
             String query = "SELECT expUUID FROM Experiment";
-            ResultSet rs = dbCon.executeQuery(query);
+            ResultSet rs = DBUtil.executeQuery(connection, query);
             
             // iterate over all returned records
             while (rs.next())
@@ -317,15 +328,100 @@ public class ExperimentHelper
                     continue;
                 }
                 
-                experiments.add(getExperiment(UUID.fromString(uuidStr), withSubClasses, dbCon, false));
+                experiments.add(getExperiment(UUID.fromString(uuidStr), withSubClasses, connection, false));
             }
         } catch (Exception ex) {
             log.error("Error while quering the database: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
         } finally {
-            dbCon.close();
+            connection.close();
         }
         
         return experiments;
+    }
+    
+    
+    public static void deleteAllExperiments(Connection connection, boolean closeDBcon) throws Exception
+    {
+        log.debug("Deleting all experiments");
+        
+        if (DBUtil.isClosed(connection))
+        {
+            log.error("Cannot delete the experiments because the connection to the DB is closed");
+            throw new RuntimeException("Cannot delete the experiments because the connection to the DB is closed");
+        }
+        
+        if (closeDBcon)
+        {
+            log.debug("Starting transaction");
+            connection.setAutoCommit(false);
+        }
+        
+        boolean exception = false;
+        
+        try {
+            String query = "DELETE from Experiment";
+            DBUtil.executeQuery(connection, query);
+        } catch (Exception ex) {
+            exception = true;
+            log.error("Unable to delete experiments: " + ex.getMessage(), ex);
+            throw new RuntimeException("Unable to delete experiments: " + ex.getMessage(), ex);
+        } finally {
+            if (closeDBcon)
+            {
+                if (exception) {
+                    log.debug("Exception thrown, so rolling back the transaction and closing the connection");
+                    connection.rollback();
+                } else {
+                    log.debug("Committing the transaction and closing the connection");
+                    connection.commit();
+                }
+            }
+        }
+    }
+    
+    public static void deleteExperiment(UUID experimentUUID, Connection connection, boolean closeDBcon) throws Exception
+    {
+        log.debug("Deleting experiment");
+        
+        if (experimentUUID == null)
+        {
+            log.error("Cannot delete Experiment object with the given UUID because it is NULL!");
+            throw new NullPointerException("Cannot delete Experiment object with the given UUID because it is NULL!");
+        }
+        
+        if (DBUtil.isClosed(connection))
+        {
+            log.error("Cannot delete the experiments because the connection to the DB is closed");
+            throw new RuntimeException("Cannot delete the experiments because the connection to the DB is closed");
+        }
+        
+        if (closeDBcon)
+        {
+            log.debug("Starting transaction");
+            connection.setAutoCommit(false);
+        }
+        
+        boolean exception = false;
+        
+        try {
+            String query = "DELETE from Experiment where expUUID = '" + experimentUUID + "'";
+            DBUtil.executeQuery(connection, query);
+        } catch (Exception ex) {
+            exception = true;
+            log.error("Unable to delete experiment: " + ex.getMessage(), ex);
+            throw new RuntimeException("Unable to delete experiment: " + ex.getMessage(), ex);
+        } finally {
+            if (closeDBcon)
+            {
+                if (exception) {
+                    log.debug("Exception thrown, so rolling back the transaction and closing the connection");
+                    connection.rollback();
+                } else {
+                    log.debug("Committing the transaction and closing the connection");
+                    connection.commit();
+                }
+            }
+        }
     }
 }

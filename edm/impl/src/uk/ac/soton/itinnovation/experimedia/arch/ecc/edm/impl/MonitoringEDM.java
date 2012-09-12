@@ -25,16 +25,16 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl;
 
 import org.apache.log4j.Logger;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.dao.ExperimentDataManagerDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IExperimentDataManager;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IEntityDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IExperimentDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IMeasurementDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IMeasurementSetDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IMetricDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IMetricGeneratorDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IMetricGroupDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IReportDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.mon.dao.ExperimentDataManagerDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDM;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IEntityDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IExperimentDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IMeasurementDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IMeasurementSetDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IMetricDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IMetricGeneratorDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IMetricGroupDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IReportDAO;
 
 /**
  * The Experiment Monitoring Data Manager, which exposes all data access objects
@@ -44,13 +44,13 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IReportDAO;
  * 
  * @author Vegard Engen
  */
-public class ExperimentDataManager implements IExperimentDataManager
+public class MonitoringEDM implements IMonitoringEDM
 {
     private ExperimentDataManagerDAO edmDAO;
     
-    static Logger log = Logger.getLogger(ExperimentDataManager.class);
+    static Logger log = Logger.getLogger(MonitoringEDM.class);
     
-    public ExperimentDataManager()
+    public MonitoringEDM()
     {
         log.info("EDM STARTING UP :)");
         try {
@@ -106,5 +106,14 @@ public class ExperimentDataManager implements IExperimentDataManager
     public IMeasurementDAO getMeasurementDAO() throws Exception
     {
         return edmDAO;
+    }
+    
+    @Override
+    public void clearMetricsDatabase() throws Exception
+    {
+        if (edmDAO == null)
+            throw new RuntimeException("Cannot clear the metrics database because the EDM DAO is NULL");
+        
+        edmDAO.clearMetricsDatabase();
     }
 }

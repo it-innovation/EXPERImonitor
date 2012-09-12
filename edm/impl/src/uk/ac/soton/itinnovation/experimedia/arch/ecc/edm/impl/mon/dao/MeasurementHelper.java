@@ -22,8 +22,9 @@
 //      Created for Project :   
 //
 /////////////////////////////////////////////////////////////////////////
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.dao;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.mon.dao;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Date;
@@ -33,7 +34,6 @@ import java.util.UUID;
 import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Measurement;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DBUtil;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DatabaseConnector;
 
 /**
  *
@@ -43,7 +43,7 @@ public class MeasurementHelper
 {
     static Logger log = Logger.getLogger(MeasurementHelper.class);
     
-    public static ValidationReturnObject isObjectValidForSave(Measurement measurement, boolean checkForMeasurementSet, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
+    public static ValidationReturnObject isObjectValidForSave(Measurement measurement, boolean checkForMeasurementSet, Connection connection, boolean closeDBcon) throws Exception
     {
         if (measurement == null)
         {
@@ -75,7 +75,7 @@ public class MeasurementHelper
         // check if it exists in the DB already
         /* commented out due to time saving - the DB may throw errors later
         try {
-            if (objectExists(measurement.getUUID(), dbCon))
+            if (objectExists(measurement.getUUID(), connection))
             {
                 return new ValidationReturnObject(false, new RuntimeException("The Measurement already exists; the UUID is not unique"));
             }
@@ -86,7 +86,7 @@ public class MeasurementHelper
         // if checking for measurement set, if flag is set
         if (checkForMeasurementSet)
         {
-            if (!MeasurementSetHelper.objectExists(measurement.getMeasurementSetUUID(), dbCon, closeDBcon))
+            if (!MeasurementSetHelper.objectExists(measurement.getMeasurementSetUUID(), connection, closeDBcon))
             {
                 return new ValidationReturnObject(false, new RuntimeException("The Measurements's MeasurementSet does not exist (UUID: " + measurement.getMeasurementSetUUID().toString() + ")"));
             }
@@ -95,7 +95,7 @@ public class MeasurementHelper
         return new ValidationReturnObject(true);
     }
     
-    public static ValidationReturnObject areObjectsValidForSave(Set<Measurement> measurements, UUID mSetUUID, boolean checkForMeasurementSet, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
+    public static ValidationReturnObject areObjectsValidForSave(Set<Measurement> measurements, UUID mSetUUID, boolean checkForMeasurementSet, Connection connection, boolean closeDBcon) throws Exception
     {
         if (measurements == null)
         {
@@ -133,7 +133,7 @@ public class MeasurementHelper
             // check if it exists in the DB already
             /* commented out to save time; DB may throw errors later
             try {
-                if (objectExists(measurements.getUUID(), dbCon))
+                if (objectExists(measurements.getUUID(), connection))
                 {
                     return new ValidationReturnObject(false, new RuntimeException("The Measurement already exists; the UUID is not unique"));
                 }
@@ -146,7 +146,7 @@ public class MeasurementHelper
         // if checking for measurement set, if flag is set
         if (checkForMeasurementSet)
         {
-            if (!MeasurementSetHelper.objectExists(mSetUUID, dbCon, closeDBcon))
+            if (!MeasurementSetHelper.objectExists(mSetUUID, connection, closeDBcon))
             {
                 return new ValidationReturnObject(false, new RuntimeException("The Measurements's MeasurementSet does not exist (UUID: " + mSetUUID.toString() + ")"));
             }
@@ -166,28 +166,31 @@ public class MeasurementHelper
         return query;
     }
     
-    public static boolean objectExists(UUID uuid, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
+    public static boolean objectExists(UUID uuid, Connection connection, boolean closeDBcon) throws Exception
     {
-        return DBUtil.objectExistsByUUID("Measurement", "measurementUUID", uuid, dbCon, closeDBcon);
+        return DBUtil.objectExistsByUUID("Measurement", "measurementUUID", uuid, connection, closeDBcon);
     }
     
-    public static void saveMeasurement(Measurement measurement, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
+    public static void saveMeasurement(Measurement measurement, Connection connection, boolean closeDBcon) throws Exception
     {
         // this validation will check if all the required parameters are set and if
         // there isn't already a duplicate instance in the DB
-        ValidationReturnObject returnObj = MeasurementHelper.isObjectValidForSave(measurement, true, dbCon, closeDBcon);
+        ValidationReturnObject returnObj = MeasurementHelper.isObjectValidForSave(measurement, true, connection, false);
         if (!returnObj.valid)
         {
             log.error("Cannot save the Measurement object: " + returnObj.exception.getMessage(), returnObj.exception);
             throw returnObj.exception;
         }
         
+        if (DBUtil.isClosed(connection))
+        {
+            log.error("Cannot save the Measurement because the connection to the DB is closed");
+            throw new RuntimeException("Cannot save the Measurement because the connection to the DB is closed");
+        }
+        
         try {
-            if (dbCon.isClosed())
-                dbCon.connect();
-            
             String query = getSqlInsertQuery(measurement);
-            ResultSet rs = dbCon.executeQuery(query, Statement.RETURN_GENERATED_KEYS);
+            ResultSet rs = DBUtil.executeQuery(connection, query, Statement.RETURN_GENERATED_KEYS);
             
             // check if the result set got the generated table key
             if (rs.next()) {
@@ -201,36 +204,34 @@ public class MeasurementHelper
             throw new RuntimeException("Error while saving Measurement: " + ex.getMessage(), ex);
         } finally {
             if (closeDBcon)
-                dbCon.close();
+                connection.close();
         }
     }
     
-    public static void saveMeasurementsForSet(Set<Measurement> measurements, UUID mSetUUID, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
+    public static void saveMeasurementsForSet(Set<Measurement> measurements, UUID mSetUUID, Connection connection, boolean closeDBcon) throws Exception
     {
         // this validation will check if all the required parameters are set and if
         // there isn't already a duplicate instance in the DB
-        ValidationReturnObject returnObj = MeasurementHelper.areObjectsValidForSave(measurements, mSetUUID, true, dbCon, closeDBcon);
+        ValidationReturnObject returnObj = MeasurementHelper.areObjectsValidForSave(measurements, mSetUUID, true, connection, closeDBcon);
         if (!returnObj.valid)
         {
             log.error("Cannot save the Measurement objects: " + returnObj.exception.getMessage(), returnObj.exception);
             throw returnObj.exception;
         }
         
+        if (DBUtil.isClosed(connection))
+        {
+            log.error("Cannot save the Measurement objects because the connection to the DB is closed");
+            throw new RuntimeException("Cannot save the Measurement objects because the connection to the DB is closed");
+        }
+        
         boolean exception = false;
         try {
-            if (dbCon.isClosed())
-            {
-                dbCon.connect();
-                
-                if (closeDBcon)
-                    dbCon.beginTransaction();
-            }
-            
             // iterate over each measurement and save
             for (Measurement measurement : measurements)
             {
                 String query = getSqlInsertQuery(measurement);
-                ResultSet rs = dbCon.executeQuery(query, Statement.RETURN_GENERATED_KEYS);
+                ResultSet rs = DBUtil.executeQuery(connection, query, Statement.RETURN_GENERATED_KEYS);
 
                 // check if the result set got the generated table key
                 if (rs.next()) {
@@ -247,17 +248,12 @@ public class MeasurementHelper
         } finally {
             if (closeDBcon)
             {
-                if (exception)
-                    dbCon.rollback();
-                else
-                    dbCon.commit();
-                
-                dbCon.close();
+                connection.close();
             }
         }
     }
     
-    public static Measurement getMeasurement(UUID measurementUUID, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
+    public static Measurement getMeasurement(UUID measurementUUID, Connection connection, boolean closeDBcon) throws Exception
     {
         if (measurementUUID == null)
         {
@@ -265,19 +261,22 @@ public class MeasurementHelper
             throw new NullPointerException("Cannot get a Measurement object with the given UUID because it is NULL!");
         }
         
-        /*if (!MeasurementHelper.objectExists(measurementUUID, dbCon))
+        /*if (!MeasurementHelper.objectExists(measurementUUID, connection))
         {
             log.error("There is no Measurement with the given UUID: " + measurementUUID.toString());
             throw new RuntimeException("There is no Measurement with the given UUID: " + measurementUUID.toString());
         }*/
         
+        if (DBUtil.isClosed(connection))
+        {
+            log.error("Cannot get the Measurement because the connection to the DB is closed");
+            throw new RuntimeException("Cannot get the Measurement because the connection to the DB is closed");
+        }
+        
         Measurement measurement = null;
         try {
-            if (dbCon.isClosed())
-                dbCon.connect();
-            
             String query = "SELECT * FROM Measurement WHERE measurementUUID = '" + measurementUUID + "'";
-            ResultSet rs = dbCon.executeQuery(query);
+            ResultSet rs = DBUtil.executeQuery(connection, query);
             
             // check if anything got returned (connection closed in finalise method)
             if (rs.next())
@@ -322,13 +321,13 @@ public class MeasurementHelper
             throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
         } finally {
             if (closeDBcon)
-                dbCon.close();
+                connection.close();
         }
         
         return measurement;
     }
 
-    public static Set<Measurement> getMeasurementsForTimePeriod(UUID mSetUUID, Date fromDate, Date toDate, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
+    public static Set<Measurement> getMeasurementsForTimePeriod(UUID mSetUUID, Date fromDate, Date toDate, Connection connection, boolean closeDBcon) throws Exception
     {
         if (mSetUUID == null)
         {
@@ -336,20 +335,23 @@ public class MeasurementHelper
             throw new NullPointerException("Cannot get Measurement objects for the MeasurementSet with the given UUID because it is NULL!");
         }
         
-        /*if (!MeasurementSetHelper.objectExists(mSetUUID, dbCon))
+        /*if (!MeasurementSetHelper.objectExists(mSetUUID, connection))
         {
             log.error("There is no MeasurementSet with the given UUID: " + mSetUUID.toString());
             throw new RuntimeException("There is no MeasurementSet with the given UUID: " + mSetUUID.toString());
         }*/
         
+        if (DBUtil.isClosed(connection))
+        {
+            log.error("Cannot get the Measurement objects because the connection to the DB is closed");
+            throw new RuntimeException("Cannot get the Measurement objects because the connection to the DB is closed");
+        }
+        
         Set<Measurement> measurements = new HashSet<Measurement>();
         try {
-            if (dbCon.isClosed())
-                dbCon.connect();
-            
             String query = "SELECT * FROM Measurement WHERE mSetUUID = '" + mSetUUID + "' AND "
                     + "timeStamp BETWEEN " + fromDate.getTime() + " AND " + toDate.getTime();
-            ResultSet rs = dbCon.executeQuery(query);
+            ResultSet rs = DBUtil.executeQuery(connection, query);
             
             // check if anything got returned (connection closed in finalise method)
             while (rs.next())
@@ -371,7 +373,7 @@ public class MeasurementHelper
             throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
         } finally {
             if (closeDBcon)
-                dbCon.close();
+                connection.close();
         }
         
         return measurements;

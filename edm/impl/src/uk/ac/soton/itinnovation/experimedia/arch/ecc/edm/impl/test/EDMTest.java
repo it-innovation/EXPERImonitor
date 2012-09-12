@@ -25,7 +25,6 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.test;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
@@ -56,16 +55,14 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Me
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricType;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Unit;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.ExperimentDataManager;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.dao.ExperimentDataManagerDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IEntityDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IExperimentDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IMeasurementDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IMeasurementSetDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IMetricDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IMetricGeneratorDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IMetricGroupDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IReportDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.MonitoringEDM;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IEntityDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IExperimentDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IMeasurementDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IMeasurementSetDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IMetricGeneratorDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IMetricGroupDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IReportDAO;
 
 /**
  *
@@ -121,7 +118,7 @@ public class EDMTest
         */
         
         
-        ExperimentDataManager edm = new ExperimentDataManager();
+        MonitoringEDM edm = new MonitoringEDM();
         UUID expUUID = UUID.fromString("bfe4c710-61ba-46f8-a519-be2f7808192e");
         UUID entityUUID = UUID.fromString("5718cd67-4310-4b2c-aeb9-9b72314630ca");
         UUID attributeUUID = UUID.fromString("4f2817b5-603a-4d02-a032-62cfca314962");
@@ -131,6 +128,9 @@ public class EDMTest
         UUID reportUUID = UUID.fromString("165c8058-5c67-4f92-ae34-df7ee2129821");
         
         boolean withSubClasses = true;
+        
+        // clear the database
+        edm.clearMetricsDatabase();
         
         //-- Create and get experiments --//
         //experiments(edm, expUUID);
@@ -148,16 +148,16 @@ public class EDMTest
         
         //measurement(edm, mSetUUID);
         
-        //experimentCompleteChain(edm, expUUID, entityUUID, attributeUUID, mGenUUID, mGrpUUID, mSetUUID);
+        experimentCompleteChain(edm, expUUID, entityUUID, attributeUUID, mGenUUID, mGrpUUID, mSetUUID);
         
         printExperimentDetails(edm, expUUID, withSubClasses);
         
-        //saveReport(edm, mSetUUID, reportUUID);
+        saveReport(edm, mSetUUID, reportUUID);
         
-        //getReport(edm, mSetUUID, reportUUID);
+        getReport(edm, mSetUUID, reportUUID);
     }
     
-    public static void experiments(ExperimentDataManager edm, UUID expUUID) throws Exception
+    public static void experiments(MonitoringEDM edm, UUID expUUID) throws Exception
     {
         boolean withSubClasses = true;
         IExperimentDAO expDAO = null;
@@ -244,7 +244,7 @@ public class EDMTest
         }
     }
     
-    public static void entities(ExperimentDataManager edm, UUID entityUUID, UUID attributeUUID, UUID expUUID) throws Exception
+    public static void entities(MonitoringEDM edm, UUID entityUUID, UUID attributeUUID, UUID expUUID) throws Exception
     {
         boolean withSubClasses = true;
         IEntityDAO entityDAO = null;
@@ -389,7 +389,7 @@ public class EDMTest
         } // end if entities == null
     }
     
-    public static void metricGenerator(ExperimentDataManager edm, UUID expUUID, UUID entityUUID, UUID mGenUUID) throws Exception
+    public static void metricGenerator(MonitoringEDM edm, UUID expUUID, UUID entityUUID, UUID mGenUUID) throws Exception
     {
         boolean withSubClasses = true;
         IMetricGeneratorDAO metricGeneratorDAO = null;
@@ -487,7 +487,7 @@ public class EDMTest
         }
     }
     
-    public static void metricGeneratorCompleteChain(ExperimentDataManager edm, UUID expUUID, UUID entityUUID, UUID attribUUID, UUID mGenUUID, UUID mGrpUUID, UUID mSetUUID) throws Exception
+    public static void metricGeneratorCompleteChain(MonitoringEDM edm, UUID expUUID, UUID entityUUID, UUID attribUUID, UUID mGenUUID, UUID mGrpUUID, UUID mSetUUID) throws Exception
     {
         IMetricGeneratorDAO metricGeneratorDAO = null;
         try {
@@ -549,7 +549,7 @@ public class EDMTest
     }
     
     
-    public static void metricGroup(ExperimentDataManager edm, UUID mGenUUID, UUID mGrpUUID) throws Exception
+    public static void metricGroup(MonitoringEDM edm, UUID mGenUUID, UUID mGrpUUID) throws Exception
     {
         boolean withSubClasses = false;
         IMetricGroupDAO metricGroupDAO = null;
@@ -603,7 +603,7 @@ public class EDMTest
         }
     }
     
-    public static void metricGroupCompleteChain(ExperimentDataManager edm, UUID attribUUID, UUID mGenUUID, UUID mGrpUUID, UUID mSetUUID) throws Exception
+    public static void metricGroupCompleteChain(MonitoringEDM edm, UUID attribUUID, UUID mGenUUID, UUID mGrpUUID, UUID mSetUUID) throws Exception
     {
         IMetricGroupDAO metricGroupDAO = null;
         try {
@@ -648,7 +648,7 @@ public class EDMTest
         }
     }
     
-    public static void measurementSet(ExperimentDataManager edm, UUID attribUUID, UUID mGrpUUID, UUID mSetUUID) throws Exception
+    public static void measurementSet(MonitoringEDM edm, UUID attribUUID, UUID mGrpUUID, UUID mSetUUID) throws Exception
     {
         boolean withSubClasses = false;
         IMeasurementSetDAO mSetDAO = null;
@@ -672,8 +672,9 @@ public class EDMTest
         }
         
         log.info("Saving Random Measurement set");
-        //Metric randomMetric = new Metric(UUID.randomUUID(), MetricType.INTERVAL, METRES_PER_SECOND);
-        Metric randomMetric = new Metric(UUID.randomUUID(), null, new Unit("milli seconds"));
+        Metric randomMetric = new Metric(UUID.randomUUID(), MetricType.INTERVAL, new Unit("milli seconds"));
+        //Metric randomMetric = new Metric(UUID.randomUUID(), MetricType.INTERVAL, null);
+        //Metric randomMetric = new Metric(UUID.randomUUID(), null, new Unit("milli seconds"));
         MeasurementSet randomMSet = new MeasurementSet(UUID.randomUUID(), attribUUID, mGrpUUID, randomMetric);
         
         try {
@@ -705,7 +706,7 @@ public class EDMTest
         
     }
     
-    public static void measurementSetViolation(ExperimentDataManager edm, UUID attribUUID, UUID mGrpUUID, UUID mSetUUID) throws Exception
+    public static void measurementSetViolation(MonitoringEDM edm, UUID attribUUID, UUID mGrpUUID, UUID mSetUUID) throws Exception
     {
         boolean withSubClasses = false;
         IMeasurementSetDAO mSetDAO = null;
@@ -739,7 +740,7 @@ public class EDMTest
         }
     }
     
-    public static void measurement(ExperimentDataManager edm, UUID mSetUUID) throws Exception
+    public static void measurement(MonitoringEDM edm, UUID mSetUUID) throws Exception
     {
         IMeasurementDAO measurementDAO = null;
         try {
@@ -762,7 +763,7 @@ public class EDMTest
         }
     }
     
-    public static void experimentCompleteChain(ExperimentDataManager edm, UUID expUUID, UUID entityUUID, UUID attribUUID, UUID mGenUUID, UUID mGrpUUID, UUID mSetUUID) throws Exception
+    public static void experimentCompleteChain(MonitoringEDM edm, UUID expUUID, UUID entityUUID, UUID attribUUID, UUID mGenUUID, UUID mGrpUUID, UUID mSetUUID) throws Exception
     {
         boolean withSubClasses = true;
         
@@ -788,7 +789,6 @@ public class EDMTest
         log.info("Creating Experiment MetricGenerator");
         MetricGenerator metricGenerator = new MetricGenerator(mGenUUID, "Experiment MetricGenerator", "A description");
         //MetricGenerator metricGenerator = new MetricGenerator(mGenUUID, null, "A description");
-        metricGenerator.addEntity(new Entity(entityUUID));
         exp.addMetricGenerator(metricGenerator);
         
 //----- ENTITY
@@ -837,7 +837,7 @@ public class EDMTest
     }
     
     
-    public static void saveReport(ExperimentDataManager edm, UUID mSetUUID, UUID reportUUID) throws Exception
+    public static void saveReport(MonitoringEDM edm, UUID mSetUUID, UUID reportUUID) throws Exception
     {
         IReportDAO reportDAO = null;
         try {
@@ -898,7 +898,7 @@ public class EDMTest
         }
     }
     
-    public static void getReport(ExperimentDataManager edm, UUID mSetUUID, UUID reportUUID) throws Exception
+    public static void getReport(MonitoringEDM edm, UUID mSetUUID, UUID reportUUID) throws Exception
     {
         IReportDAO reportDAO = null;
         try {
@@ -1032,7 +1032,7 @@ public class EDMTest
         }
     }
     
-    public static void printExperimentDetails(ExperimentDataManager edm, UUID expUUID, boolean withSubClasses) throws Exception
+    public static void printExperimentDetails(MonitoringEDM edm, UUID expUUID, boolean withSubClasses) throws Exception
     {
         IExperimentDAO expDAO = null;
         try {

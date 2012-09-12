@@ -22,8 +22,9 @@
 //      Created for Project :   
 //
 /////////////////////////////////////////////////////////////////////////
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.dao;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.mon.dao;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.HashSet;
@@ -34,7 +35,6 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Me
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Metric;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DBUtil;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DatabaseConnector;
 
 /**
  *
@@ -44,7 +44,7 @@ public class MeasurementSetHelper
 {
     static Logger log = Logger.getLogger(MeasurementSetHelper.class);
     
-    public static ValidationReturnObject isObjectValidForSave(MeasurementSet mSet, boolean checkForMetricGroup, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
+    public static ValidationReturnObject isObjectValidForSave(MeasurementSet mSet, boolean checkForMetricGroup, Connection connection, boolean closeDBcon) throws Exception
     {
         if (mSet == null)
         {
@@ -76,7 +76,7 @@ public class MeasurementSetHelper
         {
             // check if metric exists in the DB already
             try {
-                if (MetricHelper.objectExists(mSet.getMetric().getUUID(), dbCon))
+                if (MetricHelper.objectExists(mSet.getMetric().getUUID(), connection))
                 {
                     return new ValidationReturnObject(false, new RuntimeException("The MeasurementSet's metric already exists; the UUID of the metric is not unique"));
                 }
@@ -87,7 +87,7 @@ public class MeasurementSetHelper
         /*
         // check if it exists in the DB already
         try {
-            if (objectExists(mSet.getUUID(), dbCon))
+            if (objectExists(mSet.getUUID(), connection))
             {
                 return new ValidationReturnObject(false, new RuntimeException("The MeasurementSet already exists; the UUID is not unique"));
             }
@@ -98,14 +98,14 @@ public class MeasurementSetHelper
         // check that the metric group exists, if flagged to check
         if (checkForMetricGroup)
         {
-            if (!MetricGroupHelper.objectExists(mSet.getMetricGroupUUID(), dbCon, closeDBcon))
+            if (!MetricGroupHelper.objectExists(mSet.getMetricGroupUUID(), connection, closeDBcon))
             {
                 return new ValidationReturnObject(false, new RuntimeException("The MetricGroup for the MeasurementSet doesn't exit (UUID: " + mSet.getMetricGroupUUID().toString() + ")"));
             }
         }
         
         // check that the attribute exists
-        /*if (!AttributeHelper.objectExists(mSet.getAttributeUUID(), dbCon))
+        /*if (!AttributeHelper.objectExists(mSet.getAttributeUUID(), connection))
         {
             return new ValidationReturnObject(false, new RuntimeException("The Attribute for the MeasurementSet doesn't exit (UUID: " + mSet.getAttributeUUID().toString() + ")"));
         }*/
@@ -115,7 +115,7 @@ public class MeasurementSetHelper
         {
             for (Measurement measurement : mSet.getMeasurements())
             {
-                ValidationReturnObject validationReturn = MeasurementHelper.isObjectValidForSave(measurement, false, dbCon, closeDBcon); // false = don't check for measurement set existing as this won't be saved yet!
+                ValidationReturnObject validationReturn = MeasurementHelper.isObjectValidForSave(measurement, false, connection, closeDBcon); // false = don't check for measurement set existing as this won't be saved yet!
                 if (!validationReturn.valid)
                 {
                     return validationReturn;
@@ -141,37 +141,40 @@ public class MeasurementSetHelper
         return query;
     }
     
-    public static boolean objectExists(UUID uuid, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
+    public static boolean objectExists(UUID uuid, Connection connection, boolean closeDBcon) throws Exception
     {
-        return DBUtil.objectExistsByUUID("MeasurementSet", "mSetUUID", uuid, dbCon, closeDBcon);
+        return DBUtil.objectExistsByUUID("MeasurementSet", "mSetUUID", uuid, connection, closeDBcon);
     }
     
-    public static void saveMeasurementSet(MeasurementSet measurementSet, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
+    public static void saveMeasurementSet(MeasurementSet measurementSet, Connection connection, boolean closeDBcon) throws Exception
     {
         // this validation will check if all the required parameters are set and if
         // there isn't already a duplicate instance in the DB
         // will validate the metric and measurements too, if any are given
-        ValidationReturnObject returnObj = MeasurementSetHelper.isObjectValidForSave(measurementSet, false, dbCon, closeDBcon);
+        ValidationReturnObject returnObj = MeasurementSetHelper.isObjectValidForSave(measurementSet, false, connection, false);
         if (!returnObj.valid)
         {
             log.error("Cannot save the MeasurementSet object: " + returnObj.exception.getMessage(), returnObj.exception);
             throw returnObj.exception;
         }
         
-        if (dbCon.isClosed())
+        if (DBUtil.isClosed(connection))
         {
-            dbCon.connect();
-
-            if (closeDBcon)
-            {
-                dbCon.beginTransaction();
-            }
+            log.error("Cannot save the MeasurementSet because the connection to the DB is closed");
+            throw new RuntimeException("Cannot save the MeasurementSet because the connection to the DB is closed");
         }
+        
+        if (closeDBcon)
+        {
+            log.debug("Starting transaction");
+            connection.setAutoCommit(false);
+        }
+        
         
         boolean exception = false;
         // save the metric
         try {
-            MetricHelper.saveMetric(dbCon, measurementSet.getMetric(), false);
+            MetricHelper.saveMetric(measurementSet.getMetric(), connection, false);
         } catch (Exception ex) {
             exception = true;
             log.error("Cannot save the MeasurementSet object because of an error in saving the metric! " + ex.getMessage());
@@ -179,15 +182,16 @@ public class MeasurementSetHelper
         } finally {
             if (exception && closeDBcon)
             {
-                dbCon.rollback();
-                dbCon.close();
+                log.debug("Exception thrown, so rolling back the transaction and closing the connection");
+                connection.rollback();
+                connection.close();
             }
         }
         
         // saving the measurement set
         try {
             String query = MeasurementSetHelper.getSqlInsertQuery(measurementSet);
-            ResultSet rs = dbCon.executeQuery(query, Statement.RETURN_GENERATED_KEYS);
+            ResultSet rs = DBUtil.executeQuery(connection, query, Statement.RETURN_GENERATED_KEYS);
             
             // check if the result set got the generated table key
             if (rs.next()) {
@@ -204,8 +208,9 @@ public class MeasurementSetHelper
         } finally {
             if (exception && closeDBcon)
             {
-                dbCon.rollback();
-                dbCon.close();
+                log.debug("Exception thrown, so rolling back the transaction and closing the connection");
+                connection.rollback();
+                connection.close();
             }
         }
         
@@ -216,7 +221,7 @@ public class MeasurementSetHelper
                 log.debug("Saving " + measurementSet.getMeasurements().size() + " measurements for the measurement set");
                 // saving as part of a report (to be created).
                 // flags to (1) validate measurements and (2) save measurements
-                ReportHelper.saveReportForMeasurements(measurementSet.getMeasurements(), measurementSet.getUUID(), true, true, dbCon, closeDBcon);
+                ReportHelper.saveReportForMeasurements(measurementSet.getMeasurements(), measurementSet.getUUID(), true, true, connection, closeDBcon);
             }
         } catch (Exception ex) {
             throw ex;
@@ -224,17 +229,19 @@ public class MeasurementSetHelper
             if (closeDBcon)
             {
                 if (exception) {
-                    dbCon.rollback();
+                    log.debug("Exception thrown, so rolling back the transaction and closing the connection");
+                    connection.rollback();
                 }
                 else {
-                    dbCon.commit();
+                    log.debug("Committing the transaction and closing the connection");
+                    connection.commit();
                 }
-                dbCon.close();
+                connection.close();
             }
         }
     }
     
-    public static MeasurementSet getMeasurementSet(UUID measurementSetUUID, boolean withMetric, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
+    public static MeasurementSet getMeasurementSet(UUID measurementSetUUID, boolean withMetric, Connection connection, boolean closeDBcon) throws Exception
     {
         // get the measurement set with metric, but not with any measurements
         if (measurementSetUUID == null)
@@ -243,21 +250,24 @@ public class MeasurementSetHelper
             throw new NullPointerException("Cannot get a MeasurementSet object with the given UUID because it is NULL!");
         }
         
-        /*if (!MeasurementSetHelper.objectExists(measurementSetUUID, dbCon))
+        /*if (!MeasurementSetHelper.objectExists(measurementSetUUID, connection))
         {
             log.error("There is no MeasurementSet with the given UUID: " + measurementSetUUID.toString());
             throw new RuntimeException("There is no MeasurementSet with the given UUID: " + measurementSetUUID.toString());
         }*/
         
+        if (DBUtil.isClosed(connection))
+        {
+            log.error("Cannot get the MeasurementSet because the connection to the DB is closed");
+            throw new RuntimeException("Cannot get the MeasurementSet because the connection to the DB is closed");
+        }
+        
         MeasurementSet measurementSet = null;
         String metricUUIDstr = null;
         boolean exception = false;
         try {
-            if (dbCon.isClosed())
-                dbCon.connect();
-            
             String query = "SELECT * FROM MeasurementSet WHERE mSetUUID = '" + measurementSetUUID.toString() + "'";
-            ResultSet rs = dbCon.executeQuery(query);
+            ResultSet rs = DBUtil.executeQuery(connection, query);
             
             // check if anything got returned (connection closed in finalise method)
             if (rs.next())
@@ -282,7 +292,7 @@ public class MeasurementSetHelper
             throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
         } finally {
             if (exception || (closeDBcon && !withMetric))
-                dbCon.close();
+                connection.close();
         }
         
         // get the metric
@@ -295,21 +305,21 @@ public class MeasurementSetHelper
             }
 
             try {
-                Metric metric = MetricHelper.getMetric(dbCon, UUID.fromString(metricUUIDstr), false); // don't close the connection
+                Metric metric = MetricHelper.getMetric(UUID.fromString(metricUUIDstr), connection, false); // don't close the connection
                 measurementSet.setMetric(metric);
             } catch (Exception ex) {
                 log.error("Caught an exception when getting the Metric for the MeasurementSet (UUID: " + measurementSetUUID.toString() + "): " + ex.getMessage());
                 throw new RuntimeException("Caught an exception when getting the Metric for MeasurementSet (UUID: " + measurementSetUUID.toString() + "): " + ex.getMessage(), ex);
             } finally {
                 if (closeDBcon)
-                    dbCon.close();
+                    connection.close();
             }
         }
         
         return measurementSet;
     }
     
-    public static Set<MeasurementSet> getMeasurementSetForMetricGroup(UUID metricGroupUUID, boolean withMetric, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
+    public static Set<MeasurementSet> getMeasurementSetForMetricGroup(UUID metricGroupUUID, boolean withMetric, Connection connection, boolean closeDBcon) throws Exception
     {
         if (metricGroupUUID == null)
         {
@@ -317,14 +327,17 @@ public class MeasurementSetHelper
             throw new NullPointerException("Cannot get any MeasurementSet objects for a MetricGroup with the given UUID because it is NULL!");
         }
         
+        if (DBUtil.isClosed(connection))
+        {
+            log.error("Cannot get the MeasurementSet objects for the MetricGroup because the connection to the DB is closed");
+            throw new RuntimeException("Cannot get the MeasurementSet objects for the MetricGroup because the connection to the DB is closed");
+        }
+        
         Set<MeasurementSet> measurementSets = new HashSet<MeasurementSet>();
         
         try {
-            if (dbCon.isClosed())
-                dbCon.connect();
-            
             String query = "SELECT mSetUUID FROM MeasurementSet WHERE mGrpUUID = '" + metricGroupUUID.toString() + "'";
-            ResultSet rs = dbCon.executeQuery(query);
+            ResultSet rs = DBUtil.executeQuery(connection, query);
             
             // check if anything got returned (connection closed in finalise method)
             while (rs.next())
@@ -337,14 +350,14 @@ public class MeasurementSetHelper
                     continue;
                 }
                 
-                measurementSets.add(getMeasurementSet(UUID.fromString(uuidStr), withMetric, dbCon, false));
+                measurementSets.add(getMeasurementSet(UUID.fromString(uuidStr), withMetric, connection, false));
             }
         } catch (Exception ex) {
             log.error("Error while quering the database: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
         } finally {
             if (closeDBcon)
-                dbCon.close();
+                connection.close();
         }
         
         return measurementSets;

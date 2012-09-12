@@ -22,8 +22,9 @@
 //      Created for Project :   
 //
 /////////////////////////////////////////////////////////////////////////
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.dao;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.mon.dao;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -34,7 +35,6 @@ import java.util.UUID;
 import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Attribute;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DBUtil;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DatabaseConnector;
 
 /**
  *
@@ -44,7 +44,7 @@ public class AttributeHelper
 {
     static Logger log = Logger.getLogger(AttributeHelper.class);
     
-    public static ValidationReturnObject isObjectValidForSave(Attribute attrib, boolean checkForEntity, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
+    public static ValidationReturnObject isObjectValidForSave(Attribute attrib, boolean checkForEntity, Connection connection, boolean closeDBcon) throws Exception
     {
         if (attrib == null)
         {
@@ -65,7 +65,7 @@ public class AttributeHelper
         
         // check if it exists in the DB already
         /*try {
-            if (objectExists(attrib.getUUID(), dbCon))
+            if (objectExists(attrib.getUUID(), connection))
             {
                 return new ValidationReturnObject(false, new RuntimeException("The Attribute already exists; the UUID is not unique"));
             }
@@ -81,7 +81,7 @@ public class AttributeHelper
         // if checking for entity; may be false if this is called from the saveEntity method
         if (checkForEntity)
         {
-            if (!EntityHelper.objectExists(attrib.getEntityUUID(), dbCon, closeDBcon))
+            if (!EntityHelper.objectExists(attrib.getEntityUUID(), connection, closeDBcon))
             {
                 return new ValidationReturnObject(false, new RuntimeException("The Attribute's Entity does not exist (UUID: " + attrib.getEntityUUID().toString() + ")"));
             }
@@ -125,26 +125,29 @@ public class AttributeHelper
         }
     }
     
-    public static boolean objectExists(UUID uuid, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
+    public static boolean objectExists(UUID uuid, Connection connection, boolean closeDBcon) throws Exception
     {
-        return DBUtil.objectExistsByUUID("Attribute", "attribUUID", uuid, dbCon, closeDBcon);
+        return DBUtil.objectExistsByUUID("Attribute", "attribUUID", uuid, connection, closeDBcon);
     }
     
-    public static void saveAttribute(Attribute attrib, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
+    public static void saveAttribute(Attribute attrib, Connection connection, boolean closeDBcon) throws Exception
     {
         // this validation will check if all the required parameters are set and if
         // there isn't already a duplicate instance in the DB
-        ValidationReturnObject returnObj = AttributeHelper.isObjectValidForSave(attrib, false, dbCon, closeDBcon);
+        ValidationReturnObject returnObj = AttributeHelper.isObjectValidForSave(attrib, false, connection, false);
         if (!returnObj.valid)
         {
             log.error("Cannot save the Attribute object: " + returnObj.exception.getMessage(), returnObj.exception);
             throw returnObj.exception;
         }
         
+        if (DBUtil.isClosed(connection))
+        {
+            log.error("Cannot save the Attribute because the connection to the DB is closed");
+            throw new RuntimeException("Cannot save the Attribute because the connection to the DB is closed");
+        }
+        
         try {
-            if (dbCon.isClosed())
-                dbCon.connect();
-            
             // get the table names and values according to what's available in the
             // object
             List<String> valueNames = new ArrayList<String>();
@@ -152,7 +155,7 @@ public class AttributeHelper
             AttributeHelper.getTableNamesAndValues(attrib, valueNames, values);
             
             String query = DBUtil.getInsertIntoQuery("Attribute", valueNames, values);
-            ResultSet rs = dbCon.executeQuery(query, Statement.RETURN_GENERATED_KEYS);
+            ResultSet rs = DBUtil.executeQuery(connection, query, Statement.RETURN_GENERATED_KEYS);
             
             // check if the result set got the generated table key
             if (rs.next()) {
@@ -166,11 +169,11 @@ public class AttributeHelper
             throw new RuntimeException("Error while saving attribute: " + ex.getMessage(), ex);
         } finally {
             if (closeDBcon)
-                dbCon.close();
+                connection.close();
         }
     }
     
-    public static Attribute getAttribute(UUID attribUUID, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
+    public static Attribute getAttribute(UUID attribUUID, Connection connection, boolean closeDBcon) throws Exception
     {
         if (attribUUID == null)
         {
@@ -178,19 +181,22 @@ public class AttributeHelper
             throw new NullPointerException("Cannot get an Attribute object with the given UUID because it is NULL!");
         }
         
-        /*if (!AttributeHelper.objectExists(attribUUID, dbCon))
+        /*if (!AttributeHelper.objectExists(attribUUID, connection))
         {
             log.error("There is no attribute with the given UUID: " + attribUUID.toString());
             throw new RuntimeException("There is no attribute with the given UUID: " + attribUUID.toString());
         }*/
         
+        if (DBUtil.isClosed(connection))
+        {
+            log.error("Cannot get the Attribute because the connection to the DB is closed");
+            throw new RuntimeException("Cannot get the Attribute because the connection to the DB is closed");
+        }
+        
         Attribute attribute = null;
         try {
-            if (dbCon.isClosed())
-                dbCon.connect();
-            
             String query = "SELECT * FROM Attribute WHERE attribUUID = '" + attribUUID + "'";
-            ResultSet rs = dbCon.executeQuery(query);
+            ResultSet rs = DBUtil.executeQuery(connection, query);
             
             // check if anything got returned (connection closed in finalise method)
             if (rs.next())
@@ -216,13 +222,13 @@ public class AttributeHelper
             throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
         } finally {
             if (closeDBcon)
-                dbCon.close();
+                connection.close();
         }
         
         return attribute;
     }
     
-    public static Set<Attribute> getAttributesForEntity(UUID entityUUID, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
+    public static Set<Attribute> getAttributesForEntity(UUID entityUUID, Connection connection, boolean closeDBcon) throws Exception
     {
         if (entityUUID == null)
         {
@@ -230,19 +236,22 @@ public class AttributeHelper
             throw new NullPointerException("Cannot get any Attribute objects for an Entity with the given UUID because it is NULL!");
         }
         
-        /*if (!EntityHelper.objectExists(entityUUID, dbCon))
+        /*if (!EntityHelper.objectExists(entityUUID, connection))
         {
             log.error("There is no entity with the given UUID: " + entityUUID.toString());
             throw new RuntimeException("There is no entity with the given UUID: " + entityUUID.toString());
         }*/
         
+        if (DBUtil.isClosed(connection))
+        {
+            log.error("Cannot get the Attribute objects for the Entity because the connection to the DB is closed");
+            throw new RuntimeException("Cannot get the Attribute objects for the Entity because the connection to the DB is closed");
+        }
+        
         Set<Attribute> attributes = new HashSet<Attribute>();;
         try {
-            if (dbCon.isClosed())
-                dbCon.connect();
-            
             String query = "SELECT * FROM Attribute WHERE entityUUID = '" + entityUUID + "'";
-            ResultSet rs = dbCon.executeQuery(query);
+            ResultSet rs = DBUtil.executeQuery(connection, query);
             
             // check if anything got returned (connection closed in finalise method)
             while (rs.next())
@@ -270,7 +279,7 @@ public class AttributeHelper
             throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
         } finally {
             if (closeDBcon)
-                dbCon.close();
+                connection.close();
         }
         
         return attributes;

@@ -24,18 +24,18 @@
 /////////////////////////////////////////////////////////////////////////
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IEntityDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IExperimentDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IMetricGeneratorDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.IReportDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IEntityDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IExperimentDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IMetricGeneratorDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IReportDAO;
 
 /**
- * Interface to the Experiment Data Manager :: the Light version, intended to live
- * on the clients that generate metrics.
+ * Interface to the Experiment Data Manager for Monitoring data.
+ * This is the Light version, intended to be used on the clients that generate metrics.
  * 
  * @author Vegard Engen
  */
-public interface IExperimentDataManagerLight
+public interface IMonitoringEDMLight
 {
     /**
      * Get the experiment DAO, allowing saving and getting Experiment objects.

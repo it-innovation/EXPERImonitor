@@ -22,22 +22,19 @@
 //      Created for Project :   
 //
 /////////////////////////////////////////////////////////////////////////
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.dao;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.mon.dao;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.UUID;
-//import javax.measure.unit.Unit;
 import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Metric;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricType;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Unit;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DBUtil;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DatabaseConnector;
 
 /**
  *
@@ -47,7 +44,7 @@ public class MetricHelper
 {
 static Logger log = Logger.getLogger(MetricHelper.class);
     
-    public static ValidationReturnObject isObjectValidForSave(Metric metric, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
+    public static ValidationReturnObject isObjectValidForSave(Metric metric, Connection connection, boolean closeDBcon) throws Exception
     {
         if (metric == null)
         {
@@ -75,7 +72,7 @@ static Logger log = Logger.getLogger(MetricHelper.class);
         // check if it exists in the DB already
         /*
         try {
-            if (objectExists(metric.getUUID(), dbCon))
+            if (objectExists(metric.getUUID(), connection))
             {
                 return new ValidationReturnObject(false, new RuntimeException("The Metric already exists; the UUID is not unique"));
             }
@@ -86,26 +83,29 @@ static Logger log = Logger.getLogger(MetricHelper.class);
         return new ValidationReturnObject(true);
     }
     
-    public static boolean objectExists(UUID uuid, DatabaseConnector dbCon, boolean closeDBcon) throws Exception
+    public static boolean objectExists(UUID uuid, Connection connection, boolean closeDBcon) throws Exception
     {
-        return DBUtil.objectExistsByUUID("Metric", "metricUUID", uuid, dbCon, closeDBcon);
+        return DBUtil.objectExistsByUUID("Metric", "metricUUID", uuid, connection, closeDBcon);
     }
     
-    public static void saveMetric(DatabaseConnector dbCon, Metric metric, boolean closeDBcon) throws Exception
+    public static void saveMetric(Metric metric, Connection connection, boolean closeDBcon) throws Exception
     {
         // this validation will check if all the required parameters are set and if
         // there isn't already a duplicate instance in the DB
-        ValidationReturnObject returnObj = MetricHelper.isObjectValidForSave(metric, dbCon, closeDBcon);
+        ValidationReturnObject returnObj = MetricHelper.isObjectValidForSave(metric, connection, false);
         if (!returnObj.valid)
         {
             log.error("Cannot save the Metric object: " + returnObj.exception.getMessage(), returnObj.exception);
             throw returnObj.exception;
         }
         
+        if (DBUtil.isClosed(connection))
+        {
+            log.error("Cannot save the Metric because the connection to the DB is closed");
+            throw new RuntimeException("Cannot save the Metric because the connection to the DB is closed");
+        }
+        
         try {
-            if (dbCon.isClosed())
-                dbCon.connect();
-            
             /*
             byte[] unitBytes = null;
             
@@ -124,7 +124,7 @@ static Logger log = Logger.getLogger(MetricHelper.class);
             }
             */
             String query = "INSERT INTO Metric (metricUUID, mType, unit) VALUES (?, ?, ?)";
-            PreparedStatement pstmt = dbCon.getConnection().prepareStatement(query);
+            PreparedStatement pstmt = connection.prepareStatement(query);
             pstmt.setObject(1, metric.getUUID(), java.sql.Types.OTHER);
             pstmt.setString(2, metric.getMetricType().name());
             if (metric.getUnit() == null)
@@ -146,11 +146,11 @@ static Logger log = Logger.getLogger(MetricHelper.class);
             throw new RuntimeException("Error while saving metric: " + ex.getMessage(), ex);
         } finally {
             if (closeDBcon)
-                dbCon.close();
+                connection.close();
         }
     }
     
-    public static Metric getMetric(DatabaseConnector dbCon, UUID metricUUID, boolean closeDBcon) throws Exception
+    public static Metric getMetric(UUID metricUUID, Connection connection, boolean closeDBcon) throws Exception
     {
         if (metricUUID == null)
         {
@@ -158,20 +158,23 @@ static Logger log = Logger.getLogger(MetricHelper.class);
             throw new NullPointerException("Cannot get a Metric object with the given UUID because it is NULL!");
         }
         
-        if (!MetricHelper.objectExists(metricUUID, dbCon, closeDBcon))
+        if (DBUtil.isClosed(connection))
+        {
+            log.error("Cannot get the Metric because the connection to the DB is closed");
+            throw new RuntimeException("Cannot get the Metric because the connection to the DB is closed");
+        }
+        
+        /*if (!MetricHelper.objectExists(metricUUID, connection, closeDBcon))
         {
             log.error("There is no metric with the given UUID: " + metricUUID.toString());
             throw new RuntimeException("There is no metric with the given UUID: " + metricUUID.toString());
-        }
+        }*/
         
         Metric metric = null;
         
         try {
-            if (dbCon.isClosed())
-                dbCon.connect();
-        
             String query = "SELECT * FROM Metric WHERE metricUUID = '" + metricUUID.toString() + "'";
-            ResultSet rs = dbCon.executeQuery(query);
+            ResultSet rs = DBUtil.executeQuery(connection, query);
             
             // check if anything got returned (connection closed in finalise method)
             if (rs.next())
@@ -216,13 +219,13 @@ static Logger log = Logger.getLogger(MetricHelper.class);
             throw new RuntimeException("Error while getting metric: " + ex.getMessage(), ex);
         } finally {
             if (closeDBcon)
-                dbCon.close();
+                connection.close();
         }
         
         return metric;
     }
     
-    public static Metric getMetricForMeasurementSet(DatabaseConnector dbCon, UUID measurementSetUUID, boolean closeDBcon) throws Exception
+    public static Metric getMetricForMeasurementSet(UUID measurementSetUUID, Connection connection, boolean closeDBcon) throws Exception
     {
         if (measurementSetUUID == null)
         {
@@ -230,21 +233,23 @@ static Logger log = Logger.getLogger(MetricHelper.class);
             throw new NullPointerException("Cannot get a Metric object for the given measurement set, because its given UUID is NULL!");
         }
         
-        if (!MeasurementSetHelper.objectExists(measurementSetUUID, dbCon, closeDBcon))
+        if (DBUtil.isClosed(connection))
+        {
+            log.error("Cannot get the Metric for the MeasurementSet because the connection to the DB is closed");
+            throw new RuntimeException("Cannot get the Metric for the MeasurementSet because the connection to the DB is closed");
+        }
+        
+        /*if (!MeasurementSetHelper.objectExists(measurementSetUUID, connection, closeDBcon))
         {
             log.error("There is no measurement set with the given UUID: " + measurementSetUUID.toString());
             throw new RuntimeException("There is no measurement set with the given UUID: " + measurementSetUUID.toString());
-        }
+        }*/
         
         Metric metric = null;
         
         try {
-            if (dbCon.isClosed())
-                dbCon.connect();
-        
-            // TODO: validate that this is correct!
             String query = "SELECT * FROM Metric WHERE metricUUID = (SELECT metricUUID FROM MeasurementSet WHERE mSetUUID = '" + measurementSetUUID + "')";
-            ResultSet rs = dbCon.executeQuery(query);
+            ResultSet rs = DBUtil.executeQuery(connection, query);
             
             // check if anything got returned (connection closed in finalise method)
             if (rs.next())
@@ -289,9 +294,93 @@ static Logger log = Logger.getLogger(MetricHelper.class);
             throw new RuntimeException("Error while getting metric for measurement set: " + ex.getMessage(), ex);
         } finally {
             if (closeDBcon)
-                dbCon.close();
+                connection.close();
         }
         
         return metric;
+    }
+    
+    public static void deleteAllMetrics(Connection connection, boolean closeDBcon) throws Exception
+    {
+        log.debug("Deleting all metrics");
+        
+        if (DBUtil.isClosed(connection))
+        {
+            log.error("Cannot delete the metrics because the connection to the DB is closed");
+            throw new RuntimeException("Cannot delete the metrics because the connection to the DB is closed");
+        }
+        
+        if (closeDBcon)
+        {
+            log.debug("Starting transaction");
+            connection.setAutoCommit(false);
+        }
+        
+        boolean exception = false;
+        
+        try {
+            String query = "DELETE from Metric";
+            DBUtil.executeQuery(connection, query);
+        } catch (Exception ex) {
+            exception = true;
+            log.error("Unable to delete metrics: " + ex.getMessage(), ex);
+            throw new RuntimeException("Unable to delete metrics: " + ex.getMessage(), ex);
+        } finally {
+            if (closeDBcon)
+            {
+                if (exception) {
+                    log.debug("Exception thrown, so rolling back the transaction and closing the connection");
+                    connection.rollback();
+                } else {
+                    log.debug("Committing the transaction and closing the connection");
+                    connection.commit();
+                }
+            }
+        }
+    }
+    
+    public static void deleteMetric(UUID metricUUID, Connection connection, boolean closeDBcon) throws Exception
+    {
+        log.debug("Deleting metric");
+        
+        if (metricUUID == null)
+        {
+            log.error("Cannot delete metric object with the given UUID because it is NULL!");
+            throw new NullPointerException("Cannot delete metric object with the given UUID because it is NULL!");
+        }
+        
+        if (DBUtil.isClosed(connection))
+        {
+            log.error("Cannot delete the metric because the connection to the DB is closed");
+            throw new RuntimeException("Cannot delete the metric because the connection to the DB is closed");
+        }
+        
+        if (closeDBcon)
+        {
+            log.debug("Starting transaction");
+            connection.setAutoCommit(false);
+        }
+        
+        boolean exception = false;
+        
+        try {
+            String query = "DELETE from Metric where metricUUID = '" + metricUUID + "'";
+            DBUtil.executeQuery(connection, query);
+        } catch (Exception ex) {
+            exception = true;
+            log.error("Unable to delete metric: " + ex.getMessage(), ex);
+            throw new RuntimeException("Unable to delete metric: " + ex.getMessage(), ex);
+        } finally {
+            if (closeDBcon)
+            {
+                if (exception) {
+                    log.debug("Exception thrown, so rolling back the transaction and closing the connection");
+                    connection.rollback();
+                } else {
+                    log.debug("Committing the transaction and closing the connection");
+                    connection.commit();
+                }
+            }
+        }
     }
 }
