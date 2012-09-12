@@ -260,9 +260,9 @@ public class EDMTest
         entity.setUUID(entityUUID);
         entity.setName("VM");
         entity.setDescription("A Virtual Machine");
-        entity.addtAttribute(new Attribute(attributeUUID, entityUUID, "CPU", "CPU performance"));
-        entity.addtAttribute(new Attribute(UUID.randomUUID(), entityUUID, "Network", "Network performance"));
-        entity.addtAttribute(new Attribute(UUID.randomUUID(), entityUUID, "Disk", "Disk performance"));
+        entity.addAttribute(new Attribute(attributeUUID, entityUUID, "CPU", "CPU performance"));
+        entity.addAttribute(new Attribute(UUID.randomUUID(), entityUUID, "Network", "Network performance"));
+        entity.addAttribute(new Attribute(UUID.randomUUID(), entityUUID, "Disk", "Disk performance"));
         
         try {
             entityDAO.saveEntity(entity);
@@ -284,7 +284,7 @@ public class EDMTest
         Entity randomEntity = new Entity();
         randomEntity.setName("Random entity");
         randomEntity.setDescription("Blabla");
-        randomEntity.addtAttribute(new Attribute(UUID.randomUUID(), randomEntity.getUUID(), "height", "The height of the random entity"));
+        randomEntity.addAttribute(new Attribute(UUID.randomUUID(), randomEntity.getUUID(), "height", "The height of the random entity"));
         
         try {
             entityDAO.saveEntity(randomEntity);
@@ -507,9 +507,9 @@ public class EDMTest
         log.info("Creating VM entity");
         Entity entity = new Entity(entityUUID, "VM", "A Virtual Machine");
         //Entity entity = new Entity(entityUUID, null, "A Virtual Machine");
-        entity.addtAttribute(new Attribute(attribUUID, entityUUID, "CPU", "CPU performance"));
-        entity.addtAttribute(new Attribute(UUID.randomUUID(), entityUUID, "Network", "Network performance"));
-        entity.addtAttribute(new Attribute(UUID.randomUUID(), entityUUID, "Disk", "Disk performance"));
+        entity.addAttribute(new Attribute(attribUUID, entityUUID, "CPU", "CPU performance"));
+        entity.addAttribute(new Attribute(UUID.randomUUID(), entityUUID, "Network", "Network performance"));
+        entity.addAttribute(new Attribute(UUID.randomUUID(), entityUUID, "Disk", "Disk performance"));
         metricGenerator.addEntity(entity);
         
 //----- METRIC GROUP
@@ -795,9 +795,9 @@ public class EDMTest
         log.info("Creating VM entity");
         Entity entity = new Entity(entityUUID, "VM", "A Virtual Machine");
         //Entity entity = new Entity(entityUUID, null, "A Virtual Machine");
-        entity.addtAttribute(new Attribute(attribUUID, entityUUID, "CPU", "CPU performance"));
-        entity.addtAttribute(new Attribute(UUID.randomUUID(), entityUUID, "Network", "Network performance"));
-        entity.addtAttribute(new Attribute(UUID.randomUUID(), entityUUID, "Disk", "Disk performance"));
+        entity.addAttribute(new Attribute(attribUUID, entityUUID, "CPU", "CPU performance"));
+        entity.addAttribute(new Attribute(UUID.randomUUID(), entityUUID, "Network", "Network performance"));
+        entity.addAttribute(new Attribute(UUID.randomUUID(), entityUUID, "Disk", "Disk performance"));
         metricGenerator.addEntity(entity);
         
 //----- METRIC GROUP

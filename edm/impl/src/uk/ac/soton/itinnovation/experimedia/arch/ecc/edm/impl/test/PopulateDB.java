@@ -185,9 +185,9 @@ public class PopulateDB
         entity.setUUID(entityUUID);
         entity.setName("VM");
         entity.setDescription("A Virtual Machine");
-        entity.addtAttribute(new Attribute(cpuAttributeUUID, entityUUID, "CPU", "CPU performance"));
-        entity.addtAttribute(new Attribute(networkAttributeUUID, entityUUID, "Network", "Network performance"));
-        entity.addtAttribute(new Attribute(diskAttributeUUID, entityUUID, "Disk", "Disk performance"));
+        entity.addAttribute(new Attribute(cpuAttributeUUID, entityUUID, "CPU", "CPU performance"));
+        entity.addAttribute(new Attribute(networkAttributeUUID, entityUUID, "Network", "Network performance"));
+        entity.addAttribute(new Attribute(diskAttributeUUID, entityUUID, "Disk", "Disk performance"));
         
         try {
             entityDAO.saveEntity(entity);
@@ -248,9 +248,9 @@ public class PopulateDB
         entity.setUUID(entityUUID);
         entity.setName("AVC");
         entity.setDescription("Audio Visual Component");
-        entity.addtAttribute(new Attribute(cpuAttributeUUID, entityUUID, "File ingest", ""));
-        entity.addtAttribute(new Attribute(networkAttributeUUID, entityUUID, "AV streams out", ""));
-        entity.addtAttribute(new Attribute(diskAttributeUUID, entityUUID, "Frame rate", ""));
+        entity.addAttribute(new Attribute(cpuAttributeUUID, entityUUID, "File ingest", ""));
+        entity.addAttribute(new Attribute(networkAttributeUUID, entityUUID, "AV streams out", ""));
+        entity.addAttribute(new Attribute(diskAttributeUUID, entityUUID, "Frame rate", ""));
         
         try {
             entityDAO.saveEntity(entity);
@@ -311,8 +311,8 @@ public class PopulateDB
         entity.setUUID(entityUUID);
         entity.setName("POI Service");
         entity.setDescription("Point Of Interest Service");
-        entity.addtAttribute(new Attribute(cpuAttributeUUID, entityUUID, "POI requests", "The number of POI requests"));
-        entity.addtAttribute(new Attribute(networkAttributeUUID, entityUUID, "POI response time", "The response time for the POI requests"));
+        entity.addAttribute(new Attribute(cpuAttributeUUID, entityUUID, "POI requests", "The number of POI requests"));
+        entity.addAttribute(new Attribute(networkAttributeUUID, entityUUID, "POI response time", "The response time for the POI requests"));
         
         try {
             entityDAO.saveEntity(entity);
