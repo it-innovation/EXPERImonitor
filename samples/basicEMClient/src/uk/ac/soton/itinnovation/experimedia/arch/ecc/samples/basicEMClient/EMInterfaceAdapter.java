@@ -125,7 +125,7 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
       liveMonitorFace.pushMetric( report );
   }
   
-  // IEMMonitor_UserListener ---------------------------------------------------
+  // IEMDiscovery_UserListener -------------------------------------------------
   @Override
   public void onCreateInterface( UUID senderID, EMInterfaceType type )
   {
