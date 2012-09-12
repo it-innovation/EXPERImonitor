@@ -214,7 +214,7 @@ public class Entity implements Serializable
     /**
      * @param attribute the attribute to add
      */
-    public void addtAttribute(Attribute attribute)
+    public void addAttribute(Attribute attribute)
     {
         if (attribute == null)
             return;
