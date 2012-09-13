@@ -77,7 +77,7 @@ public class ECCMonitorTestExecutor implements Runnable,
                                                IEMTest_Listener
         
 {
-  private Logger exeLogger = new Logger( ECCMonitorTestExecutor.class );
+  private Logger exeLogger = Logger.getLogger( ECCMonitorTestExecutor.class );
   
   private AMQPBasicChannel providerChannel;
   private AMQPBasicChannel userChannel;
