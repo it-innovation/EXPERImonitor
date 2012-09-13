@@ -39,7 +39,8 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Me
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DBUtil;
 
 /**
- *
+ * A helper class for validating and executing queries for the Experiments.
+ * 
  * @author Vegard Engen
  */
 public class ExperimentHelper

@@ -19,7 +19,7 @@
 //
 //      Created By :            Vegard Engen
 //      Created Date :          2012-08-23
-//      Created for Project :   
+//      Created for Project :   BonFIRE
 //
 /////////////////////////////////////////////////////////////////////////
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.mon.dao;
@@ -37,7 +37,8 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Un
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DBUtil;
 
 /**
- *
+ * A helper class for validating and executing queries for the Metrics.
+ * 
  * @author Vegard Engen
  */
 public class MetricHelper

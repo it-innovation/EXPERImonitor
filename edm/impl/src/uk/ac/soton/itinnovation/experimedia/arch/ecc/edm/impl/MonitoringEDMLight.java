@@ -19,7 +19,7 @@
 //
 //      Created By :            Vegard Engen
 //      Created Date :          2012-09-07
-//      Created for Project :   
+//      Created for Project :   BonFIRE
 //
 /////////////////////////////////////////////////////////////////////////
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl;

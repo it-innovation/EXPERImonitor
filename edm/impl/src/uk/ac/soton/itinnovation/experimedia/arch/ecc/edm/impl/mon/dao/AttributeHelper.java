@@ -19,7 +19,7 @@
 //
 //      Created By :            Vegard Engen
 //      Created Date :          2012-08-23
-//      Created for Project :   
+//      Created for Project :   BonFIRE
 //
 /////////////////////////////////////////////////////////////////////////
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.mon.dao;
@@ -37,7 +37,8 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.At
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DBUtil;
 
 /**
- *
+ * A helper class for validating and executing queries for the Attributes.
+ * 
  * @author Vegard Engen
  */
 public class AttributeHelper
@@ -248,7 +249,7 @@ public class AttributeHelper
             throw new RuntimeException("Cannot get the Attribute objects for the Entity because the connection to the DB is closed");
         }
         
-        Set<Attribute> attributes = new HashSet<Attribute>();;
+        Set<Attribute> attributes = new HashSet<Attribute>();
         try {
             String query = "SELECT * FROM Attribute WHERE entityUUID = '" + entityUUID + "'";
             ResultSet rs = DBUtil.executeQuery(connection, query);

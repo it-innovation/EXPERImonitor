@@ -53,7 +53,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IMetricGro
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IReportDAO;
 
 /**
- * A DAO class for the Experiment Data Manager.
+ * A DAO class for the Monitoring Experiment Data Manager.
  * 
  * @author Vegard Engen
  */
@@ -97,7 +97,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     {
         Connection connection = null;
         try {
-            connection = dbCon.getConnection();
+            connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
         } catch (Exception ex) {
             log.error("Unable to save experiment, because a connection to the database cannot be made: " + ex.getMessage(), ex);
             throw new RuntimeException("Unable to save experiment, because a connection to the database cannot be made: " + ex.getMessage(), ex);
@@ -117,7 +117,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     {
         Connection connection = null;
         try {
-            connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
+            connection = dbCon.getConnection();
         } catch (Exception ex) {
             log.error("Unable to get experiment, because a connection to the database cannot be made: " + ex.getMessage(), ex);
             throw new RuntimeException("Unable to get experiment, because a connection to the database cannot be made: " + ex.getMessage(), ex);
@@ -137,7 +137,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     {
         Connection connection = null;
         try {
-            connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
+            connection = dbCon.getConnection();
         } catch (Exception ex) {
             log.error("Unable to get experiments, because a connection to the database cannot be made: " + ex.getMessage(), ex);
             throw new RuntimeException("Unable to get experiments, because a connection to the database cannot be made: " + ex.getMessage(), ex);
@@ -161,7 +161,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     {
         Connection connection = null;
         try {
-            connection = dbCon.getConnection();
+            connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
         } catch (Exception ex) {
             log.error("Unable to save entity, because a connection to the database cannot be made: " + ex.getMessage(), ex);
             throw new RuntimeException("Unable to save entity, because a connection to the database cannot be made: " + ex.getMessage(), ex);
@@ -181,7 +181,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     {
         Connection connection = null;
         try {
-            connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
+            connection = dbCon.getConnection();
         } catch (Exception ex) {
             log.error("Unable to get entity, because a connection to the database cannot be made: " + ex.getMessage(), ex);
             throw new RuntimeException("Unable to get entity, because a connection to the database cannot be made: " + ex.getMessage(), ex);
@@ -201,7 +201,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     {
         Connection connection = null;
         try {
-            connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
+            connection = dbCon.getConnection();
         } catch (Exception ex) {
             log.error("Unable to get entities, because a connection to the database cannot be made: " + ex.getMessage(), ex);
             throw new RuntimeException("Unable to get entities, because a connection to the database cannot be made: " + ex.getMessage(), ex);
@@ -221,7 +221,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     {
         Connection connection = null;
         try {
-            connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
+            connection = dbCon.getConnection();
         } catch (Exception ex) {
             log.error("Unable to get entities for experiment, because a connection to the database cannot be made: " + ex.getMessage(), ex);
             throw new RuntimeException("Unable to get entities for experiment, because a connection to the database cannot be made: " + ex.getMessage(), ex);
@@ -241,7 +241,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     {
         Connection connection = null;
         try {
-            connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
+            connection = dbCon.getConnection();
         } catch (Exception ex) {
             log.error("Unable to get entities for metric generator, because a connection to the database cannot be made: " + ex.getMessage(), ex);
             throw new RuntimeException("Unable to get entities for metric generator, because a connection to the database cannot be made: " + ex.getMessage(), ex);
@@ -284,7 +284,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     {
         Connection connection = null;
         try {
-            connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
+            connection = dbCon.getConnection();
         } catch (Exception ex) {
             log.error("Unable to get attribute, because a connection to the database cannot be made: " + ex.getMessage(), ex);
             throw new RuntimeException("Unable to get attribute, because a connection to the database cannot be made: " + ex.getMessage(), ex);
@@ -304,7 +304,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     {
         Connection connection = null;
         try {
-            connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
+            connection = dbCon.getConnection();
         } catch (Exception ex) {
             log.error("Unable to get attributes for entity, because a connection to the database cannot be made: " + ex.getMessage(), ex);
             throw new RuntimeException("Unable to get attributes for entity, because a connection to the database cannot be made: " + ex.getMessage(), ex);
@@ -328,7 +328,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     {
         Connection connection = null;
         try {
-            connection = dbCon.getConnection();
+            connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
         } catch (Exception ex) {
             log.error("Unable to save metric generator, because a connection to the database cannot be made: " + ex.getMessage(), ex);
             throw new RuntimeException("Unable to save metric generator, because a connection to the database cannot be made: " + ex.getMessage(), ex);
@@ -348,7 +348,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     {
         Connection connection = null;
         try {
-            connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
+            connection = dbCon.getConnection();
         } catch (Exception ex) {
             log.error("Unable to get metric generator, because a connection to the database cannot be made: " + ex.getMessage(), ex);
             throw new RuntimeException("Unable to get metric generator, because a connection to the database cannot be made: " + ex.getMessage(), ex);
@@ -368,7 +368,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     {
         Connection connection = null;
         try {
-            connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
+            connection = dbCon.getConnection();
         } catch (Exception ex) {
             log.error("Unable to get metric generators, because a connection to the database cannot be made: " + ex.getMessage(), ex);
             throw new RuntimeException("Unable to get metric generators, because a connection to the database cannot be made: " + ex.getMessage(), ex);
@@ -388,7 +388,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     {
         Connection connection = null;
         try {
-            connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
+            connection = dbCon.getConnection();
         } catch (Exception ex) {
             log.error("Unable to get metric generators for experiment, because a connection to the database cannot be made: " + ex.getMessage(), ex);
             throw new RuntimeException("Unable to get metric generators for experiment, because a connection to the database cannot be made: " + ex.getMessage(), ex);
@@ -412,7 +412,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     {
         Connection connection = null;
         try {
-            connection = dbCon.getConnection();
+            connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
         } catch (Exception ex) {
             log.error("Unable to save metric group, because a connection to the database cannot be made: " + ex.getMessage(), ex);
             throw new RuntimeException("Unable to save metric group, because a connection to the database cannot be made: " + ex.getMessage(), ex);
@@ -432,7 +432,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     {
         Connection connection = null;
         try {
-            connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
+            connection = dbCon.getConnection();
         } catch (Exception ex) {
             log.error("Unable to get metric group, because a connection to the database cannot be made: " + ex.getMessage(), ex);
             throw new RuntimeException("Unable to get metric group, because a connection to the database cannot be made: " + ex.getMessage(), ex);
@@ -452,7 +452,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     {
         Connection connection = null;
         try {
-            connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
+            connection = dbCon.getConnection();
         } catch (Exception ex) {
             log.error("Unable to get metric group for metric generator, because a connection to the database cannot be made: " + ex.getMessage(), ex);
             throw new RuntimeException("Unable to get metric group for metric generator, because a connection to the database cannot be made: " + ex.getMessage(), ex);
@@ -476,7 +476,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     {
         Connection connection = null;
         try {
-            connection = dbCon.getConnection();
+            connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
         } catch (Exception ex) {
             log.error("Unable to save measurement set, because a connection to the database cannot be made: " + ex.getMessage(), ex);
             throw new RuntimeException("Unable to save measurement set, because a connection to the database cannot be made: " + ex.getMessage(), ex);
@@ -496,7 +496,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     {
         Connection connection = null;
         try {
-            connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
+            connection = dbCon.getConnection();
         } catch (Exception ex) {
             log.error("Unable to get measurement set, because a connection to the database cannot be made: " + ex.getMessage(), ex);
             throw new RuntimeException("Unable to get measurement set, because a connection to the database cannot be made: " + ex.getMessage(), ex);
@@ -516,7 +516,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     {
         Connection connection = null;
         try {
-            connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
+            connection = dbCon.getConnection();
         } catch (Exception ex) {
             log.error("Unable to get measurement set for metric group, because a connection to the database cannot be made: " + ex.getMessage(), ex);
             throw new RuntimeException("Unable to get measurement set for metric group, because a connection to the database cannot be made: " + ex.getMessage(), ex);
@@ -540,7 +540,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     {
         Connection connection = null;
         try {
-            connection = dbCon.getConnection();
+            connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
         } catch (Exception ex) {
             log.error("Unable to save metric, because a connection to the database cannot be made: " + ex.getMessage(), ex);
             throw new RuntimeException("Unable to save metric, because a connection to the database cannot be made: " + ex.getMessage(), ex);
@@ -560,7 +560,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     {
         Connection connection = null;
         try {
-            connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
+            connection = dbCon.getConnection();
         } catch (Exception ex) {
             log.error("Unable to get metric, because a connection to the database cannot be made: " + ex.getMessage(), ex);
             throw new RuntimeException("Unable to get metric, because a connection to the database cannot be made: " + ex.getMessage(), ex);
@@ -580,7 +580,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     {
         Connection connection = null;
         try {
-            connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
+            connection = dbCon.getConnection();
         } catch (Exception ex) {
             log.error("Unable to get metric for measurement set, because a connection to the database cannot be made: " + ex.getMessage(), ex);
             throw new RuntimeException("Unable to get metric for measurement set, because a connection to the database cannot be made: " + ex.getMessage(), ex);
@@ -604,7 +604,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     {
         Connection connection = null;
         try {
-            connection = dbCon.getConnection();
+            connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
         } catch (Exception ex) {
             log.error("Unable to save measurement, because a connection to the database cannot be made: " + ex.getMessage(), ex);
             throw new RuntimeException("Unable to save measurement, because a connection to the database cannot be made: " + ex.getMessage(), ex);
@@ -624,7 +624,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     {
         Connection connection = null;
         try {
-            connection = dbCon.getConnection();
+            connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
         } catch (Exception ex) {
             log.error("Unable to save measurements for set, because a connection to the database cannot be made: " + ex.getMessage(), ex);
             throw new RuntimeException("Unable to save measurements for set, because a connection to the database cannot be made: " + ex.getMessage(), ex);
@@ -644,7 +644,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     {
         Connection connection = null;
         try {
-            connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
+            connection = dbCon.getConnection();
         } catch (Exception ex) {
             log.error("Unable to get measurement, because a connection to the database cannot be made: " + ex.getMessage(), ex);
             throw new RuntimeException("Unable to get measurement, because a connection to the database cannot be made: " + ex.getMessage(), ex);
@@ -668,7 +668,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     {
         Connection connection = null;
         try {
-            connection = dbCon.getConnection();
+            connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
         } catch (Exception ex) {
             log.error("Unable to save report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
             throw new RuntimeException("Unable to save report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
@@ -688,7 +688,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     {
         Connection connection = null;
         try {
-            connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
+            connection = dbCon.getConnection();
         } catch (Exception ex) {
             log.error("Unable to get report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
             throw new RuntimeException("Unable to get report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
@@ -708,7 +708,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     {
         Connection connection = null;
         try {
-            connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
+            connection = dbCon.getConnection();
         } catch (Exception ex) {
             log.error("Unable to get report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
             throw new RuntimeException("Unable to get report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
@@ -728,7 +728,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     {
         Connection connection = null;
         try {
-            connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
+            connection = dbCon.getConnection();
         } catch (Exception ex) {
             log.error("Unable to get report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
             throw new RuntimeException("Unable to get report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
@@ -748,7 +748,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     {
         Connection connection = null;
         try {
-            connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
+            connection = dbCon.getConnection();
         } catch (Exception ex) {
             log.error("Unable to get report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
             throw new RuntimeException("Unable to get report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
@@ -768,7 +768,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     {
         Connection connection = null;
         try {
-            connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
+            connection = dbCon.getConnection();
         } catch (Exception ex) {
             log.error("Unable to get report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
             throw new RuntimeException("Unable to get report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
@@ -788,7 +788,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     {
         Connection connection = null;
         try {
-            connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
+            connection = dbCon.getConnection();
         } catch (Exception ex) {
             log.error("Unable to get report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
             throw new RuntimeException("Unable to get report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
@@ -808,7 +808,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     {
         Connection connection = null;
         try {
-            connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
+            connection = dbCon.getConnection();
         } catch (Exception ex) {
             log.error("Unable to get report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
             throw new RuntimeException("Unable to get report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
@@ -828,7 +828,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     {
         Connection connection = null;
         try {
-            connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
+            connection = dbCon.getConnection();
         } catch (Exception ex) {
             log.error("Unable to get report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
             throw new RuntimeException("Unable to get report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
@@ -848,7 +848,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     {
         Connection connection = null;
         try {
-            connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
+            connection = dbCon.getConnection();
         } catch (Exception ex) {
             log.error("Unable to get report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
             throw new RuntimeException("Unable to get report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
@@ -868,7 +868,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     {
         Connection connection = null;
         try {
-            connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
+            connection = dbCon.getConnection();
         } catch (Exception ex) {
             log.error("Unable to get report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
             throw new RuntimeException("Unable to get report, because a connection to the database cannot be made: " + ex.getMessage(), ex);

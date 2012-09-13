@@ -7,6 +7,12 @@ Java
 	http://java.sun.com
 	Sun Microsystems, Inc. Binary Code License Agreement (http://java.sun.com/javase/6/jdk-6u3-license.txt)
 	
+Apache Log4j
+	log4j:1.2.17
+	http://logging.apache.org/log4j/2.x/
+	The Apache Software License, Version 2.0
+	See licences/Apache_v2.0.txt
+
 RabbitMQ Java Client
 	com.rabbitmq:amqp-client:2.8.4
 	http://www.rabbitmq.com
@@ -31,8 +37,8 @@ SnakeYAML
 	Apache License Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 	See licences/Apache_v2.0.txt
 
-JScience
-	org.jscience:jscience:4.3.1
-	http://www.jscience.org/
-	JScience bundles are free; permission to use, copy, modify, and distribute these modules is freely granted, provided that copyright notices are preserved
-	See licences/JScience.txt
+PostgreSQL JDBC driver
+	postgresql:9.1-901.jdbc4
+	http://jdbc.postgresql.org/
+	BSD License
+	See licences/BSD_PostgreSQL.txt

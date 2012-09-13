@@ -4,7 +4,7 @@
   <!--
   /////////////////////////////////////////////////////////////////////////
   //
-  // © University of Southampton IT Innovation Centre, 2011
+  // ï¿½ University of Southampton IT Innovation Centre, 2011
   //
   // Copyright in this software belongs to University of Southampton
   // IT Innovation Centre of Gamma House, Enterprise Road, 
@@ -30,14 +30,14 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
     <artifactId>experimedia-arch-ecc-common-dataModel</artifactId>
-    <version>0.1-SNAPSHOT</version> 
+    <version>0.9-SNAPSHOT</version> 
     <name>ECC Common Data Model</name> 
     <packaging>pom</packaging>
   
     <parent>
     <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
     <artifactId>experimedia-arch-ecc-common</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>0.9-SNAPSHOT</version>
   </parent>
   
     <modules>

@@ -26,8 +26,8 @@ package uk.ac.soton.itinnovation.experimedia.arch.edm.test.v1;
 
 import java.util.Date;
 import java.util.Set;
-import java.util.UUID;
 import junit.framework.*;
+import org.apache.log4j.Logger;
 import org.junit.Test;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.MonitoringEDM;
@@ -35,12 +35,13 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IExperimen
 
 public class ExperimentTest extends TestCase
 {
+    static Logger log = Logger.getLogger(ExperimentTest.class);
     
     public static void main(String[] args)
     {
         junit.textui.TestRunner.run(ExperimentTest.class);
 
-        System.out.println("EDM Experiment Test Complete");
+        log.info("EDM Experiment Test Complete");
         System.exit(0);
     }
     

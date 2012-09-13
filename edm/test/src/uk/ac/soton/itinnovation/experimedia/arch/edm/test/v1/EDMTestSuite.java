@@ -19,7 +19,7 @@
 //
 //      Created By :            Vegard Engen
 //      Created Date :          2012-08-22
-//      Created for Project :   
+//      Created for Project :   BonFIRE
 //
 /////////////////////////////////////////////////////////////////////////
 package uk.ac.soton.itinnovation.experimedia.arch.edm.test.v1;
@@ -27,6 +27,7 @@ package uk.ac.soton.itinnovation.experimedia.arch.edm.test.v1;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import org.apache.log4j.Logger;
 
 /**
  *
@@ -34,22 +35,25 @@ import junit.framework.TestSuite;
  */
 public class EDMTestSuite extends TestCase
 {
-  public static void main( String[] args )
-  {
-    junit.textui.TestRunner.run( getTestSuite() );
-    
-    System.out.println("EDM Tests Complete");
-    System.exit(0);
-  }
-  
-  // Private methods -----------------------------------------------------------
-  private static Test getTestSuite()
-  {
-    TestSuite suite = new TestSuite("EDM Tests");
-    
-    // ECCMonitorInterface
-    suite.addTestSuite( ExperimentTest.class );
-    
-    return suite;
-  }
+
+    static Logger log = Logger.getLogger(EDMTestSuite.class);
+
+    public static void main(String[] args)
+    {
+        junit.textui.TestRunner.run(getTestSuite());
+
+        log.info("EDM Tests Complete");
+        System.exit(0);
+    }
+
+    // Private methods -----------------------------------------------------------
+    private static Test getTestSuite()
+    {
+        TestSuite suite = new TestSuite("EDM Tests");
+
+        // ECCMonitorInterface
+        suite.addTestSuite(ExperimentTest.class);
+
+        return suite;
+    }
 }

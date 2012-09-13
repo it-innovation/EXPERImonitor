@@ -6,9 +6,3 @@ Java
 	JDK v6
 	http://java.sun.com
 	Sun Microsystems, Inc. Binary Code License Agreement (http://java.sun.com/javase/6/jdk-6u3-license.txt)
-
-JScience
-	org.jscience:jscience:4.3.1
-	http://www.jscience.org/
-	JScience bundles are free; permission to use, copy, modify, and distribute these modules is freely granted, provided that copyright notices are preserved
-	See licences/JScience.txt

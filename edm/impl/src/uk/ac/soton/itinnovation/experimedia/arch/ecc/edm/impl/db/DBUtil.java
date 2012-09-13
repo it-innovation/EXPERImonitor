@@ -19,7 +19,7 @@
 //
 //      Created By :            Vegard Engen
 //      Created Date :          2012-08-22
-//      Created for Project :   
+//      Created for Project :   BonFIRE
 //
 /////////////////////////////////////////////////////////////////////////
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db;
@@ -33,7 +33,9 @@ import java.util.UUID;
 import org.apache.log4j.Logger;
 
 /**
- *
+ * A utility class for database operations, such as checking if a connection
+ * to the database is open or closed, and executing queries.
+ * 
  * @author Vegard Engen
  */
 public class DBUtil

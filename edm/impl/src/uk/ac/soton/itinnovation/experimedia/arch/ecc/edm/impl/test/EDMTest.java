@@ -28,28 +28,13 @@ import java.util.Date;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
-/*import javax.measure.quantity.Duration;
-import javax.measure.quantity.Mass;
-import javax.measure.unit.Unit;
-import javax.measure.Measure;
-import javax.measure.unit.*;
-import javax.measure.quantity.*;
-import static javax.measure.unit.SI.*;
-import static javax.measure.unit.NonSI.*;
-import static javax.measure.unit.Dimension.*;
-import static javax.measure.unit.SystemOfUnits.*;
-import static javax.measure.unit.UnitFormat.*;
-import org.jscience.physics.amount.Amount;
-*/
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Metric;
-
-
 import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Attribute;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Entity;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Measurement;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Metric;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGroup;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricType;
@@ -74,50 +59,6 @@ public class EDMTest
     
     public static void main(String[] args) throws Exception
     {
-        /*Metric m = new Metric();
-        m.setUnit(MINUTE);
-        //Unit<Mass> unit = GRAM;
-        Unit min = MINUTE;//SECONDS.times(60);
-        Unit<Duration> sec = SECOND;
-        Unit<Duration> ms = MILLI(SECOND);
-        
-        Unit metre = METRE;
-        Unit<Length> cm = CENTI(METER);
-        Unit<Length> FOOT = METER.times(3048).divide(10000); // Exact.
-        
-        Unit<Volume> cl = CENTI(LITER);
-        
-        Unit<Velocity> mps = METRES_PER_SECOND;
-        
-        // Conversion between units.
-        System.out.println(KILO(METRE).getConverterTo(MILE).convert(10));
-        
-        // Dimension checking (allows/disallows conversions)    
-        System.out.println(ELECTRON_VOLT.isCompatible(WATT.times(HOUR)));
-
-        // Retrieval of the unit dimension (depends upon the current model).
-        System.out.println(ELECTRON_VOLT.getDimension());
-        
-        Amount<Length> x = Amount.valueOf(100, NonSI.INCH);
-        
-        System.out.println("bps? " + BIT.divide(SECOND));
-        
-        Unit bps = BIT.divide(SECOND);
-        m.setUnit(BIT.divide(SECOND));
-        System.out.println(m.getUnit().getClass());
-        
-        
-        
-        // tweets per second
-        //Unit tps = Unit.valueOf("tweet");//.divide(SECOND);
-        Unit tps = Unit.ONE.alternate("tweet").divide(SECOND);
-        System.out.println("tps = " + tps);
-        Unit<Quantity> tpsq = tps;
-        System.out.println("tpsq = " + tpsq);
-        
-        */
-        
-        
         MonitoringEDM edm = new MonitoringEDM();
         UUID expUUID = UUID.fromString("bfe4c710-61ba-46f8-a519-be2f7808192e");
         UUID entityUUID = UUID.fromString("5718cd67-4310-4b2c-aeb9-9b72314630ca");
@@ -133,7 +74,7 @@ public class EDMTest
         edm.clearMetricsDatabase();
         
         //-- Create and get experiments --//
-        //experiments(edm, expUUID);
+        experiments(edm, expUUID);
         
         //entities(edm, entityUUID, attributeUUID, expUUID);
         
@@ -148,13 +89,13 @@ public class EDMTest
         
         //measurement(edm, mSetUUID);
         
-        experimentCompleteChain(edm, expUUID, entityUUID, attributeUUID, mGenUUID, mGrpUUID, mSetUUID);
+        //experimentCompleteChain(edm, expUUID, entityUUID, attributeUUID, mGenUUID, mGrpUUID, mSetUUID);
         
-        printExperimentDetails(edm, expUUID, withSubClasses);
+        //printExperimentDetails(edm, expUUID, withSubClasses);
         
-        saveReport(edm, mSetUUID, reportUUID);
+        //saveReport(edm, mSetUUID, reportUUID);
         
-        getReport(edm, mSetUUID, reportUUID);
+        //getReport(edm, mSetUUID, reportUUID);
     }
     
     public static void experiments(MonitoringEDM edm, UUID expUUID) throws Exception

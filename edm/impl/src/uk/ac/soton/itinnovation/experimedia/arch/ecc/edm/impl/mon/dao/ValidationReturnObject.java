@@ -19,13 +19,15 @@
 //
 //      Created By :            Vegard Engen
 //      Created Date :          2012-08-22
-//      Created for Project :   
+//      Created for Project :   BonFIRE
 //
 /////////////////////////////////////////////////////////////////////////
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.mon.dao;
 
 /**
- *
+ * A very simple class to encapsulate whether a function call evaluated to
+ * true or false, with details of the exception that may have been thrown.
+ * 
  * @author Vegard Engen
  */
 public class ValidationReturnObject
