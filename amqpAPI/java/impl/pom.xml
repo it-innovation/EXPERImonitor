@@ -5,13 +5,13 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
   <artifactId>experimedia-arch-ecc-amqpAPI-impl</artifactId>
-  <version>0.1-SNAPSHOT</version>
+  <version>0.9-SNAPSHOT</version>
   <packaging>jar</packaging>
   
   <parent>
     <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
     <artifactId>experimedia-arch-ecc-amqpAPI</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>0.9-SNAPSHOT</version>
   </parent>
   
   <build>
@@ -46,7 +46,7 @@
     <dependency>
       <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
       <artifactId>experimedia-arch-ecc-amqpAPI-spec</artifactId>
-      <version>0.1-SNAPSHOT</version>
+      <version>0.9-SNAPSHOT</version>
     </dependency>
   
     <!-- 3rd party dependencies ____________________________________________ -->
