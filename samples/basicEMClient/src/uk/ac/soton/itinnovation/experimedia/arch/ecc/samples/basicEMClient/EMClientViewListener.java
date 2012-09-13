@@ -30,5 +30,5 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.basicEMClient;
 
 public interface EMClientViewListener
 {
-  void onPushDataClicked();
+    void onPushDataClicked();
 }

@@ -26,17 +26,16 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.basicEMContainer;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.dao.*;
+
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDM;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.factory.EMInterfaceFactory;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.MonitoringEDM;
+
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
-
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
-
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.ExperimentDataManager;
-
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.*;
 
 import java.awt.event.*;
@@ -54,11 +53,11 @@ public class EMController implements IEMLifecycleListener
   private EMView             mainView;
   private boolean            waitingToStartNextPhase = false;
   
-  private IExperimentDataManager expDataMgr;
-  private IMetricGeneratorDAO    expMGAccessor;
-  private IReportDAO             expReportAccessor;
-  private IMeasurementSetDAO     expMSAccessor;
-  private Experiment             expInstance;
+  private IMonitoringEDM      expDataMgr;
+  private IMetricGeneratorDAO expMGAccessor;
+  private IReportDAO          expReportAccessor;
+  private IMeasurementSetDAO  expMSAccessor;
+  private Experiment          expInstance;
   
   
   public EMController()
@@ -66,7 +65,7 @@ public class EMController implements IEMLifecycleListener
     expMonitor = EMInterfaceFactory.createEM();
     expMonitor.addLifecyleListener( this );
     
-    expDataMgr = new ExperimentDataManager();
+    expDataMgr = new MonitoringEDM();
   }
   
   public void start( String rabbitIP, UUID emID ) throws Exception
