@@ -331,7 +331,8 @@ public class EMController implements IEMLifecycleListener
               MeasurementSet ms = setIt.next();
               if ( ms != null )
                 try { expMonitor.pullMetric( client, ms.getUUID() ); }
-                catch (Exception e ) {}
+                catch (Exception e )
+                { emCtrlLogger.error( "Failed in an attempt to pull metrics from client.\n" + e.getMessage() ); }
             }
           }
         }
@@ -369,7 +370,8 @@ public class EMController implements IEMLifecycleListener
                                                      report.getToDate() );
                 
                 try { expMonitor.requestDataBatch( client, batch ); }
-                catch ( Exception e ) {}
+                catch ( Exception e ) 
+                { emCtrlLogger.error( "Failed in an attempt to get post report data from client.\n" + e.getMessage() ); }
               }
             }
           }
