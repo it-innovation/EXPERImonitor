@@ -17,7 +17,7 @@
 // PURPOSE, except where stated in the Licence Agreement supplied with
 // the software.
 //
-//      Created By :            sgc
+//      Created By :            Simon Crowle
 //      Created Date :          13-Aug-2012
 //      Created for Project :   experimedia-arch-ecc-em-impl
 //

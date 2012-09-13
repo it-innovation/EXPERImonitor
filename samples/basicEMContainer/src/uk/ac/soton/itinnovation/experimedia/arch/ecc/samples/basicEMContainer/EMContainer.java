@@ -26,18 +26,23 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.basicEMContainer;
 
 import java.util.UUID;
+import org.apache.log4j.Logger;
 
 
 
 
 public class EMContainer
 {
+  private static Logger containerLogger;
+  
   public static void main( String args[] )
   {
     String rabbitServerIP = "127.0.0.1";
     if ( args.length == 1 ) rabbitServerIP = args[0];   
     
     EMController ctrl = new EMController();
+    
+    containerLogger = Logger.getLogger( EMContainer.class );
    
     try
     {
@@ -45,6 +50,6 @@ public class EMContainer
                   UUID.fromString("00000000-0000-0000-0000-000000000000") );
     }
     catch ( Exception e )
-    { System.out.println("Serious problem trying to start EM: " + e.getMessage()); }
+    { containerLogger.error("Serious problem trying to start EM: " + e.getMessage()); }
   }
 }

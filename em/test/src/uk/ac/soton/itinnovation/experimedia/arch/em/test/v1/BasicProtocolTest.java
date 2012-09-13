@@ -28,17 +28,20 @@ package uk.ac.soton.itinnovation.experimedia.arch.em.test.v1;
 import uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccMonitor.ECCMonitorTest;
 
 import junit.framework.*;
+import org.apache.log4j.Logger;
 
 
 
 
 public class BasicProtocolTest extends TestCase
 {
+  private static Logger testLogger = Logger.getLogger( BasicProtocolTest.class );
+  
   public static void main( String[] args )
   {
     junit.textui.TestRunner.run( getEMEntryPointSuite() );
     
-    System.out.println( "Basic protocol test completed." );
+    testLogger.info( "Basic protocol test completed." );
     System.exit( 0 );
   }
   

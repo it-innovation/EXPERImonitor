@@ -34,13 +34,12 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasic
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.factory.EMInterfaceFactory;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
 
 import uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccEntryPoint.ECCMonitorEntryPointTest;
 
 import java.util.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
-
-
+import org.apache.log4j.Logger;
 
 
 
@@ -78,6 +77,8 @@ public class ECCMonitorTestExecutor implements Runnable,
                                                IEMTest_Listener
         
 {
+  private Logger exeLogger = new Logger( ECCMonitorTestExecutor.class );
+  
   private AMQPBasicChannel providerChannel;
   private AMQPBasicChannel userChannel;
   
@@ -115,7 +116,7 @@ public class ECCMonitorTestExecutor implements Runnable,
          providerGotTestBytes         == true &&
          providerGotDisconnectNotice  == true )
     {
-      System.out.println( "ECCMonitorTest is GOOD." );
+      exeLogger.info( "ECCMonitorTest is GOOD." );
       return true;
     }
       
@@ -197,7 +198,7 @@ public class ECCMonitorTestExecutor implements Runnable,
     if ( senderID.equals( ECCMonitorEntryPointTest.EMUserUUID) )
     {
       if ( !providerGotTestBytes )
-        System.out.println( "Client disconnect message received; waiting to receive bytes" );
+        exeLogger.info( "Client disconnect message received; waiting to receive bytes" );
     
       providerGotDisconnectNotice = true;
     }

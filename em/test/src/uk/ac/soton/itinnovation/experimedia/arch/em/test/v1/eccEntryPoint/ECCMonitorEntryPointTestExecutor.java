@@ -33,6 +33,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasic
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.factory.EMInterfaceFactory;
 
 import java.util.UUID;
+import org.apache.log4j.Logger;
 
 
 
@@ -50,6 +51,7 @@ import java.util.UUID;
 public class ECCMonitorEntryPointTestExecutor implements Runnable,
                                                          IEMMonitorEntryPoint_ProviderListener
 {
+  private Logger           exeLogger = Logger.getLogger( ECCMonitorEntryPointTestExecutor.class );
   private AMQPBasicChannel providerChannel;
   private AMQPBasicChannel userChannel;
   
@@ -71,7 +73,7 @@ public class ECCMonitorEntryPointTestExecutor implements Runnable,
   
   public boolean getTestResult()
   {
-    if ( gotClientRegistration ) System.out.println( "ECCMonitorEntryPointTest is GOOD." );
+    if ( gotClientRegistration ) exeLogger.info( "ECCMonitorEntryPointTest is GOOD." );
     
     return gotClientRegistration; 
   }
