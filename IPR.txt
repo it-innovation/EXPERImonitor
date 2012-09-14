@@ -1,5 +1,21 @@
 This software distribution is licenced under the terms found in the file ITInnov-EXPERIMEDIA-licence-v1.0.txt
 
+The IT Innovation software is the source code and the following associated jars:
+
+experimedia-arch-ecc-amqpAPI-impl-0.9-SNAPSHOT.jar
+experimedia-arch-ecc-amqpAPI-spec-0.9-SNAPSHOT.jar
+experimedia-arch-ecc-common-dataModel-experiment-0.9-SNAPSHOT.jar
+experimedia-arch-ecc-common-dataModel-metrics-0.9-SNAPSHOT.jar
+experimedia-arch-ecc-common-dataModel-monitor-0.9-SNAPSHOT.jar
+experimedia-arch-ecc-common-dataModel-provenance-0.9-SNAPSHOT.jar
+experimedia-arch-ecc-edm-impl-0.9-SNAPSHOT.jar
+experimedia-arch-ecc-edm-spec-0.9-SNAPSHOT.jar
+experimedia-arch-ecc-em-factory-0.9-SNAPSHOT.jar
+experimedia-arch-ecc-em-impl-0.9-SNAPSHOT.jar
+experimedia-arch-ecc-em-spec-0.9-SNAPSHOT.jar
+experimedia-arch-ecc-samples-basicEMClient-0.9-SNAPSHOT.jar
+experimedia-arch-ecc-samples-basicEMContainer-0.9-SNAPSHOT.jar
+
 This software requires various third-party libraries to compile and execute.  These libraries, where they can be found and their associated licences are:
 
 Java
