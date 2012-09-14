@@ -38,14 +38,21 @@ This usage scenario assumes you will run a RabbitMQ server on your local machine
 3. Start the RabbitMQ server, by typing:
 	rabbitmq-service start
 	
-4. Run 'releases/EMProtocolTestReleaseV1/runTest.bat'
+4. Run 'runEMContainerLOCAL.bat'
 
-5. 2 tests should be successful
+5. Run 'runEMClientLOCAL.bat'
 
-6. Shutdown your RabbitMQ server by typing in your RabbitMQ 'sbin' Command window:
+6. Run through the experiment process using the basicEMContainer.
+
+7. Shut down both client and container applications.
+
+8. Shutdown your RabbitMQ server by typing in your RabbitMQ 'sbin' Command window:
 	rabbitmq-service stop
 
+Batch files for running the client and container applications so that they connect to a remote RabbitMQ server
+are also provided.  They need to be adjusted to set the IP address of the RabbitMQ server.
 
+	
 Experiment Data Manager
 -----------------------
 The Experiment Data Manager (EDM) manages the data, such as monitoring information,
@@ -54,4 +61,3 @@ which is stored via the Experiment Monitor (EM) and displayed via the UI.
 The EDM depends on a PostgreSQL database in the back-end, which needs to be set up
 before the EDM can be used. Installation instructions can be found in a separate
 README: ./edm/resources/README.txt
-
