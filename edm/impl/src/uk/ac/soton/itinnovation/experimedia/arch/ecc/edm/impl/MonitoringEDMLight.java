@@ -49,12 +49,13 @@ public class MonitoringEDMLight implements IMonitoringEDMLight
     
     public MonitoringEDMLight()
     {
-        log.info("EDM STARTING UP :)");
+        log.info("EDM starting up");
         try {
             edmDAO = new ExperimentDataManagerDAO();
         } catch (Exception ex) {
             log.error("Failed to create ExperimentDataManagerDAO object: " + ex.getMessage(), ex);
         }
+        log.info("EDM successfully started");
     }
     
     @Override
