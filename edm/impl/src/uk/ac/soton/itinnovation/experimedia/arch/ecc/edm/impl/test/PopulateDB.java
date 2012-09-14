@@ -103,11 +103,14 @@ public class PopulateDB
      * A method to populate the database with an entity, experiment, metric generator,
      * metric group, measurement sets and reports with measurements for each of the
      * measurement sets.
+     * The database will be cleared first, in case there is any data there already.
      * @throws Exception 
      */
     public static void populateWithTestData() throws Exception
     {
         MonitoringEDM edm = new MonitoringEDM();
+        
+        edm.clearMetricsDatabase();
         
         saveExperiment(edm, expUUID);
         
