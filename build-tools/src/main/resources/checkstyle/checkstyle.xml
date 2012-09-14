@@ -9,11 +9,22 @@
         <!--property name="multiLines" value="3,22,25,26,34"/-->
     </module>
     <module name="RegexpMultiline">
-        <property name="format"
-                      value="System\.(out)|(err)\.print(ln)?\("/>
+        <property name="format" value="System\.(out)|(err)\.print(ln)?\("/>
     </module>
+    <module name="RegexpSingleline">
+        <property name="format" value="TODO|FIXME"/>
+        <property name="ignoreCase" value="true"/>
+        <property name="severity" value="warning"/>
+    </module>
+    <!--
+    <module name="FileTabCharacter">
+        <property name="fileExtensions" value="java"/>
+        <property name="severity" value="warning"/>
+    </module>
+    -->
+    <property name="charset" value="UTF-8"/>
     <module name="TreeWalker">
-
+        <!-- module name="Indentation"/-->
         <module name="UnusedImports">
             <property name="severity" value="warning"/>
         </module>
@@ -40,14 +51,11 @@
             <property name="severity" value="warning"/>
         </module>
         <!-- <module name="ConstantName"/> -->
-	<!--
         <module name="EmptyBlock">
 	    <property name="severity" value="warning"/>
 	</module>
-	-->
         <module name="InnerAssignment">
             <property name="severity" value="warning"/>
         </module>
-
     </module>
 </module>
