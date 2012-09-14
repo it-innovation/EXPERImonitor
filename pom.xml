@@ -7,7 +7,7 @@
     <version>0.9-SNAPSHOT</version> 
     <name>Experiment Content Component</name> 
     <packaging>pom</packaging>
-  
+    
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <ecc.java.version>1.6</ecc.java.version>
@@ -24,6 +24,11 @@
                     <groupId>junit</groupId>
                     <artifactId>junit</artifactId>
                     <version>4.10</version>
+                </plugin>
+                <plugin><!-- where do you put this to stop maven complaining about the version not being defined? -->
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-project-info-reports-plugin</artifactId>
+                    <version>2.5.1</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -63,7 +68,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-site-plugin</artifactId>
-                <version>3.0</version>
+                <version>3.1</version>
                 <configuration>
                     <reportPlugins>
                         <plugin><!-- where do you put this to stop maven complaining about the version not being defined? -->
@@ -109,6 +114,33 @@
                                 <headerLocation>checkstyle/regexp.header</headerLocation>
                             </configuration>
                         </plugin>
+                        <!--
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-pmd-plugin</artifactId>
+                            <version>2.7.1</version>
+                            <configuration>
+                                <linkXref>true</linkXref>
+                                <sourceEncoding>utf-8</sourceEncoding>
+                                <minimumTokens>100</minimumTokens>
+                                <targetJdk>${ecc.java.version}</targetJdk>
+                                <includes>
+                                    <include>uk/ac/soton/**/*.java</include>                      
+                                </includes>
+                                <excludeRoots>
+                                    <excludeRoot>target/generated-sources/*</excludeRoot>
+                                </excludeRoots>
+                            </configuration>
+                        </plugin>
+                        <plugin>
+                            <groupId>org.codehaus.mojo</groupId>
+                            <artifactId>findbugs-maven-plugin</artifactId>
+                            <version>2.5.2</version>
+                            <configuration>
+                                <onlyAnalyze>uk.ac.soton.-</onlyAnalyze>
+                            </configuration>
+                        </plugin>
+                        -->
                     </reportPlugins>
                 </configuration>
             </plugin>
