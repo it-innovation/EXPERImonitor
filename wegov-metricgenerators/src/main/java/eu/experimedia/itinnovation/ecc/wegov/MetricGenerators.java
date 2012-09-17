@@ -23,106 +23,177 @@
 /////////////////////////////////////////////////////////////////////////
 package eu.experimedia.itinnovation.ecc.wegov;
 
+import java.util.HashSet;
+import java.util.Set;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 
-/**
- * Generates sample WeGov metrics based on the following:
- *
- * Twitter search performed on a keyword, say "weather". That search returns 100
- * tweets and 100 associated users. This is our "Community".
- *
- * Metric generators below are all about that Community.
- *
- *
- *
- * @author max
- */
 public class MetricGenerators {
 
-    // Based on what wegov analysis components can do
-    public void analysisMetricGenerator() {
+    public static void main(String[] args) throws Throwable {
+        MetricGenerator mg = makeWegovMetricGenerator();
+        printMetricGenerator(mg);
+    }
+
+    public static MetricGenerator makeWegovMetricGenerator() {
         MetricGenerator theMetricGenerator = new MetricGenerator();
-        theMetricGenerator.setName("Wegov Analysis Metric Generator");
+        theMetricGenerator.setName("Wegov Metric Generator");
+        theMetricGenerator.setDescription("Metric generator for WeGov Social Analytics Dashboard");
 
-        MetricGroup topicAnalysisMetricGroup = new MetricGroup();
-        topicAnalysisMetricGroup.setName("Topic Analysis Metric Group");
-        topicAnalysisMetricGroup.setName("All metrics to do with Topic Analysis");
-        theMetricGenerator.addMetricGroup(topicAnalysisMetricGroup);
 
-        MetricGroup discussionActivityMetricGroup = new MetricGroup();
-        topicAnalysisMetricGroup.setName("Discussion Activity Metric Group");
-        topicAnalysisMetricGroup.setName("All metrics to do with Discussion Activity");
-        theMetricGenerator.addMetricGroup(discussionActivityMetricGroup);
+        MetricGroup wegovMetricGroup = new MetricGroup();
+        wegovMetricGroup.setName("Wegov Metric Group");
+        wegovMetricGroup.setDescription("Metric group for all WeGov Social Analytics Dashboard metrics");
+        theMetricGenerator.addMetricGroup(wegovMetricGroup);
 
-        MetricGroup roleAnalysisMetricGroup = new MetricGroup();
-        topicAnalysisMetricGroup.setName("Role Analysis Metric Group");
-        topicAnalysisMetricGroup.setName("All metrics to do with Role Analysis");
-        theMetricGenerator.addMetricGroup(roleAnalysisMetricGroup);
+        Entity twitterSchladming = new Entity();
+        twitterSchladming.setName("Schladming Twitter Group");
+        twitterSchladming.setDescription("People found in Schladming Twitter search for keyword \'Schladming\'");
+        theMetricGenerator.addEntity(twitterSchladming);
 
-        MetricGroup buzzAnalysisMetricGroup = new MetricGroup();
-        topicAnalysisMetricGroup.setName("Buzz Analysis Metric Group");
-        topicAnalysisMetricGroup.setName("All metrics to do with Buzz Analysis");
-        theMetricGenerator.addMetricGroup(buzzAnalysisMetricGroup);
+        // NUMBER OF PEOPLE
+        Attribute twitterSchladmingNumPeople = new Attribute();
+        twitterSchladmingNumPeople.setName("Number of people");
+        twitterSchladmingNumPeople.setDescription("Number of people who tweeted about Schladming");
+        twitterSchladming.addAttribute(twitterSchladmingNumPeople);
+        addMetricToAttributeAndMetricGroup(wegovMetricGroup, twitterSchladmingNumPeople, MetricType.INTERVAL, new Unit("Person"));
 
-        Entity e1 = new Entity();
-        e1.setName("Topic Analysis");
-        e1.setDescription("Topics that came up from tweets about weather in the past 5 minutes");
+        // NUMBER OF TWEETS
+        Attribute twitterSchladmingNumTweets = new Attribute();
+        twitterSchladmingNumTweets.setName("Number of tweets");
+        twitterSchladmingNumTweets.setDescription("Number of tweets collected about Schladming");
+        twitterSchladming.addAttribute(twitterSchladmingNumTweets);
+        addMetricToAttributeAndMetricGroup(wegovMetricGroup, twitterSchladmingNumTweets, MetricType.INTERVAL, new Unit("Tweet"));
 
-        Attribute a1e1 = new Attribute();
-        a1e1.setName("Discussion topics variety");
-        a1e1.setDescription("Number of topics that came from topic analysis");
-        e1.addAttribute(a1e1);
+        // AVERAGE NUMBER OF TWEETS PER MINUTE
+        Attribute twitterSchladmingAverageNumTweetsperMinute = new Attribute();
+        twitterSchladmingAverageNumTweetsperMinute.setName("Average number of tweets per minute");
+        twitterSchladmingAverageNumTweetsperMinute.setDescription("Average number of tweets collected about Schladming per minute");
+        twitterSchladming.addAttribute(twitterSchladmingAverageNumTweetsperMinute);
+        addMetricToAttributeAndMetricGroup(wegovMetricGroup, twitterSchladmingAverageNumTweetsperMinute, MetricType.RATIO, new Unit("Tweets per minute"));
 
-        Attribute a2e1 = new Attribute();
-        a2e1.setName("Discussion topics keywords");
-        a2e1.setDescription("Keywords identifying the topics from topic analysis");
-        e1.addAttribute(a2e1);
+        // TOPIC ANALYSIS TOPIC #1
+        Attribute twitterSchladmingDiscussionTopic1 = new Attribute();
+        twitterSchladmingDiscussionTopic1.setName("Topic analysis #1");
+        twitterSchladmingDiscussionTopic1.setDescription("First topic of discussion on Twitter about Schladming");
+        twitterSchladming.addAttribute(twitterSchladmingDiscussionTopic1);
+        addMetricToAttributeAndMetricGroup(wegovMetricGroup, twitterSchladmingDiscussionTopic1, MetricType.NOMINAL, new Unit("Keyword"));
 
-        Attribute a3e1 = new Attribute();
-        a3e1.setName("Most controvertial topics");
-        a3e1.setDescription("Topics with controvercy value above 5");
-        e1.addAttribute(a3e1);
+        // TOPIC ANALYSIS TOPIC #2
+        Attribute twitterSchladmingDiscussionTopic2 = new Attribute();
+        twitterSchladmingDiscussionTopic2.setName("Topic analysis #2");
+        twitterSchladmingDiscussionTopic2.setDescription("Second topic of discussion on Twitter about Schladming");
+        twitterSchladming.addAttribute(twitterSchladmingDiscussionTopic2);
+        addMetricToAttributeAndMetricGroup(wegovMetricGroup, twitterSchladmingDiscussionTopic2, MetricType.NOMINAL, new Unit("Keyword"));
 
-        Attribute a4e1 = new Attribute();
-        a4e1.setName("Positive topics");
-        a4e1.setDescription("Topics with sentiment value 0");
-        e1.addAttribute(a4e1);
+        // TOPIC ANALYSIS TOPIC #3
+        Attribute twitterSchladmingDiscussionTopic3 = new Attribute();
+        twitterSchladmingDiscussionTopic3.setName("Topic analysis #3");
+        twitterSchladmingDiscussionTopic3.setDescription("Third topic of discussion on Twitter about Schladming");
+        twitterSchladming.addAttribute(twitterSchladmingDiscussionTopic3);
+        addMetricToAttributeAndMetricGroup(wegovMetricGroup, twitterSchladmingDiscussionTopic3, MetricType.NOMINAL, new Unit("Keyword"));
 
-        Attribute a5e1 = new Attribute();
-        a5e1.setName("Negative topics");
-        a5e1.setDescription("Topics with sentiment value 0");
-        e1.addAttribute(a5e1);
+        // BROADCASTERS
+        Attribute twitterSchladmingBroadcasterRoleNumPeople = new Attribute();
+        twitterSchladmingBroadcasterRoleNumPeople.setName("Broadcaster role representation");
+        twitterSchladmingBroadcasterRoleNumPeople.setDescription("Number of people identified as Broadcaster by Role analysis");
+        twitterSchladming.addAttribute(twitterSchladmingBroadcasterRoleNumPeople);
+        addMetricToAttributeAndMetricGroup(wegovMetricGroup, twitterSchladmingBroadcasterRoleNumPeople, MetricType.INTERVAL, new Unit("Person"));
 
-        Entity e2 = new Entity();
-        e2.setName("Discussion Activity");
-        e2.setDescription("Avalanche of tweets about weather in the past 5 minutes");
+        // DAILY USERS
+        Attribute twitterSchladmingDailyUserRoleNumPeople = new Attribute();
+        twitterSchladmingDailyUserRoleNumPeople.setName("Daily user role representation");
+        twitterSchladmingDailyUserRoleNumPeople.setDescription("Number of people identified as Daily users by Role analysis");
+        twitterSchladming.addAttribute(twitterSchladmingDailyUserRoleNumPeople);
+        addMetricToAttributeAndMetricGroup(wegovMetricGroup, twitterSchladmingDailyUserRoleNumPeople, MetricType.INTERVAL, new Unit("Person"));
 
-        Attribute a1e2 = new Attribute();
-        a1e2.setName("Discussion activity over time");
-        a1e2.setDescription("Number of tweets per minute/day/week/month/year");
-        e2.addAttribute(a1e2);
+        // INFORMATION SEEKERS
+        Attribute twitterSchladmingInformationSeekerRoleNumPeople = new Attribute();
+        twitterSchladmingInformationSeekerRoleNumPeople.setName("Information Seeker role representation");
+        twitterSchladmingInformationSeekerRoleNumPeople.setDescription("Number of people identified as Information seekers by Role analysis");
+        twitterSchladming.addAttribute(twitterSchladmingInformationSeekerRoleNumPeople);
+        addMetricToAttributeAndMetricGroup(wegovMetricGroup, twitterSchladmingInformationSeekerRoleNumPeople, MetricType.INTERVAL, new Unit("Person"));
 
-        // ...
+        // INFORMATION SOURCES
+        Attribute twitterSchladmingInformationSourceRoleNumPeople = new Attribute();
+        twitterSchladmingInformationSourceRoleNumPeople.setName("Information Source role representation");
+        twitterSchladmingInformationSourceRoleNumPeople.setDescription("Number of people identified as Information sources by Role analysis");
+        twitterSchladming.addAttribute(twitterSchladmingInformationSourceRoleNumPeople);
+        addMetricToAttributeAndMetricGroup(wegovMetricGroup, twitterSchladmingInformationSourceRoleNumPeople, MetricType.INTERVAL, new Unit("Person"));
 
-        MeasurementSet ms1 = new MeasurementSet();
-        ms1.setMetricGroupUUID(topicAnalysisMetricGroup.getUUID());
-        ms1.setAttributeUUID(a1e1.getUUID());
-        topicAnalysisMetricGroup.addMeasurementSets(ms1);
+        // RARE POSTERS
+        Attribute twitterSchladmingRarePosterRoleNumPeople = new Attribute();
+        twitterSchladmingRarePosterRoleNumPeople.setName("Rare Poster role representation");
+        twitterSchladmingRarePosterRoleNumPeople.setDescription("Number of people identified as Rare posters by Role analysis");
+        twitterSchladming.addAttribute(twitterSchladmingRarePosterRoleNumPeople);
+        addMetricToAttributeAndMetricGroup(wegovMetricGroup, twitterSchladmingRarePosterRoleNumPeople, MetricType.INTERVAL, new Unit("Person"));
 
-        // ...
 
-        Metric memMetric = new Metric();
-        memMetric.setMetricType(MetricType.RATIO);
-        memMetric.setUnit(new Unit("Topics"));
-        ms1.setMetric(memMetric);
+        Entity wegovUsers = new Entity();
+        wegovUsers.setName("Users of Wegov Dashboard");
+        wegovUsers.setDescription("People using Wegov Dashboard");
+        theMetricGenerator.addEntity(wegovUsers);
 
+        // NUMBER OF PEOPLE USING WEGOV
+        Attribute wegovUsersNumPeople = new Attribute();
+        wegovUsersNumPeople.setName("Number of people");
+        wegovUsersNumPeople.setDescription("Number of people who are using Wegov dashboard");
+        wegovUsers.addAttribute(wegovUsersNumPeople);
+        addMetricToAttributeAndMetricGroup(wegovMetricGroup, wegovUsersNumPeople, MetricType.INTERVAL, new Unit("Person"));
+
+        // AVERAGE NUMBER OF WIDGETS
+        Attribute wegovUsersAverageNumWidgets = new Attribute();
+        wegovUsersAverageNumWidgets.setName("Average number of widgets");
+        wegovUsersAverageNumWidgets.setDescription("Average number of widgets created by people who are using Wegov dashboard");
+        wegovUsers.addAttribute(wegovUsersAverageNumWidgets);
+        addMetricToAttributeAndMetricGroup(wegovMetricGroup, wegovUsersAverageNumWidgets, MetricType.INTERVAL, new Unit("Widget"));
+
+        return theMetricGenerator;
     }
-    
-    public void searchMetricGenerator() {
-        // ...
+
+    private static void addMetricToAttributeAndMetricGroup(MetricGroup metricGroup, Attribute attribute, MetricType metricType, Unit metricUnit) {
+        MeasurementSet theMeasuringSet = new MeasurementSet();
+        theMeasuringSet.setMetricGroupUUID(metricGroup.getUUID());
+        theMeasuringSet.setAttributeUUID(attribute.getUUID());
+        metricGroup.addMeasurementSets(theMeasuringSet);
+
+        Metric theMetric = new Metric();
+        theMetric.setMetricType(metricType);
+        theMetric.setUnit(metricUnit);
+        theMeasuringSet.setMetric(theMetric);
     }
-    
-    public void injectionMetricGenerator() {
-        // ...
+
+    private static void printMetricGenerator(MetricGenerator mg) {
+        pr(mg.getName() + " (" + mg.getDescription() + ")", 0);
+        Set<MeasurementSet> allMeasurementSets = new HashSet<MeasurementSet>();
+
+        for (MetricGroup mgroup : mg.getMetricGroups()) {
+            allMeasurementSets.addAll(mgroup.getMeasurementSets());
+        }
+
+        for (Entity e : mg.getEntities()) {
+            pr("Entity: " + e.getName() + " (" + e.getDescription() + ")", 1);
+            for (Attribute a : e.getAttributes()) {
+                pr("Attribute: " + a.getName() + " (" + a.getDescription() + ")", 2);
+
+                for (MeasurementSet ms : allMeasurementSets) {
+                    if (ms.getAttributeUUID().toString().equals(a.getUUID().toString())) {
+                        pr("Metric type: " + ms.getMetric().getMetricType() + ", unit: " + ms.getMetric().getUnit() + "", 3);
+                    }
+                }
+            }
+        }
+    }
+
+    private static void pr(Object o, int indent) {
+        String indentString = "";
+        for (int i = 0; i < indent; i++) {
+            indentString += "\t";
+        }
+
+        if (indent > 0) {
+            System.out.println(indentString + "- " + o);
+        } else {
+            System.out.println(o);
+        }
     }
 }
