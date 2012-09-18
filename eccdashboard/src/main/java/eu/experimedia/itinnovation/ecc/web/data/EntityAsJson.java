@@ -17,20 +17,19 @@
 // the software.
 //
 //	Created By :			Maxim Bashevoy
-//	Created Date :			2012-09-03
+//	Created Date :			2012-09-18
 //	Created for Project :           Experimedia
 //
 /////////////////////////////////////////////////////////////////////////
 package eu.experimedia.itinnovation.ecc.web.data;
 
-public class MetricGeneratorAsJson {
+public class EntityAsJson {
 
     private String uuid;
     private String name;
     private String description;
-    private EntityAsJson[] listOfEntities;
 
-    public MetricGeneratorAsJson() {
+    public EntityAsJson() {
     }
 
     public String getDescription() {
@@ -56,13 +55,4 @@ public class MetricGeneratorAsJson {
     public void setUuid(String uuid) {
         this.uuid = uuid;
     }
-
-    public EntityAsJson[] getListOfEntities() {
-        return listOfEntities;
-    }
-
-    public void setListOfEntities(EntityAsJson[] listOfEntities) {
-        this.listOfEntities = listOfEntities;
-    }
-    
 }

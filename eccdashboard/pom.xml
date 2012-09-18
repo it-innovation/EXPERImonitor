@@ -198,12 +198,19 @@
                     <contextPath>${prototype.server.contextpath}</contextPath>
                     <scanIntervalSeconds>0</scanIntervalSeconds> <!-- anything above 0 enables hot redeployment-->
                     <webXml>${project.build.directory}/${project.build.finalName}/WEB-INF/web.xml</webXml>
+                    <extraClasspath>${basedir}/target/classes/</extraClasspath>
                     <connectors>
                         <connector implementation="org.mortbay.jetty.nio.SelectChannelConnector">
-                            <port>8080</port>
+                            <port>8081</port>
                             <maxIdleTime>6000000</maxIdleTime>
                         </connector>
-                    </connectors>
+                    </connectors>                    
+                    <systemProperties>
+                        <systemProperty>
+                            <name>log4j.configuration</name>
+                            <value>log4j.properties</value>
+                        </systemProperty>
+                    </systemProperties>                    
                 </configuration>
             </plugin>
         </plugins>				

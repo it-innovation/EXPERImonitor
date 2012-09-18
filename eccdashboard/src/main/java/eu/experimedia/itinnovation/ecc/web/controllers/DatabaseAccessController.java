@@ -69,7 +69,10 @@ public class DatabaseAccessController {
                 tempExperiment.setName(e.getName());
                 tempExperiment.setDescription(e.getDescription());
                 tempExperiment.setStartTime(e.getStartTime().getTime());
-                tempExperiment.setEndTime(e.getEndTime().getTime());
+                if (e.getEndTime() != null)
+                    tempExperiment.setEndTime(e.getEndTime().getTime());
+                else
+                    tempExperiment.setEndTime(0L); // means it's in progress
                 result[i] = tempExperiment;
                 tempExperiment = new ExperimentAsJson();
                 i++;
@@ -109,14 +112,14 @@ public class DatabaseAccessController {
                     listOfEntities.append("), ");
                 }
                 
-                listOfEntitiesAsString = listOfEntities.toString();
-                
-                if (listOfEntitiesAsString.length() > 2) {
-                    listOfEntitiesAsString = listOfEntitiesAsString.substring(0, listOfEntitiesAsString.length() - 2);
-                    tempMg.setListOfEntities(listOfEntitiesAsString);
-                } else {
-                    tempMg.setListOfEntities("unknown entity");
-                }
+//                listOfEntitiesAsString = listOfEntities.toString();
+//                
+//                if (listOfEntitiesAsString.length() > 2) {
+//                    listOfEntitiesAsString = listOfEntitiesAsString.substring(0, listOfEntitiesAsString.length() - 2);
+//                    tempMg.setListOfEntities(listOfEntitiesAsString);
+//                } else {
+//                    tempMg.setListOfEntities("unknown entity");
+//                }
 
                 result[i] = tempMg;
                 

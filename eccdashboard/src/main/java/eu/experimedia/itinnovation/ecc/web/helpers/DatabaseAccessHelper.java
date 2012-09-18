@@ -24,21 +24,21 @@
 package eu.experimedia.itinnovation.ecc.web.helpers;
 
 import org.springframework.stereotype.Service;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.ExperimentDataManager;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.MonitoringEDM;
 
 @Service
 public class DatabaseAccessHelper {
 
-    private static ExperimentDataManager edm;
+    private static MonitoringEDM edm;
 
-    public synchronized ExperimentDataManager getExperimentDataManager() throws Throwable {
+    public synchronized MonitoringEDM getExperimentDataManager() throws Throwable {
         return getStaticExperimentDataManager();
     }
 
-    public ExperimentDataManager getStaticExperimentDataManager() throws Throwable {
+    public MonitoringEDM getStaticExperimentDataManager() throws Throwable {
 
         if (edm == null) {
-            edm = new ExperimentDataManager();
+            edm = new MonitoringEDM();
 
         }
 

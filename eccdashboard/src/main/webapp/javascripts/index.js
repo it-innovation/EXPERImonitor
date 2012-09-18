@@ -24,48 +24,294 @@
 
 var counter = 0;
 var currentClientsUuids = [];
+var isClientMonitoringOn = true;
+var internalPhase = 0;
 
 $(document).ready(function() {
-    
-        // Get the Experiment
-        $.ajax({
-            type: 'GET',
-            url: "/da/getexperiments/do.json",
-            contentType: "application/json; charset=utf-8",
-            success: function(experiments){
-                console.log(experiments);
-                
-                if (experiments == null) {
-                    alert("Server error retrieving experiments");
-                    console.error("Server error retrieving experiments");
-                    return;
-                } else {
-                    if (experiments.length < 1) {
-                        alert("No experiments found");
-                        console.error("No experiments found");                        
-                    } else {
-                        theExperiment = experiments[0]; // we are only going to have one per dashboard for now
-                        $("#experimentName").text(theExperiment.name);
-                        $("#experimentUUID").text(theExperiment.uuid);
-                        $("#experimentDescription").text(theExperiment.description);
-                        $("#experimentExperimentID").text(theExperiment.experimentID);
-                        $("#experimentStartTime").text(longToDate(theExperiment.startTime));
-                        $("#experimentEndTime").text(longToDate(theExperiment.endTime));                        
 
-                    }
+    // Get the Experiment
+    /*
+    $.ajax({
+        type: 'GET',
+        url: "/da/getexperiments/do.json",
+        contentType: "application/json; charset=utf-8",
+        success: function(experiments){
+            console.log(experiments);
+
+            if (experiments == null) {
+                alert("Server error retrieving experiments");
+                console.error("Server error retrieving experiments");
+                return;
+            } else {
+                if (experiments.length < 1) {
+                    alert("No experiments found");
+                    console.error("No experiments found");
+                } else {
+                    theExperiment = experiments[0]; // we are only going to have one per dashboard for now
+                    $("#experimentName").text(theExperiment.name);
+                    $("#experimentUUID").text(theExperiment.uuid);
+                    $("#experimentDescription").text(theExperiment.description);
+                    $("#experimentExperimentID").text(theExperiment.experimentID);
+                    $("#experimentStartTime").text(longToDate(theExperiment.startTime));
+                    if (theExperiment.endTime == 0)
+                        $("#experimentEndTime").text('In progress');
+                    else
+                        $("#experimentEndTime").text(longToDate(theExperiment.endTime));
+
                 }
-            },
-            error: function(xhr, ajaxOptions, thrownError){
-                alert('Failed to get a list of experiments');
-                console.error('Failed to get a list of experiments');
-                console.error(thrownError);
-                console.error(xhr.status);
             }
-        });    
+        },
+        error: function(xhr, ajaxOptions, thrownError){
+            alert('Failed to get a list of experiments');
+            console.error('Failed to get a list of experiments');
+            console.error(thrownError);
+            console.error(xhr.status);
+        }
+    });
+    
+    */
+
+
+    // Get current phase
+    getPhase();    
         
-        // Get clients
-        getClients();
-        setInterval("getClients()", 3000);
+    // Get clients
+    getClients();
+
+    // Action button
+    var actionButton = $("#actionButton");
+    $("#currentPhaseID").text(internalPhase);
+    
+    actionButton.click(function(e){
+        e.preventDefault();
+        
+        // TO DISCOVERY PHASE
+        if (internalPhase == 0) {
+            $(this).text('Start Set-up Phase');
+            $(".experimentInfo").css('display', 'block');
+            $("#currentPhaseName").text('EM Metric generator discovery phase');
+            $("#currentPhaseDescription").text("Clients reporting metric generators");
+            
+            console.log('Starting monitoring process');
+            $.ajax({
+                type: 'GET',
+                url: "/em/startlifecycle/do.json",
+                contentType: "application/json; charset=utf-8",
+                success: function(currentPhase){
+                    console.log(currentPhase);
+                    if (currentPhase != null) {
+                        console.log('Process started, returned phase is: ' + currentPhase.description + ' (' + currentPhase.index + ')');
+                        $("#currentPhaseName").text(currentPhase.description);
+                        $("#currentPhaseID").text(currentPhase.index);
+                    }
+                    
+                    // Stop monitoring
+                    isClientMonitoringOn = false;
+                    
+
+                    
+
+                },
+                error: function() {
+                    console.error('Failed to start monitoring process');
+                }
+            });            
+        
+        // TO SETUP PHASE
+        } else if (internalPhase == 1) {
+            $(this).text('Start Live Monitoring Phase');
+            $("#currentPhaseName").text('EM Metric generator set-up phase');
+            $("#currentPhaseDescription").text("Setting-up clients");
+            console.log('Starting set-up phase');
+            $.ajax({
+                type: 'GET',
+                url: "/em/gotonextphase/do.json",
+                contentType: "application/json; charset=utf-8",
+                success: function(currentPhase){
+                    console.log(currentPhase);
+                    if (currentPhase != null) {
+                        console.log('Set-up phase started, returned phase is: ' + currentPhase.description + ' (' + currentPhase.index + ')');
+                        $("#currentPhaseName").text(currentPhase.description);
+                        $("#currentPhaseID").text(currentPhase.index);
+                    }
+                    
+                    // Get discovered metric generators!
+                    var theClientUuid = currentClientsUuids[0];
+                    console.log('Getting metric generators for client with UUID: ' + theClientUuid);
+                    $.ajax({
+                        type: 'POST',
+                        url: "/em/getmmetricgeneratorsforclient/do.json",
+                        data: JSON.stringify({clientUUID: theClientUuid}),
+                        contentType: "application/json; charset=utf-8",
+                        success: function(metricGenerators){
+                            console.log(metricGenerators);
+                            
+                            var detailsRow = $('<div class="row"></div>').appendTo(".clientdetails");
+                            detailsRow.empty();
+
+                            
+                            $.each(metricGenerators, function(indexMG, metricGenerator){
+                                var measurementSetDetailsContainer = $('<div class="twelve columns"></div>').appendTo(detailsRow);
+                                measurementSetDetailsContainer.data('metricGenerator', metricGenerator);
+
+                                measurementSetDetailsContainer.append('<p class="metricMonitorHeader">Measurement Set ' + (indexMG + 1) + ':</p>');
+                                measurementSetDetailsContainer.append('<p class="metricMonitorDescription">Name: ' + metricGenerator.name + '</p>');                            
+                                measurementSetDetailsContainer.append('<p class="metricMonitorDescription">Description: ' + metricGenerator.description + '</p>');                            
+                                measurementSetDetailsContainer.append('<p class="metricMonitorDescription">UUID: ' + metricGenerator.uuid + '</p>');                            
+                                
+                                var moreDetailsRow = $('<div class="row moreDetailsRow"></div>').appendTo(measurementSetDetailsContainer);
+                                var entitiesDivWrapper = $('<div class="four columns nopaddingright"></div>').appendTo(moreDetailsRow);
+                                var entitiesDiv = $('<div class="capabilitieslistbg"></div>').appendTo(entitiesDivWrapper);
+                                var attributesDivWrapper = $('<div class="four columns nopaddingright"></div>').appendTo(moreDetailsRow);
+                                var attributesDiv = $('<div class="capabilitieslistbg"></div>').appendTo(attributesDivWrapper);
+                                var infoDivWrapper = $('<div class="four columns"></div>').appendTo(moreDetailsRow);
+                                var infoDiv = $('<div class="capabilitieslistbg"></div>').appendTo(infoDivWrapper);                                
+
+                                entitiesDiv.append('<p><strong>Entities</strong></p>');
+                                
+                                $.each(metricGenerator.listOfEntities, function(indexEntity, entity){
+                                    entitiesDiv.append('<p class="noextrawhitespace entitiesitem">' + entity.name + '</p>');
+                                });
+
+                                attributesDiv.append('<p><strong>Attributes</strong></p>');
+                                attributesDiv.append('<p class="noextrawhitespace entitiesitem">Packet loss</p>');
+                                attributesDiv.append('<p class="noextrawhitespace active entitiesitem">Latency</p>');
+
+                                infoDiv.append('<p><strong>Info</strong></p>');
+                                infoDiv.append('<p class="noextrawhitespace">From this day forward, F</p>');
+                            });
+
+                            $('.entitiesitem').click(function(){
+                                $(this).parents('.capabilitieslistbg').children('.entitiesitem').removeClass('active');
+                                $(this).addClass('active');
+                            });        
+                            
+                        },
+                        error: function() {
+                            console.error("Failed to get a list of metric generators");
+                        }
+                    });                    
+
+                },
+                error: function() {
+                    console.error('Failed to start set-up phase');
+                }
+            });            
+            
+        // TO LIVE MONITORING PHASE
+        } else if (internalPhase == 2) {
+            $(this).text('Start Post Report Phase');
+            $("#currentPhaseName").text('EM Metric live monitoring phase');
+            $("#currentPhaseDescription").text("Collecting data from clients");
+            console.log('Starting live monitoring phase');
+            $.ajax({
+                type: 'GET',
+                url: "/em/gotonextphase/do.json",
+                contentType: "application/json; charset=utf-8",
+                success: function(currentPhase){
+                    console.log(currentPhase);
+                    if (currentPhase != null) {
+                        console.log('Live monitoring phase started, returned phase is: ' + currentPhase.description + ' (' + currentPhase.index + ')');
+                        $("#currentPhaseName").text(currentPhase.description);
+                        $("#currentPhaseID").text(currentPhase.index);
+                    }
+
+                },
+                error: function() {
+                    console.error('Failed to start live monitoring phase');
+                }
+            });            
+            
+        // TO POST REPORT PHASE
+        } else if (internalPhase == 3) {
+            $(this).text('Start Tear Down Phase');
+            $("#currentPhaseName").text('EM Post-monitoring reporting phase');
+            $("#currentPhaseDescription").text("Receiving summary reports");
+            console.log('Starting post report phase');
+            $.ajax({
+                type: 'GET',
+                url: "/em/gotonextphase/do.json",
+                contentType: "application/json; charset=utf-8",
+                success: function(currentPhase){
+                    console.log(currentPhase);
+                    if (currentPhase != null) {
+                        console.log('Post report phase started, returned phase is: ' + currentPhase.description + ' (' + currentPhase.index + ')');
+                        $("#currentPhaseName").text(currentPhase.description);
+                        $("#currentPhaseID").text(currentPhase.index);
+                    }
+
+                },
+                error: function() {
+                    console.error('Failed to start post report phase');
+                }
+            });            
+            
+        // TO TEAR DOWN PHASE
+        } else if (internalPhase == 4) {
+            $(this).text('Experiment finished - restart');
+            $(this).addClass('alert');
+            $("#currentPhaseName").text('EM Monitoring tear-down phase');
+            $("#currentPhaseDescription").text("Asking clients to preform tear-down");
+            console.log('Starting tear down phase');
+            $.ajax({
+                type: 'GET',
+                url: "/em/gotonextphase/do.json",
+                contentType: "application/json; charset=utf-8",
+                success: function(currentPhase){
+                    console.log(currentPhase);
+                    if (currentPhase != null) {
+                        console.log('Tear down phase started, returned phase is: ' + currentPhase.description + ' (' + currentPhase.index + ')');
+                        $("#currentPhaseName").text(currentPhase.description);
+                        $("#currentPhaseID").text(currentPhase.index);
+                    }
+
+                },
+                error: function() {
+                    console.error('Failed to start tear down phase');
+                }
+            });            
+        
+        // TO THE BEGINNING
+        } else {
+            $(this).text('Start Discovery Phase');
+            $(this).removeClass('alert');
+            $(".experimentInfo").css('display', 'none');
+            $("#currentPhaseName").text('Undefined EM phase');
+            $("#currentPhaseDescription").text("Waiting for clients to connect");
+            internalPhase = -1;
+        }
+        
+        internalPhase++;
+        $("#currentPhaseID").text(internalPhase);
+
+    });
+
+//    $('#beginMonitoringProcess').click(function(){
+//        if (currentClientsUuids.length > 0) {
+//            console.log('Starting monitoring process');
+//            $.ajax({
+//                type: 'GET',
+//                url: "/em/startlifecycle/do.json",
+//                contentType: "application/json; charset=utf-8",
+//                success: function(currentPhase){
+//                    console.log(currentPhase);
+//                    if (currentPhase != null) {
+//                        console.log('Process started, returned phase is: ' + currentPhase.description + ' (' + currentPhase.index + ')');
+//                        $("#currentPhaseName").text(currentPhase.description);
+//                        $("#currentPhaseID").text(currentPhase.index);
+//                    }
+//
+//                },
+//                error: function() {
+//                    console.error('Failed to start monitoring process');
+//                }
+//            });
+//
+//        } else {
+//            console.error('Can not start monitoring process because there are no clients');
+//            alert('Can not start monitoring process because there are no clients');
+//        }
+//    });
 
 /*
     $(".clientitem").click(function(){
@@ -108,6 +354,35 @@ $(document).ready(function() {
 */
 });
 
+// Get current phase info
+function getPhase() {
+    $.ajax({
+        type: 'GET',
+        url: "/em/getcurrentphase/do.json",
+        contentType: "application/json; charset=utf-8",
+        success: function(currentPhase){
+            console.log(currentPhase);
+            
+            if (currentPhase != null) {
+            console.log('Current phase is: ' + currentPhase.description + ' (' + currentPhase.index + ')');
+                $("#currentPhaseName").text(currentPhase.description);
+                $("#currentPhaseID").text(currentPhase.index);
+                if (currentPhase.index == 0) {
+                    $("#currentPhaseDescription").text("Waiting for clients to connect");  
+                } else {
+                    $("#currentPhaseDescription").text("This phase needs a description");  
+                    
+                }
+                
+            }
+
+        },
+        error: function() {
+            console.error('Failed to fetch current phase');
+        }
+    });
+}
+
 function getClients() {
     $.ajax({
         type: 'GET',
@@ -123,31 +398,74 @@ function getClients() {
                 var theClient;
                 $.each(clients, function(indexClient, client){
                     if (jQuery.inArray(client.uuid, currentClientsUuids) < 0) {
+
                         console.log("New client: " + client.uuid);
+
                         currentClientsUuids.push(client.uuid);
+
                         theClient = $('<p class="clientitem">' + client.name + '<span>' + client.uuid + '</span></p>').appendTo($('.clientlist'));
                         theClient.data('client', client);
-                        
+
                         theClient.click(function(){
                             $(".clientlist .clientitem").removeClass('active');
                             $(this).addClass('active');
-                            
+
                             var clientData = $(this).data().client;
-                            
-                            var cd = $(".clientdetails");
+
+                            var cd = $('.clientdetails');
                             cd.empty();
                             cd.append('<p class="clientHeader">' + clientData.name + '</p>');
                             cd.append('<p class="clientDescription">UUID: ' + clientData.uuid + '</p>');
-                            
+
+//                            $.ajax({
+//                                type: 'POST',
+//                                url: "/em/getmeasurementsetsforclient/do.json",
+//                                data: JSON.stringify({clientUUID: clientData.uuid}),
+//                                contentType: "application/json; charset=utf-8",
+//                                success: function(measurementSets){
+//                                    if (measurementSets == null) {
+//                                        console.error('Failed to retrieve measurement sets for client ' + clientData.uuid + ' because the client is no longer connected.');
+//                                    } else {
+//                                        console.log(measurementSets);
+//                                    }
+//                                    
+//                                    $.each(measurementSets, function(indexMeasurementSet, measurementSet){
+//                                        var detailsRow = $('<div class="row"></div>').appendTo(".clientdetails");
+//                                        var measurementSetDetailsContainer = $('<div class="twelve columns"></div>').appendTo(detailsRow);
+//                                        measurementSetDetailsContainer.data('measurementSet', measurementSet);
+//                                        
+//                                        measurementSetDetailsContainer.append('<p class="metricMonitorHeader">Measurement Set ' + (indexMeasurementSet + 1) + ':</p>');
+//                                        measurementSetDetailsContainer.append('<p class="metricMonitorDescription">UUID: ' + measurementSet.uuid + '</p>');
+//                                        measurementSetDetailsContainer.append('<p class="metricMonitorDescription">Metric Unit: ' + measurementSet.metricUnit + '</p>');
+//                                        measurementSetDetailsContainer.append('<p class="metricMonitorDescription">Metric UUID: ' + measurementSet.metricUUID + '</p>');
+//                                        measurementSetDetailsContainer.append('<p class="metricMonitorDescription">Metric Type: ' + measurementSet.metricType + '</p>');
+//                                        
+//                                    });
+//                                },
+//                                error: function() {
+//                                    console.error('Failed to retrieve measurement sets for client ' + clientData.uuid);
+//                                }
+//                            });
+
                         });
-                        
+
                         // If no clients selected, select the first one
                         if ($(".clientlist .active").size() < 1)
                             $(".clientlist .clientitem").first().trigger('click');
-                            
+
                     }
                 });
             }
+
+            //wait for 3 seconds then run again if it is OK
+            if (isClientMonitoringOn) {
+                setTimeout('getClients()', 3000);
+            }
+        },
+        error: function() {
+            // TODO
+            console.error("Error getting clients list, monitoring stopped");
+            isClientMonitoringOn = false;
         }
-    });    
+    });
 }

@@ -12,7 +12,7 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
         <meta name="author" content="http://twitter.com/maximbashevoy">
 
-        <title>Experimedia ECC Monitoring Dashboard</title>
+        <title>Experimedia SCC Monitoring</title>
 
         <link rel="stylesheet" href="stylesheets/jquery.jqplot.min.css">
         <link rel="stylesheet" href="stylesheets/foundation.min.css">
@@ -38,35 +38,37 @@
                 </div>
                 <div class="row experimentMetadata">
                     <div class="six columns">
+                        <div class="row">
+                            <div class="twelve columns">
+                                <h4 class="monitorControl">Monitor control</h4>
+                                <p class="noextrawhitespace">Current phase: <span id="currentPhaseName"></span></p>
+                                <p class="noextrawhitespace">Phase index: <span id="currentPhaseID"></span></p>
+                                <p>Phase description: <span id="currentPhaseDescription"></span></p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="twelve columns">
+                                <a href="#" class="large button" id="actionButton">Start Discovery Phase</a>
+<!--                                <div class="medium normal button split dropdown">
+                                    <a href="#">Take action</a>
+                                    <span></span>
+                                    <ul id="takeActionMenu">
+                                        <li id="beginMonitoringProcess"><a href="#" >Begin monitoring process</a></li>
+                                        <li><a href="#">Start set-up phase</a></li>
+                                        <li class="divider"></li>
+                                        <li><a href="#">Abandon monitoring</a></li>
+                                    </ul>                                
+                                </div>-->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="six columns experimentInfo">
                         <h4 id="experimentName">Experiment Name Placeholder</h4>
                         <p class="noextrawhitespace">UUID: <span id="experimentUUID">UUID placeholder</span></p>
                         <p class="noextrawhitespace">Description: <span id="experimentDescription">Description placeholder</span></p>
                         <p class="noextrawhitespace">Experiment ID: <span id="experimentExperimentID">ID placeholder</span></p>
                         <p class="noextrawhitespace">Start time: <span id="experimentStartTime">Start time</span></p>
                         <p class="noextrawhitespace">End time: <span id="experimentEndTime">End time</span></p>
-                    </div>
-                    <div class="six columns">
-                        <div class="row">
-                            <div class="twelve columns">
-                                <h4>Monitor control</h4>
-                                <p class="noextrawhitespace">Current phase: <strong>Metric Generator Discovery Phase</strong></p>
-                                <p>Phase status: <strong>Waiting for discovery responses</strong></p>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="twelve columns">
-                                <div class="medium normal button split dropdown">
-                                    <a href="#">Take action</a>
-                                    <span></span>
-                                    <ul>
-                                        <li><a href="#">Start set-up phase</a></li>
-                                        <li><a href="#">Buy more milk</a></li>
-                                        <li class="divider"></li>
-                                        <li><a href="#">Abandon monitoring</a></li>
-                                    </ul>                                
-                                </div>
-                            </div>
-                        </div>
                     </div>                    
                 </div>
             </div>
