@@ -7,6 +7,9 @@
 	<listener>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
+        <listener>
+            <listener-class>eu.experimedia.itinnovation.ecc.web.context.EccContextLoaderListener</listener-class>
+        </listener>        
 
 	<context-param>
 		<param-name>org.restlet.component</param-name>
