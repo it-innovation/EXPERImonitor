@@ -40,8 +40,10 @@ public class ExperimentMonitorHelper {
     public IExperimentMonitor getStaticExperimentMonitor() throws Throwable {
 
         if (em == null) {
+            
             em = EMInterfaceFactory.createEM();
             em.openEntryPoint("127.0.0.1", UUID.fromString("00000000-0000-0000-0000-000000000000"));
+            
 
         }
 

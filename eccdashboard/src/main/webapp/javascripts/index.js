@@ -25,11 +25,95 @@
 var counter = 0;
 var currentClientsUuids = [];
 var isClientMonitoringOn = true;
-var internalPhase = 0;
+var internalPhase = -1;
+var actionButton;
 
 $(document).ready(function() {
 
-    // Get the Experiment
+    actionButton = $("#actionButton");
+
+    // Get current phase so that we know where we are with the experiment
+    $.ajax({
+        type: 'GET',
+        url: "/em/getcurrentphase/do.json",
+        contentType: "application/json; charset=utf-8",
+        success: function(currentPhase){
+            console.log(currentPhase);
+
+            if (currentPhase != null) {
+                internalPhase = currentPhase.index;
+
+                console.log('Current phase is: ' + currentPhase.description + ' (' + currentPhase.index + ')');
+
+                $("#currentPhaseName").text(currentPhase.description);
+                $("#currentPhaseID").text(currentPhase.index);
+                $("#currentPhaseDescription").text("Waiting for clients to connect");
+
+
+                switch(internalPhase) {
+                    // CLIENTS CONNECTING PHASE
+                    case 0:
+                        doClientsConnectingPhase(actionButton, currentPhase);
+                        break;
+                    // DISCOVERY PHASE
+                    case 1:
+                        doDiscoveryPhase(actionButton, currentPhase);
+                        break;
+
+                    // SET-UP PHASE
+                    case 2:
+                        doSetupPhase(actionButton, currentPhase);
+                        break;
+
+                    // LIVE MONITORING PHASE
+                    case 3:
+                        console.log('In LIVE MONITORING PHASE');
+                        actionButton.text('Start Post Report Phase');
+                        break;
+
+                    // POST REPORT PHASE
+                    case 4:
+                        console.log('In POST REPORT PHASE');
+                        actionButton.text('Start Tear Down Phase');
+                        break;
+
+                    // TEAR-DOWN PHASE
+                    case 5:
+                        console.log('In TEAR-DOWN PHASE');
+                        actionButton.text('Experiment finished - restart');
+                        $(this).addClass('alert');
+                        break;
+
+                    // UNKNOWN PHASE
+                    default:
+                        console.log('ERROR: UNKNOWN PHASE');
+                        actionButton.text('ERROR');
+                        actionButton.click(function(e){
+                            e.preventDefault();
+                        })
+                        console.error('Current phase is ' + internalPhase + ', not sure what to do with it, will stop now.');
+                        $("#currentPhaseName").text("ERROR - current phase is unknown (" + internalPhase + ")");
+                        $("#currentPhaseID").text(internalPhase);
+                        break;
+                }
+
+            } else {
+                console.error("Current phase is NULL, will stop now.");
+                $("#currentPhaseName").text("ERROR - current phase is NULL");
+                $("#currentPhaseID").text(internalPhase);
+            }
+
+        },
+        error: function() {
+            console.error('Failed to fetch current phase, will stop now.');
+            $("#currentPhaseName").text("ERROR - failed to get current phase");
+            $("#currentPhaseID").text(internalPhase);
+        }
+    });
+
+    // Get clients
+
+    // Get the Experiment - later
     /*
     $.ajax({
         type: 'GET',
@@ -68,30 +152,31 @@ $(document).ready(function() {
             console.error(xhr.status);
         }
     });
-    
+
     */
 
 
     // Get current phase
-    getPhase();    
-        
+//    getPhase();
+
     // Get clients
-    getClients();
+    getClients(null);
 
     // Action button
-    var actionButton = $("#actionButton");
-    $("#currentPhaseID").text(internalPhase);
-    
+    //var actionButton = $("#actionButton");
+//    $("#currentPhaseID").text(internalPhase);
+
+/*
     actionButton.click(function(e){
         e.preventDefault();
-        
+
         // TO DISCOVERY PHASE
         if (internalPhase == 0) {
             $(this).text('Start Set-up Phase');
             $(".experimentInfo").css('display', 'block');
             $("#currentPhaseName").text('EM Metric generator discovery phase');
             $("#currentPhaseDescription").text("Clients reporting metric generators");
-            
+
             console.log('Starting monitoring process');
             $.ajax({
                 type: 'GET',
@@ -104,19 +189,19 @@ $(document).ready(function() {
                         $("#currentPhaseName").text(currentPhase.description);
                         $("#currentPhaseID").text(currentPhase.index);
                     }
-                    
+
                     // Stop monitoring
                     isClientMonitoringOn = false;
-                    
 
-                    
+
+
 
                 },
                 error: function() {
                     console.error('Failed to start monitoring process');
                 }
-            });            
-        
+            });
+
         // TO SETUP PHASE
         } else if (internalPhase == 1) {
             $(this).text('Start Live Monitoring Phase');
@@ -134,7 +219,7 @@ $(document).ready(function() {
                         $("#currentPhaseName").text(currentPhase.description);
                         $("#currentPhaseID").text(currentPhase.index);
                     }
-                    
+
                     // Get discovered metric generators!
                     var theClientUuid = currentClientsUuids[0];
                     console.log('Getting metric generators for client with UUID: ' + theClientUuid);
@@ -145,30 +230,30 @@ $(document).ready(function() {
                         contentType: "application/json; charset=utf-8",
                         success: function(metricGenerators){
                             console.log(metricGenerators);
-                            
+
                             var detailsRow = $('<div class="row"></div>').appendTo(".clientdetails");
                             detailsRow.empty();
 
-                            
+
                             $.each(metricGenerators, function(indexMG, metricGenerator){
                                 var measurementSetDetailsContainer = $('<div class="twelve columns"></div>').appendTo(detailsRow);
                                 measurementSetDetailsContainer.data('metricGenerator', metricGenerator);
 
                                 measurementSetDetailsContainer.append('<p class="metricMonitorHeader">Measurement Set ' + (indexMG + 1) + ':</p>');
-                                measurementSetDetailsContainer.append('<p class="metricMonitorDescription">Name: ' + metricGenerator.name + '</p>');                            
-                                measurementSetDetailsContainer.append('<p class="metricMonitorDescription">Description: ' + metricGenerator.description + '</p>');                            
-                                measurementSetDetailsContainer.append('<p class="metricMonitorDescription">UUID: ' + metricGenerator.uuid + '</p>');                            
-                                
+                                measurementSetDetailsContainer.append('<p class="metricMonitorDescription">Name: ' + metricGenerator.name + '</p>');
+                                measurementSetDetailsContainer.append('<p class="metricMonitorDescription">Description: ' + metricGenerator.description + '</p>');
+                                measurementSetDetailsContainer.append('<p class="metricMonitorDescription">UUID: ' + metricGenerator.uuid + '</p>');
+
                                 var moreDetailsRow = $('<div class="row moreDetailsRow"></div>').appendTo(measurementSetDetailsContainer);
                                 var entitiesDivWrapper = $('<div class="four columns nopaddingright"></div>').appendTo(moreDetailsRow);
                                 var entitiesDiv = $('<div class="capabilitieslistbg"></div>').appendTo(entitiesDivWrapper);
                                 var attributesDivWrapper = $('<div class="four columns nopaddingright"></div>').appendTo(moreDetailsRow);
                                 var attributesDiv = $('<div class="capabilitieslistbg"></div>').appendTo(attributesDivWrapper);
                                 var infoDivWrapper = $('<div class="four columns"></div>').appendTo(moreDetailsRow);
-                                var infoDiv = $('<div class="capabilitieslistbg"></div>').appendTo(infoDivWrapper);                                
+                                var infoDiv = $('<div class="capabilitieslistbg"></div>').appendTo(infoDivWrapper);
 
                                 entitiesDiv.append('<p><strong>Entities</strong></p>');
-                                
+
                                 $.each(metricGenerator.listOfEntities, function(indexEntity, entity){
                                     entitiesDiv.append('<p class="noextrawhitespace entitiesitem">' + entity.name + '</p>');
                                 });
@@ -184,20 +269,20 @@ $(document).ready(function() {
                             $('.entitiesitem').click(function(){
                                 $(this).parents('.capabilitieslistbg').children('.entitiesitem').removeClass('active');
                                 $(this).addClass('active');
-                            });        
-                            
+                            });
+
                         },
                         error: function() {
                             console.error("Failed to get a list of metric generators");
                         }
-                    });                    
+                    });
 
                 },
                 error: function() {
                     console.error('Failed to start set-up phase');
                 }
-            });            
-            
+            });
+
         // TO LIVE MONITORING PHASE
         } else if (internalPhase == 2) {
             $(this).text('Start Post Report Phase');
@@ -220,8 +305,8 @@ $(document).ready(function() {
                 error: function() {
                     console.error('Failed to start live monitoring phase');
                 }
-            });            
-            
+            });
+
         // TO POST REPORT PHASE
         } else if (internalPhase == 3) {
             $(this).text('Start Tear Down Phase');
@@ -244,8 +329,8 @@ $(document).ready(function() {
                 error: function() {
                     console.error('Failed to start post report phase');
                 }
-            });            
-            
+            });
+
         // TO TEAR DOWN PHASE
         } else if (internalPhase == 4) {
             $(this).text('Experiment finished - restart');
@@ -269,8 +354,8 @@ $(document).ready(function() {
                 error: function() {
                     console.error('Failed to start tear down phase');
                 }
-            });            
-        
+            });
+
         // TO THE BEGINNING
         } else {
             $(this).text('Start Discovery Phase');
@@ -280,11 +365,13 @@ $(document).ready(function() {
             $("#currentPhaseDescription").text("Waiting for clients to connect");
             internalPhase = -1;
         }
-        
+
         internalPhase++;
         $("#currentPhaseID").text(internalPhase);
 
     });
+    
+*/    
 
 //    $('#beginMonitoringProcess').click(function(){
 //        if (currentClientsUuids.length > 0) {
@@ -354,6 +441,166 @@ $(document).ready(function() {
 */
 });
 
+function doClientsConnectingPhase(actionButton, currentPhase) {
+    console.log('In CLIENTS CONNECTING PHASE');
+
+    actionButton.removeClass('alert');
+
+    // Setup next phase: Discovery phase
+    prepareDiscoveryPhase(actionButton);
+}
+
+function prepareDiscoveryPhase(actionButton) {
+    actionButton.text('Start Discovery Phase');
+    actionButton.unbind('click');
+    actionButton.click(function(e){
+        e.preventDefault();
+        console.log('Starting the experiment');
+        $.ajax({
+            type: 'GET',
+            url: "/em/startlifecycle/do.json",
+            contentType: "application/json; charset=utf-8",
+            success: function(currentPhase){
+                console.log(currentPhase);
+                if (currentPhase != null) {
+                    console.log('Experiment started, returned phase is: ' + currentPhase.description + ' (' + currentPhase.index + ')');
+                    doDiscoveryPhase(actionButton, currentPhase);
+                } else {
+                    console.error('Failed to start the experiment: next phase is NULL. Stopped');
+                }
+
+            },
+            error: function() {
+                console.error('Failed to start the experiment. Stopped');
+            }
+        });
+
+    });
+}
+
+function getMetricGenerators() {
+        console.log(currentClientsUuids);
+        $.ajax({
+            type: 'POST',
+            url: "/em/getmmetricgeneratorsforclient/do.json",
+            data: JSON.stringify({clientUUID: currentClientsUuids[0]}),
+            contentType: "application/json; charset=utf-8",
+            success: function(metricGenerators){
+                console.log(metricGenerators);
+                
+                if (metricGenerators.length < 1) {
+                    console.log('No metric generators returned, waiting 2 seconds and trying again');
+                    setTimeout('getMetricGenerators()', 2000);
+                }
+
+                var detailsRow = $('<div class="row"></div>').appendTo(".clientdetails");
+                detailsRow.empty();
+
+
+                $.each(metricGenerators, function(indexMG, metricGenerator){
+                    var measurementSetDetailsContainer = $('<div class="twelve columns"></div>').appendTo(detailsRow);
+                    measurementSetDetailsContainer.data('metricGenerator', metricGenerator);
+
+                    measurementSetDetailsContainer.append('<p class="metricMonitorHeader">Measurement Set ' + (indexMG + 1) + ':</p>');
+                    measurementSetDetailsContainer.append('<p class="metricMonitorDescription">Name: ' + metricGenerator.name + '</p>');
+                    measurementSetDetailsContainer.append('<p class="metricMonitorDescription">Description: ' + metricGenerator.description + '</p>');
+                    measurementSetDetailsContainer.append('<p class="metricMonitorDescription">UUID: ' + metricGenerator.uuid + '</p>');
+
+                    var moreDetailsRow = $('<div class="row moreDetailsRow"></div>').appendTo(measurementSetDetailsContainer);
+                    var entitiesDivWrapper = $('<div class="four columns nopaddingright"></div>').appendTo(moreDetailsRow);
+                    var entitiesDiv = $('<div class="capabilitieslistbg entitiesList"></div>').appendTo(entitiesDivWrapper);
+                    var attributesDivWrapper = $('<div class="four columns nopaddingright"></div>').appendTo(moreDetailsRow);
+                    var attributesDiv = $('<div class="capabilitieslistbg attributesList"></div>').appendTo(attributesDivWrapper);
+                    var infoDivWrapper = $('<div class="four columns"></div>').appendTo(moreDetailsRow);
+                    var infoDiv = $('<div class="capabilitieslistbg"></div>').appendTo(infoDivWrapper);
+
+                    entitiesDiv.append('<p><strong>Entities</strong></p>');
+
+                    $.each(metricGenerator.listOfEntities, function(indexEntity, entity){
+                        entitiesDiv.append('<p class="noextrawhitespace entitiesitem">' + entity.name + '</p>');
+                    });
+
+                    attributesDiv.append('<p><strong>Attributes</strong></p>');
+                    attributesDiv.append('<p class="noextrawhitespace entitiesitem">Packet loss</p>');
+                    attributesDiv.append('<p class="noextrawhitespace active entitiesitem">Latency</p>');
+
+                    infoDiv.append('<p><strong>Info</strong></p>');
+                    infoDiv.append('<p class="noextrawhitespace">From this day forward, F</p>');
+                });
+
+                $('.entitiesitem').click(function(){
+                    $(this).parents('.entitiesList').children('.entitiesitem').removeClass('active');
+                    $(this).addClass('active');
+                });
+
+                if ($(".entitiesList .active").size() < 1)
+                    $(".entitiesList .entitiesitem").first().trigger('click');
+                
+
+                // Setup next phase: Set-up phase
+                prepareSetupPhase(actionButton);
+
+            },
+            error: function() {
+                console.error("Failed to get a list of metric generators");
+            }
+        });    
+}
+
+function doDiscoveryPhase(actionButton, currentPhase) {
+    console.log('In DISCOVERY PHASE');
+
+    $("#currentPhaseName").text(currentPhase.description);
+    $("#currentPhaseID").text(currentPhase.index);
+    $("#currentPhaseDescription").text("Clients reporting metric generators");
+
+    // Stop client monitoring
+    isClientMonitoringOn = false;
+    
+    // Get metric generators (it takes clients some time to report generators)
+//    var theClientUuid = currentClientsUuids[0]; // TODO: setup multiple ajax calls to all clients
+//    console.log('Getting metric generators for client with UUID: ' + theClientUuid);
+    
+    getClients(getMetricGenerators);
+
+}
+
+function prepareSetupPhase(actionButton) {
+    actionButton.text('Start Set-up Phase');
+    actionButton.unbind('click');
+    actionButton.click(function(e){
+        e.preventDefault();
+        console.log('Starting set-up phase');
+        $.ajax({
+            type: 'GET',
+            url: "/em/gotonextphase/do.json",
+            contentType: "application/json; charset=utf-8",
+            success: function(currentPhase){
+                console.log(currentPhase);
+                if (currentPhase != null) {
+                    console.log('Set-up phase started, returned phase is: ' + currentPhase.description + ' (' + currentPhase.index + ')');
+                    $("#currentPhaseName").text(currentPhase.description);
+                    $("#currentPhaseID").text(currentPhase.index);
+                    doSetupPhase(actionButton, currentPhase);
+                } else {
+                    console.error('Failed to start the set-up phase: next phase is NULL. Stopped');
+                }        
+            },
+            error: function() {
+                console.error('Failed to start the set-up phase. Stopped');
+            }
+        });
+    });
+}
+
+function doSetupPhase(actionButton, currentPhase) {
+    console.log('In SET-UP PHASE');
+    
+    $("#currentPhaseName").text(currentPhase.description);
+    $("#currentPhaseID").text(currentPhase.index);
+    $("#currentPhaseDescription").text("Setting-up clients");
+}
+
 // Get current phase info
 function getPhase() {
     $.ajax({
@@ -362,18 +609,18 @@ function getPhase() {
         contentType: "application/json; charset=utf-8",
         success: function(currentPhase){
             console.log(currentPhase);
-            
+
             if (currentPhase != null) {
-            console.log('Current phase is: ' + currentPhase.description + ' (' + currentPhase.index + ')');
+                console.log('Current phase is: ' + currentPhase.description + ' (' + currentPhase.index + ')');
                 $("#currentPhaseName").text(currentPhase.description);
                 $("#currentPhaseID").text(currentPhase.index);
                 if (currentPhase.index == 0) {
-                    $("#currentPhaseDescription").text("Waiting for clients to connect");  
+                    $("#currentPhaseDescription").text("Waiting for clients to connect");
                 } else {
-                    $("#currentPhaseDescription").text("This phase needs a description");  
-                    
+                    $("#currentPhaseDescription").text("This phase needs a description");
+
                 }
-                
+
             }
 
         },
@@ -383,7 +630,8 @@ function getPhase() {
     });
 }
 
-function getClients() {
+function getClients(callOnSuccess) {
+    console.log("Getting clients, " + (callOnSuccess === null ? "on success calling myself" : "on success calling someone else"));
     $.ajax({
         type: 'GET',
         url: "/em/getclients/do.json",
@@ -428,18 +676,18 @@ function getClients() {
 //                                    } else {
 //                                        console.log(measurementSets);
 //                                    }
-//                                    
+//
 //                                    $.each(measurementSets, function(indexMeasurementSet, measurementSet){
 //                                        var detailsRow = $('<div class="row"></div>').appendTo(".clientdetails");
 //                                        var measurementSetDetailsContainer = $('<div class="twelve columns"></div>').appendTo(detailsRow);
 //                                        measurementSetDetailsContainer.data('measurementSet', measurementSet);
-//                                        
+//
 //                                        measurementSetDetailsContainer.append('<p class="metricMonitorHeader">Measurement Set ' + (indexMeasurementSet + 1) + ':</p>');
 //                                        measurementSetDetailsContainer.append('<p class="metricMonitorDescription">UUID: ' + measurementSet.uuid + '</p>');
 //                                        measurementSetDetailsContainer.append('<p class="metricMonitorDescription">Metric Unit: ' + measurementSet.metricUnit + '</p>');
 //                                        measurementSetDetailsContainer.append('<p class="metricMonitorDescription">Metric UUID: ' + measurementSet.metricUUID + '</p>');
 //                                        measurementSetDetailsContainer.append('<p class="metricMonitorDescription">Metric Type: ' + measurementSet.metricType + '</p>');
-//                                        
+//
 //                                    });
 //                                },
 //                                error: function() {
@@ -458,8 +706,13 @@ function getClients() {
             }
 
             //wait for 3 seconds then run again if it is OK
-            if (isClientMonitoringOn) {
-                setTimeout('getClients()', 3000);
+            if (callOnSuccess === null) {
+                if (isClientMonitoringOn) {
+                    setTimeout('getClients(null)', 3000);
+                }
+            } else {
+                console.log(currentClientsUuids);
+                callOnSuccess();
             }
         },
         error: function() {

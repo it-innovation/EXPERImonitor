@@ -139,7 +139,7 @@ public class ExperimentMonitorController {
 
     @RequestMapping(method = RequestMethod.POST, value = "/getmeasurementsetsforclient/do.json")
     public @ResponseBody MeasurementSetAsJson[] getMeasurementSetsForClient(@RequestBody final String inputData) throws Throwable {
-        logger.debug("Getting measurement sets for a client");
+        logger.debug("Getting measurement sets for a client. Input data: " + inputData);
         try {
             JSONObject inputDataAsJSON = (JSONObject) JSONSerializer.toJSON(inputData);
             String clientUUID = inputDataAsJSON.getString("clientUUID");
@@ -181,7 +181,7 @@ public class ExperimentMonitorController {
 
     @RequestMapping(method = RequestMethod.POST, value = "/getmmetricgeneratorsforclient/do.json")
     public @ResponseBody MetricGeneratorAsJson[] getMetricGeneratorsForClient(@RequestBody final String inputData) throws Throwable {
-        logger.debug("Getting metric generators for a client");
+        logger.debug("Getting metric generators for a client. Input data: " + inputData);
         try {
 
             JSONObject inputDataAsJSON = (JSONObject) JSONSerializer.toJSON(inputData);
