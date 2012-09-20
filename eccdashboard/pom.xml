@@ -162,13 +162,13 @@
         <dependency>
             <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
             <artifactId>experimedia-arch-ecc-em-spec</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>0.9-SNAPSHOT</version>
         </dependency>
     
         <dependency>
             <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
             <artifactId>experimedia-arch-ecc-em-factory</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>0.9-SNAPSHOT</version>
         </dependency>        
     
 <!--        <dependency>
@@ -179,7 +179,7 @@
         <dependency>
             <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
             <artifactId>experimedia-arch-ecc-samples-basicEMClient</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>0.9-SNAPSHOT</version>
             <type>jar</type>
         </dependency>
     </dependencies>
