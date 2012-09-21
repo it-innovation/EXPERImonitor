@@ -69,21 +69,17 @@ $(document).ready(function() {
 
                     // LIVE MONITORING PHASE
                     case 3:
-                        console.log('In LIVE MONITORING PHASE');
-                        actionButton.text('Start Post Report Phase');
+                        doLiveMonitoringPhase(actionButton, currentPhase)
                         break;
 
                     // POST REPORT PHASE
                     case 4:
-                        console.log('In POST REPORT PHASE');
-                        actionButton.text('Start Tear Down Phase');
+                        doPostReportPhase(actionButton, currentPhase)
                         break;
 
                     // TEAR-DOWN PHASE
                     case 5:
-                        console.log('In TEAR-DOWN PHASE');
-                        actionButton.text('Experiment finished - restart');
-                        $(this).addClass('alert');
+                        doTearDownPhase(actionButton, currentPhase)
                         break;
 
                     // UNKNOWN PHASE
@@ -246,6 +242,141 @@ function doSetupPhase(actionButton, currentPhase) {
 
     // Client monitoring OFF
     isClientMonitoringOn = false;
+    
+    prepareLiveMonitoringPhase(actionButton);
+}
+
+function prepareLiveMonitoringPhase(actionButton) {
+    actionButton.text('Start Live Monitoring Phase');
+    actionButton.unbind('click');
+    actionButton.click(function(e){
+        e.preventDefault();
+        console.log('Starting live monitoring phase');
+        $.ajax({
+            type: 'GET',
+            url: "/em/gotonextphase/do.json",
+            contentType: "application/json; charset=utf-8",
+            success: function(currentPhase){
+                console.log(currentPhase);
+                if (currentPhase != null) {
+                    console.log('Live monitoring phase started, returned phase is: ' + currentPhase.description + ' (' + currentPhase.index + ')');
+                    $("#currentPhaseName").text(currentPhase.description);
+                    $("#currentPhaseID").text(currentPhase.index);
+                    doLiveMonitoringPhase(actionButton, currentPhase);
+                } else {
+                    console.error('Failed to start live monitoring phase: next phase is NULL. Stopped');
+                }
+            },
+            error: function() {
+                console.error('Failed to start live monitoring phase. Stopped');
+            }
+        });
+    });
+}
+
+function doLiveMonitoringPhase(actionButton, currentPhase){
+    console.log('In LIVE MONITORING PHASE');
+
+    $("#currentPhaseName").text(currentPhase.description);
+    $("#currentPhaseID").text(currentPhase.index);
+    $("#currentPhaseDescription").text("Live monitoring of clients");
+
+    // Client monitoring OFF
+    isClientMonitoringOn = false;
+    
+    preparePostReportPhase(actionButton);    
+}
+
+function preparePostReportPhase(actionButton) {
+    actionButton.text('Start Post Report Phase');
+    actionButton.unbind('click');
+    actionButton.click(function(e){
+        e.preventDefault();
+        console.log('Starting post report phase');
+        $.ajax({
+            type: 'GET',
+            url: "/em/gotonextphase/do.json",
+            contentType: "application/json; charset=utf-8",
+            success: function(currentPhase){
+                console.log(currentPhase);
+                if (currentPhase != null) {
+                    console.log('Post report phase started, returned phase is: ' + currentPhase.description + ' (' + currentPhase.index + ')');
+                    $("#currentPhaseName").text(currentPhase.description);
+                    $("#currentPhaseID").text(currentPhase.index);
+                    doPostReportPhase(actionButton, currentPhase);
+                } else {
+                    console.error('Failed to start post report phase: next phase is NULL. Stopped');
+                }
+            },
+            error: function() {
+                console.error('Failed to start post report phase. Stopped');
+            }
+        });
+    });
+}
+
+
+function doPostReportPhase(actionButton, currentPhase){
+    console.log('In POST REPORT PHASE');
+
+    $("#currentPhaseName").text(currentPhase.description);
+    $("#currentPhaseID").text(currentPhase.index);
+    $("#currentPhaseDescription").text("Collecting post reports from clients");
+
+    // Client monitoring OFF
+    isClientMonitoringOn = false;
+    
+    prepareTearDownPhase(actionButton);    
+}
+
+
+function prepareTearDownPhase(actionButton) {
+    actionButton.text('Start Tear Down Phase');    
+    actionButton.unbind('click');
+    actionButton.click(function(e){
+        e.preventDefault();
+        console.log('Starting tear down phase');
+        $.ajax({
+            type: 'GET',
+            url: "/em/gotonextphase/do.json",
+            contentType: "application/json; charset=utf-8",
+            success: function(currentPhase){
+                console.log(currentPhase);
+                if (currentPhase != null) {
+                    console.log('Tear down phase started, returned phase is: ' + currentPhase.description + ' (' + currentPhase.index + ')');
+                    $("#currentPhaseName").text(currentPhase.description);
+                    $("#currentPhaseID").text(currentPhase.index);
+                    doTearDownPhase(actionButton, currentPhase);
+                } else {
+                    console.error('Failed to start tear down phase: next phase is NULL. Stopped');
+                }
+            },
+            error: function() {
+                console.error('Failed to start tear down phase. Stopped');
+            }
+        });
+    });
+}
+
+
+function doTearDownPhase(actionButton, currentPhase){
+    console.log('In TEAR-DOWN PHASE');
+    actionButton.text('Experiment finished');
+    actionButton.addClass('alert');
+    actionButton.unbind('click');
+    
+    actionButton.click(function(e){
+        e.preventDefault();
+        alert('Experiment is complete, no phases left');
+    });
+
+    $("#currentPhaseName").text(currentPhase.description);
+    $("#currentPhaseID").text(currentPhase.index);
+    $("#currentPhaseDescription").text("Experiment is complete!");
+
+    // Client monitoring OFF
+    isClientMonitoringOn = false;
+    
 }
 
 function getMetricGeneratorsForClient(clientUUID) {
