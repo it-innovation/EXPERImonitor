@@ -202,6 +202,8 @@ function doDiscoveryPhase(actionButton, currentPhase) {
     isClientMonitoringOn = false;
 
     $(".clientlist .clientitem").first().trigger('click');
+    
+    prepareSetupPhase(actionButton);
 
 }
 
@@ -479,7 +481,7 @@ function getMetricGeneratorsForClient(clientUUID) {
 
 
                     // Setup next phase: Set-up phase
-                    prepareSetupPhase(actionButton);
+//                    prepareSetupPhase(actionButton);
 
                 },
                 error: function() {
