@@ -169,7 +169,7 @@ public class ExperimentMonitorController {
                     tempMeasurementSetAsJson = new MeasurementSetAsJson();
                 }
                 
-                logger.debug("Client " + clientUUID + " has " + resultingMeasurementSets.size() + " measurement sets");
+                logger.debug("Client " + clientUUID + " has " + resultingMeasurementSets.size() + " measurement set(s)");
                 return resultingMeasurementSets.toArray(new MeasurementSetAsJson[0]);
             }
 
@@ -238,7 +238,7 @@ public class ExperimentMonitorController {
                     tempEntitiesAsJson = new HashSet<EntityAsJson>();
                 }
                 
-                logger.debug("Client " + clientUUID + " has " + resultingMetricGenerators.size() + " metric generators");
+                logger.debug("Client " + clientUUID + " has " + resultingMetricGenerators.size() + " metric generator(s)");
                 return resultingMetricGenerators.toArray(new MetricGeneratorAsJson[0]);
             }
 
