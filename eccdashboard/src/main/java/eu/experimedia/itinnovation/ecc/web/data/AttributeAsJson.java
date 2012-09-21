@@ -17,20 +17,19 @@
 // the software.
 //
 //	Created By :			Maxim Bashevoy
-//	Created Date :			2012-09-18
+//	Created Date :			2012-09-21
 //	Created for Project :           Experimedia
 //
 /////////////////////////////////////////////////////////////////////////
 package eu.experimedia.itinnovation.ecc.web.data;
 
-public class EntityAsJson {
+public class AttributeAsJson {
 
     private String uuid;
     private String name;
     private String description;
-    private AttributeAsJson[] attributes;
 
-    public EntityAsJson() {
+    public AttributeAsJson() {
     }
 
     public String getDescription() {
@@ -55,13 +54,5 @@ public class EntityAsJson {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
-    }
-
-    public AttributeAsJson[] getAttributes() {
-        return attributes;
-    }
-
-    public void setAttributes(AttributeAsJson[] attributes) {
-        this.attributes = attributes;
     }
 }

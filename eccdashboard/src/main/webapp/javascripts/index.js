@@ -508,30 +508,69 @@ function getMetricGenerators() {
 
                     var moreDetailsRow = $('<div class="row moreDetailsRow"></div>').appendTo(measurementSetDetailsContainer);
                     var entitiesDivWrapper = $('<div class="four columns nopaddingright"></div>').appendTo(moreDetailsRow);
-                    var entitiesDiv = $('<div class="capabilitieslistbg entitiesList"></div>').appendTo(entitiesDivWrapper);
+                    var entitiesDiv = $('<div class="capabilitieslistbg"></div>').appendTo(entitiesDivWrapper);
                     var attributesDivWrapper = $('<div class="four columns nopaddingright"></div>').appendTo(moreDetailsRow);
-                    var attributesDiv = $('<div class="capabilitieslistbg attributesList"></div>').appendTo(attributesDivWrapper);
+                    var attributesDiv = $('<div class="capabilitieslistbg"></div>').appendTo(attributesDivWrapper);
                     var infoDivWrapper = $('<div class="four columns"></div>').appendTo(moreDetailsRow);
                     var infoDiv = $('<div class="capabilitieslistbg"></div>').appendTo(infoDivWrapper);
 
                     entitiesDiv.append('<p><strong>Entities</strong></p>');
-
+                    attributesDiv.append('<p><strong>Attributes</strong></p>');
+                    infoDiv.append('<p><strong>Info</strong></p>');
+                    
+                    var entitiesList = $('<div class="entitiesList"></div>').appendTo(entitiesDiv);
+                    var attributesList = $('<div class="attributesList"></div>').appendTo(attributesDiv);
+                    var infoList = $('<div class="infoList"></div>').appendTo(infoDiv);
+                    
+                    var theEntity;
                     $.each(metricGenerator.listOfEntities, function(indexEntity, entity){
-                        entitiesDiv.append('<p class="noextrawhitespace entitiesitem">' + entity.name + '</p>');
+                        theEntity = $('<p class="noextrawhitespace entitiesitem">' + entity.name + '</p>').appendTo(entitiesList);
+                        theEntity.data('entity', entity);
+                        
+                        theEntity.click(function(e){
+                            e.preventDefault();
+                            
+                            $(this).parents('.entitiesList').children('.entitiesitem').removeClass('active');
+                            $(this).addClass('active');
+                            
+                            attributesList.empty();
+                            
+                            var entity = $(this).data('entity');
+                            
+                            var theAttribute;
+                            $.each(entity.attributes, function(indexAttribute, attribute){
+                                theAttribute = $('<p class="noextrawhitespace attributesitem">' + attribute.name + '</p>').appendTo(attributesList);
+                                theAttribute.data('attribute', attribute);
+                                
+                                theAttribute.click(function(ev){
+                                    ev.preventDefault();
+                                    
+                                    $(this).parents('.attributesList').children('.attributesitem').removeClass('active');
+                                    $(this).addClass('active');
+                                    
+                                    infoList.empty();
+                                    
+                                    var attribute = $(this).data('attribute');
+                                    
+                                    infoList.append('<p class="noextrawhitespace">UUID: ' + attribute.uuid + '</p>');
+                                    infoList.append('<p class="noextrawhitespace">Name: ' + attribute.name + '</p>');
+                                    infoList.append('<p class="noextrawhitespace">Description: ' + attribute.description + '</p>');
+                                });
+                            });
+                            
+                            if ($(".attributesList .active").size() < 1)
+                                $(".attributesList .attributesitem").first().trigger('click');                            
+                            
+                        });
                     });
 
-                    attributesDiv.append('<p><strong>Attributes</strong></p>');
-                    attributesDiv.append('<p class="noextrawhitespace entitiesitem">Packet loss</p>');
-                    attributesDiv.append('<p class="noextrawhitespace active entitiesitem">Latency</p>');
 
-                    infoDiv.append('<p><strong>Info</strong></p>');
-                    infoDiv.append('<p class="noextrawhitespace">From this day forward, F</p>');
                 });
 
-                $('.entitiesitem').click(function(){
-                    $(this).parents('.entitiesList').children('.entitiesitem').removeClass('active');
-                    $(this).addClass('active');
-                });
+//                $('.entitiesitem').click(function(){
+//                    $(this).parents('.entitiesList').children('.entitiesitem').removeClass('active');
+//                    $(this).addClass('active');
+//                });
 
                 if ($(".entitiesList .active").size() < 1)
                     $(".entitiesList .entitiesitem").first().trigger('click');

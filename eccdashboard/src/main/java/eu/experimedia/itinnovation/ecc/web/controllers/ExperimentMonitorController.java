@@ -38,6 +38,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Attribute;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Entity;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
@@ -173,8 +174,7 @@ public class ExperimentMonitorController {
             }
 
         } catch (Throwable ex) {
-            logger.error("Failed to return measurement sets for the client");
-            ex.printStackTrace();
+            logger.error("Failed to return measurement sets for the client", ex);
             return null;
         }
     }
@@ -194,22 +194,41 @@ public class ExperimentMonitorController {
             if (metricGenerators == null) {
                 logger.debug("Client " + clientUUID + " does not have any metric generators");
                 return null;
+                
             } else {
+                
                 MetricGeneratorAsJson tempMetricGeneratorAsJson = new MetricGeneratorAsJson();
+                
                 Set<EntityAsJson> tempEntitiesAsJson = new HashSet<EntityAsJson>();
-                EntityAsJson tempEntityASJson;
+                EntityAsJson tempEntityAsJson;
+                
+                Set<AttributeAsJson> tempAttributesAsJson = new HashSet<AttributeAsJson>();
+                AttributeAsJson tempAttributeAsJson;
+                
                 for (MetricGenerator mg : metricGenerators) {
                     tempMetricGeneratorAsJson.setUuid(mg.getUUID().toString());
                     tempMetricGeneratorAsJson.setName(mg.getName());
                     tempMetricGeneratorAsJson.setDescription(mg.getDescription());
 
-
                     for (Entity tempEntity : mg.getEntities()) {
-                        tempEntityASJson = new EntityAsJson();
-                        tempEntityASJson.setName(tempEntity.getName());
-                        tempEntityASJson.setDescription(tempEntity.getDescription());
-                        tempEntityASJson.setUuid(tempEntity.getUUID().toString());
-                        tempEntitiesAsJson.add(tempEntityASJson);
+                        tempEntityAsJson = new EntityAsJson();
+                        tempEntityAsJson.setName(tempEntity.getName());
+                        tempEntityAsJson.setDescription(tempEntity.getDescription());
+                        tempEntityAsJson.setUuid(tempEntity.getUUID().toString());
+                        
+                        for (Attribute tempAttribute : tempEntity.getAttributes()) {
+                            tempAttributeAsJson = new AttributeAsJson();
+                            tempAttributeAsJson.setUuid(tempAttribute.getUUID().toString());
+                            tempAttributeAsJson.setName(tempAttribute.getName());
+                            tempAttributeAsJson.setDescription(tempAttribute.getDescription());
+                            
+                            tempAttributesAsJson.add(tempAttributeAsJson);
+                        }
+                        
+                        tempEntityAsJson.setAttributes(tempAttributesAsJson.toArray(new AttributeAsJson[0]));
+                        tempEntitiesAsJson.add(tempEntityAsJson);
+                        
+                        tempAttributesAsJson = new HashSet<AttributeAsJson>();
                     }
 
                     tempMetricGeneratorAsJson.setListOfEntities(tempEntitiesAsJson.toArray(new EntityAsJson[0]));
@@ -224,8 +243,7 @@ public class ExperimentMonitorController {
             }
 
         } catch (Throwable ex) {
-            logger.error("Failed to return metric generators for the client");
-            ex.printStackTrace();
+            logger.error("Failed to return metric generators for the client", ex);
             return null;
         }
     }
