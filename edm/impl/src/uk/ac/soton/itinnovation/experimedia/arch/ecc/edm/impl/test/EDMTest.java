@@ -71,17 +71,18 @@ public class EDMTest
         boolean withSubClasses = true;
         
         // clear the database
-        edm.clearMetricsDatabase();
+        //log.info("Clearing the database");
+        //edm.clearMetricsDatabase();
         
         //-- Create and get experiments --//
-        experiments(edm, expUUID);
+        //experiments(edm, expUUID);
         
         //entities(edm, entityUUID, attributeUUID, expUUID);
         
-        //metricGenerator(edm, expUUID, entityUUID, mGenUUID);
+        //metricGenerator(edm, expUUID, entityUUID, mGenUUID, withSubClasses);
         //metricGeneratorCompleteChain(edm, expUUID, entityUUID, attributeUUID, mGenUUID, mGrpUUID, mSetUUID);
         
-        //metricGroup(edm, mGenUUID, mGrpUUID);
+        //metricGroup(edm, mGenUUID, mGrpUUID, withSubClasses);
         //metricGroupCompleteChain(edm, attributeUUID, mGenUUID, mGrpUUID, mSetUUID);
         
         //measurementSet(edm, attributeUUID, mGrpUUID, mSetUUID);
@@ -93,9 +94,9 @@ public class EDMTest
         
         //printExperimentDetails(edm, expUUID, withSubClasses);
         
-        //saveReport(edm, mSetUUID, reportUUID);
+        saveReport(edm, mSetUUID, reportUUID);
         
-        //getReport(edm, mSetUUID, reportUUID);
+        getReport(edm, mSetUUID, reportUUID);
     }
     
     public static void experiments(MonitoringEDM edm, UUID expUUID) throws Exception
@@ -330,9 +331,8 @@ public class EDMTest
         } // end if entities == null
     }
     
-    public static void metricGenerator(MonitoringEDM edm, UUID expUUID, UUID entityUUID, UUID mGenUUID) throws Exception
+    public static void metricGenerator(MonitoringEDM edm, UUID expUUID, UUID entityUUID, UUID mGenUUID, boolean withSubClasses) throws Exception
     {
-        boolean withSubClasses = true;
         IMetricGeneratorDAO metricGeneratorDAO = null;
         try {
             metricGeneratorDAO = edm.getMetricGeneratorDAO();
@@ -490,9 +490,8 @@ public class EDMTest
     }
     
     
-    public static void metricGroup(MonitoringEDM edm, UUID mGenUUID, UUID mGrpUUID) throws Exception
+    public static void metricGroup(MonitoringEDM edm, UUID mGenUUID, UUID mGrpUUID, boolean withSubClasses) throws Exception
     {
-        boolean withSubClasses = false;
         IMetricGroupDAO metricGroupDAO = null;
         try {
             metricGroupDAO = edm.getMetricGroupDAO();
@@ -520,6 +519,15 @@ public class EDMTest
         } catch (Exception ex) {
             log.error("Unable to save MetricGroup: " + ex.getMessage(), ex);
         }
+        
+        log.info("Getting metric group with UUID " + mGrpUUID.toString());
+        MetricGroup metricGroupFromDB = null;
+        try {
+            metricGroupFromDB = metricGroupDAO.getMetricGroup(mGrpUUID, withSubClasses);
+        } catch (Exception ex) {
+            log.error("Unable to get metric group: " + ex.getMessage(), ex);
+        }
+        printMetricGroupDetails(metricGroupFromDB);
         
         log.info("Getting metric groups for Metric Generator: " + mGenUUID.toString());
         Set<MetricGroup> metricGroups = null;

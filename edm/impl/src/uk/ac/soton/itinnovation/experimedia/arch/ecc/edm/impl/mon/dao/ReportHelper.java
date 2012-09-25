@@ -25,9 +25,10 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.mon.dao;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import org.apache.log4j.Logger;
@@ -104,19 +105,6 @@ public class ReportHelper
         return new ValidationReturnObject(true);
     }
     
-    public static String getSqlInsertQuery(Report report)
-    {
-        String query = "INSERT INTO Report (reportUUID, mSetUUID, reportTimeStamp, fromDateTimeStamp, toDateTimeStamp, numMeasurements) VALUES ("
-                    + "'" + report.getUUID().toString() + "', "
-                    + "'" + report.getMeasurementSet().getUUID().toString() + "', "
-                    + String.valueOf(report.getReportDate().getTime()) + ", "
-                    + String.valueOf(report.getFromDate().getTime()) + ", "
-                    + String.valueOf(report.getToDate().getTime()) + ", "
-                    + String.valueOf(report.getNumberOfMeasurements()) + ")";
-        
-        return query;
-    }
-    
     public static boolean objectExists(UUID uuid, Connection connection, boolean closeDBcon) throws Exception
     {
         return DBUtil.objectExistsByUUID("Report", "reportUUID", uuid, connection, closeDBcon);
@@ -149,17 +137,18 @@ public class ReportHelper
                 connection.setAutoCommit(false);
             }
             
-            String query = ReportHelper.getSqlInsertQuery(report);
-            ResultSet rs = DBUtil.executeQuery(connection, query, Statement.RETURN_GENERATED_KEYS);
+            String query = "INSERT INTO Report (reportUUID, mSetUUID, reportTimeStamp, fromDateTimeStamp, toDateTimeStamp, numMeasurements) VALUES ("
+                    + "?, ?, ?, ?, ?, ?)";
             
-            // check if the result set got the generated table key
-            if (rs.next()) {
-                String key = rs.getString(1);
-                log.debug("Saved Report with key: " + key);
-            } else {
-                exception = true;
-                throw new RuntimeException("No index returned after saving Report");
-            }
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setObject(1, report.getUUID(), java.sql.Types.OTHER);
+            pstmt.setObject(2, report.getMeasurementSet().getUUID(), java.sql.Types.OTHER);
+            pstmt.setLong(3, report.getReportDate().getTime());
+            pstmt.setLong(4, report.getFromDate().getTime());
+            pstmt.setLong(5, report.getToDate().getTime());
+            pstmt.setInt(6, report.getNumberOfMeasurements());
+            
+            pstmt.executeUpdate();
         } catch (Exception ex) {
             exception = true;
             log.error("Error while saving Report: " + ex.getMessage(), ex);
@@ -220,16 +209,18 @@ public class ReportHelper
         }
         
         try {
-            String query = ReportHelper.getSqlInsertQuery(report);
-            ResultSet rs = DBUtil.executeQuery(connection, query, Statement.RETURN_GENERATED_KEYS);
+            String query = "INSERT INTO Report (reportUUID, mSetUUID, reportTimeStamp, fromDateTimeStamp, toDateTimeStamp, numMeasurements) VALUES ("
+                    + "?, ?, ?, ?, ?, ?)";
             
-            // check if the result set got the generated table key
-            if (rs.next()) {
-                String key = rs.getString(1);
-                log.debug("Saved Report with key: " + key);
-            } else {
-                throw new RuntimeException("No index returned after saving Report");
-            }
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setObject(1, report.getUUID(), java.sql.Types.OTHER);
+            pstmt.setObject(2, report.getMeasurementSet().getUUID(), java.sql.Types.OTHER);
+            pstmt.setLong(3, report.getReportDate().getTime());
+            pstmt.setLong(4, report.getFromDate().getTime());
+            pstmt.setLong(5, report.getToDate().getTime());
+            pstmt.setInt(6, report.getNumberOfMeasurements());
+            
+            pstmt.executeUpdate();
         } catch (Exception ex) {
             log.error("Error while saving Report: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while saving Report: " + ex.getMessage(), ex);
@@ -349,8 +340,10 @@ public class ReportHelper
         
         Report report = null;
         try {
-            String query = "SELECT * FROM Report WHERE reportUUID = '" + reportUUID + "'";
-            ResultSet rs = DBUtil.executeQuery(connection, query);
+            String query = "SELECT * FROM Report WHERE reportUUID = ?";
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setObject(1, reportUUID, java.sql.Types.OTHER);
+            ResultSet rs = pstmt.executeQuery();
             
             // check if anything got returned (connection closed in finalise method)
             if (rs.next())
@@ -458,50 +451,21 @@ public class ReportHelper
             throw new RuntimeException("There is no MeasurementSet with the given UUID: " + mSetUUID.toString());
         }*/
         
-        Report report = new Report();
-        Date reportDate = new Date();
-        Date fromDate = null;
-        Date toDate = null;
-        Integer numberOfMeasurements = null;
-        
-        MeasurementSet mSet = new MeasurementSet(mSetUUID);
-        /* get the measurement set (won't have values)
-        MeasurementSet mSet = null;
-        try {
-            mSet = MeasurementSetHelper.getMeasurementSet(mSetUUID, false, connection, false);
-        } catch (Exception ex) {
-            log.error("Failed to generate report, because the MeasurementSet couldn't be retrieved from the database: " + ex.getMessage(), ex);
-            throw new RuntimeException("Failed to generate report, because the MeasurementSet couldn't be retrieved from the database: " + ex.getMessage(), ex);
-        }*/
-        report.setMeasurementSet(mSet);
-        
-        // get measurements, which will allow the calculation of the other values for the Report object
+        Report report = null;
         boolean exception = false;
         try {
-            String query = "SELECT * FROM Measurement WHERE mSetUUID = '" + mSetUUID + "'"
-                    + " ORDER BY timeStamp DESC LIMIT 1";
-            ResultSet rs = DBUtil.executeQuery(connection, query);
+            String query = "SELECT * FROM Measurement WHERE mSetUUID = ? ORDER BY timeStamp DESC LIMIT 1";
             
-            // check if anything got returned (connection closed in finalise method)
-            if (rs.next())
-            {
-				String timeStampStr = rs.getString("timeStamp");
-                
-                try {
-                    fromDate = new Date(Long.parseLong(timeStampStr));
-                    toDate = new Date(Long.parseLong(timeStampStr));
-                    numberOfMeasurements = 1;
-                } catch (Exception ex) {
-                    exception = true;
-                    log.error("Unable to process measurement(s), so cannot generate the Report: " + ex.getMessage(), ex);
-                    throw ex;
-                }
-            }
-            else // nothing in the result set
-            {
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setObject(1, mSetUUID, java.sql.Types.OTHER);
+            
+            ResultSet rs = pstmt.executeQuery();
+            
+            try {
+                report = getReportFromMeasurementResultSet(mSetUUID, rs, false);
+            } catch (Exception ex) {
                 exception = true;
-                log.error("There are no Measurements for the MeasurementSet with the given UUID: " + mSetUUID.toString());
-                throw new RuntimeException("There are no Measurements for the MeasurementSet with the given UUID: " + mSetUUID.toString());
+                throw ex;
             }
         } catch (Exception ex) {
             log.error("Error while quering the database: " + ex.getMessage(), ex);
@@ -510,18 +474,13 @@ public class ReportHelper
             if (exception && closeDBcon)
                 connection.close();
         }
-        
-        report.setReportDate(reportDate);
-        report.setFromDate(fromDate);
-        report.setToDate(toDate);
-        report.setNumberOfMeasurements(numberOfMeasurements);
-        
+        /*
         try {
             ReportHelper.saveReportWithoutMeasurements(report, connection, closeDBcon);
         } catch (Exception ex) {
             log.error("Caught an exception when trying to save the Report object generated: " + ex.getMessage(), ex);
         }
-        
+        */
         return report;
     }
     
@@ -545,57 +504,24 @@ public class ReportHelper
             throw new RuntimeException("There is no MeasurementSet with the given UUID: " + mSetUUID.toString());
         }*/
         
-        Report report = new Report();
-        Date reportDate = new Date();
-        Date fromDate = null;
-        Date toDate = null;
-        Integer numberOfMeasurements = null;
-        
-        MeasurementSet mSet = new MeasurementSet(mSetUUID);
-        /* get the measurement set (won't have values)
-        MeasurementSet mSet = null;
-        try {
-            mSet = MeasurementSetHelper.getMeasurementSet(mSetUUID, false, connection, false);
-        } catch (Exception ex) {
-            log.error("Failed to generate report, because the MeasurementSet couldn't be retrieved from the database: " + ex.getMessage(), ex);
-            throw new RuntimeException("Failed to generate report, because the MeasurementSet couldn't be retrieved from the database: " + ex.getMessage(), ex);
-        }*/
-        report.setMeasurementSet(mSet);
-        
-        // get measurements, which will allow the calculation of the other values for the Report object
+        Report report = null;
         boolean exception = false;
         try {
-            String query = "SELECT * FROM Measurement WHERE mSetUUID = '" + mSetUUID + "'"
+            String query = "SELECT * FROM Measurement WHERE mSetUUID = ?"
                     + " ORDER BY timeStamp DESC LIMIT 1";
-            ResultSet rs = DBUtil.executeQuery(connection, query);
             
-            // check if anything got returned (connection closed in finalise method)
-            if (rs.next())
-            {
-                String measurementUUIDstr = rs.getString("measurementUUID");
-				String timeStampStr = rs.getString("timeStamp");
-                String value = rs.getString("value");
-                
-                try {
-                    UUID measurementUUID = UUID.fromString(measurementUUIDstr);
-                    Date timeStamp = new Date(Long.parseLong(timeStampStr));
-                    mSet.addMeasurement(new Measurement(measurementUUID, mSetUUID, timeStamp, value));
-                    
-                    fromDate = new Date(Long.parseLong(timeStampStr));
-                    toDate = new Date(Long.parseLong(timeStampStr));
-                    numberOfMeasurements = 1;
-                } catch (Exception ex) {
-                    exception = true;
-                    log.error("Unable to process measurement, so cannot generate the Report: " + ex.getMessage(), ex);
-                    throw ex;
-                }
-            }
-            else // nothing in the result set
-            {
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setObject(1, mSetUUID, java.sql.Types.OTHER);
+            
+            ResultSet rs = pstmt.executeQuery();
+            
+            try {
+                report = getReportFromMeasurementResultSet(mSetUUID, rs, true);
+            } catch (Exception ex) {
                 exception = true;
-                log.error("There are no Measurements for the MeasurementSet with the given UUID: " + mSetUUID.toString());
-                throw new RuntimeException("There are no Measurements for the MeasurementSet with the given UUID: " + mSetUUID.toString());
+                throw ex;
             }
+            
         } catch (Exception ex) {
             log.error("Error while quering the database: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
@@ -603,18 +529,13 @@ public class ReportHelper
             if (exception && closeDBcon)
                 connection.close();
         }
-        
-        report.setReportDate(reportDate);
-        report.setFromDate(fromDate);
-        report.setToDate(toDate);
-        report.setNumberOfMeasurements(numberOfMeasurements);
-        
+        /*
         try {
             ReportHelper.saveReportWithoutMeasurements(report, connection, closeDBcon);
         } catch (Exception ex) {
             log.error("Caught an exception when trying to save the Report object generated: " + ex.getMessage(), ex);
         }
-        
+        */
         return report;
     }
 
@@ -638,68 +559,21 @@ public class ReportHelper
             throw new RuntimeException("There is no MeasurementSet with the given UUID: " + mSetUUID.toString());
         }*/
         
-        Report report = new Report();
-        Date reportDate = new Date();
-        Date fromDate = null;
-        Date toDate = null;
-        Integer numberOfMeasurements = null;
-        
-        MeasurementSet mSet = new MeasurementSet(mSetUUID);
-        /* get the measurement set (won't have values)
-        MeasurementSet mSet = null;
-        try {
-            mSet = MeasurementSetHelper.getMeasurementSet(mSetUUID, false, connection, false);
-        } catch (Exception ex) {
-            log.error("Failed to generate report, because the MeasurementSet couldn't be retrieved from the database: " + ex.getMessage(), ex);
-            throw new RuntimeException("Failed to generate report, because the MeasurementSet couldn't be retrieved from the database: " + ex.getMessage(), ex);
-        }*/
-        report.setMeasurementSet(mSet);
-        
-        // get measurements, which will allow the calculation of the other values for the Report object
+        Report report = null;
         boolean exception = false;
         try {
-            String query = "SELECT * FROM Measurement WHERE mSetUUID = '" + mSetUUID + "'";
-            ResultSet rs = DBUtil.executeQuery(connection, query);
-            int numRows = 0;
-            Long timeStampFrom = null;
-            Long timeStampTo = null;
+            String query = "SELECT * FROM Measurement WHERE mSetUUID = ?";
             
-            // check if anything got returned (connection closed in finalise method)
-            while (rs.next())
-            {
-				String timeStampStr = rs.getString("timeStamp");
-                
-                try {
-                    long timeStamp = Long.parseLong(timeStampStr);
-                    if (numRows == 0)
-                    {
-                        timeStampFrom = timeStamp;
-                        timeStampTo = timeStamp;
-                    }
-                    else if (timeStamp > timeStampTo)
-                    {
-                        timeStampTo = timeStamp;
-                    }
-                    else if (timeStamp < timeStampFrom)
-                    {
-                        timeStampFrom = timeStamp;
-                    }
-                } catch (Exception ex) {
-                    log.debug("Unable to process measurement for the report (skipping): " + ex.getMessage(), ex);
-                }
-                numRows++;
-            }
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setObject(1, mSetUUID, java.sql.Types.OTHER);
             
-            if (numRows == 0)
-            {
+            ResultSet rs = pstmt.executeQuery();
+            try {
+                report = getReportFromMeasurementResultSet(mSetUUID, rs, false);
+            } catch (Exception ex) {
                 exception = true;
-                throw new RuntimeException("There are no measurements in the database for the given measurement set to generate a report from");
+                throw ex;
             }
-            
-            fromDate = new Date(timeStampFrom);
-            toDate = new Date(timeStampTo);
-            numberOfMeasurements = numRows;
-            
         } catch (Exception ex) {
             exception = true;
             log.error("Error while quering the database: " + ex.getMessage(), ex);
@@ -708,12 +582,7 @@ public class ReportHelper
             if (exception && closeDBcon)
                 connection.close();
         }
-        
-        report.setReportDate(reportDate);
-        report.setFromDate(fromDate);
-        report.setToDate(toDate);
-        report.setNumberOfMeasurements(numberOfMeasurements);
-        
+        /*
         try {
             ReportHelper.saveReportWithoutMeasurements(report, connection, false);
         } catch (Exception ex) {
@@ -722,26 +591,63 @@ public class ReportHelper
             if (closeDBcon)
                 connection.close();
         }
-        
+        */
         return report;
     }
 
     public static Report getReportForAllMeasurementsWithData(UUID mSetUUID, Connection connection, boolean closeDBcon) throws Exception
     {
-        // get the report without data; may throw an exception
-        Report report = ReportHelper.getReportForAllMeasurements(mSetUUID, connection, false);
+        if (mSetUUID == null)
+        {
+            log.error("Cannot generate a Report object for the MeasurementSet with the given UUID because it is NULL!");
+            throw new NullPointerException("Cannot generate a Report object for the MeasurementSet with the given UUID because it is NULL!");
+        }
         
-        // get the actual measurements for the report
+        if (DBUtil.isClosed(connection))
+        {
+            log.error("Cannot get the Report because the connection to the DB is closed");
+            throw new RuntimeException("Cannot get the Report because the connection to the DB is closed");
+        }
+        
+        /*if (!MeasurementSetHelper.objectExists(mSetUUID, connection))
+        {
+            log.error("There is no MeasurementSet with the given UUID: " + mSetUUID.toString());
+            throw new RuntimeException("There is no MeasurementSet with the given UUID: " + mSetUUID.toString());
+        }*/
+        
+        Report report = null;
+        boolean exception = false;
         try {
-            report.getMeasurementSet().setMeasurements(MeasurementHelper.getMeasurementsForTimePeriod(report.getMeasurementSet().getUUID(), report.getFromDate(), report.getToDate(), connection, false));
+            String query = "SELECT * FROM Measurement WHERE mSetUUID = ?";
+            
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setObject(1, mSetUUID, java.sql.Types.OTHER);
+            
+            ResultSet rs = pstmt.executeQuery();
+            try {
+                report = getReportFromMeasurementResultSet(mSetUUID, rs, true);
+            } catch (Exception ex) {
+                exception = true;
+                throw ex;
+            }
         } catch (Exception ex) {
-            log.error("Caught an exception when getting measurements for report: " + ex.getMessage());
-            throw new RuntimeException("Failed to get the report when getting the measurements: " + ex.getMessage(), ex);
+            exception = true;
+            log.error("Error while quering the database: " + ex.getMessage(), ex);
+            throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
+        } finally {
+            if (exception && closeDBcon)
+                connection.close();
+        }
+        /*
+        try {
+            ReportHelper.saveReportWithoutMeasurements(report, connection, false);
+        } catch (Exception ex) {
+            log.error("Caught an exception when trying to save the Report object generated: " + ex.getMessage(), ex);
         } finally {
             if (closeDBcon)
                 connection.close();
         }
-        
+        */
         return report;
     }
     
@@ -771,59 +677,24 @@ public class ReportHelper
             throw new RuntimeException("There is no MeasurementSet with the given UUID: " + mSetUUID.toString());
         }*/
         
-        Report report = new Report();
-        Date reportDate = new Date();
-        Date toDate = null;
-        Integer numberOfMeasurements = null;
-        
-        MeasurementSet mSet = new MeasurementSet(mSetUUID);
-        /* get the measurement set (won't have values)
-        MeasurementSet mSet = null;
-        try {
-            mSet = MeasurementSetHelper.getMeasurementSet(mSetUUID, false, connection, false);
-        } catch (Exception ex) {
-            log.error("Failed to generate report, because the MeasurementSet couldn't be retrieved from the database: " + ex.getMessage(), ex);
-            throw new RuntimeException("Failed to generate report, because the MeasurementSet couldn't be retrieved from the database: " + ex.getMessage(), ex);
-        }*/
-        report.setMeasurementSet(mSet);
-        
-        // get measurements, which will allow the calculation of the other values for the Report object
+        Report report = null;
         boolean exception = false;
         try {
-            String query = "SELECT * FROM Measurement WHERE mSetUUID = '" + mSetUUID + "'"
-                    + " AND timeStamp >= " + fromDate.getTime();
-            ResultSet rs = DBUtil.executeQuery(connection, query);
-            int numRows = 0;
-            Long timeStampTo = null;
+            String query = "SELECT * FROM Measurement WHERE mSetUUID = ?"
+                    + " AND timeStamp >= ?";
             
-            // check if anything got returned (connection closed in finalise method)
-            while (rs.next())
-            {
-				String timeStampStr = rs.getString("timeStamp");   
-                try {
-                    long timeStamp = Long.parseLong(timeStampStr);
-                    if (numRows == 0)
-                    {
-                        timeStampTo = timeStamp;
-                    }
-                    else if (timeStampTo < timeStamp)
-                    {
-                        timeStampTo = timeStamp;
-                    }
-                } catch (Exception ex) {
-                    log.error("Unable to process measurement for the report (skipping): " + ex.getMessage(), ex);
-                }
-                numRows++;
-            }
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setObject(1, mSetUUID, java.sql.Types.OTHER);
+            pstmt.setLong(2, fromDate.getTime());
             
-            if (numRows == 0)
-            {
+            ResultSet rs = pstmt.executeQuery();
+
+            try {
+                report = getReportFromMeasurementResultSet(mSetUUID, rs, false);
+            } catch (Exception ex) {
                 exception = true;
-                throw new RuntimeException("There are no measurements in the database for the given time period of the measurement set to generate a report from");
+                throw ex;
             }
-            
-            toDate = new Date(timeStampTo);
-            numberOfMeasurements = numRows;
             
         } catch (Exception ex) {
             exception = true;
@@ -833,12 +704,7 @@ public class ReportHelper
             if (exception && closeDBcon)
                 connection.close();
         }
-        
-        report.setReportDate(reportDate);
-        report.setFromDate(fromDate);
-        report.setToDate(toDate);
-        report.setNumberOfMeasurements(numberOfMeasurements);
-        
+        /*
         try {
             ReportHelper.saveReportWithoutMeasurements(report, connection, false);
         } catch (Exception ex) {
@@ -847,26 +713,72 @@ public class ReportHelper
             if (closeDBcon)
                 connection.close();
         }
-        
+        */
         return report;
     }
     
     public static Report getReportForMeasurementsAfterDateWithData(UUID mSetUUID, Date fromDate, Connection connection, boolean closeDBcon) throws Exception
     {
-        // get the report without data; may throw an exception
-        Report report = ReportHelper.getReportForMeasurementsAfterDate(mSetUUID, fromDate, connection, false);
+        if (mSetUUID == null)
+        {
+            log.error("Cannot generate a Report object for the MeasurementSet with the given UUID because it is NULL!");
+            throw new NullPointerException("Cannot generate a Report object for the MeasurementSet with the given UUID because it is NULL!");
+        }
         
-        // get the actual measurements for the report
+        if (fromDate == null)
+        {
+            log.error("Cannot generate a Report object for the MeasurementSet from the given date because it is NULL!");
+            throw new NullPointerException("Cannot generate a Report object for the MeasurementSet from the given date because it is NULL!");
+        }
+        
+        if (DBUtil.isClosed(connection))
+        {
+            log.error("Cannot get the Report because the connection to the DB is closed");
+            throw new RuntimeException("Cannot get the Report because the connection to the DB is closed");
+        }
+        
+        /*if (!MeasurementSetHelper.objectExists(mSetUUID, connection))
+        {
+            log.error("There is no MeasurementSet with the given UUID: " + mSetUUID.toString());
+            throw new RuntimeException("There is no MeasurementSet with the given UUID: " + mSetUUID.toString());
+        }*/
+        
+        Report report = null;
+        boolean exception = false;
         try {
-            report.getMeasurementSet().setMeasurements(MeasurementHelper.getMeasurementsForTimePeriod(report.getMeasurementSet().getUUID(), report.getFromDate(), report.getToDate(), connection, false));
+            String query = "SELECT * FROM Measurement WHERE mSetUUID = ?"
+                    + " AND timeStamp >= ?";
+            
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setObject(1, mSetUUID, java.sql.Types.OTHER);
+            pstmt.setLong(2, fromDate.getTime());
+            
+            ResultSet rs = pstmt.executeQuery();
+            try {
+                report = getReportFromMeasurementResultSet(mSetUUID, rs, true);
+            } catch (Exception ex) {
+                exception = true;
+                throw ex;
+            }
+            
         } catch (Exception ex) {
-            log.error("Caught an exception when getting measurements for report: " + ex.getMessage());
-            throw new RuntimeException("Failed to get the report when getting the measurements: " + ex.getMessage(), ex);
+            exception = true;
+            log.error("Error while quering the database: " + ex.getMessage(), ex);
+            throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
+        } finally {
+            if (exception && closeDBcon)
+                connection.close();
+        }
+        /*
+        try {
+            ReportHelper.saveReportWithoutMeasurements(report, connection, false);
+        } catch (Exception ex) {
+            log.error("Caught an exception when trying to save the Report object generated: " + ex.getMessage(), ex);
         } finally {
             if (closeDBcon)
                 connection.close();
         }
-        
+        */
         return report;
     }
 
@@ -916,9 +828,15 @@ public class ReportHelper
         try {
             //String query = "SELECT * FROM Measurement WHERE mSetUUID = '" + mSetUUID + "'"
             //        + " AND timeStamp BETWEEN " + fromDate.getTime() + " AND " + toDate.getTime();
-            String query = "SELECT COUNT(*) FROM Measurement WHERE mSetUUID = '" + mSetUUID + "'"
-                    + " AND timeStamp BETWEEN " + fromDate.getTime() + " AND " + toDate.getTime();
-            ResultSet rs = DBUtil.executeQuery(connection, query);
+            String query = "SELECT COUNT(*) FROM Measurement WHERE mSetUUID = ?"
+                    + " AND timeStamp BETWEEN ? AND ?";
+            
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setObject(1, mSetUUID, java.sql.Types.OTHER);
+            pstmt.setLong(2, fromDate.getTime());
+            pstmt.setLong(3, toDate.getTime());
+            
+            ResultSet rs = pstmt.executeQuery();
             int numRows = 0;
             
             // count how many measurements we've got, if any
@@ -948,7 +866,7 @@ public class ReportHelper
         report.setFromDate(fromDate);
         report.setToDate(toDate);
         report.setNumberOfMeasurements(numberOfMeasurements);
-        
+        /*
         try {
             ReportHelper.saveReportWithoutMeasurements(report, connection, false);
         } catch (Exception ex) {
@@ -957,7 +875,7 @@ public class ReportHelper
             if (closeDBcon)
                 connection.close();
         }
-        
+        */
         return report;
     }
 
@@ -975,6 +893,93 @@ public class ReportHelper
         } finally {
             if (closeDBcon)
                 connection.close();
+        }
+        
+        return report;
+    }
+    
+    private static Report getReportFromMeasurementResultSet(UUID mSetUUID, ResultSet rs, boolean withMeasurements) throws Exception
+    {
+        Report report = new Report();
+        Date reportDate = new Date();
+        Date fromDate = null;
+        Date toDate = null;
+        Integer numberOfMeasurements = null;
+        
+        MeasurementSet mSet = new MeasurementSet(mSetUUID);
+        Set<Measurement> measurements = new HashSet<Measurement>();
+        /* get the measurement set (won't have values)
+        MeasurementSet mSet = null;
+        try {
+            mSet = MeasurementSetHelper.getMeasurementSet(mSetUUID, false, connection, false);
+        } catch (Exception ex) {
+            log.error("Failed to generate report, because the MeasurementSet couldn't be retrieved from the database: " + ex.getMessage(), ex);
+            throw new RuntimeException("Failed to generate report, because the MeasurementSet couldn't be retrieved from the database: " + ex.getMessage(), ex);
+        }*/
+        
+        try {
+            int numRows = 0;
+            Long timeStampFrom = null;
+            Long timeStampTo = null;
+            
+            // check if anything got returned (connection closed in finalise method)
+            while (rs.next())
+            {
+                String measurementUUIDstr = rs.getString("measurementUUID");
+				String timeStampStr = rs.getString("timeStamp");
+                String value = rs.getString("value");
+                
+                try {
+                    UUID measurementUUID = UUID.fromString(measurementUUIDstr);
+                    Date timeStampDate = new Date(Long.parseLong(timeStampStr));
+                    
+                    if (numRows == 0)
+                    {
+                        timeStampFrom = timeStampDate.getTime();
+                        timeStampTo = timeStampDate.getTime();
+                    }
+                    else if (timeStampDate.getTime() > timeStampTo)
+                    {
+                        timeStampTo = timeStampDate.getTime();
+                    }
+                    else if (timeStampDate.getTime() < timeStampFrom)
+                    {
+                        timeStampFrom = timeStampDate.getTime();
+                    }
+                    
+                    if (withMeasurements)
+                    {
+                        measurements.add(new Measurement(measurementUUID, mSetUUID, timeStampDate, value));
+                    }
+                } catch (Exception ex) {
+                    log.error("Unable to process measurement for the report (skipping): " + ex.getMessage(), ex);
+                }
+                numRows++;
+            }
+            
+            if (numRows == 0)
+            {
+                throw new RuntimeException("There are no measurements in the database for the given time period of the measurement set to generate a report from");
+            }
+            
+            fromDate = new Date(timeStampFrom);
+            toDate = new Date(timeStampTo);
+            numberOfMeasurements = numRows;
+            
+        } catch (Exception ex) {
+            log.error("Error while creating report from measurement data: " + ex.getMessage(), ex);
+            throw new RuntimeException("Error while creating report from measurement data: " + ex.getMessage(), ex);
+        }
+        
+        report.setReportDate(reportDate);
+        report.setFromDate(fromDate);
+        report.setToDate(toDate);
+        report.setNumberOfMeasurements(numberOfMeasurements);
+        report.setMeasurementSet(mSet);
+        
+        if (withMeasurements)
+        {
+            mSet.setMeasurements(measurements);
         }
         
         return report;

@@ -25,8 +25,8 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.mon.dao;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -131,17 +131,6 @@ public class MeasurementSetHelper
         return new ValidationReturnObject(true);
     }
     
-    public static String getSqlInsertQuery(MeasurementSet mSet)
-    {
-        String query = "INSERT INTO MeasurementSet (mSetUUID, mGrpUUID, attribUUID, metricUUID) VALUES ("
-                    + "'" + mSet.getUUID().toString() + "', "
-                    + "'" + mSet.getMetricGroupUUID().toString() + "', "
-                    + "'" + mSet.getAttributeUUID().toString() + "', "
-                    + "'" + mSet.getMetric().getUUID().toString() + "')";
-        
-        return query;
-    }
-    
     public static boolean objectExists(UUID uuid, Connection connection, boolean closeDBcon) throws Exception
     {
         return DBUtil.objectExistsByUUID("MeasurementSet", "mSetUUID", uuid, connection, closeDBcon);
@@ -191,17 +180,15 @@ public class MeasurementSetHelper
         
         // saving the measurement set
         try {
-            String query = MeasurementSetHelper.getSqlInsertQuery(measurementSet);
-            ResultSet rs = DBUtil.executeQuery(connection, query, Statement.RETURN_GENERATED_KEYS);
+            String query = "INSERT INTO MeasurementSet (mSetUUID, mGrpUUID, attribUUID, metricUUID) VALUES "
+                    + "(?, ?, ?, ?)";
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setObject(1, measurementSet.getUUID(), java.sql.Types.OTHER);
+            pstmt.setObject(2, measurementSet.getMetricGroupUUID(), java.sql.Types.OTHER);
+            pstmt.setObject(3, measurementSet.getAttributeUUID(), java.sql.Types.OTHER);
+            pstmt.setObject(4, measurementSet.getMetric().getUUID(), java.sql.Types.OTHER);
             
-            // check if the result set got the generated table key
-            if (rs.next()) {
-                String key = rs.getString(1);
-                log.debug("Saved MeasurementSet with key: " + key);
-            } else {
-                exception = true;
-                throw new RuntimeException("No index returned after saving MeasurementSet");
-            }
+            pstmt.executeUpdate();
         } catch (Exception ex) {
             exception = true;
             log.error("Error while saving MeasurementSet: " + ex.getMessage(), ex);
@@ -267,8 +254,10 @@ public class MeasurementSetHelper
         String metricUUIDstr = null;
         boolean exception = false;
         try {
-            String query = "SELECT * FROM MeasurementSet WHERE mSetUUID = '" + measurementSetUUID.toString() + "'";
-            ResultSet rs = DBUtil.executeQuery(connection, query);
+            String query = "SELECT * FROM MeasurementSet WHERE mSetUUID = ?";
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setObject(1, measurementSetUUID, java.sql.Types.OTHER);
+            ResultSet rs = pstmt.executeQuery();
             
             // check if anything got returned (connection closed in finalise method)
             if (rs.next())
@@ -337,8 +326,10 @@ public class MeasurementSetHelper
         Set<MeasurementSet> measurementSets = new HashSet<MeasurementSet>();
         
         try {
-            String query = "SELECT mSetUUID FROM MeasurementSet WHERE mGrpUUID = '" + metricGroupUUID.toString() + "'";
-            ResultSet rs = DBUtil.executeQuery(connection, query);
+            String query = "SELECT mSetUUID FROM MeasurementSet WHERE mGrpUUID = ?";
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setObject(1, metricGroupUUID, java.sql.Types.OTHER);
+            ResultSet rs = pstmt.executeQuery();
             
             // check if anything got returned (connection closed in finalise method)
             while (rs.next())

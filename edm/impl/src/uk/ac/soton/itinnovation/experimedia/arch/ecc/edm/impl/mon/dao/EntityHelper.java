@@ -25,11 +25,9 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.mon.dao;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import org.apache.log4j.Logger;
@@ -103,38 +101,6 @@ public class EntityHelper
         return new ValidationReturnObject(true);
     }
     
-    /**
-     * Checks the available parameters in the object and adds to the lists, the
-     * table names and values accordingly.
-     * 
-     * OBS: it is assumed that the object has been validated to have at least the
-     * minimum information.
-     * 
-     * @param entity
-     * @param valueNames
-     * @param values 
-     */
-    public static void getTableNamesAndValues(Entity entity, List<String> valueNames, List<String> values)
-    {
-        if (entity == null)
-            return;
-        
-        if ((valueNames == null) || (values == null))
-            return;
-        
-        valueNames.add("entityUUID");
-        values.add("'" + entity.getUUID().toString() + "'");
-        
-        valueNames.add("name");
-        values.add("'" + entity.getName() + "'");
-        
-        if (entity.getDescription() != null)
-        {
-            valueNames.add("description");
-            values.add("'" + entity.getDescription() + "'");
-        }
-    }
-    
     public static boolean objectExists(UUID uuid, Connection connection, boolean closeDBcon) throws Exception
     {
         return DBUtil.objectExistsByUUID("Entity", "entityUUID", uuid, connection, closeDBcon);
@@ -166,22 +132,14 @@ public class EntityHelper
                 connection.setAutoCommit(false);
             }
             
-            // get the table names and values according to what's available in the object
-            List<String> valueNames = new ArrayList<String>();
-            List<String> values = new ArrayList<String>();
-            EntityHelper.getTableNamesAndValues(entity, valueNames, values);
+            String query = "INSERT INTO Entity (entityUUID, name, description) VALUES (?, ?, ?)";
             
-            String query = DBUtil.getInsertIntoQuery("Entity", valueNames, values);
-            ResultSet rs = DBUtil.executeQuery(connection, query, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setObject(1, entity.getUUID(), java.sql.Types.OTHER);
+            pstmt.setString(2, entity.getName());
+            pstmt.setString(3, entity.getDescription());
             
-            // check if the result set got the generated table key
-            if (rs.next()) {
-                String key = rs.getString(1);
-                log.debug("Saved entity " + entity.getName() + " with key: " + key);
-            } else {
-                exception = true;
-                throw new RuntimeException("No index returned after saving entity " + entity.getName());
-            }//end of debugging
+            pstmt.executeUpdate();
         } catch (Exception ex) {
             exception = true;
             log.error("Error while saving entity: " + ex.getMessage(), ex);
@@ -232,24 +190,26 @@ public class EntityHelper
             throw new NullPointerException("Cannot get an Entity object with the given UUID because it is NULL!");
         }
         
-        /*if (!EntityHelper.objectExists(entityUUID, dbCon))
-        {
-            log.error("There is no entity with the given UUID: " + entityUUID.toString());
-            throw new RuntimeException("There is no entity with the given UUID: " + entityUUID.toString());
-        }*/
-        
         if (DBUtil.isClosed(connection))
         {
             log.error("Cannot get the Entity because the connection to the DB is closed");
             throw new RuntimeException("Cannot get the Entity because the connection to the DB is closed");
         }
         
+        /*if (!EntityHelper.objectExists(entityUUID, dbCon))
+        {
+            log.error("There is no entity with the given UUID: " + entityUUID.toString());
+            throw new RuntimeException("There is no entity with the given UUID: " + entityUUID.toString());
+        }*/
+        
         Entity entity = null;
         boolean exception = false;
         try {
             
-            String query = "SELECT * FROM Entity WHERE entityUUID = '" + entityUUID + "'";
-            ResultSet rs = DBUtil.executeQuery(connection, query);
+            String query = "SELECT * FROM Entity WHERE entityUUID = ?";
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setObject(1, entityUUID, java.sql.Types.OTHER);
+            ResultSet rs = pstmt.executeQuery();
             
             // check if anything got returned (connection closed in finalise method)
             if (rs.next())
@@ -305,7 +265,8 @@ public class EntityHelper
         Set<Entity> entities = new HashSet<Entity>();
         try {
             String query = "SELECT entityUUID FROM Entity";
-            ResultSet rs = DBUtil.executeQuery(connection, query);
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            ResultSet rs = pstmt.executeQuery();
             
             // check if anything got returned (connection closed in finalise method)
             while (rs.next())
@@ -348,9 +309,11 @@ public class EntityHelper
         Set<Entity> entities = new HashSet<Entity>();
         
         try {
-            String query = "SELECT entityUUID FROM MetricGenerator_Entity "
-                    + "WHERE mGenUUID = (SELECT mGenUUID FROM MetricGenerator WHERE expUUID = '" + expUUID.toString() + "')";
-            ResultSet rs = DBUtil.executeQuery(connection, query);
+            String query = "SELECT DISTINCT entityUUID FROM MetricGenerator_Entity "
+                    + "WHERE mGenUUID IN (SELECT mGenUUID FROM MetricGenerator WHERE expUUID = ?)";
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setObject(1, expUUID, java.sql.Types.OTHER);
+            ResultSet rs = pstmt.executeQuery();
             
             // check if anything got returned (connection closed in finalise method)
             while (rs.next())
@@ -393,8 +356,10 @@ public class EntityHelper
         Set<Entity> entities = new HashSet<Entity>();
         
         try {
-            String query = "SELECT entityUUID FROM MetricGenerator_Entity WHERE mGenUUID = '" + mGenUUID + "'";
-            ResultSet rs = DBUtil.executeQuery(connection, query);
+            String query = "SELECT entityUUID FROM MetricGenerator_Entity WHERE mGenUUID = ?";
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setObject(1, mGenUUID, java.sql.Types.OTHER);
+            ResultSet rs = pstmt.executeQuery();
             
             // check if anything got returned (connection closed in finalise method)
             while (rs.next())
@@ -439,7 +404,8 @@ public class EntityHelper
         
         try {
             String query = "DELETE from Entity";
-            DBUtil.executeQuery(connection, query);
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.executeUpdate();
         } catch (Exception ex) {
             exception = true;
             log.error("Unable to delete entities: " + ex.getMessage(), ex);
@@ -483,8 +449,10 @@ public class EntityHelper
         boolean exception = false;
         
         try {
-            String query = "DELETE from Entity where entityUUID = '" + entityUUID + "'";
-            DBUtil.executeQuery(connection, query);
+            String query = "DELETE from Entity where entityUUID = ?";
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setObject(1, entityUUID, java.sql.Types.OTHER);
+            pstmt.executeUpdate();
         } catch (Exception ex) {
             exception = true;
             log.error("Unable to delete entity: " + ex.getMessage(), ex);

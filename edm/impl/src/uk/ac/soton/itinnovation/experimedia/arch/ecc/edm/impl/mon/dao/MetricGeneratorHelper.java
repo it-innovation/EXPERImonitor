@@ -25,11 +25,9 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.mon.dao;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import org.apache.log4j.Logger;
@@ -138,41 +136,6 @@ public class MetricGeneratorHelper
         return new ValidationReturnObject(true);
     }
     
-    /**
-     * Checks the available parameters in the object and adds to the lists, the
-     * table names and values accordingly.
-     * 
-     * OBS: it is assumed that the object has been validated to have at least the
-     * minimum information.
-     * 
-     * @param mg
-     * @param valueNames
-     * @param values 
-     */
-    public static void getTableNamesAndValues(MetricGenerator mg, UUID expUUID, List<String> valueNames, List<String> values)
-    {
-        if (mg == null)
-            return;
-        
-        if ((valueNames == null) || (values == null))
-            return;
-
-        valueNames.add("mGenUUID");
-        values.add("'" + mg.getUUID().toString() + "'");
-        
-        valueNames.add("expUUID");
-        values.add("'" + expUUID.toString() + "'");
-        
-        valueNames.add("name");
-        values.add("'" + mg.getName() + "'");
-        
-        if (mg.getDescription() != null)
-        {
-            valueNames.add("description");
-            values.add("'" + mg.getDescription() + "'");
-        }
-    }
-    
     public static boolean objectExists(UUID uuid, Connection connection, boolean closeDBcon) throws Exception
     {
         return DBUtil.objectExistsByUUID("MetricGenerator", "mGenUUID", uuid, connection, closeDBcon);
@@ -231,24 +194,16 @@ public class MetricGeneratorHelper
         }
         
         try {
+            String query = "INSERT INTO MetricGenerator (mGenUUID, expUUID, name, description) VALUES (?, ?, ?, ?)";
             
-            // get the table names and values according to what's available in the
-            // object
-            List<String> valueNames = new ArrayList<String>();
-            List<String> values = new ArrayList<String>();
-            MetricGeneratorHelper.getTableNamesAndValues(metricGen, experimentUUID, valueNames, values);
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setObject(1, metricGen.getUUID(), java.sql.Types.OTHER);
+            pstmt.setObject(2, experimentUUID, java.sql.Types.OTHER);
+            pstmt.setString(3, metricGen.getName());
+            pstmt.setString(4, metricGen.getDescription());
             
-            String query = DBUtil.getInsertIntoQuery("MetricGenerator", valueNames, values);
-            ResultSet rs = DBUtil.executeQuery(connection, query, Statement.RETURN_GENERATED_KEYS);
-            
-            // check if the result set got the generated table key
-            if (rs.next()) {
-                String key = rs.getString(1);
-                log.debug("Saved MetricGenerator " + metricGen.getName() + " with key: " + key);
-            } else {
-                exception = true;
-                throw new RuntimeException("No index returned after saving MetricGenerator " + metricGen.getName());
-            }
+            pstmt.executeUpdate();
+
         } catch (Exception ex) {
             exception = true;
             log.error("Error while saving MetricGenerator: " + ex.getMessage(), ex);
@@ -331,17 +286,13 @@ public class MetricGeneratorHelper
         }
         
         try {
-            String query = "INSERT INTO MetricGenerator_Entity (mGenUUID, entityUUID) VALUES ("
-                    + "'" + mGenUUID.toString() + "', '" + entityUUID.toString() + "')";
-            ResultSet rs = DBUtil.executeQuery(connection, query, Statement.RETURN_GENERATED_KEYS);
+            String query = "INSERT INTO MetricGenerator_Entity (mGenUUID, entityUUID) VALUES (?, ?)";
             
-            // check if the result set got the generated table key
-            if (rs.next()) {
-                String key = rs.getString(1);
-                log.debug("Saved MetricGenerator - Entity link");
-            } else {
-                throw new RuntimeException("No index returned after saving MetricGenerator - Entity link");
-            }
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setObject(1, mGenUUID, java.sql.Types.OTHER);
+            pstmt.setObject(2, entityUUID, java.sql.Types.OTHER);
+            
+            pstmt.executeUpdate();
         } catch (Exception ex) {
             log.error("Error while saving MetricGenerator - Entity link: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while saving MetricGenerator - Entity link: " + ex.getMessage(), ex);
@@ -374,8 +325,10 @@ public class MetricGeneratorHelper
         MetricGenerator metricGenerator = null;
         boolean exception = false;
         try {
-            String query = "SELECT * FROM MetricGenerator WHERE mGenUUID = '" + metricGenUUID + "'";
-            ResultSet rs = DBUtil.executeQuery(connection, query);
+            String query = "SELECT * FROM MetricGenerator WHERE mGenUUID = ?";
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setObject(1, metricGenUUID, java.sql.Types.OTHER);
+            ResultSet rs = pstmt.executeQuery();
             
             // check if anything got returned (connection closed in finalise method)
             if (rs.next())
@@ -456,7 +409,8 @@ public class MetricGeneratorHelper
         Set<MetricGenerator> metricGenerators = new HashSet<MetricGenerator>();
         try {
             String query = "SELECT mGenUUID FROM MetricGenerator";
-            ResultSet rs = DBUtil.executeQuery(connection, query);
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            ResultSet rs = pstmt.executeQuery();
             
             // check if anything got returned (connection closed in finalise method)
             while (rs.next())
@@ -506,8 +460,10 @@ public class MetricGeneratorHelper
         
         Set<MetricGenerator> metricGenerators = new HashSet<MetricGenerator>();
         try {
-            String query = "SELECT mGenUUID FROM MetricGenerator WHERE expUUID = '" + expUUID.toString() + "'";
-            ResultSet rs = DBUtil.executeQuery(connection, query);
+            String query = "SELECT mGenUUID FROM MetricGenerator WHERE expUUID = ?";
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setObject(1, expUUID, java.sql.Types.OTHER);
+            ResultSet rs = pstmt.executeQuery();
             
             // check if anything got returned (connection closed in finalise method)
             while (rs.next())

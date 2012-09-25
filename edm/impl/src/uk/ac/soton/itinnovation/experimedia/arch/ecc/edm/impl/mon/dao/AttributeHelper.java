@@ -25,11 +25,9 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.mon.dao;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import org.apache.log4j.Logger;
@@ -91,41 +89,6 @@ public class AttributeHelper
         return new ValidationReturnObject(true);
     }
     
-    /**
-     * Checks the available parameters in the object and adds to the lists, the
-     * table names and values accordingly.
-     * 
-     * OBS: it is assumed that the object has been validated to have at least the
-     * minimum information.
-     * 
-     * @param attrib
-     * @param valueNames
-     * @param values 
-     */
-    public static void getTableNamesAndValues(Attribute attrib, List<String> valueNames, List<String> values)
-    {
-        if (attrib == null)
-            return;
-        
-        if ((valueNames == null) || (values == null))
-            return;
-        
-        valueNames.add("attribUUID");
-        values.add("'" + attrib.getUUID().toString() + "'");
-        
-        valueNames.add("entityUUID");
-        values.add("'" + attrib.getEntityUUID().toString() + "'");
-        
-        valueNames.add("name");
-        values.add("'" + attrib.getName() + "'");
-        
-        if (attrib.getDescription() != null)
-        {
-            valueNames.add("description");
-            values.add("'" + attrib.getDescription() + "'");
-        }
-    }
-    
     public static boolean objectExists(UUID uuid, Connection connection, boolean closeDBcon) throws Exception
     {
         return DBUtil.objectExistsByUUID("Attribute", "attribUUID", uuid, connection, closeDBcon);
@@ -149,22 +112,15 @@ public class AttributeHelper
         }
         
         try {
-            // get the table names and values according to what's available in the
-            // object
-            List<String> valueNames = new ArrayList<String>();
-            List<String> values = new ArrayList<String>();
-            AttributeHelper.getTableNamesAndValues(attrib, valueNames, values);
+            String query = "INSERT INTO Attribute (attribUUID, entityUUID, name, description) VALUES (?, ?, ?, ?)";
             
-            String query = DBUtil.getInsertIntoQuery("Attribute", valueNames, values);
-            ResultSet rs = DBUtil.executeQuery(connection, query, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setObject(1, attrib.getUUID(), java.sql.Types.OTHER);
+            pstmt.setObject(2, attrib.getEntityUUID(), java.sql.Types.OTHER);
+            pstmt.setString(3, attrib.getName());
+            pstmt.setString(4, attrib.getDescription());
             
-            // check if the result set got the generated table key
-            if (rs.next()) {
-                String key = rs.getString(1);
-                log.debug("Saved attribute " + attrib.getName() + " with key: " + key);
-            } else {
-                throw new RuntimeException("No index returned after saving attribute " + attrib.getName());
-            }//end of debugging
+            pstmt.executeUpdate();
         } catch (Exception ex) {
             log.error("Error while saving entity: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while saving attribute: " + ex.getMessage(), ex);
@@ -196,8 +152,10 @@ public class AttributeHelper
         
         Attribute attribute = null;
         try {
-            String query = "SELECT * FROM Attribute WHERE attribUUID = '" + attribUUID + "'";
-            ResultSet rs = DBUtil.executeQuery(connection, query);
+            String query = "SELECT * FROM Attribute WHERE attribUUID = ?";
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setObject(1, attribUUID, java.sql.Types.OTHER);
+            ResultSet rs = pstmt.executeQuery();
             
             // check if anything got returned (connection closed in finalise method)
             if (rs.next())
@@ -251,8 +209,10 @@ public class AttributeHelper
         
         Set<Attribute> attributes = new HashSet<Attribute>();
         try {
-            String query = "SELECT * FROM Attribute WHERE entityUUID = '" + entityUUID + "'";
-            ResultSet rs = DBUtil.executeQuery(connection, query);
+            String query = "SELECT * FROM Attribute WHERE entityUUID = ?";
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setObject(1, entityUUID, java.sql.Types.OTHER);
+            ResultSet rs = pstmt.executeQuery();
             
             // check if anything got returned (connection closed in finalise method)
             while (rs.next())

@@ -26,13 +26,13 @@ To load the database, there's various options to do that; here's one:
 
 Configuring the EDM to connect to the database can be done in:
 
-	./impl/src/main/resources/edm.properties
+	../impl/src/main/resources/edm.properties
 
 The database can be populated with test data via a class in the EDM java
 implementation package; PopulateDB. This is a class with a main method that
 will create an experiment, 3 entities (with multiple attribute) and 3 metric
-generators for each entity. Each metric generator will have a metric group and 
-measurement sets for each of the attributes for the respective entity. It will
+generators (one for each entity). Each metric generator will have a metric group
+and measurement sets for each of the attributes for the respective entity. It will
 also create reports for each of the measurement set with 20 random measurements.
 
 After running the PopulateDB class, the DB should be populated as per the log

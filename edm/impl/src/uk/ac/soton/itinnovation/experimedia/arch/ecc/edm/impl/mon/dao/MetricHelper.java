@@ -174,8 +174,10 @@ static Logger log = Logger.getLogger(MetricHelper.class);
         Metric metric = null;
         
         try {
-            String query = "SELECT * FROM Metric WHERE metricUUID = '" + metricUUID.toString() + "'";
-            ResultSet rs = DBUtil.executeQuery(connection, query);
+            String query = "SELECT * FROM Metric WHERE metricUUID = ?";
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setObject(1, metricUUID, java.sql.Types.OTHER);
+            ResultSet rs = pstmt.executeQuery();
             
             // check if anything got returned (connection closed in finalise method)
             if (rs.next())
@@ -249,8 +251,10 @@ static Logger log = Logger.getLogger(MetricHelper.class);
         Metric metric = null;
         
         try {
-            String query = "SELECT * FROM Metric WHERE metricUUID = (SELECT metricUUID FROM MeasurementSet WHERE mSetUUID = '" + measurementSetUUID + "')";
-            ResultSet rs = DBUtil.executeQuery(connection, query);
+            String query = "SELECT * FROM Metric WHERE metricUUID = (SELECT metricUUID FROM MeasurementSet WHERE mSetUUID = ?)";
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setObject(1, measurementSetUUID, java.sql.Types.OTHER);
+            ResultSet rs = pstmt.executeQuery();
             
             // check if anything got returned (connection closed in finalise method)
             if (rs.next())
@@ -321,7 +325,8 @@ static Logger log = Logger.getLogger(MetricHelper.class);
         
         try {
             String query = "DELETE from Metric";
-            DBUtil.executeQuery(connection, query);
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.executeUpdate();
         } catch (Exception ex) {
             exception = true;
             log.error("Unable to delete metrics: " + ex.getMessage(), ex);
@@ -365,8 +370,10 @@ static Logger log = Logger.getLogger(MetricHelper.class);
         boolean exception = false;
         
         try {
-            String query = "DELETE from Metric where metricUUID = '" + metricUUID + "'";
-            DBUtil.executeQuery(connection, query);
+            String query = "DELETE from Metric where metricUUID = ?";
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setObject(1, metricUUID, java.sql.Types.OTHER);
+            pstmt.executeUpdate();
         } catch (Exception ex) {
             exception = true;
             log.error("Unable to delete metric: " + ex.getMessage(), ex);

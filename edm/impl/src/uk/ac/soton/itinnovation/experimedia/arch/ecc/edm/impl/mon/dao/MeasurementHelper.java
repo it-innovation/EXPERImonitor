@@ -25,8 +25,8 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.mon.dao;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -156,17 +156,6 @@ public class MeasurementHelper
         return new ValidationReturnObject(true);
     }
     
-    public static String getSqlInsertQuery(Measurement measurement)
-    {
-        String query = "INSERT INTO Measurement (measurementUUID, mSetUUID, timeStamp, value) VALUES ("
-                    + "'" + measurement.getUUID().toString() + "', "
-                    + "'" + measurement.getMeasurementSetUUID().toString() + "', "
-                    + String.valueOf(measurement.getTimeStamp().getTime()) + ", "
-                    + "'" + measurement.getValue() + "')";
-        
-        return query;
-    }
-    
     public static boolean objectExists(UUID uuid, Connection connection, boolean closeDBcon) throws Exception
     {
         return DBUtil.objectExistsByUUID("Measurement", "measurementUUID", uuid, connection, closeDBcon);
@@ -190,16 +179,15 @@ public class MeasurementHelper
         }
         
         try {
-            String query = getSqlInsertQuery(measurement);
-            ResultSet rs = DBUtil.executeQuery(connection, query, Statement.RETURN_GENERATED_KEYS);
+            String query = "INSERT INTO Measurement (measurementUUID, mSetUUID, timeStamp, value) VALUES (?, ?, ?, ?)";
             
-            // check if the result set got the generated table key
-            if (rs.next()) {
-                String key = rs.getString(1);
-                //log.debug("Saved Measurement with key: " + key);
-            } else {
-                throw new RuntimeException("No index returned after saving Measurement");
-            }
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setObject(1, measurement.getUUID(), java.sql.Types.OTHER);
+            pstmt.setObject(2, measurement.getMeasurementSetUUID(), java.sql.Types.OTHER);
+            pstmt.setLong(3, measurement.getTimeStamp().getTime());
+            pstmt.setString(4, measurement.getValue());
+            
+            pstmt.executeUpdate();
         } catch (Exception ex) {
             log.error("Error while saving Measurement: " + ex.getMessage());
             throw new RuntimeException("Error while saving Measurement: " + ex.getMessage(), ex);
@@ -231,16 +219,15 @@ public class MeasurementHelper
             // iterate over each measurement and save
             for (Measurement measurement : measurements)
             {
-                String query = getSqlInsertQuery(measurement);
-                ResultSet rs = DBUtil.executeQuery(connection, query, Statement.RETURN_GENERATED_KEYS);
+                String query = "INSERT INTO Measurement (measurementUUID, mSetUUID, timeStamp, value) VALUES (?, ?, ?, ?)";
+            
+                PreparedStatement pstmt = connection.prepareStatement(query);
+                pstmt.setObject(1, measurement.getUUID(), java.sql.Types.OTHER);
+                pstmt.setObject(2, measurement.getMeasurementSetUUID(), java.sql.Types.OTHER);
+                pstmt.setLong(3, measurement.getTimeStamp().getTime());
+                pstmt.setString(4, measurement.getValue());
 
-                // check if the result set got the generated table key
-                if (rs.next()) {
-                    String key = rs.getString(1);
-                    //log.debug("Saved Measurement with key: " + key);
-                } else {
-                    throw new RuntimeException("No index returned after saving Measurement");
-                }
+                pstmt.executeUpdate();
             }
         } catch (Exception ex) {
             exception = true;
@@ -276,8 +263,10 @@ public class MeasurementHelper
         
         Measurement measurement = null;
         try {
-            String query = "SELECT * FROM Measurement WHERE measurementUUID = '" + measurementUUID + "'";
-            ResultSet rs = DBUtil.executeQuery(connection, query);
+            String query = "SELECT * FROM Measurement WHERE measurementUUID = ?";
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setObject(1, measurementUUID, java.sql.Types.OTHER);
+            ResultSet rs = pstmt.executeQuery();
             
             // check if anything got returned (connection closed in finalise method)
             if (rs.next())
@@ -350,9 +339,13 @@ public class MeasurementHelper
         
         Set<Measurement> measurements = new HashSet<Measurement>();
         try {
-            String query = "SELECT * FROM Measurement WHERE mSetUUID = '" + mSetUUID + "' AND "
-                    + "timeStamp BETWEEN " + fromDate.getTime() + " AND " + toDate.getTime();
-            ResultSet rs = DBUtil.executeQuery(connection, query);
+            String query = "SELECT * FROM Measurement WHERE mSetUUID = ? AND "
+                    + "timeStamp BETWEEN ? AND ?";
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setObject(1, mSetUUID, java.sql.Types.OTHER);
+            pstmt.setLong(2, fromDate.getTime());
+            pstmt.setLong(3, toDate.getTime());
+            ResultSet rs = pstmt.executeQuery();
             
             // check if anything got returned (connection closed in finalise method)
             while (rs.next())

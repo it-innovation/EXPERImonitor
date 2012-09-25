@@ -25,9 +25,8 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.mon.dao;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -156,22 +155,26 @@ public class ExperimentHelper
             log.debug("Starting transaction");
             connection.setAutoCommit(false);
             
-            // get the table names and values according to what's available in the object
-            List<String> valueNames = new ArrayList<String>();
-            List<String> values = new ArrayList<String>();
-            ExperimentHelper.getTableNamesAndValues(exp, valueNames, values);
+            String query = "INSERT INTO Experiment (expUUID, name, description, startTime, endTime, expID) VALUES (?, ?, ?, ?, ?, ?)";
             
-            String query = DBUtil.getInsertIntoQuery("Experiment", valueNames, values);
-            ResultSet rs = DBUtil.executeQuery(connection, query, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setObject(1, exp.getUUID(), java.sql.Types.OTHER);
+            pstmt.setObject(2, exp.getName(), java.sql.Types.OTHER);
+            pstmt.setString(3, exp.getDescription());
             
-            // check if the result set got the generated table key
-            if (rs.next()) {
-                String key = rs.getString(1);
-                log.debug("Saved experiment " + exp.getName() + " with key: " + key);
-            } else {
-                exception = true;
-                throw new RuntimeException("No index returned after saving experiment " + exp.getName());
-            }//end of debugging
+            if (exp.getStartTime() != null)
+                pstmt.setLong(4, exp.getStartTime().getTime());
+            else
+                pstmt.setNull(4, java.sql.Types.BIGINT);
+            
+            if (exp.getEndTime() != null)
+                pstmt.setLong(5, exp.getEndTime().getTime());
+            else
+                pstmt.setNull(5, java.sql.Types.BIGINT);
+            
+            pstmt.setString(6, exp.getExperimentID());
+            
+            pstmt.executeUpdate();
         } catch (Exception ex) {
             exception = true;
             log.error("Error while saving experiment: " + ex.getMessage(), ex);
@@ -243,8 +246,10 @@ public class ExperimentHelper
         Experiment exp = null;
         boolean exception = false;
         try {
-            String query = "SELECT * FROM Experiment WHERE expUUID = '" + expUUID + "'";
-            ResultSet rs = DBUtil.executeQuery(connection, query);
+            String query = "SELECT * FROM Experiment WHERE expUUID = ?";
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setObject(1, expUUID, java.sql.Types.OTHER);
+            ResultSet rs = pstmt.executeQuery();
             
             // check if anything got returned (connection closed in finalise method)
             if (rs.next())
@@ -316,7 +321,8 @@ public class ExperimentHelper
         
         try {
             String query = "SELECT expUUID FROM Experiment";
-            ResultSet rs = DBUtil.executeQuery(connection, query);
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            ResultSet rs = pstmt.executeQuery();
             
             // iterate over all returned records
             while (rs.next())
@@ -362,7 +368,8 @@ public class ExperimentHelper
         
         try {
             String query = "DELETE from Experiment";
-            DBUtil.executeQuery(connection, query);
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.executeUpdate();
         } catch (Exception ex) {
             exception = true;
             log.error("Unable to delete experiments: " + ex.getMessage(), ex);
@@ -406,8 +413,10 @@ public class ExperimentHelper
         boolean exception = false;
         
         try {
-            String query = "DELETE from Experiment where expUUID = '" + experimentUUID + "'";
-            DBUtil.executeQuery(connection, query);
+            String query = "DELETE from Experiment where expUUID = ?";
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setObject(1, experimentUUID, java.sql.Types.OTHER);
+            pstmt.executeUpdate();
         } catch (Exception ex) {
             exception = true;
             log.error("Unable to delete experiment: " + ex.getMessage(), ex);

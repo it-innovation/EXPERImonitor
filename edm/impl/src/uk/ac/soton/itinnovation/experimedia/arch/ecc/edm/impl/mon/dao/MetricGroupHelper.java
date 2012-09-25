@@ -25,9 +25,8 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.mon.dao;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -176,23 +175,15 @@ public class MetricGroupHelper
                 connection.setAutoCommit(false);
             }
             
-            // get the table names and values according to what's available in the
-            // object
-            List<String> valueNames = new ArrayList<String>();
-            List<String> values = new ArrayList<String>();
-            MetricGroupHelper.getTableNamesAndValues(metricGroup, valueNames, values);
+            String query = "INSERT INTO MetricGroup (mGrpUUID, mGenUUID, name, description) VALUES (?, ?, ?, ?)";
             
-            String query = DBUtil.getInsertIntoQuery("MetricGroup", valueNames, values);
-            ResultSet rs = DBUtil.executeQuery(connection, query, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setObject(1, metricGroup.getUUID(), java.sql.Types.OTHER);
+            pstmt.setObject(2, metricGroup.getMetricGeneratorUUID(), java.sql.Types.OTHER);
+            pstmt.setString(3, metricGroup.getName());
+            pstmt.setString(4, metricGroup.getDescription());
             
-            // check if the result set got the generated table key
-            if (rs.next()) {
-                String key = rs.getString(1);
-                log.debug("Saved MetricGroup " + metricGroup.getName() + " with key: " + key);
-            } else {
-                exception = true;
-                throw new RuntimeException("No index returned after saving MetricGroup " + metricGroup.getName());
-            }
+            pstmt.executeUpdate();
         } catch (Exception ex) {
             exception = true;
             log.error("Error while saving MetricGroup: " + ex.getMessage(), ex);
@@ -259,8 +250,10 @@ public class MetricGroupHelper
         MetricGroup metricGroup = null;
         boolean exception = false;
         try {
-            String query = "SELECT * FROM MetricGroup WHERE mGrpUUID = '" + metricGroupUUID + "'";
-            ResultSet rs = DBUtil.executeQuery(connection, query);
+            String query = "SELECT * FROM MetricGroup WHERE mGrpUUID = ?";
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setObject(1, metricGroupUUID, java.sql.Types.OTHER);
+            ResultSet rs = pstmt.executeQuery();
             
             // check if anything got returned (connection closed in finalise method)
             if (rs.next())
@@ -327,8 +320,10 @@ public class MetricGroupHelper
         Set<MetricGroup> metricGroups = new HashSet<MetricGroup>();
         
         try {
-            String query = "SELECT mGrpUUID FROM MetricGroup WHERE mGenUUID = '" + metricGenUUID.toString() + "'";
-            ResultSet rs = DBUtil.executeQuery(connection, query);
+            String query = "SELECT mGrpUUID FROM MetricGroup WHERE mGenUUID = ?";
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setObject(1, metricGenUUID, java.sql.Types.OTHER);
+            ResultSet rs = pstmt.executeQuery();
             
             // check if anything got returned (connection closed in finalise method)
             while (rs.next())
