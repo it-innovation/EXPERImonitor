@@ -103,11 +103,12 @@ public class EMClientEx extends EMClient
   { discoveredGenerators = discovered; }
   
   public void setMetricGenerators( Set<MetricGenerator> generators )
-  {
+  {    
     if ( generators != null ) metricGenerators = 
             (HashSet<MetricGenerator>) generators;
     
     generatorsToSetup.clear();
+    generatorsSetupOK.clear();
     
     // Copy UUIDs of generators into set-up set
     Iterator<MetricGenerator> genIt = metricGenerators.iterator();

@@ -45,6 +45,7 @@ public class EMMetricGenSetupPhase extends AbstractEMLCPhase
                                    implements IEMSetup_ProviderListener
 {
   private EMMetricGenSetupPhaseListener phaseListener;
+  private HashSet<UUID>                 clientsSettingUp;
   
   
   public EMMetricGenSetupPhase( AMQPBasicChannel channel,
@@ -54,6 +55,8 @@ public class EMMetricGenSetupPhase extends AbstractEMLCPhase
     super( EMPhase.eEMSetUpMetricGenerators, channel, providerID );
     
     phaseListener = listener;
+    
+    clientsSettingUp = new HashSet<UUID>();
     
     phaseState = "Ready to request client set-up";
   }
@@ -71,13 +74,18 @@ public class EMMetricGenSetupPhase extends AbstractEMLCPhase
       AMQPMessageDispatch dispatch = new AMQPMessageDispatch();
       phaseMsgPump.addDispatch( dispatch );
     
+      UUID clientID = client.getID();
       EMMetricGenSetup face = new EMMetricGenSetup( emChannel,
                                                     dispatch,
                                                     emProviderID,
-                                                    client.getID(),
+                                                    clientID,
                                                     true );
       face.setProviderListener( this );
-      client.setSetupInterface( face );             
+      client.setSetupInterface( face ); 
+      
+      // Initially assume all clients have generators to set-up (and then remove
+      // as appropriate later)
+      clientsSettingUp.add( clientID );
     }
     
     phaseMsgPump.startPump();
@@ -118,9 +126,13 @@ public class EMMetricGenSetupPhase extends AbstractEMLCPhase
           UUID genID = client.getNextGeneratorToSetup();
           client.getSetupInterface().setupMetricGenerator( genID );
         }
-        else 
+        else
+        {
+          clientsSettingUp.remove( senderID );
+          
           if ( phaseListener != null ) 
             phaseListener.onMetricGenSetupResult( client, false );
+        }
       }
     }
   }
@@ -145,24 +157,16 @@ public class EMMetricGenSetupPhase extends AbstractEMLCPhase
         }
         else
         {
+          clientsSettingUp.remove( senderID );
+          
           if ( phaseListener != null )
             phaseListener.onMetricGenSetupResult( client, 
                                                   client.metricGeneratorsSetupOK() );
-          
-          // Check to see if we've finished trying to set up all clients
-          boolean allAttemptsMade       = true;
-          Iterator<EMClientEx> clientIt = getCopySetOfCurrentClients().iterator();
-
-          while ( clientIt.hasNext() )
-            if ( clientIt.next().hasGeneratorToSetup() )
-            {
-              allAttemptsMade = false;
-              break;
-            }
-
-          if ( allAttemptsMade ) hardStop();
         }
       }
+      
+      // Check to see if we've finished trying to set up all clients
+      if ( clientsSettingUp.isEmpty() ) hardStop();
     }
   }
 }
