@@ -201,10 +201,14 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
       EMClientEx clientEx = (EMClientEx) client;
       if ( clientEx == null ) throw new Exception( "Client is invalid" );
       
+      // Don't try pulling if we've already made a request
+      if ( clientEx.isPullingMetricData() ) throw new Exception( "Still waiting for pull metric data from client" );
+      
       IEMLiveMonitor monitor = clientEx.getLiveMonitorInterface();
       if ( monitor == null ) throw new Exception( "Could not get client live monitor interface" );
       
       monitor.pullMetric( measurementSetID );
+      clientEx.setIsPullingMetricData( true );
     }
   }
   

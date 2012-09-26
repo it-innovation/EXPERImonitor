@@ -46,6 +46,9 @@ public class EMClient
   // Setup phase states
   protected HashSet<UUID> generatorsSetupOK;
   
+  // Live monitoring phase states
+  protected boolean isPullingMetricData = false;
+  
   // Post-report phase states
   protected EMPostReportSummary postReportSummary;
   
@@ -154,6 +157,15 @@ public class EMClient
     
     return true;
   }
+  
+  /**
+   * Specifies whether the client is currently generating metric data requested
+   * by the EM.
+   * 
+   * @return - true if currently generating data
+   */
+  public boolean isPullingMetricData()
+  { return isPullingMetricData; }
   
   /**
    * Returns the post report summary the client reported (if supported) during the

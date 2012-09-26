@@ -99,43 +99,46 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
   @Override
   public void controlledStop() throws Exception
   {
-    monitorStopping = true;
-    
-    // Get a copy of pushers and pullers
-    HashSet<UUID> copyOfPushers = new HashSet<UUID>();
-    HashSet<UUID> copyOfPullers = new HashSet<UUID>();
-    synchronized ( controlledStopLock )
+    if ( !monitorStopping )
     {
-      copyOfPushers.addAll( clientsStillPushing );
-      copyOfPullers.addAll( clientsStillPulling );
-    }
+      monitorStopping = true;
     
-    // Stop pushing clients
-    if ( !copyOfPushers.isEmpty() )
-    {
-      Iterator<UUID> pushIt = copyOfPushers.iterator();
-      while ( pushIt.hasNext() )
+      // Get a copy of pushers and pullers
+      HashSet<UUID> copyOfPushers = new HashSet<UUID>();
+      HashSet<UUID> copyOfPullers = new HashSet<UUID>();
+      synchronized ( controlledStopLock )
       {
-        EMClientEx client = getClient( pushIt.next() );
-        client.getLiveMonitorInterface().stopPushing();
+        copyOfPushers.addAll( clientsStillPushing );
+        copyOfPullers.addAll( clientsStillPulling );
       }
-      
-      // We'll need to wait on confirmation of clients finishing their push
-    }
-    
-    // Stop pulling clients
-    if ( !copyOfPullers.isEmpty() )
-    {
-      Iterator<UUID> pullIt = copyOfPullers.iterator();
-      while ( pullIt.hasNext() )
+
+      // Stop pushing clients
+      if ( !copyOfPushers.isEmpty() )
       {
-        EMClientEx client = getClient( pullIt.next() );
-        client.getLiveMonitorInterface().pullingStopped();
+        Iterator<UUID> pushIt = copyOfPushers.iterator();
+        while ( pushIt.hasNext() )
+        {
+          EMClientEx client = getClient( pushIt.next() );
+          client.getLiveMonitorInterface().stopPushing();
+        }
+
+        // We'll need to wait on confirmation of clients finishing their push
       }
-      
-      // We can clear the pulling list immediately
-      synchronized( controlledStopLock )
-      { clientsStillPulling.clear(); }
+
+      // Stop pulling clients
+      if ( !copyOfPullers.isEmpty() )
+      {
+        Iterator<UUID> pullIt = copyOfPullers.iterator();
+        while ( pullIt.hasNext() )
+        {
+          EMClientEx client = getClient( pullIt.next() );
+          client.getLiveMonitorInterface().pullingStopped();
+        }
+
+        // We can clear the pulling list immediately
+        synchronized( controlledStopLock )
+        { clientsStillPulling.clear(); }
+      }
     }
   }
   
@@ -220,8 +223,12 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
       
       // Only allow clients who have declared they are going to be pulled
       if ( client != null && clientsStillPulling.contains( client.getID() ) )
+      {
+        client.setIsPullingMetricData( false );
+        
         if ( phaseListener != null )
           phaseListener.onGotMetricData( client, report );
+      }
     }
   }
 }

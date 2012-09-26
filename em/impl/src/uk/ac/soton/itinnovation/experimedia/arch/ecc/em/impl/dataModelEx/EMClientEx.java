@@ -131,6 +131,10 @@ public class EMClientEx extends EMClient
   public void addSuccessfulSetup( UUID genID )
   { if ( genID != null ) generatorsSetupOK.add( genID ); }
   
+  // Live monitoring phase (and post-reporting) states -------------------------
+  public void setIsPullingMetricData( boolean pulling )
+  { isPullingMetricData = pulling; }
+  
   // Post-report phase state ---------------------------------------------------
   public void setPostReportSummary( EMPostReportSummary report )
   { postReportSummary = report; }

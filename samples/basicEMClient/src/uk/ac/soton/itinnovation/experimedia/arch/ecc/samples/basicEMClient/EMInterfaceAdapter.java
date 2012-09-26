@@ -319,7 +319,9 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
 
     @Override
     public void onPullMetricTimeOut( UUID senderID, UUID measurementSetID )
-    { /* Not implemented in this demo */  }
+    {
+    
+    }
 
     @Override
     public void onPullingStopped( UUID senderID )
