@@ -74,7 +74,15 @@ public interface EMIAdapterListener
      * 
      * @param lastReportID 
      */
-    void onLastPushProcessed( UUID lastReportID );
+    void onPushReportReceived( UUID lastReportID );
+    
+    /**
+     * Notifies the listener that the EM has successfully received a pulled
+     * Report with the supplied ID.
+     * 
+     * @param lastReportID 
+     */
+    void onPullReportReceived( UUID reportID );
 
     /**
      * Notifies the listener that it should stop pushing metric data.

@@ -64,7 +64,7 @@ public interface IEMLiveMonitor
      * @param lastReportID - UUID of the last push report received by the EM from
      * this client.
      */
-    void receivedPush( UUID lastReportID );
+    void notifyPushReceived( UUID lastReportID );
 
     /**
      * Tells the user to stop pushing data to the EM.
@@ -129,4 +129,13 @@ public interface IEMLiveMonitor
      * for a single time frame).
      */
     void sendPulledMetric( Report report );
+    
+    /**
+     * Tell the user that a pull report has been received by the EM.
+     * 
+     * @param lastReportID - UUID of the last pull report received by the EM from
+     * this client.
+     */
+    void notifyPullReceived( UUID lastReportID );
+
 }

@@ -53,12 +53,17 @@ public class EMClientController implements EMIAdapterListener,
 
     private Measurement firstMeasurement;
     private Measurement currentMeasurement;
+    
+    private HashMap<UUID, Report> pendingPushReports;
+    private HashMap<UUID, Report> pendingPullReports;
 
 
 
     public EMClientController()
     {
-        metricGenerators = new HashMap<UUID,MetricGenerator>();
+        metricGenerators   = new HashMap<UUID,MetricGenerator>();
+        pendingPushReports = new HashMap<UUID, Report>();
+        pendingPullReports = new HashMap<UUID, Report>();
     }
 
     public void start( String rabbitServerIP,
@@ -189,10 +194,20 @@ public class EMClientController implements EMIAdapterListener,
     }
 
     @Override
-    public void onLastPushProcessed( UUID lastReportID )
+    public void onPushReportReceived( UUID reportID )
     {
+        // We'll use this report with the 'MiniEDM' later, but for now...
+        pendingPushReports.remove( reportID );
+      
         // Got the last push, so allow another manual push
         clientView.enablePush( true );
+    }
+    
+    @Override
+    public void onPullReportReceived( UUID reportID )
+    {
+        // We'll use this report with the 'MiniEDM' later, but for now...
+        pendingPullReports.remove( reportID );
     }
 
     @Override
@@ -223,6 +238,9 @@ public class EMClientController implements EMIAdapterListener,
         reportOut.setToDate( date );
         reportOut.setMeasurementSet( sampleSet );
         reportOut.setNumberOfMeasurements( 1 );
+        
+        // Store for confirmation of pull later
+        pendingPullReports.put( reportOut.getUUID(), reportOut );
     }
 
     @Override
@@ -298,7 +316,8 @@ public class EMClientController implements EMIAdapterListener,
         sampleReport.setMeasurementSet( sampleSet );
         sampleReport.setNumberOfMeasurements( 1 );
 
-        // ... and report!
+        // ... and store for confirmation of push, then report!
+        pendingPushReports.put( sampleReport.getUUID(), sampleReport );
         emiAdapter.pushMetric( sampleReport );
     }
     

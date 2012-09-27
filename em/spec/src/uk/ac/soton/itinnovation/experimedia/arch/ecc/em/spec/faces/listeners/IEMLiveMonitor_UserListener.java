@@ -86,4 +86,13 @@ public interface IEMLiveMonitor_UserListener
      * @param senderID 
      */
     void onPullingStopped( UUID senderID );
+    
+    /**
+     * Notification from the EM that the pulled report identified by the report
+     * ID has been received by the EM.
+     * 
+     * @param senderID      - ID of the EM
+     * @param lastReportID  - ID of the last pull report received by the EM
+     */
+    void onReceivedPull( UUID senderID, UUID lastReportID );
 }

@@ -204,8 +204,9 @@ public class ExperimentMonitor implements IExperimentMonitor,
   public void onClientConnected( EMClient client )
   {
     Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
+    
     while ( listIt.hasNext() )
-      listIt.next().onClientConnected( client );
+    { listIt.next().onClientConnected( client ); }
   }
   
   @Override
@@ -214,72 +215,81 @@ public class ExperimentMonitor implements IExperimentMonitor,
     connectionManager.removeClient( client.getID() );
     
     Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
+    
     while ( listIt.hasNext() )
-      listIt.next().onClientDisconnected( client );
+    { listIt.next().onClientDisconnected( client ); }
   }
   
   @Override
   public void onLifecyclePhaseStarted( EMPhase phase )
   {
     Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
+    
     while ( listIt.hasNext() )
-      listIt.next().onLifecyclePhaseStarted( phase );
+    { listIt.next().onLifecyclePhaseStarted( phase ); }
   }
   
   @Override
   public void onLifecyclePhaseCompleted( EMPhase phase )
   {
     Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
+    
     while ( listIt.hasNext() )
-      listIt.next().onLifecyclePhaseCompleted( phase );
+    { listIt.next().onLifecyclePhaseCompleted( phase ); }
   }
   
   @Override
   public void onFoundClientWithMetricGenerators( EMClient client )
   {
     Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
+    
     while ( listIt.hasNext() )
-      listIt.next().onFoundClientWithMetricGenerators( client );
+    { listIt.next().onFoundClientWithMetricGenerators( client ); }
   }
   
   @Override
   public void onClientSetupResult( EMClient client, boolean success )
   {
     Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
+    
     while ( listIt.hasNext() )
-      listIt.next().onClientSetupResult( client, success );
+    { listIt.next().onClientSetupResult( client, success ); }
   }
   
   @Override
   public void onGotMetricData( EMClient client, Report report )
   {
     Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
+    
     while ( listIt.hasNext() )
-      listIt.next().onGotMetricData( client, report );
+    { listIt.next().onGotMetricData( client, report ); }
   }
   
   @Override
   public void onGotSummaryReport( EMClient client, EMPostReportSummary summary )
   {
     Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
+    
     while ( listIt.hasNext() )
-      listIt.next().onGotSummaryReport( client, summary );
+    { listIt.next().onGotSummaryReport( client, summary ); }
   }
   
   @Override
   public void onGotDataBatch( EMClient client, EMDataBatch batch )
   {
     Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
+    
     while ( listIt.hasNext() )
-      listIt.next().onGotDataBatch( client, batch );
+    { listIt.next().onGotDataBatch( client, batch ); }
   }
   
   @Override
   public void onClientTearDownResult( EMClient client, boolean success )
   {
     Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
+    
     while ( listIt.hasNext() )
-      listIt.next().onClientTearDownResult( client, success );
+    { listIt.next().onClientTearDownResult( client, success ); }
   }
   
   // Private methods -----------------------------------------------------------
@@ -310,7 +320,7 @@ public class ExperimentMonitor implements IExperimentMonitor,
     Iterator<EMClientEx> exIt       = exClients.iterator();
     
     while ( exIt.hasNext() )
-      simpleClients.add( (EMClient) exIt.next() );
+    {  simpleClients.add( (EMClient) exIt.next() ); }
     
     return simpleClients;
   }

@@ -298,7 +298,14 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
     public void onReceivedPush( UUID senderID, UUID lastReportID )
     {
         if ( senderID.equals(expMonitorID) )
-            emiListener.onLastPushProcessed( lastReportID );
+            emiListener.onPushReportReceived( lastReportID );
+    }
+    
+    @Override
+    public void onReceivedPull( UUID senderID, UUID lastReportID )
+    {
+        if ( senderID.equals(expMonitorID) )
+            emiListener.onPullReportReceived( lastReportID );
     }
 
     @Override

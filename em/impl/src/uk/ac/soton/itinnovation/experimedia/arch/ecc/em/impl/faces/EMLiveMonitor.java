@@ -83,7 +83,7 @@ public class EMLiveMonitor extends EMBaseInterface
   
   // Method ID = 2
   @Override
-  public void receivedPush( UUID lastReportID )
+  public void notifyPushReceived( UUID lastReportID )
   {
     ArrayList<Object> params = new ArrayList<Object>();
     params.add( lastReportID );
@@ -165,6 +165,16 @@ public class EMLiveMonitor extends EMBaseInterface
     params.add( report );
     
     executeMethod( 11, params );
+  }
+  
+  // Method ID = 12
+  @Override
+  public void notifyPullReceived( UUID lastReportID )
+  {
+    ArrayList<Object> params = new ArrayList<Object>();
+    params.add( lastReportID );
+    
+    executeMethod( 12, params );
   }
   
   // Protected methods ---------------------------------------------------------
@@ -264,6 +274,15 @@ public class EMLiveMonitor extends EMBaseInterface
         }
         
       } break;
+        
+      case ( 12 ) :
+      {
+        if ( userListener != null )
+        {
+          UUID reportID = jsonMapper.fromJson( methodData.get(1), UUID.class );
+          userListener.onReceivedPull( interfaceProviderID, reportID );
+        }
+      }
     }
   }
 }
