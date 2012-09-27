@@ -76,6 +76,11 @@ public class EMClientView extends javax.swing.JFrame
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(165, 174, 204));
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                onWindowClosing(evt);
+            }
+        });
 
         clientNameLabel.setFont(new java.awt.Font("Verdana", 0, 12)); // NOI18N
         clientNameLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -150,6 +155,10 @@ public class EMClientView extends javax.swing.JFrame
     actionButton.setEnabled( false );
     viewListener.onPushDataClicked();
   }//GEN-LAST:event_onPushDataClicked
+
+  private void onWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_onWindowClosing
+    viewListener.onClientViewClosed();
+  }//GEN-LAST:event_onWindowClosing
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton actionButton;

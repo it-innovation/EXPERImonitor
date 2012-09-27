@@ -65,14 +65,7 @@ public abstract class AbstractEMLCPhase
   { return phaseActive; }
   
   public EMClientEx getClient( UUID id )
-  {
-    EMClientEx client = null;
-    
-    //synchronized ( clientLock )
-    { client = phaseClients.get( id ); }
-    
-    return client;
-  }
+  { return phaseClients.get( id ); }
   
   public boolean hasClients()
   {
@@ -100,6 +93,8 @@ public abstract class AbstractEMLCPhase
   public abstract void controlledStop() throws Exception;
   
   public abstract void hardStop();
+  
+  public abstract void onClientUnexpectedlyRemoved( EMClientEx client );
   
   // Protected methods ---------------------------------------------------------
   protected AbstractEMLCPhase( EMPhase phase,
@@ -139,7 +134,6 @@ public abstract class AbstractEMLCPhase
   protected boolean removeClient( UUID id )
   {
     if ( id == null ) return false;
-    if ( phaseActive ) return false;
     
     boolean result = false;
     

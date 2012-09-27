@@ -111,6 +111,18 @@ public class EMMetricGenSetupPhase extends AbstractEMLCPhase
     if ( phaseListener != null ) phaseListener.onSetupPhaseCompleted();
   }
   
+  @Override
+  public void onClientUnexpectedlyRemoved( EMClientEx client )
+  {
+    if ( client != null )
+    {
+      UUID clientID = client.getID();
+      
+      clientsSettingUp.remove( clientID );
+      removeClient( clientID );
+    }
+  }
+  
   // IEMSetup_ProviderListener -------------------------------------------------
   @Override
   public void onNotifyReadyToSetup( UUID senderID )

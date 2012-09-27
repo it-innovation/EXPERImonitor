@@ -115,6 +115,13 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
         //.. and finally, try registering with the EM!
         entryPointFace.registerAsEMClient( clientID, clientName );
     }
+    
+    public void deregisterWithEM() throws Exception
+    {
+        if ( discoveryFace == null ) throw new Exception( "Have not registered correctly with EM" );
+      
+        discoveryFace.clientDisconnecting();
+    }
 
     public void setMetricGenerators( HashSet<MetricGenerator> generators )
     { clientGenerators = generators; }

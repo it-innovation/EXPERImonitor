@@ -249,7 +249,10 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
       
       if ( discovery != null )
         if ( discovery.addClient( client ) )
+        {
+          client.setIsConnected( true );
           lifecycleListener.onClientConnected( client );
+        }
     }
   }
   
@@ -293,6 +296,27 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   @Override
   public void onClientIsDisconnected( EMClientEx client )
   {
+    // Must carefully remove client references from active and future phases...
+    // ... remove client from future phases first
+    EMPhase nextPhase = currentPhase.nextPhase();
+    
+    while ( !nextPhase.equals(EMPhase.eEMUnknownPhase) )
+    {
+      AbstractEMLCPhase cleanPhase = lifecyclePhases.get( nextPhase );
+      
+      // Remove the client from this phase
+      if ( cleanPhase != null ) cleanPhase.onClientUnexpectedlyRemoved( client );
+      
+      // Go to the next phase
+      nextPhase = nextPhase.nextPhase();
+    }
+    
+    // Next, remove the client from the current phase
+    AbstractEMLCPhase thisPhase = lifecyclePhases.get( currentPhase );
+    if ( thisPhase != null ) thisPhase.onClientUnexpectedlyRemoved( client );
+    
+    // Finally, notify listener of this disconnection
+    client.setIsConnected( false );
     lifecycleListener.onClientDisconnected( client );
   }
   

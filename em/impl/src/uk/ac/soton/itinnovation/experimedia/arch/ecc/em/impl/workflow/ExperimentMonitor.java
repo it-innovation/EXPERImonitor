@@ -211,6 +211,8 @@ public class ExperimentMonitor implements IExperimentMonitor,
   @Override
   public void onClientDisconnected( EMClient client )
   {
+    connectionManager.removeClient( client.getID() );
+    
     Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
     while ( listIt.hasNext() )
       listIt.next().onClientDisconnected( client );

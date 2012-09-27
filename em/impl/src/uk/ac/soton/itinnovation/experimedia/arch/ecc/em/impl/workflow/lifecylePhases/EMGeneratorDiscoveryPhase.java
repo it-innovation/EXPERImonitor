@@ -130,6 +130,18 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
     if ( phaseListener != null ) phaseListener.onDiscoveryPhaseCompleted();
   }
   
+  @Override
+  public void onClientUnexpectedlyRemoved( EMClientEx client )
+  {
+    if ( client != null )
+    {
+      UUID clientID = client.getID();
+      
+      clientsExpectingGeneratorInfo.remove( clientID );
+      removeClient( clientID );
+    }
+  }
+  
   // IEMMonitor_ProviderListener -----------------------------------------------
   @Override
   public void onReadyToInitialise( UUID senderID )
@@ -215,19 +227,9 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
   @Override
   public void onClientDisconnecting( UUID senderID )
   {
-    if ( phaseActive )
-    {
-      EMClientEx client = getClient( senderID );
+    // Always respond to this event, irrespective of whether the phase is active
+    EMClientEx client = getClient( senderID );
 
-      if ( client != null )
-      {
-        clientsExpectingGeneratorInfo.remove( client.getID() );
-
-        client.destroyAllInterfaces();
-        client.setIsConnected( false );
-
-        phaseListener.onClientIsDisconnected( client );
-      }
-    }
+    if ( client != null ) phaseListener.onClientIsDisconnected( client );
   }
 }

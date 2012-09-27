@@ -104,6 +104,18 @@ public class EMTearDownPhase extends AbstractEMLCPhase
     if ( phaseListener != null ) phaseListener.onTearDownPhaseCompleted();
   }
   
+  @Override
+  public void onClientUnexpectedlyRemoved( EMClientEx client )
+  {
+    if ( client != null )
+    {
+      UUID clientID = client.getID();
+      
+      clientsStillToTearDown.remove( clientID );
+      removeClient( clientID );
+    }
+  }
+  
   // IEMTearDown_ProviderListener ----------------------------------------------
   @Override
   public void onNotifyReadyToTearDown( UUID senderID )

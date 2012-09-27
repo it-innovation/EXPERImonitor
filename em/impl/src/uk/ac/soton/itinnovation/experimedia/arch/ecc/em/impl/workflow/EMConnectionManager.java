@@ -106,6 +106,9 @@ public class EMConnectionManager implements IEMMonitorEntryPoint_ProviderListene
   public EMClientEx getClient( UUID clientID )
   { return connectedClients.get( clientID ); }
   
+  public void removeClient( UUID clientID )
+  { connectedClients.remove( clientID ); }
+  
   public Set<EMClientEx> getConnectedClients()
   {
     HashSet<EMClientEx> currClients = new HashSet<EMClientEx>();

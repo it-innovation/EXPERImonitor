@@ -44,6 +44,7 @@ public class EMPostReportPhase extends AbstractEMLCPhase
 {
   private EMPostReportPhaseListener phaseListener;
   
+  
   public EMPostReportPhase( AMQPBasicChannel channel,
                             UUID providerID,
                             EMPostReportPhaseListener listener )
@@ -99,6 +100,12 @@ public class EMPostReportPhase extends AbstractEMLCPhase
     phaseActive = false;
     
     if ( phaseListener != null ) phaseListener.onPostReportPhaseCompleted();
+  }
+  
+  @Override
+  public void onClientUnexpectedlyRemoved( EMClientEx client )
+  {
+    if ( client != null ) removeClient( client.getID() );
   }
   
   // IEMPostReport_ProviderListener --------------------------------------------

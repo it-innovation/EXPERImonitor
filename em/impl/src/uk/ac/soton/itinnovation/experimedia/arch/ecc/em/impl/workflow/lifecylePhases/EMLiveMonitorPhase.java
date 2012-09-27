@@ -151,6 +151,19 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
     if ( phaseListener != null ) phaseListener.onLiveMonitorPhaseCompleted();
   }
   
+  @Override
+  public void onClientUnexpectedlyRemoved( EMClientEx client )
+  {
+    if ( client != null )
+    {
+      UUID clientID = client.getID();
+      
+      clientsStillPushing.remove( clientID );
+      clientsStillPulling.remove( clientID );
+      removeClient( clientID );
+    }
+  }
+  
   // IEMLiveMonitor_ProviderListener -------------------------------------------
   @Override
   public void onNotifyReadyToPush( UUID senderID )

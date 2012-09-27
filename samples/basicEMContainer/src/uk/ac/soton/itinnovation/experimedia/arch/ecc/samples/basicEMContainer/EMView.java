@@ -99,6 +99,15 @@ public class EMView extends javax.swing.JFrame
       clientListModel.addElement( client );
   }
   
+  public synchronized void removeClient( EMClient client )
+  {
+    if ( client != null )
+    {
+      clientListModel.removeElement( client );
+      addLogText( "Client " + client.getName() + " has disconnected" );
+    }
+  }
+  
   public synchronized void updateClient( EMClient client )
   {
     // Update the client if it is currently selected

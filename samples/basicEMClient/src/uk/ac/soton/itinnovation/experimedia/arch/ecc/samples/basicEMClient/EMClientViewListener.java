@@ -30,5 +30,15 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.basicEMClient;
 
 public interface EMClientViewListener
 {
+    /**
+     * The user has pushed the 'Push data' button on the UI
+     * 
+     */
     void onPushDataClicked();
+    
+    /**
+     * The user has closed the view (so client is disconnecting)
+     * 
+     */
+    void onClientViewClosed();
 }

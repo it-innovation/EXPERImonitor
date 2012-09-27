@@ -301,6 +301,15 @@ public class EMClientController implements EMIAdapterListener,
         // ... and report!
         emiAdapter.pushMetric( sampleReport );
     }
+    
+    @Override
+    public void onClientViewClosed()
+    {
+        // Need to notify that we're leaving...
+        try { emiAdapter.deregisterWithEM(); }
+        catch ( Exception e )
+        { clientLogger.error( "Could not cleanly disconnect from EM:\n" + e.getMessage() ); }
+    }
 
     // Private method ------------------------------------------------------------
     private MeasurementSet createMeasurementSetEmptySample()
