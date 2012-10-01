@@ -41,9 +41,9 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DBUtil;
  * 
  * @author Vegard Engen
  */
-public class MetricGeneratorHelper
+public class MetricGeneratorDAOHelper
 {
-    static Logger log = Logger.getLogger(MetricGeneratorHelper.class);
+    static Logger log = Logger.getLogger(MetricGeneratorDAOHelper.class);
     
     public static ValidationReturnObject isObjectValidForSave(MetricGenerator mg, UUID expUUID, boolean checkForExperiment, Connection connection, boolean closeDBcon) throws Exception
     {
@@ -81,7 +81,7 @@ public class MetricGeneratorHelper
         {
             log.debug("Checking if experiment exists (UUID " + expUUID.toString() + ")");
             try {
-                if (!ExperimentHelper.objectExists(expUUID, connection, closeDBcon))
+                if (!ExperimentDAOHelper.objectExists(expUUID, connection, closeDBcon))
                 {
                     return new ValidationReturnObject(false, new RuntimeException("The Experiment specified for the MetricGenerator does not exist! UUID not found: " + expUUID.toString()));
                 }
@@ -147,7 +147,7 @@ public class MetricGeneratorHelper
         // there isn't already a duplicate instance in the DB
         // will validate the metric groups too, if any are given
         // final flag is to check that the experiment is in the DB already
-        ValidationReturnObject returnObj = MetricGeneratorHelper.isObjectValidForSave(metricGen, experimentUUID, true, connection, false);
+        ValidationReturnObject returnObj = MetricGeneratorDAOHelper.isObjectValidForSave(metricGen, experimentUUID, true, connection, false);
         if (!returnObj.valid)
         {
             log.error("Cannot save the MetricGenerator object: " + returnObj.exception.getMessage(), returnObj.exception);
@@ -175,9 +175,9 @@ public class MetricGeneratorHelper
                 for (Entity entity : metricGen.getEntities())
                 {
                     // check if the entity exists; if not, then save it
-                    if (!EntityHelper.objectExists(entity.getUUID(), connection, false))
+                    if (!EntityDAOHelper.objectExists(entity.getUUID(), connection, false))
                     {
-                        EntityHelper.saveEntity(entity, connection, false);
+                        EntityDAOHelper.saveEntity(entity, connection, false);
                     }
                 }
             } catch (Exception ex) {
@@ -225,7 +225,7 @@ public class MetricGeneratorHelper
                 for (MetricGroup mGrp : metricGen.getMetricGroups())
                 {
                     if (mGrp != null)
-                        MetricGroupHelper.saveMetricGroup(mGrp, connection, false); // flag not to close the DB connection
+                        MetricGroupDAOHelper.saveMetricGroup(mGrp, connection, false); // flag not to close the DB connection
                 }
             }
         } catch (Exception ex) {
@@ -361,7 +361,7 @@ public class MetricGeneratorHelper
             Set<MetricGroup> metricGroups = null;
 
             try {
-                metricGroups = MetricGroupHelper.getMetricGroupsForMetricGenerator(metricGenUUID, withSubClasses, connection, false); // don't close the connection
+                metricGroups = MetricGroupDAOHelper.getMetricGroupsForMetricGenerator(metricGenUUID, withSubClasses, connection, false); // don't close the connection
             } catch (Exception ex) {
                 exception = true;
                 log.error("Caught an exception when getting metric groups for MetricGenerator (UUID: " + metricGenUUID.toString() + "): " + ex.getMessage());
@@ -380,7 +380,7 @@ public class MetricGeneratorHelper
             Set<Entity> entities = new HashSet<Entity>();
 
             try {
-                entities = EntityHelper.getEntitiesForMetricGenerator(metricGenUUID, withSubClasses, connection, false); // don't close the connection
+                entities = EntityDAOHelper.getEntitiesForMetricGenerator(metricGenUUID, withSubClasses, connection, false); // don't close the connection
             } catch (Exception ex) {
                 log.error("Caught an exception when getting metric groups for MetricGenerator (UUID: " + metricGenUUID.toString() + "): " + ex.getMessage());
                 throw new RuntimeException("Unable to get MetricGenerator object due to an issue with getting its metric groups: " + ex.getMessage(), ex);

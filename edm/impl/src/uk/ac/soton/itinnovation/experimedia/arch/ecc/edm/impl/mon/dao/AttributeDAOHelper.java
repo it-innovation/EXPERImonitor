@@ -39,9 +39,9 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DBUtil;
  * 
  * @author Vegard Engen
  */
-public class AttributeHelper
+public class AttributeDAOHelper
 {
-    static Logger log = Logger.getLogger(AttributeHelper.class);
+    static Logger log = Logger.getLogger(AttributeDAOHelper.class);
     
     public static ValidationReturnObject isObjectValidForSave(Attribute attrib, boolean checkForEntity, Connection connection, boolean closeDBcon) throws Exception
     {
@@ -80,7 +80,7 @@ public class AttributeHelper
         // if checking for entity; may be false if this is called from the saveEntity method
         if (checkForEntity)
         {
-            if (!EntityHelper.objectExists(attrib.getEntityUUID(), connection, closeDBcon))
+            if (!EntityDAOHelper.objectExists(attrib.getEntityUUID(), connection, closeDBcon))
             {
                 return new ValidationReturnObject(false, new RuntimeException("The Attribute's Entity does not exist (UUID: " + attrib.getEntityUUID().toString() + ")"));
             }
@@ -98,7 +98,7 @@ public class AttributeHelper
     {
         // this validation will check if all the required parameters are set and if
         // there isn't already a duplicate instance in the DB
-        ValidationReturnObject returnObj = AttributeHelper.isObjectValidForSave(attrib, false, connection, false);
+        ValidationReturnObject returnObj = AttributeDAOHelper.isObjectValidForSave(attrib, false, connection, false);
         if (!returnObj.valid)
         {
             log.error("Cannot save the Attribute object: " + returnObj.exception.getMessage(), returnObj.exception);

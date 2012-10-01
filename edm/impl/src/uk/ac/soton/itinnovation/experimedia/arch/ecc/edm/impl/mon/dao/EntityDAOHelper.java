@@ -40,9 +40,9 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DBUtil;
  * 
  * @author Vegard Engen
  */
-public class EntityHelper
+public class EntityDAOHelper
 {
-    static Logger log = Logger.getLogger(EntityHelper.class);
+    static Logger log = Logger.getLogger(EntityDAOHelper.class);
     
     public static ValidationReturnObject isObjectValidForSave(Entity entity, Connection connection, boolean closeDBcon) throws Exception
     {
@@ -111,7 +111,7 @@ public class EntityHelper
         // this validation will check if all the required parameters are set and if
         // there isn't already a duplicate instance in the DB
         // will validate the attributes too, if any are given
-        ValidationReturnObject returnObj = EntityHelper.isObjectValidForSave(entity, connection, false);
+        ValidationReturnObject returnObj = EntityDAOHelper.isObjectValidForSave(entity, connection, false);
         if (!returnObj.valid)
         {
             log.error("Cannot save the Entity object: " + returnObj.exception.getMessage(), returnObj.exception);
@@ -161,7 +161,7 @@ public class EntityHelper
                 for (Attribute attrib : entity.getAttributes())
                 {
                     if (attrib != null)
-                        AttributeHelper.saveAttribute(attrib, connection, false); // flag not to close the DB connection
+                        AttributeDAOHelper.saveAttribute(attrib, connection, false); // flag not to close the DB connection
                 }
             }
         } catch (Exception ex) {
@@ -239,7 +239,7 @@ public class EntityHelper
             Set<Attribute> attributes = null;
 
             try {
-                attributes = AttributeHelper.getAttributesForEntity(entityUUID, connection, false); // don't close the connection
+                attributes = AttributeDAOHelper.getAttributesForEntity(entityUUID, connection, false); // don't close the connection
             } catch (Exception ex) {
                 log.error("Caught an exception when getting attributes for entity (UUID: " + entityUUID.toString() + "): " + ex.getMessage());
                 throw new RuntimeException("Unable to get Entity object due to an issue with getting its attributes: " + ex.getMessage(), ex);

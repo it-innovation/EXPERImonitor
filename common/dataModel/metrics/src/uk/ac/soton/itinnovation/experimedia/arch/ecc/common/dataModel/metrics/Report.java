@@ -41,14 +41,17 @@ public class Report
     private Date reportDate;
     private Date fromDate;
     private Date toDate;
+    private boolean synchronised;
     private Integer numberOfMeasurements;
     
     /**
-     * Default constructor which generates a random UUID for the Report object.
+     * Default constructor which generates a random UUID for the Report object and
+     * sets the synchronised flag to false.
      */
     public Report()
     {
         this.uuid = UUID.randomUUID();
+        this.synchronised = false;
     }
     
     /**
@@ -73,7 +76,7 @@ public class Report
         if (report.getNumberOfMeasurements() != null)
             this.numberOfMeasurements = new Integer(report.getNumberOfMeasurements());
         
-        this.numberOfMeasurements = report.getNumberOfMeasurements();
+        this.synchronised = report.isSynchronised();
     }
     
     /**
@@ -202,5 +205,21 @@ public class Report
     public void setNumberOfMeasurements(Integer num)
     {
         this.numberOfMeasurements = num;
+    }
+
+    /**
+     * @return the synchronised
+     */
+    public boolean isSynchronised()
+    {
+        return synchronised;
+    }
+
+    /**
+     * @param synchronised the synchronised to set
+     */
+    public void setSynchronised(boolean synchronised)
+    {
+        this.synchronised = synchronised;
     }
 }

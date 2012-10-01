@@ -41,9 +41,9 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DBUtil;
  * 
  * @author Vegard Engen
  */
-public class MeasurementSetHelper
+public class MeasurementSetDAOHelper
 {
-    static Logger log = Logger.getLogger(MeasurementSetHelper.class);
+    static Logger log = Logger.getLogger(MeasurementSetDAOHelper.class);
     
     public static ValidationReturnObject isObjectValidForSave(MeasurementSet mSet, boolean checkForMetricGroup, Connection connection, boolean closeDBcon) throws Exception
     {
@@ -99,7 +99,7 @@ public class MeasurementSetHelper
         // check that the metric group exists, if flagged to check
         if (checkForMetricGroup)
         {
-            if (!MetricGroupHelper.objectExists(mSet.getMetricGroupUUID(), connection, closeDBcon))
+            if (!MetricGroupDAOHelper.objectExists(mSet.getMetricGroupUUID(), connection, closeDBcon))
             {
                 return new ValidationReturnObject(false, new RuntimeException("The MetricGroup for the MeasurementSet doesn't exit (UUID: " + mSet.getMetricGroupUUID().toString() + ")"));
             }
@@ -116,7 +116,7 @@ public class MeasurementSetHelper
         {
             for (Measurement measurement : mSet.getMeasurements())
             {
-                ValidationReturnObject validationReturn = MeasurementHelper.isObjectValidForSave(measurement, false, connection, closeDBcon); // false = don't check for measurement set existing as this won't be saved yet!
+                ValidationReturnObject validationReturn = MeasurementDAOHelper.isObjectValidForSave(measurement, false, connection, closeDBcon); // false = don't check for measurement set existing as this won't be saved yet!
                 if (!validationReturn.valid)
                 {
                     return validationReturn;
@@ -141,7 +141,7 @@ public class MeasurementSetHelper
         // this validation will check if all the required parameters are set and if
         // there isn't already a duplicate instance in the DB
         // will validate the metric and measurements too, if any are given
-        ValidationReturnObject returnObj = MeasurementSetHelper.isObjectValidForSave(measurementSet, false, connection, false);
+        ValidationReturnObject returnObj = MeasurementSetDAOHelper.isObjectValidForSave(measurementSet, false, connection, false);
         if (!returnObj.valid)
         {
             log.error("Cannot save the MeasurementSet object: " + returnObj.exception.getMessage(), returnObj.exception);
@@ -164,7 +164,7 @@ public class MeasurementSetHelper
         boolean exception = false;
         // save the metric
         try {
-            MetricHelper.saveMetric(measurementSet.getMetric(), connection, false);
+            MetricDAOHelper.saveMetric(measurementSet.getMetric(), connection, false);
         } catch (Exception ex) {
             exception = true;
             log.error("Cannot save the MeasurementSet object because of an error in saving the metric! " + ex.getMessage());
@@ -193,26 +193,6 @@ public class MeasurementSetHelper
             exception = true;
             log.error("Error while saving MeasurementSet: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while saving MeasurementSet: " + ex.getMessage(), ex);
-        } finally {
-            if (exception && closeDBcon)
-            {
-                log.debug("Exception thrown, so rolling back the transaction and closing the connection");
-                connection.rollback();
-                connection.close();
-            }
-        }
-        
-        try {
-            // save any measurements if not NULL
-            if ((measurementSet.getMeasurements() != null) && !measurementSet.getMeasurements().isEmpty())
-            {
-                log.debug("Saving " + measurementSet.getMeasurements().size() + " measurements for the measurement set");
-                // saving as part of a report (to be created).
-                // flags to (1) validate measurements and (2) save measurements
-                ReportHelper.saveReportForMeasurements(measurementSet.getMeasurements(), measurementSet.getUUID(), true, true, connection, closeDBcon);
-            }
-        } catch (Exception ex) {
-            throw ex;
         } finally {
             if (closeDBcon)
             {
@@ -295,7 +275,7 @@ public class MeasurementSetHelper
             }
 
             try {
-                Metric metric = MetricHelper.getMetric(UUID.fromString(metricUUIDstr), connection, false); // don't close the connection
+                Metric metric = MetricDAOHelper.getMetric(UUID.fromString(metricUUIDstr), connection, false); // don't close the connection
                 measurementSet.setMetric(metric);
             } catch (Exception ex) {
                 log.error("Caught an exception when getting the Metric for the MeasurementSet (UUID: " + measurementSetUUID.toString() + "): " + ex.getMessage());

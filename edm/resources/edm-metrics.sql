@@ -140,9 +140,22 @@ CREATE TABLE Report
    reportTimeStamp bigint NOT NULL, 
    fromDateTimeStamp bigint NOT NULL, 
    toDateTimeStamp bigint NOT NULL, 
+   synchronised boolean NOT NULL, 
    numMeasurements integer NOT NULL, 
    CONSTRAINT reportUUID PRIMARY KEY (reportUUID), 
    CONSTRAINT mSetUUID FOREIGN KEY (mSetUUID) REFERENCES MeasurementSet (mSetUUID) ON UPDATE CASCADE ON DELETE CASCADE
+) 
+WITH (
+  OIDS = FALSE
+)
+;
+
+CREATE TABLE Report_Measurement
+(
+   reportUUID uuid NOT NULL, 
+   measurementUUID uuid NOT NULL, 
+   CONSTRAINT reportUUID FOREIGN KEY (reportUUID) REFERENCES Report (reportUUID) ON UPDATE CASCADE ON DELETE CASCADE, 
+   CONSTRAINT measurementUUID FOREIGN KEY (measurementUUID) REFERENCES Measurement (measurementUUID) ON UPDATE CASCADE ON DELETE CASCADE
 ) 
 WITH (
   OIDS = FALSE

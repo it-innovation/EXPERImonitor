@@ -42,9 +42,9 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DBUtil;
  * 
  * @author Vegard Engen
  */
-public class ExperimentHelper
+public class ExperimentDAOHelper
 {
-    static Logger log = Logger.getLogger(ExperimentHelper.class);
+    static Logger log = Logger.getLogger(ExperimentDAOHelper.class);
     
     public static ValidationReturnObject isObjectValidForSave(Experiment exp) throws Exception
     {
@@ -137,7 +137,7 @@ public class ExperimentHelper
     {
         // this validation will check if all the required parameters are set and if
         // there isn't already a duplicate instance in the DB
-        ValidationReturnObject returnObj = ExperimentHelper.isObjectValidForSave(exp);
+        ValidationReturnObject returnObj = ExperimentDAOHelper.isObjectValidForSave(exp);
         if (!returnObj.valid)
         {
             log.error("Cannot save the Experiment object: " + returnObj.exception.getMessage(), returnObj.exception);
@@ -196,7 +196,7 @@ public class ExperimentHelper
                 for (MetricGenerator mg : exp.getMetricGenerators())
                 {
                     if (mg != null)
-                        MetricGeneratorHelper.saveMetricGenerator(mg, exp.getUUID(), connection, false); // don't close the DB con
+                        MetricGeneratorDAOHelper.saveMetricGenerator(mg, exp.getUUID(), connection, false); // don't close the DB con
                 }
             }
         } catch (Exception ex) {
@@ -293,7 +293,7 @@ public class ExperimentHelper
             Set<MetricGenerator> metricGenerators = null;
 
             try {
-                metricGenerators = MetricGeneratorHelper.getMetricGeneratorsForExperiment(expUUID, withSubClasses, connection, false);
+                metricGenerators = MetricGeneratorDAOHelper.getMetricGeneratorsForExperiment(expUUID, withSubClasses, connection, false);
             } catch (Exception ex) {
                 log.error("Caught an exception when getting metric generators for experiment (UUID: " + expUUID.toString() + "): " + ex.getMessage());
             } finally {

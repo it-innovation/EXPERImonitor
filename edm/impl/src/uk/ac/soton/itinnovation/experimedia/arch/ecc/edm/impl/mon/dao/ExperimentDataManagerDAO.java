@@ -103,7 +103,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to save experiment, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            ExperimentHelper.saveExperiment(exp, connection);
+            ExperimentDAOHelper.saveExperiment(exp, connection);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -123,7 +123,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to get experiment, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            return ExperimentHelper.getExperiment(expUUID, withSubClasses, connection, true);
+            return ExperimentDAOHelper.getExperiment(expUUID, withSubClasses, connection, true);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -143,7 +143,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to get experiments, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            return ExperimentHelper.getExperiments(withSubClasses, connection);
+            return ExperimentDAOHelper.getExperiments(withSubClasses, connection);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -167,7 +167,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to save entity, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            EntityHelper.saveEntity(entity, connection, true);
+            EntityDAOHelper.saveEntity(entity, connection, true);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -187,7 +187,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to get entity, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            return EntityHelper.getEntity(entityUUID, withAttributes, connection, true);
+            return EntityDAOHelper.getEntity(entityUUID, withAttributes, connection, true);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -207,7 +207,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to get entities, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            return EntityHelper.getEntities(withAttributes, connection);
+            return EntityDAOHelper.getEntities(withAttributes, connection);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -227,7 +227,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to get entities for experiment, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            return EntityHelper.getEntitiesForExperiment(expUUID, withAttributes, connection, true);
+            return EntityDAOHelper.getEntitiesForExperiment(expUUID, withAttributes, connection, true);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -247,7 +247,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to get entities for metric generator, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            return EntityHelper.getEntitiesForMetricGenerator(mGenUUID, withAttributes, connection, true);
+            return EntityDAOHelper.getEntitiesForMetricGenerator(mGenUUID, withAttributes, connection, true);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -270,7 +270,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to save attribute, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            AttributeHelper.saveAttribute(attrib, connection, true);
+            AttributeDAOHelper.saveAttribute(attrib, connection, true);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -290,7 +290,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to get attribute, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            return AttributeHelper.getAttribute(attribUUID, connection, true);
+            return AttributeDAOHelper.getAttribute(attribUUID, connection, true);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -310,7 +310,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to get attributes for entity, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            return AttributeHelper.getAttributesForEntity(entityUUID, connection, true);
+            return AttributeDAOHelper.getAttributesForEntity(entityUUID, connection, true);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -334,7 +334,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to save metric generator, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            MetricGeneratorHelper.saveMetricGenerator(metricGen, experimentUUID, connection, true);
+            MetricGeneratorDAOHelper.saveMetricGenerator(metricGen, experimentUUID, connection, true);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -354,7 +354,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to get metric generator, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            return MetricGeneratorHelper.getMetricGenerator(metricGenUUID, withSubClasses, connection, true);
+            return MetricGeneratorDAOHelper.getMetricGenerator(metricGenUUID, withSubClasses, connection, true);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -374,7 +374,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to get metric generators, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            return MetricGeneratorHelper.getMetricGenerators(withSubClasses, connection);
+            return MetricGeneratorDAOHelper.getMetricGenerators(withSubClasses, connection);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -394,7 +394,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to get metric generators for experiment, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            return MetricGeneratorHelper.getMetricGeneratorsForExperiment(expUUID, withSubClasses, connection, true);
+            return MetricGeneratorDAOHelper.getMetricGeneratorsForExperiment(expUUID, withSubClasses, connection, true);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -418,7 +418,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to save metric group, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            MetricGroupHelper.saveMetricGroup(metricGroup, connection, true);
+            MetricGroupDAOHelper.saveMetricGroup(metricGroup, connection, true);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -438,7 +438,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to get metric group, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            return MetricGroupHelper.getMetricGroup(metricGroupUUID, withSubClasses, connection, true);
+            return MetricGroupDAOHelper.getMetricGroup(metricGroupUUID, withSubClasses, connection, true);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -458,7 +458,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to get metric group for metric generator, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            return MetricGroupHelper.getMetricGroupsForMetricGenerator(metricGenUUID, withSubClasses, connection, true);
+            return MetricGroupDAOHelper.getMetricGroupsForMetricGenerator(metricGenUUID, withSubClasses, connection, true);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -482,7 +482,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to save measurement set, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            MeasurementSetHelper.saveMeasurementSet(measurementSet, connection, true);
+            MeasurementSetDAOHelper.saveMeasurementSet(measurementSet, connection, true);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -502,7 +502,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to get measurement set, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            return MeasurementSetHelper.getMeasurementSet(measurementSetUUID, withMetric, connection, true);
+            return MeasurementSetDAOHelper.getMeasurementSet(measurementSetUUID, withMetric, connection, true);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -522,7 +522,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to get measurement set for metric group, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            return MeasurementSetHelper.getMeasurementSetForMetricGroup(metricGroupUUID, withMetric, connection, true);
+            return MeasurementSetDAOHelper.getMeasurementSetForMetricGroup(metricGroupUUID, withMetric, connection, true);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -546,7 +546,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to save metric, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            MetricHelper.saveMetric(metric, connection, true);
+            MetricDAOHelper.saveMetric(metric, connection, true);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -566,7 +566,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to get metric, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            return MetricHelper.getMetric(metricUUID, connection, true);
+            return MetricDAOHelper.getMetric(metricUUID, connection, true);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -586,7 +586,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to get metric for measurement set, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            return MetricHelper.getMetricForMeasurementSet(measurementSetUUID, connection, true);
+            return MetricDAOHelper.getMetricForMeasurementSet(measurementSetUUID, connection, true);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -610,7 +610,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to save measurement, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            MeasurementHelper.saveMeasurement(measurement, connection, true);
+            MeasurementDAOHelper.saveMeasurement(measurement, connection, true);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -630,7 +630,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to save measurements for set, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            MeasurementHelper.saveMeasurementsForSet(measurements, mSetUUID, connection, true);
+            MeasurementDAOHelper.saveMeasurementsForSet(measurements, mSetUUID, connection, true);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -650,7 +650,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to get measurement, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            return MeasurementHelper.getMeasurement(measurementUUID, connection, true);
+            return MeasurementDAOHelper.getMeasurement(measurementUUID, connection, true);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -674,7 +674,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to save report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            ReportHelper.saveReport(report, connection, true);
+            ReportDAOHelper.saveReport(report, connection, true);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -694,7 +694,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to get report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            return ReportHelper.getReport(reportUUID, connection, true);
+            return ReportDAOHelper.getReport(reportUUID, connection, true);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -714,7 +714,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to get report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            return ReportHelper.getReportWithData(reportUUID, connection, true);
+            return ReportDAOHelper.getReportWithData(reportUUID, connection, true);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -734,7 +734,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to get report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            return ReportHelper.getReportForLatestMeasurement(measurementSetUUID, connection, true);
+            return ReportDAOHelper.getReportForLatestMeasurement(measurementSetUUID, connection, true);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -754,7 +754,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to get report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            return ReportHelper.getReportForLatestMeasurementWithData(measurementSetUUID, connection, true);
+            return ReportDAOHelper.getReportForLatestMeasurementWithData(measurementSetUUID, connection, true);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -774,7 +774,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to get report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            return ReportHelper.getReportForAllMeasurements(measurementSetUUID, connection, true);
+            return ReportDAOHelper.getReportForAllMeasurements(measurementSetUUID, connection, true);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -794,7 +794,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to get report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            return ReportHelper.getReportForAllMeasurementsWithData(measurementSetUUID, connection, true);
+            return ReportDAOHelper.getReportForAllMeasurementsWithData(measurementSetUUID, connection, true);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -814,7 +814,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to get report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            return ReportHelper.getReportForMeasurementsAfterDate(measurementSetUUID, fromDate, connection, true);
+            return ReportDAOHelper.getReportForMeasurementsAfterDate(measurementSetUUID, fromDate, connection, true);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -834,7 +834,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to get report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            return ReportHelper.getReportForMeasurementsAfterDateWithData(measurementSetUUID, fromDate, connection, true);
+            return ReportDAOHelper.getReportForMeasurementsAfterDateWithData(measurementSetUUID, fromDate, connection, true);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -854,7 +854,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to get report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            return ReportHelper.getReportForMeasurementsForTimePeriod(measurementSetUUID, fromDate, toDate, connection, true);
+            return ReportDAOHelper.getReportForMeasurementsForTimePeriod(measurementSetUUID, fromDate, toDate, connection, true);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -874,7 +874,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to get report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            return ReportHelper.getReportForMeasurementsForTimePeriodWithData(measurementSetUUID, fromDate, toDate, connection, true);
+            return ReportDAOHelper.getReportForMeasurementsForTimePeriodWithData(measurementSetUUID, fromDate, toDate, connection, true);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -902,7 +902,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
         
         // experiments (cascade will delete metric generators etc
         try {
-            ExperimentHelper.deleteAllExperiments(connection, false);
+            ExperimentDAOHelper.deleteAllExperiments(connection, false);
         } catch (Exception ex) {
             log.debug("Rolling back delete transaction and closing the DB connection");
             connection.rollback();
@@ -912,7 +912,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
         
         // entities (in case some entities were created not in a metric group)
         try {
-            EntityHelper.deleteAllEntities(connection, false);
+            EntityDAOHelper.deleteAllEntities(connection, false);
         } catch (Exception ex) {
             log.debug("Rolling back delete transaction and closing the DB connection");
             connection.rollback();
@@ -922,7 +922,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
         
         // metrics
         try {
-            MetricHelper.deleteAllMetrics(connection, false);
+            MetricDAOHelper.deleteAllMetrics(connection, false);
         } catch (Exception ex) {
             log.debug("Rolling back delete transaction and closing the DB connection");
             connection.rollback();

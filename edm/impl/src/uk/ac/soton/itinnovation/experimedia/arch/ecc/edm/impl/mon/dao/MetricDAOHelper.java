@@ -41,9 +41,9 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DBUtil;
  * 
  * @author Vegard Engen
  */
-public class MetricHelper
+public class MetricDAOHelper
 {
-static Logger log = Logger.getLogger(MetricHelper.class);
+static Logger log = Logger.getLogger(MetricDAOHelper.class);
     
     public static ValidationReturnObject isObjectValidForSave(Metric metric, Connection connection, boolean closeDBcon) throws Exception
     {
@@ -93,7 +93,7 @@ static Logger log = Logger.getLogger(MetricHelper.class);
     {
         // this validation will check if all the required parameters are set and if
         // there isn't already a duplicate instance in the DB
-        ValidationReturnObject returnObj = MetricHelper.isObjectValidForSave(metric, connection, false);
+        ValidationReturnObject returnObj = MetricDAOHelper.isObjectValidForSave(metric, connection, false);
         if (!returnObj.valid)
         {
             log.error("Cannot save the Metric object: " + returnObj.exception.getMessage(), returnObj.exception);

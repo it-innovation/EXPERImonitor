@@ -41,9 +41,9 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DBUtil;
  * 
  * @author Vegard Engen
  */
-public class MetricGroupHelper
+public class MetricGroupDAOHelper
 {
-    static Logger log = Logger.getLogger(MetricGroupHelper.class);
+    static Logger log = Logger.getLogger(MetricGroupDAOHelper.class);
     
     public static ValidationReturnObject isObjectValidForSave(MetricGroup mGroup, boolean checkForMetricGenerator, Connection connection, boolean closeDBcon) throws Exception
     {
@@ -83,7 +83,7 @@ public class MetricGroupHelper
         // check if the metric generator exists, if it should be checked...
         if (checkForMetricGenerator)
         {
-            if (!MetricGeneratorHelper.objectExists(mGroup.getMetricGeneratorUUID(), connection, closeDBcon))
+            if (!MetricGeneratorDAOHelper.objectExists(mGroup.getMetricGeneratorUUID(), connection, closeDBcon))
             {
                 return new ValidationReturnObject(false, new RuntimeException("The MetricGenerator for the MetricGroup doesn't exit"));
             }
@@ -94,7 +94,7 @@ public class MetricGroupHelper
         {
             for (MeasurementSet mSet : mGroup.getMeasurementSets())
             {
-                ValidationReturnObject validationReturn = MeasurementSetHelper.isObjectValidForSave(mSet, false, connection, closeDBcon); // false = don't check for measurement set existing as this won't be saved yet!
+                ValidationReturnObject validationReturn = MeasurementSetDAOHelper.isObjectValidForSave(mSet, false, connection, closeDBcon); // false = don't check for measurement set existing as this won't be saved yet!
                 if (!validationReturn.valid)
                 {
                     return validationReturn;
@@ -154,7 +154,7 @@ public class MetricGroupHelper
         // this validation will check if all the required parameters are set and if
         // there isn't already a duplicate instance in the DB
         // will validate the measurement sets too, if any are given
-        ValidationReturnObject returnObj = MetricGroupHelper.isObjectValidForSave(metricGroup, false, connection, false);
+        ValidationReturnObject returnObj = MetricGroupDAOHelper.isObjectValidForSave(metricGroup, false, connection, false);
         if (!returnObj.valid)
         {
             log.error("Cannot save the MetricGroup object: " + returnObj.exception.getMessage(), returnObj.exception);
@@ -205,7 +205,7 @@ public class MetricGroupHelper
                 for (MeasurementSet mSet : metricGroup.getMeasurementSets())
                 {
                     if (mSet != null)
-                        MeasurementSetHelper.saveMeasurementSet(mSet, connection, false); // flag not to close the DB connection
+                        MeasurementSetDAOHelper.saveMeasurementSet(mSet, connection, false); // flag not to close the DB connection
                 }
             }
         } catch (Exception ex) {
@@ -286,7 +286,7 @@ public class MetricGroupHelper
             Set<MeasurementSet> measurementSets = null;
 
             try {
-                measurementSets = MeasurementSetHelper.getMeasurementSetForMetricGroup(metricGroupUUID, withSubClasses, connection, false); // don't close the connection
+                measurementSets = MeasurementSetDAOHelper.getMeasurementSetForMetricGroup(metricGroupUUID, withSubClasses, connection, false); // don't close the connection
             } catch (Exception ex) {
                 log.error("Caught an exception when getting measurement sets for MetricGroup (UUID: " + metricGroupUUID.toString() + "): " + ex.getMessage());
                 throw new RuntimeException("Caught an exception when getting measurement sets for MetricGroup (UUID: " + metricGroupUUID.toString() + "): " + ex.getMessage(), ex);

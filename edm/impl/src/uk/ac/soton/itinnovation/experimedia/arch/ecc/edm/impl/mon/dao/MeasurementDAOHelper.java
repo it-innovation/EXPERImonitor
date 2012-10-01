@@ -40,9 +40,9 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DBUtil;
  * 
  * @author Vegard Engen
  */
-public class MeasurementHelper
+public class MeasurementDAOHelper
 {
-    static Logger log = Logger.getLogger(MeasurementHelper.class);
+    static Logger log = Logger.getLogger(MeasurementDAOHelper.class);
     
     public static ValidationReturnObject isObjectValidForSave(Measurement measurement, boolean checkForMeasurementSet, Connection connection, boolean closeDBcon) throws Exception
     {
@@ -87,7 +87,7 @@ public class MeasurementHelper
         // if checking for measurement set, if flag is set
         if (checkForMeasurementSet)
         {
-            if (!MeasurementSetHelper.objectExists(measurement.getMeasurementSetUUID(), connection, closeDBcon))
+            if (!MeasurementSetDAOHelper.objectExists(measurement.getMeasurementSetUUID(), connection, closeDBcon))
             {
                 return new ValidationReturnObject(false, new RuntimeException("The Measurements's MeasurementSet does not exist (UUID: " + measurement.getMeasurementSetUUID().toString() + ")"));
             }
@@ -147,7 +147,7 @@ public class MeasurementHelper
         // if checking for measurement set, if flag is set
         if (checkForMeasurementSet)
         {
-            if (!MeasurementSetHelper.objectExists(mSetUUID, connection, closeDBcon))
+            if (!MeasurementSetDAOHelper.objectExists(mSetUUID, connection, closeDBcon))
             {
                 return new ValidationReturnObject(false, new RuntimeException("The Measurements's MeasurementSet does not exist (UUID: " + mSetUUID.toString() + ")"));
             }
@@ -165,7 +165,7 @@ public class MeasurementHelper
     {
         // this validation will check if all the required parameters are set and if
         // there isn't already a duplicate instance in the DB
-        ValidationReturnObject returnObj = MeasurementHelper.isObjectValidForSave(measurement, true, connection, false);
+        ValidationReturnObject returnObj = MeasurementDAOHelper.isObjectValidForSave(measurement, true, connection, false);
         if (!returnObj.valid)
         {
             log.error("Cannot save the Measurement object: " + returnObj.exception.getMessage(), returnObj.exception);
@@ -201,7 +201,7 @@ public class MeasurementHelper
     {
         // this validation will check if all the required parameters are set and if
         // there isn't already a duplicate instance in the DB
-        ValidationReturnObject returnObj = MeasurementHelper.areObjectsValidForSave(measurements, mSetUUID, true, connection, closeDBcon);
+        ValidationReturnObject returnObj = MeasurementDAOHelper.areObjectsValidForSave(measurements, mSetUUID, true, connection, closeDBcon);
         if (!returnObj.valid)
         {
             log.error("Cannot save the Measurement objects: " + returnObj.exception.getMessage(), returnObj.exception);
