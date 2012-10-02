@@ -37,6 +37,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Me
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
 
 import java.util.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMPhaseTimeOut;
 
 
 
@@ -128,6 +129,26 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
     phaseActive = false;
     
     if ( phaseListener != null ) phaseListener.onDiscoveryPhaseCompleted();
+  }
+  
+  @Override
+  public void timeOutClient( EMClientEx client ) throws Exception
+  {
+    // Safety first
+    if ( client == null ) throw new Exception( "Could not time-out: client is null" );
+    if ( !phaseActive )   throw new Exception( "Could not time-out: phase not active" );     
+    
+    // Check this client is registered with this phase first
+    if ( isClientRegisteredInPhase(client) )
+    {
+      if ( client.isNotifiedOfTimeOut(EMPhaseTimeOut.eEMTODiscoveryTimeOut) ) 
+        throw new Exception( "Time-out already sent to client" );
+      
+      client.addTimeOutNotification( EMPhaseTimeOut.eEMTODiscoveryTimeOut );
+      client.getDiscoveryInterface().discoveryTimeOut();
+    }
+    else
+      throw new Exception( "This client cannot be timed-out in Post-report phase" );
   }
   
   @Override

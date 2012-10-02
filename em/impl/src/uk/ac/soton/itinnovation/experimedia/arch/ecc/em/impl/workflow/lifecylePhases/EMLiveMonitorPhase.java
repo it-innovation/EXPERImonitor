@@ -152,6 +152,29 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
   }
   
   @Override
+  public void timeOutClient( EMClientEx client ) throws Exception
+  {
+    // Safety first
+    if ( client == null ) throw new Exception( "Could not time-out: client is null" );
+    if ( !phaseActive )   throw new Exception( "Could not time-out: phase not active" );     
+    
+    // Check this client is registered with this phase first
+    if ( isClientRegisteredInPhase(client) )
+    {
+      if ( client.isNotifiedOfTimeOut(EMPhaseTimeOut.eEMTOLiveMonitorTimeOut) ) 
+        throw new Exception( "Time-out already sent to client" );
+      
+      if ( !client.isPullingMetricData() )
+        throw new Exception( "Client is not currently generating pulled metric data" );
+      
+      client.addTimeOutNotification( EMPhaseTimeOut.eEMTOLiveMonitorTimeOut );
+      client.getLiveMonitorInterface().pullMetricTimeOut( client.getPullingMeasurementSetID() );
+    }
+    else
+      throw new Exception( "This client cannot be timed-out in Post-report phase" );
+  }
+  
+  @Override
   public void onClientUnexpectedlyRemoved( EMClientEx client )
   {
     if ( client != null )
@@ -233,15 +256,29 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
     if ( phaseActive )
     {
       EMClientEx client = getClient( senderID );
+      boolean processedOK = false;
       
       // Only allow clients who have declared they are going to be pulled
-      if ( client != null && clientsStillPulling.contains( client.getID() ) )
+      if ( client != null && report != null &&
+           clientsStillPulling.contains( client.getID() ) )
       {
-        client.setIsPullingMetricData( false );
-        
-        if ( phaseListener != null )
-          phaseListener.onGotMetricData( client, report );
+        // Only pass on metric data we were expecting
+        UUID msID = report.getMeasurementSet().getUUID();
+        if ( msID.equals( client.getPullingMeasurementSetID() ) )
+        {
+          if ( phaseListener != null )
+          {
+            phaseListener.onGotMetricData( client, report );
+            processedOK = true;
+          }
+           
+          client.setPullingMeasurementSetID( null ); // No longer pulling data
+        }
       }
+      
+      // Log problems
+      if ( !processedOK )
+        phaseLogger.error( "Could not process sent pulled metric - error with client data" );
     }
   }
 }

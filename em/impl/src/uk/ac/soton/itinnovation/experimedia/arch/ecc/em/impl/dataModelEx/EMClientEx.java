@@ -92,6 +92,9 @@ public class EMClientEx extends EMClient
   public void setTearDownInterface( IEMTearDown face )
   { tearDownFace = face; }
   
+  public void addTimeOutNotification( EMPhaseTimeOut timeoutSent )
+  { timeOutsCalled.add( timeoutSent ); }
+  
   // Discovery phase state -----------------------------------------------------
   public void setIsConnected( boolean connected )
   { clientConnected = connected; }
@@ -116,28 +119,42 @@ public class EMClientEx extends EMClient
       generatorsToSetup.add( genIt.next().getUUID() );
   }
   
-  // Setup phase state ---------------------------------------------------------
+  // Setup phase state ---------------------------------------------------------  
   public boolean hasGeneratorToSetup()
   { return ( !generatorsToSetup.isEmpty() ); }
   
-  public UUID getNextGeneratorToSetup()
+  public UUID getCurrentMetricGenSetupID()
+  { return currentMGSetupID; }
+  
+  public UUID iterateNextMGToSetup()
   { 
     if ( !generatorsToSetup.isEmpty() )
-      return generatorsToSetup.remove( 0 );
+      currentMGSetupID = generatorsToSetup.remove( 0 );
+    else
+      currentMGSetupID = null;
     
-    return null;
+    return currentMGSetupID;
   }
   
   public void addSuccessfulSetup( UUID genID )
   { if ( genID != null ) generatorsSetupOK.add( genID ); }
   
   // Live monitoring phase (and post-reporting) states -------------------------
-  public void setIsPullingMetricData( boolean pulling )
-  { isPullingMetricData = pulling; }
+  public UUID getPullingMeasurementSetID()
+  { return currentPullMeasurementSetID; }
+  
+  public void setPullingMeasurementSetID( UUID measurementSetID )
+  { currentPullMeasurementSetID = measurementSetID; }
   
   // Post-report phase state ---------------------------------------------------
   public void setPostReportSummary( EMPostReportSummary report )
   { postReportSummary = report; }
+  
+  public UUID getCurrentPostReportBatchID()
+  { return currentPostReportBatchID; }
+  
+  public void setCurrentPostReportBatchID( UUID batchID )
+  { currentPostReportBatchID = batchID; }
   
   // Tear-down phase state -----------------------------------------------------
   public void setTearDownResult( boolean success )

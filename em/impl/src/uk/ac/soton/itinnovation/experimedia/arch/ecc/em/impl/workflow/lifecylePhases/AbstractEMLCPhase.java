@@ -46,13 +46,14 @@ public abstract class AbstractEMLCPhase
   private final Object              clientLock = new Object();
   
   protected final Logger phaseLogger = Logger.getLogger( AbstractEMLCPhase.class );
-  protected EMPhase phaseType;
-  protected String  phaseState;
+  protected EMPhase      phaseType;
+  protected String       phaseState;
+  protected boolean      phaseActive           = false;
+  protected boolean      phaseSupportsTimeOuts = true;
  
   protected AMQPBasicChannel        emChannel;
   protected UUID                    emProviderID;
   protected AMQPMessageDispatchPump phaseMsgPump;
-  protected boolean                 phaseActive = false;
   
   
   public EMPhase getPhaseType()
@@ -63,6 +64,9 @@ public abstract class AbstractEMLCPhase
   
   public boolean isActive()
   { return phaseActive; }
+  
+  public boolean isTimeOutSupported()
+  { return phaseSupportsTimeOuts; }
   
   public EMClientEx getClient( UUID id )
   { return phaseClients.get( id ); }
@@ -93,6 +97,8 @@ public abstract class AbstractEMLCPhase
   public abstract void controlledStop() throws Exception;
   
   public abstract void hardStop();
+  
+  public abstract void timeOutClient( EMClientEx client ) throws Exception;
   
   public abstract void onClientUnexpectedlyRemoved( EMClientEx client );
   
@@ -144,5 +150,13 @@ public abstract class AbstractEMLCPhase
     }
    
     return result;
+  }
+  
+  protected boolean isClientRegisteredInPhase( EMClientEx client )
+  {
+    if ( client == null ) return false;
+    if ( getClient(client.getID()) == null ) return false;
+    
+    return true;
   }
 }

@@ -112,6 +112,29 @@ public class EMMetricGenSetupPhase extends AbstractEMLCPhase
   }
   
   @Override
+  public void timeOutClient( EMClientEx client ) throws Exception
+  {
+    // Safety first
+    if ( client == null ) throw new Exception( "Could not time-out: client is null" );
+    if ( !phaseActive )   throw new Exception( "Could not time-out: phase not active" );     
+    
+    // Check this client is registered with this phase first
+    if ( isClientRegisteredInPhase(client) )
+    {
+      if ( client.isNotifiedOfTimeOut(EMPhaseTimeOut.eEMTOSetUpTimeOut) ) 
+        throw new Exception( "Time-out already sent to client" );
+      
+      if ( !client.isSettingUpMetricGenerator() )
+        throw new Exception( "Client is not currently setting up a metric generator" );
+      
+      client.addTimeOutNotification( EMPhaseTimeOut.eEMTOSetUpTimeOut );
+      client.getSetupInterface().setupTimeOut( client.getCurrentMetricGenSetupID() );
+    }
+    else
+      throw new Exception( "This client cannot be timed-out in Post-report phase" );
+  }
+  
+  @Override
   public void onClientUnexpectedlyRemoved( EMClientEx client )
   {
     if ( client != null )
@@ -135,16 +158,11 @@ public class EMMetricGenSetupPhase extends AbstractEMLCPhase
       {
         if ( client.hasGeneratorToSetup() )
         {
-          UUID genID = client.getNextGeneratorToSetup();
+          UUID genID = client.iterateNextMGToSetup();
           client.getSetupInterface().setupMetricGenerator( genID );
         }
         else
-        {
-          clientsSettingUp.remove( senderID );
-          
-          if ( phaseListener != null ) 
-            phaseListener.onMetricGenSetupResult( client, false );
-        }
+          clientsSettingUp.remove( senderID ); // Don't ask again
       }
     }
   }
@@ -162,13 +180,14 @@ public class EMMetricGenSetupPhase extends AbstractEMLCPhase
       {
         if ( genID != null && success ) client.addSuccessfulSetup( genID );
         
-        if ( client.hasGeneratorToSetup() )
-        {
-          UUID nextGen = client.getNextGeneratorToSetup();
+        // Try setting up another MG (if it exists)
+        UUID nextGen = client.iterateNextMGToSetup();
+        
+        if ( nextGen != null )
           client.getSetupInterface().setupMetricGenerator( nextGen );
-        }
         else
         {
+          // Otherwise, finish up and report the result
           clientsSettingUp.remove( senderID );
           
           if ( phaseListener != null )

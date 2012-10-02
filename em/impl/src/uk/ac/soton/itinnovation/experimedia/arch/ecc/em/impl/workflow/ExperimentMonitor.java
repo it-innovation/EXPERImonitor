@@ -199,6 +199,13 @@ public class ExperimentMonitor implements IExperimentMonitor,
     catch ( Exception e ) { throw e; }
   }
   
+  @Override
+  public void notifyClientOfTimeOut( EMClient client ) throws Exception
+  {
+    try { lifecycleManager.tryClientTimeOut( client ); }
+    catch ( Exception e ) { throw e; }
+  }
+  
   // IEMLifecycleListener ------------------------------------------------------
   @Override
   public void onClientConnected( EMClient client )

@@ -132,7 +132,7 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
             liveMonitorFace.pushMetric( report );
     }
 
-    // IEMDiscovery_UserListener -------------------------------------------------
+    // IEMDiscovery_UserListener -----------------------------------------------
     @Override
     public void onCreateInterface( UUID senderID, EMInterfaceType type )
     {
@@ -261,14 +261,14 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
 
     @Override
     public void onDiscoveryTimeOut( UUID senderID )
-    { /* Not implemented in this demo */ }
+    { emiListener.onDiscoveryTimeOut(); }
 
     @Override
     public void onSetStatusMonitorEndpoint( UUID senderID,
                                             String endPoint )
     { /* Not implemented in this demo */ }
 
-    // IEMMonitorSetup_UserListener ----------------------------------------------
+    // IEMMonitorSetup_UserListener --------------------------------------------
     @Override
     public void onSetupMetricGenerator( UUID senderID, UUID genID )
     {
@@ -284,9 +284,9 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
 
     @Override
     public void onSetupTimeOut( UUID senderID, UUID genID )
-    { /* Not imeplemented in this demo */ }
+    { emiListener.onSetupTimeOut( genID ); }
 
-    // IEMLiveMonitor_UserListener -----------------------------------------------
+    // IEMLiveMonitor_UserListener ---------------------------------------------
     @Override
     public void onStartPushing( UUID senderID )
     {
@@ -333,15 +333,13 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
 
     @Override
     public void onPullMetricTimeOut( UUID senderID, UUID measurementSetID )
-    {
-    
-    }
+    { emiListener.onPullMetricTimeOut( measurementSetID ); }
 
     @Override
     public void onPullingStopped( UUID senderID )
     { /* Not implemented in this demo */ }
 
-    // IEMPostReport_UserListener ------------------------------------------------
+    // IEMPostReport_UserListener ----------------------------------------------
     @Override
     public void onRequestPostReportSummary( UUID senderID )
     {
@@ -367,9 +365,9 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
 
     @Override
     public void notifyReportBatchTimeOut( UUID senderID, UUID batchID )
-    { /* Not implemented in this demo */ }
+    { emiListener.onReportBatchTimeOut( batchID ); }
 
-    // IEMTearDown_UserListener --------------------------------------------------
+    // IEMTearDown_UserListener ------------------------------------------------
     @Override
     public void onTearDownMetricGenerators( UUID senderID )       
     {

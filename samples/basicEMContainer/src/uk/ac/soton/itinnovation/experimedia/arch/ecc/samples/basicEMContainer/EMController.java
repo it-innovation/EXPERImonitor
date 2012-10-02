@@ -133,6 +133,8 @@ public class EMController implements IEMLifecycleListener
       } break;
     }
     
+    mainView.enableTimeOuts( true );
+    
     EMPhase nextPhase  = expMonitor.getNextPhase();
     mainView.setMonitoringPhaseValue( phase.toString(), nextPhase.toString() );
   }
@@ -148,8 +150,10 @@ public class EMController implements IEMLifecycleListener
       try 
       { expMonitor.goToNextPhase(); }
       catch ( Exception e )
-      {}
+      { emCtrlLogger.error("Could not go to next phase: " + e.getMessage()); }
     }
+    else
+      mainView.enableTimeOuts( false );
   }
   
   @Override
@@ -408,6 +412,19 @@ public class EMController implements IEMLifecycleListener
     return result;
   }
   
+  private void sendTimeOut( EMClient client )
+  {
+    emCtrlLogger.info( "Sending timeout" );
+    
+    try { expMonitor.notifyClientOfTimeOut(client); }
+    catch ( Exception e )
+    { 
+      mainView.addLogText( "Couldn't time-out client " +
+                           client.getName() + " : " +
+                           e.getLocalizedMessage() );
+    }
+  }
+  
   // Internal event handling ---------------------------------------------------
   private class ViewWindowListener extends WindowAdapter
   {
@@ -433,5 +450,9 @@ public class EMController implements IEMLifecycleListener
     @Override
     public void onPullPostReportButtonClicked()
     { pullPostReports(); }
+    
+    @Override
+    public void onSendTimeOut( EMClient client )
+    { sendTimeOut( client ); }
   }
 }

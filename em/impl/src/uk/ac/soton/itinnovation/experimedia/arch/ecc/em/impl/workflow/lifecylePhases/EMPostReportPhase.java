@@ -103,6 +103,29 @@ public class EMPostReportPhase extends AbstractEMLCPhase
   }
   
   @Override
+  public void timeOutClient( EMClientEx client ) throws Exception
+  {
+    // Safety first
+    if ( client == null ) throw new Exception( "Could not time-out: client is null" );
+    if ( !phaseActive )   throw new Exception( "Could not time-out: phase not active" );     
+    
+    // Check this client is registered with this phase first
+    if ( isClientRegisteredInPhase(client) )
+    {
+      if ( client.isNotifiedOfTimeOut(EMPhaseTimeOut.eEMTOPostReportTimeOut) ) 
+        throw new Exception( "Time-out already sent to client" );
+      
+      if ( !client.isCreatingPostReportData() )
+        throw new Exception( "Client is not currently generating post-report data" );
+      
+      client.addTimeOutNotification( EMPhaseTimeOut.eEMTOPostReportTimeOut );
+      client.getPostReportInterface().notifyReportBatchTimeOut( client.getCurrentPostReportBatchID() );
+    }
+    else
+      throw new Exception( "This client cannot be timed-out in Post-report phase" );
+  }
+  
+  @Override
   public void onClientUnexpectedlyRemoved( EMClientEx client )
   {
     if ( client != null ) removeClient( client.getID() );
@@ -145,8 +168,20 @@ public class EMPostReportPhase extends AbstractEMLCPhase
     {
       EMClientEx client = getClient( senderID );
       
-      if ( client != null && phaseListener != null )
-        phaseListener.onGotDataBatch( client, populatedBatch );
+      if ( client != null && populatedBatch != null )
+      {
+        // Check data ID matches the batch we expected
+        UUID thisBatchID = populatedBatch.getID();
+        
+        if ( client.getCurrentPostReportBatchID().equals(thisBatchID) )
+          client.setCurrentPostReportBatchID( null ); // Got the right data, so clear 
+        else
+          phaseLogger.equals( "EM got a data batch it did not expect: " + thisBatchID.toString() );
+        
+        // Notify anyway! We don't want to loose data
+        if ( phaseListener != null )
+          phaseListener.onGotDataBatch( client, populatedBatch );
+      }
     }
   }
 }

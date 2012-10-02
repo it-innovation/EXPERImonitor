@@ -26,7 +26,7 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecylePhases;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.IEMLifecycleListener;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.IEMLiveMonitor;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 
@@ -36,12 +36,10 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.EMConnecti
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
 
-
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
 
 import java.util.*;
 import org.apache.log4j.Logger;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.IEMPostReport;
 
 
 
@@ -53,16 +51,18 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
                                            EMPostReportPhaseListener,
                                            EMTearDownPhaseListener
 {
-  private final Logger lmLogger = Logger.getLogger( EMLifecycleManager.class );
+  private final Logger lmLogger   = Logger.getLogger( EMLifecycleManager.class );
+  private final Object clientLock = new Object();
   
   private AMQPBasicChannel emChannel;
   private UUID             emProviderID;
   
   private EnumMap<EMPhase, AbstractEMLCPhase> lifecyclePhases;
-  private EMPhase currentPhase = EMPhase.eEMUnknownPhase;
-  private boolean windingCurrPhaseDown = false;
   
-  private final Object clientLock = new Object();
+  private EMPhase currentPhase         = EMPhase.eEMUnknownPhase;
+  private boolean windingCurrPhaseDown = false;
+ 
+  
   
   private IEMLifecycleListener lifecycleListener;
   
@@ -207,8 +207,8 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
       IEMLiveMonitor monitor = clientEx.getLiveMonitorInterface();
       if ( monitor == null ) throw new Exception( "Could not get client live monitor interface" );
       
+      clientEx.setPullingMeasurementSetID( measurementSetID );
       monitor.pullMetric( measurementSetID );
-      clientEx.setIsPullingMetricData( true );
     }
   }
   
@@ -231,8 +231,23 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
       IEMPostReport postReport = clientEx.getPostReportInterface();
       if ( postReport == null ) throw new Exception( "Could not get client post report interface" );
       
+      clientEx.setCurrentPostReportBatchID( batch.getID() );
       postReport.requestDataBatch( batch );
     }
+  }
+  
+  public void tryClientTimeOut( EMClient client ) throws Exception
+  {
+    if ( client == null ) throw new Exception( "Client is null" );
+    if ( currentPhase == EMPhase.eEMUnknownPhase ) throw new Exception( "Cannot time-out in unknown phase" );
+    
+    // Check phase support and that the client
+    AbstractEMLCPhase thisPhase = lifecyclePhases.get( currentPhase );
+    if ( !thisPhase.isTimeOutSupported() ) throw new Exception( "Current phase does not time-outs" );
+    
+    // Try the time-out
+    try { thisPhase.timeOutClient( (EMClientEx) client ); }
+    catch ( Exception e ) { throw e; }
   }
   
   // EMConnectionManagerListener -----------------------------------------------

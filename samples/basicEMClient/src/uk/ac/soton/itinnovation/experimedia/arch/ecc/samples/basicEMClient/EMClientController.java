@@ -175,6 +175,10 @@ public class EMClientController implements EMIAdapterListener,
     }
 
     @Override
+    public void onDiscoveryTimeOut()
+    { clientView.addLogMessage( "Got discovery time-out message" ); }
+    
+    @Override
     public void onSetupMetricGenerator( UUID genID, Boolean[] resultOUT )
     {
         clientView.setStatus( "Setting up generators" );
@@ -184,6 +188,10 @@ public class EMClientController implements EMIAdapterListener,
 
         clientView.addLogMessage( "Completed generator set-up" );
     }
+    
+    @Override
+    public void onSetupTimeOut( UUID metricGeneratorID )
+    { clientView.addLogMessage( "Got set-up time-out message" ); }
 
     @Override
     public void onStartPushingMetricData()
@@ -209,6 +217,10 @@ public class EMClientController implements EMIAdapterListener,
         // We'll use this report with the 'MiniEDM' later, but for now...
         pendingPullReports.remove( reportID );
     }
+    
+    @Override
+    public void onPullMetricTimeOut( UUID measurementSetID )
+    { clientView.addLogMessage( "Got live pull time-out message" ); }
 
     @Override
     public void onStopPushingMetricData()
@@ -283,6 +295,10 @@ public class EMClientController implements EMIAdapterListener,
         ms.addMeasurement( firstMeasurement );
         ms.addMeasurement( currentMeasurement );
     }
+    
+    @Override
+    public void onReportBatchTimeOut( UUID batchID )
+    { clientView.addLogMessage( "Got post-report time-out message" ); }
 
     @Override
     public void onGetTearDownResult( Boolean[] resultOUT )
@@ -329,6 +345,10 @@ public class EMClientController implements EMIAdapterListener,
         catch ( Exception e )
         { clientLogger.error( "Could not cleanly disconnect from EM:\n" + e.getMessage() ); }
     }
+    
+    @Override
+    public void onTearDownTimeOut()
+    { clientView.addLogMessage( "Got tear-down time-out message" ); }
 
     // Private method ------------------------------------------------------------
     private MeasurementSet createMeasurementSetEmptySample()

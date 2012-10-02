@@ -25,6 +25,8 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.basicEMContainer;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMClient;
+
 
 
 
@@ -37,4 +39,6 @@ public interface EMViewListener
   void onPullMetricButtonClicked();
   
   void onPullPostReportButtonClicked();
+  
+  void onSendTimeOut( EMClient client );
 }

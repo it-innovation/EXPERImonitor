@@ -105,6 +105,26 @@ public class EMTearDownPhase extends AbstractEMLCPhase
   }
   
   @Override
+  public void timeOutClient( EMClientEx client ) throws Exception
+  {
+    // Safety first
+    if ( client == null ) throw new Exception( "Could not time-out: client is null" );
+    if ( !phaseActive )   throw new Exception( "Could not time-out: phase not active" );      
+    
+    // Check this client is registered with this phase first
+    if ( isClientRegisteredInPhase(client) )
+    {
+      if ( client.isNotifiedOfTimeOut(EMPhaseTimeOut.eEMTOTearDownTimeOut) ) 
+        throw new Exception( "Time-out already sent to client" );
+      
+      client.addTimeOutNotification( EMPhaseTimeOut.eEMTOTearDownTimeOut );
+      client.getTearDownInterface().tearDownTimeOut();
+    }
+    else
+      throw new Exception( "This client cannot be timed-out in Tear-down phase" );
+  }
+  
+  @Override
   public void onClientUnexpectedlyRemoved( EMClientEx client )
   {
     if ( client != null )

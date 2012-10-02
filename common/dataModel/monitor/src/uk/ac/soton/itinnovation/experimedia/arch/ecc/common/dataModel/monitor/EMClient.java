@@ -44,32 +44,22 @@ public class EMClient
   protected HashSet<MetricGenerator> metricGenerators;
   
   // Setup phase states
+  protected UUID          currentMGSetupID;
   protected HashSet<UUID> generatorsSetupOK;
   
   // Live monitoring phase states
-  protected boolean isPullingMetricData = false;
+  protected UUID currentPullMeasurementSetID;
   
   // Post-report phase states
+  protected UUID                currentPostReportBatchID;
   protected EMPostReportSummary postReportSummary;
   
   // Tear-down phase
   protected boolean tearDownSuccessful = false;
   
-  /**
-   * Constructor of the client representing a user of the EM. ID must be random.
-   * 
-   * @param id    - Random UUID of the client
-   * @param name  - Human recognisable name of the client
-   */
-  public EMClient( UUID id, String name )
-  {
-    clientID = id;
-    clientName = name;
-    
-    supportedPhases   = EnumSet.noneOf( EMPhase.class );
-    metricGenerators  = new HashSet<MetricGenerator>();
-    generatorsSetupOK = new HashSet<UUID>();
-  }
+  // Multi-phase time-out states
+  protected EnumSet<EMPhaseTimeOut> timeOutsCalled;
+  
   
   @Override
   public String toString()
@@ -141,6 +131,15 @@ public class EMClient
   }
   
   /**
+   * Use this method to determine whether the client is currently setting up
+   * a metric generator.
+   * 
+   * @return - Returns true if a metric generator is being set up.
+   */
+  public boolean isSettingUpMetricGenerator()
+  { return (currentMGSetupID != null); }
+  
+  /**
    * Returns the set-up result the client reported (if supported) during the the
    * set-up phase.
    * 
@@ -165,7 +164,7 @@ public class EMClient
    * @return - true if currently generating data
    */
   public boolean isPullingMetricData()
-  { return isPullingMetricData; }
+  { return (currentPullMeasurementSetID != null); }
   
   /**
    * Returns the post report summary the client reported (if supported) during the
@@ -177,6 +176,15 @@ public class EMClient
   { return postReportSummary; }
   
   /**
+   * Use this method to determine if the client is currently generating post-report
+   * data for the EM.
+   * 
+   * @return - Returns true if the client is generating post-report data.
+   */
+  public boolean isCreatingPostReportData()
+  { return ( currentPostReportBatchID != null); }
+  
+  /**
    * Returns the result of the tear-down process the client executed (if it supports it)
    * during the tear-down phase.
    * 
@@ -184,4 +192,42 @@ public class EMClient
    */
   public boolean getTearDownResult()
   { return tearDownSuccessful; }
+  
+  /**
+   * Returns a copy of the time-outs sent to this client by the EM.
+   * 
+   * @return - Set of known time-outs sent to the client.
+   */
+  public EnumSet<EMPhaseTimeOut> getCopyOfSentTimeOuts()
+  { return EnumSet.copyOf( timeOutsCalled ); }
+  
+  /**
+   * Use this method to determine if the client has had a specific time-out
+   * sent to them by the EM
+   * 
+   * @param timeout - Specific time-out of interest
+   * @return        - Returns true if the time-out has been sent
+   */
+  public boolean isNotifiedOfTimeOut( EMPhaseTimeOut timeout )
+  { return timeOutsCalled.contains( timeout ); }
+  
+  // Protected methods ---------------------------------------------------------
+  /**
+   * Constructor of the client representing a user of the EM. ID must be random.
+   * Clients should only be constructed by the EM.
+   * 
+   * @param id    - Random UUID of the client
+   * @param name  - Human recognisable name of the client
+   */
+  protected EMClient( UUID id, String name )
+  {
+    clientID = id;
+    clientName = name;
+    
+    supportedPhases = EnumSet.noneOf( EMPhase.class );
+    timeOutsCalled  = EnumSet.noneOf( EMPhaseTimeOut.class );
+    
+    metricGenerators  = new HashSet<MetricGenerator>();
+    generatorsSetupOK = new HashSet<UUID>();
+  }
 }

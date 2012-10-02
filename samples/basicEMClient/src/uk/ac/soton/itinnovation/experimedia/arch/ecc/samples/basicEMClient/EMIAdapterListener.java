@@ -51,16 +51,33 @@ public interface EMIAdapterListener
      * method on the EMInterfaceAdapter class.
      */
     void onPopulateMetricGeneratorInfo();
+    
+    /**
+     * Notifies the listener that the EM has sent a discover phase time-out; this
+     * means that the EM will no longer be accepting metric generator info from
+     * this listener.
+     * 
+     */
+    void onDiscoveryTimeOut();
 
     /**
      * The listener is requested to set up the metric generator indicated by the
      * provided ID and report the result of the set-up process in the OUT 
      * parameter.
      * 
-     * @param generatorID - ID of the MetricGenerator
-     * @param resultOUT   - result of the set-up (as OUT parameter)
+     * @param metricGeneratorID - ID of the MetricGenerator
+     * @param resultOUT         - result of the set-up (as OUT parameter)
      */
-    void onSetupMetricGenerator( UUID generatorID, Boolean[] resultOUT );
+    void onSetupMetricGenerator( UUID metricGeneratorID, Boolean[] resultOUT );
+    
+    /**
+     * Notifies the listener that time has run out for setting up the metric
+     * generator identified by the ID. Listeners should stop trying to set up this
+     * metric generator if this is on-going.
+     * 
+     * @param metricGeneratorID - ID of the metric generator being set up
+     */
+    void onSetupTimeOut( UUID metricGeneratorID );
 
     /**
      * Notifies the listener that it can now start pushing metric data
@@ -83,6 +100,15 @@ public interface EMIAdapterListener
      * @param lastReportID 
      */
     void onPullReportReceived( UUID reportID );
+    
+    /**
+     * Notifies the listener that the pulling of metric data from the MeasurementSet
+     * identified has timed-out; listeners should not attempt to send this data until
+     * asked again.
+     * 
+     * @param measurementSetID 
+     */
+    void onPullMetricTimeOut( UUID measurementSetID );
 
     /**
      * Notifies the listener that it should stop pushing metric data.
@@ -114,6 +140,15 @@ public interface EMIAdapterListener
      * @param batchOut - Data batch OUT parameter
      */
     void onPopulateDataBatch( EMDataBatch batchOut );
+    
+    /**
+     * Notifies the listener that the data batch report (identified by the ID)
+     * is now over-due and to cancel any process in place that is trying to
+     * generate and then send it.
+     * 
+     * @param batchID - ID of the data batch requested by the EM.
+     */
+    void onReportBatchTimeOut( UUID batchID );
 
     /**
      * Requests the listener to complete a tear-down process and report the
@@ -122,4 +157,11 @@ public interface EMIAdapterListener
      * @param resultOUT - Result of the tear-down process as an OUT parameter
      */
     void onGetTearDownResult( Boolean[] resultOUT );
+    
+    /**
+     * Notifies the listener that time has run out to report on the success of
+     * its tearing down process.
+     * 
+     */
+    void onTearDownTimeOut();
 }

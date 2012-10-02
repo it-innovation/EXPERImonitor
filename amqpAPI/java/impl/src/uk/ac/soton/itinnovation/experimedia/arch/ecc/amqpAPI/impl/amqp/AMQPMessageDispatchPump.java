@@ -58,7 +58,7 @@ public class AMQPMessageDispatchPump implements Runnable,
     
     switch ( priority )
     {
-      case HIGH    : pumpThread.setPriority( Thread.MIN_PRIORITY ); break;
+      case HIGH    : pumpThread.setPriority( Thread.MAX_PRIORITY ); break;
       
       case NORMAL  : pumpThread.setPriority( Thread.NORM_PRIORITY ); break;
       
