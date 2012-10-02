@@ -23,7 +23,7 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.basicEMContainer;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.basicECCContainer;
 
 import java.util.UUID;
 import org.apache.log4j.Logger;

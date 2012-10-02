@@ -27,7 +27,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.basicEMContainer;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.basicECCContainer;
 
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMClient;

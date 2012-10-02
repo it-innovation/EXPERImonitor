@@ -22,7 +22,7 @@
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.basicEMClient;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.basicECCClient;
 
 /**
  *

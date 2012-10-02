@@ -18,27 +18,39 @@
 // the software.
 //
 //      Created By :            Simon Crowle
-//      Created Date :          27-Aug-2012
+//      Created Date :          15-Aug-2012
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.basicEMClient;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.basicECCClient;
+
+import java.util.UUID;
+import org.apache.log4j.Logger;
 
 
 
 
-public interface EMClientViewListener
+public class EMClientContainer
 {
-    /**
-     * The user has pushed the 'Push data' button on the UI
-     * 
-     */
-    void onPushDataClicked();
-    
-    /**
-     * The user has closed the view (so client is disconnecting)
-     * 
-     */
-    void onClientViewClosed();
+    public static Logger clientLogger;
+
+    public static void main( String args[] )
+    {
+        EMClientController ctrl = new EMClientController();
+
+        try
+        {
+            String rabbitServerIP = "127.0.0.1";
+            if ( args.length == 1 ) rabbitServerIP = args[0];     
+
+            clientLogger = Logger.getLogger( EMClientContainer.class );
+
+            ctrl.start( rabbitServerIP,
+                        UUID.fromString("00000000-0000-0000-0000-000000000000"), // EM ID
+                        UUID.randomUUID() );                                     // ID of this client
+        }
+        catch (Exception e )
+        { clientLogger.error( "Had a problem connecting to the EM:\n" + e.getMessage() ); }
+    }
 }

@@ -16,8 +16,9 @@
   </parent>
 
   <modules>
-    <module>basicEMClient</module>
-    <module>basicEMContainer</module>
+	  <module>shared</module>
+    <module>basicECCClient</module>
+    <module>basicECCContainer</module>
   </modules>
     
 </project>
