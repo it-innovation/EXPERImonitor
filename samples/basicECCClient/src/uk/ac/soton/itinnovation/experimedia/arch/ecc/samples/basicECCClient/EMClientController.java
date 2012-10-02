@@ -25,10 +25,9 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.basicECCClient;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
-
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
-
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
 
 import org.apache.log4j.Logger;
