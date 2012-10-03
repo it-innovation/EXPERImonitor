@@ -220,4 +220,10 @@ public class MetricGroup implements Serializable
         
         this.measurementSets.addAll(measurementSets);
     }
+    
+    @Override
+    public String toString()
+    {
+        return name;
+    }
 }

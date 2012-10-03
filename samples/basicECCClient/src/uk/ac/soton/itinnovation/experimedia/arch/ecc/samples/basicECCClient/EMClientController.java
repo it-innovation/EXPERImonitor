@@ -136,6 +136,23 @@ public class EMClientController implements EMIAdapterListener,
         entityAttribute.setDescription( "Very simple measurement of total bytes used" );
         entityAttribute.setEntityUUID( entityBeingObserved.getUUID() );
         entityBeingObserved.addAttribute( entityAttribute );
+        
+        // ---------------------------------------------------------------------
+        Entity e2 = new Entity();
+        e2.setName( "EM Temp Entity" );
+        
+        Attribute a2 = new Attribute();
+        a2.setName( "Another attribute" );
+        a2.setDescription( "Attribute description here" );
+        a2.setEntityUUID( e2.getUUID() );
+        e2.addAttribute( a2 );
+        
+        MetricGenerator mgt = new MetricGenerator();
+        mgt.setName( "MGENTemp" + clientName );
+        mgt.setDescription( "Temp mg" );
+        mgt.addEntity( e2 );
+        metricGenerators.put( mgt.getUUID(), mgt );       
+        // ---------------------------------------------------------------------
 
         // Create a single metric generator that will represent this metric data generation
         MetricGenerator metricGen = new MetricGenerator();

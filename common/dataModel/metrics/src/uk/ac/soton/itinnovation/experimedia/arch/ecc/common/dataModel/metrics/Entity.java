@@ -238,6 +238,12 @@ public class Entity implements Serializable
         
         this.attributes.addAll(attributes);
     }
+    
+    @Override
+    public String toString()
+    {
+        return name;
+    }
 
     /**
      * @return the experimentUUIDs

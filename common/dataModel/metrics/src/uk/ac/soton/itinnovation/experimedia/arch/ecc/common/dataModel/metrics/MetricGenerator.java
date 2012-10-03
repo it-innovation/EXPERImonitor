@@ -261,4 +261,10 @@ public class MetricGenerator implements Serializable
         
         this.entities.addAll(entities);
     }
+    
+    @Override
+    public String toString()
+    {
+        return name;
+    }
 }
