@@ -299,7 +299,7 @@ public class EMView extends javax.swing.JFrame
         .addGap(82, 82, 82))
     );
 
-    jTabbedPane1.addTab("Conntected EM Clients", jPanel1);
+    jTabbedPane1.addTab("Connected to the ECC", jPanel1);
 
     loggingText.setColumns(20);
     loggingText.setRows(5);
@@ -469,6 +469,8 @@ public class EMView extends javax.swing.JFrame
         .addGap(18, 18, 18)
         .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 510, javax.swing.GroupLayout.PREFERRED_SIZE))
     );
+
+    jTabbedPane1.getAccessibleContext().setAccessibleName("Connected ECC Clients");
 
     pack();
   }// </editor-fold>//GEN-END:initComponents
