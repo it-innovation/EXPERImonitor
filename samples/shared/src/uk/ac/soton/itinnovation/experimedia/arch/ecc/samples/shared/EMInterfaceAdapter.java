@@ -47,25 +47,25 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
                                            IEMPostReport_UserListener,
                                            IEMTearDown_UserListener
 {
-    private EMIAdapterListener emiListener;
-    private String             clientName;
-    private AMQPBasicChannel   amqpChannel;
-    private UUID               expMonitorID;
-    private UUID               clientID;
+    protected EMIAdapterListener emiListener;
+    protected String             clientName;
+    protected AMQPBasicChannel   amqpChannel;
+    protected UUID               expMonitorID;
+    protected UUID               clientID;
 
-    private EMInterfaceFactory       interfaceFactory;
-    private IAMQPMessageDispatchPump dispatchPump;
+    protected EMInterfaceFactory       interfaceFactory;
+    protected IAMQPMessageDispatchPump dispatchPump;
 
     // EM Interfaces
-    private IEMMonitorEntryPoint entryPointFace;
-    private IEMDiscovery         discoveryFace;
-    private IEMMetricGenSetup    setupFace;
-    private IEMLiveMonitor       liveMonitorFace;
-    private IEMPostReport        postReportFace;
-    private IEMTearDown          tearDownFace;
+    protected IEMMonitorEntryPoint entryPointFace;
+    protected IEMDiscovery         discoveryFace;
+    protected IEMMetricGenSetup    setupFace;
+    protected IEMLiveMonitor       liveMonitorFace;
+    protected IEMPostReport        postReportFace;
+    protected IEMTearDown          tearDownFace;
 
     // Metric Generators
-    private HashSet<MetricGenerator> clientGenerators;
+    protected HashSet<MetricGenerator> clientGenerators;
 
 
     public EMInterfaceAdapter( EMIAdapterListener listener )
