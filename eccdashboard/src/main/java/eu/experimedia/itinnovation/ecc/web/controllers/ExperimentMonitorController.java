@@ -27,6 +27,7 @@ package eu.experimedia.itinnovation.ecc.web.controllers;
 import eu.experimedia.itinnovation.ecc.web.data.*;
 import eu.experimedia.itinnovation.ecc.web.services.ExperimentMonitorService;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
@@ -73,6 +74,45 @@ public class ExperimentMonitorController {
 
                 tempClient = new EMClientAsJson();
                 i++;
+            }
+
+            return resultingListOfClients;
+        } catch (Throwable ex) {
+            logger.error("Failed to return a list of connected clients");
+            ex.printStackTrace();
+            return null;
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/getcurrentphaseclients/do.json")
+    public @ResponseBody EMClientAsJson[] getCurrentPhaseClients() throws Throwable {
+        logger.debug("Returning list of connected clients");
+        try {
+            EMClient[] clients = emService.getCurrentPhaseClients();
+            int numClients = clients.length;
+
+            EMClientAsJson tempClient = new EMClientAsJson();
+            EMClientAsJson[] resultingListOfClients = new EMClientAsJson[numClients];
+
+            int i = 0; Iterator it; EMPhase phase; Set<String> phases = new HashSet<String>();
+            for (EMClient e : clients) {
+                tempClient.setUuid(e.getID().toString());
+                tempClient.setName(e.getName());
+                
+                // Extra: get supported phases
+                it = e.getCopyOfSupportedPhases().iterator();
+                while(it.hasNext()) {
+                    phase = (EMPhase) it.next();
+                    phases.add("[" + phase.getIndex() + "] " + phase.name());
+                }
+                
+                tempClient.setSupportedPhases(phases.toArray(new String[0]));
+                
+                resultingListOfClients[i] = tempClient;
+
+                tempClient = new EMClientAsJson();
+                i++;
+                phases.clear();
             }
 
             return resultingListOfClients;

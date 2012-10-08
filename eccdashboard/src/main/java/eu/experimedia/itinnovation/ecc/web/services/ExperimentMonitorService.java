@@ -65,6 +65,24 @@ public class ExperimentMonitorService {
         return clients;
     }
     
+    public EMClient[] getCurrentPhaseClients() throws Throwable {
+        logger.debug("Returning a list of current phase clients");
+        
+        EMClient[] clients = emHelper.getExperimentMonitor().getCurrentPhaseClients().toArray(new EMClient[0]);
+        
+        if (clients != null) {
+            if (clients.length > 0) {
+                logger.debug("List of current phase clients has " + clients.length + " item(s)");
+            } else {
+                logger.debug("List of current phase clients is EMPTY");
+            }
+        } else {
+            logger.debug("List of current phase clients is NULL");
+        }
+        
+        return clients;
+    }
+    
     public EMPhase getCurrentPhase() throws Throwable {
         logger.debug("Returning current phase");
         return emHelper.getExperimentMonitor().getCurrentPhase();
@@ -83,7 +101,7 @@ public class ExperimentMonitorService {
     public MetricGenerator[] getMetricGeneratorsForClient(String clientUUID) throws Throwable {
         logger.debug("Getting metric generators for client " + clientUUID);
         boolean clientIsOnTheList = false;
-        EMClient theClient = new EMClient(UUID.fromString("00000000-0000-0000-1000-000000000000"), "Temp client");
+        EMClient theClient = null;
         Set<MetricGenerator> resultingMetricGeneratorSet = new HashSet<MetricGenerator>();
         
         for (EMClient client : this.getAllConnectedClients()) {
@@ -110,7 +128,7 @@ public class ExperimentMonitorService {
     public MeasurementSet[] getMeasurementSetsForClient(String clientUUID) throws Throwable {
         logger.debug("Getting measurement sets for client " + clientUUID);
         boolean clientIsOnTheList = false;
-        EMClient theClient = new EMClient(UUID.fromString("00000000-0000-0000-1000-000000000000"), "Temp client");
+        EMClient theClient = null;
         Set<MeasurementSet> resultingMeasurementSet = new HashSet<MeasurementSet>();
         
         for (EMClient client : this.getAllConnectedClients()) {

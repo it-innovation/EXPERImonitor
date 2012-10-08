@@ -27,6 +27,7 @@ public class EMClientAsJson {
 
     private String uuid;
     private String name;
+    private String[] supportedPhases;
 
     public EMClientAsJson() {
     }
@@ -45,5 +46,13 @@ public class EMClientAsJson {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    public String[] getSupportedPhases() {
+        return supportedPhases;
+    }
+
+    public void setSupportedPhases(String[] supportedPhases) {
+        this.supportedPhases = supportedPhases;
     }
 }

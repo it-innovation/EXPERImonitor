@@ -178,7 +178,7 @@
         </dependency>        -->
         <dependency>
             <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
-            <artifactId>experimedia-arch-ecc-samples-basicEMClient</artifactId>
+            <artifactId>experimedia-arch-ecc-samples-shared</artifactId>
             <version>0.9-SNAPSHOT</version>
             <type>jar</type>
         </dependency>

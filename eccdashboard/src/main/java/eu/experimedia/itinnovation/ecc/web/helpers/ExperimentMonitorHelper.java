@@ -23,28 +23,37 @@
 /////////////////////////////////////////////////////////////////////////
 package eu.experimedia.itinnovation.ecc.web.helpers;
 
+import eu.experimedia.itinnovation.ecc.web.adapters.DashboardExperimentMonitor;
 import java.util.UUID;
+import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.factory.EMInterfaceFactory;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.IExperimentMonitor;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.MonitoringEDM;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDM;
 
 @Service
 public class ExperimentMonitorHelper {
+    private static final Logger logger = Logger.getLogger(ExperimentMonitorHelper.class);
 
-    private static IExperimentMonitor em;
+    private static DashboardExperimentMonitor em;
+    private IMonitoringEDM expDataMgr;
 
-    public synchronized IExperimentMonitor getExperimentMonitor() throws Throwable {
+    public synchronized DashboardExperimentMonitor getExperimentMonitor() throws Throwable {
         return getStaticExperimentMonitor();
     }
 
-    public IExperimentMonitor getStaticExperimentMonitor() throws Throwable {
+    public DashboardExperimentMonitor getStaticExperimentMonitor() throws Throwable {
 
         if (em == null) {
+            logger.debug("Creating new Experiment Monitor");
             
-            em = EMInterfaceFactory.createEM();
+            // Clear database
+            expDataMgr = new MonitoringEDM();
+            expDataMgr.clearMetricsDatabase();
+            
+            // Create new Experiment monitor
+            em = new DashboardExperimentMonitor();
             em.openEntryPoint("127.0.0.1", UUID.fromString("00000000-0000-0000-0000-000000000000"));
             
-
         }
 
         return em;

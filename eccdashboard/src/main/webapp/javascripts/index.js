@@ -50,11 +50,15 @@ $(document).ready(function() {
                 $("#currentPhaseName").text(currentPhase.description);
                 $("#currentPhaseID").text(currentPhase.index);
                 $("#currentPhaseDescription").text("Waiting for clients to connect");
+                
+                displayExperimentInfo();
 
-
+                // RELOAD CLIENTS LIST FOR EVERY PHASE AS
+                // NOT ALL CLIENTS SUPPORT ALL PHASES
                 switch(internalPhase) {
                     // CLIENTS CONNECTING PHASE
                     case 0:
+                        // TEST DISCONNECTING CLIENTS - does not work for some reason, works on Simon's computer
                         doClientsConnectingPhase(actionButton, currentPhase);
                         break;
                     // DISCOVERY PHASE
@@ -109,49 +113,53 @@ $(document).ready(function() {
         }
     });
 
-    // Get the Experiment - later
-    /*
-    $.ajax({
-        type: 'GET',
-        url: "/da/getexperiments/do.json",
-        contentType: "application/json; charset=utf-8",
-        success: function(experiments){
-            console.log(experiments);
-
-            if (experiments == null) {
-                alert("Server error retrieving experiments");
-                console.error("Server error retrieving experiments");
-                return;
-            } else {
-                if (experiments.length < 1) {
-                    alert("No experiments found");
-                    console.error("No experiments found");
-                } else {
-                    theExperiment = experiments[0]; // we are only going to have one per dashboard for now
-                    $("#experimentName").text(theExperiment.name);
-                    $("#experimentUUID").text(theExperiment.uuid);
-                    $("#experimentDescription").text(theExperiment.description);
-                    $("#experimentExperimentID").text(theExperiment.experimentID);
-                    $("#experimentStartTime").text(longToDate(theExperiment.startTime));
-                    if (theExperiment.endTime == 0)
-                        $("#experimentEndTime").text('In progress');
-                    else
-                        $("#experimentEndTime").text(longToDate(theExperiment.endTime));
-
-                }
-            }
-        },
-        error: function(xhr, ajaxOptions, thrownError){
-            alert('Failed to get a list of experiments');
-            console.error('Failed to get a list of experiments');
-            console.error(thrownError);
-            console.error(xhr.status);
-        }
-    });
-
-    */
-
 });
+
+function displayExperimentInfo() {
+    // Get experiment info    
+    if (internalPhase > 0) {
+        $.ajax({
+            type: 'GET',
+            url: "/da/getexperiments/do.json",
+            contentType: "application/json; charset=utf-8",
+            success: function(experiments){
+                console.log(experiments);
+
+                if (experiments == null) {
+                    alert("Server error retrieving experiments");
+                    console.error("Server error retrieving experiments");
+                    return;
+                } else {
+                    if (experiments.length < 1) {
+                        console.debug("No experiments found, retrying in 2 seconds");
+                        setTimeout(function(){displayExperimentInfo()}, 2000);
+                        // alert("No experiments found");
+                    } else {
+
+                        $(".experimentInfo").css('display', 'block');
+                        theExperiment = experiments[0]; // we are only going to have one per dashboard for now
+                        $("#experimentName").text(theExperiment.name);
+                        $("#experimentUUID").text(theExperiment.uuid);
+                        $("#experimentDescription").text(theExperiment.description);
+                        $("#experimentExperimentID").text(theExperiment.experimentID);
+                        $("#experimentStartTime").text(longToDate(theExperiment.startTime));
+                        if (theExperiment.endTime == 0)
+                            $("#experimentEndTime").text('In progress');
+                        else
+                            $("#experimentEndTime").text(longToDate(theExperiment.endTime));
+
+                    }
+                }
+            },
+            error: function(xhr, ajaxOptions, thrownError){
+                alert('Failed to get a list of experiments');
+                console.error('Failed to get a list of experiments');
+                console.error(thrownError);
+                console.error(xhr.status);
+            }
+        });    
+    }
+}
 
 function doClientsConnectingPhase(actionButton, currentPhase) {
     console.log('In CLIENTS CONNECTING PHASE');
@@ -176,6 +184,7 @@ function prepareDiscoveryPhase(actionButton) {
                 console.log(currentPhase);
                 if (currentPhase != null) {
                     console.log('Experiment started, returned phase is: ' + currentPhase.description + ' (' + currentPhase.index + ')');
+                    internalPhase = currentPhase.index;
                     doDiscoveryPhase(actionButton, currentPhase);
                 } else {
                     console.error('Failed to start the experiment: next phase is NULL. Stopped');
@@ -203,6 +212,12 @@ function doDiscoveryPhase(actionButton, currentPhase) {
 
     $(".clientlist .clientitem").first().trigger('click');
     
+    // Show experiment details
+    displayExperimentInfo();        
+    
+    // Get list of clients
+    getCurrentPhaseClients();
+    
     prepareSetupPhase(actionButton);
 
 }
@@ -221,6 +236,7 @@ function prepareSetupPhase(actionButton) {
                 console.log(currentPhase);
                 if (currentPhase != null) {
                     console.log('Set-up phase started, returned phase is: ' + currentPhase.description + ' (' + currentPhase.index + ')');
+                    internalPhase = currentPhase.index;
                     $("#currentPhaseName").text(currentPhase.description);
                     $("#currentPhaseID").text(currentPhase.index);
                     doSetupPhase(actionButton, currentPhase);
@@ -245,6 +261,9 @@ function doSetupPhase(actionButton, currentPhase) {
     // Client monitoring OFF
     isClientMonitoringOn = false;
     
+    // Get list of clients
+    getCurrentPhaseClients();    
+    
     prepareLiveMonitoringPhase(actionButton);
 }
 
@@ -262,6 +281,7 @@ function prepareLiveMonitoringPhase(actionButton) {
                 console.log(currentPhase);
                 if (currentPhase != null) {
                     console.log('Live monitoring phase started, returned phase is: ' + currentPhase.description + ' (' + currentPhase.index + ')');
+                    internalPhase = currentPhase.index;
                     $("#currentPhaseName").text(currentPhase.description);
                     $("#currentPhaseID").text(currentPhase.index);
                     doLiveMonitoringPhase(actionButton, currentPhase);
@@ -286,6 +306,9 @@ function doLiveMonitoringPhase(actionButton, currentPhase){
     // Client monitoring OFF
     isClientMonitoringOn = false;
     
+    // Get list of clients
+    getCurrentPhaseClients();    
+    
     preparePostReportPhase(actionButton);    
 }
 
@@ -303,6 +326,7 @@ function preparePostReportPhase(actionButton) {
                 console.log(currentPhase);
                 if (currentPhase != null) {
                     console.log('Post report phase started, returned phase is: ' + currentPhase.description + ' (' + currentPhase.index + ')');
+                    internalPhase = currentPhase.index;
                     $("#currentPhaseName").text(currentPhase.description);
                     $("#currentPhaseID").text(currentPhase.index);
                     doPostReportPhase(actionButton, currentPhase);
@@ -328,6 +352,9 @@ function doPostReportPhase(actionButton, currentPhase){
     // Client monitoring OFF
     isClientMonitoringOn = false;
     
+    // Get list of clients
+    getCurrentPhaseClients();    
+    
     prepareTearDownPhase(actionButton);    
 }
 
@@ -346,6 +373,7 @@ function prepareTearDownPhase(actionButton) {
                 console.log(currentPhase);
                 if (currentPhase != null) {
                     console.log('Tear down phase started, returned phase is: ' + currentPhase.description + ' (' + currentPhase.index + ')');
+                    internalPhase = currentPhase.index;
                     $("#currentPhaseName").text(currentPhase.description);
                     $("#currentPhaseID").text(currentPhase.index);
                     doTearDownPhase(actionButton, currentPhase);
@@ -378,6 +406,9 @@ function doTearDownPhase(actionButton, currentPhase){
 
     // Client monitoring OFF
     isClientMonitoringOn = false;
+    
+    // Get list of clients
+    getCurrentPhaseClients();    
     
 }
 
@@ -493,6 +524,17 @@ function getMetricGeneratorsForClient(clientUUID) {
         }
 }
 
+function getCurrentPhaseClients() {
+    $.ajax({
+        type: 'GET',
+        url: "/em/getcurrentphaseclients/do.json",
+        contentType: "application/json; charset=utf-8",
+        success: function(clients){
+            console.log(clients);
+        }   
+    });
+}
+
 function getClients() {
     if (isClientMonitoringOn) {
         $.ajax({
@@ -512,6 +554,7 @@ function getClients() {
     //                    if (jQuery.inArray(client.uuid, currentClientsUuids) < 0) {
 
                             console.log("Client: " + client.uuid);
+                            console.log(client);
 
     //                        currentClientsUuids.push(client.uuid);
 
