@@ -22,8 +22,6 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-var counter = 0;
-//var currentClientsUuids = [];
 var isClientMonitoringOn = true;
 var internalPhase = -1;
 var actionButton;

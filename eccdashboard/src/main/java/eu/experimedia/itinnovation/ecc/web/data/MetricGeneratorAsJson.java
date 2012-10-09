@@ -29,6 +29,7 @@ public class MetricGeneratorAsJson {
     private String name;
     private String description;
     private EntityAsJson[] listOfEntities;
+    private MetricGroupAsJson[] listOfMetricGroups;
 
     public MetricGeneratorAsJson() {
     }
@@ -64,5 +65,12 @@ public class MetricGeneratorAsJson {
     public void setListOfEntities(EntityAsJson[] listOfEntities) {
         this.listOfEntities = listOfEntities;
     }
-    
+
+    public MetricGroupAsJson[] getListOfMetricGroups() {
+        return listOfMetricGroups;
+    }
+
+    public void setListOfMetricGroups(MetricGroupAsJson[] listOfMetricGroups) {
+        this.listOfMetricGroups = listOfMetricGroups;
+    }
 }

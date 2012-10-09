@@ -46,10 +46,6 @@ h4.monitorControl p span {
     font-weight: bold;
 }
 
-div.experimentInfo {
-    display: none;
-}
-
 p.metricMonitorHeader {
     font-weight: bold;
     margin: 0;

@@ -87,3 +87,7 @@ dl.faketabs dd.active {
 div.experimentMetadata span {
     font-weight: bold;
 }
+
+div.experimentInfo {
+    display: none;
+}

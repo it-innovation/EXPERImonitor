@@ -24,7 +24,7 @@
 
 var counter = 0;
 var theExperiment;
-var DATE_FORMAT = "d/M/yyyy H:m";
+var DATE_FORMAT = "d/M/yyyy HH:mm";
 
 $(document).ready(function() {
         $(document).foundationButtons();
