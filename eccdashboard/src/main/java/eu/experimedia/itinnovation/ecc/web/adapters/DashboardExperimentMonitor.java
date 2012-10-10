@@ -28,6 +28,8 @@ import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasicChannel;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPConnectionFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Measurement;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMClient;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMDataBatch;
@@ -59,13 +61,18 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
     private IReportDAO expReportAccessor;
     private IMeasurementSetDAO expMSAccessor;
     private Experiment expInstance;
+    private HashMap<Date, String> testMeasurements = new HashMap<Date, String>();
 
     public DashboardExperimentMonitor() {
         lifecycleListeners = new HashSet<IEMLifecycleListener>();
-        
+
         expDataMgr = new MonitoringEDM();
     }
 
+    public HashMap<Date, String> getTestMeasurements() {
+        return testMeasurements;
+    }
+    
     // IExperimentMonitor --------------------------------------------------------
     @Override
     public eStatus getStatus() {
@@ -139,9 +146,9 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
 
     @Override
     public EMPhase startLifecycle() throws Exception {
-        
+
         logger.debug("Starting experiment lifecycle");
-        
+
         if (monitorStatus != IExperimentMonitor.eStatus.ENTRY_POINT_OPEN) {
             throw new Exception("Not in a state ready to start lifecycle");
         }
@@ -307,7 +314,7 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
         while (listIt.hasNext()) {
             listIt.next().onFoundClientWithMetricGenerators(client);
         }
-        
+
         // get supported phases:
         client.getCopyOfSupportedPhases();
     }
@@ -323,11 +330,58 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
 
     @Override
     public void onGotMetricData(EMClient client, Report report) {
-        Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
+        if (client != null) {
+            if (report != null) {
+                logger.debug("Received metric data from client: " + client.getName() + " [" + client.getID().toString() + "], report [" + report.getUUID().toString() + "] with " + report.getNumberOfMeasurements() + " measurement(s)");
 
-        while (listIt.hasNext()) {
-            listIt.next().onGotMetricData(client, report);
+                MeasurementSet measurementSet = report.getMeasurementSet();
+
+                if (measurementSet != null) {
+
+                    Set<Measurement> measurements = measurementSet.getMeasurements();
+
+                    if (measurements != null) {
+                        if (!measurements.isEmpty()) {
+                            Iterator it = measurements.iterator();
+                            Measurement measurement;
+                            int measurementsCounter = 1;
+                            String measurementUUID, measurementValue;
+                            Date measurementTimestamp;
+                            while(it.hasNext()) {
+
+                                measurement = (Measurement) it.next();
+                                measurementUUID = measurement.getUUID().toString();
+                                measurementTimestamp = measurement.getTimeStamp();
+                                measurementValue = measurement.getValue();
+                                logger.debug(measurementsCounter + ": [" + measurementUUID + "] " + measurementTimestamp.toString() + " - " + measurementValue);
+                                testMeasurements.put(measurementTimestamp, measurementValue);
+                                measurementsCounter++;
+
+                            }
+//                            mainView.addLogText(client.getName() + " got metric data: " + measurements.iterator().next().getValue());
+                        } else {
+                            logger.error("Measurements for measurement set [" + measurementSet.getUUID().toString() + "] are EMPTY");
+                        }
+                    } else {
+                        logger.error("Measurements for measurement set [" + measurementSet.getUUID().toString() + "] are NULL");
+                    }
+
+                } else {
+                    logger.error("Measurement set for report [" + report.getUUID().toString() + "] is NULL");
+
+                }
+            } else {
+                logger.error("Received metric data NULL report from client: " + client.getName() + " [" + client.getID().toString() + "]");
+            }
+        } else {
+            logger.error("Received metric data from NULL client!");
         }
+
+//        Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
+//
+//        while (listIt.hasNext()) {
+//            listIt.next().onGotMetricData(client, report);
+//        }
     }
 
     @Override

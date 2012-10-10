@@ -224,13 +224,30 @@ function getMetricGenerators() {
             
             console.log(metricGenerators);
             
+            $(".metricgenlist").empty();
+            
             if (metricGenerators.length < 1) {
                 console.debug("No metric generators found, retrying in 2 seconds");
                 setTimeout(function(){getMetricGenerators()}, 2000);
             } else {
                 var mgObj;
                 $.each(metricGenerators, function(index, mg){
-                    mgObj = $('<p class="metricgenitem">' + mg.name + '<span>' + mg.listOfEntities[0].name + '</span></p>').appendTo(".metricgenlist");
+                    
+                    // Create entities string with names/descriptions
+                    var entitiesNameList = "";
+                    var entitiesNameListWithDescriptions = "";
+                    $.each(mg.listOfEntities, function(entityIndex, entityItem){
+                        if ( entityIndex < mg.listOfEntities.length - 1 ) {
+                            entitiesNameList += entityItem.name + ", ";
+                            entitiesNameListWithDescriptions += entityItem.name + " (" + entityItem.description + "), ";
+                        } else {
+                            entitiesNameList += entityItem.name;
+                            entitiesNameListWithDescriptions += entityItem.name + " (" + entityItem.description + ")";
+                        }
+                    });
+                    
+                    // Sidebar metric generator element
+                    mgObj = $('<p class="metricgenitem">' + mg.name + '<span>' + entitiesNameList + '</span></p>').appendTo(".metricgenlist");
 
                     mgObj.data('mg', mg);
                     
@@ -246,11 +263,11 @@ function getMetricGenerators() {
 
                         md.append('<p class="metricGeneratorHeader">' + mgdata.name + ' (' + mgdata.description + ')</p>');
                         md.append('<p class="metricGeneratorDescription">UUID: ' + mgdata.uuid + '</p>');
-                        md.append('<p class="metricGeneratorDescription">Entities: ' + mgdata.listOfEntities[0].name + ' (' + mgdata.listOfEntities[0].description + ')</p>');
+                        md.append('<p class="metricGeneratorDescription">Entities: ' + entitiesNameListWithDescriptions + '</p>');
     
                         $.each(mgdata.listOfMetricGroups, function(indexMetricGroup, metricGroup){
                             md.append('<p class="metricGroupHeader">Metric Group ' + (indexMetricGroup + 1) + ': ' + metricGroup.name + ' (' + metricGroup.description + ')</p>');
-                            md.append('<p class="metricGroupSubheader">' + metricGroup.uuid + '</p>');
+                            md.append('<p class="metricGroupSubheader">UUID: ' + metricGroup.uuid + '</p>');
                             
                             var counter = 0; // for unique div IDs required by jqPlot
                             var measurementSetContainer = $('<div class="twelve columns"></div>').appendTo($('<div class="row"></div>').appendTo(md));
@@ -280,6 +297,10 @@ function getMetricGenerators() {
                                 $(".graphDataSwitcher .switchbutton").click(function(){
                                     $(this).parent().find('.switchbutton').removeClass('active');
                                     $(this).addClass('active');
+                                    
+                                    $.getJSON('/em/gettestdata/do.json', function(measurements) {
+                                        console.log(measurements);
+                                    });
 
                                     var counter = $(this).data().counter;
                                     var jqplotContainerID = $(this).data().jqplotContainerID;
@@ -393,6 +414,9 @@ function doSetupPhase(actionButton, currentPhase) {
     $("#currentPhaseID").text(currentPhase.index);
     $("#currentPhaseDescription").text("Setting-up clients");
 
+    // Show metric generators
+    getMetricGenerators();
+
     prepareLiveMonitoringPhase(actionButton);
 }
 
@@ -431,6 +455,9 @@ function doLiveMonitoringPhase(actionButton, currentPhase){
     $("#currentPhaseName").text(currentPhase.description);
     $("#currentPhaseID").text(currentPhase.index);
     $("#currentPhaseDescription").text("Live monitoring of clients");
+
+    // Show metric generators
+    getMetricGenerators();
 
     preparePostReportPhase(actionButton);
 }
@@ -471,6 +498,9 @@ function doPostReportPhase(actionButton, currentPhase){
     $("#currentPhaseName").text(currentPhase.description);
     $("#currentPhaseID").text(currentPhase.index);
     $("#currentPhaseDescription").text("Collecting post reports from clients");
+
+    // Show metric generators
+    getMetricGenerators();
 
     prepareTearDownPhase(actionButton);
 }

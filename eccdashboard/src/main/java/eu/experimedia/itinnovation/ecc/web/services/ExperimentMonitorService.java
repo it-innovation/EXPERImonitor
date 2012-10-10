@@ -25,9 +25,7 @@
 package eu.experimedia.itinnovation.ecc.web.services;
 
 import eu.experimedia.itinnovation.ecc.web.helpers.ExperimentMonitorHelper;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -46,6 +44,11 @@ public class ExperimentMonitorService {
     @Autowired
     @Qualifier("experimentMonitorHelper")
     private transient ExperimentMonitorHelper emHelper;
+    
+    public HashMap<Date, String> getTestData() throws Throwable {
+        logger.debug("Returning test data");
+        return emHelper.getExperimentMonitor().getTestMeasurements();
+    }    
     
     public EMClient[] getAllConnectedClients() throws Throwable {
         logger.debug("Returning a list of all connected clients");
