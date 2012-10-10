@@ -36,14 +36,14 @@ import java.util.*;
 
 
 
-public class EMClientController implements EMIAdapterListener,
-                                           EMClientViewListener
+public class ECCClientController implements EMIAdapterListener,
+                                           ECCClientViewListener
 {
-    private final Logger clientLogger = Logger.getLogger( EMClientController.class );
+    private final Logger clientLogger = Logger.getLogger( ECCClientController.class );
 
     private AMQPBasicChannel   amqpChannel;
     private EMInterfaceAdapter emiAdapter;
-    private EMClientView       clientView;
+    private ECCClientView       clientView;
     private String             clientName;
 
     private Entity                        entityBeingObserved;
@@ -58,7 +58,7 @@ public class EMClientController implements EMIAdapterListener,
 
 
 
-    public EMClientController()
+    public ECCClientController()
     {
         metricGenerators   = new HashMap<UUID,MetricGenerator>();
         pendingPushReports = new HashMap<UUID, Report>();
@@ -92,7 +92,7 @@ public class EMClientController implements EMIAdapterListener,
             // Set up a simple view --------------------------------------------------
             Date date = new Date();
             clientName = date.toString();
-            clientView = new EMClientView( clientName, this );
+            clientView = new ECCClientView( clientName, this );
             clientView.setVisible( true );
 
             // Create EM interface adapter, listen to it...

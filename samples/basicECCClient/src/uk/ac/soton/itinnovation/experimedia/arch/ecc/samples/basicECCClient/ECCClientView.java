@@ -28,15 +28,15 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.basicECCClient;
  *
  * @author sgc
  */
-public class EMClientView extends javax.swing.JFrame
+public class ECCClientView extends javax.swing.JFrame
 {
-  private EMClientViewListener viewListener;
+  private ECCClientViewListener viewListener;
 
   /**
    * Creates new form EMClientView
    */
-  public EMClientView( String clientName,
-                       EMClientViewListener listener) 
+  public ECCClientView( String clientName,
+                       ECCClientViewListener listener) 
   {
     initComponents();
     

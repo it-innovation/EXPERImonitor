@@ -17,6 +17,7 @@
 
   <modules>
 	  <module>shared</module>
+	  <module>headerlessECCClient</module>
     <module>basicECCClient</module>
     <module>basicECCContainer</module>
   </modules>
