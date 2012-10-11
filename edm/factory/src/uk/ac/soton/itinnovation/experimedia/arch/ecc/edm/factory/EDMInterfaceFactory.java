@@ -25,9 +25,9 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.MonitoringEDM;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.MonitoringEDMLight;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.MonitoringEDMAgent;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDM;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDMLight;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDMAgent;
 
 
 /**
@@ -60,15 +60,15 @@ public class EDMInterfaceFactory
     }
     
     /**
-     * Get a Monitoring EDM Light interface, to get access to storing and retrieving
+     * Get a Monitoring EDM Agent interface, to get access to storing and retrieving
      * monitoring data.
      * 
      * @return Instance of the light version of EDM monitoring.
      * @throws Exception 
      */
-    public static IMonitoringEDMLight getMonitoringEDMLight() throws Exception
+    public static IMonitoringEDMAgent getMonitoringEDMAgent() throws Exception
     {
-        IMonitoringEDMLight edm = new MonitoringEDMLight();
+        IMonitoringEDMAgent edm = new MonitoringEDMAgent();
         
         return edm;
     }

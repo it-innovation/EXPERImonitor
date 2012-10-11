@@ -35,6 +35,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Me
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricType;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Unit;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DBUtil;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.NoDataException;
 
 /**
  * A helper class for validating and executing queries for the Metrics.
@@ -49,25 +50,25 @@ static Logger log = Logger.getLogger(MetricDAOHelper.class);
     {
         if (metric == null)
         {
-            return new ValidationReturnObject(false, new NullPointerException("The Metric object is NULL - cannot save that..."));
+            return new ValidationReturnObject(false, new IllegalArgumentException("The Metric object is NULL - cannot save that..."));
         }
         
         // check if all the required information is given; uuid, type and unit
         
         if (metric.getUUID() == null)
         {
-            return new ValidationReturnObject(false, new NullPointerException("The Metric UUID is NULL"));
+            return new ValidationReturnObject(false, new IllegalArgumentException("The Metric UUID is NULL"));
         }
         
         if (metric.getMetricType() == null)
         {
-            return new ValidationReturnObject(false, new NullPointerException("The Metric type is NULL"));
+            return new ValidationReturnObject(false, new IllegalArgumentException("The Metric type is NULL"));
         }
         
         // TOOD: include check for unit again when serialisation issue has been sorted by SGC
         /*if (metric.getUnit() == null)
         {
-            return new ValidationReturnObject(false, new NullPointerException("The Metric unit is NULL"));
+            return new ValidationReturnObject(false, new IllegalArgumentException("The Metric unit is NULL"));
         }*/
         
         // check if it exists in the DB already
@@ -156,7 +157,7 @@ static Logger log = Logger.getLogger(MetricDAOHelper.class);
         if (metricUUID == null)
         {
             log.error("Cannot get a Metric object with the given UUID because it is NULL!");
-            throw new NullPointerException("Cannot get a Metric object with the given UUID because it is NULL!");
+            throw new IllegalArgumentException("Cannot get a Metric object with the given UUID because it is NULL!");
         }
         
         if (DBUtil.isClosed(connection))
@@ -215,8 +216,10 @@ static Logger log = Logger.getLogger(MetricDAOHelper.class);
             else // nothing in the result set
             {
                 log.error("There is no metric with the given UUID: " + metricUUID.toString());
-                throw new RuntimeException("There is no metric with the given UUID: " + metricUUID.toString());
+                throw new NoDataException("There is no metric with the given UUID: " + metricUUID.toString());
             }
+        } catch (NoDataException nde) {
+            throw nde;
         } catch (Exception ex) {
             log.error("Error while getting metric: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while getting metric: " + ex.getMessage(), ex);
@@ -233,7 +236,7 @@ static Logger log = Logger.getLogger(MetricDAOHelper.class);
         if (measurementSetUUID == null)
         {
             log.error("Cannot get a Metric object for the given measurement set, because its given UUID is NULL!");
-            throw new NullPointerException("Cannot get a Metric object for the given measurement set, because its given UUID is NULL!");
+            throw new IllegalArgumentException("Cannot get a Metric object for the given measurement set, because its given UUID is NULL!");
         }
         
         if (DBUtil.isClosed(connection))
@@ -291,9 +294,16 @@ static Logger log = Logger.getLogger(MetricDAOHelper.class);
             }
             else // nothing in the result set
             {
+                if (!ExperimentDAOHelper.objectExists(measurementSetUUID, connection, false))
+                {
+                    log.debug("There is no measurement set with UUID " + measurementSetUUID.toString());
+                    throw new NoDataException("There is no measurement set with UUID " + measurementSetUUID.toString());
+                }
                 log.error("Didn't find any metric for measurement set with the given UUID: " + measurementSetUUID.toString());
-                throw new RuntimeException("Didn't find any metric for measurement set with the given UUID: " + measurementSetUUID.toString());
+                throw new NoDataException("Didn't find any metric for measurement set with the given UUID: " + measurementSetUUID.toString());
             }
+        } catch (NoDataException nde) {
+            throw nde;
         } catch (Exception ex) {
             log.error("Error while getting metric for measurement set: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while getting metric for measurement set: " + ex.getMessage(), ex);
@@ -352,7 +362,7 @@ static Logger log = Logger.getLogger(MetricDAOHelper.class);
         if (metricUUID == null)
         {
             log.error("Cannot delete metric object with the given UUID because it is NULL!");
-            throw new NullPointerException("Cannot delete metric object with the given UUID because it is NULL!");
+            throw new IllegalArgumentException("Cannot delete metric object with the given UUID because it is NULL!");
         }
         
         if (DBUtil.isClosed(connection))

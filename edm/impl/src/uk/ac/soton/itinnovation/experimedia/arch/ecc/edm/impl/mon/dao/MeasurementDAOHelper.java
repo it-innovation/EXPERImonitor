@@ -34,6 +34,7 @@ import java.util.UUID;
 import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Measurement;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DBUtil;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.NoDataException;
 
 /**
  * A helper class for validating and executing queries for the Measurements.
@@ -48,29 +49,29 @@ public class MeasurementDAOHelper
     {
         if (measurement == null)
         {
-            return new ValidationReturnObject(false, new NullPointerException("The Measurement object is NULL - cannot save that..."));
+            return new ValidationReturnObject(false, new IllegalArgumentException("The Measurement object is NULL - cannot save that..."));
         }
         
         // check if all the required information is given; uuid, mSetUUID, timeStamp, value
         
         if (measurement.getUUID() == null)
         {
-            return new ValidationReturnObject(false, new NullPointerException("The Measurement UUID is NULL"));
+            return new ValidationReturnObject(false, new IllegalArgumentException("The Measurement UUID is NULL"));
         }
         
         if (measurement.getMeasurementSetUUID() == null)
         {
-            return new ValidationReturnObject(false, new NullPointerException("The MeasurementSet UUID is NULL"));
+            return new ValidationReturnObject(false, new IllegalArgumentException("The MeasurementSet UUID is NULL"));
         }
         
         if (measurement.getTimeStamp() == null)
         {
-            return new ValidationReturnObject(false, new NullPointerException("The Measurement timestamp is NULL"));
+            return new ValidationReturnObject(false, new IllegalArgumentException("The Measurement timestamp is NULL"));
         }
         
         if (measurement.getValue() == null)
         {
-            return new ValidationReturnObject(false, new NullPointerException("The Measurement value is NULL"));
+            return new ValidationReturnObject(false, new IllegalArgumentException("The Measurement value is NULL"));
         }
         
         // check if it exists in the DB already
@@ -100,12 +101,12 @@ public class MeasurementDAOHelper
     {
         if (measurements == null)
         {
-            return new ValidationReturnObject(false, new NullPointerException("The Measurement object is NULL - cannot save that..."));
+            return new ValidationReturnObject(false, new IllegalArgumentException("The Measurement object is NULL - cannot save that..."));
         }
         
         if (mSetUUID == null)
         {
-            return new ValidationReturnObject(false, new NullPointerException("The MeasurementSET UUID given is NULL"));
+            return new ValidationReturnObject(false, new IllegalArgumentException("The MeasurementSET UUID given is NULL"));
         }
         
         // check if all the required information is given; uuid, mSetUUID, timeStamp, value
@@ -113,22 +114,22 @@ public class MeasurementDAOHelper
         {
             if (measurement.getUUID() == null)
             {
-                return new ValidationReturnObject(false, new NullPointerException("The Measurement UUID is NULL"));
+                return new ValidationReturnObject(false, new IllegalArgumentException("The Measurement UUID is NULL"));
             }
 
             if (measurement.getMeasurementSetUUID() == null)
             {
-                return new ValidationReturnObject(false, new NullPointerException("The MeasurementSet UUID is NULL"));
+                return new ValidationReturnObject(false, new IllegalArgumentException("The MeasurementSet UUID is NULL"));
             }
 
             if (measurement.getTimeStamp() == null)
             {
-                return new ValidationReturnObject(false, new NullPointerException("The Measurement timestamp is NULL"));
+                return new ValidationReturnObject(false, new IllegalArgumentException("The Measurement timestamp is NULL"));
             }
 
             if (measurement.getValue() == null)
             {
-                return new ValidationReturnObject(false, new NullPointerException("The Measurement value is NULL"));
+                return new ValidationReturnObject(false, new IllegalArgumentException("The Measurement value is NULL"));
             }
             
             // check if it exists in the DB already
@@ -179,13 +180,14 @@ public class MeasurementDAOHelper
         }
         
         try {
-            String query = "INSERT INTO Measurement (measurementUUID, mSetUUID, timeStamp, value) VALUES (?, ?, ?, ?)";
+            String query = "INSERT INTO Measurement (measurementUUID, mSetUUID, timeStamp, value, synchronised) VALUES (?, ?, ?, ?, ?)";
             
             PreparedStatement pstmt = connection.prepareStatement(query);
             pstmt.setObject(1, measurement.getUUID(), java.sql.Types.OTHER);
             pstmt.setObject(2, measurement.getMeasurementSetUUID(), java.sql.Types.OTHER);
             pstmt.setLong(3, measurement.getTimeStamp().getTime());
             pstmt.setString(4, measurement.getValue());
+            pstmt.setBoolean(5, false);
             
             pstmt.executeUpdate();
         } catch (Exception ex) {
@@ -214,23 +216,22 @@ public class MeasurementDAOHelper
             throw new RuntimeException("Cannot save the Measurement objects because the connection to the DB is closed");
         }
         
-        boolean exception = false;
         try {
             // iterate over each measurement and save
             for (Measurement measurement : measurements)
             {
-                String query = "INSERT INTO Measurement (measurementUUID, mSetUUID, timeStamp, value) VALUES (?, ?, ?, ?)";
+                String query = "INSERT INTO Measurement (measurementUUID, mSetUUID, timeStamp, value, synchronised) VALUES (?, ?, ?, ?, ?)";
             
                 PreparedStatement pstmt = connection.prepareStatement(query);
                 pstmt.setObject(1, measurement.getUUID(), java.sql.Types.OTHER);
                 pstmt.setObject(2, measurement.getMeasurementSetUUID(), java.sql.Types.OTHER);
                 pstmt.setLong(3, measurement.getTimeStamp().getTime());
                 pstmt.setString(4, measurement.getValue());
+                pstmt.setBoolean(5, false);
 
                 pstmt.executeUpdate();
             }
         } catch (Exception ex) {
-            exception = true;
             log.error("Error while saving Measurement: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while saving Measurement: " + ex.getMessage(), ex);
         } finally {
@@ -246,14 +247,8 @@ public class MeasurementDAOHelper
         if (measurementUUID == null)
         {
             log.error("Cannot get a Measurement object with the given UUID because it is NULL!");
-            throw new NullPointerException("Cannot get a Measurement object with the given UUID because it is NULL!");
+            throw new IllegalArgumentException("Cannot get a Measurement object with the given UUID because it is NULL!");
         }
-        
-        /*if (!MeasurementHelper.objectExists(measurementUUID, connection))
-        {
-            log.error("There is no Measurement with the given UUID: " + measurementUUID.toString());
-            throw new RuntimeException("There is no Measurement with the given UUID: " + measurementUUID.toString());
-        }*/
         
         if (DBUtil.isClosed(connection))
         {
@@ -274,6 +269,7 @@ public class MeasurementDAOHelper
                 String mSetUUIDstr = rs.getString("mSetUUID");
 				String timeStampStr = rs.getString("timeStamp");
                 String value = rs.getString("value");
+                Boolean synchronised = null;
                 
                 Date timeStamp = null;
                 UUID mSetUUID = null;
@@ -299,13 +295,24 @@ public class MeasurementDAOHelper
                     throw new RuntimeException("Unable to retrieve Measurement instance, because the timestamp in the DB could not be converted!", ex);
                 }
                 
+                try {
+                    synchronised = rs.getBoolean("synchronised");
+                } catch (NullPointerException npe) {
+                    throw new RuntimeException("Could not get the synchronised flag from the database.", npe);
+                } catch (Exception ex) {
+                    throw new RuntimeException("Could not get the synchronised flag from the database.", ex);
+                }
+                
                 measurement = new Measurement(measurementUUID, mSetUUID, timeStamp, value);
+                measurement.setSynchronised(synchronised);
             }
             else // nothing in the result set
             {
                 log.error("There is no Measurement with the given UUID: " + measurementUUID.toString());
-                throw new RuntimeException("There is no Measurement with the given UUID: " + measurementUUID.toString());
+                throw new NoDataException("There is no Measurement with the given UUID: " + measurementUUID.toString());
             }
+        } catch (NoDataException nde) {
+            throw nde;
         } catch (Exception ex) {
             log.error("Error while quering the database: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
@@ -322,14 +329,8 @@ public class MeasurementDAOHelper
         if (mSetUUID == null)
         {
             log.error("Cannot get Measurement objects for the MeasurementSet with the given UUID because it is NULL!");
-            throw new NullPointerException("Cannot get Measurement objects for the MeasurementSet with the given UUID because it is NULL!");
+            throw new IllegalArgumentException("Cannot get Measurement objects for the MeasurementSet with the given UUID because it is NULL!");
         }
-        
-        /*if (!MeasurementSetHelper.objectExists(mSetUUID, connection))
-        {
-            log.error("There is no MeasurementSet with the given UUID: " + mSetUUID.toString());
-            throw new RuntimeException("There is no MeasurementSet with the given UUID: " + mSetUUID.toString());
-        }*/
         
         if (DBUtil.isClosed(connection))
         {
@@ -347,9 +348,15 @@ public class MeasurementDAOHelper
             pstmt.setLong(3, toDate.getTime());
             ResultSet rs = pstmt.executeQuery();
             
-            // check if anything got returned (connection closed in finalise method)
-            while (rs.next())
+            // check if anything got returned
+            if (!rs.next())
             {
+                log.debug("There are no measurements for the given time period (" + fromDate + " - " + toDate + ").");
+                throw new NoDataException("There are no measurements for the given time period (" + fromDate + " - " + toDate + ").");
+            }
+            
+            // process each result item
+            do {
                 String measurementUUIDstr = rs.getString("measurementUUID");
 				String timeStampStr = rs.getString("timeStamp");
                 String value = rs.getString("value");
@@ -357,11 +364,18 @@ public class MeasurementDAOHelper
                 try {
                     Date timeStamp = new Date(Long.parseLong(timeStampStr));
                     UUID measurementUUID = UUID.fromString(measurementUUIDstr);
-                    measurements.add(new Measurement(measurementUUID, mSetUUID, timeStamp, value));
+                    Boolean synchronised = rs.getBoolean("synchronised");;
+                    
+                    Measurement measurement = new Measurement(measurementUUID, mSetUUID, timeStamp, value);
+                    measurement.setSynchronised(synchronised);
+                    measurements.add(measurement);
                 } catch (Exception ex) {
                     log.error("Unable to process a measurement, but continuing: " + ex.getMessage(), ex);
                 }
-            }
+            } while (rs.next());
+            
+        } catch (NoDataException nde) {
+            throw nde;
         } catch (Exception ex) {
             log.error("Error while quering the database: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);

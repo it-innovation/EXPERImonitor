@@ -27,6 +27,7 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao;
 import java.util.Set;
 import java.util.UUID;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.NoDataException;
 
 /**
  * A DAO to save and get MeasurementSet objects from storage.
@@ -58,9 +59,10 @@ public interface IMeasurementSetDAO
      * To save measurements for an existing measurement set, use the Report facility!
      * 
      * @param measurementSet The measurement set instance to be saved.
+     * @throws IllegalArgumentException If the MeasurementSet is not valid to be saved, typically due to missing information (e.g., NULL values).
      * @throws Exception If there's a technical issue or a measurement set with the same UUID already exists.
      */
-    public void saveMeasurementSet(MeasurementSet measurementSet) throws Exception;
+    public void saveMeasurementSet(MeasurementSet measurementSet) throws IllegalArgumentException, Exception;
     
     /**
      * Get a measurement set instance according to its UUID. Will not include the
@@ -68,9 +70,11 @@ public interface IMeasurementSetDAO
      * @param measurementSetUUID The UUID of the measurement set.
      * @param withMetric Flag to say whether to return the metric too.
      * @return A measurement set object, if it exists.
-     * @throws Exception If there's a technical issue or there is no measurement set with the given UUID.
+     * @throws IllegalArgumentException If measurementSetUUID is not a valid argument (e.g., NULL).
+     * @throws NoDataException If there's no measurement set with the given UUID.
+     * @throws Exception If there's a technical issue.
      */
-    public MeasurementSet getMeasurementSet(UUID measurementSetUUID, boolean withMetric) throws Exception;
+    public MeasurementSet getMeasurementSet(UUID measurementSetUUID, boolean withMetric) throws IllegalArgumentException, NoDataException, Exception;
     
     /**
      * Get all measurement sets for a metric group. Will include any sub-classes
@@ -78,8 +82,9 @@ public interface IMeasurementSetDAO
      * getting the measurements for a measurement set.
      * @param metricGroupUUID The UUID of the metric group.
      * @param withMetric Flag to say whether to return the metric too.
-     * @return A measurement set object, if it exists.
-     * @throws Exception If there's a technical issue or there is no metric group with the given UUID.
+     * @return A set of MeasurementSet objects, if any exist for the given metric group.
+     * @throws NoDataException If there is no metric group with the given UUID, or there are no measurement sets for the metric group.
+     * @throws Exception If there's a technical issue.
      */
-    public Set<MeasurementSet> getMeasurementSetForMetricGroup(UUID metricGroupUUID, boolean withMetric) throws Exception;
+    public Set<MeasurementSet> getMeasurementSetForMetricGroup(UUID metricGroupUUID, boolean withMetric) throws IllegalArgumentException, NoDataException, Exception;
 }

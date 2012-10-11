@@ -33,6 +33,7 @@ import java.util.UUID;
 import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Attribute;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DBUtil;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.NoDataException;
 
 /**
  * A helper class for validating and executing queries for the Attributes.
@@ -47,19 +48,19 @@ public class AttributeDAOHelper
     {
         if (attrib == null)
         {
-            return new ValidationReturnObject(false, new NullPointerException("The Attribute object is NULL - cannot save that..."));
+            return new ValidationReturnObject(false, new IllegalArgumentException("The Attribute object is NULL - cannot save that..."));
         }
         
         // check if all the required information is given; uuid, name
         
         if (attrib.getUUID() == null)
         {
-            return new ValidationReturnObject(false, new NullPointerException("The Attribute UUID is NULL"));
+            return new ValidationReturnObject(false, new IllegalArgumentException("The Attribute UUID is NULL"));
         }
         
         if (attrib.getName() == null)
         {
-            return new ValidationReturnObject(false, new NullPointerException("The Attribute name is NULL"));
+            return new ValidationReturnObject(false, new IllegalArgumentException("The Attribute name is NULL"));
         }
         
         // check if it exists in the DB already
@@ -135,14 +136,8 @@ public class AttributeDAOHelper
         if (attribUUID == null)
         {
             log.error("Cannot get an Attribute object with the given UUID because it is NULL!");
-            throw new NullPointerException("Cannot get an Attribute object with the given UUID because it is NULL!");
+            throw new IllegalArgumentException("Cannot get an Attribute object with the given UUID because it is NULL!");
         }
-        
-        /*if (!AttributeHelper.objectExists(attribUUID, connection))
-        {
-            log.error("There is no attribute with the given UUID: " + attribUUID.toString());
-            throw new RuntimeException("There is no attribute with the given UUID: " + attribUUID.toString());
-        }*/
         
         if (DBUtil.isClosed(connection))
         {
@@ -174,8 +169,10 @@ public class AttributeDAOHelper
             else // nothing in the result set
             {
                 log.error("There is no attribute with the given UUID: " + attribUUID.toString());
-                throw new RuntimeException("There is no attribute with the given UUID: " + attribUUID.toString());
+                throw new NoDataException("There is no attribute with the given UUID: " + attribUUID.toString());
             }
+        } catch (NoDataException nde) {
+            throw nde;
         } catch (Exception ex) {
             log.error("Error while quering the database: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
@@ -192,14 +189,8 @@ public class AttributeDAOHelper
         if (entityUUID == null)
         {
             log.error("Cannot get any Attribute objects for an Entity with the given UUID because it is NULL!");
-            throw new NullPointerException("Cannot get any Attribute objects for an Entity with the given UUID because it is NULL!");
+            throw new IllegalArgumentException("Cannot get any Attribute objects for an Entity with the given UUID because it is NULL!");
         }
-        
-        /*if (!EntityHelper.objectExists(entityUUID, connection))
-        {
-            log.error("There is no entity with the given UUID: " + entityUUID.toString());
-            throw new RuntimeException("There is no entity with the given UUID: " + entityUUID.toString());
-        }*/
         
         if (DBUtil.isClosed(connection))
         {
@@ -214,9 +205,20 @@ public class AttributeDAOHelper
             pstmt.setObject(1, entityUUID, java.sql.Types.OTHER);
             ResultSet rs = pstmt.executeQuery();
             
-            // check if anything got returned (connection closed in finalise method)
-            while (rs.next())
+            // check if anything got returned
+            if (!rs.next())
             {
+                if (!EntityDAOHelper.objectExists(entityUUID, connection, false))
+                {
+                    log.debug("There is no entity with the UUID = " + entityUUID.toString());
+                    throw new NoDataException("There is no entity with the UUID = " + entityUUID.toString());
+                }
+                log.debug("There are no attributes for the given entity (UUID = " + entityUUID.toString() + ").");
+                throw new NoDataException("There are no attributes for the given entity (UUID = " + entityUUID.toString() + ").");
+            }
+            
+            // process each result item
+            do {
                 String attribUUIDstr = rs.getString("attribUUID");
                 String entityUUIDstr = rs.getString("entityUUID");
                 String name = rs.getString("name");
@@ -233,8 +235,10 @@ public class AttributeDAOHelper
                 }
                 
                 attributes.add(new Attribute(UUID.fromString(attribUUIDstr), UUID.fromString(entityUUIDstr), name, description));
-            }
+            }while (rs.next());
             
+        } catch (NoDataException nde) {
+            throw nde;
         } catch (Exception ex) {
             log.error("Error while quering the database: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);

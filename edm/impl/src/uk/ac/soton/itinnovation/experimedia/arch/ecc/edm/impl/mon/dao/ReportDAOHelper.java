@@ -36,6 +36,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Me
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DBUtil;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.NoDataException;
 
 /**
  * A helper class for validating and executing queries for the Reports.
@@ -50,39 +51,39 @@ public class ReportDAOHelper
     {
         if (report == null)
         {
-            return new ValidationReturnObject(false, new NullPointerException("The Report object is NULL - cannot save that..."));
+            return new ValidationReturnObject(false, new IllegalArgumentException("The Report object is NULL - cannot save that..."));
         }
         
         // check if all the required information is given; uuid, mSetUUID, from timestamp, to timestamp, numMeasurements
         
         if (report.getUUID() == null)
         {
-            return new ValidationReturnObject(false, new NullPointerException("The Report UUID is NULL"));
+            return new ValidationReturnObject(false, new IllegalArgumentException("The Report UUID is NULL"));
         }
         
         if (report.getMeasurementSet() == null)
         {
-            return new ValidationReturnObject(false, new NullPointerException("The Report's MeasurementSet is NULL"));
+            return new ValidationReturnObject(false, new IllegalArgumentException("The Report's MeasurementSet is NULL"));
         }
         
         if (report.getReportDate() == null)
         {
-            return new ValidationReturnObject(false, new NullPointerException("The Report's reporting date is NULL"));
+            return new ValidationReturnObject(false, new IllegalArgumentException("The Report's reporting date is NULL"));
         }
         
         if (report.getFromDate() == null)
         {
-            return new ValidationReturnObject(false, new NullPointerException("The Report's from date is NULL"));
+            return new ValidationReturnObject(false, new IllegalArgumentException("The Report's from date is NULL"));
         }
         
         if (report.getToDate() == null)
         {
-            return new ValidationReturnObject(false, new NullPointerException("The Report's to date is NULL"));
+            return new ValidationReturnObject(false, new IllegalArgumentException("The Report's to date is NULL"));
         }
         
         if (report.getNumberOfMeasurements() == null)
         {
-            return new ValidationReturnObject(false, new NullPointerException("The Report's number of measurements value is NULL"));
+            return new ValidationReturnObject(false, new IllegalArgumentException("The Report's number of measurements value is NULL"));
         }
         /*
         // check if it exists in the DB already
@@ -137,8 +138,8 @@ public class ReportDAOHelper
                 connection.setAutoCommit(false);
             }
             
-            String query = "INSERT INTO Report (reportUUID, mSetUUID, reportTimeStamp, fromDateTimeStamp, toDateTimeStamp, synchronised, numMeasurements) VALUES ("
-                    + "?, ?, ?, ?, ?, ?, ?)";
+            String query = "INSERT INTO Report (reportUUID, mSetUUID, reportTimeStamp, fromDateTimeStamp, toDateTimeStamp, numMeasurements) VALUES ("
+                    + "?, ?, ?, ?, ?, ?)";
             
             PreparedStatement pstmt = connection.prepareStatement(query);
             pstmt.setObject(1, report.getUUID(), java.sql.Types.OTHER);
@@ -146,8 +147,7 @@ public class ReportDAOHelper
             pstmt.setLong(3, report.getReportDate().getTime());
             pstmt.setLong(4, report.getFromDate().getTime());
             pstmt.setLong(5, report.getToDate().getTime());
-            pstmt.setBoolean(6, false);
-            pstmt.setInt(7, report.getNumberOfMeasurements());
+            pstmt.setInt(6, report.getNumberOfMeasurements());
             
             pstmt.executeUpdate();
         } catch (Exception ex) {
@@ -217,13 +217,13 @@ public class ReportDAOHelper
         if (reportUUID == null)
         {
             log.error("Cannot link report and measurement because the report UUID is NULL!");
-            throw new NullPointerException("Cannot link report and measurement because the report UUID is NULL!");
+            throw new IllegalArgumentException("Cannot link report and measurement because the report UUID is NULL!");
         }
         
         if (measurementUUID == null)
         {
             log.error("Cannot link report and measurement because the measurement UUID is NULL!");
-            throw new NullPointerException("Cannot link report and measurement because the measurement UUID is NULL!");
+            throw new IllegalArgumentException("Cannot link report and measurement because the measurement UUID is NULL!");
         }
         
         if (DBUtil.isClosed(connection))
@@ -282,8 +282,8 @@ public class ReportDAOHelper
         }
         
         try {
-            String query = "INSERT INTO Report (reportUUID, mSetUUID, reportTimeStamp, fromDateTimeStamp, toDateTimeStamp, synchronised, numMeasurements) VALUES ("
-                    + "?, ?, ?, ?, ?, ?, ?)";
+            String query = "INSERT INTO Report (reportUUID, mSetUUID, reportTimeStamp, fromDateTimeStamp, toDateTimeStamp, numMeasurements) VALUES ("
+                    + "?, ?, ?, ?, ?, ?)";
             
             PreparedStatement pstmt = connection.prepareStatement(query);
             pstmt.setObject(1, report.getUUID(), java.sql.Types.OTHER);
@@ -291,8 +291,7 @@ public class ReportDAOHelper
             pstmt.setLong(3, report.getReportDate().getTime());
             pstmt.setLong(4, report.getFromDate().getTime());
             pstmt.setLong(5, report.getToDate().getTime());
-            pstmt.setBoolean(6, false);
-            pstmt.setInt(7, report.getNumberOfMeasurements());
+            pstmt.setInt(6, report.getNumberOfMeasurements());
             
             pstmt.executeUpdate();
         } catch (Exception ex) {
@@ -304,12 +303,45 @@ public class ReportDAOHelper
         }
     }
     
+    public static void saveMeasurementsForReport(Report report, Connection connection) throws Exception
+    {
+        if (report == null)
+        {
+            log.error("Cannot save the measurements for the report because the Report object is NULL");
+            throw new IllegalArgumentException("Cannot save the measurements for the report because the Report object is NULL");
+        }
+        if (report.getMeasurementSet() == null)
+        {
+            log.error("Cannot save the measurements for the report because the MeasurementSet object is NULL");
+            throw new IllegalArgumentException("Cannot save the measurements for the report because the MeasurementSet object is NULL");
+        }
+        if ((report.getMeasurementSet().getMeasurements() == null) || report.getMeasurementSet().getMeasurements().isEmpty())
+        {
+            log.error("Cannot save the measurements for the report because there are no Measurement objects");
+            throw new IllegalArgumentException("Cannot save the measurements for the report because there are no Measurement objects");
+        }
+        
+        if (DBUtil.isClosed(connection))
+        {
+            log.error("Cannot save the measurements for the report because the connection to the DB is closed");
+            throw new RuntimeException("Cannot save the measurements for the report because the connection to the DB is closed");
+        }
+        
+        try {
+            log.debug("Saving " + report.getMeasurementSet().getMeasurements().size() + " measurements for the report");
+            MeasurementDAOHelper.saveMeasurementsForSet(report.getMeasurementSet().getMeasurements(), report.getMeasurementSet().getUUID(), connection, false); // flag not to close the DB connection
+        } catch (Exception ex) {
+            log.error("Error while saving the measurements for the report: " + ex.getMessage(), ex);
+            throw new RuntimeException("Error while saving the measurements for the report: " + ex.getMessage(), ex);
+        }
+    }
+    
     public static Report getReport(UUID reportUUID, Connection connection, boolean closeDBcon) throws Exception
     {
         if (reportUUID == null)
         {
             log.error("Cannot get a Report object with the given UUID because it is NULL!");
-            throw new NullPointerException("Cannot get a Report object with the given UUID because it is NULL!");
+            throw new IllegalArgumentException("Cannot get a Report object with the given UUID because it is NULL!");
         }
         
         if (DBUtil.isClosed(connection))
@@ -318,12 +350,6 @@ public class ReportDAOHelper
             throw new RuntimeException("Cannot get the Report because the connection to the DB is closed");
         }
         
-        /*if (!ReportHelper.objectExists(reportUUID, connection))
-        {
-            log.error("There is no Report with the given UUID: " + reportUUID.toString());
-            throw new RuntimeException("There is no Report with the given UUID: " + reportUUID.toString());
-        }*/
-        
         Report report = null;
         try {
             String query = "SELECT * FROM Report WHERE reportUUID = ?";
@@ -331,14 +357,13 @@ public class ReportDAOHelper
             pstmt.setObject(1, reportUUID, java.sql.Types.OTHER);
             ResultSet rs = pstmt.executeQuery();
             
-            // check if anything got returned (connection closed in finalise method)
+            // check if anything got returned
             if (rs.next())
             {
                 UUID mSetUUID = null;
                 Date reportTimeStamp = null;
                 Date fromDateTimeStamp = null;
                 Date toDateTimeStamp = null;
-                Boolean synchronised = null;
                 Integer numMeasurements = null;
                 
                 try {
@@ -374,14 +399,6 @@ public class ReportDAOHelper
                 }
                 
                 try {
-                    synchronised = rs.getBoolean("synchronised");
-                } catch (NullPointerException npe) {
-                    throw new RuntimeException("Could not get the synchronised flag from the database.", npe);
-                } catch (Exception ex) {
-                    throw new RuntimeException("Could not get the synchronised flag from the database.", ex);
-                }
-                
-                try {
                     numMeasurements = rs.getInt("numMeasurements");
                 } catch (NullPointerException npe) {
                     throw new RuntimeException("Could not get the numMeasurements parameter from the database.", npe);
@@ -390,13 +407,14 @@ public class ReportDAOHelper
                 }
                 
                 report = new Report(reportUUID, new MeasurementSet(mSetUUID), reportTimeStamp, fromDateTimeStamp, toDateTimeStamp, numMeasurements);
-                report.setSynchronised(synchronised);
             }
             else // nothing in the result set
             {
                 log.error("There is no Report with the given UUID: " + reportUUID.toString());
-                throw new RuntimeException("There is no Report with the given UUID: " + reportUUID.toString());
+                throw new NoDataException("There is no Report with the given UUID: " + reportUUID.toString());
             }
+        } catch (NoDataException nde) {
+            throw nde;
         } catch (Exception ex) {
             log.error("Error while quering the database: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
@@ -423,9 +441,15 @@ public class ReportDAOHelper
             pstmt.setObject(1, reportUUID, java.sql.Types.OTHER);
             ResultSet rs = pstmt.executeQuery();
 
-            // check if anything got returned (connection closed in finalise method)
-            while (rs.next())
+            // check if anything got returned
+            if (!rs.next())
             {
+                log.debug("There are no measurements for the report (UUID = " + reportUUID.toString() + ").");
+                throw new NoDataException("There are no measurements for the report (UUID = " + reportUUID.toString() + ").");
+            }
+            
+            // process each result item
+            do {
                 String measurementUUIDstr = rs.getString("measurementUUID");
                 String mSetUUIDstr = rs.getString("mSetUUID");
                 String timeStampStr = rs.getString("timeStamp");
@@ -436,8 +460,10 @@ public class ReportDAOHelper
                 UUID mSetUUID = UUID.fromString(mSetUUIDstr);
                 
                 measurements.add(new Measurement(measurementUUID, mSetUUID, timeStamp, value));
-            }
-        
+            } while (rs.next());
+            
+        } catch (NoDataException nde) {
+            throw nde;
         } catch (Exception ex) {
             log.error("Caught an exception when getting measurements for report: " + ex.getMessage());
             throw new RuntimeException("Failed to get the report when getting the measurements: " + ex.getMessage(), ex);
@@ -455,7 +481,7 @@ public class ReportDAOHelper
         if (mSetUUID == null)
         {
             log.error("Cannot generate a Report object for the MeasurementSet with the given UUID because it is NULL!");
-            throw new NullPointerException("Cannot generate a Report object for the MeasurementSet with the given UUID because it is NULL!");
+            throw new IllegalArgumentException("Cannot generate a Report object for the MeasurementSet with the given UUID because it is NULL!");
         }
         
         if (DBUtil.isClosed(connection))
@@ -463,12 +489,6 @@ public class ReportDAOHelper
             log.error("Cannot get the Report because the connection to the DB is closed");
             throw new RuntimeException("Cannot get the Report because the connection to the DB is closed");
         }
-        
-        /*if (!MeasurementSetHelper.objectExists(mSetUUID, connection))
-        {
-            log.error("There is no MeasurementSet with the given UUID: " + mSetUUID.toString());
-            throw new RuntimeException("There is no MeasurementSet with the given UUID: " + mSetUUID.toString());
-        }*/
         
         Report report = null;
         boolean exception = false;
@@ -480,13 +500,12 @@ public class ReportDAOHelper
             
             ResultSet rs = pstmt.executeQuery();
             
-            try {
-                report = getReportFromMeasurementResultSet(mSetUUID, rs, false);
-            } catch (Exception ex) {
-                exception = true;
-                throw ex;
-            }
+            report = getReportFromMeasurementResultSet(mSetUUID, rs, false);
+        } catch (NoDataException nde) {
+            exception = true;
+            throw nde;
         } catch (Exception ex) {
+            exception = true;
             log.error("Error while quering the database: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
         } finally {
@@ -508,7 +527,7 @@ public class ReportDAOHelper
         if (mSetUUID == null)
         {
             log.error("Cannot generate a Report object for the MeasurementSet with the given UUID because it is NULL!");
-            throw new NullPointerException("Cannot generate a Report object for the MeasurementSet with the given UUID because it is NULL!");
+            throw new IllegalArgumentException("Cannot generate a Report object for the MeasurementSet with the given UUID because it is NULL!");
         }
         
         if (DBUtil.isClosed(connection))
@@ -516,12 +535,6 @@ public class ReportDAOHelper
             log.error("Cannot get the Report because the connection to the DB is closed");
             throw new RuntimeException("Cannot get the Report because the connection to the DB is closed");
         }
-        
-        /*if (!MeasurementSetHelper.objectExists(mSetUUID, connection))
-        {
-            log.error("There is no MeasurementSet with the given UUID: " + mSetUUID.toString());
-            throw new RuntimeException("There is no MeasurementSet with the given UUID: " + mSetUUID.toString());
-        }*/
         
         Report report = null;
         boolean exception = false;
@@ -533,15 +546,13 @@ public class ReportDAOHelper
             pstmt.setObject(1, mSetUUID, java.sql.Types.OTHER);
             
             ResultSet rs = pstmt.executeQuery();
+            report = getReportFromMeasurementResultSet(mSetUUID, rs, true);
             
-            try {
-                report = getReportFromMeasurementResultSet(mSetUUID, rs, true);
-            } catch (Exception ex) {
-                exception = true;
-                throw ex;
-            }
-            
+        } catch (NoDataException nde) {
+            exception = true;
+            throw nde;
         } catch (Exception ex) {
+            exception = true;
             log.error("Error while quering the database: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
         } finally {
@@ -563,7 +574,7 @@ public class ReportDAOHelper
         if (mSetUUID == null)
         {
             log.error("Cannot generate a Report object for the MeasurementSet with the given UUID because it is NULL!");
-            throw new NullPointerException("Cannot generate a Report object for the MeasurementSet with the given UUID because it is NULL!");
+            throw new IllegalArgumentException("Cannot generate a Report object for the MeasurementSet with the given UUID because it is NULL!");
         }
         
         if (DBUtil.isClosed(connection))
@@ -571,12 +582,6 @@ public class ReportDAOHelper
             log.error("Cannot get the Report because the connection to the DB is closed");
             throw new RuntimeException("Cannot get the Report because the connection to the DB is closed");
         }
-        
-        /*if (!MeasurementSetHelper.objectExists(mSetUUID, connection))
-        {
-            log.error("There is no MeasurementSet with the given UUID: " + mSetUUID.toString());
-            throw new RuntimeException("There is no MeasurementSet with the given UUID: " + mSetUUID.toString());
-        }*/
         
         Report report = null;
         boolean exception = false;
@@ -587,12 +592,11 @@ public class ReportDAOHelper
             pstmt.setObject(1, mSetUUID, java.sql.Types.OTHER);
             
             ResultSet rs = pstmt.executeQuery();
-            try {
-                report = getReportFromMeasurementResultSet(mSetUUID, rs, false);
-            } catch (Exception ex) {
-                exception = true;
-                throw ex;
-            }
+            report = getReportFromMeasurementResultSet(mSetUUID, rs, false);
+            
+        } catch (NoDataException nde) {
+            exception = true;
+            throw nde;
         } catch (Exception ex) {
             exception = true;
             log.error("Error while quering the database: " + ex.getMessage(), ex);
@@ -619,7 +623,7 @@ public class ReportDAOHelper
         if (mSetUUID == null)
         {
             log.error("Cannot generate a Report object for the MeasurementSet with the given UUID because it is NULL!");
-            throw new NullPointerException("Cannot generate a Report object for the MeasurementSet with the given UUID because it is NULL!");
+            throw new IllegalArgumentException("Cannot generate a Report object for the MeasurementSet with the given UUID because it is NULL!");
         }
         
         if (DBUtil.isClosed(connection))
@@ -643,12 +647,11 @@ public class ReportDAOHelper
             pstmt.setObject(1, mSetUUID, java.sql.Types.OTHER);
             
             ResultSet rs = pstmt.executeQuery();
-            try {
-                report = getReportFromMeasurementResultSet(mSetUUID, rs, true);
-            } catch (Exception ex) {
-                exception = true;
-                throw ex;
-            }
+            report = getReportFromMeasurementResultSet(mSetUUID, rs, true);
+            
+        } catch (NoDataException nde) {
+            exception = true;
+            throw nde;
         } catch (Exception ex) {
             exception = true;
             log.error("Error while quering the database: " + ex.getMessage(), ex);
@@ -675,13 +678,13 @@ public class ReportDAOHelper
         if (mSetUUID == null)
         {
             log.error("Cannot generate a Report object for the MeasurementSet with the given UUID because it is NULL!");
-            throw new NullPointerException("Cannot generate a Report object for the MeasurementSet with the given UUID because it is NULL!");
+            throw new IllegalArgumentException("Cannot generate a Report object for the MeasurementSet with the given UUID because it is NULL!");
         }
         
         if (fromDate == null)
         {
             log.error("Cannot generate a Report object for the MeasurementSet from the given date because it is NULL!");
-            throw new NullPointerException("Cannot generate a Report object for the MeasurementSet from the given date because it is NULL!");
+            throw new IllegalArgumentException("Cannot generate a Report object for the MeasurementSet from the given date because it is NULL!");
         }
         
         if (DBUtil.isClosed(connection))
@@ -689,12 +692,6 @@ public class ReportDAOHelper
             log.error("Cannot get the Report because the connection to the DB is closed");
             throw new RuntimeException("Cannot get the Report because the connection to the DB is closed");
         }
-        
-        /*if (!MeasurementSetHelper.objectExists(mSetUUID, connection))
-        {
-            log.error("There is no MeasurementSet with the given UUID: " + mSetUUID.toString());
-            throw new RuntimeException("There is no MeasurementSet with the given UUID: " + mSetUUID.toString());
-        }*/
         
         Report report = null;
         boolean exception = false;
@@ -707,14 +704,11 @@ public class ReportDAOHelper
             pstmt.setLong(2, fromDate.getTime());
             
             ResultSet rs = pstmt.executeQuery();
-
-            try {
-                report = getReportFromMeasurementResultSet(mSetUUID, rs, false);
-            } catch (Exception ex) {
-                exception = true;
-                throw ex;
-            }
+            report = getReportFromMeasurementResultSet(mSetUUID, rs, false);
             
+        } catch (NoDataException nde) {
+            exception = true;
+            throw nde;
         } catch (Exception ex) {
             exception = true;
             log.error("Error while quering the database: " + ex.getMessage(), ex);
@@ -741,13 +735,13 @@ public class ReportDAOHelper
         if (mSetUUID == null)
         {
             log.error("Cannot generate a Report object for the MeasurementSet with the given UUID because it is NULL!");
-            throw new NullPointerException("Cannot generate a Report object for the MeasurementSet with the given UUID because it is NULL!");
+            throw new IllegalArgumentException("Cannot generate a Report object for the MeasurementSet with the given UUID because it is NULL!");
         }
         
         if (fromDate == null)
         {
             log.error("Cannot generate a Report object for the MeasurementSet from the given date because it is NULL!");
-            throw new NullPointerException("Cannot generate a Report object for the MeasurementSet from the given date because it is NULL!");
+            throw new IllegalArgumentException("Cannot generate a Report object for the MeasurementSet from the given date because it is NULL!");
         }
         
         if (DBUtil.isClosed(connection))
@@ -755,12 +749,6 @@ public class ReportDAOHelper
             log.error("Cannot get the Report because the connection to the DB is closed");
             throw new RuntimeException("Cannot get the Report because the connection to the DB is closed");
         }
-        
-        /*if (!MeasurementSetHelper.objectExists(mSetUUID, connection))
-        {
-            log.error("There is no MeasurementSet with the given UUID: " + mSetUUID.toString());
-            throw new RuntimeException("There is no MeasurementSet with the given UUID: " + mSetUUID.toString());
-        }*/
         
         Report report = null;
         boolean exception = false;
@@ -773,13 +761,11 @@ public class ReportDAOHelper
             pstmt.setLong(2, fromDate.getTime());
             
             ResultSet rs = pstmt.executeQuery();
-            try {
-                report = getReportFromMeasurementResultSet(mSetUUID, rs, true);
-            } catch (Exception ex) {
-                exception = true;
-                throw ex;
-            }
+            report = getReportFromMeasurementResultSet(mSetUUID, rs, true);
             
+        } catch (NoDataException nde) {
+            exception = true;
+            throw nde;
         } catch (Exception ex) {
             exception = true;
             log.error("Error while quering the database: " + ex.getMessage(), ex);
@@ -806,13 +792,13 @@ public class ReportDAOHelper
         if (mSetUUID == null)
         {
             log.error("Cannot generate a Report object for the MeasurementSet with the given UUID because it is NULL!");
-            throw new NullPointerException("Cannot generate a Report object for the MeasurementSet with the given UUID because it is NULL!");
+            throw new IllegalArgumentException("Cannot generate a Report object for the MeasurementSet with the given UUID because it is NULL!");
         }
         
         if (fromDate == null)
         {
             log.error("Cannot generate a Report object for the MeasurementSet from the given date because it is NULL!");
-            throw new NullPointerException("Cannot generate a Report object for the MeasurementSet from the given date because it is NULL!");
+            throw new IllegalArgumentException("Cannot generate a Report object for the MeasurementSet from the given date because it is NULL!");
         }
         
         if (DBUtil.isClosed(connection))
@@ -821,25 +807,11 @@ public class ReportDAOHelper
             throw new RuntimeException("Cannot get the Report because the connection to the DB is closed");
         }
         
-        /*if (!MeasurementSetHelper.objectExists(mSetUUID, connection))
-        {
-            log.error("There is no MeasurementSet with the given UUID: " + mSetUUID.toString());
-            throw new RuntimeException("There is no MeasurementSet with the given UUID: " + mSetUUID.toString());
-        }*/
-        
         Report report = new Report();
         Date reportDate = new Date();
         Integer numberOfMeasurements = null;
         
         MeasurementSet mSet = new MeasurementSet(mSetUUID);
-        /* get the measurement set (won't have values)
-        MeasurementSet mSet = null;
-        try {
-            mSet = MeasurementSetHelper.getMeasurementSet(mSetUUID, false, connection, false);
-        } catch (Exception ex) {
-            log.error("Failed to generate report, because the MeasurementSet couldn't be retrieved from the database: " + ex.getMessage(), ex);
-            throw new RuntimeException("Failed to generate report, because the MeasurementSet couldn't be retrieved from the database: " + ex.getMessage(), ex);
-        }*/
         report.setMeasurementSet(mSet);
         
         // get measurements, which will allow the calculation of the other values for the Report object
@@ -868,10 +840,13 @@ public class ReportDAOHelper
             if (numRows == 0)
             {
                 exception = true;
-                throw new RuntimeException("There are no measurements in the database for the given time period of the measurement set to generate a report from");
+                throw new NoDataException("There are no measurements in the database for the given time period of the measurement set to generate a report from");
             }
             numberOfMeasurements = numRows;
             
+        } catch (NoDataException nde) {
+            exception = true;
+            throw nde;
         } catch (Exception ex) {
             exception = true;
             log.error("Error while quering the database: " + ex.getMessage(), ex);
@@ -906,6 +881,8 @@ public class ReportDAOHelper
         // get the actual measurements for the report
         try {
             report.getMeasurementSet().setMeasurements(MeasurementDAOHelper.getMeasurementsForTimePeriod(report.getMeasurementSet().getUUID(), report.getFromDate(), report.getToDate(), connection, false));
+        } catch (NoDataException nde) {
+            throw nde;
         } catch (Exception ex) {
             log.error("Caught an exception when getting measurements for report: " + ex.getMessage());
             throw new RuntimeException("Failed to get the report when getting the measurements: " + ex.getMessage(), ex);
@@ -941,9 +918,15 @@ public class ReportDAOHelper
             Long timeStampFrom = null;
             Long timeStampTo = null;
             
-            // check if anything got returned (connection closed in finalise method)
-            while (rs.next())
+            // check if anything got returned
+            if (!rs.next())
             {
+                log.debug("There are no measurements in the database for the given time period of the measurement set to generate a report from");
+                throw new NoDataException("There are no measurements in the database for the given time period of the measurement set to generate a report from");
+            }
+            
+            // process each result item
+            do {
                 String measurementUUIDstr = rs.getString("measurementUUID");
 				String timeStampStr = rs.getString("timeStamp");
                 String value = rs.getString("value");
@@ -974,17 +957,14 @@ public class ReportDAOHelper
                     log.error("Unable to process measurement for the report (skipping): " + ex.getMessage(), ex);
                 }
                 numRows++;
-            }
-            
-            if (numRows == 0)
-            {
-                throw new RuntimeException("There are no measurements in the database for the given time period of the measurement set to generate a report from");
-            }
+            } while (rs.next());
             
             fromDate = new Date(timeStampFrom);
             toDate = new Date(timeStampTo);
             numberOfMeasurements = numRows;
             
+        } catch (NoDataException nde) {
+            throw nde;
         } catch (Exception ex) {
             log.error("Error while creating report from measurement data: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while creating report from measurement data: " + ex.getMessage(), ex);

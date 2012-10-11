@@ -122,16 +122,16 @@ public class PopulateDB
         saveMetricGenerator2(edm, expUUID, entity2UUID, entity2attribute1UUID, entity2attribute2UUID, entity2attribute3UUID, mGen2UUID, mGrp2UUID, mGrp2mSet1UUID, mGrp2mSet2UUID, mGrp2mSet3UUID);
         saveMetricGenerator3(edm, expUUID, entity3UUID, entity3attribute1UUID, entity3attribute2UUID, mGen3UUID, mGrp3UUID, mGrp3mSet1UUID, mGrp3mSet2UUID);
         
-        saveReportWithRandomMeasurements(edm, mGrp1mSet1UUID, 20, 2000, 6000);
-        saveReportWithRandomMeasurements(edm, mGrp1mSet2UUID, 20, 500000, 1000000);
-        saveReportWithRandomMeasurements(edm, mGrp1mSet3UUID, 20, 100, 400);
+        saveRandomMeasurements(edm, mGrp1mSet1UUID, 20, 2000, 6000);
+        saveRandomMeasurements(edm, mGrp1mSet2UUID, 20, 500000, 1000000);
+        saveRandomMeasurements(edm, mGrp1mSet3UUID, 20, 100, 400);
         
-        saveReportWithRandomMeasurements(edm, mGrp2mSet1UUID, 20, 5, 20);
-        saveReportWithRandomMeasurements(edm, mGrp2mSet2UUID, 20, 5, 20);
-        saveReportWithRandomMeasurements(edm, mGrp2mSet3UUID, 20, 20, 40);
+        saveRandomMeasurements(edm, mGrp2mSet1UUID, 20, 5, 20);
+        saveRandomMeasurements(edm, mGrp2mSet2UUID, 20, 5, 20);
+        saveRandomMeasurements(edm, mGrp2mSet3UUID, 20, 20, 40);
         
-        saveReportWithRandomMeasurements(edm, mGrp3mSet1UUID, 20, 150, 300);
-        saveReportWithRandomMeasurements(edm, mGrp3mSet2UUID, 20, 100, 999);
+        saveRandomMeasurements(edm, mGrp3mSet1UUID, 20, 150, 300);
+        saveRandomMeasurements(edm, mGrp3mSet2UUID, 20, 100, 999);
         
         printDetailsForExperiment(edm, expUUID);
     }
@@ -636,11 +636,12 @@ public class PopulateDB
                     if ((mGen.getEntities() == null) || mGen.getEntities().isEmpty()){
                         log.info("      * There are NO entities in the metric generator");
                     } else {
-                        log.info("      * There's " + mGen.getMetricGroups().size() + " entity/entities in the metric generator");
+                        log.info("      * There's " + mGen.getEntities().size() + " entity/entities in the metric generator");
 
                         for (Entity entity : mGen.getEntities())
                         {
                             if (entity.getUUID() != null) log.info("        - UUID:  " + entity.getUUID());
+                        if (entity.getEntityID() != null) log.info("        - ID:    " + entity.getEntityID());
                             if (entity.getName() != null) log.info("        - Name:  " + entity.getName());
                             if (entity.getDescription() != null) log.info("        - Desc:  " + entity.getDescription());
                             if ((entity.getAttributes() == null) || entity.getAttributes().isEmpty()) {
@@ -667,9 +668,8 @@ public class PopulateDB
     }
     
     /**
-     * Save a report with random measurements for a particular measurement set,
-     * given the number of measurements to create and min/max range for the
-     * random numbers.
+     * Save random measurements for a particular measurement set, given the number
+     * of measurements to create and min/max range for the random numbers.
      * 
      * The timestamps of the measurements are calculated to be in the past,
      * 1/10 second apart starting from the current time the value is calculated:
@@ -689,7 +689,7 @@ public class PopulateDB
      * @param max The maximum value of the range for the random measurement values.
      * @throws Exception 
      */
-    public static void saveReportWithRandomMeasurements(MonitoringEDM edm, UUID mSetUUID, int numMeasurements, int min, int max) throws Exception
+    public static void saveRandomMeasurements(MonitoringEDM edm, UUID mSetUUID, int numMeasurements, int min, int max) throws Exception
     {
         IReportDAO reportDAO = null;
         try {
@@ -730,10 +730,10 @@ public class PopulateDB
         Report report = new Report(UUID.randomUUID(), mSet, new Date(), new Date(timeStampFrom), new Date(timeStampTo), mSet.getMeasurements().size());
         
         try {
-            reportDAO.saveReport(report);
-            log.info("Report saved successfully!");
+            reportDAO.saveMeasurementsForReport(report);
+            log.info("Measurements saved successfully!");
         } catch (Exception ex) {
-            log.error("Unable to save Report: " + ex.getMessage(), ex);
+            log.error("Unable to save measurements: " + ex.getMessage(), ex);
             throw ex;
         }
     }

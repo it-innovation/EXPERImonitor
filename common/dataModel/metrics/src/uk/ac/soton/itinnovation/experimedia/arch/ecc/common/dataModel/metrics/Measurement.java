@@ -40,16 +40,19 @@ public class Measurement implements Serializable
     private UUID measurementSetUUID; // the measurement is a part of a set, in which the metric is defined
     private Date timeStamp; // the time the measurement was taken
     private String value; // could consider encoding this differently in the future
+    private boolean synchronised;
     
     // other things?
     //   - range?
     
     /**
-     * Default constructor, which sets a random UUID for the object instance.
+     * Default constructor, which sets a random UUID for the object instance and
+     * sets the synchronised flag to false.
      */
     public Measurement()
     {
         this.uuid = UUID.randomUUID();
+        this.synchronised = false;
     }
     
     /**
@@ -67,7 +70,9 @@ public class Measurement implements Serializable
             this.measurementSetUUID = UUID.fromString(m.getMeasurementSetUUID().toString());
         if (m.getTimeStamp() != null)
             this.timeStamp = new Date(m.getTimeStamp().getTime());
+        
         this.value = m.getValue();
+        this.synchronised = m.isSynchronised();
     }
     
     /**
@@ -147,5 +152,21 @@ public class Measurement implements Serializable
     public void setValue(String value)
     {
         this.value = value;
-    }    
+    }
+
+    /**
+     * @return the synchronised
+     */
+    public boolean isSynchronised()
+    {
+        return synchronised;
+    }
+
+    /**
+     * @param synchronised the synchronised to set
+     */
+    public void setSynchronised(boolean synchronised)
+    {
+        this.synchronised = synchronised;
+    }
 }

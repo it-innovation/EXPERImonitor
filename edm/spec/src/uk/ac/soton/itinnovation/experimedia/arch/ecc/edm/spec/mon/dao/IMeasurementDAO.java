@@ -27,6 +27,7 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao;
 import java.util.Set;
 import java.util.UUID;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Measurement;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.NoDataException;
 
 /**
  * A DAO to save and get Measurement objects from storage.
@@ -42,24 +43,28 @@ public interface IMeasurementDAO
      * Saves a measurement, which must have a unique UUID and refer to an existing
      * measurement set (by its UUID).
      * @param measurement
+     * @throws IllegalArgumentException If the Measurement is not valid to be saved, typically due to missing information (e.g., NULL values).
      * @throws Exception If there's a technical issue or a measurement with the same UUID already exists.
      */
-    public void saveMeasurement(Measurement measurement) throws Exception;
+    public void saveMeasurement(Measurement measurement) throws IllegalArgumentException, Exception;
     
     /**
      * Saves measurements for an existing measurement set, and will create a
      * Report for them.
      * @param measurements The measurements to save.
      * @param mSetUUID The UUID of the measurement set.
+     * @throws IllegalArgumentException If the arguments are invalid, typically due to missing information (e.g., NULL values).
      * @throws Exception If there's a technical issue, if the measurement set does not exist, or a measurement with the same UUID already exists.
      */
-    public void saveMeasurementsForSet(Set<Measurement> measurements, UUID mSetUUID) throws Exception;
+    public void saveMeasurementsForSet(Set<Measurement> measurements, UUID mSetUUID) throws IllegalArgumentException, NoDataException, Exception;
     
     /**
      * Get a measurement according to its UUID.
      * @param measurementUUID The measurement UUID.
      * @return A measurement object, if it exists.
-     * @throws Exception If there's a technical issue or there is no measurement with the given UUID.
+     * @throws IllegalArgumentException If measurementUUID is not a valid argument (e.g., NULL).
+     * @throws NoDataException If there's no measurement with the given UUID.
+     * @throws Exception If there's a technical issue.
      */
-    public Measurement getMeasurement(UUID measurementUUID) throws Exception;
+    public Measurement getMeasurement(UUID measurementUUID) throws IllegalArgumentException, NoDataException, Exception;
 }

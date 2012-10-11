@@ -35,6 +35,7 @@ import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGroup;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DBUtil;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.NoDataException;
 
 /**
  * A helper class for validating and executing queries for the Metric Groups.
@@ -49,24 +50,24 @@ public class MetricGroupDAOHelper
     {
         if (mGroup == null)
         {
-            return new ValidationReturnObject(false, new NullPointerException("The MetricGroup object is NULL - cannot save that..."));
+            return new ValidationReturnObject(false, new IllegalArgumentException("The MetricGroup object is NULL - cannot save that..."));
         }
         
         // check if all the required information is given; uuid, metric generator UUID, name, measurement sets (if any are given)
         
         if (mGroup.getUUID() == null)
         {
-            return new ValidationReturnObject(false, new NullPointerException("The MetricGroup UUID is NULL"));
+            return new ValidationReturnObject(false, new IllegalArgumentException("The MetricGroup UUID is NULL"));
         }
         
         if (mGroup.getMetricGeneratorUUID() == null)
         {
-            return new ValidationReturnObject(false, new NullPointerException("The MetricGroup's metric generator UUID is NULL"));
+            return new ValidationReturnObject(false, new IllegalArgumentException("The MetricGroup's metric generator UUID is NULL"));
         }
         
         if (mGroup.getName() == null)
         {
-            return new ValidationReturnObject(false, new NullPointerException("The MetricGroup name is NULL"));
+            return new ValidationReturnObject(false, new IllegalArgumentException("The MetricGroup name is NULL"));
         }
         
         /*
@@ -107,41 +108,6 @@ public class MetricGroupDAOHelper
         }
         
         return new ValidationReturnObject(true);
-    }
-    
-    /**
-     * Checks the available parameters in the object and adds to the lists, the
-     * table names and values accordingly.
-     * 
-     * OBS: it is assumed that the object has been validated to have at least the
-     * minimum information.
-     * 
-     * @param mGrp
-     * @param valueNames
-     * @param values 
-     */
-    public static void getTableNamesAndValues(MetricGroup mGrp, List<String> valueNames, List<String> values)
-    {
-        if (mGrp == null)
-            return;
-        
-        if ((valueNames == null) || (values == null))
-            return;
-
-        valueNames.add("mGrpUUID");
-        values.add("'" + mGrp.getUUID().toString() + "'");
-        
-        valueNames.add("mGenUUID");
-        values.add("'" + mGrp.getMetricGeneratorUUID().toString() + "'");
-        
-        valueNames.add("name");
-        values.add("'" + mGrp.getName().toString() + "'");
-        
-        if (mGrp.getDescription() != null)
-        {
-            valueNames.add("description");
-            values.add("'" + mGrp.getDescription() + "'");
-        }
     }
     
     public static boolean objectExists(UUID uuid, Connection connection, boolean closeDBcon) throws Exception
@@ -232,7 +198,7 @@ public class MetricGroupDAOHelper
         if (metricGroupUUID == null)
         {
             log.error("Cannot get a MetricGroup object with the given UUID because it is NULL!");
-            throw new NullPointerException("Cannot get a MetricGroup object with the given UUID because it is NULL!");
+            throw new IllegalArgumentException("Cannot get a MetricGroup object with the given UUID because it is NULL!");
         }
         
         if (DBUtil.isClosed(connection))
@@ -267,8 +233,10 @@ public class MetricGroupDAOHelper
             else // nothing in the result set
             {
                 log.error("There is no MetricGroup with the given UUID: " + metricGroupUUID.toString());
-                throw new RuntimeException("There is no MetricGroup with the given UUID: " + metricGroupUUID.toString());
+                throw new NoDataException("There is no MetricGroup with the given UUID: " + metricGroupUUID.toString());
             }
+        } catch (NoDataException nde) {
+            throw nde;
         } catch (Exception ex) {
             exception = true;
             log.error("Error while quering the database: " + ex.getMessage(), ex);
@@ -287,6 +255,8 @@ public class MetricGroupDAOHelper
 
             try {
                 measurementSets = MeasurementSetDAOHelper.getMeasurementSetForMetricGroup(metricGroupUUID, withSubClasses, connection, false); // don't close the connection
+            } catch (NoDataException nde) {
+                log.debug("There were no measurement sets for the metric group");
             } catch (Exception ex) {
                 log.error("Caught an exception when getting measurement sets for MetricGroup (UUID: " + metricGroupUUID.toString() + "): " + ex.getMessage());
                 throw new RuntimeException("Caught an exception when getting measurement sets for MetricGroup (UUID: " + metricGroupUUID.toString() + "): " + ex.getMessage(), ex);
@@ -308,7 +278,7 @@ public class MetricGroupDAOHelper
         if (metricGenUUID == null)
         {
             log.error("Cannot get any MetricGroup objects for a MetricGenerator with the given UUID because it is NULL!");
-            throw new NullPointerException("Cannot get any MetricGroup objects for a MetricGenerator with the given UUID because it is NULL!");
+            throw new IllegalArgumentException("Cannot get any MetricGroup objects for a MetricGenerator with the given UUID because it is NULL!");
         }
         
         if (DBUtil.isClosed(connection))
@@ -325,9 +295,20 @@ public class MetricGroupDAOHelper
             pstmt.setObject(1, metricGenUUID, java.sql.Types.OTHER);
             ResultSet rs = pstmt.executeQuery();
             
-            // check if anything got returned (connection closed in finalise method)
-            while (rs.next())
+            // check if anything got returned
+            if (!rs.next())
             {
+                if (!MetricGeneratorDAOHelper.objectExists(metricGenUUID, connection, false))
+                {
+                    log.debug("There is no metric generator with UUID " + metricGenUUID.toString());
+                    throw new NoDataException("There is no metric generator with UUID " + metricGenUUID.toString());
+                }
+                log.debug("There are no metric groups for the given metric generator (UUID = " + metricGenUUID.toString() + ").");
+                throw new NoDataException("There are no metric groups for the given metric generator (UUID = " + metricGenUUID.toString() + ").");
+            }
+            
+            // process each result item
+            do {
                 String uuidStr = rs.getString("mGrpUUID");
                 
                 if (uuidStr == null)
@@ -337,7 +318,10 @@ public class MetricGroupDAOHelper
                 }
                 
                 metricGroups.add(getMetricGroup(UUID.fromString(uuidStr), withSubClasses, connection, false));
-            }
+            } while (rs.next());
+            
+        } catch (NoDataException nde) {
+            throw nde;
         } catch (Exception ex) {
             log.error("Error while quering the database: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);

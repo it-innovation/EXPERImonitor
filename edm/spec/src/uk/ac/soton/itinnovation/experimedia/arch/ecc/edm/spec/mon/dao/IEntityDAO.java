@@ -28,6 +28,7 @@ import java.util.Set;
 import java.util.UUID;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Attribute;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Entity;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.NoDataException;
 
 /**
  * A DAO to save and get Entity and Attribute objects from storage.
@@ -48,9 +49,10 @@ public interface IEntityDAO
      * Saves an entity instance, which must have a unique UUID. Any attributes that
      * the entity may have will also be saved.
      * @param ent The Entity instance to be saved (must have a unique UUID).
+     * @throws IllegalArgumentException If the Entity is not valid to be saved, typically due to missing information.
      * @throws Exception If there's a technical issue or an entity with the same UUID already exists.
      */
-    public void saveEntity(Entity ent) throws Exception;
+    public void saveEntity(Entity ent) throws IllegalArgumentException, Exception;
     
     /**
      * Get an entity instance from a UUID, which will include any attributes the
@@ -58,35 +60,42 @@ public interface IEntityDAO
      * @param entityUUID The UUID of the entity.
      * @param withSubClasses Flag to say whether to return attributes too.
      * @return An Entity instance.
-     * @throws Exception If there's a technical issue or there is no entity with the given UUID.
+     * @throws IllegalArgumentException If entityUUID is not a valid argument (e.g., NULL).
+     * @throws NoDataException If there's no entity with the given UUID.
+     * @throws Exception If there's a technical issue.
      */
-    public Entity getEntity(UUID entityUUID, boolean withAttributes) throws Exception;
+    public Entity getEntity(UUID entityUUID, boolean withAttributes) throws IllegalArgumentException, NoDataException, Exception;
     
     /**
      * Get all the existing entities, if any.
      * @param withSubClasses Flag to say whether to return attributes too.
-     * @return Empty set if there are no entities.
+     * @return A set of Entity objects, if any exist.
+     * @throws NoDataException If there are no entities.
      * @throws Exception If there's a technical issue.
      */
-    public Set<Entity> getEntities(boolean withAttributes) throws Exception;
+    public Set<Entity> getEntities(boolean withAttributes) throws NoDataException, Exception;
     
     /**
      * Get all the entities for a specific experiment, if any.
      * @param expUUID The experiment UUID.
      * @param withSubClasses Flag to say whether to return attributes too.
-     * @return An empty set if no entities monitored in the given experiment exist.
-     * @throws Exception If there's a technical issue or there is no experiment with the given UUID.
+     * @return A set of Entity objects, if any are being monitored within the given experiment.
+     * @throws IllegalArgumentException If expUUID is not a valid argument (e.g., NULL).
+     * @throws NoDataException If there's no entity/entities for the given experiment UUID.
+     * @throws Exception If there's a technical issue.
      */
-    public Set<Entity> getEntitiesForExperiment(UUID expUUID, boolean withAttributes) throws Exception;
+    public Set<Entity> getEntitiesForExperiment(UUID expUUID, boolean withAttributes) throws IllegalArgumentException, NoDataException, Exception;
     
     /**
      * Get all the entities for a specific metric generator, if any.
      * @param mGenUUID The metric generator UUID.
      * @param withSubClasses Flag to say whether to return attributes too.
-     * @return An empty set if no entities monitored by the given metric generator exists.
-     * @throws Exception If there's a technical issue or there is no metric generator with the given UUID.
+     * @return A set of Entity objects, if any are monitored by the given metric generator.
+     * @throws IllegalArgumentException If mGenUUID is not a valid argument (e.g., NULL).
+     * @throws NoDataException If there's no entity/entities for the given metric generator UUID, or there's no metric generator with the given UUID.
+     * @throws Exception If there's a technical issue.
      */
-    public Set<Entity> getEntitiesForMetricGenerator(UUID mGenUUID, boolean withAttributes) throws Exception;
+    public Set<Entity> getEntitiesForMetricGenerator(UUID mGenUUID, boolean withAttributes) throws IllegalArgumentException, NoDataException, Exception;
     
     
     //--------------------------- ATTRIBUTE ----------------------------------//
@@ -96,23 +105,28 @@ public interface IEntityDAO
      * Saves an attribute instance, which must have the UUID of an already saved
      * Entity, and must have a unique UUID itself.
      * @param attrib The attribute instance that should be saved.
+     * @throws IllegalArgumentException If the Attribute is not valid to be saved, typically due to missing information.
      * @throws Exception If there's a technical issue or an attribute with the same UUID already exists.
      */
-    public void saveAttribute(Attribute attrib) throws Exception;
+    public void saveAttribute(Attribute attrib) throws IllegalArgumentException, Exception;
     
     /**
      * Get an attribute instance according to the UUID, if it exists.
      * @param attribUUID The attribute UUID.
      * @return An attribute instance, if it exists.
+     * @throws IllegalArgumentException If attribUUID is not a valid argument (e.g., NULL).
+     * @throws NoDataException If there's no attribute with the given UUID.
      * @throws Exception If there's a technical issue or there is no attribute with the given UUID.
      */
-    public Attribute getAttribute(UUID attribUUID) throws Exception;
+    public Attribute getAttribute(UUID attribUUID) throws IllegalArgumentException, NoDataException, Exception;
     
     /**
      * Get all attribute instances for an entity, according to the entity UUID.
      * @param entityUUID The entity UUID.
-     * @return Empty set if no attributes exist for the entity.
-     * @throws Exception If there's a technical issue or there is no entity with the given UUID.
+     * @return A set of Attribute objects, if any exist for the given entity.
+     * @throws IllegalArgumentException If entityUUID is not a valid argument (e.g., NULL).
+     * @throws NoDataException If there's no entity with the given UUID, or it has no attributes.
+     * @throws Exception If there's a technical issue.
      */
-    public Set<Attribute> getAttributesForEntity(UUID entityUUID) throws Exception;
+    public Set<Attribute> getAttributesForEntity(UUID entityUUID) throws IllegalArgumentException, NoDataException, Exception;
 }

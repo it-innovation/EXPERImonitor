@@ -32,8 +32,8 @@ import java.util.UUID;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
 
 /**
- * An experiment is the top-level class that all entities are part of, and that 
- * metric generators produce metrics for.
+ * An experiment is the top-level class that all metric generators (and entities)
+ * are part of.
  * 
  * An experiment can consist of many different entities that are monitored, some
  * of which could be system components, virtual resources or human beings. Each of

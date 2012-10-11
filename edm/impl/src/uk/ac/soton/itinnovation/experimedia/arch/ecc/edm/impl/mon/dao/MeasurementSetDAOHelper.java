@@ -35,6 +35,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Me
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Metric;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DBUtil;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.NoDataException;
 
 /**
  * A helper class for validating and executing queries for the Measurement Sets.
@@ -49,29 +50,29 @@ public class MeasurementSetDAOHelper
     {
         if (mSet == null)
         {
-            return new ValidationReturnObject(false, new NullPointerException("The MeasurementSet object is NULL - cannot save that..."));
+            return new ValidationReturnObject(false, new IllegalArgumentException("The MeasurementSet object is NULL - cannot save that..."));
         }
         
         // check if all the required information is given; uuid, metric group UUID, attribute UUID, metric, measurements (if any)
         
         if (mSet.getUUID() == null)
         {
-            return new ValidationReturnObject(false, new NullPointerException("The MeasurementSet UUID is NULL"));
+            return new ValidationReturnObject(false, new IllegalArgumentException("The MeasurementSet UUID is NULL"));
         }
         
         if (mSet.getMetricGroupUUID() == null)
         {
-            return new ValidationReturnObject(false, new NullPointerException("The MeasurementSet's measurement group UUID is NULL"));
+            return new ValidationReturnObject(false, new IllegalArgumentException("The MeasurementSet's measurement group UUID is NULL"));
         }
         
         if (mSet.getAttributeUUID() == null)
         {
-            return new ValidationReturnObject(false, new NullPointerException("The MeasurementSet's attribute UUID is NULL"));
+            return new ValidationReturnObject(false, new IllegalArgumentException("The MeasurementSet's attribute UUID is NULL"));
         }
         
         if (mSet.getMetric() == null)
         {
-            return new ValidationReturnObject(false, new NullPointerException("The MeasurementSet's metric is NULL"));
+            return new ValidationReturnObject(false, new IllegalArgumentException("The MeasurementSet's metric is NULL"));
         }
         /*else
         {
@@ -215,14 +216,8 @@ public class MeasurementSetDAOHelper
         if (measurementSetUUID == null)
         {
             log.error("Cannot get a MeasurementSet object with the given UUID because it is NULL!");
-            throw new NullPointerException("Cannot get a MeasurementSet object with the given UUID because it is NULL!");
+            throw new IllegalArgumentException("Cannot get a MeasurementSet object with the given UUID because it is NULL!");
         }
-        
-        /*if (!MeasurementSetHelper.objectExists(measurementSetUUID, connection))
-        {
-            log.error("There is no MeasurementSet with the given UUID: " + measurementSetUUID.toString());
-            throw new RuntimeException("There is no MeasurementSet with the given UUID: " + measurementSetUUID.toString());
-        }*/
         
         if (DBUtil.isClosed(connection))
         {
@@ -254,8 +249,10 @@ public class MeasurementSetDAOHelper
             else // nothing in the result set
             {
                 log.error("There is no MeasurementSet with the given UUID: " + measurementSetUUID.toString());
-                throw new RuntimeException("There is no MeasurementSet with the given UUID: " + measurementSetUUID.toString());
+                throw new NoDataException("There is no MeasurementSet with the given UUID: " + measurementSetUUID.toString());
             }
+        } catch (NoDataException nde) {
+            throw nde;
         } catch (Exception ex) {
             exception = true;
             log.error("Error while quering the database: " + ex.getMessage(), ex);
@@ -277,6 +274,9 @@ public class MeasurementSetDAOHelper
             try {
                 Metric metric = MetricDAOHelper.getMetric(UUID.fromString(metricUUIDstr), connection, false); // don't close the connection
                 measurementSet.setMetric(metric);
+            } catch (NoDataException nde) {
+                log.debug("There was no metric stored for the measurement set");
+                throw nde;
             } catch (Exception ex) {
                 log.error("Caught an exception when getting the Metric for the MeasurementSet (UUID: " + measurementSetUUID.toString() + "): " + ex.getMessage());
                 throw new RuntimeException("Caught an exception when getting the Metric for MeasurementSet (UUID: " + measurementSetUUID.toString() + "): " + ex.getMessage(), ex);
@@ -294,7 +294,7 @@ public class MeasurementSetDAOHelper
         if (metricGroupUUID == null)
         {
             log.error("Cannot get any MeasurementSet objects for a MetricGroup with the given UUID because it is NULL!");
-            throw new NullPointerException("Cannot get any MeasurementSet objects for a MetricGroup with the given UUID because it is NULL!");
+            throw new IllegalArgumentException("Cannot get any MeasurementSet objects for a MetricGroup with the given UUID because it is NULL!");
         }
         
         if (DBUtil.isClosed(connection))
@@ -311,9 +311,20 @@ public class MeasurementSetDAOHelper
             pstmt.setObject(1, metricGroupUUID, java.sql.Types.OTHER);
             ResultSet rs = pstmt.executeQuery();
             
-            // check if anything got returned (connection closed in finalise method)
-            while (rs.next())
+            // check if anything got returned
+            if (!rs.next())
             {
+                if (!MetricGroupDAOHelper.objectExists(metricGroupUUID, connection, false))
+                {
+                    log.debug("There is no metric group with UUID " + metricGroupUUID.toString());
+                    throw new NoDataException("There is no metric group with UUID " + metricGroupUUID.toString());
+                }
+                log.debug("There are no measurement sets for the given metric group (UUID = " + metricGroupUUID.toString() + ").");
+                throw new NoDataException("There are no measurement sets for the given metric group (UUID = " + metricGroupUUID.toString() + ").");
+            }
+            
+            // process each result item
+            do {
                 String uuidStr = rs.getString("mSetUUID");
                 
                 if (uuidStr == null)
@@ -323,7 +334,10 @@ public class MeasurementSetDAOHelper
                 }
                 
                 measurementSets.add(getMeasurementSet(UUID.fromString(uuidStr), withMetric, connection, false));
-            }
+            } while (rs.next());
+            
+        } catch (NoDataException nde) {
+            throw nde;
         } catch (Exception ex) {
             log.error("Error while quering the database: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);

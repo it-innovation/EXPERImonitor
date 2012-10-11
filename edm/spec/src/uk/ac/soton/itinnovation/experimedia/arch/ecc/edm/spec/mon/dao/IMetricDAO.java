@@ -26,6 +26,7 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao;
 
 import java.util.UUID;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Metric;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.NoDataException;
 
 /**
  * A DAO to save and get Metric objects from storage.
@@ -41,23 +42,27 @@ public interface IMetricDAO
      * Saves a metric, which must have a unique UUID and refer to an existing
      * measurement set (by its UUID).
      * @param metric The metric object to be saved.
+     * @throws IllegalArgumentException If the Metric is not valid to be saved, typically due to missing information (e.g., NULL values).
      * @throws Exception If there's a technical issue or a metric with the same UUID already exists.
      */
-    public void saveMetric(Metric metric) throws Exception;
+    public void saveMetric(Metric metric) throws IllegalArgumentException, Exception;
     
     /**
      * Get a metric object according to its UUID.
      * @param metricUUID The metric UUID.
      * @return A metric object, if it exists.
-     * @throws Exception If there's a technical issue or there is no metric with the given UUID.
+     * @throws IllegalArgumentException If metricUUID is not a valid argument (e.g., NULL).
+     * @throws NoDataException If there's no metric with the given UUID.
+     * @throws Exception If there's a technical issue.
      */
-    public Metric getMetric(UUID metricUUID) throws Exception;
+    public Metric getMetric(UUID metricUUID) throws IllegalArgumentException, NoDataException, Exception;
     
     /**
      * Get a metric object for a measurement set.
      * @param measurementSetUUID The measurement set UUID.
-     * @return A metric object, if it exists.
-     * @throws Exception If there's a technical issue or there is no measurement set with the given UUID.
+     * @return A metric object, if one exist for the given measurement set.
+     * @throws NoDataException If there is no measurement set with the given UUID or there is no metric for it.
+     * @throws Exception If there's a technical issue.
      */
-    public Metric getMetricForMeasurementSet(UUID measurementSetUUID) throws Exception;
+    public Metric getMetricForMeasurementSet(UUID measurementSetUUID) throws IllegalArgumentException, NoDataException, Exception;
 }

@@ -26,7 +26,7 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl;
 
 import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.mon.dao.ExperimentDataManagerDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDMLight;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDMAgent;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IEntityDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IExperimentDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IMetricGeneratorDAO;
@@ -41,13 +41,13 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IReportDAO
  * 
  * @author Vegard Engen
  */
-public class MonitoringEDMLight implements IMonitoringEDMLight
+public class MonitoringEDMAgent implements IMonitoringEDMAgent
 {
     private ExperimentDataManagerDAO edmDAO;
     
-    static Logger log = Logger.getLogger(MonitoringEDMLight.class);
+    static Logger log = Logger.getLogger(MonitoringEDMAgent.class);
     
-    public MonitoringEDMLight()
+    public MonitoringEDMAgent()
     {
         log.info("EDM starting up");
         try {

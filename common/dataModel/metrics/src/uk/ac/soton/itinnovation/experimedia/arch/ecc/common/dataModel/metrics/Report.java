@@ -28,7 +28,9 @@ import java.util.Date;
 import java.util.UUID;
 
 /**
- * A report class, which contains meta-information about a measurement set.
+ * A report class that provides a means of transferring measurements, which 
+ * contains meta-information about a measurement set and the measurements for it 
+ * for a given time period
  * 
  * Currently only the number of measurements is supported.
  * 
@@ -41,17 +43,14 @@ public class Report
     private Date reportDate;
     private Date fromDate;
     private Date toDate;
-    private boolean synchronised;
     private Integer numberOfMeasurements;
     
     /**
-     * Default constructor which generates a random UUID for the Report object and
-     * sets the synchronised flag to false.
+     * Default constructor which generates a random UUID for the Report object.
      */
     public Report()
     {
         this.uuid = UUID.randomUUID();
-        this.synchronised = false;
     }
     
     /**
@@ -75,8 +74,6 @@ public class Report
             this.toDate = new Date(report.getToDate().getTime());
         if (report.getNumberOfMeasurements() != null)
             this.numberOfMeasurements = new Integer(report.getNumberOfMeasurements());
-        
-        this.synchronised = report.isSynchronised();
     }
     
     /**
@@ -205,21 +202,5 @@ public class Report
     public void setNumberOfMeasurements(Integer num)
     {
         this.numberOfMeasurements = num;
-    }
-
-    /**
-     * @return the synchronised
-     */
-    public boolean isSynchronised()
-    {
-        return synchronised;
-    }
-
-    /**
-     * @param synchronised the synchronised to set
-     */
-    public void setSynchronised(boolean synchronised)
-    {
-        this.synchronised = synchronised;
     }
 }

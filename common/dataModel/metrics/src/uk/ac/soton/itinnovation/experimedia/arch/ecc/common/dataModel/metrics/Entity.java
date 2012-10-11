@@ -49,6 +49,7 @@ import java.util.UUID;
 public class Entity implements Serializable
 {
     private UUID uuid; // used to uniquely identify an entity in our framework
+    private String entityID; // can be used to identify the entity according to 'external' ID
     private String name;
     private String description;
     private Set<Attribute> attributes;
@@ -82,6 +83,7 @@ public class Entity implements Serializable
             this.uuid = UUID.fromString(e.getUUID().toString());
         this.name = e.getName();
         this.description = e.getDescription();
+        this.entityID = e.getEntityID();
         
         this.attributes = new HashSet<Attribute>();
         if (e.getAttributes() != null)
@@ -131,21 +133,33 @@ public class Entity implements Serializable
     }
     
     /**
+     * A constructor to set all the fields of the entity class except for the attributes.
+     * @param uuid A UUID used to uniquely identify an entity in this framework.
+     * @param entityID An ID that can be used if the Entity is known by a particular ID outside of the framework.
+     * @param name The name of the Entity.
+     * @param description A description of the entity.
+     */
+    public Entity(UUID uuid, String entityID, String name, String description)
+    {
+        this(uuid);
+        this.name = name;
+        this.description = description;
+        this.entityID = entityID;
+    }
+    
+    /**
      * A constructor to set all the fields of the entity class.
      * @param uuid A UUID used to uniquely identify an entity in this framework.
+     * @param entityID An ID that can be used if the Entity is known by a particular ID outside of the framework.
      * @param name The name of the Entity.
      * @param description A description of the entity.
      * @param attributes A set of attributes of the entity, which could be observed to generate metrics.
-     * @param experimentUUIDs A set of experiment UUIDs that this entity is a part of.
-     *
-    public Entity(UUID uuid, String name, String description, Set<Attribute> attributes, Set<UUID> experimentUUIDs)
+     */
+    public Entity(UUID uuid, String entityID, String name, String description, Set<Attribute> attributes)
     {
-        this.uuid = uuid;
-        this.name = name;
-        this.description = description;
+        this(uuid, entityID, name, description);
         this.attributes = attributes;
-        this.experimentUUIDs = experimentUUIDs;
-    }*/
+    }
     
     /**
      * @return the uuid
@@ -243,6 +257,22 @@ public class Entity implements Serializable
     public String toString()
     {
         return name;
+    }
+
+    /**
+     * @return the entityID
+     */
+    public String getEntityID()
+    {
+        return entityID;
+    }
+
+    /**
+     * @param entityID the entityID to set
+     */
+    public void setEntityID(String entityID)
+    {
+        this.entityID = entityID;
     }
 
     /**

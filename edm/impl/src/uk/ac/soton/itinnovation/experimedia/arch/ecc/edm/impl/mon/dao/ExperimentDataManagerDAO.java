@@ -682,6 +682,37 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
                 connection.close();
         }
     }
+    
+    @Override
+    public void saveMeasurementsForReport(Report report) throws Exception
+    {
+        Connection connection = null;
+        try {
+            connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
+            log.debug("Starting transaction");
+            connection.setAutoCommit(false);
+        } catch (Exception ex) {
+            log.error("Unable to save measurements for report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
+            throw new RuntimeException("Unable to save measurements for report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
+        }
+        boolean exception = false;
+        try {
+            ReportDAOHelper.saveMeasurementsForReport(report, connection);
+        } catch (Exception ex) {
+            exception = true;
+            throw ex;
+        } finally {
+            if (exception) {
+                log.debug("Exception thrown, so rolling back the transaction and closing the connection");
+                connection.rollback();
+            }
+            else {
+                log.debug("Committing the transaction and closing the connection");
+                connection.commit();
+            }
+            connection.close();
+        }
+    }
 
     @Override
     public Report getReport(UUID reportUUID) throws Exception

@@ -21,7 +21,7 @@ To load the database, there's various options to do that; here's one:
 	On the command line, assuming you're in the same directory as the
 	'edm-metrics.sql' file and the database username is 'postgres', execute:
 	
-		psql -d edm-metrics -U postgres -f edm-metrics.sql
+		psql -d edm-metrics -U postgres -f edm-metrics-postgres.sql
 
 
 Configuring the EDM to connect to the database can be done in:

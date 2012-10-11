@@ -27,6 +27,7 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao;
 import java.util.Set;
 import java.util.UUID;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.NoDataException;
 
 /**
  * A DAO to save and get MetricGenerator objects from storage.
@@ -52,9 +53,10 @@ public interface IMetricGeneratorDAO
      * not null).
      * @param metricGen The metric generator instance to be saved.
      * @param experimentUUID The experiment UUID.
+     * @throws IllegalArgumentException If the MetricGenerator or experiment UUID are not valid to be saved, typically due to missing information (e.g., NULL values).
      * @throws Exception If there's a technical issue or a metric generator with the same UUID already exists.
      */
-    public void saveMetricGenerator(MetricGenerator metricGen, UUID experimentUUID) throws Exception;
+    public void saveMetricGenerator(MetricGenerator metricGen, UUID experimentUUID) throws IllegalArgumentException, Exception;
     
     /**
      * Get a metric generator instance from a UUID. Will include all sub-classes
@@ -62,26 +64,30 @@ public interface IMetricGeneratorDAO
      * @param metricGenUUID The metric generator UUID.
      * @param withSubClasses Flag to say whether to return subclasses too; MetricGroup and Entity, as well as sub-classes below that.
      * @return A metric generator instance if it exists.
-     * @throws Exception If there's a technical issue or there is no metric generator with the given UUID.
+     * @throws IllegalArgumentException If metricGenUUID is not a valid argument (e.g., NULL).
+     * @throws NoDataException If there's no metric generator with the given UUID.
+     * @throws Exception If there's a technical issue.
      */
-    public MetricGenerator getMetricGenerator(UUID metricGenUUID, boolean withSubClasses) throws Exception;
+    public MetricGenerator getMetricGenerator(UUID metricGenUUID, boolean withSubClasses) throws IllegalArgumentException, NoDataException, Exception;
     
     /**
      * Get all metric generators. Will include all sub-classes except for measurements,
      * if available.
      * @param withSubClasses Flag to say whether to return subclasses too; MetricGroup and Entity, as well as sub-classes below that.
-     * @return Empty set if there are no metric generators.
+     * @return A set of MetricGenerator objects, if any exist.
+     * @throws NoDataException If there are no metric generators.
      * @throws Exception If there's a technical issue.
      */
-    public Set<MetricGenerator> getMetricGenerators(boolean withSubClasses) throws Exception;
+    public Set<MetricGenerator> getMetricGenerators(boolean withSubClasses) throws NoDataException, Exception;
     
     /**
      * Get all metric generators for an experiment. Will include all sub-classes
      * except for measurements, if available.
      * @param expUUID The experiment UUID.
      * @param withSubClasses Flag to say whether to return subclasses too; MetricGroup and Entity, as well as sub-classes below that.
-     * @return Empty set if no metric generators exist for the experiment.
-     * @throws Exception If there's a technical issue or there is no experiment with the given UUID.
+     * @return A set of MetricGenerator objects, if any exist for the given experiment.
+     * @throws NoDataException If there is no experiment with the given UUID or there are no metric generators for the given experiment.
+     * @throws Exception If there's a technical issue.
      */
-    public Set<MetricGenerator> getMetricGeneratorsForExperiment(UUID expUUID, boolean withSubClasses) throws Exception;
+    public Set<MetricGenerator> getMetricGeneratorsForExperiment(UUID expUUID, boolean withSubClasses) throws IllegalArgumentException, NoDataException, Exception;
 }

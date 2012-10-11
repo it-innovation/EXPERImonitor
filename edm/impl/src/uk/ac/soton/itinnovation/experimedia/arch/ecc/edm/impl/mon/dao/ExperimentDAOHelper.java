@@ -36,6 +36,7 @@ import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DBUtil;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.NoDataException;
 
 /**
  * A helper class for validating and executing queries for the Experiments.
@@ -50,19 +51,19 @@ public class ExperimentDAOHelper
     {
         if (exp == null)
         {
-            return new ValidationReturnObject(false, new NullPointerException("The Experiment object is NULL - cannot save that..."));
+            return new ValidationReturnObject(false, new IllegalArgumentException("The Experiment object is NULL - cannot save that..."));
         }
         
         // check if all the required information is given; uuid, name
         
         if (exp.getUUID() == null)
         {
-            return new ValidationReturnObject(false, new NullPointerException("The Experiment UUID is NULL"));
+            return new ValidationReturnObject(false, new IllegalArgumentException("The Experiment UUID is NULL"));
         }
         
         if (exp.getName() == null)
         {
-            return new ValidationReturnObject(false, new NullPointerException("The Experiment name is NULL"));
+            return new ValidationReturnObject(false, new IllegalArgumentException("The Experiment name is NULL"));
         }
         /*
         // check if it exists in the DB already
@@ -228,7 +229,7 @@ public class ExperimentDAOHelper
         if (expUUID == null)
         {
             log.error("Cannot get an Experiment object with the given UUID because it is NULL!");
-            throw new NullPointerException("Cannot get an Experiment object with the given UUID because it is NULL!");
+            throw new IllegalArgumentException("Cannot get an Experiment object with the given UUID because it is NULL!");
         }
         
         /*if (!ExperimentHelper.objectExists(expUUID, dbCon))
@@ -274,8 +275,10 @@ public class ExperimentDAOHelper
             else // nothing in the result set
             {
                 log.error("There is no experiment with the given UUID: " + expUUID.toString());
-                throw new RuntimeException("There is no experiment with the given UUID: " + expUUID.toString());
+                throw new NoDataException("There is no experiment with the given UUID: " + expUUID.toString());
             }
+        } catch (NoDataException nde) {
+            throw nde;
         } catch (Exception ex) {
             exception = true;
             log.error("Error while quering the database: " + ex.getMessage(), ex);
@@ -294,8 +297,11 @@ public class ExperimentDAOHelper
 
             try {
                 metricGenerators = MetricGeneratorDAOHelper.getMetricGeneratorsForExperiment(expUUID, withSubClasses, connection, false);
+            } catch (NoDataException nde) {
+                log.debug("There were no metric generators for the experiment");
             } catch (Exception ex) {
                 log.error("Caught an exception when getting metric generators for experiment (UUID: " + expUUID.toString() + "): " + ex.getMessage());
+                throw new RuntimeException("Caught an exception when getting metric generators for experiment (UUID: " + expUUID.toString() + "): " + ex.getMessage(), ex);
             } finally {
                 if (closeDBcon)
                 {
@@ -324,9 +330,15 @@ public class ExperimentDAOHelper
             PreparedStatement pstmt = connection.prepareStatement(query);
             ResultSet rs = pstmt.executeQuery();
             
-            // iterate over all returned records
-            while (rs.next())
+            // check if anything got returned
+            if (!rs.next())
             {
+                log.debug("There are no experiments in the EDM.");
+                throw new NoDataException("There are no experiments in the EDM.");
+            }
+            
+            // process each result item
+            do {
                 String uuidStr = rs.getString("expUUID");
                 
                 if (uuidStr == null)
@@ -336,10 +348,13 @@ public class ExperimentDAOHelper
                 }
                 
                 experiments.add(getExperiment(UUID.fromString(uuidStr), withSubClasses, connection, false));
-            }
+            } while (rs.next());
+            
+        } catch (NoDataException nde) {
+            throw nde;
         } catch (Exception ex) {
-            log.error("Error while quering the database: " + ex.getMessage(), ex);
-            throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
+            log.error("Error while getting the experiments: " + ex.getMessage(), ex);
+            throw new RuntimeException("Error while getting the experiments: " + ex.getMessage(), ex);
         } finally {
             connection.close();
         }
@@ -395,7 +410,7 @@ public class ExperimentDAOHelper
         if (experimentUUID == null)
         {
             log.error("Cannot delete Experiment object with the given UUID because it is NULL!");
-            throw new NullPointerException("Cannot delete Experiment object with the given UUID because it is NULL!");
+            throw new IllegalArgumentException("Cannot delete Experiment object with the given UUID because it is NULL!");
         }
         
         if (DBUtil.isClosed(connection))

@@ -16,6 +16,7 @@ WITH (
 CREATE TABLE Entity
 (
    entityUUID uuid NOT NULL, 
+   entityID text, 
    name text NOT NULL, 
    description text, 
    CONSTRAINT entityUUID PRIMARY KEY (entityUUID)
@@ -125,6 +126,7 @@ CREATE TABLE Measurement
    mSetUUID uuid NOT NULL, 
    timeStamp bigint NOT NULL, 
    value text, 
+   synchronised boolean NOT NULL, 
    CONSTRAINT measurementUUID PRIMARY KEY (measurementUUID), 
    CONSTRAINT mSetUUID FOREIGN KEY (mSetUUID) REFERENCES MeasurementSet (mSetUUID) ON UPDATE CASCADE ON DELETE CASCADE
 ) 
@@ -140,7 +142,6 @@ CREATE TABLE Report
    reportTimeStamp bigint NOT NULL, 
    fromDateTimeStamp bigint NOT NULL, 
    toDateTimeStamp bigint NOT NULL, 
-   synchronised boolean NOT NULL, 
    numMeasurements integer NOT NULL, 
    CONSTRAINT reportUUID PRIMARY KEY (reportUUID), 
    CONSTRAINT mSetUUID FOREIGN KEY (mSetUUID) REFERENCES MeasurementSet (mSetUUID) ON UPDATE CASCADE ON DELETE CASCADE

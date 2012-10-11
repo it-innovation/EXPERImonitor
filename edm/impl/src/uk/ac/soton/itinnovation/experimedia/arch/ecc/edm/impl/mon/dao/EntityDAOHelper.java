@@ -34,6 +34,7 @@ import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Attribute;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Entity;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DBUtil;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.NoDataException;
 
 /**
  * A helper class for validating and executing queries for the Entities.
@@ -48,19 +49,19 @@ public class EntityDAOHelper
     {
         if (entity == null)
         {
-            return new ValidationReturnObject(false, new NullPointerException("The Entity object is NULL - cannot save that..."));
+            return new ValidationReturnObject(false, new IllegalArgumentException("The Entity object is NULL - cannot save that..."));
         }
         
         // check if all the required information is given; uuid, name
         
         if (entity.getUUID() == null)
         {
-            return new ValidationReturnObject(false, new NullPointerException("The Entity UUID is NULL"));
+            return new ValidationReturnObject(false, new IllegalArgumentException("The Entity UUID is NULL"));
         }
         
         if (entity.getName() == null)
         {
-            return new ValidationReturnObject(false, new NullPointerException("The Entity name is NULL"));
+            return new ValidationReturnObject(false, new IllegalArgumentException("The Entity name is NULL"));
         }
         /*
         // check if it exists in the DB already
@@ -91,9 +92,9 @@ public class EntityDAOHelper
                 if (attrib == null)
                 {
                     if (entity.getAttributes().size() > 0)
-                        return new ValidationReturnObject(false, new NullPointerException("One or more the Entity's attributes are NULL"));
+                        return new ValidationReturnObject(false, new IllegalArgumentException("One or more the Entity's attributes are NULL"));
                     else
-                        return new ValidationReturnObject(false, new NullPointerException("The Entity's attribute is NULL"));
+                        return new ValidationReturnObject(false, new IllegalArgumentException("The Entity's attribute is NULL"));
                 }
             }
         }
@@ -132,12 +133,13 @@ public class EntityDAOHelper
                 connection.setAutoCommit(false);
             }
             
-            String query = "INSERT INTO Entity (entityUUID, name, description) VALUES (?, ?, ?)";
+            String query = "INSERT INTO Entity (entityUUID, entityID, name, description) VALUES (?, ?, ?, ?)";
             
             PreparedStatement pstmt = connection.prepareStatement(query);
             pstmt.setObject(1, entity.getUUID(), java.sql.Types.OTHER);
-            pstmt.setString(2, entity.getName());
-            pstmt.setString(3, entity.getDescription());
+            pstmt.setString(2, entity.getEntityID());
+            pstmt.setString(3, entity.getName());
+            pstmt.setString(4, entity.getDescription());
             
             pstmt.executeUpdate();
         } catch (Exception ex) {
@@ -187,7 +189,7 @@ public class EntityDAOHelper
         if (entityUUID == null)
         {
             log.error("Cannot get an Entity object with the given UUID because it is NULL!");
-            throw new NullPointerException("Cannot get an Entity object with the given UUID because it is NULL!");
+            throw new IllegalArgumentException("Cannot get an Entity object with the given UUID because it is NULL!");
         }
         
         if (DBUtil.isClosed(connection))
@@ -195,12 +197,6 @@ public class EntityDAOHelper
             log.error("Cannot get the Entity because the connection to the DB is closed");
             throw new RuntimeException("Cannot get the Entity because the connection to the DB is closed");
         }
-        
-        /*if (!EntityHelper.objectExists(entityUUID, dbCon))
-        {
-            log.error("There is no entity with the given UUID: " + entityUUID.toString());
-            throw new RuntimeException("There is no entity with the given UUID: " + entityUUID.toString());
-        }*/
         
         Entity entity = null;
         boolean exception = false;
@@ -214,16 +210,20 @@ public class EntityDAOHelper
             // check if anything got returned (connection closed in finalise method)
             if (rs.next())
             {
+                String entityID = rs.getString("entityID");
                 String name = rs.getString("name");
 				String description = rs.getString("description");
                 
-                entity = new Entity(entityUUID, name, description);
+                entity = new Entity(entityUUID, entityID, name, description);
             }
             else // nothing in the result set
             {
                 log.error("There is no entity with the given UUID: " + entityUUID.toString());
-                throw new RuntimeException("There is no entity with the given UUID: " + entityUUID.toString());
+                throw new NoDataException("There is no entity with the given UUID: " + entityUUID.toString());
             }
+            
+        } catch (NoDataException nde) {
+            throw nde;
         } catch (Exception ex) {
             exception = true;
             log.error("Error while quering the database: " + ex.getMessage(), ex);
@@ -240,6 +240,8 @@ public class EntityDAOHelper
 
             try {
                 attributes = AttributeDAOHelper.getAttributesForEntity(entityUUID, connection, false); // don't close the connection
+            } catch (NoDataException nde) {
+                log.debug("There were no attributes for the entity");
             } catch (Exception ex) {
                 log.error("Caught an exception when getting attributes for entity (UUID: " + entityUUID.toString() + "): " + ex.getMessage());
                 throw new RuntimeException("Unable to get Entity object due to an issue with getting its attributes: " + ex.getMessage(), ex);
@@ -268,9 +270,15 @@ public class EntityDAOHelper
             PreparedStatement pstmt = connection.prepareStatement(query);
             ResultSet rs = pstmt.executeQuery();
             
-            // check if anything got returned (connection closed in finalise method)
-            while (rs.next())
+            // check if anything got returned
+            if (!rs.next())
             {
+                log.debug("There are no entities stored in the EDM.");
+                throw new NoDataException("There are no entities stored in the EDM.");
+            }
+            
+            // process each result item
+            do {
                 String uuidStr = rs.getString("entityUUID");
                 
                 if (uuidStr == null)
@@ -280,8 +288,10 @@ public class EntityDAOHelper
                 }
                 
                 entities.add(getEntity(UUID.fromString(uuidStr), withAttributes, connection, false));
-            }
-
+            } while (rs.next());
+            
+        } catch (NoDataException nde) {
+            throw nde;
         } catch (Exception ex) {
             log.error("Error while quering the database: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
@@ -297,7 +307,7 @@ public class EntityDAOHelper
         if (expUUID == null)
         {
             log.error("Cannot get Entity objects for the given experiment, because the UUID provided is NULL!");
-            throw new NullPointerException("Cannot get Entity objects for the given experiment, because the UUID provided is NULL!");
+            throw new IllegalArgumentException("Cannot get Entity objects for the given experiment, because the UUID provided is NULL!");
         }
         
         if (DBUtil.isClosed(connection))
@@ -315,9 +325,20 @@ public class EntityDAOHelper
             pstmt.setObject(1, expUUID, java.sql.Types.OTHER);
             ResultSet rs = pstmt.executeQuery();
             
-            // check if anything got returned (connection closed in finalise method)
-            while (rs.next())
+            // check if anything got returned
+            if (!rs.next())
             {
+                if (!ExperimentDAOHelper.objectExists(expUUID, connection, false))
+                {
+                    log.debug("There is no experiment with UUID " + expUUID.toString());
+                    throw new NoDataException("There is no experiment with UUID " + expUUID.toString());
+                }
+                log.debug("There are no entities for the given experiment (UUID = " + expUUID.toString() + ").");
+                throw new NoDataException("There are no entities for the given experiment (UUID = " + expUUID.toString() + ").");
+            }
+            
+            // process each result item
+            do {
                 String uuidStr = rs.getString("entityUUID");
                 
                 if (uuidStr == null)
@@ -327,8 +348,10 @@ public class EntityDAOHelper
                 }
                 
                 entities.add(getEntity(UUID.fromString(uuidStr), withAttributes, connection, false));
-            }
-
+            } while (rs.next());
+            
+        } catch (NoDataException nde) {
+            throw nde;
         } catch (Exception ex) {
             log.error("Error while quering the database: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
@@ -344,7 +367,7 @@ public class EntityDAOHelper
         if (mGenUUID == null)
         {
             log.error("Cannot get Entity objects for the given metric generator, because the UUID provided is NULL!");
-            throw new NullPointerException("Cannot get Entity objects for the given metric generator, because the UUID provided is NULL!");
+            throw new IllegalArgumentException("Cannot get Entity objects for the given metric generator, because the UUID provided is NULL!");
         }
         
         if (DBUtil.isClosed(connection))
@@ -361,9 +384,21 @@ public class EntityDAOHelper
             pstmt.setObject(1, mGenUUID, java.sql.Types.OTHER);
             ResultSet rs = pstmt.executeQuery();
             
-            // check if anything got returned (connection closed in finalise method)
-            while (rs.next())
+            // check if anything got returned
+            if (!rs.next())
             {
+                if (!MetricGeneratorDAOHelper.objectExists(mGenUUID, connection, false))
+                {
+                    log.debug("There is no metric generator with UUID " + mGenUUID.toString());
+                    throw new NoDataException("There is no metric generator with UUID " + mGenUUID.toString());
+                }
+                
+                log.debug("There are no entities for the given metric generator (UUID = " + mGenUUID.toString() + ").");
+                throw new NoDataException("There are no entities for the given metric generator (UUID = " + mGenUUID.toString() + ").");
+            }
+            
+            // process each result item
+            do {
                 String entityUUIDstr = rs.getString("entityUUID");
                 if (entityUUIDstr == null)
                 {
@@ -372,7 +407,10 @@ public class EntityDAOHelper
                 }
                 
                 entities.add(getEntity(UUID.fromString(entityUUIDstr), withAttributes, connection, false));
-            }
+            } while (rs.next());
+            
+        } catch (NoDataException nde) {
+            throw nde;
         } catch (Exception ex) {
             log.error("Error while quering the database: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
@@ -431,7 +469,7 @@ public class EntityDAOHelper
         if (entityUUID == null)
         {
             log.error("Cannot delete entity object with the given UUID because it is NULL!");
-            throw new NullPointerException("Cannot delete entity object with the given UUID because it is NULL!");
+            throw new IllegalArgumentException("Cannot delete entity object with the given UUID because it is NULL!");
         }
         
         if (DBUtil.isClosed(connection))

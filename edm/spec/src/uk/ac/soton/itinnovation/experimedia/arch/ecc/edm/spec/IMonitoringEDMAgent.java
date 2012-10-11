@@ -35,7 +35,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IReportDAO
  * 
  * @author Vegard Engen
  */
-public interface IMonitoringEDMLight
+public interface IMonitoringEDMAgent
 {
     /**
      * Get the experiment DAO, allowing saving and getting Experiment objects.

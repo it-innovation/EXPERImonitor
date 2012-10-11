@@ -27,6 +27,7 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao;
 import java.util.Set;
 import java.util.UUID;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.NoDataException;
 
 /**
  * A DAO to save and get Experiment objects from storage.
@@ -46,24 +47,28 @@ public interface IExperimentDAO
     /**
      * Save an experiment (must have a unique UUID).
      * @param exp The experiment instance to be saved (must have a unique UUID).
+     * @throws IllegalArgumentException If the Experiment is not valid to be saved, typically due to missing information.
      * @throws Exception If there's a technical issue or an experiment with the same UUID already exists.
      */
-    public void saveExperiment(Experiment exp) throws Exception;
+    public void saveExperiment(Experiment exp) throws IllegalArgumentException, Exception;
     
     /**
      * Get an experiment instance according to an experiment UUID.
      * @param expUUID The UUID of the experiment.
      * @param withSubClasses Flag to say whether to return subclasses too; MetricGenerator and sub-classes below that.
      * @return An experiment instance with all sub-classes except for measurements.
+     * @throws IllegalArgumentException If expUUID is not a valid argument (e.g., NULL).
+     * @throws NoDataException If there's no experiment with the given UUID.
      * @throws Exception If there's a technical issue or there is no experiment with the given UUID.
      */
-    public Experiment getExperiment(UUID expUUID, boolean withSubClasses) throws Exception;
+    public Experiment getExperiment(UUID expUUID, boolean withSubClasses) throws NoDataException, IllegalArgumentException, Exception;
     
     /**
      * Get all existing experiments.
      * @param withSubClasses Flag to say whether to return subclasses too; MetricGenerator and sub-classes below that.
-     * @return Empty set if no experiments exist.
+     * @return A set of Experiment objects, if any exist.
+     * @throws NoDataException If there are no experiments.
      * @throws Exception If there's a technical issue.
      */
-    public Set<Experiment> getExperiments(boolean withSubClasses) throws Exception;
+    public Set<Experiment> getExperiments(boolean withSubClasses) throws NoDataException, Exception;
 }
