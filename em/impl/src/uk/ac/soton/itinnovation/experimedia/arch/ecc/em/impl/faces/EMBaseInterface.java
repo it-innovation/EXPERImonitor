@@ -80,7 +80,13 @@ public abstract class EMBaseInterface implements IAMQPMessageDispatchListener
   {
     amqpChannel = channel;
     isProvider  = asProvider;
-    jsonMapper  = new Gson();
+    
+    // JSON mapping
+    // Configure Gson for precision date handling
+    jsonMapper  = new GsonBuilder()
+                      .setDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
+                      .create();
+    
     jsonParser  = new JsonParser();
   }
   

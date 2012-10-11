@@ -32,13 +32,12 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces.EMDiscovery;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMPhase;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
 
 import java.util.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMPhaseTimeOut;
-
 
 
 
@@ -46,6 +45,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EM
 public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
                                        implements IEMDiscovery_ProviderListener
 {
+  private Experiment                        currentExperiment;
   private EMGeneratorDiscoveryPhaseListener phaseListener;
   
   private HashSet<UUID> clientsExpectingGeneratorInfo;
@@ -57,14 +57,22 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
   {
     super( EMPhase.eEMDiscoverMetricGenerators, channel, providerID );
     
-    phaseListener = listener;
-    
+    phaseListener                 = listener;
     clientsExpectingGeneratorInfo = new HashSet<UUID>();
     
     // Start pump early as clients connect in this phase
     phaseMsgPump.startPump();
     
     phaseState = "Waiting for clients";
+  }
+  
+  public void setExperimentInfo( Experiment expInfo ) throws Exception
+  {
+    // Safety first
+    if ( expInfo == null ) throw new Exception( "Experiment info is NULL" );
+    if ( phaseActive ) throw new Exception( "Already started phase - cannot change experiment info now" );
+  
+    currentExperiment = expInfo;
   }
   
   // AbstractEMLCPhase ---------------------------------------------------------
@@ -100,6 +108,7 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
   {
     if ( phaseActive ) throw new Exception( "Phase already active" );
     if ( !hasClients() ) throw new Exception( "No clients available for this phase" );
+    if ( currentExperiment == null ) throw new Exception( "Experiment info is NULL" );
   
     phaseActive = true;
     
@@ -107,7 +116,14 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
     for ( EMClientEx client : getCopySetOfCurrentClients() )
     {
       IEMDiscovery monFace = client.getDiscoveryInterface();
-      monFace.registrationConfirmed( true );
+      
+      monFace.registrationConfirmed( true,
+                                     currentExperiment.getUUID(),
+                                     currentExperiment.getExperimentID(),
+                                     currentExperiment.getName(),
+                                     currentExperiment.getDescription(),
+                                     currentExperiment.getStartTime() );
+      
       client.setIsConnected( true );
 
       // Initially assume all clients will offer metric generators

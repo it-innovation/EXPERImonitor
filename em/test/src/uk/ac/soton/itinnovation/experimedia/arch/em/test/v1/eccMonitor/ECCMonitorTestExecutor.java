@@ -44,6 +44,7 @@ import org.apache.log4j.Logger;
 
 
 
+
 /**
  * ECCMonitorTestExecutor provides a more complex test for interacting with the 
  * provider of the following interfaces:
@@ -240,10 +241,23 @@ public class ECCMonitorTestExecutor implements Runnable,
   }
   
   @Override
-  public void onRegistrationConfirmed( UUID senderID, Boolean confirmed )
+  public void onRegistrationConfirmed( UUID    senderID,
+                                       Boolean confirmed,
+                                       UUID    expUniqueID,
+                                       String  expNamedID,
+                                       String  expName,
+                                       String  expDescription,
+                                       Date    expCreateTime )
   {
+    // Check the experiment info is correct
+    boolean expInfoOK = ( expUniqueID.equals(ECCMonitorEntryPointTest.EMExperimentUUID)    &&
+                          expNamedID.equals(ECCMonitorEntryPointTest.EMExperimentNamedID)  &&
+                          expName.equals(ECCMonitorEntryPointTest.EMExperimentName)        &&
+                          expDescription.equals(ECCMonitorEntryPointTest.EMExperimentDesc) &&
+                          expCreateTime.equals(ECCMonitorEntryPointTest.EMStartDate) );
+    
     // Make sure event is from the correct sender
-    if ( senderID.equals( ECCMonitorEntryPointTest.EMProviderUUID) )
+    if ( senderID.equals( ECCMonitorEntryPointTest.EMProviderUUID) && expInfoOK )
     {
       userGotRegistrationConfirmed = true; // Don't really care about the result
     
@@ -311,6 +325,11 @@ public class ECCMonitorTestExecutor implements Runnable,
     userDiscovery.setUserListener( this );
     
     // Start simulation from point of registration confirmation from provider
-    providerDiscovery.registrationConfirmed( true );
+    providerDiscovery.registrationConfirmed( true,
+                                             ECCMonitorEntryPointTest.EMExperimentUUID,
+                                             ECCMonitorEntryPointTest.EMExperimentNamedID,
+                                             ECCMonitorEntryPointTest.EMExperimentName,
+                                             ECCMonitorEntryPointTest.EMExperimentDesc,
+                                             ECCMonitorEntryPointTest.EMStartDate );
   }
 }

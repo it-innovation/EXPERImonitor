@@ -30,6 +30,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.IEMLifecyc
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
 
@@ -37,6 +38,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClien
 
 import java.util.*;
 import org.apache.log4j.Logger;
+
 
 
 
@@ -124,8 +126,10 @@ public class ExperimentMonitor implements IExperimentMonitor,
   { lifecycleListeners.remove(listener); }
   
   @Override
-  public EMPhase startLifecycle() throws Exception
+  public EMPhase startLifecycle( Experiment expInfo ) throws Exception
   {
+    if ( expInfo == null ) throw new Exception( "Experiment info is NULL" );
+    
     if ( monitorStatus != IExperimentMonitor.eStatus.ENTRY_POINT_OPEN )
       throw new Exception( "Not in a state ready to start lifecycle" );
     
@@ -134,6 +138,8 @@ public class ExperimentMonitor implements IExperimentMonitor,
     
     if ( lifecycleManager.isLifecycleStarted() )
       throw new Exception( "Lifecycle has already started" );
+    
+    lifecycleManager.setExperimentInfo( expInfo );
     
     return lifecycleManager.iterateLifecycle();
   }

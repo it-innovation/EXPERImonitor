@@ -36,10 +36,12 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.EMConnecti
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
 
 import java.util.*;
 import org.apache.log4j.Logger;
+
 
 
 
@@ -57,6 +59,7 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   private AMQPBasicChannel emChannel;
   private UUID             emProviderID;
   
+  private Experiment                          currentExperiment;
   private EnumMap<EMPhase, AbstractEMLCPhase> lifecyclePhases;
   
   private EMPhase currentPhase         = EMPhase.eEMUnknownPhase;
@@ -72,10 +75,10 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
     lifecyclePhases = new EnumMap<EMPhase, AbstractEMLCPhase>( EMPhase.class );
   }
   
-  public void initialise( AMQPBasicChannel channel, 
-                          UUID providerID,
+  public void initialise( AMQPBasicChannel     channel, 
+                          UUID                 providerID,
                           IEMLifecycleListener listener )
-  {
+  {    
     emChannel         = channel;
     emProviderID      = providerID;
     lifecycleListener = listener;
@@ -84,6 +87,7 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
     EMGeneratorDiscoveryPhase gdp = new EMGeneratorDiscoveryPhase( emChannel,
                                                                    emProviderID,
                                                                    this );
+    
     lifecyclePhases.put( EMPhase.eEMDiscoverMetricGenerators, gdp );
     
     EMMetricGenSetupPhase sup = new EMMetricGenSetupPhase( emChannel, emProviderID, this );
@@ -97,11 +101,23 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
     
     EMTearDownPhase tdp = new EMTearDownPhase( emChannel, emProviderID, this );
     lifecyclePhases.put( EMPhase.eEMTearDown, tdp );
-    
   }
   
   public boolean isLifecycleStarted()
-  { return (currentPhase.getIndex() > 0); }
+  { return (!currentPhase.equals(EMPhase.eEMUnknownPhase)); }
+  
+  public void setExperimentInfo( Experiment expInfo ) throws Exception
+  { 
+    currentExperiment = expInfo;
+    
+    EMGeneratorDiscoveryPhase dp = (EMGeneratorDiscoveryPhase) lifecyclePhases.get( EMPhase.eEMDiscoverMetricGenerators );
+    
+    try { dp.setExperimentInfo( expInfo ); }
+    catch ( Exception e ) { throw e; }
+  }
+  
+  public Experiment getExperimentInfo()
+  { return currentExperiment; }
   
   public EMPhase getCurrentPhase()
   { return currentPhase; }

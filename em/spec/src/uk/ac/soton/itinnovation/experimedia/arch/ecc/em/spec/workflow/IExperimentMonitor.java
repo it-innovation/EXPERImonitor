@@ -26,8 +26,10 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 
 import java.util.*;
+
 
 
 
@@ -98,13 +100,16 @@ public interface IExperimentMonitor
   void removeLifecycleListener( IEMLifecycleListener listener );
   
   /**
-   * Starts the experiment life-cycle.
+   * Starts the experiment life-cycle - all connected clients are sent a registration
+   * message which includes the experiment information supplied here.
+   * 
+   * @param expInfo - Information describing the experiment.
    * 
    * @return - Returns the first phase of the life-cycle
    * @throws Exception  - throws if the EM has not opened the entry point for clients;
    * there are no clients connected; or the life-cycle has already started.
    */
-  EMPhase startLifecycle() throws Exception;
+  EMPhase startLifecycle( Experiment expInfo ) throws Exception;
   
   /**
    * Use this method to find out which experimental phase the EM is currently running.

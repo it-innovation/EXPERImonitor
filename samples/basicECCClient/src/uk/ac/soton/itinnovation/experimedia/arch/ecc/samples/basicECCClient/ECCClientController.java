@@ -29,6 +29,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 
 import org.apache.log4j.Logger;
 
@@ -36,8 +37,9 @@ import java.util.*;
 
 
 
+
 public class ECCClientController implements EMIAdapterListener,
-                                           ECCClientViewListener
+                                            ECCClientViewListener
 {
     private final Logger clientLogger = Logger.getLogger( ECCClientController.class );
 
@@ -113,10 +115,13 @@ public class ECCClientController implements EMIAdapterListener,
 
     // EMIAdapterListener --------------------------------------------------------
     @Override
-    public void onEMConnectionResult( boolean connected )
+    public void onEMConnectionResult( boolean connected, Experiment expInfo )
     {
         if ( connected )
+        {
           clientView.setStatus( "Connected to EM" );
+          clientView.addLogMessage( "Linked to experiment: " + expInfo.getName() );
+        }
         else
           clientView.setStatus( "Refused connection to EM" );
     }
@@ -136,23 +141,6 @@ public class ECCClientController implements EMIAdapterListener,
         entityAttribute.setDescription( "Very simple measurement of total bytes used" );
         entityAttribute.setEntityUUID( entityBeingObserved.getUUID() );
         entityBeingObserved.addAttribute( entityAttribute );
-        
-        // ---------------------------------------------------------------------
-        Entity e2 = new Entity();
-        e2.setName( "EM Temp Entity" );
-        
-        Attribute a2 = new Attribute();
-        a2.setName( "Another attribute" );
-        a2.setDescription( "Attribute description here" );
-        a2.setEntityUUID( e2.getUUID() );
-        e2.addAttribute( a2 );
-        
-        MetricGenerator mgt = new MetricGenerator();
-        mgt.setName( "MGENTemp" + clientName );
-        mgt.setDescription( "Temp mg" );
-        mgt.addEntity( e2 );
-        metricGenerators.put( mgt.getUUID(), mgt );       
-        // ---------------------------------------------------------------------
 
         // Create a single metric generator that will represent this metric data generation
         MetricGenerator metricGen = new MetricGenerator();

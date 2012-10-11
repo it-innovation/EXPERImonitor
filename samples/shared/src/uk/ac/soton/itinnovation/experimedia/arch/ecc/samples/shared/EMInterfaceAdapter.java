@@ -25,7 +25,6 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared.EMIAdapterListener;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.spec.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.*;
@@ -37,6 +36,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 
 import java.util.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 
 
 
@@ -52,6 +52,7 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
     protected AMQPBasicChannel   amqpChannel;
     protected UUID               expMonitorID;
     protected UUID               clientID;
+    protected Experiment         currentExperiment;
 
     protected EMInterfaceFactory       interfaceFactory;
     protected IAMQPMessageDispatchPump dispatchPump;
@@ -124,6 +125,9 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
         discoveryFace.clientDisconnecting();
     }
 
+    public Experiment getExperimentInfo()
+    { return currentExperiment; }
+    
     public void setMetricGenerators( HashSet<MetricGenerator> generators )
     { clientGenerators = generators; }
 
@@ -216,11 +220,24 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
     }
 
     @Override
-    public void onRegistrationConfirmed( UUID senderID, Boolean confirmed )
+    public void onRegistrationConfirmed( UUID    senderID, 
+                                         Boolean confirmed,
+                                         UUID    expUniqueID,
+                                         String  expNamedID,
+                                         String  expName,
+                                         String  expDescription,
+                                         Date    createTime )
     {
         if ( senderID.equals(expMonitorID) )
         {
-            emiListener.onEMConnectionResult( confirmed );
+            // Create the experiment information for this client
+            currentExperiment = new Experiment( expUniqueID,
+                                                expNamedID,
+                                                expName,
+                                                expDescription,
+                                                createTime );
+          
+            emiListener.onEMConnectionResult( confirmed, currentExperiment );
             discoveryFace.readyToInitialise();
         }
     }

@@ -56,7 +56,6 @@ public class EMController implements IEMLifecycleListener
   private IMonitoringEDM      expDataMgr;
   private IMetricGeneratorDAO expMGAccessor;
   private IReportDAO          expReportAccessor;
-  private IMeasurementSetDAO  expMSAccessor;
   private Experiment          expInstance;
   
   
@@ -280,15 +279,17 @@ public class EMController implements IEMLifecycleListener
     catch ( Exception e ) {}
   }
   
-  private void startMonitoringProcess()
+  private void startMonitoringProcess() throws Exception
   {
-    if ( expMonitor != null )
+    if ( expMonitor == null || expInstance == null )
+      throw new Exception( "Experiment monitor and/or experiment information is not ready" );
+    
       try
-      { 
-        EMPhase phase = expMonitor.startLifecycle();
+      {         
+        EMPhase phase = expMonitor.startLifecycle( expInstance );
         mainView.setMonitoringPhaseValue( phase.toString(), null );
       }
-      catch ( Exception e ) {}
+      catch ( Exception e ) { throw e; }
   }
   
   private void startUpNextPhase()
@@ -393,7 +394,6 @@ public class EMController implements IEMLifecycleListener
     {
       expMGAccessor     = expDataMgr.getMetricGeneratorDAO();
       expReportAccessor = expDataMgr.getReportDAO();
-      expMSAccessor     = expDataMgr.getMeasurementSetDAO();
 
       Date expDate = new Date();
       expInstance  = new Experiment();
@@ -437,7 +437,11 @@ public class EMController implements IEMLifecycleListener
   {
     @Override
     public void onStartPhasesButtonClicked()
-    { startMonitoringProcess(); }
+    { 
+      try { startMonitoringProcess(); }
+      catch ( Exception e )
+      { emCtrlLogger.error( "Could not start the monitoring process: " + e.getMessage() ); }
+    }
     
     @Override
     public void onNextPhaseButtonClicked()

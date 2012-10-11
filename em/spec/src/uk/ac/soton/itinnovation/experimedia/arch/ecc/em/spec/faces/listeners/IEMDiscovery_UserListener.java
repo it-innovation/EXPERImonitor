@@ -27,7 +27,7 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMInterfaceType;
 
-import java.util.UUID;
+import java.util.*;
 
 
 
@@ -54,10 +54,20 @@ public interface IEMDiscovery_UserListener
    * Provider (EM) notifies the user that they have successfully (or not)
    * registered.
    * 
-   * @param senderID  - ID of the EM sending this event
-   * @param confirmed - confirmation (or not) of registration
+   * @param senderID       - ID of the EM sending this event
+   * @param confirmed      - Confirmed registration - provider is aware of user (or not)
+   * @param experimentID   - Unique ID for the experiment being run by the EM
+   * @param expName        - Name of the experiment being run by the EM
+   * @param expDescription - Short description of the experiment being run by the EM
+   * @param createTime     - Creation time of the experiment
    */
-  void onRegistrationConfirmed( UUID senderID, Boolean confirmed );
+  void onRegistrationConfirmed( UUID    senderID, 
+                                Boolean confirmed,
+                                UUID    expUniqueID,
+                                String  expNamedID,
+                                String  expName,
+                                String  expDescription,
+                                Date    createTime );
   
   /**
    * EM requests a list of supported activities by the user.

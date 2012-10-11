@@ -87,10 +87,20 @@ public class EMDiscovery extends EMBaseInterface
   
   // Method ID = 2
   @Override
-  public void registrationConfirmed( Boolean confirmed )
+  public void registrationConfirmed( Boolean confirmed,
+                                     UUID    expUniqueID,
+                                     String  expNamedID,
+                                     String  expName,
+                                     String  expDescription,
+                                     Date    createTime )
   {
     ArrayList<Object> params = new ArrayList<Object>();
     params.add( confirmed );
+    params.add( expUniqueID );
+    params.add( expNamedID );
+    params.add( expName );
+    params.add( expDescription );
+    params.add( createTime );
     
     executeMethod( 2, params );
   }
@@ -199,7 +209,16 @@ public class EMDiscovery extends EMBaseInterface
         if ( userListener != null )
         {
           boolean confirmed = jsonMapper.fromJson( methodData.get(1), Boolean.class );
-          userListener.onRegistrationConfirmed( interfaceProviderID, confirmed );
+          UUID  expUniqueID = jsonMapper.fromJson( methodData.get(2), UUID.class );
+          String expNamedID = jsonMapper.fromJson( methodData.get(3), String.class );
+          String    expName = jsonMapper.fromJson( methodData.get(4), String.class );
+          String    expDesc = jsonMapper.fromJson( methodData.get(5), String.class ); 
+          Date   createTime = jsonMapper.fromJson( methodData.get(6), Date.class );
+
+          userListener.onRegistrationConfirmed( interfaceProviderID, 
+                                                confirmed, expUniqueID, 
+                                                expNamedID, expName, expDesc,
+                                                createTime );
         }
       } break;
         

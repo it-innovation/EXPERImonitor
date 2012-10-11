@@ -68,11 +68,21 @@ public interface IEMDiscovery
     void createInterface( EMInterfaceType type );
 
     /**
-    * Send confirmation of user registration with the EM.
+    * Send confirmation of user registration with the EM (includes experiment details)
     * 
-    * @param confirmed - Confirmed registration - provider is aware of user (or not)
+    * @param confirmed      - Confirmed registration - provider is aware of user (or not)
+    * @param expUniqueID    - Unique ID for the experiment being run by the EM
+    * @param expNamedID     - More meaningful identity of the experiment being run by the EM
+    * @param expName        - Name of the experiment being run by the EM
+    * @param expDescription - Short description of the experiment being run by the EM
+    * @param createTime     - Creation time of the experiment
     */
-    void registrationConfirmed( Boolean confirmed );
+    void registrationConfirmed( Boolean confirmed,
+                                UUID    expUniqueID,
+                                String  expNamedID,
+                                String  expName,
+                                String  expDescription,
+                                Date    createTime );
 
     /**
     * Request a list of supported activity phases from the user that it supports.

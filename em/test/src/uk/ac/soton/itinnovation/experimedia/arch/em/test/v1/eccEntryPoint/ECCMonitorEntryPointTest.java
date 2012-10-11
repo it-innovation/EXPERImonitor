@@ -53,8 +53,13 @@ public class ECCMonitorEntryPointTest extends TestCase
   protected AMQPBasicChannel      amqpProviderChannel;
   protected AMQPBasicChannel      amqpUserChannel;
   
-  public static final UUID EMProviderUUID = UUID.fromString( "00000000-0000-0000-0000-000000000000" );
-  public static final UUID EMUserUUID     = UUID.fromString( "00000000-0000-0000-0000-0000000000FF" );
+  public static final UUID EMProviderUUID   = UUID.fromString( "00000000-0000-0000-0000-000000000000" );
+  public static final UUID EMUserUUID       = UUID.fromString( "00000000-0000-0000-0000-0000000000FF" );
+  public static final UUID EMExperimentUUID = UUID.fromString( "00000000-0000-0000-0000-00000000FF00" );
+  public static final String EMExperimentNamedID = "Experiment 1";
+  public static final String EMExperimentName    = "JUnit test experiment";
+  public static final String EMExperimentDesc    = "This isn't really an experiment";
+  public static final Date   EMStartDate         = new Date();
   
   public static void main( String[] args )
   { junit.textui.TestRunner.run( ECCMonitorEntryPointTest.class ); }

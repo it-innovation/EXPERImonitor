@@ -28,8 +28,10 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 
 import java.util.*;
+
 
 
 
@@ -42,7 +44,7 @@ public interface EMIAdapterListener
      * 
      * @param connected - true if connected.
      */
-    void onEMConnectionResult( boolean connected );
+    void onEMConnectionResult( boolean connected, Experiment expInfo );
 
     /**
      * Request the listener populate a MetricGenerator set with the information
