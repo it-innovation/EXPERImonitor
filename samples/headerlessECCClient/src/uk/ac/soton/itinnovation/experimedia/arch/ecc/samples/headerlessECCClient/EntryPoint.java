@@ -45,11 +45,11 @@ public class EntryPoint
             InputStream certificateStream   = null;
             String      certificatePassword = null;
             
-            boolean useProperties = true;
+            boolean useProperties = false;
             
             if ( useProperties )
             {
-                InputStream is = EntryPoint.class.getResourceAsStream( "/main/resources/clientProperties.properties" );
+                InputStream is = EntryPoint.class.getResourceAsStream( "/main/resources/client.properties" );
                 if ( is == null ) throw new Exception( "Could not find client properties file" );
                 
                 Properties props = new Properties();
@@ -67,6 +67,10 @@ public class EntryPoint
                                     certificatePassword,
                                     UUID.fromString("00000000-0000-0000-0000-000000000000"), 
                                     UUID.randomUUID() );
+            
+            client.initialiseDataManagement();
+            
+            client.beginMonitoring();
         }
         catch ( Exception e )
         { clientLogger.error("Problem starting: could not connect to the ECC: " + e.getMessage()); }

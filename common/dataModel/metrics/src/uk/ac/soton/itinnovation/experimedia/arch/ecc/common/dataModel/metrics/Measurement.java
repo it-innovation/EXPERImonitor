@@ -56,6 +56,19 @@ public class Measurement implements Serializable
     }
     
     /**
+     * Measurement value constructor; creates an instance and automatically time-stamps 
+     * the construction date.
+     * 
+     * @param value - Value of the measurement to be stored
+     */
+    public Measurement(String value)
+    {
+        this.timeStamp = new Date();
+        this.uuid = UUID.randomUUID();
+        this.value = value;
+    }
+    
+    /**
      * Copy constructor; takes a deep copy of all objects.
      * @param m The measurement object a copy is made from.
      */
