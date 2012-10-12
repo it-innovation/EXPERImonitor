@@ -25,7 +25,7 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.headerlessECCClient;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDMLight;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDMAgent;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 
@@ -52,7 +52,7 @@ public class ECCHeaderlessClient
     
     private AMQPBasicChannel    amqpChannel;
     
-    private IMonitoringEDMLight  expDataManager;
+    private IMonitoringEDMAgent  expDataAgent;
     private MeasurementScheduler measurementScheduler;
     
     private Experiment           currentExperiment;
@@ -101,12 +101,12 @@ public class ECCHeaderlessClient
     public void initialiseDataManagement() throws Exception
     {
         // Initialise the 'mini' version of the EDM for local data management
-        expDataManager       = EDMInterfaceFactory.getMonitoringEDMLight();
+        expDataAgent       = EDMInterfaceFactory.getMonitoringEDMAgent();
         measurementScheduler = new MeasurementScheduler();
         measurementTasks     = new HashSet<MeasurementTask>();
         
         try
-        { measurementScheduler.initialise( expDataManager ); }
+        { measurementScheduler.initialise( expDataAgent ); }
         catch ( Exception e )
         {
             clientLogger.error( "Could not initialise measurement scheduler" );
