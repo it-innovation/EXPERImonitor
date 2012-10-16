@@ -221,11 +221,11 @@ function getMetricGenerators() {
         url: "/em/getmetricgenerators/do.json",
         contentType: "application/json; charset=utf-8",
         success: function(metricGenerators){
-            
+
             console.log(metricGenerators);
-            
+
             $(".metricgenlist").empty();
-            
+
             if (metricGenerators.length < 1) {
                 console.debug("No metric generators found, retrying in 2 seconds");
                 setTimeout(function(){getMetricGenerators()}, 2000);
@@ -233,7 +233,7 @@ function getMetricGenerators() {
                 var mgObj;
                 var md = $(".metricgendetails");
                 $.each(metricGenerators, function(index, mg){
-                    
+
                     // Create entities string with names/descriptions
                     var entitiesNameList = "";
                     var entitiesNameListWithDescriptions = "";
@@ -246,28 +246,28 @@ function getMetricGenerators() {
                             entitiesNameListWithDescriptions += entityItem.name + " (" + entityItem.description + ")";
                         }
                     });
-                    
+
                     // Sidebar metric generator element
                     mgObj = $('<p class="metricgenitem">' + mg.name + '<span>' + entitiesNameList + '</span></p>').appendTo(".metricgenlist");
 
                     mgObj.data('mg', mg);
-                    
+
                     mgObj.click(function(){
                         md.empty();
                         $(".metricgenlist .metricgenitem").removeClass('active');
                         $(this).addClass('active');
-                        
+
                         var mgdata = $(this).data().mg;
 //                        console.log(mgdata);
 
                         md.append('<p class="metricGeneratorHeader">' + mgdata.name + ' (' + mgdata.description + ')</p>');
                         md.append('<p class="metricGeneratorDescription">UUID: ' + mgdata.uuid + '</p>');
                         md.append('<p class="metricGeneratorDescription">Entities: ' + entitiesNameListWithDescriptions + '</p>');
-    
+
                         $.each(mgdata.listOfMetricGroups, function(indexMetricGroup, metricGroup){
                             md.append('<p class="metricGroupHeader">Metric Group ' + (indexMetricGroup + 1) + ': ' + metricGroup.name + ' (' + metricGroup.description + ')</p>');
                             md.append('<p class="metricGroupSubheader">UUID: ' + metricGroup.uuid + '</p>');
-                            
+
                             var counter = 0; // for unique div IDs required by jqPlot
                             var measurementSetContainer = $('<div class="twelve columns"></div>').appendTo($('<div class="row"></div>').appendTo(md));
                             $.each(metricGroup.measurementSets, function(indexMeasurementSet, measurementSet){
@@ -275,15 +275,15 @@ function getMetricGenerators() {
                                 ad.append('<p class="header">Measurement Set ' + (indexMeasurementSet + 1) + ': ' + measurementSet.attribute + ' (' + measurementSet.metricUnit + ', ' + measurementSet.metricType + ')<span>collapse</span></p>');
 
                                 ad.append('<p class="parameters">UUID: ' + measurementSet.uuid + '</p>');
-                                
+
                                 // Start monitoring here
                                 pollDataForMeasurementSet(measurementSet.uuid, ad, counter);
- 
-                                // $(".graphDataSwitcher .switchbutton:first").trigger('click');                                
-                                
+
+                                // $(".graphDataSwitcher .switchbutton:first").trigger('click');
+
                                 counter++;
                             });
-                            
+
                         });
 
     //                                        md.append('<a href="#" class="small button radius normal inpanelbutton">Add to Dashboard</a>');
@@ -314,9 +314,9 @@ function getMetricGenerators() {
                                 });
                             }
                         }); */
-                    });                    
+                    });
                 });
-                
+
                 $(".metricgenlist .metricgenitem").first().trigger('click');
             }
         }
@@ -327,15 +327,15 @@ function pollAndReplotGraph(jqplotGraph, measurementSetId) {
 
     console.log('Refreshing data for measurement set: ' + measurementSetId);
     console.log(jqplotGraph);
-    
+
     $.ajax({
         type: 'GET',
         url: "/em/gettestdata/do.json",
         contentType: "application/json; charset=utf-8",
-        success: function(measurementSetData){    
-            
+        success: function(measurementSetData){
+
             var oldData = jqplotGraph.series[0].data;
-            
+
             var newData = new Array();
             var tempArray;
             $.each(measurementSetData, function(dataPointIndex, dataPoint){
@@ -344,20 +344,23 @@ function pollAndReplotGraph(jqplotGraph, measurementSetId) {
                 tempArray[1] = parseInt(dataPoint.value);
                 newData[dataPointIndex] = tempArray;
             });
-            
+
             if (newData.length > oldData.length) {
                 console.log('NEW DATA for measurement set: ' + measurementSetId);
-                
-                jqplotGraph.series[0].data = newData;                
+
+                $('#lastMetricReport_' + measurementSetId).text(longToDate(measurementSetData[measurementSetData.length - 1].time));
+                $('#totalNumReports_' + measurementSetId).text(measurementSetData.length);
+
+                jqplotGraph.series[0].data = newData;
                 jqplotGraph.resetAxesScale();
                 jqplotGraph.replot();
-                
+
             } else {
                 console.log('No new points for measurement set: ' + measurementSetId);
             }
-            
+
             setTimeout(function(){pollAndReplotGraph(jqplotGraph, measurementSetId)}, 2000);
-            
+
         }
     });
 
@@ -365,15 +368,15 @@ function pollAndReplotGraph(jqplotGraph, measurementSetId) {
 
 // ONLY jquery.jqplot.1.0.0a_r701 WORKS with dateaxirenderer and replot!
 function pollDataForMeasurementSet(measurementSetId, ad, counter) {
-    
+
         console.log('Polling data for measurement set: ' + measurementSetId);
-    
+
         $.ajax({
             type: 'GET',
             url: "/em/gettestdata/do.json",
             contentType: "application/json; charset=utf-8",
             success: function(measurementSetData){
-                
+
                 console.log(measurementSetData);
 
                 if (measurementSetData == null) {
@@ -387,9 +390,9 @@ function pollDataForMeasurementSet(measurementSetId, ad, counter) {
                         // alert("No experiments found");
                     } else {
 
-                        ad.append('<p class="parameters">Last metric report: ' + measurementSetData[measurementSetData.length - 1].time + '</p>');
-                        ad.append('<p class="parameters">Total number of reports: ' + measurementSetData.length + '</p>');
-                        
+                        ad.append('<p class="parameters">Last metric report: <span id="lastMetricReport_' + measurementSetId + '">' + longToDate(measurementSetData[measurementSetData.length - 1].time) + '</span></p>');
+                        ad.append('<p class="parameters">Total number of reports: <span id="totalNumReports_' + measurementSetId + '">' + measurementSetData.length + '<span></p>');
+
                         var jqplotContainerID = "representationContainer" + counter;
                         var graphSelectorID = "graphselector" + counter;
                         var tableSelectorID = "tableselector" + counter;
@@ -403,15 +406,15 @@ function pollDataForMeasurementSet(measurementSetId, ad, counter) {
 //                        tableSelectorButton.data('counter', counter);
 //                        tableSelectorButton.data('jqplotContainerID', jqplotContainerID);
 
-                        $('<div id="'+ jqplotContainerID + '" class="row"></div>').appendTo(ad);    
-                        
+                        $('<div id="'+ jqplotContainerID + '" class="row"></div>').appendTo(ad);
+
                         $('#' + jqplotContainerID).empty();
-                        
+
                         var dataDivGraphsAndHistory = $('<div class="eleven columns centered"></div>').appendTo($('#' + jqplotContainerID));
-                        
+
                         dataDivGraphsAndHistory.append('<div id="dataplot' + counter + '" class="extraspacebottom"></div>');
 //                        var plotdata = [['2008-09-30 4:00PM',4], ['2008-10-30 4:00PM',6.5], ['2008-11-30 4:00PM',5.7], ['2008-12-30 4:00PM',9]];
-                        
+
                         var plotdata = new Array();
                         var tempArray;
                         $.each(measurementSetData, function(dataPointIndex, dataPoint){
@@ -422,13 +425,13 @@ function pollDataForMeasurementSet(measurementSetId, ad, counter) {
                         });
 
                         console.log(plotdata);
-                        
+
 //                        var dataTable = $('<table class="metricstable"><tbody></tbody></table>').appendTo($('<div id="datatablecontainer' + counter + '" class="extraspacebottom"></div>').appendTo(dataDivGraphsAndHistory));
 //                        dataTable.append('<tr><th>Timestamp, yyyy-mm-dd HH:MM:SS</th><th>Value, ms</th></tr>');
 //                        $.each(plotdata, function(key, value){
 //                            dataTable.append('<tr><td>' + value[0] + '</td><td>' + value[1] + '</td></tr>');
-//                        });                        
-                        
+//                        });
+
                         var jqplotGraph = $.jqplot ('dataplot' + counter, [plotdata], {
                             axes:{
                                 xaxis:{
@@ -439,8 +442,8 @@ function pollDataForMeasurementSet(measurementSetId, ad, counter) {
 
                                 }
                             }
-                        });                        
-                        
+                        });
+
                         setTimeout(function(){pollAndReplotGraph(jqplotGraph, measurementSetId)}, 2000);
                     }
                 }
@@ -451,12 +454,12 @@ function pollDataForMeasurementSet(measurementSetId, ad, counter) {
                 console.error(thrownError);
                 console.error(xhr.status);
             }
-        });    
-    
+        });
+
 //    $.getJSON('/em/gettestdata/do.json', function(measurements) {
 //            console.log(measurements);
 //        });
-//    
+//
 
 
     /*
@@ -512,8 +515,8 @@ function pollDataForMeasurementSet(measurementSetId, ad, counter) {
             });
 
         }
-    }); 
-    
+    });
+
     */
 }
 
@@ -638,7 +641,7 @@ function doPostReportPhase(actionButton, currentPhase){
     $("#currentPhaseID").text(currentPhase.index);
     $("#currentPhaseDescription").text("Collecting post reports from clients");
 
-    // Show the list of metric generators with live post report 
+    // Show the list of metric generators with live post report
     getMetricGenerators();
 
     prepareTearDownPhase(actionButton);

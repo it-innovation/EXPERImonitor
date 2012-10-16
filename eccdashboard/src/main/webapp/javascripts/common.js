@@ -24,13 +24,13 @@
 
 var counter = 0;
 var theExperiment;
-var DATE_FORMAT = "d/M/yyyy HH:mm";
+var DATE_FORMAT = "dd/MM/yyyy HH:mm:ss";
 
-$(document).ready(function() {
-        $(document).foundationButtons();
-        
-
-});
+//$(document).ready(function() {
+//        $(document).foundationButtons();
+//        
+//
+//});
 
 // Converts date as long to string format
 function longToDate(longTime) {

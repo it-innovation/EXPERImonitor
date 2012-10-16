@@ -53,7 +53,7 @@ public class ExperimentMonitorService {
     private transient ExperimentMonitorHelper emHelper;
     
     public HashMap<Date, String> getTestData() throws Throwable {
-        logger.debug("Returning test data");
+//        logger.debug("Returning test data");
         return emHelper.getExperimentMonitor().getTestMeasurements();
     }    
     
