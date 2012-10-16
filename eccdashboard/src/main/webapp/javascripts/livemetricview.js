@@ -208,14 +208,15 @@ function doDiscoveryPhase(actionButton, currentPhase) {
     displayExperimentInfo();
 
     // Show just a list of metric generators
-    getMetricGenerators();
+    showMetricGenerators();
 
     prepareSetupPhase(actionButton);
 
 }
 
-// Populates metrics generators' list
-function getMetricGenerators() {
+// Just lists metric generators
+function showMetricGenerators() {
+    
     $.ajax({
         type: 'GET',
         url: "/em/getmetricgenerators/do.json",
@@ -228,7 +229,81 @@ function getMetricGenerators() {
 
             if (metricGenerators.length < 1) {
                 console.debug("No metric generators found, retrying in 2 seconds");
-                setTimeout(function(){getMetricGenerators()}, 2000);
+                setTimeout(function(){showMetricGenerators()}, 2000);
+            } else {
+                var mgObj;
+                var md = $(".metricgendetails");
+                $.each(metricGenerators, function(index, mg){
+
+                    // Create entities string with names/descriptions
+                    var entitiesNameList = "";
+                    var entitiesNameListWithDescriptions = "";
+                    $.each(mg.listOfEntities, function(entityIndex, entityItem){
+                        if ( entityIndex < mg.listOfEntities.length - 1 ) {
+                            entitiesNameList += entityItem.name + ", ";
+                            entitiesNameListWithDescriptions += entityItem.name + " (" + entityItem.description + "), ";
+                        } else {
+                            entitiesNameList += entityItem.name;
+                            entitiesNameListWithDescriptions += entityItem.name + " (" + entityItem.description + ")";
+                        }
+                    });
+
+                    // Sidebar metric generator element
+                    mgObj = $('<p class="metricgenitem">' + mg.name + '<span>' + entitiesNameList + '</span></p>').appendTo(".metricgenlist");
+
+                    mgObj.data('mg', mg);
+
+                    mgObj.click(function(){
+                        md.empty();
+                        $(".metricgenlist .metricgenitem").removeClass('active');
+                        $(this).addClass('active');
+
+                        var mgdata = $(this).data().mg;
+//                        console.log(mgdata);
+
+                        md.append('<p class="metricGeneratorHeader">' + mgdata.name + ' (' + mgdata.description + ')</p>');
+                        md.append('<p class="metricGeneratorDescription">UUID: ' + mgdata.uuid + '</p>');
+                        md.append('<p class="metricGeneratorDescription">Entities: ' + entitiesNameListWithDescriptions + '</p>');
+
+                        $.each(mgdata.listOfMetricGroups, function(indexMetricGroup, metricGroup){
+                            md.append('<p class="metricGroupHeader">Metric Group ' + (indexMetricGroup + 1) + ': ' + metricGroup.name + ' (' + metricGroup.description + ')</p>');
+                            md.append('<p class="metricGroupSubheader">UUID: ' + metricGroup.uuid + '</p>');
+
+                            var counter = 0; // for unique div IDs required by jqPlot
+                            var measurementSetContainer = $('<div class="twelve columns"></div>').appendTo($('<div class="row"></div>').appendTo(md));
+                            $.each(metricGroup.measurementSets, function(indexMeasurementSet, measurementSet){
+                                var ad = $('<div class="attributediv"></div>').appendTo(measurementSetContainer);
+                                ad.append('<p class="header">Measurement Set ' + (indexMeasurementSet + 1) + ': ' + measurementSet.attribute + ' (' + measurementSet.metricUnit + ', ' + measurementSet.metricType + ')<span>collapse</span></p>');
+                                ad.append('<p class="parameters">UUID: ' + measurementSet.uuid + '</p>');
+
+                                counter++;
+                            });
+                        });
+                    });
+                });
+
+                $(".metricgenlist .metricgenitem").first().trigger('click');
+            }
+        }
+    });    
+    
+}
+
+// Populates metrics generators' list and polls the first one (for the live phase only)
+function getMetricGeneratorsPollFirstOne() {
+    $.ajax({
+        type: 'GET',
+        url: "/em/getmetricgenerators/do.json",
+        contentType: "application/json; charset=utf-8",
+        success: function(metricGenerators){
+
+            console.log(metricGenerators);
+
+            $(".metricgenlist").empty();
+
+            if (metricGenerators.length < 1) {
+                console.debug("No metric generators found, retrying in 2 seconds");
+                setTimeout(function(){getMetricGeneratorsPollFirstOne()}, 2000);
             } else {
                 var mgObj;
                 var md = $(".metricgendetails");
@@ -385,7 +460,7 @@ function pollDataForMeasurementSet(measurementSetId, ad, counter) {
                     return;
                 } else {
                     if (measurementSetData.length < 1) {
-                        console.debug("No data found, retrying in 2 seconds");
+                        console.debug("No data found, retrying in 2 seconds");                        
                         setTimeout(function(){pollDataForMeasurementSet(measurementSetId, ad, counter)}, 2000);
                         // alert("No experiments found");
                     } else {
@@ -557,7 +632,7 @@ function doSetupPhase(actionButton, currentPhase) {
     $("#currentPhaseDescription").text("Setting-up clients");
 
     // Show just a list of metric generators
-    getMetricGenerators();
+    showMetricGenerators();
 
     prepareLiveMonitoringPhase(actionButton);
 }
@@ -599,7 +674,7 @@ function doLiveMonitoringPhase(actionButton, currentPhase){
     $("#currentPhaseDescription").text("Live monitoring of clients");
 
     // Show the list of metric generators with live monitoring
-    getMetricGenerators();
+    getMetricGeneratorsPollFirstOne();
 
     preparePostReportPhase(actionButton);
 }
@@ -642,7 +717,7 @@ function doPostReportPhase(actionButton, currentPhase){
     $("#currentPhaseDescription").text("Collecting post reports from clients");
 
     // Show the list of metric generators with live post report
-    getMetricGenerators();
+    showMetricGenerators();
 
     prepareTearDownPhase(actionButton);
 }
