@@ -72,7 +72,7 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
     public HashMap<Date, String> getTestMeasurements() {
         return testMeasurements;
     }
-    
+
     // IExperimentMonitor --------------------------------------------------------
     @Override
     public eStatus getStatus() {
@@ -145,9 +145,11 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
     }
 
     @Override
-    public EMPhase startLifecycle() throws Exception {
+    public EMPhase startLifecycle(Experiment expInfo) throws Exception {
 
-        logger.debug("Starting experiment lifecycle");
+        if (expInfo == null) {
+            throw new Exception("Experiment info is NULL");
+        }
 
         if (monitorStatus != IExperimentMonitor.eStatus.ENTRY_POINT_OPEN) {
             throw new Exception("Not in a state ready to start lifecycle");
@@ -160,8 +162,13 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
         if (lifecycleManager.isLifecycleStarted()) {
             throw new Exception("Lifecycle has already started");
         }
+        
+//        createExperiment();
+        
+        // Save a list of connected clients and properties to the database?
+        // Then just use that list instead of talking to EM?
 
-        createExperiment();
+        lifecycleManager.setExperimentInfo(expInfo);
 
         return lifecycleManager.iterateLifecycle();
     }
@@ -347,7 +354,7 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
                             int measurementsCounter = 1;
                             String measurementUUID, measurementValue;
                             Date measurementTimestamp;
-                            while(it.hasNext()) {
+                            while (it.hasNext()) {
 
                                 measurement = (Measurement) it.next();
                                 measurementUUID = measurement.getUUID().toString();

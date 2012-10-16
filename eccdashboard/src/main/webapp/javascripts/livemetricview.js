@@ -207,7 +207,7 @@ function doDiscoveryPhase(actionButton, currentPhase) {
     // Show experiment details
     displayExperimentInfo();
 
-    // Show metric generators
+    // Show just a list of metric generators
     getMetricGenerators();
 
     prepareSetupPhase(actionButton);
@@ -231,6 +231,7 @@ function getMetricGenerators() {
                 setTimeout(function(){getMetricGenerators()}, 2000);
             } else {
                 var mgObj;
+                var md = $(".metricgendetails");
                 $.each(metricGenerators, function(index, mg){
                     
                     // Create entities string with names/descriptions
@@ -252,14 +253,12 @@ function getMetricGenerators() {
                     mgObj.data('mg', mg);
                     
                     mgObj.click(function(){
-                        var mgdata = $(this).data().mg;
-//                        console.log(mgdata);
-
+                        md.empty();
                         $(".metricgenlist .metricgenitem").removeClass('active');
                         $(this).addClass('active');
-
-                        var md = $(".metricgendetails");
-                        md.empty();
+                        
+                        var mgdata = $(this).data().mg;
+//                        console.log(mgdata);
 
                         md.append('<p class="metricGeneratorHeader">' + mgdata.name + ' (' + mgdata.description + ')</p>');
                         md.append('<p class="metricGeneratorDescription">UUID: ' + mgdata.uuid + '</p>');
@@ -276,65 +275,11 @@ function getMetricGenerators() {
                                 ad.append('<p class="header">Measurement Set ' + (indexMeasurementSet + 1) + ': ' + measurementSet.attribute + ' (' + measurementSet.metricUnit + ', ' + measurementSet.metricType + ')<span>collapse</span></p>');
 
                                 ad.append('<p class="parameters">UUID: ' + measurementSet.uuid + '</p>');
-                                ad.append('<p class="parameters">Last metric report: ' + randomDate(new Date(2012, 0, 1), new Date()) + '</p>');
-                                ad.append('<p class="parameters">Total number of reports: ' + (Math.floor(Math.random()*11)) + '</p>');
                                 
-                                var jqplotContainerID = "representationContainer" + counter;
-                                var graphSelectorID = "graphselector" + counter;
-                                var tableSelectorID = "tableselector" + counter;
-
-                                var graphDataSwitcher = $('<div class="graphDataSwitcher"></div>').appendTo(ad);
-                                var graphSelectorButton = $('<div id="' + graphSelectorID + '" class="switchbutton"><p>Graph</p></div>').appendTo(graphDataSwitcher);
-                                var tableSelectorButton = $('<div id="' + tableSelectorID + '" class="switchbutton"><p>History data</p></div>').appendTo(graphDataSwitcher);
-
-                                graphSelectorButton.data('counter', counter);
-                                graphSelectorButton.data('jqplotContainerID', jqplotContainerID);
-                                tableSelectorButton.data('counter', counter);
-                                tableSelectorButton.data('jqplotContainerID', jqplotContainerID);
-
-                                $('<div id="'+ jqplotContainerID + '" class="row"></div>').appendTo(ad);
-
-                                $(".graphDataSwitcher .switchbutton").click(function(){
-                                    $(this).parent().find('.switchbutton').removeClass('active');
-                                    $(this).addClass('active');
-                                    
-                                    $.getJSON('/em/gettestdata/do.json', function(measurements) {
-                                        console.log(measurements);
-                                    });
-
-                                    var counter = $(this).data().counter;
-                                    var jqplotContainerID = $(this).data().jqplotContainerID;
-
-                                    $('#' + jqplotContainerID).empty();
-                                    var dataDivGraphsAndHistory = $('<div class="eleven columns centered"></div>').appendTo($('#' + jqplotContainerID));
-                                    var plotdata = [['2008-09-30 4:00PM',4], ['2008-10-30 4:00PM',6.5], ['2008-11-30 4:00PM',5.7], ['2008-12-30 4:00PM',9]];
-
-                                    if ($(this).attr('id').indexOf('g') === 0) {
-                                        dataDivGraphsAndHistory.append('<div id="dataplot' + counter + '" class="extraspacebottom"></div>');
-
-                                        $.jqplot ('dataplot' + counter, [plotdata], {
-                                            title:'Latency (ms)',
-                                            axes:{
-                                                xaxis:{
-                                                    label:'Timestamp (mmm dd, yy)',
-                                                    renderer:$.jqplot.DateAxisRenderer,
-                                                    tickOptions:{formatString:'%b %#d, %y'}
-                                                }
-
-                                            }
-                                        });
-                                    } else {
-                                        var dataTable = $('<table class="metricstable"><tbody></tbody></table>').appendTo($('<div id="datatablecontainer' + counter + '" class="extraspacebottom"></div>').appendTo(dataDivGraphsAndHistory));
-                                        dataTable.append('<tr><th>Timestamp, yyyy-mm-dd HH:MM</th><th>Value, ms</th></tr>');
-                                        $.each(plotdata, function(key, value){
-                                            dataTable.append('<tr><td>' + value[0] + '</td><td>' + value[1] + '</td></tr>');
-                                        });
-
-                                    }
-                                });
-
-
-                                $(".graphDataSwitcher .switchbutton:first").trigger('click');                                
+                                // Start monitoring here
+                                pollDataForMeasurementSet(measurementSet.uuid, ad, counter);
+ 
+                                // $(".graphDataSwitcher .switchbutton:first").trigger('click');                                
                                 
                                 counter++;
                             });
@@ -378,6 +323,200 @@ function getMetricGenerators() {
     });
 }
 
+function pollAndReplotGraph(jqplotGraph, measurementSetId) {
+
+    console.log('Refreshing data for measurement set: ' + measurementSetId);
+    console.log(jqplotGraph);
+    
+    $.ajax({
+        type: 'GET',
+        url: "/em/gettestdata/do.json",
+        contentType: "application/json; charset=utf-8",
+        success: function(measurementSetData){    
+            
+            var oldData = jqplotGraph.series[0].data;
+            
+            var newData = new Array();
+            var tempArray;
+            $.each(measurementSetData, function(dataPointIndex, dataPoint){
+                tempArray = new Array();
+                tempArray[0] = dataPoint.time; // Has to be in msec for some reason!
+                tempArray[1] = parseInt(dataPoint.value);
+                newData[dataPointIndex] = tempArray;
+            });
+            
+            if (newData.length > oldData.length) {
+                console.log('NEW DATA for measurement set: ' + measurementSetId);
+                
+                jqplotGraph.series[0].data = newData;                
+                jqplotGraph.resetAxesScale();
+                jqplotGraph.replot();
+                
+            } else {
+                console.log('No new points for measurement set: ' + measurementSetId);
+            }
+            
+            setTimeout(function(){pollAndReplotGraph(jqplotGraph, measurementSetId)}, 2000);
+            
+        }
+    });
+
+}
+
+// ONLY jquery.jqplot.1.0.0a_r701 WORKS with dateaxirenderer and replot!
+function pollDataForMeasurementSet(measurementSetId, ad, counter) {
+    
+        console.log('Polling data for measurement set: ' + measurementSetId);
+    
+        $.ajax({
+            type: 'GET',
+            url: "/em/gettestdata/do.json",
+            contentType: "application/json; charset=utf-8",
+            success: function(measurementSetData){
+                
+                console.log(measurementSetData);
+
+                if (measurementSetData == null) {
+                    alert("Server error retrieving measurement set data");
+                    console.error("Server error retrieving measurement set data");
+                    return;
+                } else {
+                    if (measurementSetData.length < 1) {
+                        console.debug("No data found, retrying in 2 seconds");
+                        setTimeout(function(){pollDataForMeasurementSet(measurementSetId, ad, counter)}, 2000);
+                        // alert("No experiments found");
+                    } else {
+
+                        ad.append('<p class="parameters">Last metric report: ' + measurementSetData[measurementSetData.length - 1].time + '</p>');
+                        ad.append('<p class="parameters">Total number of reports: ' + measurementSetData.length + '</p>');
+                        
+                        var jqplotContainerID = "representationContainer" + counter;
+                        var graphSelectorID = "graphselector" + counter;
+                        var tableSelectorID = "tableselector" + counter;
+
+//                        var graphDataSwitcher = $('<div class="graphDataSwitcher"></div>').appendTo(ad);
+//                        var graphSelectorButton = $('<div id="' + graphSelectorID + '" class="switchbutton"><p>Graph</p></div>').appendTo(graphDataSwitcher);
+//                        var tableSelectorButton = $('<div id="' + tableSelectorID + '" class="switchbutton"><p>History data</p></div>').appendTo(graphDataSwitcher);
+//
+//                        graphSelectorButton.data('counter', counter);
+//                        graphSelectorButton.data('jqplotContainerID', jqplotContainerID);
+//                        tableSelectorButton.data('counter', counter);
+//                        tableSelectorButton.data('jqplotContainerID', jqplotContainerID);
+
+                        $('<div id="'+ jqplotContainerID + '" class="row"></div>').appendTo(ad);    
+                        
+                        $('#' + jqplotContainerID).empty();
+                        
+                        var dataDivGraphsAndHistory = $('<div class="eleven columns centered"></div>').appendTo($('#' + jqplotContainerID));
+                        
+                        dataDivGraphsAndHistory.append('<div id="dataplot' + counter + '" class="extraspacebottom"></div>');
+//                        var plotdata = [['2008-09-30 4:00PM',4], ['2008-10-30 4:00PM',6.5], ['2008-11-30 4:00PM',5.7], ['2008-12-30 4:00PM',9]];
+                        
+                        var plotdata = new Array();
+                        var tempArray;
+                        $.each(measurementSetData, function(dataPointIndex, dataPoint){
+                            tempArray = new Array();
+                            tempArray[0] = dataPoint.time;
+                            tempArray[1] = parseInt(dataPoint.value);
+                            plotdata[dataPointIndex] = tempArray;
+                        });
+
+                        console.log(plotdata);
+                        
+//                        var dataTable = $('<table class="metricstable"><tbody></tbody></table>').appendTo($('<div id="datatablecontainer' + counter + '" class="extraspacebottom"></div>').appendTo(dataDivGraphsAndHistory));
+//                        dataTable.append('<tr><th>Timestamp, yyyy-mm-dd HH:MM:SS</th><th>Value, ms</th></tr>');
+//                        $.each(plotdata, function(key, value){
+//                            dataTable.append('<tr><td>' + value[0] + '</td><td>' + value[1] + '</td></tr>');
+//                        });                        
+                        
+                        var jqplotGraph = $.jqplot ('dataplot' + counter, [plotdata], {
+                            axes:{
+                                xaxis:{
+//                                    min: plotdata[0][0],
+//                                    max: plotdata[plotdata.length - 1][0],
+                                    renderer:$.jqplot.DateAxisRenderer,
+                                    tickOptions:{formatString:'%b %#d<br/> %T'}
+
+                                }
+                            }
+                        });                        
+                        
+                        setTimeout(function(){pollAndReplotGraph(jqplotGraph, measurementSetId)}, 2000);
+                    }
+                }
+            },
+            error: function(xhr, ajaxOptions, thrownError){
+                alert('Failed to get retrieving measurement set data');
+                console.error('Failed to get retrieving measurement set data');
+                console.error(thrownError);
+                console.error(xhr.status);
+            }
+        });    
+    
+//    $.getJSON('/em/gettestdata/do.json', function(measurements) {
+//            console.log(measurements);
+//        });
+//    
+
+
+    /*
+    var jqplotContainerID = "representationContainer" + counter;
+    var graphSelectorID = "graphselector" + counter;
+    var tableSelectorID = "tableselector" + counter;
+
+    var graphDataSwitcher = $('<div class="graphDataSwitcher"></div>').appendTo(ad);
+    var graphSelectorButton = $('<div id="' + graphSelectorID + '" class="switchbutton"><p>Graph</p></div>').appendTo(graphDataSwitcher);
+    var tableSelectorButton = $('<div id="' + tableSelectorID + '" class="switchbutton"><p>History data</p></div>').appendTo(graphDataSwitcher);
+
+    graphSelectorButton.data('counter', counter);
+    graphSelectorButton.data('jqplotContainerID', jqplotContainerID);
+    tableSelectorButton.data('counter', counter);
+    tableSelectorButton.data('jqplotContainerID', jqplotContainerID);
+
+    $('<div id="'+ jqplotContainerID + '" class="row"></div>').appendTo(ad);
+
+    $(".graphDataSwitcher .switchbutton").click(function(){
+        $(this).parent().find('.switchbutton').removeClass('active');
+        $(this).addClass('active');
+
+        $.getJSON('/em/gettestdata/do.json', function(measurements) {
+            console.log(measurements);
+        });
+
+        var counter = $(this).data().counter;
+        var jqplotContainerID = $(this).data().jqplotContainerID;
+
+        $('#' + jqplotContainerID).empty();
+        var dataDivGraphsAndHistory = $('<div class="eleven columns centered"></div>').appendTo($('#' + jqplotContainerID));
+        var plotdata = [['2008-09-30 4:00PM',4], ['2008-10-30 4:00PM',6.5], ['2008-11-30 4:00PM',5.7], ['2008-12-30 4:00PM',9]];
+
+        if ($(this).attr('id').indexOf('g') === 0) {
+            dataDivGraphsAndHistory.append('<div id="dataplot' + counter + '" class="extraspacebottom"></div>');
+
+            $.jqplot ('dataplot' + counter, [plotdata], {
+                title:'Latency (ms)',
+                axes:{
+                    xaxis:{
+                        label:'Timestamp (mmm dd, yy)',
+                        renderer:$.jqplot.DateAxisRenderer,
+                        tickOptions:{formatString:'%b %#d, %y'}
+                    }
+
+                }
+            });
+        } else {
+            var dataTable = $('<table class="metricstable"><tbody></tbody></table>').appendTo($('<div id="datatablecontainer' + counter + '" class="extraspacebottom"></div>').appendTo(dataDivGraphsAndHistory));
+            dataTable.append('<tr><th>Timestamp, yyyy-mm-dd HH:MM</th><th>Value, ms</th></tr>');
+            $.each(plotdata, function(key, value){
+                dataTable.append('<tr><td>' + value[0] + '</td><td>' + value[1] + '</td></tr>');
+            });
+
+        }
+    }); 
+    
+    */
+}
+
 function prepareSetupPhase(actionButton) {
     actionButton.text('Start Set-up Phase');
     actionButton.unbind('click');
@@ -414,7 +553,7 @@ function doSetupPhase(actionButton, currentPhase) {
     $("#currentPhaseID").text(currentPhase.index);
     $("#currentPhaseDescription").text("Setting-up clients");
 
-    // Show metric generators
+    // Show just a list of metric generators
     getMetricGenerators();
 
     prepareLiveMonitoringPhase(actionButton);
@@ -456,7 +595,7 @@ function doLiveMonitoringPhase(actionButton, currentPhase){
     $("#currentPhaseID").text(currentPhase.index);
     $("#currentPhaseDescription").text("Live monitoring of clients");
 
-    // Show metric generators
+    // Show the list of metric generators with live monitoring
     getMetricGenerators();
 
     preparePostReportPhase(actionButton);
@@ -499,7 +638,7 @@ function doPostReportPhase(actionButton, currentPhase){
     $("#currentPhaseID").text(currentPhase.index);
     $("#currentPhaseDescription").text("Collecting post reports from clients");
 
-    // Show metric generators
+    // Show the list of metric generators with live post report 
     getMetricGenerators();
 
     prepareTearDownPhase(actionButton);
