@@ -23,6 +23,7 @@
 /////////////////////////////////////////////////////////////////////////
 package eu.experimedia.itinnovation.ecc.web.adapters;
 
+import eu.experimedia.itinnovation.ecc.web.data.DataPoint;
 import java.util.*;
 import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasicChannel;
@@ -70,12 +71,12 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
         expDataMgr = new MonitoringEDM();
     }
 
-    public HashMap<Date, String> getMeasurementsForMeasurementSet(String measurementSetUuid) {
+    public LinkedHashMap<String, DataPoint> getMeasurementsForMeasurementSet(String measurementSetUuid) {
         if (reportedMeasurementSets.containsKey(measurementSetUuid)) {
             DashboardMeasurementSet theMeasurementSet = reportedMeasurementSets.get(measurementSetUuid);
             return theMeasurementSet.getMeasurements();
         } else {
-            return new HashMap<Date, String>();
+            return new LinkedHashMap<String, DataPoint>();
         }
     }
 
@@ -354,12 +355,15 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
                             "], report [" + report.getUUID().toString() + "] with " + report.getNumberOfMeasurements() +
                             " measurement(s) for measurement set [" + measurementSet.getUUID().toString() + "]");
                     
+                    String measurementSetUuid = measurementSet.getUUID().toString();
                     DashboardMeasurementSet theDashboardMeasurementSet;
-                    if (reportedMeasurementSets.containsKey(measurementSet.getUUID().toString())) {
-                        theDashboardMeasurementSet = reportedMeasurementSets.get(measurementSet.getUUID().toString());
+                    if (reportedMeasurementSets.containsKey(measurementSetUuid)) {
+                        logger.debug("Already have measurementSet: [" + measurementSetUuid + "] ");
+                        theDashboardMeasurementSet = reportedMeasurementSets.get(measurementSetUuid);
                     } else {
-                        theDashboardMeasurementSet = new DashboardMeasurementSet(measurementSet.getUUID().toString());  
-                        reportedMeasurementSets.put(measurementSet.getUUID().toString(), theDashboardMeasurementSet);
+                        logger.debug("Tracking NEW measurementSet: [" + measurementSetUuid + "] ");
+                        theDashboardMeasurementSet = new DashboardMeasurementSet(measurementSetUuid);  
+                        reportedMeasurementSets.put(measurementSetUuid, theDashboardMeasurementSet);
                     }
                     
                     Set<Measurement> measurements = measurementSet.getMeasurements();
@@ -379,7 +383,7 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
                                 
                                 logger.debug("Measurement " + measurementsCounter + ": [" + measurementUUID + "] " + measurementTimestamp.toString() + " - " + measurementValue);
                                 
-                                theDashboardMeasurementSet.addMeasurement(measurementTimestamp, measurementValue);
+                                theDashboardMeasurementSet.addMeasurement(measurementUUID, new DataPoint(measurementTimestamp.getTime(), measurementValue, measurementUUID));
                                 
                                 measurementsCounter++;
 

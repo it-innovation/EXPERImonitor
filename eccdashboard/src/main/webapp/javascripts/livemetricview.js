@@ -334,6 +334,9 @@ function getMetricGeneratorsPollFirstOne() {
                         md.empty();
                         $(".metricgenlist .metricgenitem").removeClass('active');
                         $(this).addClass('active');
+                        
+                        // Stop all polling
+                        measurementSetsToMonitorLive = [];
 
                         var mgdata = $(this).data().mg;
 //                        console.log(mgdata);
@@ -459,7 +462,7 @@ function isMeasurementSetMonitored(measurementSetUuid) {
     return ($.inArray(measurementSetUuid, measurementSetsToMonitorLive) > -1);
 }
 
-function pollAndReplotGraph(jqplotGraph, measurementSetUuid) {
+function pollAndReplotGraph(jqplotGraph, measurementSetUuid, lastMeasurementUUID) {
 
     if (isMeasurementSetMonitored(measurementSetUuid)) {
 
@@ -475,17 +478,22 @@ function pollAndReplotGraph(jqplotGraph, measurementSetUuid) {
                 
                 if (isMeasurementSetMonitored(measurementSetUuid)) {
                     var oldData = jqplotGraph.series[0].data;
+                    var newMeasurementUUID = measurementSetData[measurementSetData.length - 1].measurementUUID;
 
                     var newData = new Array();
                     var tempArray;
                     $.each(measurementSetData, function(dataPointIndex, dataPoint){
                         tempArray = new Array();
-                        tempArray[0] = dataPoint.time; // Has to be in msec for some reason!
+                        tempArray[0] = dataPoint.time;
                         tempArray[1] = parseInt(dataPoint.value);
                         newData[dataPointIndex] = tempArray;
                     });
 
-                    if (newData.length > oldData.length) {
+                    console.log('New data length: ' + newData.length);
+                    console.log('Old data length: ' + oldData.length);
+                    console.log('LastMeasurementUUID: ' + lastMeasurementUUID);
+                    console.log('NewMeasurementUUID: ' + newMeasurementUUID);
+                    if ( (newData.length > oldData.length) || ( (newData.length == oldData.length) && (lastMeasurementUUID !== newMeasurementUUID) ) )  {
                         console.log('NEW DATA for measurement set: ' + measurementSetUuid);
 
                         $('#lastMetricReport_' + measurementSetUuid).text(longToDate(measurementSetData[measurementSetData.length - 1].time));
@@ -499,7 +507,7 @@ function pollAndReplotGraph(jqplotGraph, measurementSetUuid) {
                         console.log('No new points for measurement set: ' + measurementSetUuid);
                     }
 
-                    setTimeout(function(){pollAndReplotGraph(jqplotGraph, measurementSetUuid)}, 2000);
+                    setTimeout(function(){pollAndReplotGraph(jqplotGraph, measurementSetUuid, newMeasurementUUID)}, 2000);
                 } else {
                     console.log('Received measurementSetData but ignored it as refreshing graph data is OFF for measurement set: ' + measurementSetUuid);
                 }
@@ -582,7 +590,7 @@ function pollDataForMeasurementSet(measurementSetUuid) {
                                 plotdata[dataPointIndex] = tempArray;
                             });
 
-                            console.log(plotdata);
+//                            console.log(plotdata);
 
     //                        var dataTable = $('<table class="metricstable"><tbody></tbody></table>').appendTo($('<div id="datatablecontainer' + counter + '" class="extraspacebottom"></div>').appendTo(dataDivGraphsAndHistory));
     //                        dataTable.append('<tr><th>Timestamp, yyyy-mm-dd HH:MM:SS</th><th>Value, ms</th></tr>');
@@ -602,7 +610,7 @@ function pollDataForMeasurementSet(measurementSetUuid) {
                                 }
                             });
 
-                            setTimeout(function(){pollAndReplotGraph(jqplotGraph, measurementSetUuid)}, 2000);
+                            setTimeout(function(){pollAndReplotGraph(jqplotGraph, measurementSetUuid, -1)}, 2000);
                         }
                     }
                 } else {

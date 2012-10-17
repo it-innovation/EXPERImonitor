@@ -317,20 +317,17 @@ public class ExperimentMonitorController {
             JSONObject inputDataAsJSON = (JSONObject) JSONSerializer.toJSON(inputData);
             String measurementSetUuid = inputDataAsJSON.getString("measurementSetUuid");
             
-            // The data has to come out sorted by time, hence the TreeMap
-            Map<Date, String> data = new TreeMap<Date, String>(emService.getMeasurementsForMeasurementSet(measurementSetUuid));
+            LinkedHashMap<String, DataPoint> data = emService.getMeasurementsForMeasurementSet(measurementSetUuid);
             logger.debug("Measurement set [" + measurementSetUuid + "] has " + data.size() + " data point(s)");
             
             DataPoint[] result = new DataPoint[data.keySet().size()];
             
             Iterator it = data.keySet().iterator();
-            Date time; long timeAsLong; String value;
+            String measurementUUID;
             int counter = 0;
             while(it.hasNext()) {
-                time = (Date) it.next();                
-                value = data.get(time);
-                timeAsLong = time.getTime();
-                result[counter] = new DataPoint(timeAsLong, value);
+                measurementUUID = (String) it.next();                
+                result[counter] = data.get(measurementUUID);
                 counter++;
             }
 

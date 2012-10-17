@@ -24,10 +24,11 @@
 
 package eu.experimedia.itinnovation.ecc.web.services;
 
+import eu.experimedia.itinnovation.ecc.web.data.DataPoint;
 import eu.experimedia.itinnovation.ecc.web.helpers.ExperimentMonitorHelper;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Set;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +53,7 @@ public class ExperimentMonitorService {
     @Qualifier("experimentMonitorHelper")
     private transient ExperimentMonitorHelper emHelper;
     
-    public HashMap<Date, String> getMeasurementsForMeasurementSet(String measurementSetUuid) throws Throwable {
+    public LinkedHashMap<String, DataPoint> getMeasurementsForMeasurementSet(String measurementSetUuid) throws Throwable {
 //        logger.debug("Returning test data");
         return emHelper.getExperimentMonitor().getMeasurementsForMeasurementSet(measurementSetUuid);
     }    
