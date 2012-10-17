@@ -55,33 +55,7 @@ public class ExperimentMonitorController {
 //    protected SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     
-    @RequestMapping(method = RequestMethod.GET, value = "/gettestdata/do.json")
-    public @ResponseBody DataPoint[] getTestData() throws Throwable {
-        
-        logger.debug("Returning test data");
-        try {
-            // The data has to come out sorted by time
-            Map<Date, String> data = new TreeMap<Date, String>(emService.getTestData());
-            DataPoint[] result = new DataPoint[data.keySet().size()];
-            
-            Iterator it = data.keySet().iterator();
-            Date time; long timeAsLong; String value;
-            int counter = 0;
-            while(it.hasNext()) {
-                time = (Date) it.next();                
-                value = data.get(time);
-                timeAsLong = time.getTime();
-                result[counter] = new DataPoint(timeAsLong, value);
-                counter++;
-            }
 
-            return result;
-        } catch (Throwable ex) {
-            logger.error("Failed to return test data");
-            ex.printStackTrace();
-            return null;
-        }        
-    }
     
     @RequestMapping(method = RequestMethod.GET, value = "/getclients/do.json")
     public @ResponseBody EMClientAsJson[] getConnectedClients() throws Throwable {
@@ -332,6 +306,41 @@ public class ExperimentMonitorController {
         }
     }
 
+    
+    @RequestMapping(method = RequestMethod.POST, value = "/getmeasurementsformeasurementset/do.json")
+    public @ResponseBody DataPoint[] getMeasurementsForMeasurementSet(@RequestBody final String inputData) throws Throwable {
+        
+        logger.debug("Returning data for a measurement set. Input data: " + inputData);
+        
+        try {
+            
+            JSONObject inputDataAsJSON = (JSONObject) JSONSerializer.toJSON(inputData);
+            String measurementSetUuid = inputDataAsJSON.getString("measurementSetUuid");
+            
+            // The data has to come out sorted by time, hence the TreeMap
+            Map<Date, String> data = new TreeMap<Date, String>(emService.getMeasurementsForMeasurementSet(measurementSetUuid));
+            logger.debug("Measurement set [" + measurementSetUuid + "] has " + data.size() + " data point(s)");
+            
+            DataPoint[] result = new DataPoint[data.keySet().size()];
+            
+            Iterator it = data.keySet().iterator();
+            Date time; long timeAsLong; String value;
+            int counter = 0;
+            while(it.hasNext()) {
+                time = (Date) it.next();                
+                value = data.get(time);
+                timeAsLong = time.getTime();
+                result[counter] = new DataPoint(timeAsLong, value);
+                counter++;
+            }
+
+            return result;
+        } catch (Throwable ex) {
+            logger.error("Failed to return data for a measurement set.");
+            ex.printStackTrace();
+            return null;
+        }        
+    }    
 
     @RequestMapping(method = RequestMethod.POST, value = "/getmeasurementsetsforclient/do.json")
     public @ResponseBody MeasurementSetAsJson[] getMeasurementSetsForClient(@RequestBody final String inputData) throws Throwable {

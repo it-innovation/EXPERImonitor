@@ -52,9 +52,9 @@ public class ExperimentMonitorService {
     @Qualifier("experimentMonitorHelper")
     private transient ExperimentMonitorHelper emHelper;
     
-    public HashMap<Date, String> getTestData() throws Throwable {
+    public HashMap<Date, String> getMeasurementsForMeasurementSet(String measurementSetUuid) throws Throwable {
 //        logger.debug("Returning test data");
-        return emHelper.getExperimentMonitor().getTestMeasurements();
+        return emHelper.getExperimentMonitor().getMeasurementsForMeasurementSet(measurementSetUuid);
     }    
     
     public EMClient[] getAllConnectedClients() throws Throwable {

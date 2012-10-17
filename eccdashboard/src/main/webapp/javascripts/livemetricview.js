@@ -466,9 +466,11 @@ function pollAndReplotGraph(jqplotGraph, measurementSetUuid) {
         console.log('Refreshing graph data for measurement set: ' + measurementSetUuid);
 
         $.ajax({
-            type: 'GET',
-            url: "/em/gettestdata/do.json",
+            type: 'POST',
+            url: "/em/getmeasurementsformeasurementset/do.json",
             contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({measurementSetUuid: measurementSetUuid}),
+            dataType: 'json',            
             success: function(measurementSetData){
                 
                 if (isMeasurementSetMonitored(measurementSetUuid)) {
@@ -518,9 +520,11 @@ function pollDataForMeasurementSet(measurementSetUuid) {
         console.log('Polling data for measurement set: ' + measurementSetUuid);
         
         $.ajax({
-            type: 'GET',
-            url: "/em/gettestdata/do.json",
+            type: 'POST',
+            url: "/em/getmeasurementsformeasurementset/do.json",
             contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({measurementSetUuid: measurementSetUuid}),
+            dataType: 'json',
             success: function(measurementSetData){
                 
                 if (isMeasurementSetMonitored(measurementSetUuid)) {
