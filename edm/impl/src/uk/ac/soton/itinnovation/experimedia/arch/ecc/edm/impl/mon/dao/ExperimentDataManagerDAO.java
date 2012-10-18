@@ -663,7 +663,26 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             connection.close();
         }
     }
-
+    
+    @Override
+    public Measurement getMeasurement(UUID measurementUUID) throws Exception
+    {
+        Connection connection = null;
+        try {
+            connection = dbCon.getConnection();
+        } catch (Exception ex) {
+            log.error("Unable to get measurement, because a connection to the database cannot be made: " + ex.getMessage(), ex);
+            throw new RuntimeException("Unable to get measurement, because a connection to the database cannot be made: " + ex.getMessage(), ex);
+        }
+        try {
+            return MeasurementDAOHelper.getMeasurement(measurementUUID, connection);
+        } catch (Exception ex) {
+            throw ex;
+        } finally {
+            connection.close();
+        }
+    }
+    
     @Override
     public void setSyncFlagForAMeasurement(UUID measurementUUID, boolean syncFlag) throws IllegalArgumentException, Exception
     {
@@ -717,24 +736,68 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     }
     
     @Override
-    public Measurement getMeasurement(UUID measurementUUID) throws Exception
+    public void deleteSynchronisedMeasurements() throws Exception
     {
         Connection connection = null;
         try {
-            connection = dbCon.getConnection();
+            connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
+            log.debug("Starting transaction");
+            connection.setAutoCommit(false);
         } catch (Exception ex) {
-            log.error("Unable to get measurement, because a connection to the database cannot be made: " + ex.getMessage(), ex);
-            throw new RuntimeException("Unable to get measurement, because a connection to the database cannot be made: " + ex.getMessage(), ex);
+            log.error("Unable to delete synchronised measurements, because a connection to the database cannot be made: " + ex.getMessage(), ex);
+            throw new RuntimeException("Unable to delete synchronised measurements, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
+        
+        boolean exception = false;
         try {
-            return MeasurementDAOHelper.getMeasurement(measurementUUID, connection);
+            MeasurementDAOHelper.deleteSynchronisedMeasurements(connection);
         } catch (Exception ex) {
+            exception = true;
             throw ex;
         } finally {
+            if (exception) {
+                log.debug("Exception thrown, so rolling back the transaction and closing the connection");
+                connection.rollback();
+            }
+            else {
+                log.debug("Committing the transaction and closing the connection");
+                connection.commit();
+            }
             connection.close();
         }
     }
-    
+
+    @Override
+    public void deleteMeasurements(Set<UUID> measurements) throws IllegalArgumentException, Exception
+    {
+        Connection connection = null;
+        try {
+            connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
+            log.debug("Starting transaction");
+            connection.setAutoCommit(false);
+        } catch (Exception ex) {
+            log.error("Unable to delete measurements, because a connection to the database cannot be made: " + ex.getMessage(), ex);
+            throw new RuntimeException("Unable to delete measurements, because a connection to the database cannot be made: " + ex.getMessage(), ex);
+        }
+        
+        boolean exception = false;
+        try {
+            MeasurementDAOHelper.deleteMeasurements(measurements, connection);
+        } catch (Exception ex) {
+            exception = true;
+            throw ex;
+        } finally {
+            if (exception) {
+                log.debug("Exception thrown, so rolling back the transaction and closing the connection");
+                connection.rollback();
+            }
+            else {
+                log.debug("Committing the transaction and closing the connection");
+                connection.commit();
+            }
+            connection.close();
+        }
+    }
     
     //---------------------------- REPORT ------------------------------------//
     

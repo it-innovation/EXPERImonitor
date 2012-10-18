@@ -712,7 +712,7 @@ public class ReportDAOHelper
         Report report = null;
         try {
             String query = "SELECT * FROM Measurement WHERE mSetUUID = ?"
-                    + " AND synchronised = ? AND timeStamp >= ? ORDER BY timeStamp DESC LIMIT = ?" + numMeasurements;
+                    + " AND synchronised = ? AND timeStamp >= ? ORDER BY timeStamp DESC LIMIT ?";
             
             PreparedStatement pstmt = connection.prepareStatement(query);
             pstmt.setObject(1, measurementSetUUID, java.sql.Types.OTHER);

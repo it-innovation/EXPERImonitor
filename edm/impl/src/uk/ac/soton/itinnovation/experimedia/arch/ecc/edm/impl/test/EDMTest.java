@@ -25,6 +25,7 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.test;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
@@ -95,9 +96,9 @@ public class EDMTest
         
         //printExperimentDetails(edm, expUUID, withSubClasses);
         
-        //saveReport(edm, mSetUUID, reportUUID);
+        saveReport(edm, mSetUUID, reportUUID);
         
-        //getReport(edm, mSetUUID, reportUUID);
+        getReport(edm, mSetUUID, reportUUID);
         
         updateAndDeleteReportTests(edm, mSetUUID);
     }
@@ -1002,6 +1003,53 @@ public class EDMTest
             log.error("Unable to get Report: " + ex.getMessage(), ex);
         }
         printReportDetails(report);
+        
+        
+        Random rand = new Random();
+        Set<UUID> measurements = new HashSet<UUID>();
+        for (Measurement m : report.getMeasurementSet().getMeasurements())
+        {
+            if (rand.nextBoolean()) measurements.add(m.getUUID());
+        }
+        
+        log.info("Setting 1 measurement to be synced");
+        try {
+            IMeasurementDAO measurementDAO = edm.getMeasurementDAO();
+            measurementDAO.setSyncFlagForAMeasurement(measurements.iterator().next(), true);
+        } catch (Exception ex) {
+            log.error ("Unable to get Measurement DAO: " + ex.getMessage(), ex);
+            throw ex;
+        }
+        
+        log.info("Setting " + measurements.size() + " measurements to be synced");
+        try {
+            IMeasurementDAO measurementDAO = edm.getMeasurementDAO();
+            measurementDAO.setSyncFlagForMeasurements(measurements, true);
+        } catch (Exception ex) {
+            log.error ("Unable to get Measurement DAO: " + ex.getMessage(), ex);
+            throw ex;
+        }
+        
+        log.info("Getting report for the 100 last unsynced measurements --- WITH DATA");
+        report = null;
+        try {
+            report = reportDAO.getReportForUnsyncedMeasurementsAfterDate(mSetUUID, fromDate, 100, true);
+        } catch (NoDataException ex) {
+            log.error("Unable to get Report: " + ex.getMessage());
+        } catch (Exception ex) {
+            log.error("Unable to get Report: " + ex.getMessage(), ex);
+        }
+        printReportDetails(report);
+        
+        log.info("Deleting synchronised measurements");
+        try {
+            IMeasurementDAO measurementDAO = edm.getMeasurementDAO();
+            measurementDAO.deleteSynchronisedMeasurements();
+            log.info("Successfully deleted any synchronised measurements");
+        } catch (Exception ex) {
+            log.error ("Unable to get Measurement DAO: " + ex.getMessage(), ex);
+            throw ex;
+        }
     }
     
     
@@ -1031,7 +1079,7 @@ public class EDMTest
         log.info("Getting report by UUID");
         report = null;
         try {
-            report = reportDAO.getReport(reportUUID, false);
+            report = reportDAO.getReport(reportUUID, true);
         } catch (NoDataException ex) {
             log.error("Unable to get Report: " + ex.getMessage());
         } catch (Exception ex) {

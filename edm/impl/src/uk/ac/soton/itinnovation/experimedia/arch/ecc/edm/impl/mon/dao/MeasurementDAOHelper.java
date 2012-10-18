@@ -467,11 +467,29 @@ public class MeasurementDAOHelper
                 pstmt.setObject(1, mUUID, java.sql.Types.OTHER);
                 pstmt.addBatch();
             }
-            // executing final batch of measurements
             pstmt.executeBatch();
         } catch (Exception ex) {
             log.error("Error while saving Measurement: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while saving Measurement: " + ex.getMessage(), ex);
+        }
+    }
+    
+    public static void deleteSynchronisedMeasurements(Connection connection) throws IllegalArgumentException, Exception
+    {
+        if (DBUtil.isClosed(connection))
+        {
+            log.error("Cannot delete the synchronised Measurement objects because the connection to the DB is closed");
+            throw new RuntimeException("Cannot delete the synchronised Measurement objects because the connection to the DB is closed");
+        }
+        
+        try {
+            String query = "DELETE FROM Measurement WHERE synchronised = ?";
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setBoolean(1, true);
+            pstmt.executeUpdate();
+        } catch (Exception ex) {
+            log.error("Error while deleting synchronised Measurements: " + ex.getMessage(), ex);
+            throw new RuntimeException("Error while deleting synchronised Measurements: " + ex.getMessage(), ex);
         }
     }
 }
