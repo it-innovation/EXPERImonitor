@@ -45,7 +45,7 @@ public interface IMetricDAO
      * @throws IllegalArgumentException If the Metric is not valid to be saved, typically due to missing information (e.g., NULL values).
      * @throws Exception If there's a technical issue or a metric with the same UUID already exists.
      */
-    public void saveMetric(Metric metric) throws IllegalArgumentException, Exception;
+    void saveMetric(Metric metric) throws IllegalArgumentException, Exception;
     
     /**
      * Get a metric object according to its UUID.
@@ -55,7 +55,7 @@ public interface IMetricDAO
      * @throws NoDataException If there's no metric with the given UUID.
      * @throws Exception If there's a technical issue.
      */
-    public Metric getMetric(UUID metricUUID) throws IllegalArgumentException, NoDataException, Exception;
+    Metric getMetric(UUID metricUUID) throws IllegalArgumentException, NoDataException, Exception;
     
     /**
      * Get a metric object for a measurement set.
@@ -64,5 +64,5 @@ public interface IMetricDAO
      * @throws NoDataException If there is no measurement set with the given UUID or there is no metric for it.
      * @throws Exception If there's a technical issue.
      */
-    public Metric getMetricForMeasurementSet(UUID measurementSetUUID) throws IllegalArgumentException, NoDataException, Exception;
+    Metric getMetricForMeasurementSet(UUID measurementSetUUID) throws IllegalArgumentException, NoDataException, Exception;
 }

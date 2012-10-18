@@ -25,8 +25,12 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.mon.dao;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.UUID;
 import org.apache.log4j.Logger;
@@ -1148,6 +1152,72 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     
     
     //---------------------------- OTHER -------------------------------------//
+    
+    public boolean isDatabaseSetUpAndAccessible()
+    {
+        Connection connection = null;
+        try {
+            connection = dbCon.getConnection();
+        } catch (Exception ex) {
+            log.debug("Connection to the database cannot be made: " + ex.getMessage(), ex);
+            return false;
+        }
+        
+        try {
+            String query = "select relname from pg_stat_user_tables WHERE schemaname='public'";
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            ResultSet rs = pstmt.executeQuery();
+
+            // check if we got anything from the query.
+            if (!rs.next())
+            {
+                log.debug("Query for table schema returned nothing");
+                return false;
+            }
+            
+            // create a map of tables and check against the result set
+            Map<String, Boolean> tableNameMap = new HashMap<String, Boolean>();
+            tableNameMap.put("entity", false);
+            tableNameMap.put("attribute", false);
+            tableNameMap.put("metricgroup", false);
+            tableNameMap.put("measurement", false);
+            tableNameMap.put("measurementset", false);
+            tableNameMap.put("report", false);
+            tableNameMap.put("metricgenerator", false);
+            tableNameMap.put("metric", false);
+            tableNameMap.put("metrictype", false);
+            tableNameMap.put("report_measurement", false);
+            tableNameMap.put("metricgenerator_entity", false);
+            tableNameMap.put("experiment", false);
+            int count = 0;
+            do {
+                count++;
+                tableNameMap.put(rs.getString(1), true);
+            } while (rs.next());
+            
+            if (count < 12)
+            {
+                log.debug("Less than 12 tables, so not correct!");
+                return false;
+            }
+            
+            boolean valid = true;
+            for (String key : tableNameMap.keySet())
+            {
+                if (!tableNameMap.get(key))
+                {
+                    log.debug("Table '" + key + "' not found");
+                    valid = false;
+                }
+            }
+            return valid;
+        } catch (SQLException ex) {
+            log.debug("Error when executing database query to get table schema: " + ex.toString(), ex);
+            return false;
+        } finally {
+            try { connection.close(); } catch (SQLException ex){}
+        }
+    }
     
     
     public void clearMetricsDatabase() throws Exception

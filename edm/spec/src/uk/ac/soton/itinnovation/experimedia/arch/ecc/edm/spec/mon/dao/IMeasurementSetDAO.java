@@ -62,7 +62,7 @@ public interface IMeasurementSetDAO
      * @throws IllegalArgumentException If the MeasurementSet is not valid to be saved, typically due to missing information (e.g., NULL values).
      * @throws Exception If there's a technical issue or a measurement set with the same UUID already exists.
      */
-    public void saveMeasurementSet(MeasurementSet measurementSet) throws IllegalArgumentException, Exception;
+    void saveMeasurementSet(MeasurementSet measurementSet) throws IllegalArgumentException, Exception;
     
     /**
      * Get a measurement set instance according to its UUID. Will not include the
@@ -74,7 +74,7 @@ public interface IMeasurementSetDAO
      * @throws NoDataException If there's no measurement set with the given UUID.
      * @throws Exception If there's a technical issue.
      */
-    public MeasurementSet getMeasurementSet(UUID measurementSetUUID, boolean withMetric) throws IllegalArgumentException, NoDataException, Exception;
+    MeasurementSet getMeasurementSet(UUID measurementSetUUID, boolean withMetric) throws IllegalArgumentException, NoDataException, Exception;
     
     /**
      * Get all measurement sets for a metric group. Will include any sub-classes
@@ -86,5 +86,5 @@ public interface IMeasurementSetDAO
      * @throws NoDataException If there is no metric group with the given UUID, or there are no measurement sets for the metric group.
      * @throws Exception If there's a technical issue.
      */
-    public Set<MeasurementSet> getMeasurementSetForMetricGroup(UUID metricGroupUUID, boolean withMetric) throws IllegalArgumentException, NoDataException, Exception;
+    Set<MeasurementSet> getMeasurementSetForMetricGroup(UUID metricGroupUUID, boolean withMetric) throws IllegalArgumentException, NoDataException, Exception;
 }

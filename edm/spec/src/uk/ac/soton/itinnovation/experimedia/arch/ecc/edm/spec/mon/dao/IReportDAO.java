@@ -51,7 +51,7 @@ public interface IReportDAO
      * @throws IllegalArgumentException If the Report is not valid to be saved, typically due to missing information (e.g., NULL values).
      * @throws Exception If there's a technical issue or a report with the same UUID already exists.
      */
-    public void saveReport(Report report) throws IllegalArgumentException, Exception;
+    void saveReport(Report report) throws IllegalArgumentException, Exception;
     
     /**
      * Saves the measurements for a report, not the report itself.
@@ -59,7 +59,7 @@ public interface IReportDAO
      * @throws IllegalArgumentException If the Measurement objects are not valid to be saved, typically due to missing information (e.g., NULL values).
      * @throws Exception If there's a technical issue or a measurement with the same UUID already exists.
      */
-    public void saveMeasurementsForReport(Report report) throws IllegalArgumentException, Exception;
+    void saveMeasurementsForReport(Report report) throws IllegalArgumentException, Exception;
     
     /**
      * Get a report object from its UUID. Will contain a MeasurementSet with
@@ -71,7 +71,7 @@ public interface IReportDAO
      * @throws NoDataException If there's no report with the given UUID.
      * @throws Exception If there's a technical issue.
      */
-    public Report getReport(UUID reportUUID, boolean withMeasurements) throws IllegalArgumentException, NoDataException, Exception;
+    Report getReport(UUID reportUUID, boolean withMeasurements) throws IllegalArgumentException, NoDataException, Exception;
     
     /**
      * Get a report for the latest measurement for a particular measurement set.
@@ -84,7 +84,7 @@ public interface IReportDAO
      * @throws NoDataException If there is no measurement set with the given UUID or there are no measurements.
      * @throws Exception If there's a technical issue.
      */
-    public Report getReportForLatestMeasurement(UUID measurementSetUUID, boolean withMeasurements) throws IllegalArgumentException, NoDataException, Exception;
+    Report getReportForLatestMeasurement(UUID measurementSetUUID, boolean withMeasurements) throws IllegalArgumentException, NoDataException, Exception;
     
     /**
      * Get a report for all measurements for a particular measurement set.
@@ -97,7 +97,7 @@ public interface IReportDAO
      * @throws NoDataException If there is no measurement set with the given UUID or there are no measurements.
      * @throws Exception If there's a technical issue.
      */
-    public Report getReportForAllMeasurements(UUID measurementSetUUID, boolean withMeasurements) throws IllegalArgumentException, NoDataException, Exception;
+    Report getReportForAllMeasurements(UUID measurementSetUUID, boolean withMeasurements) throws IllegalArgumentException, NoDataException, Exception;
     
     /**
      * Get a report for all measurements for a particular measurement set after a given date.
@@ -111,7 +111,7 @@ public interface IReportDAO
      * @throws NoDataException If there is no measurement set with the given UUID or there are no measurements.
      * @throws Exception If there's a technical issue.
      */
-    public Report getReportForMeasurementsAfterDate(UUID measurementSetUUID, Date fromDate, boolean withMeasurements) throws IllegalArgumentException, NoDataException, Exception;
+    Report getReportForMeasurementsAfterDate(UUID measurementSetUUID, Date fromDate, boolean withMeasurements) throws IllegalArgumentException, NoDataException, Exception;
     
     
     /**
@@ -127,7 +127,7 @@ public interface IReportDAO
      * @throws NoDataException If there is no measurement set with the given UUID or there are no measurements.
      * @throws Exception If there's a technical issue.
      */
-    public Report getReportForMeasurementsForTimePeriod(UUID measurementSetUUID, Date fromDate, Date toDate, boolean withMeasurements) throws IllegalArgumentException, NoDataException, Exception;
+    Report getReportForMeasurementsForTimePeriod(UUID measurementSetUUID, Date fromDate, Date toDate, boolean withMeasurements) throws IllegalArgumentException, NoDataException, Exception;
     
     
     /**
@@ -144,7 +144,7 @@ public interface IReportDAO
      * @throws NoDataException If there is no measurement set with the given UUID or there are no measurements.
      * @throws Exception If there's a technical issue.
      */
-    public Report getReportForUnsyncedMeasurementsAfterDate(UUID measurementSetUUID, Date fromDate, int numMeasurements, boolean withMeasurements) throws IllegalArgumentException, NoDataException, Exception;
+    Report getReportForUnsyncedMeasurementsAfterDate(UUID measurementSetUUID, Date fromDate, int numMeasurements, boolean withMeasurements) throws IllegalArgumentException, NoDataException, Exception;
     
     /**
      * Set the synchronisation flag for measurements of a report.
@@ -154,7 +154,7 @@ public interface IReportDAO
      * @throws IllegalArgumentException If there Report UUID is not valid (e.g. NULL).
      * @throws Exception If there's a technical issue.
      */
-    public void setReportMeasurementsSyncFlag(UUID reportUUID, boolean syncFlag) throws IllegalArgumentException, Exception;
+    void setReportMeasurementsSyncFlag(UUID reportUUID, boolean syncFlag) throws IllegalArgumentException, Exception;
     
     /**
      * Delete a report with the given UUID - with the option to also delete any
@@ -165,7 +165,7 @@ public interface IReportDAO
      * @throws IllegalArgumentException If there Report UUID is not valid (e.g. NULL).
      * @throws Exception If there's a technical issue.
      */
-    public void deleteReport(UUID reportUUID, boolean withMeasurements) throws IllegalArgumentException, Exception;
+    void deleteReport(UUID reportUUID, boolean withMeasurements) throws IllegalArgumentException, Exception;
     
     
     
@@ -183,7 +183,7 @@ public interface IReportDAO
      * @throws Exception If there's a technical issue.
      */
     @Deprecated
-    public Report getReportWithData(UUID reportUUID) throws IllegalArgumentException, NoDataException, Exception;
+    Report getReportWithData(UUID reportUUID) throws IllegalArgumentException, NoDataException, Exception;
     
     /**
      * Get a report for the latest measurement for a particular measurement set.
@@ -196,7 +196,7 @@ public interface IReportDAO
      * @throws Exception If there's a technical issue.
      */
     @Deprecated
-    public Report getReportForLatestMeasurementWithData(UUID measurementSetUUID) throws IllegalArgumentException, NoDataException, Exception;
+    Report getReportForLatestMeasurementWithData(UUID measurementSetUUID) throws IllegalArgumentException, NoDataException, Exception;
     
     /**
      * Get a report for all measurements for a particular measurement set.
@@ -209,7 +209,7 @@ public interface IReportDAO
      * @throws Exception If there's a technical issue.
      */
     @Deprecated
-    public Report getReportForAllMeasurementsWithData(UUID measurementSetUUID) throws IllegalArgumentException, NoDataException, Exception;
+    Report getReportForAllMeasurementsWithData(UUID measurementSetUUID) throws IllegalArgumentException, NoDataException, Exception;
     
     /**
      * Get a report for all measurements for a particular measurement set after a given date.
@@ -223,7 +223,7 @@ public interface IReportDAO
      * @throws Exception If there's a technical issue.
      */
     @Deprecated
-    public Report getReportForMeasurementsAfterDateWithData(UUID measurementSetUUID, Date fromDate) throws IllegalArgumentException, NoDataException, Exception;
+    Report getReportForMeasurementsAfterDateWithData(UUID measurementSetUUID, Date fromDate) throws IllegalArgumentException, NoDataException, Exception;
     
     /**
      * Get a report for the measurements for a particular measurement set within a given time
@@ -238,5 +238,5 @@ public interface IReportDAO
      * @throws Exception If there's a technical issue.
      */
     @Deprecated
-    public Report getReportForMeasurementsForTimePeriodWithData(UUID measurementSetUUID, Date fromDate, Date toDate) throws IllegalArgumentException, NoDataException, Exception;
+    Report getReportForMeasurementsForTimePeriodWithData(UUID measurementSetUUID, Date fromDate, Date toDate) throws IllegalArgumentException, NoDataException, Exception;
 }

@@ -72,6 +72,9 @@ public class EDMTest
         
         boolean withSubClasses = true;
         
+        
+        log.info("DB check: " + edm.isDatabaseSetUpAndAccessible());
+        
         // clear the database
         log.info("Clearing the database");
         edm.clearMetricsDatabase();
@@ -92,15 +95,15 @@ public class EDMTest
         
         //measurement(edm, mSetUUID);
         
-        experimentCompleteChain(edm, expUUID, entityUUID, attributeUUID, mGenUUID, mGrpUUID, mSetUUID);
+        //experimentCompleteChain(edm, expUUID, entityUUID, attributeUUID, mGenUUID, mGrpUUID, mSetUUID);
         
         //printExperimentDetails(edm, expUUID, withSubClasses);
         
-        saveReport(edm, mSetUUID, reportUUID);
+        //saveReport(edm, mSetUUID, reportUUID);
         
-        getReport(edm, mSetUUID, reportUUID);
+        //getReport(edm, mSetUUID, reportUUID);
         
-        updateAndDeleteReportTests(edm, mSetUUID);
+        //updateAndDeleteReportTests(edm, mSetUUID);
     }
     
     public static void experiments(MonitoringEDM edm, UUID expUUID) throws Exception

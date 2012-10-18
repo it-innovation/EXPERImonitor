@@ -45,62 +45,67 @@ public interface IMonitoringEDM
      * @return Experiment DAO interface.
      * @throws Exception 
      */
-    public IExperimentDAO getExperimentDAO() throws Exception;
+    IExperimentDAO getExperimentDAO() throws Exception;
     
     /**
      * Get the entity DAO, allowing saving and getting Entity objects.
      * @return Entity DAO interface.
      * @throws Exception 
      */
-    public IEntityDAO getEntityDAO() throws Exception;
+    IEntityDAO getEntityDAO() throws Exception;
     
     /**
      * Get the metric generator DAO, allowing saving and getting MetricGenerator objects.
      * @return MetricGenerator DAO interface.
      * @throws Exception 
      */
-    public IMetricGeneratorDAO getMetricGeneratorDAO() throws Exception;
+    IMetricGeneratorDAO getMetricGeneratorDAO() throws Exception;
     
     /**
      * Get the metric group DAO, allowing saving and getting MetricGroup objects.
      * @return MetricGroup DAO interface.
      * @throws Exception 
      */
-    public IMetricGroupDAO getMetricGroupDAO() throws Exception;
+    IMetricGroupDAO getMetricGroupDAO() throws Exception;
     
     /**
      * Get the measurement set DAO, allowing saving and getting MeasurementSet objects.
      * @return MeasurementSet DAO interface.
      * @throws Exception 
      */
-    public IMeasurementSetDAO getMeasurementSetDAO() throws Exception;
+    IMeasurementSetDAO getMeasurementSetDAO() throws Exception;
     
     /**
      * Get the metric DAO, allowing saving and getting Metric objects.
      * @return Metric DAO interface.
      * @throws Exception 
      */
-    public IMetricDAO getMetricDAO() throws Exception;
+    IMetricDAO getMetricDAO() throws Exception;
     
     /**
      * Get the report DAO, allowing saving and getting Report objects.
      * @return Report DAO interface.
      * @throws Exception 
      */
-    public IReportDAO getReportDAO() throws Exception;
+    IReportDAO getReportDAO() throws Exception;
     
     /**
      * Get the measurement DAO, allowing saving and getting Measurement objects.
      * @return Measurement DAO interface.
      * @throws Exception 
      */
-    public IMeasurementDAO getMeasurementDAO() throws Exception;
+    IMeasurementDAO getMeasurementDAO() throws Exception;
     
     /**
-     * Clear the metrics database.
+     * Check if the database has been set up correctly and is accessible.
+     * Will try to connect to the database and check that the schema is in place.
+     * @return True if set up and accessible; false otherwise.
+     */
+    boolean isDatabaseSetUpAndAccessible();
+    
+    /**
+     * Clear the data in the metrics database.
      * @throws Exception 
      */
-    public void clearMetricsDatabase() throws Exception;
-    
-    
+    void clearMetricsDatabase() throws Exception;
 }

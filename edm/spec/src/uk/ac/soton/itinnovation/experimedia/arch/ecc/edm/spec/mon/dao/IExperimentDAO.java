@@ -50,7 +50,7 @@ public interface IExperimentDAO
      * @throws IllegalArgumentException If the Experiment is not valid to be saved, typically due to missing information.
      * @throws Exception If there's a technical issue or an experiment with the same UUID already exists.
      */
-    public void saveExperiment(Experiment exp) throws IllegalArgumentException, Exception;
+    void saveExperiment(Experiment exp) throws IllegalArgumentException, Exception;
     
     /**
      * Get an experiment instance according to an experiment UUID.
@@ -61,7 +61,7 @@ public interface IExperimentDAO
      * @throws NoDataException If there's no experiment with the given UUID.
      * @throws Exception If there's a technical issue or there is no experiment with the given UUID.
      */
-    public Experiment getExperiment(UUID expUUID, boolean withSubClasses) throws NoDataException, IllegalArgumentException, Exception;
+    Experiment getExperiment(UUID expUUID, boolean withSubClasses) throws NoDataException, IllegalArgumentException, Exception;
     
     /**
      * Get all existing experiments.
@@ -70,5 +70,5 @@ public interface IExperimentDAO
      * @throws NoDataException If there are no experiments.
      * @throws Exception If there's a technical issue.
      */
-    public Set<Experiment> getExperiments(boolean withSubClasses) throws NoDataException, Exception;
+    Set<Experiment> getExperiments(boolean withSubClasses) throws NoDataException, Exception;
 }
