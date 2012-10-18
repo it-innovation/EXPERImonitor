@@ -43,6 +43,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.EDMUtil;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DBUtil;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DatabaseConnector;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DatabaseType;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.NoDataException;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IEntityDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IExperimentDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IMeasurementDAO;
@@ -605,17 +606,29 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
         Connection connection = null;
         try {
             connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
+            log.debug("Starting transaction");
+            connection.setAutoCommit(false);
         } catch (Exception ex) {
             log.error("Unable to save measurement, because a connection to the database cannot be made: " + ex.getMessage(), ex);
             throw new RuntimeException("Unable to save measurement, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
+        
+        boolean exception = false;
         try {
-            MeasurementDAOHelper.saveMeasurement(measurement, connection, true);
+            MeasurementDAOHelper.saveMeasurement(measurement, connection);
         } catch (Exception ex) {
+            exception = true;
             throw ex;
         } finally {
-            if (DBUtil.isConnected(connection))
-                connection.close();
+            if (exception) {
+                log.debug("Exception thrown, so rolling back the transaction and closing the connection");
+                connection.rollback();
+            }
+            else {
+                log.debug("Committing the transaction and closing the connection");
+                connection.commit();
+            }
+            connection.close();
         }
     }
     
@@ -625,17 +638,81 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
         Connection connection = null;
         try {
             connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
+            log.debug("Starting transaction");
+            connection.setAutoCommit(false);
         } catch (Exception ex) {
             log.error("Unable to save measurements for set, because a connection to the database cannot be made: " + ex.getMessage(), ex);
             throw new RuntimeException("Unable to save measurements for set, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
+        
+        boolean exception = false;
         try {
-            MeasurementDAOHelper.saveMeasurementsForSet(measurements, mSetUUID, connection, true);
+            MeasurementDAOHelper.saveMeasurementsForSet(measurements, mSetUUID, connection);
+        } catch (Exception ex) {
+            exception = true;
+            throw ex;
+        } finally {
+            if (exception) {
+                log.debug("Exception thrown, so rolling back the transaction and closing the connection");
+                connection.rollback();
+            }
+            else {
+                log.debug("Committing the transaction and closing the connection");
+                connection.commit();
+            }
+            connection.close();
+        }
+    }
+
+    @Override
+    public void setSyncFlagForAMeasurement(UUID measurementUUID, boolean syncFlag) throws IllegalArgumentException, Exception
+    {
+        Connection connection = null;
+        try {
+            connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
+        } catch (Exception ex) {
+            log.error("Unable to set sync flag for measurement, because a connection to the database cannot be made: " + ex.getMessage(), ex);
+            throw new RuntimeException("Unable to set sync flag measurement, because a connection to the database cannot be made: " + ex.getMessage(), ex);
+        }
+        
+        try {
+            MeasurementDAOHelper.setSyncFlagForAMeasurement(measurementUUID, syncFlag, connection);
         } catch (Exception ex) {
             throw ex;
         } finally {
-            if (DBUtil.isConnected(connection))
-                connection.close();
+            connection.close();
+        }
+    }
+
+    @Override
+    public void setSyncFlagForMeasurements(Set<UUID> measurements, boolean syncFlag) throws IllegalArgumentException, Exception
+    {
+        Connection connection = null;
+        try {
+            connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
+            log.debug("Starting transaction");
+            connection.setAutoCommit(false);
+        } catch (Exception ex) {
+            log.error("Unable to set sync flag for measurements, because a connection to the database cannot be made: " + ex.getMessage(), ex);
+            throw new RuntimeException("Unable to set sync flag measurements, because a connection to the database cannot be made: " + ex.getMessage(), ex);
+        }
+        
+        boolean exception = false;
+        try {
+            MeasurementDAOHelper.setSyncFlagForMeasurements(measurements, syncFlag, connection);
+        } catch (Exception ex) {
+            exception = true;
+            throw ex;
+        } finally {
+            if (exception) {
+                log.debug("Exception thrown, so rolling back the transaction and closing the connection");
+                connection.rollback();
+            }
+            else {
+                log.debug("Committing the transaction and closing the connection");
+                connection.commit();
+            }
+            connection.close();
         }
     }
     
@@ -650,12 +727,11 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to get measurement, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            return MeasurementDAOHelper.getMeasurement(measurementUUID, connection, true);
+            return MeasurementDAOHelper.getMeasurement(measurementUUID, connection);
         } catch (Exception ex) {
             throw ex;
         } finally {
-            if (DBUtil.isConnected(connection))
-                connection.close();
+            connection.close();
         }
     }
     
@@ -669,17 +745,28 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
         Connection connection = null;
         try {
             connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
+            log.debug("Starting transaction");
+            connection.setAutoCommit(false);
         } catch (Exception ex) {
             log.error("Unable to save report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
             throw new RuntimeException("Unable to save report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
+        boolean exception = false;
         try {
-            ReportDAOHelper.saveReport(report, connection, true);
+            ReportDAOHelper.saveReport(report, connection);
         } catch (Exception ex) {
+            exception = true;
             throw ex;
         } finally {
-            if (DBUtil.isConnected(connection))
-                connection.close();
+            if (exception) {
+                log.debug("Exception thrown, so rolling back the transaction and closing the connection");
+                connection.rollback();
+            }
+            else {
+                log.debug("Committing the transaction and closing the connection");
+                connection.commit();
+            }
+            connection.close();
         }
     }
     
@@ -715,7 +802,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     }
 
     @Override
-    public Report getReport(UUID reportUUID) throws Exception
+    public Report getReport(UUID reportUUID, boolean withMeasurements) throws Exception
     {
         Connection connection = null;
         try {
@@ -725,7 +812,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to get report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            return ReportDAOHelper.getReport(reportUUID, connection, true);
+            return ReportDAOHelper.getReport(reportUUID, withMeasurements, connection);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -745,7 +832,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to get report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            return ReportDAOHelper.getReportWithData(reportUUID, connection, true);
+            return ReportDAOHelper.getReport(reportUUID, true, connection);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -755,7 +842,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     }
 
     @Override
-    public Report getReportForLatestMeasurement(UUID measurementSetUUID) throws Exception
+    public Report getReportForLatestMeasurement(UUID measurementSetUUID, boolean withMeasurements) throws Exception
     {
         Connection connection = null;
         try {
@@ -765,7 +852,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to get report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            return ReportDAOHelper.getReportForLatestMeasurement(measurementSetUUID, connection, true);
+            return ReportDAOHelper.getReportForLatestMeasurement(measurementSetUUID, withMeasurements, connection);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -785,7 +872,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to get report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            return ReportDAOHelper.getReportForLatestMeasurementWithData(measurementSetUUID, connection, true);
+            return ReportDAOHelper.getReportForLatestMeasurement(measurementSetUUID, true, connection);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -795,7 +882,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     }
 
     @Override
-    public Report getReportForAllMeasurements(UUID measurementSetUUID) throws Exception
+    public Report getReportForAllMeasurements(UUID measurementSetUUID, boolean withMeasurements) throws Exception
     {
         Connection connection = null;
         try {
@@ -805,7 +892,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to get report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            return ReportDAOHelper.getReportForAllMeasurements(measurementSetUUID, connection, true);
+            return ReportDAOHelper.getReportForAllMeasurements(measurementSetUUID, withMeasurements, connection);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -825,7 +912,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to get report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            return ReportDAOHelper.getReportForAllMeasurementsWithData(measurementSetUUID, connection, true);
+            return ReportDAOHelper.getReportForAllMeasurements(measurementSetUUID, true, connection);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -835,7 +922,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     }
 
     @Override
-    public Report getReportForMeasurementsAfterDate(UUID measurementSetUUID, Date fromDate) throws Exception
+    public Report getReportForMeasurementsAfterDate(UUID measurementSetUUID, Date fromDate, boolean withMeasurements) throws Exception
     {
         Connection connection = null;
         try {
@@ -845,7 +932,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to get report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            return ReportDAOHelper.getReportForMeasurementsAfterDate(measurementSetUUID, fromDate, connection, true);
+            return ReportDAOHelper.getReportForMeasurementsAfterDate(measurementSetUUID, fromDate, withMeasurements, connection);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -865,7 +952,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to get report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            return ReportDAOHelper.getReportForMeasurementsAfterDateWithData(measurementSetUUID, fromDate, connection, true);
+            return ReportDAOHelper.getReportForMeasurementsAfterDate(measurementSetUUID, fromDate, true, connection);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -875,7 +962,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     }
 
     @Override
-    public Report getReportForMeasurementsForTimePeriod(UUID measurementSetUUID, Date fromDate, Date toDate) throws Exception
+    public Report getReportForMeasurementsForTimePeriod(UUID measurementSetUUID, Date fromDate, Date toDate, boolean withMeasurements) throws Exception
     {
         Connection connection = null;
         try {
@@ -885,7 +972,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to get report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            return ReportDAOHelper.getReportForMeasurementsForTimePeriod(measurementSetUUID, fromDate, toDate, connection, true);
+            return ReportDAOHelper.getReportForMeasurementsForTimePeriod(measurementSetUUID, fromDate, toDate, withMeasurements, connection);
         } catch (Exception ex) {
             throw ex;
         } finally {
@@ -905,12 +992,94 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             throw new RuntimeException("Unable to get report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
         try {
-            return ReportDAOHelper.getReportForMeasurementsForTimePeriodWithData(measurementSetUUID, fromDate, toDate, connection, true);
+            return ReportDAOHelper.getReportForMeasurementsForTimePeriod(measurementSetUUID, fromDate, toDate, true, connection);
         } catch (Exception ex) {
             throw ex;
         } finally {
             if (DBUtil.isConnected(connection))
                 connection.close();
+        }
+    }
+    
+    @Override
+    public Report getReportForUnsyncedMeasurementsAfterDate(UUID measurementSetUUID, Date fromDate, int numMeasurements, boolean withMeasurements) throws IllegalArgumentException, NoDataException, Exception
+    {
+        Connection connection = null;
+        try {
+            connection = dbCon.getConnection();
+        } catch (Exception ex) {
+            log.error("Unable to get report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
+            throw new RuntimeException("Unable to get report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
+        }
+        try {
+            return ReportDAOHelper.getReportForUnsyncedMeasurementsAfterDate(measurementSetUUID, fromDate, numMeasurements, withMeasurements, connection);
+        } catch (Exception ex) {
+            throw ex;
+        } finally {
+            if (DBUtil.isConnected(connection))
+                connection.close();
+        }
+    }
+    
+    @Override
+    public void setReportMeasurementsSyncFlag(UUID reportUUID, boolean syncFlag) throws IllegalArgumentException, Exception
+    {
+        Connection connection = null;
+        try {
+            connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
+            log.debug("Starting transaction");
+            connection.setAutoCommit(false);
+        } catch (Exception ex) {
+            log.error("Unable to set sync flag for measurements of report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
+            throw new RuntimeException("Unable to set sync flag for measurements of report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
+        }
+        boolean exception = false;
+        try {
+            ReportDAOHelper.setReportMeasurementsSyncFlag(reportUUID, syncFlag, connection);
+        } catch (Exception ex) {
+            exception = true;
+            throw ex;
+        } finally {
+            if (exception) {
+                log.debug("Exception thrown, so rolling back the transaction and closing the connection");
+                connection.rollback();
+            }
+            else {
+                log.debug("Committing the transaction and closing the connection");
+                connection.commit();
+            }
+            connection.close();
+        }
+    }
+
+    @Override
+    public void deleteReport(UUID reportUUID, boolean withMeasurements) throws IllegalArgumentException, Exception
+    {
+        Connection connection = null;
+        try {
+            connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
+            log.debug("Starting transaction");
+            connection.setAutoCommit(false);
+        } catch (Exception ex) {
+            log.error("Unable to delete report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
+            throw new RuntimeException("Unable to delete report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
+        }
+        boolean exception = false;
+        try {
+            ReportDAOHelper.deleteReport(reportUUID, withMeasurements, connection);
+        } catch (Exception ex) {
+            exception = true;
+            throw ex;
+        } finally {
+            if (exception) {
+                log.debug("Exception thrown, so rolling back the transaction and closing the connection");
+                connection.rollback();
+            }
+            else {
+                log.debug("Committing the transaction and closing the connection");
+                connection.commit();
+            }
+            connection.close();
         }
     }
     
@@ -924,12 +1093,12 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
         Connection connection = null;
         try {
             connection = dbCon.getConnection();
+            log.debug("Starting transaction");
+            connection.setAutoCommit(false);
         } catch (Exception ex) {
             log.error("Unable to clear the database, because a connection to the database cannot be made: " + ex.getMessage(), ex);
             throw new RuntimeException("Unable to clear the database, because a connection to the database cannot be made: " + ex.getMessage(), ex);
         }
-        log.debug("Starting transaction");
-        connection.setAutoCommit(false);
         
         // experiments (cascade will delete metric generators etc
         try {

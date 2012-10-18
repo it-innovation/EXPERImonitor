@@ -45,7 +45,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.NoDataException;
  */
 public interface IEntityDAO
 {
-/**
+    /**
      * Saves an entity instance, which must have a unique UUID. Any attributes that
      * the entity may have will also be saved.
      * @param ent The Entity instance to be saved (must have a unique UUID).
@@ -58,7 +58,7 @@ public interface IEntityDAO
      * Get an entity instance from a UUID, which will include any attributes the
      * entity may have.
      * @param entityUUID The UUID of the entity.
-     * @param withSubClasses Flag to say whether to return attributes too.
+     * @param withAttributes Flag to say whether to return attributes too.
      * @return An Entity instance.
      * @throws IllegalArgumentException If entityUUID is not a valid argument (e.g., NULL).
      * @throws NoDataException If there's no entity with the given UUID.
@@ -68,7 +68,7 @@ public interface IEntityDAO
     
     /**
      * Get all the existing entities, if any.
-     * @param withSubClasses Flag to say whether to return attributes too.
+     * @param withAttributes Flag to say whether to return attributes too.
      * @return A set of Entity objects, if any exist.
      * @throws NoDataException If there are no entities.
      * @throws Exception If there's a technical issue.
@@ -89,7 +89,7 @@ public interface IEntityDAO
     /**
      * Get all the entities for a specific metric generator, if any.
      * @param mGenUUID The metric generator UUID.
-     * @param withSubClasses Flag to say whether to return attributes too.
+     * @param withAttributes Flag to say whether to return attributes too.
      * @return A set of Entity objects, if any are monitored by the given metric generator.
      * @throws IllegalArgumentException If mGenUUID is not a valid argument (e.g., NULL).
      * @throws NoDataException If there's no entity/entities for the given metric generator UUID, or there's no metric generator with the given UUID.

@@ -46,7 +46,7 @@ public class MeasurementSetDAOHelper
 {
     static Logger log = Logger.getLogger(MeasurementSetDAOHelper.class);
     
-    public static ValidationReturnObject isObjectValidForSave(MeasurementSet mSet, boolean checkForMetricGroup, Connection connection, boolean closeDBcon) throws Exception
+    public static ValidationReturnObject isObjectValidForSave(MeasurementSet mSet, boolean checkForMetricGroup, Connection connection) throws Exception
     {
         if (mSet == null)
         {
@@ -100,7 +100,7 @@ public class MeasurementSetDAOHelper
         // check that the metric group exists, if flagged to check
         if (checkForMetricGroup)
         {
-            if (!MetricGroupDAOHelper.objectExists(mSet.getMetricGroupUUID(), connection, closeDBcon))
+            if (!MetricGroupDAOHelper.objectExists(mSet.getMetricGroupUUID(), connection))
             {
                 return new ValidationReturnObject(false, new RuntimeException("The MetricGroup for the MeasurementSet doesn't exit (UUID: " + mSet.getMetricGroupUUID().toString() + ")"));
             }
@@ -117,7 +117,7 @@ public class MeasurementSetDAOHelper
         {
             for (Measurement measurement : mSet.getMeasurements())
             {
-                ValidationReturnObject validationReturn = MeasurementDAOHelper.isObjectValidForSave(measurement, false, connection, closeDBcon); // false = don't check for measurement set existing as this won't be saved yet!
+                ValidationReturnObject validationReturn = MeasurementDAOHelper.isObjectValidForSave(measurement, false, connection); // false = don't check for measurement set existing as this won't be saved yet!
                 if (!validationReturn.valid)
                 {
                     return validationReturn;
@@ -132,9 +132,9 @@ public class MeasurementSetDAOHelper
         return new ValidationReturnObject(true);
     }
     
-    public static boolean objectExists(UUID uuid, Connection connection, boolean closeDBcon) throws Exception
+    public static boolean objectExists(UUID uuid, Connection connection) throws Exception
     {
-        return DBUtil.objectExistsByUUID("MeasurementSet", "mSetUUID", uuid, connection, closeDBcon);
+        return DBUtil.objectExistsByUUID("MeasurementSet", "mSetUUID", uuid, connection, false);
     }
     
     public static void saveMeasurementSet(MeasurementSet measurementSet, Connection connection, boolean closeDBcon) throws Exception
@@ -142,7 +142,7 @@ public class MeasurementSetDAOHelper
         // this validation will check if all the required parameters are set and if
         // there isn't already a duplicate instance in the DB
         // will validate the metric and measurements too, if any are given
-        ValidationReturnObject returnObj = MeasurementSetDAOHelper.isObjectValidForSave(measurementSet, false, connection, false);
+        ValidationReturnObject returnObj = MeasurementSetDAOHelper.isObjectValidForSave(measurementSet, false, connection);
         if (!returnObj.valid)
         {
             log.error("Cannot save the MeasurementSet object: " + returnObj.exception.getMessage(), returnObj.exception);
@@ -314,7 +314,7 @@ public class MeasurementSetDAOHelper
             // check if anything got returned
             if (!rs.next())
             {
-                if (!MetricGroupDAOHelper.objectExists(metricGroupUUID, connection, false))
+                if (!MetricGroupDAOHelper.objectExists(metricGroupUUID, connection))
                 {
                     log.debug("There is no metric group with UUID " + metricGroupUUID.toString());
                     throw new NoDataException("There is no metric group with UUID " + metricGroupUUID.toString());

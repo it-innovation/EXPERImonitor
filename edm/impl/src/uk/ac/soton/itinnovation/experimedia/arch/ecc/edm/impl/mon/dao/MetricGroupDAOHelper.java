@@ -28,7 +28,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import org.apache.log4j.Logger;
@@ -95,7 +94,7 @@ public class MetricGroupDAOHelper
         {
             for (MeasurementSet mSet : mGroup.getMeasurementSets())
             {
-                ValidationReturnObject validationReturn = MeasurementSetDAOHelper.isObjectValidForSave(mSet, false, connection, closeDBcon); // false = don't check for measurement set existing as this won't be saved yet!
+                ValidationReturnObject validationReturn = MeasurementSetDAOHelper.isObjectValidForSave(mSet, false, connection); // false = don't check for measurement set existing as this won't be saved yet!
                 if (!validationReturn.valid)
                 {
                     return validationReturn;
@@ -110,9 +109,9 @@ public class MetricGroupDAOHelper
         return new ValidationReturnObject(true);
     }
     
-    public static boolean objectExists(UUID uuid, Connection connection, boolean closeDBcon) throws Exception
+    public static boolean objectExists(UUID uuid, Connection connection) throws Exception
     {
-        return DBUtil.objectExistsByUUID("MetricGroup", "mGrpUUID", uuid, connection, closeDBcon);
+        return DBUtil.objectExistsByUUID("MetricGroup", "mGrpUUID", uuid, connection, false);
     }
     
     public static void saveMetricGroup(MetricGroup metricGroup, Connection connection, boolean closeDBcon) throws Exception

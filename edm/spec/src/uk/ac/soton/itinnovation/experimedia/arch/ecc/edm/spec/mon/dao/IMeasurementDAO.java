@@ -67,4 +67,22 @@ public interface IMeasurementDAO
      * @throws Exception If there's a technical issue.
      */
     public Measurement getMeasurement(UUID measurementUUID) throws IllegalArgumentException, NoDataException, Exception;
+    
+    /**
+     * Set the synchronisation flag for the given measurement.
+     * @param measurementUUID The UUID of the measurement.
+     * @param syncFlag The synchronisation flag.
+     * @throws IllegalArgumentException If measurementUUID is not a valid argument (e.g., NULL).
+     * @throws Exception If there's a technical issue, if the measurement set does not exist, or a measurement with the same UUID already exists.
+     */
+    public void setSyncFlagForAMeasurement(UUID measurementUUID, boolean syncFlag) throws IllegalArgumentException, Exception;
+    
+    /**
+     * Set the synchronisation flag for all the measurements in the given set.
+     * @param measurements The set of UUIDs to set the synchronisation flag for.
+     * @param syncFlag The synchronisation flag.
+     * @throws IllegalArgumentException If measurement set is not a valid argument (e.g., NULL or empty).
+     * @throws Exception If there's a technical issue, if the measurement set does not exist, or a measurement with the same UUID already exists.
+     */
+    public void setSyncFlagForMeasurements(Set<UUID> measurements, boolean syncFlag) throws IllegalArgumentException, Exception;
 }
