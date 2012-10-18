@@ -91,6 +91,14 @@ public interface IEMLiveMonitor
      * Tells the user that no more pulling requests will be issued.
      */
     void pullingStopped();
+    
+    /**
+     * Tell the user that a pull report has been received by the EM.
+     * 
+     * @param lastReportID - UUID of the last pull report received by the EM from
+     * this client.
+     */
+    void notifyPullReceived( UUID lastReportID );
 
     // User methods --------------------------------------------------------------
     /**
@@ -129,13 +137,4 @@ public interface IEMLiveMonitor
      * for a single time frame).
      */
     void sendPulledMetric( Report report );
-    
-    /**
-     * Tell the user that a pull report has been received by the EM.
-     * 
-     * @param lastReportID - UUID of the last pull report received by the EM from
-     * this client.
-     */
-    void notifyPullReceived( UUID lastReportID );
-
 }

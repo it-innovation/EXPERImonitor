@@ -57,6 +57,8 @@ public class MeasurementScheduler
     
     public void initialise( IMonitoringEDMAgent edmAgent ) throws Exception
     {
+        initialisedOK = false;
+        
         // Safety first
         if ( initialisedOK )    throw new Exception( "Already initialised" );
         if ( edmAgent == null ) throw new Exception( "EDM is NULL" );
@@ -107,12 +109,9 @@ public class MeasurementScheduler
         {
             synchronized( edmLock )
             {
-              schedulerLogger.info( "Saving MS: " + report.getMeasurementSet().getUUID().toString() + 
-                                    " at time " + report.getToDate().toString() );
-              
-              //try { edmReportDAO.saveReport(report); }
-              //catch ( Exception e )
-              //{ schedulerLogger.error( "EDM save report problem: " + e.getMessage() ); }
+              try { edmReportDAO.saveReport(report); }
+              catch ( Exception e )
+              { schedulerLogger.error( "EDM save report problem: " + e.getMessage() ); }
             }
         }
     }

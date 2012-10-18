@@ -26,8 +26,7 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.headerlessECCClient;
 
 import java.io.*;
-import java.util.Properties;
-import java.util.UUID;
+import java.util.*;
 import org.apache.log4j.Logger;
 
 
@@ -40,37 +39,55 @@ public class EntryPoint
     public static void main( String args[] )
     {
         try
-        {
-            String rabbitServerIP           = "127.0.0.1";
-            InputStream certificateStream   = null;
-            String      certificatePassword = null;
+        {          
+            ECCHeaderlessClient client      = new ECCHeaderlessClient( "Headerless Client " + new Date().toString() );
+            boolean usingVerifiedConnection = false; //( args.length == 1 ); // Expect a keystore password from CLI here
+            boolean connectedToAMQPBus      = false;
             
-            boolean useProperties = false;
+            InputStream is = EntryPoint.class.getResourceAsStream( "/main/resources/client.properties" );
+            if ( is == null ) throw new Exception( "Could not find client properties file" );
+                
+            Properties props = new Properties();
+            props.load( is );
             
-            if ( useProperties )
+            if ( usingVerifiedConnection )
             {
-                InputStream is = EntryPoint.class.getResourceAsStream( "/main/resources/client.properties" );
-                if ( is == null ) throw new Exception( "Could not find client properties file" );
+                String rabbitServerIP      = props.getProperty( "Monitor_IP" );
+                InputStream ksStream       = EntryPoint.class.getResourceAsStream( props.getProperty("Keystore") ); 
+                String certificatePassword = args[0];
                 
-                Properties props = new Properties();
-                props.load( is );
-                
-                rabbitServerIP      = props.getProperty( "ECC_IP" );
-                certificateStream   = EntryPoint.class.getResourceAsStream( props.getProperty("Certificate") ); 
-                certificatePassword = props.getProperty( "CertificatePassword" );
+                connectedToAMQPBus = client.tryVerifiedConnectToAMQPBus( rabbitServerIP, 
+                                                                       ksStream, 
+                                                                       certificatePassword );
+            }
+            else
+            {
+                String rabbitServerIP = props.getProperty( "Monitor_IP" );
+                boolean useSSL = ( props.getProperty( "Monitor_Use_SSL" ).equals("true") );
+              
+                if ( useSSL )
+                    connectedToAMQPBus = client.tryConnectToAMQPBus( rabbitServerIP, true );
+                else
+                    connectedToAMQPBus = client.tryConnectToAMQPBus( rabbitServerIP, false );
             }
             
-            ECCHeaderlessClient client = new ECCHeaderlessClient();
-            
-            client.tryConnectToECC( rabbitServerIP, 
-                                    certificateStream,
-                                    certificatePassword,
-                                    UUID.fromString("00000000-0000-0000-0000-000000000000"), 
-                                    UUID.randomUUID() );
-            
-            client.initialiseDataManagement();
-            
-            client.beginMonitoring();
+            if ( connectedToAMQPBus )
+            {
+                // Try to create local data persistence (not critical, but very useful)
+                if ( client.initialiseLocalDataManagement() )
+                    clientLogger.info( "Successfully created EDMAgent and measurement scheduling" );
+                else
+                    clientLogger.warn( "Could not create local EDMAgent - will continue, but will not schedule/store measurements" );
+                
+                UUID expMonitorID = UUID.fromString( props.getProperty( "MonitorID" ) );
+                
+                if ( client.tryRegisteringWithECCMonitor( expMonitorID,
+                                                          UUID.randomUUID() ) )
+                {
+                    // Successfully connected and registered with the EM/ECC - the client will continue from here
+                    clientLogger.info( "Successfully registered with EM/ECC... engaging with monitoring process" );
+                }
+            }
         }
         catch ( Exception e )
         { clientLogger.error("Problem starting: could not connect to the ECC: " + e.getMessage()); }
