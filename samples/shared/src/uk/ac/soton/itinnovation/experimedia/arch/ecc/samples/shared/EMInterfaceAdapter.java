@@ -66,7 +66,7 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
     protected IEMTearDown          tearDownFace;
 
     // Metric Generators
-    protected HashSet<MetricGenerator> clientGenerators;
+    protected Set<MetricGenerator> clientGenerators;
 
 
     public EMInterfaceAdapter( EMIAdapterListener listener )
@@ -120,7 +120,7 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
     
     public void deregisterWithEM() throws Exception
     {
-        if ( discoveryFace == null ) throw new Exception( "Have not registered correctly with EM" );
+        if ( discoveryFace == null ) throw new Exception( "Have not tried to register with the EM/ECC" );
       
         discoveryFace.clientDisconnecting();
     }
@@ -128,7 +128,7 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
     public Experiment getExperimentInfo()
     { return currentExperiment; }
     
-    public void setMetricGenerators( HashSet<MetricGenerator> generators )
+    public void setMetricGenerators( Set<MetricGenerator> generators )
     { clientGenerators = generators; }
 
     public void pushMetric( Report report )

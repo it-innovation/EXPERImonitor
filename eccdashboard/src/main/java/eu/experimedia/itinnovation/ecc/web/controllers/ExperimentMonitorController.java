@@ -52,35 +52,10 @@ public class ExperimentMonitorController {
     @Qualifier("experimentMonitorService")
     ExperimentMonitorService emService;
     
-    // jqPlot wants: 2008-09-30 4:00PM
-    protected SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy K:mma");
+//    protected SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     
-    @RequestMapping(method = RequestMethod.GET, value = "/gettestdata/do.json")
-    public @ResponseBody DataPoint[] getTestData() throws Throwable {
-        logger.debug("Returning test data");
-        try {
-            HashMap<Date, String> data = emService.getTestData();
-            DataPoint[] result = new DataPoint[data.keySet().size()];
-            
-            Iterator it = data.keySet().iterator();
-            Date time; String timeAsString, value;
-            int counter = 0;
-            while(it.hasNext()) {
-                time = (Date) it.next();                
-                value = data.get(time);
-                timeAsString = simpleDateFormat.format(time);
-                result[counter] = new DataPoint(timeAsString, value);
-                counter++;
-            }
 
-            return result;
-        } catch (Throwable ex) {
-            logger.error("Failed to return test data");
-            ex.printStackTrace();
-            return null;
-        }        
-    }
     
     @RequestMapping(method = RequestMethod.GET, value = "/getclients/do.json")
     public @ResponseBody EMClientAsJson[] getConnectedClients() throws Throwable {
@@ -149,12 +124,26 @@ public class ExperimentMonitorController {
         }
     }
     
-
+    /**
+     * Returns a list of metric generators for clients in the current phase only
+     * 
+     * For Live Metric View
+     * 
+     * @throws Throwable 
+     */
     @RequestMapping(method = RequestMethod.GET, value = "/getmetricgenerators/do.json")
     public @ResponseBody MetricGeneratorAsJson[] getMetricGenerators() throws Throwable {
+        
+        // Should be simpler - just return a list of metric generators with minimum data
+        // Separate method should load selected metric generator!
+        
         logger.debug("Returning list of metric generators for current phase");
         try {
+            
+            // Faster to get them from the database at this point?
+            // Ping clients to see if they are alive?
             EMClient[] clients = emService.getCurrentPhaseClients();
+            
             
             if (clients.length < 1) {
                 logger.error("No clients currently connected, method problably called by mistake in a wrong phase.");
@@ -163,7 +152,6 @@ public class ExperimentMonitorController {
                 logger.debug("Returning metric generators for " + clients.length + " client(s)");
                 
                 Set<MetricGeneratorAsJson> resultingMgSet = new HashSet<MetricGeneratorAsJson>();
-                
                 
                 MetricGeneratorAsJson tempMetricGeneratorAsJson = new MetricGeneratorAsJson();
                 String name, uuid, desc;
@@ -318,6 +306,41 @@ public class ExperimentMonitorController {
         }
     }
 
+    
+    @RequestMapping(method = RequestMethod.POST, value = "/getmeasurementsformeasurementset/do.json")
+    public @ResponseBody DataPoint[] getMeasurementsForMeasurementSet(@RequestBody final String inputData) throws Throwable {
+        
+        logger.debug("Returning data for a measurement set. Input data: " + inputData);
+        
+        try {
+            
+            JSONObject inputDataAsJSON = (JSONObject) JSONSerializer.toJSON(inputData);
+            String measurementSetUuid = inputDataAsJSON.getString("measurementSetUuid");
+            
+            // The data has to come out sorted by time, hence the TreeMap
+            Map<Date, String> data = new TreeMap<Date, String>(emService.getMeasurementsForMeasurementSet(measurementSetUuid));
+            logger.debug("Measurement set [" + measurementSetUuid + "] has " + data.size() + " data point(s)");
+            
+            DataPoint[] result = new DataPoint[data.keySet().size()];
+            
+            Iterator it = data.keySet().iterator();
+            Date time; long timeAsLong; String value;
+            int counter = 0;
+            while(it.hasNext()) {
+                time = (Date) it.next();                
+                value = data.get(time);
+                timeAsLong = time.getTime();
+                result[counter] = new DataPoint(timeAsLong, value);
+                counter++;
+            }
+
+            return result;
+        } catch (Throwable ex) {
+            logger.error("Failed to return data for a measurement set.");
+            ex.printStackTrace();
+            return null;
+        }        
+    }    
 
     @RequestMapping(method = RequestMethod.POST, value = "/getmeasurementsetsforclient/do.json")
     public @ResponseBody MeasurementSetAsJson[] getMeasurementSetsForClient(@RequestBody final String inputData) throws Throwable {

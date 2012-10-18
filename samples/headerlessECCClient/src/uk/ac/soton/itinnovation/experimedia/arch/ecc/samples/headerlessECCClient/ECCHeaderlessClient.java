@@ -25,16 +25,18 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.headerlessECCClient;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDMLight;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMInterfaceFactory;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared.*;
-
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
+
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.headerlessECCClient.tools.*;
 
@@ -46,90 +48,326 @@ import org.apache.log4j.Logger;
 
 
 
-public class ECCHeaderlessClient
+public class ECCHeaderlessClient implements EMIAdapterListener
 {
     private final Logger clientLogger = Logger.getLogger( ECCHeaderlessClient.class );
+    private final String clientName;
     
-    private AMQPBasicChannel    amqpChannel;
-    
-    private IMonitoringEDMLight  expDataManager;
+    private AMQPBasicChannel     amqpChannel;
+    private EMInterfaceAdapter   emiAdapter;
+    private IMonitoringEDMAgent  edmAgent;
     private MeasurementScheduler measurementScheduler;
+    private boolean              edmAgentOK  = false;
+    private boolean              schedulerOK = false;
     
-    private Experiment           currentExperiment;
-    private Set<MeasurementTask> measurementTasks;
+    private Experiment                     currentExperiment;
+    private HashMap<UUID, MeasurementSet>  measurementSetMap;
+    private HashMap<UUID, MeasurementTask> tasksByMeasurementSetMap;
     
     
-    public ECCHeaderlessClient()
-    {}
+    public ECCHeaderlessClient( String name )
+    {
+        clientName = name;
         
-    public void tryConnectToECC( String      rabbitServerIP,
-                                 InputStream certificateResource,
-                                 String      certificatePassword,
-                                 UUID        monitorID,
-                                 UUID        clientID ) throws Exception
+        measurementSetMap = new HashMap<UUID, MeasurementSet>();
+    }
+    
+    public boolean tryConnectToAMQPBus( String rabbitServerIP, boolean useSSL ) throws Exception
     {
         // Safety first
         if ( rabbitServerIP == null ) throw new Exception( "IP parameter is invalid" );
-        if ( monitorID == null || clientID == null ) throw new Exception( "ID parameter is null" );
         
         AMQPConnectionFactory amqpFactory = new AMQPConnectionFactory();
         amqpFactory.setAMQPHostIPAddress( rabbitServerIP );
         
         try
         {
-            if ( certificateResource != null )
-            {
-                amqpFactory.connectToSecureAMQPHost( certificateResource,
-                                                     certificatePassword );
-                
-                amqpChannel = amqpFactory.createNewChannel();
-                
-                clientLogger.info( "Connected to the ECC (using non-secured channel)" );
-            }
+            if ( useSSL )
+              amqpFactory.connectToAMQPSSLHost();
             else
-            {
-                amqpFactory.connectToAMQPHost();
-                amqpChannel = amqpFactory.createNewChannel();
-                
-                clientLogger.info( "Connected to the ECC (using non-secured channel)" );
-            }
+              amqpFactory.connectToAMQPHost();
+            
+            
+            amqpChannel = amqpFactory.createNewChannel();
+            clientLogger.info( "Connected to the AMQP (using non-secured channel)" );
         }
         catch ( Exception e )
         { clientLogger.error( "Headerless client problem: could not connect to ECC" ); throw e; }
+        
+        return true;
     }
-    
-    public void initialiseDataManagement() throws Exception
+        
+    public boolean tryVerifiedConnectToAMQPBus( String      rabbitServerIP,
+                                                InputStream certificateResource,
+                                                String      certificatePassword
+                                              ) throws      Exception
     {
-        // Initialise the 'mini' version of the EDM for local data management
-        expDataManager       = EDMInterfaceFactory.getMonitoringEDMLight();
-        measurementScheduler = new MeasurementScheduler();
-        measurementTasks     = new HashSet<MeasurementTask>();
+        // Safety first
+        if ( rabbitServerIP == null )      throw new Exception( "IP parameter is NULL" );
+        if ( certificateResource == null ) throw new Exception( "Certificate resource is NULL" );
+        if ( certificatePassword == null ) throw new Exception( "Certificate password is NULL" );
+        
+        AMQPConnectionFactory amqpFactory = new AMQPConnectionFactory();
+        amqpFactory.setAMQPHostIPAddress( rabbitServerIP );
         
         try
-        { measurementScheduler.initialise( expDataManager ); }
+        {
+            amqpFactory.connectToVerifiedAMQPHost( certificateResource,
+                                                   certificatePassword );
+
+            amqpChannel = amqpFactory.createNewChannel();
+
+            clientLogger.info( "Connected to the AMQP (using non-secured channel)" );
+        }
+        catch ( Exception e )
+        { clientLogger.error( "Headerless client problem: could not connect to ECC" ); throw e; }
+        
+        return true;
+    }
+    
+    public boolean initialiseLocalDataManagement()
+    {
+        edmAgentOK  = false;
+        schedulerOK = false;
+      
+        // Initialise the 'mini' version of the EDM for local data management
+        try
+        {
+            edmAgent = EDMInterfaceFactory.getMonitoringEDMAgent();
+            edmAgentOK   = true; // Assume OK for now
+        }
+        catch ( Exception e )
+        {
+            clientLogger.error( "Could not create EDM agent" );
+            return false;
+        }
+        
+        // Initialise a scheduler to take/store measurements periodically
+        measurementScheduler     = new MeasurementScheduler();
+        tasksByMeasurementSetMap = new HashMap<UUID, MeasurementTask>(); 
+      
+        try
+        { 
+          measurementScheduler.initialise( edmAgent );
+          schedulerOK = true;
+        }
         catch ( Exception e )
         {
             clientLogger.error( "Could not initialise measurement scheduler" );
+            return false;
+        }
+        
+        return true;
+    }
+    
+    public boolean tryRegisteringWithECCMonitor( UUID monitorID,
+                                                 UUID clientID ) throws Exception
+    {
+        // Safety first
+        if ( monitorID == null || clientID == null ) throw new Exception( "ID parameter is null" );
+        if ( amqpChannel == null ) throw new Exception( "No connection with AMQP bus" );
+      
+        // Create Experiment Monitor interface adapter to help listen to the ECC/EM
+        emiAdapter = new EMInterfaceAdapter( this );
+        
+        // And try registering
+        try
+        {
+            emiAdapter.registerWithEM( clientName, amqpChannel, 
+                                       clientID, monitorID );
+        }
+        catch ( Exception e )
+        {
+            clientLogger.error( "Could not attempt registration with Experiment monitor" );
             throw e;
+        }
+        
+        return true;
+    }
+    
+    
+    
+    // EMIAdapterListener ------------------------------------------------------
+    @Override
+    public void onEMConnectionResult( boolean connected, Experiment expInfo )
+    {
+        boolean connectionAndExperimentOK = false;
+      
+        if ( connected )
+        {
+            if ( expInfo != null )
+            {
+              currentExperiment = new Experiment();
+              currentExperiment.setName( expInfo.getName() );
+              currentExperiment.setDescription( expInfo.getDescription() );
+              currentExperiment.setStartTime( expInfo.getStartTime() );
+              
+              connectionAndExperimentOK = true;
+            }
+            else clientLogger.error( "Experiment information is null" );
+        }
+        else clientLogger.error( "Connection refused by ECC" );
+        
+        // If we didn't get past this stage, there's no point in continuing
+        if ( !connectionAndExperimentOK ) tryDisconnecting();
+    }
+
+    @Override
+    public void onPopulateMetricGeneratorInfo()
+    {
+        // Time to start defining what metrics we can produce for this experiment
+        if ( currentExperiment != null )
+        {
+            // Define all metric generators for this experiment
+            defineExperimentMetrics( currentExperiment );
+            
+            // If we have an EDMAgent available, save our experiment & metric generators
+            if ( edmAgentOK )
+            {
+                try
+                {
+                  IExperimentDAO dao = edmAgent.getExperimentDAO();
+                  dao.saveExperiment( currentExperiment );
+                }
+                catch ( Exception e )
+                {
+                  clientLogger.error( "Had problems saving data with the ExperimentDAO: " + e.getMessage() );
+                  edmAgentOK  = false;
+                  schedulerOK = false;
+                }
+            }
+            
+            // Even if the EDMAgent isn't available, we can still send data, so
+            // notify the adapter of our metrics
+            emiAdapter.setMetricGenerators( currentExperiment.getMetricGenerators() );
+        
+        }
+        else  // Things are bad if we can't describe our metric generators - so disconnect
+        {
+          tryDisconnecting();
+          clientLogger.error( "Trying to populate metric generator info - but current experiment is null. Disconnecting" );
+        }
+    }
+
+    @Override
+    public void onDiscoveryTimeOut()
+    { 
+
+    }
+    
+    @Override
+    public void onSetupMetricGenerator( UUID genID, Boolean[] resultOUT )
+    {
+        // Assume that we haven't set up properly at first, then verify
+        resultOUT[0] = false;
+      
+        if ( currentExperiment != null )
+        {
+            // Check we've got the metric generator and measurement tasks are ready
+          Iterator<MetricGenerator> mGenIt = currentExperiment.getMetricGenerators().iterator();
+          
         }
     }
     
-    public void beginMonitoring() throws Exception
+    @Override
+    public void onSetupTimeOut( UUID metricGeneratorID )
     {
-        // Testing for now: try out a series of measurement tasks
-        // Just create a dummy experiment for now
-        currentExperiment = new Experiment();
-        currentExperiment.setName( "Unconnected experiment" );
-        currentExperiment.setDescription( "This experiment is only for stand-alone testing purposes" );
-        
-        defineExperimentMetrics( currentExperiment );
-        
-        startMeasuring();
+      
+    }
+
+    @Override
+    public void onStartPushingMetricData()
+    {
+
+    }
+
+    @Override
+    public void onPushReportReceived( UUID reportID )
+    {
+
+    }
+    
+    @Override
+    public void onPullReportReceived( UUID reportID )
+    {
+
+    }
+    
+    @Override
+    public void onPullMetricTimeOut( UUID measurementSetID )
+    { 
+
+    }
+
+    @Override
+    public void onStopPushingMetricData()
+    {
+
+    }
+
+    @Override
+    /*
+    * Note that 'reportOut' is an OUT parameter provided by the adapter
+    */
+    public void onPullMetric( UUID measurementSetID, Report reportOut )
+    {
+
+    }
+
+    @Override
+    /*
+    * Note that the summaryOUT parameter is an OUT parameter supplied by the
+    * adapter
+    */
+    public void onPopulateSummaryReport( EMPostReportSummary summaryOUT )
+    {
+
+    }
+
+    @Override
+    public void onPopulateDataBatch( EMDataBatch batchOut )
+    {
+
+    }
+    
+    @Override
+    public void onReportBatchTimeOut( UUID batchID )
+    { 
+
+    }
+
+    @Override
+    public void onGetTearDownResult( Boolean[] resultOUT )
+    {
+
+    }
+
+    @Override
+    public void onTearDownTimeOut()
+    { 
+      
     }
     
     // Private methods ---------------------------------------------------------
+    private boolean tryDisconnecting()
+    {
+        boolean disconnectedOK = false;
+      
+        try 
+        { 
+            emiAdapter.deregisterWithEM();
+            disconnectedOK = true;
+        }
+        catch ( Exception e )
+        { clientLogger.error( "Could not de-register with the EM/ECC" ); }
+
+        return disconnectedOK;
+    }
+    
     private void defineExperimentMetrics( Experiment experiment )
     {
+        measurementSetMap.clear(); // This map will be useful later
+      
         // Set up top-level groups ---------------------------------------------
         MetricGenerator mGen = new MetricGenerator();
         experiment.addMetricGenerator( mGen );
@@ -187,6 +425,25 @@ public class ECCHeaderlessClient
         
     }
     
+    private Set<MeasurementSet> getMeasurementSets( MetricGenerator mGen )
+    {
+        HashSet<MeasurementSet> msetsTarget = new HashSet<MeasurementSet>();
+        
+        if ( mGen != null )
+        {
+            Iterator<MetricGroup> mgIt = mGen.getMetricGroups().iterator();
+            while ( mgIt.hasNext() )
+            {
+                MetricGroup mg = mgIt.next();
+                Iterator<MeasurementSet> msIt = mg.getMeasurementSets().iterator();
+                
+                while ( msIt.hasNext() ) { msetsTarget.add( msIt.next() ); }
+            }
+        }
+        
+        return msetsTarget;
+    }
+    
     private void setupMeasurementForAttribute( Attribute        attr,
                                                MetricGroup      parentGroup,
                                                MetricType       type,
@@ -201,17 +458,20 @@ public class ECCHeaderlessClient
         ms.setAttributeUUID( attr.getUUID() );
         ms.setMetric( new Metric(UUID.randomUUID(), type, unit) );
         
+        // Map this measurement set for later
+        measurementSetMap.put( ms.getUUID(), ms );
+        
         // Create an automatic measurement task to periodically take measurements
         try
         {
             // Must keep hold of task reference to ensure continued sampling
             MeasurementTask task = measurementScheduler.
-                                  createMeasurementTask( ms,           // MeasurementSet
-                                                         listener,     // Listener that will take measurement
-                                                         -1,           // Monitor indefinitely...
-                                                         intervalMS ); // ... each 'X' milliseconds
+                    createMeasurementTask( ms,           // MeasurementSet
+                                           listener,     // Listener that will take measurement
+                                           -1,           // Monitor indefinitely...
+                                           intervalMS ); // ... each 'X' milliseconds
             
-            measurementTasks.add( task );
+            tasksByMeasurementSetMap.put( ms.getUUID(), task );
         }
         catch (Exception e )
         { clientLogger.error( "Could not define measurement for attribute " + attr.getName() ); }
@@ -219,7 +479,9 @@ public class ECCHeaderlessClient
     
     private void startMeasuring()
     {
-        Iterator<MeasurementTask> taskIt = measurementTasks.iterator();
+        Iterator<MeasurementTask> taskIt =
+                tasksByMeasurementSetMap.values().iterator();
+        
         while ( taskIt.hasNext() )
         {
             taskIt.next().startMeasuring();

@@ -17,38 +17,33 @@
 // the software.
 //
 //	Created By :			Maxim Bashevoy
-//	Created Date :			2012-10-10
+//	Created Date :			2012-10-17
 //	Created for Project :           Experimedia
 //
 /////////////////////////////////////////////////////////////////////////
-package eu.experimedia.itinnovation.ecc.web.data;
+package eu.experimedia.itinnovation.ecc.web.adapters;
 
-public class DataPoint {
+import java.util.Date;
+import java.util.HashMap;
 
-    long time;
-    String value;
+public class DashboardMeasurementSet {
 
-    public DataPoint() {
+    private String UUID;
+    private HashMap<Date, String> measurements = new HashMap<Date, String>();
+
+    public DashboardMeasurementSet(String UUID) {
+        this.UUID = UUID;
     }
 
-    public DataPoint(long time, String value) {
-        this.time = time;
-        this.value = value;
+    public void addMeasurement(Date timestamp, String value) {
+        measurements.put(timestamp, value);
     }
 
-    public long getTime() {
-        return time;
+    public HashMap<Date, String> getMeasurements() {
+        return measurements;
     }
 
-    public void setTime(long time) {
-        this.time = time;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    public void setValue(String value) {
-        this.value = value;
+    public String getUUID() {
+        return UUID;
     }
 }

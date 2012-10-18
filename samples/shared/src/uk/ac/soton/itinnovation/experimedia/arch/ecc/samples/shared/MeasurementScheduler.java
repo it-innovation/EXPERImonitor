@@ -25,7 +25,7 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDMLight;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDMAgent;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IReportDAO;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
@@ -55,13 +55,15 @@ public class MeasurementScheduler
     public MeasurementScheduler()
     {}
     
-    public void initialise( IMonitoringEDMLight edmLight ) throws Exception
+    public void initialise( IMonitoringEDMAgent edmAgent ) throws Exception
     {
+        initialisedOK = false;
+        
         // Safety first
         if ( initialisedOK )    throw new Exception( "Already initialised" );
-        if ( edmLight == null ) throw new Exception( "EDM is NULL" );
+        if ( edmAgent == null ) throw new Exception( "EDM is NULL" );
 
-        edmReportDAO              = edmLight.getReportDAO();
+        edmReportDAO              = edmAgent.getReportDAO();
         scheduler                 = new Timer();
         scheduledMeasurementsByID = new HashSet<UUID>();
         
@@ -107,12 +109,9 @@ public class MeasurementScheduler
         {
             synchronized( edmLock )
             {
-              schedulerLogger.info( "Saving MS: " + report.getMeasurementSet().getUUID().toString() + 
-                                    " at time " + report.getToDate().toString() );
-              
-              //try { edmReportDAO.saveReport(report); }
-              //catch ( Exception e )
-              //{ schedulerLogger.error( "EDM save report problem: " + e.getMessage() ); }
+              try { edmReportDAO.saveReport(report); }
+              catch ( Exception e )
+              { schedulerLogger.error( "EDM save report problem: " + e.getMessage() ); }
             }
         }
     }

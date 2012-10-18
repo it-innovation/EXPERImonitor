@@ -61,7 +61,8 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
     private IReportDAO expReportAccessor;
     private IMeasurementSetDAO expMSAccessor;
     private Experiment expInstance;
-    private HashMap<Date, String> testMeasurements = new HashMap<Date, String>();
+//    private ArrayList<DashboardMeasurementSet> reportedMeasurementSets = new ArrayList<DashboardMeasurementSet>();
+    private HashMap<String, DashboardMeasurementSet> reportedMeasurementSets = new HashMap<String, DashboardMeasurementSet>();
 
     public DashboardExperimentMonitor() {
         lifecycleListeners = new HashSet<IEMLifecycleListener>();
@@ -69,10 +70,15 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
         expDataMgr = new MonitoringEDM();
     }
 
-    public HashMap<Date, String> getTestMeasurements() {
-        return testMeasurements;
+    public HashMap<Date, String> getMeasurementsForMeasurementSet(String measurementSetUuid) {
+        if (reportedMeasurementSets.containsKey(measurementSetUuid)) {
+            DashboardMeasurementSet theMeasurementSet = reportedMeasurementSets.get(measurementSetUuid);
+            return theMeasurementSet.getMeasurements();
+        } else {
+            return new HashMap<Date, String>();
+        }
     }
-    
+
     // IExperimentMonitor --------------------------------------------------------
     @Override
     public eStatus getStatus() {
@@ -145,9 +151,11 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
     }
 
     @Override
-    public EMPhase startLifecycle() throws Exception {
+    public EMPhase startLifecycle(Experiment expInfo) throws Exception {
 
-        logger.debug("Starting experiment lifecycle");
+        if (expInfo == null) {
+            throw new Exception("Experiment info is NULL");
+        }
 
         if (monitorStatus != IExperimentMonitor.eStatus.ENTRY_POINT_OPEN) {
             throw new Exception("Not in a state ready to start lifecycle");
@@ -160,8 +168,13 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
         if (lifecycleManager.isLifecycleStarted()) {
             throw new Exception("Lifecycle has already started");
         }
+        
+//        createExperiment();
+        
+        // Save a list of connected clients and properties to the database?
+        // Then just use that list instead of talking to EM?
 
-        createExperiment();
+        lifecycleManager.setExperimentInfo(expInfo);
 
         return lifecycleManager.iterateLifecycle();
     }
@@ -332,12 +345,23 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
     public void onGotMetricData(EMClient client, Report report) {
         if (client != null) {
             if (report != null) {
-                logger.debug("Received metric data from client: " + client.getName() + " [" + client.getID().toString() + "], report [" + report.getUUID().toString() + "] with " + report.getNumberOfMeasurements() + " measurement(s)");
 
                 MeasurementSet measurementSet = report.getMeasurementSet();
 
                 if (measurementSet != null) {
 
+                    logger.debug("Received metric data from client: " + client.getName() + " [" + client.getID().toString() +
+                            "], report [" + report.getUUID().toString() + "] with " + report.getNumberOfMeasurements() +
+                            " measurement(s) for measurement set [" + measurementSet.getUUID().toString() + "]");
+                    
+                    DashboardMeasurementSet theDashboardMeasurementSet;
+                    if (reportedMeasurementSets.containsKey(measurementSet.getUUID().toString())) {
+                        theDashboardMeasurementSet = reportedMeasurementSets.get(measurementSet.getUUID().toString());
+                    } else {
+                        theDashboardMeasurementSet = new DashboardMeasurementSet(measurementSet.getUUID().toString());  
+                        reportedMeasurementSets.put(measurementSet.getUUID().toString(), theDashboardMeasurementSet);
+                    }
+                    
                     Set<Measurement> measurements = measurementSet.getMeasurements();
 
                     if (measurements != null) {
@@ -347,14 +371,16 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
                             int measurementsCounter = 1;
                             String measurementUUID, measurementValue;
                             Date measurementTimestamp;
-                            while(it.hasNext()) {
-
+                            while (it.hasNext()) {
                                 measurement = (Measurement) it.next();
                                 measurementUUID = measurement.getUUID().toString();
-                                measurementTimestamp = measurement.getTimeStamp();
+                                measurementTimestamp = measurement.getTimeStamp();                                
                                 measurementValue = measurement.getValue();
-                                logger.debug(measurementsCounter + ": [" + measurementUUID + "] " + measurementTimestamp.toString() + " - " + measurementValue);
-                                testMeasurements.put(measurementTimestamp, measurementValue);
+                                
+                                logger.debug("Measurement " + measurementsCounter + ": [" + measurementUUID + "] " + measurementTimestamp.toString() + " - " + measurementValue);
+                                
+                                theDashboardMeasurementSet.addMeasurement(measurementTimestamp, measurementValue);
+                                
                                 measurementsCounter++;
 
                             }

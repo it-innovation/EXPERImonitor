@@ -25,16 +25,23 @@
 package eu.experimedia.itinnovation.ecc.web.services;
 
 import eu.experimedia.itinnovation.ecc.web.helpers.ExperimentMonitorHelper;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGroup;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMClient;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMPhase;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.MonitoringEDM;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDM;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IExperimentDAO;
 
 @Service("experimentMonitorService")
 public class ExperimentMonitorService {
@@ -45,9 +52,9 @@ public class ExperimentMonitorService {
     @Qualifier("experimentMonitorHelper")
     private transient ExperimentMonitorHelper emHelper;
     
-    public HashMap<Date, String> getTestData() throws Throwable {
-        logger.debug("Returning test data");
-        return emHelper.getExperimentMonitor().getTestMeasurements();
+    public HashMap<Date, String> getMeasurementsForMeasurementSet(String measurementSetUuid) throws Throwable {
+//        logger.debug("Returning test data");
+        return emHelper.getExperimentMonitor().getMeasurementsForMeasurementSet(measurementSetUuid);
     }    
     
     public EMClient[] getAllConnectedClients() throws Throwable {
@@ -93,7 +100,20 @@ public class ExperimentMonitorService {
     
     public EMPhase startLifeCycle() throws Throwable {
         logger.debug("Starting lifecycle");
-        return emHelper.getExperimentMonitor().startLifecycle();
+        
+        // Create experiment - only temp fix!
+        IMonitoringEDM expDataMgr = new MonitoringEDM();
+        Date expDate = new Date();
+        Experiment expInstance = new Experiment();
+        expInstance.setName("Test Experiment");
+        expInstance.setDescription("Test Experimedia experiment");
+        expInstance.setStartTime(expDate);
+        expInstance.setExperimentID("1");
+
+        IExperimentDAO expDAO = expDataMgr.getExperimentDAO();
+        expDAO.saveExperiment(expInstance);
+        
+        return emHelper.getExperimentMonitor().startLifecycle(expInstance);
     }
     
     public void goToNextPhase() throws Throwable {
