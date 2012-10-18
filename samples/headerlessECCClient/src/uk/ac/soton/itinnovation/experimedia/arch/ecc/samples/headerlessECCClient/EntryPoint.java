@@ -57,8 +57,8 @@ public class EntryPoint
                 String certificatePassword = args[0];
                 
                 connectedToAMQPBus = client.tryVerifiedConnectToAMQPBus( rabbitServerIP, 
-                                                                       ksStream, 
-                                                                       certificatePassword );
+                                                                         ksStream, 
+                                                                         certificatePassword );
             }
             else
             {
