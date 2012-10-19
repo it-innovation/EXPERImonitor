@@ -45,7 +45,7 @@ public class ECCClientController implements EMIAdapterListener,
 
     private AMQPBasicChannel   amqpChannel;
     private EMInterfaceAdapter emiAdapter;
-    private ECCClientView       clientView;
+    private ECCClientView      clientView;
     private String             clientName;
 
     private Entity                        entityBeingObserved;
@@ -126,6 +126,35 @@ public class ECCClientController implements EMIAdapterListener,
           clientView.setStatus( "Refused connection to EM" );
     }
 
+    @Override
+    public void onEMDeregistration( String reason )
+    {
+        clientView.addLogMessage( "Got disconnected from EM: " + reason );
+        try
+        { emiAdapter.disconnectFromEM(); }
+        catch ( Exception e )
+        { clientLogger.error( "Had problems disconnecting from EM: " + e.getMessage() ); }
+    }
+    
+    @Override
+    public void onDescribeSupportPhases( EnumSet<EMPhase> phasesOUT )
+    {
+        // We're going to support all phases (although we won't do much in some of them)
+        // ... we MUST support the discovery phase by default, but don't need to include
+        phasesOUT.add( EMPhase.eEMSetUpMetricGenerators );
+        phasesOUT.add( EMPhase.eEMLiveMonitoring );
+        phasesOUT.add( EMPhase.eEMPostMonitoringReport );
+        phasesOUT.add( EMPhase.eEMTearDown );
+    }
+    
+    @Override
+    public void onDescribePushPullBehaviours( Boolean[] pushPullOUT )
+    {
+        // We're going to support both push and pull
+        pushPullOUT[0] = true;
+        pushPullOUT[1] = true;
+    }
+    
     @Override
     public void onPopulateMetricGeneratorInfo()
     {
@@ -345,7 +374,7 @@ public class ECCClientController implements EMIAdapterListener,
     public void onClientViewClosed()
     {
         // Need to notify that we're leaving...
-        try { emiAdapter.deregisterWithEM(); }
+        try { emiAdapter.disconnectFromEM(); }
         catch ( Exception e )
         { clientLogger.error( "Could not cleanly disconnect from EM:\n" + e.getMessage() ); }
     }

@@ -267,6 +267,10 @@ public class ECCMonitorTestExecutor implements Runnable,
   }
   
   @Override
+  public void onDeregisteringThisClient( UUID senderID, String reason )
+  { /* Not implemented in this test */ }
+  
+  @Override
   public void onRequestActivityPhases( UUID senderID )
   { /*Not implemented in this test*/ }
   

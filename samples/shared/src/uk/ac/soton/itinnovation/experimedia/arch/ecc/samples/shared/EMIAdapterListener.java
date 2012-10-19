@@ -45,7 +45,33 @@ public interface EMIAdapterListener
      * @param connected - true if connected.
      */
     void onEMConnectionResult( boolean connected, Experiment expInfo );
+    
+    /**
+     * Notifies the listener of the EM's de-registration of this client. Listeners
+     * should call the 'disconnectFromEM()' method to disconnect cleanly.
+     * 
+     * @param reason - Reason given by EM for de-registration
+     */
+    void onEMDeregistration( String reason );
+    
+    /**
+     * Requests the listener of the result notify the EMIAdapter of the monitoring
+     * phases it supports.
+     * 
+     * @param phasesOUT - OUT parameter to be used by listener to set the monitoring
+     *                    phases they support
+     * 
+     */
+    void onDescribeSupportPhases( EnumSet<EMPhase> phasesOUT );
 
+    /**
+     * Request the listener specifies whether they push or pull or both.
+     * 
+     * @param pushPullOUT - OUT parameter of two booleans, index 0 for PUSH support
+     *                      and index 1 for PULL support
+     */
+    void onDescribePushPullBehaviours( Boolean[] pushPullOUT );
+    
     /**
      * Request the listener populate a MetricGenerator set with the information
      * describing what metric data will be sent to the EM during live monitoring

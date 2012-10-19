@@ -41,6 +41,7 @@ public class AMQPConnectionFactory
   private static Logger factoryLog = Logger.getLogger( AMQPConnectionFactory.class );
   
   private InetAddress amqpHostIP;
+  private int         amqpPortNumber = 5672;
   private Connection  amqpConnection;
   
   
@@ -60,6 +61,14 @@ public class AMQPConnectionFactory
     catch ( UnknownHostException uhe ) { amqpHostIP = null; }
     
     return ipSuccess;
+  }
+  
+  public boolean setAMQPHostPort( int port )
+  {
+      if ( port < 1 ) return false;
+      
+      amqpPortNumber = port;
+      return true;
   }
   
   public String getLocalIP()
@@ -84,6 +93,7 @@ public class AMQPConnectionFactory
     
     ConnectionFactory amqpFactory = new ConnectionFactory();
     amqpFactory.setHost( amqpHostIP.getHostAddress() );
+    amqpFactory.setPort( amqpPortNumber );
       
     try { amqpConnection = amqpFactory.newConnection(); }
     catch ( Exception e )
@@ -98,7 +108,7 @@ public class AMQPConnectionFactory
     
     ConnectionFactory amqpFactory = new ConnectionFactory();
     amqpFactory.setHost( amqpHostIP.getHostAddress() );
-    amqpFactory.setPort( 5671 );
+    amqpFactory.setPort( amqpPortNumber );
     amqpFactory.useSslProtocol();
     
     try { amqpConnection = amqpFactory.newConnection(); }
@@ -114,26 +124,12 @@ public class AMQPConnectionFactory
     if ( amqpConnection != null ) throw new Exception( "Already connected to host" );
     if ( password       == null ) throw new Exception( "Password is null" );
     
-    // KEYSTORE and PASSWORD ONE
-    char[] keyPassphrase = password.toCharArray();
-    KeyStore ks = KeyStore.getInstance( "PKCS12" );
-    try { ks.load( keystore, keyPassphrase ); }
-    catch ( Exception e )
-    {
-      factoryLog.error( "Had problems loading keystore: " + e.getMessage() );
-      throw e;
-    }
-    
-    KeyManagerFactory kmf = KeyManagerFactory.getInstance( "SunX509" );
-    kmf.init( ks, keyPassphrase );
-
-    // TRUST STORE and PASSWORD TWO
     char[] trustPassphrase = password.toCharArray();  
     KeyStore tks = KeyStore.getInstance( "JKS" );
     try { tks.load( keystore, trustPassphrase ); }
     catch ( Exception e )
     {
-      factoryLog.error( "Had problems loading keystore (for trust management): " + e.getMessage() );
+      factoryLog.error( "Had problems loading keystore: " + e.getMessage() );
       throw e;
     }
 
@@ -141,11 +137,11 @@ public class AMQPConnectionFactory
     tmf.init( tks );
 
     SSLContext sslContext = SSLContext.getInstance("SSLv3");
-    sslContext.init( kmf.getKeyManagers(), tmf.getTrustManagers(), null );
+    sslContext.init( null, tmf.getTrustManagers(), null );
 
     ConnectionFactory amqpFactory = new ConnectionFactory();
     amqpFactory.setHost( amqpHostIP.getHostAddress() );
-    amqpFactory.setPort( 5671 );
+    amqpFactory.setPort( amqpPortNumber );
     amqpFactory.useSslProtocol( sslContext );
       
     try { amqpConnection = amqpFactory.newConnection(); }

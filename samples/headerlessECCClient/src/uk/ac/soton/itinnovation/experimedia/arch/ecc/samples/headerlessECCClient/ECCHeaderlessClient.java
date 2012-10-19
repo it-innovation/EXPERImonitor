@@ -72,13 +72,17 @@ public class ECCHeaderlessClient implements EMIAdapterListener
         measurementSetMap = new HashMap<UUID, MeasurementSet>();
     }
     
-    public boolean tryConnectToAMQPBus( String rabbitServerIP, boolean useSSL ) throws Exception
+    public boolean tryConnectToAMQPBus( String rabbitServerIP, 
+                                        int portNumber,
+                                        boolean useSSL ) throws Exception
     {
         // Safety first
         if ( rabbitServerIP == null ) throw new Exception( "IP parameter is invalid" );
+        if ( portNumber < 1 ) throw new Exception( "Port number is invalid" );
         
         AMQPConnectionFactory amqpFactory = new AMQPConnectionFactory();
         amqpFactory.setAMQPHostIPAddress( rabbitServerIP );
+        amqpFactory.setAMQPHostPort( portNumber );
         
         try
         {
@@ -87,48 +91,61 @@ public class ECCHeaderlessClient implements EMIAdapterListener
             else
               amqpFactory.connectToAMQPHost();
             
-            
             amqpChannel = amqpFactory.createNewChannel();
-            clientLogger.info( "Connected to the AMQP (using non-secured channel)" );
+            
+            clientLogger.info( "Connected to the AMQP (using " +
+                                (useSSL ? "SSL" : "non-secured") + " channel)" );
         }
         catch ( Exception e )
-        { clientLogger.error( "Headerless client problem: could not connect to ECC" ); throw e; }
+        { 
+            clientLogger.error( "Headerless client problem: could not connect to" +
+                                (useSSL ? "SSL" : "non-secured") + " AMQP channel" ); 
+            throw e; 
+        }
         
         return true;
     }
         
     public boolean tryVerifiedConnectToAMQPBus( String      rabbitServerIP,
-                                                InputStream certificateResource,
-                                                String      certificatePassword
+                                                int         portNumber,
+                                                InputStream keystoreStream,
+                                                String      keystorePassword
                                               ) throws      Exception
     {
         // Safety first
-        if ( rabbitServerIP == null )      throw new Exception( "IP parameter is NULL" );
-        if ( certificateResource == null ) throw new Exception( "Certificate resource is NULL" );
-        if ( certificatePassword == null ) throw new Exception( "Certificate password is NULL" );
+        if ( rabbitServerIP == null )   throw new Exception( "IP parameter is NULL" );
+        if ( portNumber < 1 )           throw new Exception( "Port number is invalid" );
+        if ( keystoreStream == null )   throw new Exception( "Certificate resource is NULL" );
+        if ( keystorePassword == null ) throw new Exception( "Certificate password is NULL" );
         
         AMQPConnectionFactory amqpFactory = new AMQPConnectionFactory();
         amqpFactory.setAMQPHostIPAddress( rabbitServerIP );
+        amqpFactory.setAMQPHostPort( portNumber );
         
         try
         {
-            amqpFactory.connectToVerifiedAMQPHost( certificateResource,
-                                                   certificatePassword );
+            amqpFactory.connectToVerifiedAMQPHost( keystoreStream,
+                                                   keystorePassword );
 
             amqpChannel = amqpFactory.createNewChannel();
 
-            clientLogger.info( "Connected to the AMQP (using non-secured channel)" );
+            clientLogger.info( "Connected to the AMQP (using a verified SSL channel)" );
         }
         catch ( Exception e )
-        { clientLogger.error( "Headerless client problem: could not connect to ECC" ); throw e; }
+        { 
+            clientLogger.error( "Headerless client problem: could not connect to SSL verified AMQP" ); 
+            throw e;
+        }
         
         return true;
     }
     
-    public boolean initialiseLocalDataManagement()
+    public boolean initialiseLocalDataManagement( Properties edmProps )
     {
         edmAgentOK  = false;
         schedulerOK = false;
+        
+        //TODO: Something with these EDM properties?
       
         // Initialise the 'mini' version of the EDM for local data management
         try
@@ -185,7 +202,10 @@ public class ECCHeaderlessClient implements EMIAdapterListener
         return true;
     }
     
-    
+    public void disconnectFromECCMonitor()
+    {
+        tryDisconnecting();
+    }
     
     // EMIAdapterListener ------------------------------------------------------
     @Override
@@ -210,6 +230,30 @@ public class ECCHeaderlessClient implements EMIAdapterListener
         
         // If we didn't get past this stage, there's no point in continuing
         if ( !connectionAndExperimentOK ) tryDisconnecting();
+    }
+    
+    @Override
+    public void onEMDeregistration( String reason )
+    {
+        clientLogger.info( "Got disconnected from EM: " + reason );
+        tryDisconnecting();
+    }
+    
+    @Override
+    public void onDescribeSupportPhases( EnumSet<EMPhase> phasesOUT )
+    {
+        // We're going to skip the Set-up and Tear-down phases...
+        // ... we MUST support the discovery phase by default, but don't need to include
+        phasesOUT.add( EMPhase.eEMLiveMonitoring );
+        phasesOUT.add( EMPhase.eEMPostMonitoringReport );
+    }
+    
+    @Override
+    public void onDescribePushPullBehaviours( Boolean[] pushPullOUT )
+    {
+        // We're just going to support pulling for this client
+        pushPullOUT[0] = false; // No pushing
+        pushPullOUT[1] = true;
     }
 
     @Override
@@ -257,23 +301,11 @@ public class ECCHeaderlessClient implements EMIAdapterListener
     
     @Override
     public void onSetupMetricGenerator( UUID genID, Boolean[] resultOUT )
-    {
-        // Assume that we haven't set up properly at first, then verify
-        resultOUT[0] = false;
-      
-        if ( currentExperiment != null )
-        {
-            // Check we've got the metric generator and measurement tasks are ready
-          Iterator<MetricGenerator> mGenIt = currentExperiment.getMetricGenerators().iterator();
-          
-        }
-    }
+    { /* This demo has opted out of this phase */ }
     
     @Override
     public void onSetupTimeOut( UUID metricGeneratorID )
-    {
-      
-    }
+    { /* This demo has opted out of this pase */ }
 
     @Override
     public void onStartPushingMetricData()
@@ -338,15 +370,11 @@ public class ECCHeaderlessClient implements EMIAdapterListener
 
     @Override
     public void onGetTearDownResult( Boolean[] resultOUT )
-    {
-
-    }
+    { /* This demo has opted out of this phase */ }
 
     @Override
     public void onTearDownTimeOut()
-    { 
-      
-    }
+    { /* This demo has opted out of this phase */ }
     
     // Private methods ---------------------------------------------------------
     private boolean tryDisconnecting()
@@ -355,11 +383,11 @@ public class ECCHeaderlessClient implements EMIAdapterListener
       
         try 
         { 
-            emiAdapter.deregisterWithEM();
+            emiAdapter.disconnectFromEM();
             disconnectedOK = true;
         }
         catch ( Exception e )
-        { clientLogger.error( "Could not de-register with the EM/ECC" ); }
+        { clientLogger.error( "Could not de-register with the EM/ECC" + e.getMessage() ); }
 
         return disconnectedOK;
     }
