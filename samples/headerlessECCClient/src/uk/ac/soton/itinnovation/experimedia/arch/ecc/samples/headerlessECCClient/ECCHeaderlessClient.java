@@ -60,16 +60,24 @@ public class ECCHeaderlessClient implements EMIAdapterListener
     private boolean              edmAgentOK  = false;
     private boolean              schedulerOK = false;
     
-    private Experiment                     currentExperiment;
-    private HashMap<UUID, MeasurementSet>  measurementSetMap;
-    private HashMap<UUID, MeasurementTask> tasksByMeasurementSetMap;
+    private Experiment                      currentExperiment;
+    private HashMap<UUID, MeasurementSet>   measurementSetMap;
+    private HashSet<MeasurementTask>        scheduledMeasurementTasks;
+    private HashMap<UUID, ITakeMeasurement> measurementSetInstantSamplers;
     
     
     public ECCHeaderlessClient( String name )
     {
         clientName = name;
         
+        // Easy-to-find measurement sets based on their IDs
         measurementSetMap = new HashMap<UUID, MeasurementSet>();
+        
+        // Set of measurement tasks created for attributes ( see setupMeasurementForAttribute(..) ) 
+        scheduledMeasurementTasks = new HashSet<MeasurementTask>();
+        
+        // For 'on-the-fly' measurements only - used when there is no persistence/scheduling support
+        measurementSetInstantSamplers = new HashMap<UUID, ITakeMeasurement>(); 
     }
     
     public boolean tryConnectToAMQPBus( String rabbitServerIP, 
@@ -110,7 +118,7 @@ public class ECCHeaderlessClient implements EMIAdapterListener
                                                 int         portNumber,
                                                 InputStream keystoreStream,
                                                 String      keystorePassword
-                                              ) throws      Exception
+                                              ) throws Exception
     {
         // Safety first
         if ( rabbitServerIP == null )   throw new Exception( "IP parameter is NULL" );
@@ -150,23 +158,23 @@ public class ECCHeaderlessClient implements EMIAdapterListener
         // Initialise the 'mini' version of the EDM for local data management
         try
         {
-            edmAgent = EDMInterfaceFactory.getMonitoringEDMAgent();
-            edmAgentOK   = true; // Assume OK for now
+            edmAgent   = EDMInterfaceFactory.getMonitoringEDMAgent();
+            edmAgentOK = edmAgent.isDatabaseSetUpAndAccessible();
+            if ( !edmAgentOK ) throw new Exception( "EDM Agent is not configured correctly" );
+            
         }
         catch ( Exception e )
         {
-            clientLogger.error( "Could not create EDM agent" );
+            clientLogger.error( "Could not create EDM agent" + e.getMessage() );
             return false;
         }
         
         // Initialise a scheduler to take/store measurements periodically
-        measurementScheduler     = new MeasurementScheduler();
-        tasksByMeasurementSetMap = new HashMap<UUID, MeasurementTask>(); 
-      
         try
-        { 
-          measurementScheduler.initialise( edmAgent );
-          schedulerOK = true;
+        {
+            measurementScheduler = new MeasurementScheduler();
+            measurementScheduler.initialise( edmAgent );
+            schedulerOK = true;
         }
         catch ( Exception e )
         {
@@ -191,7 +199,7 @@ public class ECCHeaderlessClient implements EMIAdapterListener
         try
         {
             emiAdapter.registerWithEM( clientName, amqpChannel, 
-                                       clientID, monitorID );
+                                       monitorID, clientID );
         }
         catch ( Exception e )
         {
@@ -296,7 +304,7 @@ public class ECCHeaderlessClient implements EMIAdapterListener
     @Override
     public void onDiscoveryTimeOut()
     { 
-
+        //TO DO
     }
     
     @Override
@@ -309,41 +317,59 @@ public class ECCHeaderlessClient implements EMIAdapterListener
 
     @Override
     public void onStartPushingMetricData()
-    {
-
-    }
+    { /* Pushing not implemented in this demo */ }
 
     @Override
     public void onPushReportReceived( UUID reportID )
+    { /* Pushing not implemented in this demo */ }
+    
+    @Override
+    public void onStopPushingMetricData()
+    { /* Pushing not implemented in this demo */ }
+    
+    @Override
+    /*
+    * Note that 'reportOut' is an OUT parameter provided by the adapter
+    */
+    public void onPullMetric( UUID measurementSetID, Report reportOUT )
     {
-
+        clientLogger.info( "Got pull for: " + measurementSetID.toString() );
+      
+        // If we have an EDMAgent running, then get the latest measurement from there
+        if ( edmAgentOK )
+        {        
+            //TODO: Use EDMAgent to get the latest data for this MS
+            
+        }
+        else  // Otherwise, immediately generate the metric 'on-the-fly'
+        {      
+            ITakeMeasurement sampler = measurementSetInstantSamplers.get( measurementSetID );
+            MeasurementSet   mSet    = measurementSetMap.get( measurementSetID );
+          
+            if ( sampler != null && mSet != null )
+            {
+                // Make an empty measurement set for this data first
+                MeasurementSet emptySet = new MeasurementSet( mSet, false );
+                reportOUT.setMeasurementSet( emptySet );
+              
+                sampler.takeMeasure( reportOUT );
+            }
+            else
+                clientLogger.error( "Could not find measurement sampler for " + 
+                                    measurementSetID.toString() );
+        }
     }
     
     @Override
     public void onPullReportReceived( UUID reportID )
     {
-
+        //TODO
     }
     
     @Override
     public void onPullMetricTimeOut( UUID measurementSetID )
     { 
-
-    }
-
-    @Override
-    public void onStopPushingMetricData()
-    {
-
-    }
-
-    @Override
-    /*
-    * Note that 'reportOut' is an OUT parameter provided by the adapter
-    */
-    public void onPullMetric( UUID measurementSetID, Report reportOut )
-    {
-
+        //TODO
     }
 
     @Override
@@ -353,19 +379,19 @@ public class ECCHeaderlessClient implements EMIAdapterListener
     */
     public void onPopulateSummaryReport( EMPostReportSummary summaryOUT )
     {
-
+        //TODO
     }
 
     @Override
     public void onPopulateDataBatch( EMDataBatch batchOut )
     {
-
+        //TODO
     }
     
     @Override
     public void onReportBatchTimeOut( UUID batchID )
     { 
-
+        //TODO
     }
 
     @Override
@@ -404,11 +430,13 @@ public class ECCHeaderlessClient implements EMIAdapterListener
         
         MetricGroup resourceGroup = new MetricGroup();
         mGen.addMetricGroup( resourceGroup );
+        resourceGroup.setMetricGeneratorUUID( resourceGroup.getUUID() );
         resourceGroup.setName( "Local data metrics" );
         resourceGroup.setDescription( "Group representing data related metrics" );
         
         MetricGroup walkGroup = new MetricGroup();
         mGen.addMetricGroup( walkGroup );
+        walkGroup.setMetricGeneratorUUID( walkGroup.getUUID() );
         walkGroup.setName( "Random walkers group" );
         walkGroup.setDescription( "Containers pseudo random number based walkers" );
 
@@ -427,7 +455,7 @@ public class ECCHeaderlessClient implements EMIAdapterListener
                                       MetricType.RATIO,
                                       new Unit("Kilobytes"),
                                       new MemoryUsageTool(),
-                                      100 ); // Measure every 100 ms
+                                      1000 ); // Measure every second
         
         attr = new Attribute();
         thisComputer.addAttribute( attr );
@@ -438,7 +466,7 @@ public class ECCHeaderlessClient implements EMIAdapterListener
                                       MetricType.INTERVAL,
                                       new Unit("Degrees"),
                                       new PsuedoRandomWalkTool( 90 ),
-                                      200 ); // Measure every 200 ms
+                                      2000 ); // Measure every 2 seconds
         
         attr = new Attribute();
         thisComputer.addAttribute( attr );
@@ -449,27 +477,8 @@ public class ECCHeaderlessClient implements EMIAdapterListener
                                       MetricType.INTERVAL,
                                       new Unit("Degrees"),
                                       new PsuedoRandomWalkTool( 10 ),
-                                      400 ); // Measure every 400 ms
+                                      4000 ); // Measure every 4 seconds
         
-    }
-    
-    private Set<MeasurementSet> getMeasurementSets( MetricGenerator mGen )
-    {
-        HashSet<MeasurementSet> msetsTarget = new HashSet<MeasurementSet>();
-        
-        if ( mGen != null )
-        {
-            Iterator<MetricGroup> mgIt = mGen.getMetricGroups().iterator();
-            while ( mgIt.hasNext() )
-            {
-                MetricGroup mg = mgIt.next();
-                Iterator<MeasurementSet> msIt = mg.getMeasurementSets().iterator();
-                
-                while ( msIt.hasNext() ) { msetsTarget.add( msIt.next() ); }
-            }
-        }
-        
-        return msetsTarget;
     }
     
     private void setupMeasurementForAttribute( Attribute        attr,
@@ -489,27 +498,29 @@ public class ECCHeaderlessClient implements EMIAdapterListener
         // Map this measurement set for later
         measurementSetMap.put( ms.getUUID(), ms );
         
-        // Create an automatic measurement task to periodically take measurements
-        try
-        {
-            // Must keep hold of task reference to ensure continued sampling
-            MeasurementTask task = measurementScheduler.
-                    createMeasurementTask( ms,           // MeasurementSet
-                                           listener,     // Listener that will take measurement
-                                           -1,           // Monitor indefinitely...
-                                           intervalMS ); // ... each 'X' milliseconds
-            
-            tasksByMeasurementSetMap.put( ms.getUUID(), task );
-        }
-        catch (Exception e )
-        { clientLogger.error( "Could not define measurement for attribute " + attr.getName() ); }
+        // If available, create an automatic measurement task to periodically take measurements
+        if ( edmAgentOK && schedulerOK )
+            try
+            {
+                // Must keep hold of task reference to ensure continued sampling
+                MeasurementTask task = measurementScheduler.
+                        createMeasurementTask( ms,           // MeasurementSet
+                                               listener,     // Listener that will take measurement
+                                               -1,           // Monitor indefinitely...
+                                               intervalMS ); // ... each 'X' milliseconds
+                
+                scheduledMeasurementTasks.add( task );
+            }
+            catch (Exception e )
+            { clientLogger.error( "Could not define measurement task for attribute " + attr.getName() ); }
+        else
+            // If we can't schedule & store measurements, just have the samplers handy
+            measurementSetInstantSamplers.put( ms.getUUID(), listener );
     }
     
     private void startMeasuring()
     {
-        Iterator<MeasurementTask> taskIt =
-                tasksByMeasurementSetMap.values().iterator();
-        
+        Iterator<MeasurementTask> taskIt = scheduledMeasurementTasks.iterator();
         while ( taskIt.hasNext() )
         {
             taskIt.next().startMeasuring();
