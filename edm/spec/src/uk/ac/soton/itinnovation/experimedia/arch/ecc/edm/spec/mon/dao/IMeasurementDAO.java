@@ -46,7 +46,7 @@ public interface IMeasurementDAO
      * @throws IllegalArgumentException If the Measurement is not valid to be saved, typically due to missing information (e.g., NULL values).
      * @throws Exception If there's a technical issue or a measurement with the same UUID already exists.
      */
-    public void saveMeasurement(Measurement measurement) throws IllegalArgumentException, Exception;
+    void saveMeasurement(Measurement measurement) throws IllegalArgumentException, Exception;
     
     /**
      * Saves measurements for an existing measurement set, and will create a
@@ -56,7 +56,7 @@ public interface IMeasurementDAO
      * @throws IllegalArgumentException If the arguments are invalid, typically due to missing information (e.g., NULL values).
      * @throws Exception If there's a technical issue, if the measurement set does not exist, or a measurement with the same UUID already exists.
      */
-    public void saveMeasurementsForSet(Set<Measurement> measurements, UUID mSetUUID) throws IllegalArgumentException, NoDataException, Exception;
+    void saveMeasurementsForSet(Set<Measurement> measurements, UUID mSetUUID) throws IllegalArgumentException, NoDataException, Exception;
     
     /**
      * Get a measurement according to its UUID.
@@ -66,5 +66,37 @@ public interface IMeasurementDAO
      * @throws NoDataException If there's no measurement with the given UUID.
      * @throws Exception If there's a technical issue.
      */
-    public Measurement getMeasurement(UUID measurementUUID) throws IllegalArgumentException, NoDataException, Exception;
+    Measurement getMeasurement(UUID measurementUUID) throws IllegalArgumentException, NoDataException, Exception;
+    
+    /**
+     * Set the synchronisation flag for the given measurement.
+     * @param measurementUUID The UUID of the measurement.
+     * @param syncFlag The synchronisation flag.
+     * @throws IllegalArgumentException If measurementUUID is not a valid argument (e.g., NULL).
+     * @throws Exception If there's a technical issue.
+     */
+    void setSyncFlagForAMeasurement(UUID measurementUUID, boolean syncFlag) throws IllegalArgumentException, Exception;
+    
+    /**
+     * Set the synchronisation flag for all the measurements in the given set.
+     * @param measurements The set of UUIDs to set the synchronisation flag for.
+     * @param syncFlag The synchronisation flag.
+     * @throws IllegalArgumentException If measurement set is not a valid argument (e.g., NULL or empty).
+     * @throws Exception If there's a technical issue.
+     */
+    void setSyncFlagForMeasurements(Set<UUID> measurements, boolean syncFlag) throws IllegalArgumentException, Exception;
+    
+    /**
+     * Delete any measurements flagged as synchronised.
+     * @throws Exception If there are any technical issues.
+     */
+    void deleteSynchronisedMeasurements() throws Exception;
+    
+    /**
+     * Delete the given set of measurements.
+     * @param measurements Set of UUIDs of measurements to be deleted.
+     * @throws IllegalArgumentException If the measurement set not a valid argument (e.g., NULL or empty).
+     * @throws Exception If there's a technical issue.
+     */
+    void deleteMeasurements(Set<UUID> measurements) throws IllegalArgumentException, Exception;
 }

@@ -47,6 +47,36 @@ public class MeasurementTask
                                   FINITE,
                                   INFINITE };
     
+    public MeasurementTask( MeasurementScheduler scheduler,
+                            ITakeMeasurement listener,
+                            MeasurementSet ms,
+                            int repetitions,
+                            long intervalMS )
+    {
+        measurementScheduler = scheduler;
+        measurementListener  = listener;
+        measurementSet       = ms;
+        intervalMilliSecs    = intervalMS;
+      
+        if ( repetitions == -1 )
+        {
+            taskRecurrance = eTaskRecurrance.INFINITE;
+            reoccurCount   = repetitions;
+        }
+        else if ( repetitions == 0 )
+        {
+            taskRecurrance = eTaskRecurrance.NEVER;
+            reoccurCount   = repetitions;
+        }
+        else if ( repetitions > 0 )
+        {
+            taskRecurrance = eTaskRecurrance.FINITE;
+            reoccurCount   = repetitions;
+        }
+        
+        timedMeasurementTask = new TimedMeasurementTask();
+    }
+    
     public UUID getMeasurementSetID()
     { return measurementSet.getUUID(); }
     
@@ -80,39 +110,8 @@ public class MeasurementTask
             isTakingMeasurements = false;
         }
     }
-  
-    // Protected methods -------------------------------------------------------
-    protected MeasurementTask( MeasurementScheduler scheduler,
-                               ITakeMeasurement listener,
-                               MeasurementSet ms,
-                               int repetitions,
-                               long intervalMS )
-    {
-        measurementScheduler = scheduler;
-        measurementListener  = listener;
-        measurementSet       = ms;
-        intervalMilliSecs    = intervalMS;
-      
-        if ( repetitions == -1 )
-        {
-            taskRecurrance = eTaskRecurrance.INFINITE;
-            reoccurCount   = repetitions;
-        }
-        else if ( repetitions == 0 )
-        {
-            taskRecurrance = eTaskRecurrance.NEVER;
-            reoccurCount   = repetitions;
-        }
-        else if ( repetitions > 0 )
-        {
-            taskRecurrance = eTaskRecurrance.FINITE;
-            reoccurCount   = repetitions;
-        }
-        
-        timedMeasurementTask = new TimedMeasurementTask();
-    }
     
-    protected void executeMeasurement()
+    public void executeMeasurement()
     {
         if ( isTakingMeasurements )
         {
@@ -124,12 +123,17 @@ public class MeasurementTask
             
             // Create empty MeasurementSet clone ready to populate with data
             MeasurementSet msClone = new MeasurementSet( measurementSet, false );
+            
+            Report report = new Report();
+            report.setMeasurementSet( msClone );
 
-            Report report = measurementListener.takeMeasure( msClone );
+            measurementListener.takeMeasure( report );
             measurementScheduler.storeMeasurement( report );
         }
     }
     
+  
+    // Protected methods -------------------------------------------------------    
     @Override
     protected void finalize() throws Throwable
     {

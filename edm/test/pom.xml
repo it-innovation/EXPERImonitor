@@ -76,7 +76,7 @@
     
     <dependency>
       <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
-      <artifactId>experimedia-arch-ecc-edm-impl</artifactId>
+      <artifactId>experimedia-arch-ecc-edm-factory</artifactId>
       <version>0.9-SNAPSHOT</version>
     </dependency>
     

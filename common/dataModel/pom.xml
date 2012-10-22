@@ -17,7 +17,7 @@
   
     <modules>
         <module>metrics</module>
-		<module>experiment</module>
+        <module>experiment</module>
         <module>provenance</module>
 		<module>monitor</module>
     </modules>

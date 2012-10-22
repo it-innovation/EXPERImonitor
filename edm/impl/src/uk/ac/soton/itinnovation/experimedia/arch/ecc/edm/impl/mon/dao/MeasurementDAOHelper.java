@@ -45,7 +45,7 @@ public class MeasurementDAOHelper
 {
     static Logger log = Logger.getLogger(MeasurementDAOHelper.class);
     
-    public static ValidationReturnObject isObjectValidForSave(Measurement measurement, boolean checkForMeasurementSet, Connection connection, boolean closeDBcon) throws Exception
+    public static ValidationReturnObject isObjectValidForSave(Measurement measurement, boolean checkForMeasurementSet, Connection connection) throws Exception
     {
         if (measurement == null)
         {
@@ -88,7 +88,7 @@ public class MeasurementDAOHelper
         // if checking for measurement set, if flag is set
         if (checkForMeasurementSet)
         {
-            if (!MeasurementSetDAOHelper.objectExists(measurement.getMeasurementSetUUID(), connection, closeDBcon))
+            if (!MeasurementSetDAOHelper.objectExists(measurement.getMeasurementSetUUID(), connection))
             {
                 return new ValidationReturnObject(false, new RuntimeException("The Measurements's MeasurementSet does not exist (UUID: " + measurement.getMeasurementSetUUID().toString() + ")"));
             }
@@ -97,7 +97,7 @@ public class MeasurementDAOHelper
         return new ValidationReturnObject(true);
     }
     
-    public static ValidationReturnObject areObjectsValidForSave(Set<Measurement> measurements, UUID mSetUUID, boolean checkForMeasurementSet, Connection connection, boolean closeDBcon) throws Exception
+    public static ValidationReturnObject areObjectsValidForSave(Set<Measurement> measurements, UUID mSetUUID, boolean checkEachMeasurement, boolean checkForMeasurementSet, Connection connection) throws Exception
     {
         if (measurements == null)
         {
@@ -110,45 +110,48 @@ public class MeasurementDAOHelper
         }
         
         // check if all the required information is given; uuid, mSetUUID, timeStamp, value
-        for (Measurement measurement : measurements)
+        if (checkEachMeasurement)
         {
-            if (measurement.getUUID() == null)
+            for (Measurement measurement : measurements)
             {
-                return new ValidationReturnObject(false, new IllegalArgumentException("The Measurement UUID is NULL"));
-            }
-
-            if (measurement.getMeasurementSetUUID() == null)
-            {
-                return new ValidationReturnObject(false, new IllegalArgumentException("The MeasurementSet UUID is NULL"));
-            }
-
-            if (measurement.getTimeStamp() == null)
-            {
-                return new ValidationReturnObject(false, new IllegalArgumentException("The Measurement timestamp is NULL"));
-            }
-
-            if (measurement.getValue() == null)
-            {
-                return new ValidationReturnObject(false, new IllegalArgumentException("The Measurement value is NULL"));
-            }
-            
-            // check if it exists in the DB already
-            /* commented out to save time; DB may throw errors later
-            try {
-                if (objectExists(measurements.getUUID(), connection))
+                if (measurement.getUUID() == null)
                 {
-                    return new ValidationReturnObject(false, new RuntimeException("The Measurement already exists; the UUID is not unique"));
+                    return new ValidationReturnObject(false, new IllegalArgumentException("The Measurement UUID is NULL"));
                 }
-            } catch (Exception ex) {
-                throw ex;
+
+                if (measurement.getMeasurementSetUUID() == null)
+                {
+                    return new ValidationReturnObject(false, new IllegalArgumentException("The MeasurementSet UUID is NULL"));
+                }
+
+                if (measurement.getTimeStamp() == null)
+                {
+                    return new ValidationReturnObject(false, new IllegalArgumentException("The Measurement timestamp is NULL"));
+                }
+
+                if (measurement.getValue() == null)
+                {
+                    return new ValidationReturnObject(false, new IllegalArgumentException("The Measurement value is NULL"));
+                }
+
+                // check if it exists in the DB already
+                /* commented out to save time; DB may throw errors later
+                try {
+                    if (objectExists(measurements.getUUID(), connection))
+                    {
+                        return new ValidationReturnObject(false, new RuntimeException("The Measurement already exists; the UUID is not unique"));
+                    }
+                } catch (Exception ex) {
+                    throw ex;
+                }
+                */
             }
-            */
         }
         
         // if checking for measurement set, if flag is set
         if (checkForMeasurementSet)
         {
-            if (!MeasurementSetDAOHelper.objectExists(mSetUUID, connection, closeDBcon))
+            if (!MeasurementSetDAOHelper.objectExists(mSetUUID, connection))
             {
                 return new ValidationReturnObject(false, new RuntimeException("The Measurements's MeasurementSet does not exist (UUID: " + mSetUUID.toString() + ")"));
             }
@@ -157,16 +160,16 @@ public class MeasurementDAOHelper
         return new ValidationReturnObject(true);
     }
     
-    public static boolean objectExists(UUID uuid, Connection connection, boolean closeDBcon) throws Exception
+    public static boolean objectExists(UUID uuid, Connection connection) throws Exception
     {
-        return DBUtil.objectExistsByUUID("Measurement", "measurementUUID", uuid, connection, closeDBcon);
+        return DBUtil.objectExistsByUUID("Measurement", "measurementUUID", uuid, connection, false);
     }
     
-    public static void saveMeasurement(Measurement measurement, Connection connection, boolean closeDBcon) throws Exception
+    public static void saveMeasurement(Measurement measurement, Connection connection) throws Exception
     {
         // this validation will check if all the required parameters are set and if
         // there isn't already a duplicate instance in the DB
-        ValidationReturnObject returnObj = MeasurementDAOHelper.isObjectValidForSave(measurement, true, connection, false);
+        ValidationReturnObject returnObj = MeasurementDAOHelper.isObjectValidForSave(measurement, true, connection);
         if (!returnObj.valid)
         {
             log.error("Cannot save the Measurement object: " + returnObj.exception.getMessage(), returnObj.exception);
@@ -193,17 +196,14 @@ public class MeasurementDAOHelper
         } catch (Exception ex) {
             log.error("Error while saving Measurement: " + ex.getMessage());
             throw new RuntimeException("Error while saving Measurement: " + ex.getMessage(), ex);
-        } finally {
-            if (closeDBcon)
-                connection.close();
         }
     }
     
-    public static void saveMeasurementsForSet(Set<Measurement> measurements, UUID mSetUUID, Connection connection, boolean closeDBcon) throws Exception
+    public static void saveMeasurementsForSet(Set<Measurement> measurements, UUID mSetUUID, Connection connection) throws Exception
     {
         // this validation will check if all the required parameters are set and if
         // there isn't already a duplicate instance in the DB
-        ValidationReturnObject returnObj = MeasurementDAOHelper.areObjectsValidForSave(measurements, mSetUUID, true, connection, closeDBcon);
+        ValidationReturnObject returnObj = MeasurementDAOHelper.areObjectsValidForSave(measurements, mSetUUID, true, true, connection);
         if (!returnObj.valid)
         {
             log.error("Cannot save the Measurement objects: " + returnObj.exception.getMessage(), returnObj.exception);
@@ -217,32 +217,35 @@ public class MeasurementDAOHelper
         }
         
         try {
+            String query = "INSERT INTO Measurement (measurementUUID, mSetUUID, timeStamp, value, synchronised) VALUES (?, ?, ?, ?, ?)";
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            
             // iterate over each measurement and save
+            int counter = 0;
             for (Measurement measurement : measurements)
             {
-                String query = "INSERT INTO Measurement (measurementUUID, mSetUUID, timeStamp, value, synchronised) VALUES (?, ?, ?, ?, ?)";
-            
-                PreparedStatement pstmt = connection.prepareStatement(query);
+                counter++;
                 pstmt.setObject(1, measurement.getUUID(), java.sql.Types.OTHER);
                 pstmt.setObject(2, measurement.getMeasurementSetUUID(), java.sql.Types.OTHER);
                 pstmt.setLong(3, measurement.getTimeStamp().getTime());
                 pstmt.setString(4, measurement.getValue());
                 pstmt.setBoolean(5, false);
-
-                pstmt.executeUpdate();
+                pstmt.addBatch();
+                
+                // execute batch for every 10,000 measurements
+                if (counter % 10000 == 0) {
+                    pstmt.executeBatch();
+                }
             }
+            // executing final batch of measurements
+            pstmt.executeBatch();
         } catch (Exception ex) {
             log.error("Error while saving Measurement: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while saving Measurement: " + ex.getMessage(), ex);
-        } finally {
-            if (closeDBcon)
-            {
-                connection.close();
-            }
         }
     }
     
-    public static Measurement getMeasurement(UUID measurementUUID, Connection connection, boolean closeDBcon) throws Exception
+    public static Measurement getMeasurement(UUID measurementUUID, Connection connection) throws Exception
     {
         if (measurementUUID == null)
         {
@@ -316,15 +319,12 @@ public class MeasurementDAOHelper
         } catch (Exception ex) {
             log.error("Error while quering the database: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
-        } finally {
-            if (closeDBcon)
-                connection.close();
         }
         
         return measurement;
     }
 
-    public static Set<Measurement> getMeasurementsForTimePeriod(UUID mSetUUID, Date fromDate, Date toDate, Connection connection, boolean closeDBcon) throws Exception
+    public static Set<Measurement> getMeasurementsForTimePeriod(UUID mSetUUID, Date fromDate, Date toDate, Connection connection) throws Exception
     {
         if (mSetUUID == null)
         {
@@ -364,7 +364,7 @@ public class MeasurementDAOHelper
                 try {
                     Date timeStamp = new Date(Long.parseLong(timeStampStr));
                     UUID measurementUUID = UUID.fromString(measurementUUIDstr);
-                    Boolean synchronised = rs.getBoolean("synchronised");;
+                    Boolean synchronised = rs.getBoolean("synchronised");
                     
                     Measurement measurement = new Measurement(measurementUUID, mSetUUID, timeStamp, value);
                     measurement.setSynchronised(synchronised);
@@ -379,11 +379,117 @@ public class MeasurementDAOHelper
         } catch (Exception ex) {
             log.error("Error while quering the database: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
-        } finally {
-            if (closeDBcon)
-                connection.close();
         }
         
         return measurements;
+    }
+    
+    public static void setSyncFlagForAMeasurement(UUID measurementUUID, boolean syncFlag, Connection connection) throws IllegalArgumentException, Exception
+    {
+        if (measurementUUID == null)
+        {
+            log.error("Cannot set the sync flag for the Measurement because the given UUID is NULL");
+            throw new IllegalArgumentException("Cannot set the sync flag for the Measurement because the given UUID is NULL");
+        }
+        
+        if (DBUtil.isClosed(connection))
+        {
+            log.error("Cannot set the sync flag for the Measurement because the connection to the DB is closed");
+            throw new RuntimeException("Cannot set the sync flag for the Measurement because the connection to the DB is closed");
+        }
+        
+        try {
+            String query = "UPDATE Measurement SET synchronised = ? WHERE measurementUUID = ?";
+            
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setBoolean(1, syncFlag);
+            pstmt.setObject(2, measurementUUID, java.sql.Types.OTHER);
+            
+            pstmt.executeUpdate();
+        } catch (Exception ex) {
+            log.error("Error while setting the sync flag for the Measurement: " + ex.getMessage());
+            throw new RuntimeException("Error while setting the sync flag for the Measurement: " + ex.getMessage(), ex);
+        }
+    }
+
+    
+    public static void setSyncFlagForMeasurements(Set<UUID> measurements, boolean syncFlag, Connection connection) throws IllegalArgumentException, Exception
+    {
+        if ((measurements == null) || measurements.isEmpty())
+        {
+            log.error("Cannot delete measurements, because the set of IDs is NULL or empty");
+            throw new IllegalArgumentException("Cannot delete measurements, because the set of IDs is NULL or empty");
+        }
+        
+        if (DBUtil.isClosed(connection))
+        {
+            log.error("Cannot set the sync flag for the Measurements because the connection to the DB is closed");
+            throw new RuntimeException("Cannot set the sync flag for the Measurements because the connection to the DB is closed");
+        }
+        
+        try {
+            String query = "UPDATE Measurement SET synchronised = ? WHERE measurementUUID = ?";
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            
+            for (UUID mUUID : measurements)
+            {
+                pstmt.setBoolean(1, syncFlag);
+                pstmt.setObject(2, mUUID, java.sql.Types.OTHER);
+                pstmt.addBatch();
+            }
+            
+            pstmt.executeBatch();
+        } catch (Exception ex) {
+            log.error("Error while setting the sync flag for the Measurement: " + ex.getMessage());
+            throw new RuntimeException("Error while setting the sync flag for the Measurement: " + ex.getMessage(), ex);
+        }
+    }
+    
+    public static void deleteMeasurements(Set<UUID> measurements, Connection connection) throws IllegalArgumentException, Exception
+    {
+        if ((measurements == null) || measurements.isEmpty())
+        {
+            log.error("Cannot delete measurements, because the set of IDs is NULL or empty");
+            throw new IllegalArgumentException("Cannot delete measurements, because the set of IDs is NULL or empty");
+        }
+        if (DBUtil.isClosed(connection))
+        {
+            log.error("Cannot delete the Measurement objects because the connection to the DB is closed");
+            throw new RuntimeException("Cannot delete the Measurement objects because the connection to the DB is closed");
+        }
+        
+        try {
+            String query = "DELETE FROM Measurement WHERE measurementUUID = ?";
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            
+            for (UUID mUUID : measurements)
+            {
+                pstmt.setObject(1, mUUID, java.sql.Types.OTHER);
+                pstmt.addBatch();
+            }
+            pstmt.executeBatch();
+        } catch (Exception ex) {
+            log.error("Error while saving Measurement: " + ex.getMessage(), ex);
+            throw new RuntimeException("Error while saving Measurement: " + ex.getMessage(), ex);
+        }
+    }
+    
+    public static void deleteSynchronisedMeasurements(Connection connection) throws IllegalArgumentException, Exception
+    {
+        if (DBUtil.isClosed(connection))
+        {
+            log.error("Cannot delete the synchronised Measurement objects because the connection to the DB is closed");
+            throw new RuntimeException("Cannot delete the synchronised Measurement objects because the connection to the DB is closed");
+        }
+        
+        try {
+            String query = "DELETE FROM Measurement WHERE synchronised = ?";
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setBoolean(1, true);
+            pstmt.executeUpdate();
+        } catch (Exception ex) {
+            log.error("Error while deleting synchronised Measurements: " + ex.getMessage(), ex);
+            throw new RuntimeException("Error while deleting synchronised Measurements: " + ex.getMessage(), ex);
+        }
     }
 }

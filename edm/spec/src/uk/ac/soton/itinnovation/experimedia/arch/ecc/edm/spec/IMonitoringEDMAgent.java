@@ -42,26 +42,39 @@ public interface IMonitoringEDMAgent
      * @return Experiment DAO interface.
      * @throws Exception 
      */
-    public IExperimentDAO getExperimentDAO() throws Exception;
+    IExperimentDAO getExperimentDAO() throws Exception;
     
     /**
      * Get the entity DAO, allowing saving and getting Entity objects.
      * @return Entity DAO interface.
      * @throws Exception 
      */
-    public IEntityDAO getEntityDAO() throws Exception;
+    IEntityDAO getEntityDAO() throws Exception;
     
     /**
      * Get the metric generator DAO, allowing saving and getting MetricGenerator objects.
      * @return MetricGenerator DAO interface.
      * @throws Exception 
      */
-    public IMetricGeneratorDAO getMetricGeneratorDAO() throws Exception;
+    IMetricGeneratorDAO getMetricGeneratorDAO() throws Exception;
     
     /**
      * Get the report DAO, allowing saving and getting Report objects.
      * @return Report DAO interface.
      * @throws Exception 
      */
-    public IReportDAO getReportDAO() throws Exception;
+    IReportDAO getReportDAO() throws Exception;
+    
+    /**
+     * Check if the database has been set up correctly and is accessible.
+     * Will try to connect to the database and check that the schema is in place.
+     * @return True if set up and accessible; false otherwise.
+     */
+    boolean isDatabaseSetUpAndAccessible();
+    
+    /**
+     * Clear the data in the metrics database.
+     * @throws Exception 
+     */
+    void clearMetricsDatabase() throws Exception;
 }

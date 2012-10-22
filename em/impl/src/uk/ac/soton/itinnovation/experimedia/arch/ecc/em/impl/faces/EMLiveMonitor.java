@@ -125,6 +125,16 @@ public class EMLiveMonitor extends EMBaseInterface
     executeMethod( 6, null );
   }
   
+  // Method ID = 12
+  @Override
+  public void notifyPullReceived( UUID lastReportID )
+  {
+    ArrayList<Object> params = new ArrayList<Object>();
+    params.add( lastReportID );
+    
+    executeMethod( 12, params );
+  }
+  
   // User methods --------------------------------------------------------------
   // Method ID = 7
   @Override
@@ -165,16 +175,6 @@ public class EMLiveMonitor extends EMBaseInterface
     params.add( report );
     
     executeMethod( 11, params );
-  }
-  
-  // Method ID = 12
-  @Override
-  public void notifyPullReceived( UUID lastReportID )
-  {
-    ArrayList<Object> params = new ArrayList<Object>();
-    params.add( lastReportID );
-    
-    executeMethod( 12, params );
   }
   
   // Protected methods ---------------------------------------------------------

@@ -53,7 +53,7 @@ public interface IMetricGroupDAO
      * @throws IllegalArgumentException If the MetricGroup is not valid to be saved, typically due to missing information (e.g., NULL values).
      * @throws Exception If there's a technical issue or a metric group with the same UUID already exists.
      */
-    public void saveMetricGroup(MetricGroup metricGroup) throws IllegalArgumentException, Exception;
+    void saveMetricGroup(MetricGroup metricGroup) throws IllegalArgumentException, Exception;
     
     /**
      * Get the a metric group instance from a UUID. Will include all sub-classes
@@ -65,7 +65,7 @@ public interface IMetricGroupDAO
      * @throws NoDataException If there's no metric group with the given UUID.
      * @throws Exception If there's a technical issue.
      */
-    public MetricGroup getMetricGroup(UUID metricGroupUUID, boolean withSubClasses) throws IllegalArgumentException, NoDataException, Exception;
+    MetricGroup getMetricGroup(UUID metricGroupUUID, boolean withSubClasses) throws IllegalArgumentException, NoDataException, Exception;
     
     /**
      * Get all metric groups for a metric generator. Will include any sub-classes,
@@ -77,5 +77,5 @@ public interface IMetricGroupDAO
      * @throws NoDataException If there's no metric generator with the given UUID or there are no metric groups for it.
      * @throws Exception If there's a technical issue.
      */
-    public Set<MetricGroup> getMetricGroupsForMetricGenerator(UUID metricGenUUID, boolean withSubClasses) throws IllegalArgumentException, NoDataException, Exception;
+    Set<MetricGroup> getMetricGroupsForMetricGenerator(UUID metricGenUUID, boolean withSubClasses) throws IllegalArgumentException, NoDataException, Exception;
 }

@@ -25,6 +25,7 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.test;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
@@ -71,16 +72,19 @@ public class EDMTest
         
         boolean withSubClasses = true;
         
+        
+        log.info("DB check: " + edm.isDatabaseSetUpAndAccessible());
+        
         // clear the database
         log.info("Clearing the database");
         edm.clearMetricsDatabase();
         
         //-- Create and get experiments --//
-        experiments(edm, expUUID);
+        //experiments(edm, expUUID);
         
-        entities(edm, entityUUID, attributeUUID, expUUID, withSubClasses);
+        //entities(edm, entityUUID, attributeUUID, expUUID, withSubClasses);
         
-        metricGenerator(edm, expUUID, entityUUID, mGenUUID, withSubClasses);
+        //metricGenerator(edm, expUUID, entityUUID, mGenUUID, withSubClasses);
         //metricGeneratorCompleteChain(edm, expUUID, entityUUID, attributeUUID, mGenUUID, mGrpUUID, mSetUUID);
         
         //metricGroup(edm, mGenUUID, mGrpUUID, withSubClasses);
@@ -98,6 +102,8 @@ public class EDMTest
         //saveReport(edm, mSetUUID, reportUUID);
         
         //getReport(edm, mSetUUID, reportUUID);
+        
+        //updateAndDeleteReportTests(edm, mSetUUID);
     }
     
     public static void experiments(MonitoringEDM edm, UUID expUUID) throws Exception
@@ -886,7 +892,7 @@ public class EDMTest
         log.info("Getting report by UUID");
         Report report = null;
         try {
-            report = reportDAO.getReport(reportUUID);
+            report = reportDAO.getReport(reportUUID, false);
         } catch (NoDataException ex) {
             log.error("Unable to get Report: " + ex.getMessage());
         } catch (Exception ex) {
@@ -897,7 +903,7 @@ public class EDMTest
         log.info("Getting report by UUID - WITH DATA");
         report = null;
         try {
-            report = reportDAO.getReportWithData(reportUUID);
+            report = reportDAO.getReport(reportUUID, true);
         } catch (NoDataException ex) {
             log.error("Unable to get Report: " + ex.getMessage());
         } catch (Exception ex) {
@@ -909,7 +915,7 @@ public class EDMTest
         log.info("Getting report for latest value");
         report = null;
         try {
-            report = reportDAO.getReportForLatestMeasurement(mSetUUID);
+            report = reportDAO.getReportForLatestMeasurement(mSetUUID, false);
         } catch (NoDataException ex) {
             log.error("Unable to get Report: " + ex.getMessage());
         } catch (Exception ex) {
@@ -920,7 +926,7 @@ public class EDMTest
         log.info("Getting report for latest value - WITH DATA");
         report = null;
         try {
-            report = reportDAO.getReportForLatestMeasurementWithData(mSetUUID);
+            report = reportDAO.getReportForLatestMeasurement(mSetUUID, true);
         } catch (NoDataException ex) {
             log.error("Unable to get Report: " + ex.getMessage());
         } catch (Exception ex) {
@@ -930,10 +936,11 @@ public class EDMTest
         
 //----- GET REPORT FROM DATE
         Date fromDate = new Date(Long.parseLong("1346146199684"));
-        log.info("Getting report from date " + fromDate);
+        int numMeasurements = 100;
+        log.info("Getting report for " + numMeasurements + " measurements from date " + fromDate);
         report = null;
         try {
-            report = reportDAO.getReportForMeasurementsAfterDate(mSetUUID, fromDate);
+            report = reportDAO.getReportForMeasurementsAfterDate(mSetUUID, fromDate, false);
         } catch (NoDataException ex) {
             log.error("Unable to get Report: " + ex.getMessage());
         } catch (Exception ex) {
@@ -941,10 +948,10 @@ public class EDMTest
         }
         printReportDetails(report);
         
-        log.info("Getting report from date " + fromDate + " --- WITH DATA");
+        log.info("Getting report for " + numMeasurements + " measurements from date " + fromDate + " --- WITH DATA");
         report = null;
         try {
-            report = reportDAO.getReportForMeasurementsAfterDateWithData(mSetUUID, fromDate);
+            report = reportDAO.getReportForMeasurementsAfterDate(mSetUUID, fromDate, true);
         } catch (NoDataException ex) {
             log.error("Unable to get Report: " + ex.getMessage());
         } catch (Exception ex) {
@@ -958,7 +965,7 @@ public class EDMTest
         log.info("Getting report for period " + fromDate + " - " + toDate);
         report = null;
         try {
-            report = reportDAO.getReportForMeasurementsForTimePeriod(mSetUUID, fromDate, toDate);
+            report = reportDAO.getReportForMeasurementsForTimePeriod(mSetUUID, fromDate, toDate, false);
         } catch (NoDataException ex) {
             log.error("Unable to get Report: " + ex.getMessage());
         } catch (Exception ex) {
@@ -969,7 +976,7 @@ public class EDMTest
         log.info("Getting report for period " + fromDate + " - " + toDate + " --- WITH DATA");
         report = null;
         try {
-            report = reportDAO.getReportForMeasurementsForTimePeriodWithData(mSetUUID, fromDate, toDate);
+            report = reportDAO.getReportForMeasurementsForTimePeriod(mSetUUID, fromDate, toDate, true);
         } catch (NoDataException ex) {
             log.error("Unable to get Report: " + ex.getMessage());
         } catch (Exception ex) {
@@ -981,7 +988,7 @@ public class EDMTest
         log.info("Getting report for all measurements");
         report = null;
         try {
-            report = reportDAO.getReportForAllMeasurements(mSetUUID);
+            report = reportDAO.getReportForAllMeasurements(mSetUUID, false);
         } catch (NoDataException ex) {
             log.error("Unable to get Report: " + ex.getMessage());
         } catch (Exception ex) {
@@ -992,13 +999,114 @@ public class EDMTest
         log.info("Getting report for all measurements --- WITH DATA");
         report = null;
         try {
-            report = reportDAO.getReportForAllMeasurementsWithData(mSetUUID);
+            report = reportDAO.getReportForAllMeasurements(mSetUUID, true);
         } catch (NoDataException ex) {
             log.error("Unable to get Report: " + ex.getMessage());
         } catch (Exception ex) {
             log.error("Unable to get Report: " + ex.getMessage(), ex);
         }
         printReportDetails(report);
+        
+        
+        Random rand = new Random();
+        Set<UUID> measurements = new HashSet<UUID>();
+        for (Measurement m : report.getMeasurementSet().getMeasurements())
+        {
+            if (rand.nextBoolean()) measurements.add(m.getUUID());
+        }
+        
+        log.info("Setting 1 measurement to be synced");
+        try {
+            IMeasurementDAO measurementDAO = edm.getMeasurementDAO();
+            measurementDAO.setSyncFlagForAMeasurement(measurements.iterator().next(), true);
+        } catch (Exception ex) {
+            log.error ("Unable to get Measurement DAO: " + ex.getMessage(), ex);
+            throw ex;
+        }
+        
+        log.info("Setting " + measurements.size() + " measurements to be synced");
+        try {
+            IMeasurementDAO measurementDAO = edm.getMeasurementDAO();
+            measurementDAO.setSyncFlagForMeasurements(measurements, true);
+        } catch (Exception ex) {
+            log.error ("Unable to get Measurement DAO: " + ex.getMessage(), ex);
+            throw ex;
+        }
+        
+        log.info("Getting report for the 100 last unsynced measurements --- WITH DATA");
+        report = null;
+        try {
+            report = reportDAO.getReportForUnsyncedMeasurementsAfterDate(mSetUUID, fromDate, 100, true);
+        } catch (NoDataException ex) {
+            log.error("Unable to get Report: " + ex.getMessage());
+        } catch (Exception ex) {
+            log.error("Unable to get Report: " + ex.getMessage(), ex);
+        }
+        printReportDetails(report);
+        
+        log.info("Deleting synchronised measurements");
+        try {
+            IMeasurementDAO measurementDAO = edm.getMeasurementDAO();
+            measurementDAO.deleteSynchronisedMeasurements();
+            log.info("Successfully deleted any synchronised measurements");
+        } catch (Exception ex) {
+            log.error ("Unable to get Measurement DAO: " + ex.getMessage(), ex);
+            throw ex;
+        }
+    }
+    
+    
+    public static void updateAndDeleteReportTests(MonitoringEDM edm, UUID mSetUUID) throws Exception
+    {
+        IReportDAO reportDAO = null;
+        try {
+            reportDAO = edm.getReportDAO();
+        } catch (Exception ex) {
+            log.error ("Unable to get Report DAO: " + ex.getMessage(), ex);
+            throw ex;
+        }
+        
+        log.info("Saving Report for measurement set " + mSetUUID.toString());
+        
+        UUID reportUUID = UUID.randomUUID();
+        Report report = getReportWithRandomMeasurements(reportUUID, mSetUUID);
+        
+        try {
+            reportDAO.saveReport(report);
+            log.info("Report saved successfully!");
+        } catch (Exception ex) {
+            log.error("Unable to save Report: " + ex.getMessage(), ex);
+        }
+        
+//----- GET REPORT BY UUID
+        log.info("Getting report by UUID");
+        report = null;
+        try {
+            report = reportDAO.getReport(reportUUID, true);
+        } catch (NoDataException ex) {
+            log.error("Unable to get Report: " + ex.getMessage());
+        } catch (Exception ex) {
+            log.error("Unable to get Report: " + ex.getMessage(), ex);
+        }
+        printReportDetails(report);
+        
+//----- SET SYNCED FLAG FOR MEASUREMENTS FOR REPORT BY UUID
+        log.info("Setting sync flag for measurements for report by UUID: " + reportUUID);
+        try {
+            reportDAO.setReportMeasurementsSyncFlag(reportUUID, true);
+            log.info("Report updated successfully");
+        } catch (Exception ex) {
+            log.error("Unable to update Report: " + ex.getMessage(), ex);
+        }
+        
+//----- DELETE REPORT BY UUID
+        log.info("Deleting report by UUID: " + reportUUID);
+        try {
+            reportDAO.deleteReport(reportUUID, true);
+            log.info("Report deleted successfully");
+        } catch (Exception ex) {
+            log.error("Unable to delete Report: " + ex.getMessage(), ex);
+        }
     }
     
     public static void printReportDetails(Report report)

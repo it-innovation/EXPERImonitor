@@ -108,6 +108,15 @@ public class MonitoringEDM implements IMonitoringEDM
     {
         return edmDAO;
     }
+
+    @Override
+    public boolean isDatabaseSetUpAndAccessible()
+    {
+        if (edmDAO == null)
+            throw new RuntimeException("Cannot check the metrics database because the EDM DAO is NULL");
+        
+        return edmDAO.isDatabaseSetUpAndAccessible();
+    }
     
     @Override
     public void clearMetricsDatabase() throws Exception

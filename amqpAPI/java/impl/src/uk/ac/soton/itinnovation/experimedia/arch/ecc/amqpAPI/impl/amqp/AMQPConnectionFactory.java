@@ -31,13 +31,17 @@ import java.security.*;
 import javax.net.ssl.*;
 
 import com.rabbitmq.client.*;
+import org.apache.log4j.Logger;
 
 
 
 
 public class AMQPConnectionFactory
 {
+  private static Logger factoryLog = Logger.getLogger( AMQPConnectionFactory.class );
+  
   private InetAddress amqpHostIP;
+  private int         amqpPortNumber = 5672;
   private Connection  amqpConnection;
   
   
@@ -57,6 +61,14 @@ public class AMQPConnectionFactory
     catch ( UnknownHostException uhe ) { amqpHostIP = null; }
     
     return ipSuccess;
+  }
+  
+  public boolean setAMQPHostPort( int port )
+  {
+      if ( port < 1 ) return false;
+      
+      amqpPortNumber = port;
+      return true;
   }
   
   public String getLocalIP()
@@ -81,41 +93,56 @@ public class AMQPConnectionFactory
     
     ConnectionFactory amqpFactory = new ConnectionFactory();
     amqpFactory.setHost( amqpHostIP.getHostAddress() );
+    amqpFactory.setPort( amqpPortNumber );
       
     try { amqpConnection = amqpFactory.newConnection(); }
-    catch ( IOException ioe )
-    { throw new Exception( "Could not create AMQP host connection" ); }
+    catch ( Exception e )
+    { throw new Exception( "Could not create AMQP host connection: " + e.getMessage() ); }
   }
   
-  public void connectToSecureAMQPHost( InputStream certificateStream,
-                                       String      password ) throws Exception
+  public void connectToAMQPSSLHost() throws Exception
+  {
+    // Safety first
+    if ( amqpHostIP     == null ) throw new Exception( "AMQP Host IP not correct" );
+    if ( amqpConnection != null ) throw new Exception( "Already connected to host" );
+    
+    ConnectionFactory amqpFactory = new ConnectionFactory();
+    amqpFactory.setHost( amqpHostIP.getHostAddress() );
+    amqpFactory.setPort( amqpPortNumber );
+    amqpFactory.useSslProtocol();
+    
+    try { amqpConnection = amqpFactory.newConnection(); }
+    catch ( Exception e )
+    { throw new Exception( "Could not create AMQP host SSL connection: " + e.getMessage() ); }
+  }
+  
+  public void connectToVerifiedAMQPHost( InputStream keystore,
+                                         String      password ) throws Exception
   {
     // Safety first
     if ( amqpHostIP     == null ) throw new Exception( "AMQP Host IP not correct" );
     if ( amqpConnection != null ) throw new Exception( "Already connected to host" );
     if ( password       == null ) throw new Exception( "Password is null" );
     
-    char[] keyPassphrase = password.toCharArray();
-    KeyStore ks = KeyStore.getInstance("PKCS12");
-    ks.load( certificateStream, keyPassphrase );
-
-    KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
-    kmf.init(ks, keyPassphrase);
-
     char[] trustPassphrase = password.toCharArray();  
-    KeyStore tks = KeyStore.getInstance("JKS");
-    tks.load(null, trustPassphrase);
+    KeyStore tks = KeyStore.getInstance( "JKS" );
+    try { tks.load( keystore, trustPassphrase ); }
+    catch ( Exception e )
+    {
+      factoryLog.error( "Had problems loading keystore: " + e.getMessage() );
+      throw e;
+    }
 
-    TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
-    tmf.init(tks);
+    TrustManagerFactory tmf = TrustManagerFactory.getInstance( "SunX509" );
+    tmf.init( tks );
 
     SSLContext sslContext = SSLContext.getInstance("SSLv3");
-    sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
+    sslContext.init( null, tmf.getTrustManagers(), null );
 
     ConnectionFactory amqpFactory = new ConnectionFactory();
     amqpFactory.setHost( amqpHostIP.getHostAddress() );
-    amqpFactory.setPort(5671);
-    amqpFactory.useSslProtocol(sslContext);
+    amqpFactory.setPort( amqpPortNumber );
+    amqpFactory.useSslProtocol( sslContext );
       
     try { amqpConnection = amqpFactory.newConnection(); }
     catch ( IOException ioe )

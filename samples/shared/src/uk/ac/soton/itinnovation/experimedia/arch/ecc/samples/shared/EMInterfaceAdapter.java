@@ -64,14 +64,20 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
     protected IEMLiveMonitor       liveMonitorFace;
     protected IEMPostReport        postReportFace;
     protected IEMTearDown          tearDownFace;
+    
+    protected boolean clientRegistered = false;
 
-    // Metric Generators
-    protected HashSet<MetricGenerator> clientGenerators;
+    // Supported phases & metric Generators
+    protected EnumSet<EMPhase>     supportedPhases;
+    protected Set<MetricGenerator> clientGenerators;
 
 
     public EMInterfaceAdapter( EMIAdapterListener listener )
     {
-        emiListener = listener;
+        emiListener     = listener;
+        
+        clientGenerators = new HashSet<MetricGenerator>();
+        supportedPhases  = EnumSet.noneOf( EMPhase.class );
     }
 
     public void registerWithEM( String name,
@@ -85,10 +91,11 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
         if ( emID == null ) throw new Exception( "Experiment Monitor ID is null" );
         if ( ourID == null ) throw new Exception( "Our client ID is null" );
 
-        amqpChannel  = channel;
-        clientName   = name;
-        expMonitorID = emID;
-        clientID     = ourID;
+        clientRegistered = false;
+        amqpChannel      = channel;
+        clientName       = name;
+        expMonitorID     = emID;
+        clientID         = ourID;
 
         // Create interface factory to support interfaces required by the EM
         interfaceFactory = new EMInterfaceFactory( amqpChannel, false );
@@ -118,18 +125,40 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
         entryPointFace.registerAsEMClient( clientID, clientName );
     }
     
-    public void deregisterWithEM() throws Exception
+    public void disconnectFromEM() throws Exception
     {
-        if ( discoveryFace == null ) throw new Exception( "Have not registered correctly with EM" );
-      
-        discoveryFace.clientDisconnecting();
+        boolean sentDisconnectMessage = false;
+        
+        if ( discoveryFace != null )
+        {
+            discoveryFace.clientDisconnecting();
+            sentDisconnectMessage = true;
+        }
+     
+        // Tidy up anyway
+        dispatchPump.stopPump();
+        
+        entryPointFace  = null;
+        discoveryFace   = null;
+        setupFace       = null;
+        liveMonitorFace = null;
+        postReportFace  = null;
+        tearDownFace    = null;
+        
+        amqpChannel      = null;
+        clientRegistered = false;
+        
+        if ( !sentDisconnectMessage )
+          throw new Exception( "Could not communicate disconnection with EM/ECC" );
     }
 
     public Experiment getExperimentInfo()
     { return currentExperiment; }
     
-    public void setMetricGenerators( HashSet<MetricGenerator> generators )
-    { clientGenerators = generators; }
+    public void setMetricGenerators( Set<MetricGenerator> generators )
+    {
+        if ( generators != null ) clientGenerators = generators;
+    }
 
     public void pushMetric( Report report )
     {
@@ -175,9 +204,13 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
 
                         liveMonitorFace.setUserListener( this );
 
-                        // Report that we can both push and be pulled
-                        liveMonitorFace.notifyReadyToPush();
-                        liveMonitorFace.notifyReadyForPull();
+                        // Find out whether we can push or pull, or both
+                        Boolean[] pushPull = new Boolean[2];
+                        emiListener.onDescribePushPullBehaviours( pushPull );
+                        
+                        // Notify EM of behaviours
+                        if ( pushPull[0] ) liveMonitorFace.notifyReadyToPush();
+                        if ( pushPull[1] ) liveMonitorFace.notifyReadyForPull();
                     }
 
                 } break;
@@ -241,21 +274,20 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
             discoveryFace.readyToInitialise();
         }
     }
+    
+    @Override
+    public void onDeregisteringThisClient( UUID senderID, String reason )
+    {
+      
+    }
 
     @Override
     public void onRequestActivityPhases( UUID senderID )
     {
         if ( senderID.equals(expMonitorID) )
         {
-            // Notify EM that ALL the phases are supported by this adapter
-            EnumSet<EMPhase> phases = EnumSet.noneOf( EMPhase.class );
-            phases.add( EMPhase.eEMDiscoverMetricGenerators );
-            phases.add( EMPhase.eEMSetUpMetricGenerators );
-            phases.add( EMPhase.eEMLiveMonitoring );
-            phases.add( EMPhase.eEMPostMonitoringReport );
-            phases.add( EMPhase.eEMTearDown );
-
-            discoveryFace.sendActivePhases( phases );
+            emiListener.onDescribeSupportPhases( supportedPhases );
+            discoveryFace.sendActivePhases( supportedPhases );
         }
     }
 

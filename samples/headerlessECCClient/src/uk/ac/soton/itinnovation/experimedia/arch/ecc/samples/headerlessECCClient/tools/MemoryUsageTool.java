@@ -37,17 +37,13 @@ public class MemoryUsageTool implements ITakeMeasurement
     private final Runtime rt = Runtime.getRuntime();
               
     @Override
-    public Report takeMeasure( MeasurementSet ms )
+    public void takeMeasure( Report reportOUT )
     {
         String memVal = Long.toString( rt.totalMemory() - rt.freeMemory() );
         Measurement measure = new Measurement( memVal );
-        ms.addMeasurement( measure );       
-
-        Report report = new Report();
-        report.setMeasurementSet( ms );
-        report.setFromDate( measure.getTimeStamp() );
-        report.setToDate( measure.getTimeStamp() );
-
-        return report;
+        
+        reportOUT.getMeasurementSet().addMeasurement( measure );
+        reportOUT.setFromDate( measure.getTimeStamp() );
+        reportOUT.setToDate( measure.getTimeStamp() );
     }
 }

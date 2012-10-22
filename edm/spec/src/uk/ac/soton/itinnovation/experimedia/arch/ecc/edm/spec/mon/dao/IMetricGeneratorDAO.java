@@ -56,7 +56,7 @@ public interface IMetricGeneratorDAO
      * @throws IllegalArgumentException If the MetricGenerator or experiment UUID are not valid to be saved, typically due to missing information (e.g., NULL values).
      * @throws Exception If there's a technical issue or a metric generator with the same UUID already exists.
      */
-    public void saveMetricGenerator(MetricGenerator metricGen, UUID experimentUUID) throws IllegalArgumentException, Exception;
+    void saveMetricGenerator(MetricGenerator metricGen, UUID experimentUUID) throws IllegalArgumentException, Exception;
     
     /**
      * Get a metric generator instance from a UUID. Will include all sub-classes
@@ -68,7 +68,7 @@ public interface IMetricGeneratorDAO
      * @throws NoDataException If there's no metric generator with the given UUID.
      * @throws Exception If there's a technical issue.
      */
-    public MetricGenerator getMetricGenerator(UUID metricGenUUID, boolean withSubClasses) throws IllegalArgumentException, NoDataException, Exception;
+    MetricGenerator getMetricGenerator(UUID metricGenUUID, boolean withSubClasses) throws IllegalArgumentException, NoDataException, Exception;
     
     /**
      * Get all metric generators. Will include all sub-classes except for measurements,
@@ -78,7 +78,7 @@ public interface IMetricGeneratorDAO
      * @throws NoDataException If there are no metric generators.
      * @throws Exception If there's a technical issue.
      */
-    public Set<MetricGenerator> getMetricGenerators(boolean withSubClasses) throws NoDataException, Exception;
+    Set<MetricGenerator> getMetricGenerators(boolean withSubClasses) throws NoDataException, Exception;
     
     /**
      * Get all metric generators for an experiment. Will include all sub-classes
@@ -89,5 +89,5 @@ public interface IMetricGeneratorDAO
      * @throws NoDataException If there is no experiment with the given UUID or there are no metric generators for the given experiment.
      * @throws Exception If there's a technical issue.
      */
-    public Set<MetricGenerator> getMetricGeneratorsForExperiment(UUID expUUID, boolean withSubClasses) throws IllegalArgumentException, NoDataException, Exception;
+    Set<MetricGenerator> getMetricGeneratorsForExperiment(UUID expUUID, boolean withSubClasses) throws IllegalArgumentException, NoDataException, Exception;
 }
