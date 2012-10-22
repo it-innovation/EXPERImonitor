@@ -53,9 +53,20 @@ public class ExperimentMonitorService {
     @Qualifier("experimentMonitorHelper")
     private transient ExperimentMonitorHelper emHelper;
     
+    /**
+     * LIVE MONITORING PHASE ONLY. Returns measurements for a measurement set.
+     * 
+     */
     public LinkedHashMap<String, DataPoint> getMeasurementsForMeasurementSet(String measurementSetUuid) throws Throwable {
-//        logger.debug("Returning test data");
         return emHelper.getExperimentMonitor().getMeasurementsForMeasurementSet(measurementSetUuid);
+    }    
+    
+    /**
+     * TEAR DOWN PHASE ONLY. Returns measurements for a summary measurement set.
+     * 
+     */
+    public LinkedHashMap<String, DataPoint> getMeasurementsForSummarySet(String measurementSetUuid) throws Throwable {
+        return emHelper.getExperimentMonitor().getMeasurementsForSummarySet(measurementSetUuid);
     }    
     
     public EMClient[] getAllConnectedClients() throws Throwable {
