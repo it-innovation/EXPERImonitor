@@ -83,6 +83,15 @@ public interface IEMDiscovery
                                 String  expName,
                                 String  expDescription,
                                 Date    createTime );
+    
+    /**
+     * Notifies the client that they are being de-registered from the EM for the
+     * reason specified. Clients should reply using the 'clientDisconnecting()'
+     * method and then terminate their AMQP connection.
+     * 
+     * @param reason - A short description of why the client has been de-registered.
+     */
+    void deregisteringThisClient( String reason );
 
     /**
     * Request a list of supported activity phases from the user that it supports.

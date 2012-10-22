@@ -105,6 +105,16 @@ public class EMDiscovery extends EMBaseInterface
     executeMethod( 2, params );
   }
   
+  // Method ID = 13
+  @Override
+  public void deregisteringThisClient( String reason )
+  {
+    ArrayList<Object> params = new ArrayList<Object>();
+    params.add( reason );
+    
+    executeMethod( 13, params );
+  }
+  
   // Method ID = 3
   @Override
   public void requestActivityPhases()
@@ -317,6 +327,16 @@ public class EMDiscovery extends EMBaseInterface
       {
         if ( providerListener != null )
           providerListener.onClientDisconnecting( interfaceUserID );
+        
+      } break;
+        
+      case ( 13 ) :
+      {
+        if ( userListener != null )
+        {
+          String reason = jsonMapper.fromJson( methodData.get(1), String.class );
+          userListener.onDeregisteringThisClient( interfaceProviderID, reason );
+        }
         
       } break;
     }

@@ -70,6 +70,16 @@ public interface IEMDiscovery_UserListener
                                 Date    createTime );
   
   /**
+   * Provider (EM) has notified the user that they are being de-registered. Clients
+   * should reply by using the clientDisconnecting() method on the discovery interface.
+   * 
+   * @param senderID  - ID of the EM sending this event
+   * @param reason    - Brief description for the reason for de-registering
+   */
+  void onDeregisteringThisClient( UUID senderID,
+                                  String reason );
+  
+  /**
    * EM requests a list of supported activities by the user.
    * 
    * @param senderID - ID of the EM sending this event

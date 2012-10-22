@@ -38,59 +38,177 @@ public class EntryPoint
   
     public static void main( String args[] )
     {
-        try
-        {          
-            ECCHeaderlessClient client      = new ECCHeaderlessClient( "Headerless Client " + new Date().toString() );
-            boolean usingVerifiedConnection = false; //( args.length == 1 ); // Expect a keystore password from CLI here
-            boolean connectedToAMQPBus      = false;
-            
-            InputStream is = EntryPoint.class.getResourceAsStream( "/main/resources/client.properties" );
-            if ( is == null ) throw new Exception( "Could not find client properties file" );
-                
-            Properties props = new Properties();
-            props.load( is );
-            
-            if ( usingVerifiedConnection )
+        // Get some configuration information from somewhere
+        Properties emProps  = getProperties( "em");
+        Properties edmProps = getProperties( "edm" );
+        
+        if ( emProps != null )
+        {
+              ECCHeaderlessClient client = new ECCHeaderlessClient( "Headerless Client " + new Date().toString() );
+
+              // Try connecting to AMQP bus
+              if ( connectToAMQPBus( client, emProps ) )
+              {
+                  // Attempt to register with the Experiment Monitor
+                  if ( tryRegisterWithECCMonitor( client, emProps, edmProps ) )
+                      clientLogger.info( "Successfully attempteded client registration... waiting for ECC response" );
+                  
+                  // Wait for a manual exit
+                  System.out.println( "Type EXIT to stop client" );
+                  boolean continueMonitoring = true;
+                  BufferedReader br = new BufferedReader( new InputStreamReader(System.in) );
+                  
+                  while ( continueMonitoring )
+                  {
+                      String command = null;
+                      try { command = br.readLine(); }
+                      catch ( IOException ioe )
+                      {
+                          clientLogger.error( "Cannot read commands from CLI!" );
+                          continueMonitoring = false;
+                      }
+                      
+                      if ( command.contains("EXIT") ) continueMonitoring = false;                      
+                  }
+                  
+                  // Tidy up
+                  client.disconnectFromECCMonitor();
+                  
+                  System.exit( 1 );
+              }  
+        }
+        else { clientLogger.error( "Could not find client configuration properties" ); }
+    }
+    
+    private static Properties getProperties( String configName )
+    {
+        Properties targetProperties = null;
+        InputStream propsStream     = null;
+        
+        // Look for file on class path first...
+        File propFile = new File( configName + ".properties" );
+        if ( propFile.exists() )
+            try
+            { propsStream = (InputStream) new FileInputStream( propFile ); }
+            catch ( IOException ioe )
+            { clientLogger.error( "Could not open client configuration properties file" ); }
+        
+        // ... but if it doesn't exist, try pulling the same from internal resources
+        if ( propsStream == null ) 
+          propsStream = EntryPoint.class.getResourceAsStream( "/main/resources/" +
+                                                              configName + ".properties" );
+     
+        // If we've got a good stream, try loading it
+        if ( propsStream != null )
+        {
+          targetProperties = new Properties();
+          try { targetProperties.load( propsStream ); }
+          catch ( IOException ioe )
+          { 
+            clientLogger.error( "Could not load client configuration properties" );
+            targetProperties = null;
+          }
+        }
+        
+        // Tidy up
+        if ( propsStream != null )
+          try 
+          { propsStream.close(); }
+          catch ( IOException ioe )
+          { clientLogger.error( "Could not close client properties stream (and/or file)" ); }
+        
+        // Return properties
+        return targetProperties;
+    }
+    
+    private static boolean connectToAMQPBus( ECCHeaderlessClient client,
+                                             Properties          emProps )
+    {
+        // Safety first
+        if ( client == null || emProps == null ) return false;
+        
+        // Get shared properties first
+        String rabbitServerIP   = emProps.getProperty( "Monitor_IP" );
+        String rabbitServerPort = emProps.getProperty( "MonitorPort" );
+        String eccMonitorID     = emProps.getProperty( "MonitorID" );
+        
+        boolean connectedOK = false;
+        
+        // Proceed only if these at least exist
+        if ( rabbitServerIP   != null &&
+             rabbitServerPort != null &&
+             eccMonitorID     != null )
+        {
+            int portNumber = Integer.parseInt( rabbitServerPort );
+          
+            // Now check to see if we're using a verified connection type
+            if ( emProps.containsKey("Keystore") && 
+                 emProps.containsKey("KeystorePassword") )
             {
-                String rabbitServerIP      = props.getProperty( "Monitor_IP" );
-                InputStream ksStream       = EntryPoint.class.getResourceAsStream( props.getProperty("Keystore") ); 
-                String certificatePassword = args[0];
-                
-                connectedToAMQPBus = client.tryVerifiedConnectToAMQPBus( rabbitServerIP, 
-                                                                         ksStream, 
-                                                                         certificatePassword );
+                InputStream ksStream = EntryPoint.class.getResourceAsStream( emProps.getProperty("Keystore") ); 
+                String ksPassword    = emProps.getProperty( "KeystorePassword" );
+
+                try
+                {
+                    connectedOK = client.tryVerifiedConnectToAMQPBus( rabbitServerIP,
+                                                                      portNumber,
+                                                                      ksStream, 
+                                                                      ksPassword );
+                }
+                catch ( Exception e )
+                { clientLogger.error( "Could not connect to AMQP Bus: " + e.getMessage() ); }
             }
             else
             {
-                String rabbitServerIP = props.getProperty( "Monitor_IP" );
-                boolean useSSL = ( props.getProperty( "Monitor_Use_SSL" ).equals("true") );
-              
-                if ( useSSL )
-                    connectedToAMQPBus = client.tryConnectToAMQPBus( rabbitServerIP, true );
-                else
-                    connectedToAMQPBus = client.tryConnectToAMQPBus( rabbitServerIP, false );
-            }
-            
-            if ( connectedToAMQPBus )
-            {
-                // Try to create local data persistence (not critical, but very useful)
-                if ( client.initialiseLocalDataManagement() )
-                    clientLogger.info( "Successfully created EDMAgent and measurement scheduling" );
-                else
-                    clientLogger.warn( "Could not create local EDMAgent - will continue, but will not schedule/store measurements" );
+                // Might still try connect to the (unverified) AMQP server using SSL
+                boolean useSSL = false;
+                if ( emProps.containsKey("Monitor_Use_SSL") )
+                    useSSL = ( emProps.getProperty( "Monitor_Use_SSL" ).equals("true") );
                 
-                UUID expMonitorID = UUID.fromString( props.getProperty( "MonitorID" ) );
-                
-                if ( client.tryRegisteringWithECCMonitor( expMonitorID,
-                                                          UUID.randomUUID() ) )
-                {
-                    // Successfully connected and registered with the EM/ECC - the client will continue from here
-                    clientLogger.info( "Successfully registered with EM/ECC... engaging with monitoring process" );
+                try
+                { connectedOK = client.tryConnectToAMQPBus( rabbitServerIP,
+                                                            portNumber,
+                                                            useSSL ); }
+                catch ( Exception e )
+                { 
+                  clientLogger.error( "Could not connect to " +
+                                      (useSSL ? "(SSL)" : "(insecure)") +
+                                      "AMQP Bus: " + e.getMessage() );
                 }
             }
         }
-        catch ( Exception e )
-        { clientLogger.error("Problem starting: could not connect to the ECC: " + e.getMessage()); }
+        
+        return connectedOK;
+    }
     
+    private static boolean tryRegisterWithECCMonitor( ECCHeaderlessClient client,
+                                                      Properties          emProps,
+                                                      Properties          edmProps )
+    {
+        boolean registrationAttempt = false;
+        
+        // Try to create local data persistence (not critical, but very useful)
+        if ( client.initialiseLocalDataManagement(edmProps) )
+            clientLogger.info( "Successfully created EDMAgent and measurement scheduling" );
+        else
+            clientLogger.warn( "Could not create local EDMAgent - will continue, but will not schedule/store measurements" );
+
+        // Make sure we have a valid UUID to connect to EM/ECC
+        UUID expMonitorID = null;
+
+        try { expMonitorID = UUID.fromString( emProps.getProperty( "MonitorID" ) ); }
+        catch ( IllegalArgumentException iae )
+        { clientLogger.error( "EM/ECC ID is invalid" ); }
+
+        if ( expMonitorID != null )
+        try
+        {
+            if ( client.tryRegisteringWithECCMonitor( expMonitorID,
+                                                      UUID.randomUUID() ) ) registrationAttempt = true;
+        }
+        catch ( Exception e )
+        { clientLogger.error( "Could not attempt registration with EM/ECC: " + e.getMessage() ); }
+        
+        return registrationAttempt;
     }
 }

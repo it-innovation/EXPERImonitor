@@ -271,7 +271,10 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
             phaseListener.onGotMetricData( client, report );
             processedOK = true;
           }
-           
+          
+          // Let client know we've received the data
+          client.getLiveMonitorInterface().notifyPullReceived( report.getUUID() );
+        
           client.setPullingMeasurementSetID( null ); // No longer pulling data
         }
       }

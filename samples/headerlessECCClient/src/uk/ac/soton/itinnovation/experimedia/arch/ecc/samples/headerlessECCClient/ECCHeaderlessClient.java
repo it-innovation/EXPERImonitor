@@ -60,25 +60,37 @@ public class ECCHeaderlessClient implements EMIAdapterListener
     private boolean              edmAgentOK  = false;
     private boolean              schedulerOK = false;
     
-    private Experiment                     currentExperiment;
-    private HashMap<UUID, MeasurementSet>  measurementSetMap;
-    private HashMap<UUID, MeasurementTask> tasksByMeasurementSetMap;
+    private Experiment                      currentExperiment;
+    private HashMap<UUID, MeasurementSet>   measurementSetMap;
+    private HashSet<MeasurementTask>        scheduledMeasurementTasks;
+    private HashMap<UUID, ITakeMeasurement> measurementSetInstantSamplers;
     
     
     public ECCHeaderlessClient( String name )
     {
         clientName = name;
         
+        // Easy-to-find measurement sets based on their IDs
         measurementSetMap = new HashMap<UUID, MeasurementSet>();
+        
+        // Set of measurement tasks created for attributes ( see setupMeasurementForAttribute(..) ) 
+        scheduledMeasurementTasks = new HashSet<MeasurementTask>();
+        
+        // For 'on-the-fly' measurements only - used when there is no persistence/scheduling support
+        measurementSetInstantSamplers = new HashMap<UUID, ITakeMeasurement>(); 
     }
     
-    public boolean tryConnectToAMQPBus( String rabbitServerIP, boolean useSSL ) throws Exception
+    public boolean tryConnectToAMQPBus( String rabbitServerIP, 
+                                        int portNumber,
+                                        boolean useSSL ) throws Exception
     {
         // Safety first
         if ( rabbitServerIP == null ) throw new Exception( "IP parameter is invalid" );
+        if ( portNumber < 1 ) throw new Exception( "Port number is invalid" );
         
         AMQPConnectionFactory amqpFactory = new AMQPConnectionFactory();
         amqpFactory.setAMQPHostIPAddress( rabbitServerIP );
+        amqpFactory.setAMQPHostPort( portNumber );
         
         try
         {
@@ -87,69 +99,82 @@ public class ECCHeaderlessClient implements EMIAdapterListener
             else
               amqpFactory.connectToAMQPHost();
             
-            
             amqpChannel = amqpFactory.createNewChannel();
-            clientLogger.info( "Connected to the AMQP (using non-secured channel)" );
+            
+            clientLogger.info( "Connected to the AMQP (using " +
+                                (useSSL ? "SSL" : "non-secured") + " channel)" );
         }
         catch ( Exception e )
-        { clientLogger.error( "Headerless client problem: could not connect to ECC" ); throw e; }
+        { 
+            clientLogger.error( "Headerless client problem: could not connect to" +
+                                (useSSL ? "SSL" : "non-secured") + " AMQP channel" ); 
+            throw e; 
+        }
         
         return true;
     }
         
     public boolean tryVerifiedConnectToAMQPBus( String      rabbitServerIP,
-                                                InputStream certificateResource,
-                                                String      certificatePassword
-                                              ) throws      Exception
+                                                int         portNumber,
+                                                InputStream keystoreStream,
+                                                String      keystorePassword
+                                              ) throws Exception
     {
         // Safety first
-        if ( rabbitServerIP == null )      throw new Exception( "IP parameter is NULL" );
-        if ( certificateResource == null ) throw new Exception( "Certificate resource is NULL" );
-        if ( certificatePassword == null ) throw new Exception( "Certificate password is NULL" );
+        if ( rabbitServerIP == null )   throw new Exception( "IP parameter is NULL" );
+        if ( portNumber < 1 )           throw new Exception( "Port number is invalid" );
+        if ( keystoreStream == null )   throw new Exception( "Certificate resource is NULL" );
+        if ( keystorePassword == null ) throw new Exception( "Certificate password is NULL" );
         
         AMQPConnectionFactory amqpFactory = new AMQPConnectionFactory();
         amqpFactory.setAMQPHostIPAddress( rabbitServerIP );
+        amqpFactory.setAMQPHostPort( portNumber );
         
         try
         {
-            amqpFactory.connectToVerifiedAMQPHost( certificateResource,
-                                                   certificatePassword );
+            amqpFactory.connectToVerifiedAMQPHost( keystoreStream,
+                                                   keystorePassword );
 
             amqpChannel = amqpFactory.createNewChannel();
 
-            clientLogger.info( "Connected to the AMQP (using non-secured channel)" );
+            clientLogger.info( "Connected to the AMQP (using a verified SSL channel)" );
         }
         catch ( Exception e )
-        { clientLogger.error( "Headerless client problem: could not connect to ECC" ); throw e; }
+        { 
+            clientLogger.error( "Headerless client problem: could not connect to SSL verified AMQP" ); 
+            throw e;
+        }
         
         return true;
     }
     
-    public boolean initialiseLocalDataManagement()
+    public boolean initialiseLocalDataManagement( Properties edmProps )
     {
         edmAgentOK  = false;
         schedulerOK = false;
+        
+        //TODO: Something with these EDM properties?
       
         // Initialise the 'mini' version of the EDM for local data management
         try
         {
-            edmAgent = EDMInterfaceFactory.getMonitoringEDMAgent();
-            edmAgentOK   = true; // Assume OK for now
+            edmAgent   = EDMInterfaceFactory.getMonitoringEDMAgent();
+            edmAgentOK = edmAgent.isDatabaseSetUpAndAccessible();
+            if ( !edmAgentOK ) throw new Exception( "EDM Agent is not configured correctly" );
+            
         }
         catch ( Exception e )
         {
-            clientLogger.error( "Could not create EDM agent" );
+            clientLogger.error( "Could not create EDM agent" + e.getMessage() );
             return false;
         }
         
         // Initialise a scheduler to take/store measurements periodically
-        measurementScheduler     = new MeasurementScheduler();
-        tasksByMeasurementSetMap = new HashMap<UUID, MeasurementTask>(); 
-      
         try
-        { 
-          measurementScheduler.initialise( edmAgent );
-          schedulerOK = true;
+        {
+            measurementScheduler = new MeasurementScheduler();
+            measurementScheduler.initialise( edmAgent );
+            schedulerOK = true;
         }
         catch ( Exception e )
         {
@@ -174,7 +199,7 @@ public class ECCHeaderlessClient implements EMIAdapterListener
         try
         {
             emiAdapter.registerWithEM( clientName, amqpChannel, 
-                                       clientID, monitorID );
+                                       monitorID, clientID );
         }
         catch ( Exception e )
         {
@@ -185,7 +210,10 @@ public class ECCHeaderlessClient implements EMIAdapterListener
         return true;
     }
     
-    
+    public void disconnectFromECCMonitor()
+    {
+        tryDisconnecting();
+    }
     
     // EMIAdapterListener ------------------------------------------------------
     @Override
@@ -210,6 +238,30 @@ public class ECCHeaderlessClient implements EMIAdapterListener
         
         // If we didn't get past this stage, there's no point in continuing
         if ( !connectionAndExperimentOK ) tryDisconnecting();
+    }
+    
+    @Override
+    public void onEMDeregistration( String reason )
+    {
+        clientLogger.info( "Got disconnected from EM: " + reason );
+        tryDisconnecting();
+    }
+    
+    @Override
+    public void onDescribeSupportPhases( EnumSet<EMPhase> phasesOUT )
+    {
+        // We're going to skip the Set-up and Tear-down phases...
+        // ... we MUST support the discovery phase by default, but don't need to include
+        phasesOUT.add( EMPhase.eEMLiveMonitoring );
+        phasesOUT.add( EMPhase.eEMPostMonitoringReport );
+    }
+    
+    @Override
+    public void onDescribePushPullBehaviours( Boolean[] pushPullOUT )
+    {
+        // We're just going to support pulling for this client
+        pushPullOUT[0] = false; // No pushing
+        pushPullOUT[1] = true;
     }
 
     @Override
@@ -252,66 +304,72 @@ public class ECCHeaderlessClient implements EMIAdapterListener
     @Override
     public void onDiscoveryTimeOut()
     { 
-
+        //TO DO
     }
     
     @Override
     public void onSetupMetricGenerator( UUID genID, Boolean[] resultOUT )
-    {
-        // Assume that we haven't set up properly at first, then verify
-        resultOUT[0] = false;
-      
-        if ( currentExperiment != null )
-        {
-            // Check we've got the metric generator and measurement tasks are ready
-          Iterator<MetricGenerator> mGenIt = currentExperiment.getMetricGenerators().iterator();
-          
-        }
-    }
+    { /* This demo has opted out of this phase */ }
     
     @Override
     public void onSetupTimeOut( UUID metricGeneratorID )
-    {
-      
-    }
+    { /* This demo has opted out of this pase */ }
 
     @Override
     public void onStartPushingMetricData()
-    {
-
-    }
+    { /* Pushing not implemented in this demo */ }
 
     @Override
     public void onPushReportReceived( UUID reportID )
+    { /* Pushing not implemented in this demo */ }
+    
+    @Override
+    public void onStopPushingMetricData()
+    { /* Pushing not implemented in this demo */ }
+    
+    @Override
+    /*
+    * Note that 'reportOut' is an OUT parameter provided by the adapter
+    */
+    public void onPullMetric( UUID measurementSetID, Report reportOUT )
     {
-
+        clientLogger.info( "Got pull for: " + measurementSetID.toString() );
+      
+        // If we have an EDMAgent running, then get the latest measurement from there
+        if ( edmAgentOK )
+        {        
+            //TODO: Use EDMAgent to get the latest data for this MS
+            
+        }
+        else  // Otherwise, immediately generate the metric 'on-the-fly'
+        {      
+            ITakeMeasurement sampler = measurementSetInstantSamplers.get( measurementSetID );
+            MeasurementSet   mSet    = measurementSetMap.get( measurementSetID );
+          
+            if ( sampler != null && mSet != null )
+            {
+                // Make an empty measurement set for this data first
+                MeasurementSet emptySet = new MeasurementSet( mSet, false );
+                reportOUT.setMeasurementSet( emptySet );
+              
+                sampler.takeMeasure( reportOUT );
+            }
+            else
+                clientLogger.error( "Could not find measurement sampler for " + 
+                                    measurementSetID.toString() );
+        }
     }
     
     @Override
     public void onPullReportReceived( UUID reportID )
     {
-
+        //TODO
     }
     
     @Override
     public void onPullMetricTimeOut( UUID measurementSetID )
     { 
-
-    }
-
-    @Override
-    public void onStopPushingMetricData()
-    {
-
-    }
-
-    @Override
-    /*
-    * Note that 'reportOut' is an OUT parameter provided by the adapter
-    */
-    public void onPullMetric( UUID measurementSetID, Report reportOut )
-    {
-
+        //TODO
     }
 
     @Override
@@ -321,32 +379,28 @@ public class ECCHeaderlessClient implements EMIAdapterListener
     */
     public void onPopulateSummaryReport( EMPostReportSummary summaryOUT )
     {
-
+        //TODO
     }
 
     @Override
     public void onPopulateDataBatch( EMDataBatch batchOut )
     {
-
+        //TODO
     }
     
     @Override
     public void onReportBatchTimeOut( UUID batchID )
     { 
-
+        //TODO
     }
 
     @Override
     public void onGetTearDownResult( Boolean[] resultOUT )
-    {
-
-    }
+    { /* This demo has opted out of this phase */ }
 
     @Override
     public void onTearDownTimeOut()
-    { 
-      
-    }
+    { /* This demo has opted out of this phase */ }
     
     // Private methods ---------------------------------------------------------
     private boolean tryDisconnecting()
@@ -355,11 +409,11 @@ public class ECCHeaderlessClient implements EMIAdapterListener
       
         try 
         { 
-            emiAdapter.deregisterWithEM();
+            emiAdapter.disconnectFromEM();
             disconnectedOK = true;
         }
         catch ( Exception e )
-        { clientLogger.error( "Could not de-register with the EM/ECC" ); }
+        { clientLogger.error( "Could not de-register with the EM/ECC" + e.getMessage() ); }
 
         return disconnectedOK;
     }
@@ -376,11 +430,13 @@ public class ECCHeaderlessClient implements EMIAdapterListener
         
         MetricGroup resourceGroup = new MetricGroup();
         mGen.addMetricGroup( resourceGroup );
+        resourceGroup.setMetricGeneratorUUID( resourceGroup.getUUID() );
         resourceGroup.setName( "Local data metrics" );
         resourceGroup.setDescription( "Group representing data related metrics" );
         
         MetricGroup walkGroup = new MetricGroup();
         mGen.addMetricGroup( walkGroup );
+        walkGroup.setMetricGeneratorUUID( walkGroup.getUUID() );
         walkGroup.setName( "Random walkers group" );
         walkGroup.setDescription( "Containers pseudo random number based walkers" );
 
@@ -399,7 +455,7 @@ public class ECCHeaderlessClient implements EMIAdapterListener
                                       MetricType.RATIO,
                                       new Unit("Kilobytes"),
                                       new MemoryUsageTool(),
-                                      100 ); // Measure every 100 ms
+                                      1000 ); // Measure every second
         
         attr = new Attribute();
         thisComputer.addAttribute( attr );
@@ -410,7 +466,7 @@ public class ECCHeaderlessClient implements EMIAdapterListener
                                       MetricType.INTERVAL,
                                       new Unit("Degrees"),
                                       new PsuedoRandomWalkTool( 90 ),
-                                      200 ); // Measure every 200 ms
+                                      2000 ); // Measure every 2 seconds
         
         attr = new Attribute();
         thisComputer.addAttribute( attr );
@@ -421,27 +477,8 @@ public class ECCHeaderlessClient implements EMIAdapterListener
                                       MetricType.INTERVAL,
                                       new Unit("Degrees"),
                                       new PsuedoRandomWalkTool( 10 ),
-                                      400 ); // Measure every 400 ms
+                                      4000 ); // Measure every 4 seconds
         
-    }
-    
-    private Set<MeasurementSet> getMeasurementSets( MetricGenerator mGen )
-    {
-        HashSet<MeasurementSet> msetsTarget = new HashSet<MeasurementSet>();
-        
-        if ( mGen != null )
-        {
-            Iterator<MetricGroup> mgIt = mGen.getMetricGroups().iterator();
-            while ( mgIt.hasNext() )
-            {
-                MetricGroup mg = mgIt.next();
-                Iterator<MeasurementSet> msIt = mg.getMeasurementSets().iterator();
-                
-                while ( msIt.hasNext() ) { msetsTarget.add( msIt.next() ); }
-            }
-        }
-        
-        return msetsTarget;
     }
     
     private void setupMeasurementForAttribute( Attribute        attr,
@@ -461,27 +498,29 @@ public class ECCHeaderlessClient implements EMIAdapterListener
         // Map this measurement set for later
         measurementSetMap.put( ms.getUUID(), ms );
         
-        // Create an automatic measurement task to periodically take measurements
-        try
-        {
-            // Must keep hold of task reference to ensure continued sampling
-            MeasurementTask task = measurementScheduler.
-                    createMeasurementTask( ms,           // MeasurementSet
-                                           listener,     // Listener that will take measurement
-                                           -1,           // Monitor indefinitely...
-                                           intervalMS ); // ... each 'X' milliseconds
-            
-            tasksByMeasurementSetMap.put( ms.getUUID(), task );
-        }
-        catch (Exception e )
-        { clientLogger.error( "Could not define measurement for attribute " + attr.getName() ); }
+        // If available, create an automatic measurement task to periodically take measurements
+        if ( edmAgentOK && schedulerOK )
+            try
+            {
+                // Must keep hold of task reference to ensure continued sampling
+                MeasurementTask task = measurementScheduler.
+                        createMeasurementTask( ms,           // MeasurementSet
+                                               listener,     // Listener that will take measurement
+                                               -1,           // Monitor indefinitely...
+                                               intervalMS ); // ... each 'X' milliseconds
+                
+                scheduledMeasurementTasks.add( task );
+            }
+            catch (Exception e )
+            { clientLogger.error( "Could not define measurement task for attribute " + attr.getName() ); }
+        else
+            // If we can't schedule & store measurements, just have the samplers handy
+            measurementSetInstantSamplers.put( ms.getUUID(), listener );
     }
     
     private void startMeasuring()
     {
-        Iterator<MeasurementTask> taskIt =
-                tasksByMeasurementSetMap.values().iterator();
-        
+        Iterator<MeasurementTask> taskIt = scheduledMeasurementTasks.iterator();
         while ( taskIt.hasNext() )
         {
             taskIt.next().startMeasuring();

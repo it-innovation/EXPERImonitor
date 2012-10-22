@@ -50,7 +50,7 @@ public class PsuedoRandomWalkTool implements ITakeMeasurement
     }
     
     @Override
-    public Report takeMeasure( MeasurementSet ms )
+    public void takeMeasure( Report reportOUT )
     {
         // Take a random walk (var
         if ( random.nextBoolean() )
@@ -62,13 +62,9 @@ public class PsuedoRandomWalkTool implements ITakeMeasurement
         if ( directionDegrees > 359 ) directionDegrees = 0;
 
         Measurement measure = new Measurement( Integer.toString(directionDegrees) );
-        ms.addMeasurement( measure );
-
-        Report report = new Report();
-        report.setMeasurementSet( ms );
-        report.setFromDate( measure.getTimeStamp() );
-        report.setToDate( measure.getTimeStamp() );
-
-        return report;
+        reportOUT.getMeasurementSet().addMeasurement( measure );
+        
+        reportOUT.setFromDate( measure.getTimeStamp() );
+        reportOUT.setToDate( measure.getTimeStamp() );
     }
 }
