@@ -61,7 +61,7 @@ public class EDMTest
     
     public static void main(String[] args) throws Exception
     {
-        MonitoringEDM edm = new MonitoringEDM();
+        
         UUID expUUID = UUID.fromString("bfe4c710-61ba-46f8-a519-be2f7808192e");
         UUID entityUUID = UUID.fromString("5718cd67-4310-4b2c-aeb9-9b72314630ca");
         UUID attributeUUID = UUID.fromString("4f2817b5-603a-4d02-a032-62cfca314962");
@@ -72,7 +72,13 @@ public class EDMTest
         
         boolean withSubClasses = true;
         
-        
+        MonitoringEDM edm = new MonitoringEDM();
+        if (!edm.isDatabaseSetUpAndAccessible())
+        {
+            log.error("EDM not set up properly!");
+            System.exit(1);
+        }
+    
         log.info("DB check: " + edm.isDatabaseSetUpAndAccessible());
         
         // clear the database
@@ -95,9 +101,9 @@ public class EDMTest
         
         //measurement(edm, mSetUUID);
         
-        //experimentCompleteChain(edm, expUUID, entityUUID, attributeUUID, mGenUUID, mGrpUUID, mSetUUID);
+        experimentCompleteChain(edm, expUUID, entityUUID, attributeUUID, mGenUUID, mGrpUUID, mSetUUID);
         
-        //printExperimentDetails(edm, expUUID, withSubClasses);
+        printExperimentDetails(edm, expUUID, withSubClasses);
         
         //saveReport(edm, mSetUUID, reportUUID);
         

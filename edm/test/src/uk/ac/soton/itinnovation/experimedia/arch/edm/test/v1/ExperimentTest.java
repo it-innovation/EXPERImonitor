@@ -53,7 +53,13 @@ public class ExperimentTest extends TestCase
     @Test
     public void testSaveExperiment_valid()
     {
-        MonitoringEDM edm = new MonitoringEDM();
+        MonitoringEDM edm = null;
+        try {
+            edm = new MonitoringEDM();
+        } catch (Exception ex) {
+            fail ("Unable to get Monitoring EDM");
+        }
+        
         IExperimentDAO expDAO = null;
         try {
             expDAO = edm.getExperimentDAO();
@@ -78,7 +84,13 @@ public class ExperimentTest extends TestCase
     @Test
     public void testSaveExperiment_duplicateUUID()
     {
-        MonitoringEDM edm = new MonitoringEDM();
+        MonitoringEDM edm = null;
+        try {
+            edm = new MonitoringEDM();
+        } catch (Exception ex) {
+            fail ("Unable to get Monitoring EDM");
+        }
+        
         IExperimentDAO expDAO = null;
         try {
             expDAO = edm.getExperimentDAO();
@@ -107,7 +119,12 @@ public class ExperimentTest extends TestCase
     @Test
     public void testSaveExperiment_noName()
     {
-        MonitoringEDM edm = new MonitoringEDM();
+        MonitoringEDM edm = null;
+        try {
+            edm = new MonitoringEDM();
+        } catch (Exception ex) {
+            fail ("Unable to get Monitoring EDM");
+        }
         IExperimentDAO expDAO = null;
         try {
             expDAO = edm.getExperimentDAO();
@@ -126,7 +143,12 @@ public class ExperimentTest extends TestCase
     @Test
     public void testGetExperiment()
     {
-        MonitoringEDM edm = new MonitoringEDM();
+        MonitoringEDM edm = null;
+        try {
+            edm = new MonitoringEDM();
+        } catch (Exception ex) {
+            fail ("Unable to get Monitoring EDM");
+        }
         IExperimentDAO expDAO = null;
         try {
             expDAO = edm.getExperimentDAO();
@@ -165,7 +187,12 @@ public class ExperimentTest extends TestCase
     @Test
     public void testGetExperiments()
     {
-        MonitoringEDM edm = new MonitoringEDM();
+        MonitoringEDM edm = null;
+        try {
+            edm = new MonitoringEDM();
+        } catch (Exception ex) {
+            fail ("Unable to get Monitoring EDM");
+        }
         IExperimentDAO expDAO = null;
         try {
             expDAO = edm.getExperimentDAO();

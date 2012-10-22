@@ -31,6 +31,7 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 import org.apache.log4j.Logger;
@@ -64,29 +65,29 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IReportDAO
  */
 public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMetricGeneratorDAO, IMetricGroupDAO, IMeasurementSetDAO, IMetricDAO, IMeasurementDAO, IReportDAO
 {
-    private Map<String,String> configs;
     private DatabaseConnector dbCon;
-    
     private static Logger log = Logger.getLogger(ExperimentDataManagerDAO.class);
     
     /**
-     * Experiment Data Manager DAO constructor, which reads the configuration file
-     * and sets up a DatabaseConnector object to access the database for
-     * storing and retrieving data.
      * 
+     * @param configParams Configuration parameters, which will be used instead of reading default config file from disk.
      * @throws Exception 
      */
-    public ExperimentDataManagerDAO() throws Exception
+    public ExperimentDataManagerDAO(Properties configParams) throws Exception
     {
-        try {
-            configs = EDMUtil.getConfigs();
-        } catch (Exception ex){
-            log.error("Caught an exception when reading the config file: " + ex.getMessage());
-            throw new RuntimeException("Caught an exception when reading the config file: " + ex.getMessage(), ex);
+        if (configParams == null)
+        {
+            log.error("Properties (config) object is NULL - cannot instantiate the EDM DAO");
+            throw new IllegalArgumentException("Properties (config) object is NULL - cannot instantiate the EDM DAO");
         }
         
+        initDatabaseConnector(configParams);
+    }
+    
+    private void initDatabaseConnector(Properties configParams) throws Exception
+    {
         try {
-            dbCon = new DatabaseConnector(configs.get("dbURL"), configs.get("dbName"), configs.get("dbUsername"),configs.get("dbPassword"), DatabaseType.fromValue(configs.get("dbType")));
+            dbCon = new DatabaseConnector(configParams.getProperty("dbURL"), configParams.getProperty("dbName"), configParams.getProperty("dbUsername"),configParams.getProperty("dbPassword"), DatabaseType.fromValue(configParams.getProperty("dbType")));
         } catch (Throwable ex) {
             log.error("Failed to create DatabaseConnector: " + ex.getMessage(), ex);
             throw new RuntimeException("Failed to create DatabaseConnector: " + ex.getMessage(), ex);

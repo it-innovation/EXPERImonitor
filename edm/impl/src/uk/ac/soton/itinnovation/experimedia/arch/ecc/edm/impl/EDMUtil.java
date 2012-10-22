@@ -24,8 +24,6 @@
 /////////////////////////////////////////////////////////////////////////
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 import org.apache.log4j.Logger;
 
@@ -37,37 +35,45 @@ import org.apache.log4j.Logger;
 public class EDMUtil
 {
     static Logger log = Logger.getLogger(EDMUtil.class);
+    private static String configFileName = "edm.properties";
     
-    public static Map<String,String> getConfigs() throws Exception
+    public static Properties getConfigs() throws Exception
     {
-        Map<String,String> configs = new HashMap<String, String>();
+        Properties prop = new Properties();
+        
+        try {
+            prop.load(EDMUtil.class.getClassLoader().getResourceAsStream(configFileName));
+        } catch (Exception ex) {
+            log.error("Error with loading configuration file edm.properties: " + ex.getMessage(), ex);
+            throw new RuntimeException("Error with loading configuration file " + configFileName + ": " + ex.getMessage(), ex);
+        }
+        
+        return prop;
+    }
+    
+    public static boolean isConfigValid(Properties prop)
+    {
+        if (prop == null)
+        {
+            log.error("The Properties object is NULL");
+            return false;
+        }
+        
         String[] expectedConfigNames = new String[] {
             "dbURL", "dbName", "dbUsername", "dbPassword", "dbType"
         };
-        String filename = "edm.properties";
-        Properties prop = new Properties();
-
-        // load the properties file
-        try {
-            prop.load(EDMUtil.class.getClassLoader().getResourceAsStream(filename));
-        } catch (Exception ex) {
-            log.error("Error with loading configuration file edm.properties: " + ex.getMessage(), ex);
-            throw new RuntimeException("Error with loading configuration file " + filename + ": " + ex.getMessage(), ex);
-        }
         
-        // get the expected config parameters and add to the map
+         // get the expected config parameters and add to the map
         for (String configName : expectedConfigNames)
         {
             try {
-                String value = prop.getProperty(configName);
-                if (value != null)
-                    configs.put(configName, value);
+                prop.getProperty(configName);
             } catch (Exception ex) {
-                log.error("Error with loading the '" + configName + "' parameter from evalEngService.properties. " + ex.getMessage(), ex);
-                throw new RuntimeException("Error with loading the '" + configName + "' parameter from evalEngService.properties. " + ex.getMessage(), ex);
+                log.error("Error with reading the '" + configName + "' parameter: " + ex.toString(), ex);
+                return false;
             }
         }
         
-        return configs;
+        return true;
     }
 }

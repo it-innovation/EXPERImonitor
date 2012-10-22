@@ -24,6 +24,7 @@
 /////////////////////////////////////////////////////////////////////////
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl;
 
+import java.util.Properties;
 import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.mon.dao.ExperimentDataManagerDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDMAgent;
@@ -44,18 +45,61 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IReportDAO
 public class MonitoringEDMAgent implements IMonitoringEDMAgent
 {
     private ExperimentDataManagerDAO edmDAO;
+    private Properties configParams;
     
     static Logger log = Logger.getLogger(MonitoringEDMAgent.class);
     
+    /**
+     * Monitoring Experiment Data Manager Agent constructor, which reads the
+     * configuration file on the class path and sets up a EDM DAO object accordingly.
+     * storing and retrieving data.
+     */
     public MonitoringEDMAgent()
     {
-        log.info("EDM starting up");
+        log.info("EDM Agent starting up");
         try {
-            edmDAO = new ExperimentDataManagerDAO();
+            try {
+                log.debug("Reading configuration file on the class path");
+                configParams = EDMUtil.getConfigs();
+            } catch (Exception ex){
+                log.error("Caught an exception when reading the config file: " + ex.getMessage());
+                throw ex;
+            }
+
+            if (!EDMUtil.isConfigValid(configParams))
+            {
+                log.error("The configuration parameters are not valid.");
+                throw new RuntimeException("The configuration parameters are not valid.");
+            }
+            
+            edmDAO = new ExperimentDataManagerDAO(configParams);
         } catch (Exception ex) {
             log.error("Failed to create ExperimentDataManagerDAO object: " + ex.getMessage(), ex);
+            throw new RuntimeException("Failed to create ExperimentDataManagerDAO object: " + ex.getMessage(), ex);
         }
-        log.info("EDM successfully started");
+        log.info("EDM Agent successfully started");
+    }
+    
+    /**
+     * Monitoring Experiment Data Manager Agent constructor, which sets up the EDM DAO
+     * according to the config parameters provided.
+     * @param config Configuration parameters.
+     */
+    public MonitoringEDMAgent(Properties config) throws Exception
+    {
+        log.info("EDM Agent starting up");
+        configParams = config;
+        try {
+            if (!EDMUtil.isConfigValid(configParams)) {
+                throw new RuntimeException("The provided configuration parameters are not valid.");
+            }
+            
+            edmDAO = new ExperimentDataManagerDAO(config);
+        } catch (Exception ex) {
+            log.error("Failed to create ExperimentDataManagerDAO object: " + ex.getMessage(), ex);
+            throw new RuntimeException("Failed to create ExperimentDataManagerDAO object: " + ex.getMessage(), ex);
+        }
+        log.info("EDM Agent successfully started");
     }
     
     @Override

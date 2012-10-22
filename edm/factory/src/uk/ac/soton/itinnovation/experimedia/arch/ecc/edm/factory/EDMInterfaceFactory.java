@@ -24,6 +24,7 @@
 /////////////////////////////////////////////////////////////////////////
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory;
 
+import java.util.Properties;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.MonitoringEDM;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.MonitoringEDMAgent;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDM;
@@ -48,7 +49,7 @@ public class EDMInterfaceFactory
     /**
      * Get a Monitoring EDM interface, to get access to storing and retrieving
      * monitoring data.
-     * 
+     * Will set up the EDM DAO according to the EDM properties file on the class path.
      * @return Instance of the EDM monitoring.
      * @throws Exception 
      */
@@ -60,15 +61,43 @@ public class EDMInterfaceFactory
     }
     
     /**
+     * Get a Monitoring EDM interface, to get access to storing and retrieving
+     * monitoring data.
+     * @param config Configuration parameters, which will be used instead of reading config file from disk.
+     * @return Instance of the EDM monitoring.
+     * @throws Exception 
+     */
+    public static IMonitoringEDM getMonitoringEDM(Properties config) throws Exception
+    {
+        IMonitoringEDM edm = new MonitoringEDM(config);
+        
+        return edm;
+    }
+    
+    /**
      * Get a Monitoring EDM Agent interface, to get access to storing and retrieving
      * monitoring data.
-     * 
+     * Will set up the EDM DAO according to the EDM properties file on the class path.
      * @return Instance of the light version of EDM monitoring.
      * @throws Exception 
      */
     public static IMonitoringEDMAgent getMonitoringEDMAgent() throws Exception
     {
         IMonitoringEDMAgent edm = new MonitoringEDMAgent();
+        
+        return edm;
+    }
+    
+    /**
+     * Get a Monitoring EDM Agent interface, to get access to storing and retrieving
+     * monitoring data.
+     * @param config Configuration parameters, which will be used instead of reading config file from disk.
+     * @return Instance of the light version of EDM monitoring.
+     * @throws Exception 
+     */
+    public static IMonitoringEDMAgent getMonitoringEDMAgent(Properties config) throws Exception
+    {
+        IMonitoringEDMAgent edm = new MonitoringEDMAgent(config);
         
         return edm;
     }
