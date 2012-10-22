@@ -31,6 +31,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDM;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.factory.EMInterfaceFactory;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMInterfaceFactory;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.MonitoringEDM;
 
@@ -64,7 +65,11 @@ public class EMController implements IEMLifecycleListener
     expMonitor = EMInterfaceFactory.createEM();
     expMonitor.addLifecyleListener( this );
     
-    expDataMgr = new MonitoringEDM();
+    try {
+      expDataMgr = EDMInterfaceFactory.getMonitoringEDM();
+    } catch (Exception ex) {
+      emCtrlLogger.error( "Could not create Monitoring EDM", ex );
+    }
   }
   
   public void start( String rabbitIP, UUID emID ) throws Exception
@@ -389,6 +394,12 @@ public class EMController implements IEMLifecycleListener
   private boolean createExperiment()
   {
     boolean result = false;
+    
+    if (expDataMgr == null)
+    {
+      emCtrlLogger.error("EDM not created");
+      return false;
+    }
     
     try
     {

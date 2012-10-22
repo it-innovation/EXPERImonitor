@@ -29,8 +29,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
@@ -44,7 +44,6 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Me
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGroup;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.EDMUtil;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DBUtil;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DatabaseConnector;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DatabaseType;
@@ -1216,7 +1215,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             log.debug("Error when executing database query to get table schema: " + ex.toString(), ex);
             return false;
         } finally {
-            try { connection.close(); } catch (SQLException ex){}
+            try { connection.close(); } catch (SQLException ex){ }
         }
     }
     
