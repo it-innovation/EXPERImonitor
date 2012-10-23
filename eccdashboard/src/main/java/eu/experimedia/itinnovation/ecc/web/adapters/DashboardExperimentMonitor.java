@@ -35,7 +35,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EM
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMDataBatch;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMPhase;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMPostReportSummary;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.MonitoringEDM;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMInterfaceFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDM;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IExperimentDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IMeasurementSetDAO;
@@ -67,7 +67,12 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
     public DashboardExperimentMonitor() {
         lifecycleListeners = new HashSet<IEMLifecycleListener>();
 
-        expDataMgr = new MonitoringEDM();
+        try {
+            expDataMgr = EDMInterfaceFactory.getMonitoringEDM();
+        }
+        catch (Exception e) {
+            logger.error("Could not create EDM");
+        }
     }
 
     public HashMap<Date, String> getMeasurementsForMeasurementSet(String measurementSetUuid) {
