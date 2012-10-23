@@ -48,10 +48,11 @@ public interface IReportDAO
      * Saves a report, which must have a unique UUID and refer to an existing
      * measurement set (by its UUID).
      * @param report The report object to be saved.
+     * @param saveMeasurements Boolean to flag whether measurements should be saved too.
      * @throws IllegalArgumentException If the Report is not valid to be saved, typically due to missing information (e.g., NULL values).
      * @throws Exception If there's a technical issue or a report with the same UUID already exists.
      */
-    void saveReport(Report report) throws IllegalArgumentException, Exception;
+    void saveReport(Report report, boolean saveMeasurements) throws IllegalArgumentException, Exception;
     
     /**
      * Saves the measurements for a report, not the report itself.
@@ -59,7 +60,7 @@ public interface IReportDAO
      * @throws IllegalArgumentException If the Measurement objects are not valid to be saved, typically due to missing information (e.g., NULL values).
      * @throws Exception If there's a technical issue or a measurement with the same UUID already exists.
      */
-    void saveMeasurementsForReport(Report report) throws IllegalArgumentException, Exception;
+    void saveMeasurements(Report report) throws IllegalArgumentException, Exception;
     
     /**
      * Get a report object from its UUID. Will contain a MeasurementSet with
@@ -100,7 +101,8 @@ public interface IReportDAO
     Report getReportForAllMeasurements(UUID measurementSetUUID, boolean withMeasurements) throws IllegalArgumentException, NoDataException, Exception;
     
     /**
-     * Get a report for all measurements for a particular measurement set after a given date.
+     * Get a report for all measurements for a particular measurement set from
+     * a given date. This is inclusive the given date.
      * Will contain a MeasurementSet with the UUID to identify it, and measurements
      * if the respective flag is true.
      * @param measurementSetUUID The measurement set UUID.
@@ -111,7 +113,7 @@ public interface IReportDAO
      * @throws NoDataException If there is no measurement set with the given UUID or there are no measurements.
      * @throws Exception If there's a technical issue.
      */
-    Report getReportForMeasurementsAfterDate(UUID measurementSetUUID, Date fromDate, boolean withMeasurements) throws IllegalArgumentException, NoDataException, Exception;
+    Report getReportForMeasurementsFromDate(UUID measurementSetUUID, Date fromDate, boolean withMeasurements) throws IllegalArgumentException, NoDataException, Exception;
     
     
     /**
@@ -132,7 +134,7 @@ public interface IReportDAO
     
     /**
      * Get a report for unsynchronised measurements for a particular measurement 
-     * set after the given given date.
+     * set from the given given date. This is inclusive the date given.
      * Will contain a MeasurementSet with the UUID to identify it, and
      * measurements if the respective flag is set to true.
      * @param measurementSetUUID The measurement set UUID.
@@ -144,7 +146,7 @@ public interface IReportDAO
      * @throws NoDataException If there is no measurement set with the given UUID or there are no measurements.
      * @throws Exception If there's a technical issue.
      */
-    Report getReportForUnsyncedMeasurementsAfterDate(UUID measurementSetUUID, Date fromDate, int numMeasurements, boolean withMeasurements) throws IllegalArgumentException, NoDataException, Exception;
+    Report getReportForUnsyncedMeasurementsFromDate(UUID measurementSetUUID, Date fromDate, int numMeasurements, boolean withMeasurements) throws IllegalArgumentException, NoDataException, Exception;
     
     /**
      * Set the synchronisation flag for measurements of a report.

@@ -821,7 +821,7 @@ public class EDMTest
         Report report = getReportWithRandomMeasurements(reportUUID, mSetUUID);
         
         try {
-            reportDAO.saveReport(report);
+            reportDAO.saveReport(report, true);
             log.info("Report saved successfully!");
         } catch (Exception ex) {
             log.error("Unable to save Report: " + ex.getMessage(), ex);
@@ -830,7 +830,7 @@ public class EDMTest
             log.info("Trying to save the same report, but with a random UUID");
             report.setUUID(UUID.randomUUID());
             try {
-                reportDAO.saveReport(report);
+                reportDAO.saveReport(report, true);
                 log.info("Report saved successfully!");
             } catch (Exception ex2) {
                 log.error("Unable to save Report: " + ex2.getMessage(), ex2);
@@ -843,7 +843,7 @@ public class EDMTest
         Report report2 = getReportWithRandomMeasurements(UUID.randomUUID(), mSetUUID);
         
         try {
-            reportDAO.saveMeasurementsForReport(report2);
+            reportDAO.saveMeasurements(report2);
             log.info("Measurements for Report saved successfully!");
         } catch (Exception ex) {
             log.error("Unable to save measurements for Report: " + ex.getMessage(), ex);
@@ -946,7 +946,7 @@ public class EDMTest
         log.info("Getting report for " + numMeasurements + " measurements from date " + fromDate);
         report = null;
         try {
-            report = reportDAO.getReportForMeasurementsAfterDate(mSetUUID, fromDate, false);
+            report = reportDAO.getReportForMeasurementsFromDate(mSetUUID, fromDate, false);
         } catch (NoDataException ex) {
             log.error("Unable to get Report: " + ex.getMessage());
         } catch (Exception ex) {
@@ -957,7 +957,7 @@ public class EDMTest
         log.info("Getting report for " + numMeasurements + " measurements from date " + fromDate + " --- WITH DATA");
         report = null;
         try {
-            report = reportDAO.getReportForMeasurementsAfterDate(mSetUUID, fromDate, true);
+            report = reportDAO.getReportForMeasurementsFromDate(mSetUUID, fromDate, true);
         } catch (NoDataException ex) {
             log.error("Unable to get Report: " + ex.getMessage());
         } catch (Exception ex) {
@@ -1042,7 +1042,7 @@ public class EDMTest
         log.info("Getting report for the 100 last unsynced measurements --- WITH DATA");
         report = null;
         try {
-            report = reportDAO.getReportForUnsyncedMeasurementsAfterDate(mSetUUID, fromDate, 100, true);
+            report = reportDAO.getReportForUnsyncedMeasurementsFromDate(mSetUUID, fromDate, 100, true);
         } catch (NoDataException ex) {
             log.error("Unable to get Report: " + ex.getMessage());
         } catch (Exception ex) {
@@ -1078,7 +1078,7 @@ public class EDMTest
         Report report = getReportWithRandomMeasurements(reportUUID, mSetUUID);
         
         try {
-            reportDAO.saveReport(report);
+            reportDAO.saveReport(report, true);
             log.info("Report saved successfully!");
         } catch (Exception ex) {
             log.error("Unable to save Report: " + ex.getMessage(), ex);

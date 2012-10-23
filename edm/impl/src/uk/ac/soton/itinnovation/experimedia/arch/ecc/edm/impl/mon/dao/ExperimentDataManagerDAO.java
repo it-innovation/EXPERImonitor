@@ -807,7 +807,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     
     
     @Override
-    public void saveReport(Report report) throws Exception
+    public void saveReport(Report report, boolean saveMeasurements) throws Exception
     {
         Connection connection = null;
         try {
@@ -820,7 +820,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
         }
         boolean exception = false;
         try {
-            ReportDAOHelper.saveReport(report, connection);
+            ReportDAOHelper.saveReport(report, saveMeasurements, connection);
         } catch (Exception ex) {
             exception = true;
             throw ex;
@@ -838,7 +838,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     }
     
     @Override
-    public void saveMeasurementsForReport(Report report) throws Exception
+    public void saveMeasurements(Report report) throws Exception
     {
         Connection connection = null;
         try {
@@ -989,7 +989,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     }
 
     @Override
-    public Report getReportForMeasurementsAfterDate(UUID measurementSetUUID, Date fromDate, boolean withMeasurements) throws Exception
+    public Report getReportForMeasurementsFromDate(UUID measurementSetUUID, Date fromDate, boolean withMeasurements) throws Exception
     {
         Connection connection = null;
         try {
@@ -1069,7 +1069,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     }
     
     @Override
-    public Report getReportForUnsyncedMeasurementsAfterDate(UUID measurementSetUUID, Date fromDate, int numMeasurements, boolean withMeasurements) throws IllegalArgumentException, NoDataException, Exception
+    public Report getReportForUnsyncedMeasurementsFromDate(UUID measurementSetUUID, Date fromDate, int numMeasurements, boolean withMeasurements) throws IllegalArgumentException, NoDataException, Exception
     {
         Connection connection = null;
         try {
