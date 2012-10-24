@@ -23,6 +23,7 @@
 /////////////////////////////////////////////////////////////////////////
 package eu.experimedia.itinnovation.ecc.web.adapters;
 
+import eu.experimedia.itinnovation.ecc.web.data.DataPoint;
 import java.util.*;
 import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasicChannel;
@@ -63,6 +64,7 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
     private Experiment expInstance;
 //    private ArrayList<DashboardMeasurementSet> reportedMeasurementSets = new ArrayList<DashboardMeasurementSet>();
     private HashMap<String, DashboardMeasurementSet> reportedMeasurementSets = new HashMap<String, DashboardMeasurementSet>();
+    private HashMap<String, DashboardSummarySet> summarySets = new HashMap<String, DashboardSummarySet>();
 
     public DashboardExperimentMonitor() {
         lifecycleListeners = new HashSet<IEMLifecycleListener>();
@@ -75,12 +77,21 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
         }
     }
 
-    public HashMap<Date, String> getMeasurementsForMeasurementSet(String measurementSetUuid) {
+    public LinkedHashMap<String, DataPoint> getMeasurementsForMeasurementSet(String measurementSetUuid) {
         if (reportedMeasurementSets.containsKey(measurementSetUuid)) {
             DashboardMeasurementSet theMeasurementSet = reportedMeasurementSets.get(measurementSetUuid);
             return theMeasurementSet.getMeasurements();
         } else {
-            return new HashMap<Date, String>();
+            return new LinkedHashMap<String, DataPoint>();
+        }
+    }
+
+    public LinkedHashMap<String, DataPoint> getMeasurementsForSummarySet(String summarySetUuid) {
+        if (summarySets.containsKey(summarySetUuid)) {
+            DashboardSummarySet theSummarySet = summarySets.get(summarySetUuid);
+            return theSummarySet.getMeasurements();
+        } else {
+            return new LinkedHashMap<String, DataPoint>();
         }
     }
 
@@ -359,12 +370,15 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
                             "], report [" + report.getUUID().toString() + "] with " + report.getNumberOfMeasurements() +
                             " measurement(s) for measurement set [" + measurementSet.getUUID().toString() + "]");
                     
+                    String measurementSetUuid = measurementSet.getUUID().toString();
                     DashboardMeasurementSet theDashboardMeasurementSet;
-                    if (reportedMeasurementSets.containsKey(measurementSet.getUUID().toString())) {
-                        theDashboardMeasurementSet = reportedMeasurementSets.get(measurementSet.getUUID().toString());
+                    if (reportedMeasurementSets.containsKey(measurementSetUuid)) {
+                        logger.debug("Already tracking measurementSet: [" + measurementSetUuid + "] ");
+                        theDashboardMeasurementSet = reportedMeasurementSets.get(measurementSetUuid);
                     } else {
-                        theDashboardMeasurementSet = new DashboardMeasurementSet(measurementSet.getUUID().toString());  
-                        reportedMeasurementSets.put(measurementSet.getUUID().toString(), theDashboardMeasurementSet);
+                        logger.debug("Tracking NEW measurementSet: [" + measurementSetUuid + "] ");
+                        theDashboardMeasurementSet = new DashboardMeasurementSet(measurementSetUuid);  
+                        reportedMeasurementSets.put(measurementSetUuid, theDashboardMeasurementSet);
                     }
                     
                     Set<Measurement> measurements = measurementSet.getMeasurements();
@@ -384,7 +398,7 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
                                 
                                 logger.debug("Measurement " + measurementsCounter + ": [" + measurementUUID + "] " + measurementTimestamp.toString() + " - " + measurementValue);
                                 
-                                theDashboardMeasurementSet.addMeasurement(measurementTimestamp, measurementValue);
+                                theDashboardMeasurementSet.addMeasurement(measurementUUID, new DataPoint(measurementTimestamp.getTime(), measurementValue, measurementUUID));
                                 
                                 measurementsCounter++;
 
@@ -417,11 +431,94 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
 
     @Override
     public void onGotSummaryReport(EMClient client, EMPostReportSummary summary) {
-        Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
+        if (client != null) {
+            if (summary != null) {
 
-        while (listIt.hasNext()) {
-            listIt.next().onGotSummaryReport(client, summary);
-        }
+                Set<UUID> summaryMeasurementSetIds = summary.getReportedMeasurementSetIDs();
+                
+                if (!summaryMeasurementSetIds.isEmpty()) {
+                
+                    logger.debug("Received summary report from client: " + client.getName() + " [" + client.getID().toString() +
+                            "], with " + summaryMeasurementSetIds.size() + " measurement set(s)");
+                    
+                    // Go through all reported measurement sets:
+                    String summarySetUuid; Report tempSummaryReport; Set<Measurement> measurements; MeasurementSet tempMeasurementSet;
+                    for (UUID measurementSetUuid : summaryMeasurementSetIds) {
+                        
+                        summarySetUuid = measurementSetUuid.toString();
+
+                        DashboardSummarySet theDashboardSummarySet;
+                        if (summarySets.containsKey(summarySetUuid)) {
+                            logger.debug("Already tracking summarySet: [" + summarySetUuid + "] ");
+                            theDashboardSummarySet = summarySets.get(summarySetUuid);
+                        } else {
+                            logger.debug("Tracking NEW summarySet: [" + summarySetUuid + "] ");
+                            theDashboardSummarySet = new DashboardSummarySet(summarySetUuid);  
+                            summarySets.put(summarySetUuid, theDashboardSummarySet);
+                        }
+                        
+                        tempSummaryReport = summary.getReport(measurementSetUuid);
+                        
+                        if (tempSummaryReport != null) {
+                            
+                            tempMeasurementSet = tempSummaryReport.getMeasurementSet();
+                            
+                            if (tempMeasurementSet != null) {
+                                
+                                measurements = tempMeasurementSet.getMeasurements();
+
+                                if (measurements != null) {
+                                    if (!measurements.isEmpty()) {
+                                        Iterator it = measurements.iterator();
+                                        Measurement measurement;
+                                        int measurementsCounter = 1;
+                                        String measurementUUID, measurementValue;
+                                        Date measurementTimestamp;
+                                        while (it.hasNext()) {
+                                            measurement = (Measurement) it.next();
+                                            measurementUUID = measurement.getUUID().toString();
+                                            measurementTimestamp = measurement.getTimeStamp();                                
+                                            measurementValue = measurement.getValue();
+
+                                            logger.debug("Summary measurement " + measurementsCounter + ": [" + measurementUUID + "] " + measurementTimestamp.toString() + " - " + measurementValue);
+
+                                            theDashboardSummarySet.addMeasurement(measurementUUID, new DataPoint(measurementTimestamp.getTime(), measurementValue, measurementUUID));
+
+                                            measurementsCounter++;
+
+                                        }
+            //                            mainView.addLogText(client.getName() + " got metric data: " + measurements.iterator().next().getValue());
+                                    } else {
+                                        logger.error("Measurements for measurement set [" + tempMeasurementSet.getUUID().toString() + "] are EMPTY");
+                                    }
+                                } else {
+                                    logger.error("Measurements for measurement set [" + tempMeasurementSet.getUUID().toString() + "] are NULL");
+                                }
+                            } else {
+                                logger.error("Measurement set for summary report [" + tempSummaryReport.getUUID().toString() + "] is NULL");                            
+                            }
+                        } else {
+                            logger.error("Summary report for measurement set [" + measurementSetUuid + "] is NULL");                            
+                        }
+                    } 
+                
+                } else {
+                    logger.error("Received EMPTY summary report (no measurement set UUIDs) from client: " + client.getName() + " [" + client.getID().toString() + "]");
+                }
+                
+            } else {
+                logger.error("Received NULL summary report from client: " + client.getName() + " [" + client.getID().toString() + "]");
+            }
+        } else {
+            logger.error("Received summary report from NULL client!");
+        }        
+        
+        
+//        Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
+//
+//        while (listIt.hasNext()) {
+//            listIt.next().onGotSummaryReport(client, summary);
+//        }
     }
 
     @Override

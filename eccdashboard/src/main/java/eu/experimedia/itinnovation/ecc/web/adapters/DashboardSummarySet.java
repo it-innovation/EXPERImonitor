@@ -17,35 +17,36 @@
 // the software.
 //
 //	Created By :			Maxim Bashevoy
-//	Created Date :			2012-10-17
+//	Created Date :			2012-10-22
 //	Created for Project :           Experimedia
 //
 /////////////////////////////////////////////////////////////////////////
+
 package eu.experimedia.itinnovation.ecc.web.adapters;
 
 import eu.experimedia.itinnovation.ecc.web.data.DataPoint;
 import java.util.LinkedHashMap;
-import java.util.Map.Entry;
+import java.util.Map;
 import org.apache.log4j.Logger;
 
-public class DashboardMeasurementSet {
-    
-    private final Logger logger = Logger.getLogger(DashboardMeasurementSet.class);
+
+public class DashboardSummarySet {
+    private final Logger logger = Logger.getLogger(DashboardSummarySet.class);
     
     private String UUID;
     private LinkedHashMap<String, DataPoint> measurements = new LinkedHashMap<String, DataPoint>(){
         @Override
-        protected boolean removeEldestEntry(Entry eldest) {
-                return size() > 5; // This is the map size. New entries remove eldest entries
+        protected boolean removeEldestEntry(Map.Entry eldest) {
+                return size() > 50; // This is the map size. New entries remove eldest entries
         }        
     };
 
-    public DashboardMeasurementSet(String UUID) {
+    public DashboardSummarySet(String UUID) {
         this.UUID = UUID;
     }
 
     public void addMeasurement(String measurementUuid, DataPoint dataPoint) {
-        logger.debug("Adding new data point " + dataPoint.getValue() + " to measurement set [" + this.UUID + "]");
+        logger.debug("Adding new data point " + dataPoint.getValue() + " to summary set [" + this.UUID + "]");
         measurements.put(measurementUuid, dataPoint);
     }
 

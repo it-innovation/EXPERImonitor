@@ -51,12 +51,12 @@ public class ExperimentMonitorController {
     @Autowired
     @Qualifier("experimentMonitorService")
     ExperimentMonitorService emService;
-    
+
 //    protected SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-    
 
-    
+
+
     @RequestMapping(method = RequestMethod.GET, value = "/getclients/do.json")
     public @ResponseBody EMClientAsJson[] getConnectedClients() throws Throwable {
         logger.debug("Returning list of connected clients");
@@ -99,16 +99,16 @@ public class ExperimentMonitorController {
             for (EMClient e : clients) {
                 tempClient.setUuid(e.getID().toString());
                 tempClient.setName(e.getName());
-                
+
                 // Extra: get supported phases
                 it = e.getCopyOfSupportedPhases().iterator();
                 while(it.hasNext()) {
                     phase = (EMPhase) it.next();
                     phases.add("[" + phase.getIndex() + "] " + phase.name());
                 }
-                
+
                 tempClient.setSupportedPhases(phases.toArray(new String[0]));
-                
+
                 resultingListOfClients[i] = tempClient;
 
                 tempClient = new EMClientAsJson();
@@ -123,36 +123,36 @@ public class ExperimentMonitorController {
             return null;
         }
     }
-    
+
     /**
      * Returns a list of metric generators for clients in the current phase only
-     * 
+     *
      * For Live Metric View
-     * 
-     * @throws Throwable 
+     *
+     * @throws Throwable
      */
     @RequestMapping(method = RequestMethod.GET, value = "/getmetricgenerators/do.json")
     public @ResponseBody MetricGeneratorAsJson[] getMetricGenerators() throws Throwable {
-        
+
         // Should be simpler - just return a list of metric generators with minimum data
         // Separate method should load selected metric generator!
-        
+
         logger.debug("Returning list of metric generators for current phase");
         try {
-            
+
             // Faster to get them from the database at this point?
             // Ping clients to see if they are alive?
             EMClient[] clients = emService.getCurrentPhaseClients();
-            
-            
+
+
             if (clients.length < 1) {
-                logger.error("No clients currently connected, method problably called by mistake in a wrong phase.");
+                logger.error("No clients currently connected, method probably called by mistake in a wrong phase.");
                 return new MetricGeneratorAsJson[0];
             } else {
                 logger.debug("Returning metric generators for " + clients.length + " client(s)");
-                
+
                 Set<MetricGeneratorAsJson> resultingMgSet = new HashSet<MetricGeneratorAsJson>();
-                
+
                 MetricGeneratorAsJson tempMetricGeneratorAsJson = new MetricGeneratorAsJson();
                 String name, uuid, desc;
                 EntityAsJson tempEntityAsJson = new EntityAsJson();
@@ -161,73 +161,73 @@ public class ExperimentMonitorController {
                 Set<EntityAsJson> tempEntityAsJsonSet = new HashSet<EntityAsJson>();
                 Set<MetricGroupAsJson> tempMetricGroupAsJsonSet = new HashSet<MetricGroupAsJson>();
                 Set<MeasurementSetAsJson> tempMeasurementSetAsJsonSet = new HashSet<MeasurementSetAsJson>();
-                
+
                 Set<Attribute> allAttributes = new HashSet<Attribute>();
                 for (EMClient client : clients) {
-                    
+
                     for (MetricGenerator metricGenerator : client.getCopyOfMetricGenerators()) {
-                        
+
                         uuid = metricGenerator.getUUID().toString();
                         name = metricGenerator.getName();
                         desc = metricGenerator.getDescription();
-                        
+
                         // Entities
                         for (Entity entity : metricGenerator.getEntities()) {
-                            
+
                             tempEntityAsJson.setUuid(entity.getUUID().toString());
                             tempEntityAsJson.setName(entity.getName());
                             tempEntityAsJson.setDescription(entity.getDescription());
-                            
+
                             tempEntityAsJsonSet.add(tempEntityAsJson);
                             tempEntityAsJson = new EntityAsJson();
-                            
+
                             allAttributes.addAll(entity.getAttributes());
                         }
-                        
+
                         // Metric groups
                         for (MetricGroup metricGroup : metricGenerator.getMetricGroups()) {
                             tempMetricGroupAsJson.setUuid(metricGroup.getUUID().toString());
                             tempMetricGroupAsJson.setName(metricGroup.getName());
                             tempMetricGroupAsJson.setDescription(metricGroup.getDescription());
-                            
+
                             for (MeasurementSet measurementSet : metricGroup.getMeasurementSets()) {
-                                
+
                                 tempMeasurementSetAsJson.setUuid(measurementSet.getUUID().toString());
                                 tempMeasurementSetAsJson.setAttribute(this.getAttributeNameForMeasurementSet(measurementSet, allAttributes.toArray(new Attribute[0])));
 //                                tempMeasurementSetAsJson.setAttribute(measurementSet.getAttributeUUID().toString());
                                 tempMeasurementSetAsJson.setMetricUUID(measurementSet.getMetric().getUUID().toString());
                                 tempMeasurementSetAsJson.setMetricType(measurementSet.getMetric().getMetricType().name());
                                 tempMeasurementSetAsJson.setMetricUnit(measurementSet.getMetric().getUnit().getName());
-                                        
+
                                 tempMeasurementSetAsJsonSet.add(tempMeasurementSetAsJson);
                                 tempMeasurementSetAsJson = new MeasurementSetAsJson();
                             }
-                            
+
                             tempMetricGroupAsJson.setMeasurementSets(tempMeasurementSetAsJsonSet.toArray(new MeasurementSetAsJson[0]));
-                            
+
                             tempMetricGroupAsJsonSet.add(tempMetricGroupAsJson);
-                            
+
                             tempMeasurementSetAsJsonSet = new HashSet<MeasurementSetAsJson>();
                             tempMetricGroupAsJson = new MetricGroupAsJson();
                         }
-                        
+
                         logger.debug("Found metric generator: [" + uuid + "] " + name + " (" + desc + ") with " + tempEntityAsJsonSet.size() + " entity(ies) and " + tempMetricGroupAsJsonSet.size() + " metric group(s)");
-                        
+
                         tempMetricGeneratorAsJson.setUuid(uuid);
                         tempMetricGeneratorAsJson.setName(name);
                         tempMetricGeneratorAsJson.setDescription(desc);
                         tempMetricGeneratorAsJson.setListOfEntities(tempEntityAsJsonSet.toArray(new EntityAsJson[0]));
                         tempMetricGeneratorAsJson.setListOfMetricGroups(tempMetricGroupAsJsonSet.toArray(new MetricGroupAsJson[0]));
-                        
+
                         resultingMgSet.add(tempMetricGeneratorAsJson);
-                        
+
                         allAttributes = new HashSet<Attribute>();
                         tempEntityAsJsonSet = new HashSet<EntityAsJson>();
                         tempMetricGroupAsJsonSet = new HashSet<MetricGroupAsJson>();
                         tempMetricGeneratorAsJson = new MetricGeneratorAsJson();
                     }
                 }
-                
+
                 return resultingMgSet.toArray(new MetricGeneratorAsJson[0]);
             }
 
@@ -236,21 +236,21 @@ public class ExperimentMonitorController {
             ex.printStackTrace();
             return null;
         }
-    }  
-    
+    }
+
     private String getAttributeNameForMeasurementSet(MeasurementSet measurementSet, Attribute[] allAttributes) {
         String attributeSetUUID = measurementSet.getAttributeUUID().toString();
         String attributeName = "unknown attribute";
-        
+
         for (Attribute attribute : allAttributes) {
             if (attribute.getUUID().toString().equals(attributeSetUUID)) {
                 attributeName = attribute.getName();
                 break;
             }
         }
-        
+
         return attributeName;
-    }    
+    }
 
     @RequestMapping(method = RequestMethod.GET, value = "/getcurrentphase/do.json")
     public @ResponseBody EMPhaseAsJson getCurrentPhase() throws Throwable {
@@ -306,31 +306,28 @@ public class ExperimentMonitorController {
         }
     }
 
-    
+
     @RequestMapping(method = RequestMethod.POST, value = "/getmeasurementsformeasurementset/do.json")
     public @ResponseBody DataPoint[] getMeasurementsForMeasurementSet(@RequestBody final String inputData) throws Throwable {
-        
+
         logger.debug("Returning data for a measurement set. Input data: " + inputData);
-        
+
         try {
-            
+
             JSONObject inputDataAsJSON = (JSONObject) JSONSerializer.toJSON(inputData);
             String measurementSetUuid = inputDataAsJSON.getString("measurementSetUuid");
-            
-            // The data has to come out sorted by time, hence the TreeMap
-            Map<Date, String> data = new TreeMap<Date, String>(emService.getMeasurementsForMeasurementSet(measurementSetUuid));
+
+            LinkedHashMap<String, DataPoint> data = emService.getMeasurementsForMeasurementSet(measurementSetUuid);
             logger.debug("Measurement set [" + measurementSetUuid + "] has " + data.size() + " data point(s)");
-            
+
             DataPoint[] result = new DataPoint[data.keySet().size()];
-            
+
             Iterator it = data.keySet().iterator();
-            Date time; long timeAsLong; String value;
+            String measurementUUID;
             int counter = 0;
             while(it.hasNext()) {
-                time = (Date) it.next();                
-                value = data.get(time);
-                timeAsLong = time.getTime();
-                result[counter] = new DataPoint(timeAsLong, value);
+                measurementUUID = (String) it.next();
+                result[counter] = data.get(measurementUUID);
                 counter++;
             }
 
@@ -339,8 +336,40 @@ public class ExperimentMonitorController {
             logger.error("Failed to return data for a measurement set.");
             ex.printStackTrace();
             return null;
-        }        
-    }    
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/getsummaryformeasurementset/do.json")
+    public @ResponseBody DataPoint[] getSummaryForMeasurementSet(@RequestBody final String inputData) throws Throwable {
+
+        logger.debug("Returning data for a summary set. Input data: " + inputData);
+
+        try {
+
+            JSONObject inputDataAsJSON = (JSONObject) JSONSerializer.toJSON(inputData);
+            String measurementSetUuid = inputDataAsJSON.getString("measurementSetUuid");
+
+            LinkedHashMap<String, DataPoint> data = emService.getMeasurementsForSummarySet(measurementSetUuid);
+            logger.debug("Summary set [" + measurementSetUuid + "] has " + data.size() + " data point(s)");
+
+            DataPoint[] result = new DataPoint[data.keySet().size()];
+
+            Iterator it = data.keySet().iterator();
+            String measurementUUID;
+            int counter = 0;
+            while(it.hasNext()) {
+                measurementUUID = (String) it.next();
+                result[counter] = data.get(measurementUUID);
+                counter++;
+            }
+
+            return result;
+        } catch (Throwable ex) {
+            logger.error("Failed to return data for a summary set.");
+            ex.printStackTrace();
+            return null;
+        }
+    }
 
     @RequestMapping(method = RequestMethod.POST, value = "/getmeasurementsetsforclient/do.json")
     public @ResponseBody MeasurementSetAsJson[] getMeasurementSetsForClient(@RequestBody final String inputData) throws Throwable {
@@ -372,7 +401,7 @@ public class ExperimentMonitorController {
 
                     tempMeasurementSetAsJson = new MeasurementSetAsJson();
                 }
-                
+
                 logger.debug("Client " + clientUUID + " has " + resultingMeasurementSets.size() + " measurement set(s)");
                 return resultingMeasurementSets.toArray(new MeasurementSetAsJson[0]);
             }
@@ -398,17 +427,17 @@ public class ExperimentMonitorController {
             if (metricGenerators == null) {
                 logger.debug("Client " + clientUUID + " does not have any metric generators");
                 return null;
-                
+
             } else {
-                
+
                 MetricGeneratorAsJson tempMetricGeneratorAsJson = new MetricGeneratorAsJson();
-                
+
                 Set<EntityAsJson> tempEntitiesAsJson = new HashSet<EntityAsJson>();
                 EntityAsJson tempEntityAsJson;
-                
+
                 Set<AttributeAsJson> tempAttributesAsJson = new HashSet<AttributeAsJson>();
                 AttributeAsJson tempAttributeAsJson;
-                
+
                 for (MetricGenerator mg : metricGenerators) {
                     tempMetricGeneratorAsJson.setUuid(mg.getUUID().toString());
                     tempMetricGeneratorAsJson.setName(mg.getName());
@@ -419,19 +448,19 @@ public class ExperimentMonitorController {
                         tempEntityAsJson.setName(tempEntity.getName());
                         tempEntityAsJson.setDescription(tempEntity.getDescription());
                         tempEntityAsJson.setUuid(tempEntity.getUUID().toString());
-                        
+
                         for (Attribute tempAttribute : tempEntity.getAttributes()) {
                             tempAttributeAsJson = new AttributeAsJson();
                             tempAttributeAsJson.setUuid(tempAttribute.getUUID().toString());
                             tempAttributeAsJson.setName(tempAttribute.getName());
                             tempAttributeAsJson.setDescription(tempAttribute.getDescription());
-                            
+
                             tempAttributesAsJson.add(tempAttributeAsJson);
                         }
-                        
+
                         tempEntityAsJson.setAttributes(tempAttributesAsJson.toArray(new AttributeAsJson[0]));
                         tempEntitiesAsJson.add(tempEntityAsJson);
-                        
+
                         tempAttributesAsJson = new HashSet<AttributeAsJson>();
                     }
 
@@ -441,7 +470,7 @@ public class ExperimentMonitorController {
                     tempMetricGeneratorAsJson = new MetricGeneratorAsJson();
                     tempEntitiesAsJson = new HashSet<EntityAsJson>();
                 }
-                
+
                 logger.debug("Client " + clientUUID + " has " + resultingMetricGenerators.size() + " metric generator(s)");
                 return resultingMetricGenerators.toArray(new MetricGeneratorAsJson[0]);
             }
@@ -451,5 +480,5 @@ public class ExperimentMonitorController {
             return null;
         }
     }
-        
+
 }

@@ -27,13 +27,15 @@ public class DataPoint {
 
     long time;
     String value;
+    String measurementUUID;
 
     public DataPoint() {
     }
 
-    public DataPoint(long time, String value) {
+    public DataPoint(long time, String value, String measurementUUID) {
         this.time = time;
         this.value = value;
+        this.measurementUUID = measurementUUID;
     }
 
     public long getTime() {
@@ -50,5 +52,13 @@ public class DataPoint {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    public String getMeasurementUUID() {
+        return measurementUUID;
+    }
+
+    public void setMeasurementUUID(String measurementUUID) {
+        this.measurementUUID = measurementUUID;
     }
 }
