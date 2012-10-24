@@ -1,0 +1,24 @@
+#!/bin/sh
+
+juju-log "rabbit relation changed"
+
+relation-set username=headless
+relation-set vhost=/
+
+if [ `relation-get hostname` == "" ]; then
+	juju-info "Waiting for rabbit hostname..."
+	exit 0
+fi
+
+cd `dirname $0`/../code
+
+cat > em.properties <<EOF
+MonitorID=00000000-0000-0000-0000-000000000000
+Monitor_IP=`relation-get hostname`
+MonitorPort=5672
+Monitor_Use_SSL=false
+#Keystore=/main/resources/rabbitKeyStore.jks
+#KeystorePassword=rabbit
+EOF
+
+./restart
