@@ -224,6 +224,9 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
                             // Notify EM of behaviours
                             if ( pushPull[0] ) liveMonitorFace.notifyReadyToPush();
                             if ( pushPull[1] ) liveMonitorFace.notifyReadyForPull();
+                            
+                            // Tell listener that the Live Monitoring phase has begun
+                            emiListener.onLiveMonitoringStarted();
                         }
                         else
                         {
@@ -313,7 +316,7 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
         if ( senderID.equals(expMonitorID) )
         {
             if ( emiListener != null )
-                emiListener.onDescribeSupportPhases( supportedPhases );
+                emiListener.onDescribeSupportedPhases( supportedPhases );
             else
             {
                 // Legacy behaviour: specify full support
@@ -433,7 +436,7 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
     }
 
     @Override
-    public void onPullMetric( UUID senderID, UUID measurementSetID )
+    public synchronized void onPullMetric( UUID senderID, UUID measurementSetID )
     {
         if ( senderID.equals(expMonitorID) && liveMonitorFace != null )
         {
@@ -457,7 +460,13 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
 
     @Override
     public void onPullingStopped( UUID senderID )
-    { /* Not implemented in this demo */ }
+    {
+        if ( senderID.equals(expMonitorID) )
+        {
+            if ( emiListener != null )
+                emiListener.onPullingStopped();
+        }
+    }
 
     // IEMPostReport_UserListener ----------------------------------------------
     @Override
@@ -482,7 +491,7 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
         if ( senderID.equals(expMonitorID) && reqBatch != null && postReportFace != null )
         {
             if ( emiListener != null )
-                emiListener.onPopulateDataBatch( reqBatch );
+                 emiListener.onPopulateDataBatch( reqBatch );
             else
             {
                 // Probably won't support this request in the legacy version

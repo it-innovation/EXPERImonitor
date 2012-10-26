@@ -268,7 +268,7 @@ public class EMLiveMonitor extends EMBaseInterface
       case ( 11 ) :
       {
         if ( providerListener != null )
-        {
+        {          
           Report report = jsonMapper.fromJson( methodData.get(1), Report.class );
           providerListener.onSendPulledMetric( interfaceUserID, report );
         }

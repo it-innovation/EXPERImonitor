@@ -33,7 +33,7 @@ import java.util.*;
 
 
 public class EMClient
-{
+{  
   protected UUID    clientID;
   protected String  clientName;
   protected boolean clientConnected = false;
@@ -48,7 +48,7 @@ public class EMClient
   protected HashSet<UUID> generatorsSetupOK;
   
   // Live monitoring phase states
-  protected UUID currentPullMeasurementSetID;
+  protected HashSet<UUID> currentMeasurementSetPulls;
   
   // Post-report phase states
   protected UUID                currentPostReportBatchID;
@@ -164,7 +164,21 @@ public class EMClient
    * @return - true if currently generating data
    */
   public boolean isPullingMetricData()
-  { return (currentPullMeasurementSetID != null); }
+  { return !currentMeasurementSetPulls.isEmpty(); }
+  
+  /**
+   * Returns the IDs of all MeasurementSet IDs that have been requested by the EM
+   * but not yet returned by the client
+   * 
+   * @return  - Set of IDs of MeasurementSets currently being pulled
+   */
+  public Set<UUID> getCopyOfCurrentMeasurementSetPullIDs()
+  {
+    HashSet<UUID> pullCopy = new HashSet<UUID>();
+    pullCopy.addAll( currentMeasurementSetPulls );
+    
+    return pullCopy;
+  }
   
   /**
    * Returns the post report summary the client reported (if supported) during the
@@ -227,7 +241,8 @@ public class EMClient
     supportedPhases = EnumSet.noneOf( EMPhase.class );
     timeOutsCalled  = EnumSet.noneOf( EMPhaseTimeOut.class );
     
-    metricGenerators  = new HashSet<MetricGenerator>();
-    generatorsSetupOK = new HashSet<UUID>();
+    metricGenerators           = new HashSet<MetricGenerator>();
+    generatorsSetupOK          = new HashSet<UUID>();
+    currentMeasurementSetPulls = new HashSet<UUID>();
   }
 }

@@ -33,8 +33,6 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.factory.EMInterfaceFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMInterfaceFactory;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.MonitoringEDM;
-
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.*;
@@ -322,7 +320,6 @@ public class EMController implements IEMLifecycleListener
   {
     if ( expMonitor != null )
     {
-      //TODO: Visitor pattern!
       Set<EMClient> clients = expMonitor.getCurrentPhaseClients();
       Iterator<EMClient> cIt = clients.iterator();
       
@@ -330,23 +327,17 @@ public class EMController implements IEMLifecycleListener
       {
         EMClient client = cIt.next();
         
-        Iterator<MetricGenerator> mgIt = client.getCopyOfMetricGenerators().iterator();
-        while ( mgIt.hasNext() )
+        if ( !client.isPullingMetricData() )
         {
-          Iterator<MetricGroup> groupIt = mgIt.next().getMetricGroups().iterator();
-          while ( groupIt.hasNext() )
-          {
-            Iterator<MeasurementSet> setIt = groupIt.next().getMeasurementSets().iterator();
-            while( setIt.hasNext() )
-            {
-              MeasurementSet ms = setIt.next();
-              if ( ms != null )
-                try { expMonitor.pullMetric( client, ms.getUUID() ); }
-                catch (Exception e )
-                { emCtrlLogger.error( "Failed in an attempt to pull metrics from client.\n" + e.getMessage() ); }
-            }
+          try { expMonitor.pullAllMetrics( client ); }
+          catch ( Exception e )
+          { emCtrlLogger.error( "Could not pull metrics for client: " +
+                                client.getName() + ", because: " + 
+                                e.getMessage() ); 
           }
         }
+        else mainView.addLogText( "Client " + client.getName() + 
+                                  " is busy generating metrics" );
       }
     }
   }

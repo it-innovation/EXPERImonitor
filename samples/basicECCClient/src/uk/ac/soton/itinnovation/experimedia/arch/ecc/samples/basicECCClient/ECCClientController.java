@@ -137,7 +137,7 @@ public class ECCClientController implements EMIAdapterListener,
     }
     
     @Override
-    public void onDescribeSupportPhases( EnumSet<EMPhase> phasesOUT )
+    public void onDescribeSupportedPhases( EnumSet<EMPhase> phasesOUT )
     {
         // We're going to support all phases (although we won't do much in some of them)
         // ... we MUST support the discovery phase by default, but don't need to include
@@ -225,6 +225,12 @@ public class ECCClientController implements EMIAdapterListener,
     @Override
     public void onSetupTimeOut( UUID metricGeneratorID )
     { clientView.addLogMessage( "Got set-up time-out message" ); }
+    
+    @Override
+    public void onLiveMonitoringStarted()
+    {
+        clientView.addLogMessage( "ECC has started Live Monitoring process" );
+    }
 
     @Override
     public void onStartPushingMetricData()
@@ -288,6 +294,12 @@ public class ECCClientController implements EMIAdapterListener,
         pendingPullReports.put( reportOut.getUUID(), reportOut );
     }
 
+    @Override
+    public void onPullingStopped()
+    {
+        clientView.addLogMessage( "ECC has stopped pulling" );
+    }
+    
     @Override
     /*
     * Note that the summaryOUT parameter is an OUT parameter supplied by the

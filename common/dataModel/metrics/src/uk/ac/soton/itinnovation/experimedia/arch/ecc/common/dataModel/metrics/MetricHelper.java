@@ -18,44 +18,39 @@
 // the software.
 //
 //      Created By :            Simon Crowle
-//      Created Date :          11-Jul-2012
+//      Created Date :          26-Oct-2012
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics;
 
-import com.rabbitmq.client.*;
-
-import java.io.IOException;
+import java.util.*;
 
 
 
 
-public class AMQPBasicChannel
+public class MetricHelper
 {
-  private Channel amqpChannel;
-  
-  public AMQPBasicChannel( Channel channel )
-  { amqpChannel = channel; }
-  
-  public Object getChannelImpl()
-  { return amqpChannel; }
-  
-  public boolean isOpen()
-  {
-    if ( amqpChannel != null )
-      return ( amqpChannel.isOpen() );
-    
-    return false;
-  }
-  
-  public void close()
-  {
-    if ( amqpChannel != null )
-      if ( amqpChannel.isOpen() )
-        try { amqpChannel.close(); }
-        catch (IOException ioe) {}
-  }
-  
+    public static Set<MeasurementSet> getAllMeasurementSets( Set<MetricGenerator> mgenSet )
+    {
+        HashSet<MeasurementSet> mSets = new HashSet<MeasurementSet>();
+        
+        if ( mgenSet != null )
+        {
+            Iterator<MetricGenerator> mgenIt = mgenSet.iterator();
+            while ( mgenIt.hasNext() )
+            {
+                Iterator<MetricGroup> mgIt = mgenIt.next().getMetricGroups().iterator();
+                while ( mgIt.hasNext() )
+                {
+                    Iterator<MeasurementSet> msIt = mgIt.next().getMeasurementSets().iterator();
+                    while ( msIt.hasNext() )
+                    { mSets.add( msIt.next() ); }
+                }
+            }
+        }
+        
+        return mSets;        
+    }
 }
