@@ -15,11 +15,11 @@ if [ ! -d lib ]; then
 	mvn install
 	mvn dependency:copy-dependencies
 fi
-rm -rf charms/precise/headerlesseccclient/code/lib/
-cp -r lib charms/precise/headerlesseccclient/code/lib
+rm -rf charms/precise/headlesseccclient/code/lib/
+cp -r lib charms/precise/headlesseccclient/code/lib
 
 echo "Deploying charm..."
-juju deploy --repository=./charms local:headerlesseccclient headless
+juju deploy --repository=./charms local:headlesseccclient headless
 juju add-relation headless:localdb postgresql:db
 juju add-relation headless:rabbit rabbitmq-server
 
