@@ -471,6 +471,7 @@ function getMetricGeneratorsForClient(clientUUID) {
                                 var entity = $(this).data('entity');
 
                                 var theAttribute;
+                                var theAttributeDescription;
                                 $.each(entity.attributes, function(indexAttribute, attribute){
                                     theAttribute = $('<p class="noextrawhitespace attributesitem">' + attribute.name + '</p>').appendTo(attributesList);
                                     theAttribute.data('attribute', attribute);
@@ -487,7 +488,20 @@ function getMetricGeneratorsForClient(clientUUID) {
 
                                         infoList.append('<p class="noextrawhitespace">UUID: ' + attribute.uuid + '</p>');
                                         infoList.append('<p class="noextrawhitespace">Name: ' + attribute.name + '</p>');
-                                        infoList.append('<p class="noextrawhitespace">Description: ' + attribute.description + '</p>');
+                                        
+                                        theAttributeDescription = attribute.description;
+                                        infoList.append('<p class="noextrawhitespace">Description: ' + theAttributeDescription + '</p>');
+                                        
+                                        $.each(theAttributeDescription.split(" "), function(index, value){
+                                            // console.log(value);
+
+                                            if ( value.indexOf('http') == 0 && ( ( value.match('.jpg$') == '.jpg') || ( value.match('.png$') == '.png' ) ) ) {
+                                                // console.log('Image url: ' + value);
+                                                infoList.append("<img src='" + value + "'>");
+                                            }
+
+                                        });                                        
+                                        
                                     });
                                 });
 
