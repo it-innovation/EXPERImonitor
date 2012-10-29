@@ -37,9 +37,7 @@ public class AMQPBasicChannel
   private Channel amqpChannel;
   
   public AMQPBasicChannel( Channel channel )
-  {
-    amqpChannel = channel;
-  }
+  { amqpChannel = channel; }
   
   public Object getChannelImpl()
   { return amqpChannel; }

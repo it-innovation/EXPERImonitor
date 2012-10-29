@@ -43,9 +43,10 @@ public class EMClientEx extends EMClient
   private IEMLiveMonitor    liveFace;
   private IEMPostReport     postFace;
   private IEMTearDown       tearDownFace;
-  
+ 
   private ArrayList<UUID> generatorsToSetup;
  
+  
   public EMClientEx( UUID id, String name )
   {
     super( id, name );
@@ -139,12 +140,25 @@ public class EMClientEx extends EMClient
   public void addSuccessfulSetup( UUID genID )
   { if ( genID != null ) generatorsSetupOK.add( genID ); }
   
-  // Live monitoring phase (and post-reporting) states -------------------------
-  public UUID getPullingMeasurementSetID()
-  { return currentPullMeasurementSetID; }
+  // Live monitoring phase (and post-reporting) states -------------------------  
+  public void addPullingMeasurementSetID( UUID msID )
+  { currentMeasurementSetPulls.add( msID ); }
   
-  public void setPullingMeasurementSetID( UUID measurementSetID )
-  { currentPullMeasurementSetID = measurementSetID; }
+  public boolean isCurrentlyPullingMeasurementSetID( UUID msID )
+  { return currentMeasurementSetPulls.contains( msID ); }
+  
+  public void removePullingMeasurementSetID( UUID msID )
+  { if ( msID != null ) currentMeasurementSetPulls.remove(msID); }
+  
+  public UUID getNextMeasurementSetIDToPull()
+  {
+    if ( currentMeasurementSetPulls.isEmpty() ) return null;
+    
+    return currentMeasurementSetPulls.iterator().next();
+  }
+  
+  public void clearAllMeasurementSetPulls()
+  { currentMeasurementSetPulls.clear(); }
   
   // Post-report phase state ---------------------------------------------------
   public void setPostReportSummary( EMPostReportSummary report )

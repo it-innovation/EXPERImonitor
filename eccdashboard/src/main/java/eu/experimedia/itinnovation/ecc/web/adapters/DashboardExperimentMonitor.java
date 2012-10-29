@@ -276,6 +276,15 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
             throw e;
         }
     }
+    
+    @Override
+    public void pullAllMetrics( EMClient client ) throws Exception {
+        try {
+            lifecycleManager.tryPullAllMetrics(client);
+        } catch (Exception e) {
+            throw e;
+        }
+    }
 
     @Override
     public void requestDataBatch(EMClient client, EMDataBatch batch) throws Exception {

@@ -62,7 +62,7 @@ public interface EMIAdapterListener
      *                    phases they support
      * 
      */
-    void onDescribeSupportPhases( EnumSet<EMPhase> phasesOUT );
+    void onDescribeSupportedPhases( EnumSet<EMPhase> phasesOUT );
 
     /**
      * Request the listener specifies whether they push or pull or both.
@@ -106,12 +106,17 @@ public interface EMIAdapterListener
      * @param metricGeneratorID - ID of the metric generator being set up
      */
     void onSetupTimeOut( UUID metricGeneratorID );
+    
+    /**
+     * Notifies listener that live monitoring has begun.
+     */
+    void onLiveMonitoringStarted();
 
     /**
      * Notifies the listener that it can now start pushing metric data
      */
     void onStartPushingMetricData();
-
+    
     /**
      * Notifies the listener that the EM has successfully received a pushed
      * Report with the supplied ID. (The listener is now able to push the
@@ -122,12 +127,26 @@ public interface EMIAdapterListener
     void onPushReportReceived( UUID lastReportID );
     
     /**
+     * Notifies the listener that it should stop pushing metric data.
+     */
+    void onStopPushingMetricData();
+    
+    /**
      * Notifies the listener that the EM has successfully received a pulled
      * Report with the supplied ID.
      * 
      * @param lastReportID 
      */
     void onPullReportReceived( UUID reportID );
+    
+    /**
+     * Notifies the listener that it should generate metric data for the
+     * supplied MeasurementSet ID - use the OUT parameter to set this data.
+     * 
+     * @param measurementSetID - MeasurementSet ID to report on
+     * @param reportOUT        - Report 'OUT' parameter to insert data into
+     */
+    void onPullMetric( UUID measurementSetID, Report reportOUT );
     
     /**
      * Notifies the listener that the pulling of metric data from the MeasurementSet
@@ -139,18 +158,11 @@ public interface EMIAdapterListener
     void onPullMetricTimeOut( UUID measurementSetID );
 
     /**
-     * Notifies the listener that it should stop pushing metric data.
-     */
-    void onStopPushingMetricData();
-
-    /**
-     * Notifies the listener that it should generate metric data for the
-     * supplied MeasurementSet ID - use the OUT parameter to set this data.
+     * Notifies the listener that the EM has finished pulling (during the
+     * Live Monitoring phase)
      * 
-     * @param measurementSetID - MeasurementSet ID to report on
-     * @param reportOUT        - Report 'OUT' parameter to insert data into
      */
-    void onPullMetric( UUID measurementSetID, Report reportOUT );
+    void onPullingStopped();
 
     /**
      * Notifies the listener that they should construct a post report summary.

@@ -172,6 +172,17 @@ public interface IExperimentMonitor
   void pullMetric( EMClient client, UUID measurementSetID ) throws Exception;
   
   /**
+   * Progressively pulls all metrics available from the client. After this method
+   * has been called, users of IExperimentMonitor will need to use 
+   * Client.isPullingMetricData() to determine when it is possible to request
+   * another pull (clients will not be asked to pull if they are already doing so).
+   * 
+   * @param client      - Client to pull data from
+   * @throws Exception  - Throws if the parameters are invalid or the client is already pulling.
+   */
+  void pullAllMetrics( EMClient client ) throws Exception;
+  
+  /**
    * Requests a batch of report data from the client - see EMDataBatch for further
    * information on requesting metric data batches.
    * 

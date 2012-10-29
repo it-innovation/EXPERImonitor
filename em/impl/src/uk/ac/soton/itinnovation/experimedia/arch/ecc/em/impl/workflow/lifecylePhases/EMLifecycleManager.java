@@ -26,7 +26,6 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecylePhases;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.IEMLifecycleListener;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 
@@ -37,11 +36,10 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.EMConnecti
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 
 import java.util.*;
 import org.apache.log4j.Logger;
-
 
 
 
@@ -168,10 +166,15 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
         }
         catch( Exception e ) 
         {
-          String errorMsg = "Could not start lifecycle phase: " + lcPhase.getPhaseType() + "\n";
-          errorMsg       += "Life-cycle exception: " + e.getMessage();
+          String msg = "Could not start lifecycle phase: " + lcPhase.getPhaseType() + "\n"
+                     + "Life-cycle exception: " + e.getMessage();
           
-          lmLogger.error( errorMsg );
+          lmLogger.warn( msg );
+          
+          // Try the next phase automatically
+          lmLogger.info( "Trying next phase: " + currentPhase.nextPhase() );
+          
+          currentPhase = iterateLifecycle();
         }
     }
     
@@ -209,23 +212,54 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   
   public void tryPullMetric( EMClient client, UUID measurementSetID ) throws Exception
   {
+    // Safety first
     if ( client == null || measurementSetID == null ) throw new Exception( "Pull parameters are invalid" );
-    if ( currentPhase != EMPhase.eEMLiveMonitoring ) throw new Exception( "Not in metric pulling compatible phase" );
-      
+    if ( currentPhase != EMPhase.eEMLiveMonitoring )  throw new Exception( "Not in metric pulling compatible phase" );
+    if ( client.isPullingMetricData() )               throw new Exception( "Client is already being pulled for data" );
+    
     synchronized ( clientLock )
     {
       EMClientEx clientEx = (EMClientEx) client;
       if ( clientEx == null ) throw new Exception( "Client is invalid" );
-      
-      // Don't try pulling if we've already made a request
-      if ( clientEx.isPullingMetricData() ) throw new Exception( "Still waiting for pull metric data from client" );
-      
-      IEMLiveMonitor monitor = clientEx.getLiveMonitorInterface();
-      if ( monitor == null ) throw new Exception( "Could not get client live monitor interface" );
-      
-      clientEx.setPullingMeasurementSetID( measurementSetID );
-      monitor.pullMetric( measurementSetID );
+
+      clientEx.addPullingMeasurementSetID( measurementSetID );
+      clientEx.getLiveMonitorInterface().pullMetric( measurementSetID );
     }
+  }
+  
+  public void tryPullAllMetrics( EMClient client ) throws Exception
+  {
+    // Safety first
+    if ( currentPhase != EMPhase.eEMLiveMonitoring )  throw new Exception( "Not in metric pulling compatible phase" );
+    if ( client.isPullingMetricData() )               throw new Exception( "Client is already being pulled for data" );
+    
+    // Get all MeasurementSets available
+    Set<MeasurementSet> targetMSets = 
+            MetricHelper.getAllMeasurementSets( client.getCopyOfMetricGenerators() );
+    
+    // If we don't have any MeasurementSets, then back out
+    if ( targetMSets.isEmpty() )
+      throw new Exception( "Client (apparently) has no measurement sets to pull!" );
+    else
+    {
+      synchronized ( clientLock ) // Otherwise, collect, stack and post request for the first one
+      {
+        EMClientEx clientEx = (EMClientEx) client;
+        if ( clientEx == null ) throw new Exception( "Client is invalid" );
+        
+        Iterator<MeasurementSet> msIt = targetMSets.iterator();
+        UUID lastMSID = null;
+        
+        while ( msIt.hasNext() )
+        {
+          lastMSID = msIt.next().getUUID();
+          clientEx.addPullingMeasurementSetID( lastMSID ); 
+        }
+        
+        clientEx.getLiveMonitorInterface().pullMetric( lastMSID );
+      }
+    }
+    
   }
   
   public void tryRequestDataBatch( EMClient client, EMDataBatch batch ) throws Exception
@@ -244,11 +278,8 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
       EMClientEx clientEx = (EMClientEx) client;
       if ( clientEx == null ) throw new Exception( "Client is invalid" );
       
-      IEMPostReport postReport = clientEx.getPostReportInterface();
-      if ( postReport == null ) throw new Exception( "Could not get client post report interface" );
-      
       clientEx.setCurrentPostReportBatchID( batch.getID() );
-      postReport.requestDataBatch( batch );
+      clientEx.getPostReportInterface().requestDataBatch( batch );
     }
   }
   

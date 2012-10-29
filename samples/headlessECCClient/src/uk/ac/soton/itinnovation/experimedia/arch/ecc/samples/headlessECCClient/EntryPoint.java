@@ -23,7 +23,7 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.headerlessECCClient;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.headlessECCClient;
 
 import java.io.*;
 import java.util.*;
@@ -38,13 +38,40 @@ public class EntryPoint
   
     public static void main( String args[] )
     {
+        // If have an argument to clear the EDMAgent database, do so, then exit
+        if ( args.length == 1 && args[0].equals( "deleteLocalData") )
+        {
+            Properties edmProps = getProperties( "edm" );
+            if ( edmProps != null )
+            {
+                ECCHeadlessClient client = new ECCHeadlessClient( "Dummy client" );
+                
+                if ( client.deleteLocalData( edmProps ) )
+                    clientLogger.info( "Deleted EDM data successfully" );
+                else
+                    clientLogger.error( "Failed to delete EDM datra." );
+            }
+            else
+                clientLogger.error( "Could not find EDM Agent configuration" );
+            
+            clientLogger.info( "Now exiting headless client" );
+            System.exit( 0 );
+            
+        }
+        else
+            // Otherwise, initialise client and begin
+            initialiseClient();
+    }
+    
+    private static void initialiseClient()
+    {
         // Get some configuration information from somewhere
         Properties emProps  = getProperties( "em");
         Properties edmProps = getProperties( "edm" );
         
         if ( emProps != null )
         {
-              ECCHeaderlessClient client = new ECCHeaderlessClient( "Headerless Client " + new Date().toString() );
+              ECCHeadlessClient client = new ECCHeadlessClient( "Headless Client " + new Date().toString() );
 
               // Try connecting to AMQP bus
               if ( connectToAMQPBus( client, emProps ) )
@@ -74,7 +101,7 @@ public class EntryPoint
                   // Tidy up
                   client.disconnectFromECCMonitor();
                   
-                  System.exit( 1 );
+                  System.exit( 0 );
               }  
         }
         else { clientLogger.error( "Could not find client configuration properties" ); }
@@ -121,7 +148,7 @@ public class EntryPoint
         return targetProperties;
     }
     
-    private static boolean connectToAMQPBus( ECCHeaderlessClient client,
+    private static boolean connectToAMQPBus( ECCHeadlessClient client,
                                              Properties          emProps )
     {
         // Safety first
@@ -181,17 +208,17 @@ public class EntryPoint
         return connectedOK;
     }
     
-    private static boolean tryRegisterWithECCMonitor( ECCHeaderlessClient client,
+    private static boolean tryRegisterWithECCMonitor( ECCHeadlessClient client,
                                                       Properties          emProps,
                                                       Properties          edmProps )
     {
         boolean registrationAttempt = false;
         
         // Try to create local data persistence (not critical, but very useful)
-        if ( client.initialiseLocalDataManagement(edmProps) )
-            clientLogger.info( "Successfully created EDMAgent and measurement scheduling" );
-        else
-            clientLogger.warn( "Could not create local EDMAgent - will continue, but will not schedule/store measurements" );
+//        if ( client.initialiseLocalDataManagement(edmProps) )
+//            clientLogger.info( "Successfully created EDMAgent and measurement scheduling" );
+//        else
+//            clientLogger.warn( "Could not create local EDMAgent - will continue, but will not schedule/store measurements" );
 
         // Make sure we have a valid UUID to connect to EM/ECC
         UUID expMonitorID = null;
