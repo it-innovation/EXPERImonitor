@@ -1,0 +1,737 @@
+#displayArea {
+	margin: -1px 9px -5px 9px;
+	padding: 9px 0 0 0;
+	width: 950px;
+	min-height: 700px;
+	float: left;
+	border-right: 1px solid #333;
+	border-left: 1px solid #333;
+}
+
+	#displayArea h1 {
+		margin: 10px 10px;
+		padding: 0;
+		width: 688px;
+		border: 0;
+		font-size: 16px;
+	}
+
+	#displayArea h1 span.underline {
+		text-decoration: underline;
+		cursor: pointer;
+	}
+
+	.jqplot-xaxis {
+	    margin-top: -3px;
+
+	}
+
+	.jqplot-yaxis {
+	    margin-right: 7px;
+	}
+
+	.gmap {
+		height: 250px;
+		width: 100%;
+	}
+
+	p.locationDecription {
+		width: 294px;
+    color: solid black;
+		margin: 10px;
+		padding: 0;
+	}
+
+	p.saveLocation {
+		position: absolute;
+		margin: 0;
+		padding: 0;
+		text-align: right;
+		top: 11px;
+		right: 10px;
+		font-size: 11px;
+		text-decoration: underline;
+		cursor: pointer;
+	}
+
+	p.peedindexaslabel {
+		position: absolute;
+		top: 7px;
+		right: 7px;
+		margin: 0;
+		padding: 2px;
+		background-color: yellow;
+		width: 30px;
+		height: 30px;
+		-webkit-border-radius: 10px;
+		-moz-border-radius: 10px;
+		border-radius: 10px;
+		font-size: 18px;
+		line-height: 30px;
+		font-weight: bold;
+		text-align: center;
+	}
+
+	.widgetHeaderDiv {
+		width: 100%;
+		margin: 8px 0 0 0;
+	}
+
+	.searchWidgetHeaderDiv {
+		width: 100%;
+    /*background-color: teal;*/
+    background-color: rgb(144, 200, 219);
+		margin: 8px 0 0 0;
+	}
+
+	.analysisWidgetHeaderDiv {
+		width: 100%;
+    /*border: 2px solid #333;*/
+    /*background-color: orange;*/
+    background-color: rgb(232, 185, 2); /* this is "wegov orange" */
+		margin: 8px 0 0 0;
+	}
+
+	.widgetLogo {
+		padding: 0;
+		/* margin: 0 0 0 9px; */
+    margin: 5px;
+		float: left;
+		width: 30px;
+		/*cursor: pointer;*/
+
+	}
+
+	.widgetHeaderTextDiv {
+		float: left;
+		padding: 0;
+    font-size: 14px;
+		margin: 0 0 0 5px;
+		width: 255px;
+		/*cursor: pointer;*/
+	}
+
+	.widgetHeaderExtraTextDiv {
+		padding: 0;
+		margin: 5px 10px 0 9px;
+		width: 290px;
+	}
+
+	.widgetHeaderExtraTextDiv p {
+		width: 100%;
+		/*color: #999;*/
+    color: black;
+		font-size: 10px;
+		padding: 0;
+		margin: 0;
+	}
+
+	.widgetContent {
+		width: 290px;
+		min-height: 200px;
+    /*border: 1px black;*/
+    border: 1px solid black;
+		/*margin: 10px 0 0 9px;*/
+    margin: 5px;
+		padding: 4px;
+		overflow: hidden;
+    word-wrap: normal;
+	}
+
+	.widgetPostContent {
+		width: 290px;
+		margin: 10px 0;
+	}
+
+	p.locationEntry {
+		padding: 0;
+		margin: 5px 5px 5px 11px;
+		width: 280px;
+	}
+
+	.widgetFooter {
+		width: 100%;
+		margin: 0 0 9px 0;
+	}
+
+	.widgetFooter p {
+		text-decoration: underline;
+		/*color: #999;*/
+    color: black;
+		cursor: pointer;
+		padding: 0;
+		width: 100px;
+		font-size: 10px;
+	}
+
+	.widgetSettings {
+		float: left;
+		margin: 0 0 0 9px;
+	}
+
+	.widgetRefresh {
+		float: right;
+		margin: 0 9px 0 0;
+		text-align: right;
+	}
+
+	.widgetDetails {
+		float: right;
+		margin: 0 9px 0 0;
+    font-size: 10px;
+		text-align: right;
+	}
+
+	h2.widgetHeader {
+		margin: 5px 0 0 5px;
+		padding: 0;
+		font-size: 14px;
+		font-weight: normal;
+		width: 100%;
+	}
+
+	.changeCurrentlocation {
+		color: #999;
+		font-size: 10px;
+		cursor: pointer;
+		text-decoration: underline;
+	}
+/*
+	a.clickableWidgetHeader {
+		margin: 5px 0 0 5px;
+		padding: 0;
+		font-size: 14px;
+		font-weight: normal;
+		width: 90%;
+		display: block;
+		cursor: pointer;
+		color: #111;
+		text-decoration: underline;
+	}
+*/
+	a.clickableWidgetHeader {
+		margin: 0px 0 0 0px;
+		padding: 0;
+		font-size: 14px;
+		font-weight: normal;
+		width: 90%;
+		display: block;
+		cursor: pointer;
+		color: #111;
+		text-decoration: underline;
+	}
+
+	a.nonClickableWidgetHeader {
+		margin: 0px 0 0 5px;
+		padding: 0;
+		font-size: 14px;
+		font-weight: normal;
+		width: 90%;
+		display: block;
+		/*cursor: pointer;*/
+		color: #111;
+		/*text-decoration: underline;*/
+	}
+
+	h2.analysisWidgetTitle {
+		margin: 0px 0 0 0px;
+		padding: 0;
+		font-size: 14px;
+		font-weight: normal;
+		width: 100%;
+	}
+
+/*
+	.peerindexchart {
+		width: 295px;
+		height: 220px;
+		margin: 10px 0 10px 13px;
+		padding: 10px 0 0 0;
+	}
+*/
+
+	.peerindexchart {
+		width: 290px;
+		height: 220px;
+		/*margin: 10px 0 10px 13px;*/
+    margin: auto auto auto auto;
+		/*padding: 10px 0 0 0;*/
+    padding: 0 0 0 0;
+	}
+
+/*
+	.piechart {
+		width: 320px;
+		height: 220px;
+		margin: 10px auto 10px auto;
+		padding: 10px 0 0 0;
+	}
+*/
+
+	.piechart {
+		width: 290px;
+		height: 250px;
+		/*margin: 10px auto 10px auto;*/
+    margin: auto auto auto auto;
+		/*padding: 10px 0 0 0;*/
+    padding: 0 0 0 0;
+	}
+
+  div.jqplot-data-label {
+		font-size: 14px;
+	}
+
+	div.listOfUserWithRoleDiv {
+		width: 290px;
+		margin: 0 auto;
+		padding: 0;
+		height: 215px;
+		overflow: hidden;
+	}
+
+	div.listOfTopicsDiv {
+		width: 290px;
+		margin: 10px auto 0 auto;
+		padding: 0;
+	}
+
+	div.listOfTrendsDiv {
+		width: 290px;
+		margin: 10px auto 0 auto;
+		padding: 0;
+	}
+
+	div.listOfTrendsDiv p.trend {
+		margin: 5px 0;
+		padding: 0;
+	}
+
+	div.listOfTrendsDiv a {
+		margin: 0;
+		padding: 0;
+		color: #222;
+		font-size: 14px;
+	}
+
+	p.koblenzResultsHeader {
+		padding: 7px 0;
+		margin: 0;
+	}
+
+	div.koblenzWidgettopicWrapper {
+		width: 270px;
+		margin: 0 0 5px 0;
+		padding: 0 0 0 20px;
+	}
+
+	a.koblenzTopicuserProfileLink {
+		color: #222;
+		padding: 5px 0;
+/* 		margin: 0 0 0 20px; */
+		display: inline;
+/* 		width: 280px; */
+		height: 15px;
+	}
+
+	p.koblenzKeyUsersLabel {
+		display: inline;
+		margin: 0 5px 0 0;
+		padding: 5px 0;
+		height: 15px;
+	}
+
+	p.koblenzTopicKeywords {
+		font-weight: bold;
+		font-size: 13px;
+		/*width: 300px;*/
+    width: 100%;
+		margin: 0;
+		padding: 0;
+		display: block;
+		height: 18px;
+		overflow: hidden;
+		white-space: nowrap;
+	}
+
+	.widgetFull {
+		width: 670px;
+		min-height: 206px;
+		padding: 0 10px 10px 10px;
+		margin: 10px 10px 0 10px;
+		border: 3px solid #333;
+    background-color: orange;
+		float: left;
+		-webkit-border-radius: 10px;
+		-moz-border-radius: 10px;
+		border-radius: 10px;
+		-webkit-box-shadow: 0px 2px 2px 2px rgba(3, 3, 3, 0.25);
+		-moz-box-shadow: 0px 2px 2px 2px rgba(3, 3, 3, 0.25);
+		box-shadow: 0px 2px 2px 2px rgba(3, 3, 3, 0.25);
+		position: relative;
+	}
+
+	p.middleTextWidget {
+		float: left;
+		width: 100%;
+		margin: 130px 0 0 0;
+		text-align: center;
+	}
+
+	p.middleTextWidgetWithHeaderOn {
+		float: left;
+		width: 100%;
+		margin: 40px 0 0 0;
+		text-align: center;
+	}
+
+	span.aslink {
+		color: #0000dd;
+		text-decoration: underline;
+		cursor: pointer;
+	}
+
+	ul.topicsList {
+		list-style-type: decimal;
+		padding: 0 0 0 20px;
+		margin: 10px 0 15px 10px;
+	}
+
+	li.topicItem {
+		padding: 0;
+		margin: 10px 0 0 10px;
+		font-weight: bold;
+		font-size: 14px;
+	}
+
+	li.topicItem:hover {
+		text-decoration: underline;
+		cursor: pointer;
+	}
+
+	#addNewLocationControl {
+		position: absolute;
+		margin: 0;
+		padding: 0;
+		text-align: right;
+		top: 11px;
+		right: 10px;
+		font-size: 11px;
+		text-decoration: underline;
+		cursor: pointer;
+	}
+
+	#map_canvas {
+        height: 400px;
+        width: 600px;
+        margin-top: 0.6em;
+      }
+
+     #add-new-location-dialog-holder-controls {
+     	width: 100%;
+     	text-align: right;
+     	padding: 0;
+
+     }
+
+/*
+	Widgets as portlets
+*/
+
+#widgets {
+	border: 0;
+	display: block;
+	width: 100%;
+}
+	.column {
+		width: 310px;
+		float: left;
+		padding-bottom: 10px;
+		/* border: 1px solid red; */
+		min-height: 600px;
+		margin: 0 0 0 5px;
+		/* background-color: #eee; */
+	}
+
+	.portlet {
+		width: 308px;
+		min-height: 40px;
+		padding: 0;
+		margin: 10px 0 0 0;
+		border: 1px solid #333;
+		/*border: 2px solid #333;*/
+    /*background-color: orange;*/
+		float: left;
+		-webkit-border-radius: 10px;
+		-moz-border-radius: 10px;
+		border-radius: 10px;
+		-webkit-box-shadow: 0px 2px 2px 2px rgba(3, 3, 3, 0.25);
+		-moz-box-shadow: 0px 2px 2px 2px rgba(3, 3, 3, 0.25);
+		box-shadow: 0px 2px 2px 2px rgba(3, 3, 3, 0.25);
+		position: relative;
+		background-color: #FFF;
+
+    /*background-color: #ADD8E6;*/
+	}
+
+  .portlet_analysis {
+    background-color: rgb(232, 185, 2);
+  }
+
+  .portlet_search {
+    background-color: rgb(144, 200, 219);
+  }
+
+
+	.portlet .widgetContainer {
+		width: 290px;
+		height: 200px;
+		margin: 10px 0 0 10px;
+		padding: 0;
+		overflow: hidden;
+    /* background-color: orange; */
+
+	}
+
+	.widgetFull .widgetContainer {
+		margin-top: 10px;
+	}
+
+	.portlet .widgetTweet {
+		margin: 0 0 7px 0;
+		padding: 0;
+		width: 100%;
+		font-size: 11px;
+		display: block;
+		clear: both;
+	}
+
+	.portlet .widgetTweet p {
+		display: block;
+	}
+
+	.portlet .widgetTweet a {
+		color: #222;
+		font-weight: bold;
+		margin-bottom: 3px;
+		text-decoration: none;
+	}
+
+	a.capitalisedLink {
+		text-transform: capitalize;
+
+	}
+
+	.portlet .widgetTweet a:hover {
+		text-decoration: underline;
+	}
+
+	.portlet .widgetTweet img {
+		width: 48px;
+		height: 48px;
+		float: left;
+		margin: 0 4px 7px 0;
+		padding: 0;
+	}
+
+	.portlet-header { margin: 0.3em; padding-bottom: 4px; padding-left: 0.2em; }
+	.portlet-header .ui-icon { float: right; }
+	.portlet-content { padding: 0.4em; }
+	.ui-sortable-placeholder { border: 1px dotted black; visibility: visible !important; height: 50px !important; }
+	.ui-sortable-placeholder * { visibility: hidden; }
+
+.propertiesControlImg {
+	position: absolute;
+	right: 8px;
+	bottom: 8px;
+	margin: 0;
+	padding: 0;
+	width: 16px;
+	height: 16px;
+	cursor: pointer;
+}
+	.configureTwitterPostsByLocation {
+	    background: rgb(250, 250, 250);
+	    border: solid 1px #333;
+	    position:fixed;
+	    width: 500px;
+	    /* height: 250px; */
+	    z-index: 500;
+	    display: none;
+	    overflow: auto;
+	    margin: 0;
+	    padding: 10px;
+	}
+
+	div.widgetPropertiesOptions {
+		width: 100%;
+		margin: 0 0 30px 0;
+		padding: 0;
+	}
+
+	div.widgetPropertiesOptions p {
+		display: block;
+		width: 100%;
+		margin: 5px 0;
+	}
+
+	div.widgetPropertiesControls {
+		width: 100%;
+		position: relative;
+		text-align: right;
+		margin: 0 0 10px 0;
+		padding: 0;
+	}
+
+	div.widgetPropertiesControls p {
+		display: inline;
+	}
+
+	div.widgetPropertiesOptions p {
+		display: inline;
+		font-size: 14px;
+	}
+
+	div.roleSelectionRoleSelector {
+		width: 100%;
+		padding: 0;
+		margin: 0;
+	}
+
+	div.roleSelectionDropDownDiv {
+		float: left;
+		width: 220px;
+		padding: 10px 0;
+		margin: 0;
+		display: block;
+	}
+
+  div.widgetColourSelectionDropDownDiv {
+		float: right;
+		/*width: 220px;*/
+		/*padding: 10px 0;
+		margin: 0;*/
+		display: block;
+	}
+
+	div.roleSelectionDropDownDiv .k-dropdown {
+		margin: 11px 0 0 0;
+		width: 190px;
+	}
+
+	div.sourceWidgetSelectionDropDownDiv .k-dropdown {
+		margin: 11px 0 0 0;
+		width: 490px;
+	}
+
+
+	div.roleSelectionDropDownDiv .k-input {
+		font-size: 14px;
+	}
+
+	div.roleDescriptionDropDownDiv {
+		float: left;
+		width: 270px;
+		padding: 0;
+		margin: 10px 0 0 0;
+		display: block;
+	}
+	div.roleDescriptionDropDownDiv p {
+		padding: 0;
+		margin: 0;
+		width: 100%;
+		word-wrap: break-word;
+		font-size: 14px;
+		color: #222;
+	}
+
+	p.deleteWidgetButton {
+		position: absolute;
+		top: 20px;
+		right: 10px;
+		font-size: 11px;
+		color: red;
+		text-decoration: underline;
+		cursor: pointer;
+	}
+
+	p.numResultsTitle {
+		font-size: 11px;
+		/*color: #999;*/
+    color: black;
+		margin: -3px 0 2px 0;
+		padding: 0;
+	}
+
+	div.widgetPropertiesOptions input[type=text] {
+		width: 492px;
+		height: 28px;
+		font-size: 14px;
+		-webkit-border-radius: 5px;
+		-moz-border-radius: 5px;
+		border-radius: 5px;
+		border: 0;
+		margin: 11px 0;
+		padding: 1px 4px;
+		-webkit-box-shadow: inset 1px 2px 1px 1px rgba(0, 0, 0, 0.34);
+		-moz-box-shadow: inset 1px 2px 1px 1px rgba(0, 0, 0, 0.34);
+		box-shadow: inset 1px 2px 1px 1px rgba(0, 0, 0, 0.34);
+	}
+
+	div.widgetPropertiesOptions input[type=checkbox] {
+		margin: 30px 5px 10px 0;
+		width: 14px;
+		heigth: 14px;
+	}
+
+	p.duplicateWidgetButton {
+		color: white;
+		margin: 0 110px 0 10px;
+		padding: 6px 15px;
+		text-decoration: none;
+		font-size: 18px;
+		font-weight: normal;
+		border: 0;
+		background: #E99520 url('../../img/loginbtn_bg.png') repeat-x;
+		-webkit-border-radius: 8px;
+		-moz-border-radius: 8px;
+		border-radius: 8px;
+		-webkit-box-shadow: 0px 2px 1px 2px rgba(0, 0, 0, 0.34);
+		-moz-box-shadow: 0px 2px 1px 2px rgba(0, 0, 0, 0.34);
+		box-shadow: 0px 2px 1px 2px rgba(0, 0, 0, 0.34);
+		cursor: pointer;
+	}
+	p.updateWidgetButton {
+		color: white;
+		margin: 0 0 0 10px;
+		padding: 6px 15px;
+		text-decoration: none;
+		font-size: 18px;
+		font-weight: normal;
+		border: 0;
+		background: #E99520 url('../../img/loginbtn_bg.png') repeat-x;
+		-webkit-border-radius: 8px;
+		-moz-border-radius: 8px;
+		border-radius: 8px;
+		-webkit-box-shadow: 0px 2px 1px 2px rgba(0, 0, 0, 0.34);
+		-moz-box-shadow: 0px 2px 1px 2px rgba(0, 0, 0, 0.34);
+		box-shadow: 0px 2px 1px 2px rgba(0, 0, 0, 0.34);
+		cursor: pointer;
+	}
+
+	p.cancelWidgetButton {
+		color: white;
+		margin: 0 0 0 5px;
+		padding: 6px 15px;
+		text-decoration: none;
+		font-size: 18px;
+		font-weight: normal;
+		border: 0;
+		background: #E99520 url('../../img/loginbtn_bg_grey.png') repeat-x;
+		-webkit-border-radius: 8px;
+		-moz-border-radius: 8px;
+		border-radius: 8px;
+		-webkit-box-shadow: 0px 2px 1px 2px rgba(0, 0, 0, 0.34);
+		-moz-box-shadow: 0px 2px 1px 2px rgba(0, 0, 0, 0.34);
+		box-shadow: 0px 2px 1px 2px rgba(0, 0, 0, 0.34);
+		cursor: pointer;
+	}

@@ -1,0 +1,45 @@
+#header {
+	width: 100%;
+	height: 82px;
+	background: #90C8DB url('../img/header_small_bg.png') no-repeat;
+	margin:0 0 10px 0;
+	padding:0;
+	position: relative;
+}
+
+#content {
+	margin: 0;
+	padding: 0 0 0 20px;
+}
+	
+	#content h1 {
+		font-size: 4em;
+		font-weight: bold;
+		margin: 20px 0 10px 20px;
+		padding: 0;
+		color: #000;
+		width: 950px;	
+	}
+	
+	#content h2 {
+		margin: 20px 0;
+		padding: 0;
+		width: 400px;
+	}
+
+div.halfpage {
+	float: left;
+	margin: 0;
+	padding: 0 20px;
+	width: 410px;
+}
+
+p.paddedleft {
+	padding: 10px 0 10px 30px;
+	margin: 0;
+}
+
+h3 {
+	margin: 0;
+	padding: 0;
+}

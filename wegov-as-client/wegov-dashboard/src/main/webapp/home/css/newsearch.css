@@ -1,0 +1,823 @@
+#searchRunResultsWrapper {
+	font-size: 12px;
+	margin: 5px 10px 5px 10px;
+	padding: 0;
+	width: 950px;
+	min-height: 600px;
+/*	height: 550px;	*/
+/* 	overflow: scroll; */
+}
+
+#searchParameters {
+	float: left;
+	width: 469px;
+/*	min-height: 400px; */
+ 	border-right: 1px solid #333;
+	margin: 10px 0 10px 10px;
+/* 	background-color: red;
+ */	position: relative;
+}
+	
+#searchRunResults {
+	float: left;
+	width: 470px;
+/*	min-height: 400px; */
+	margin: 10px 0 10px 0px;
+/* 	background-color: red;
+ */	position: relative;
+}
+
+#titlePanel {
+	width: 100%;
+	margin: 0;
+}
+
+/* #resultsPanel {
+    border-right: 1px solid #333333;
+    float: left;
+    margin: 0;
+    min-height: 400px;
+    padding: 0 10px;
+    width: 450px;
+} */
+
+/*#resultsPanel {
+    border-right: none;
+    float: left;
+    margin: 0;
+    min-height: 400px;
+    padding: 0 10px;
+	display: block;
+    width: 100%;
+}*/
+
+
+/* #resultsPanel {
+	float: none;
+    padding: 0;
+	max-height: 430px;
+	overflow: scroll;
+} */
+
+#resultsPanel {
+	margin-left: 0;
+}
+
+#resultsTabPanel {
+	margin-top: 10px;
+	max-height: 530px;
+	overflow-y: scroll;
+}
+
+#otherPanel {
+	width: 230px;
+}
+
+/*.singlePostWrapper {
+	width: 430px;
+	width: 100%;
+	margin: 0;
+	padding: 5px 9px 7px 0px;
+	position: relative;
+	border-bottom: 1px solid #E8E8E8;
+}*/
+
+/*
+.singlePostWrapper {
+	width: 600px;
+}
+*/
+
+/*
+.postContentsWrapper {
+	float: left;
+	margin: 0 0 0 5px;
+	width: 430px;
+	display: block;
+	font-size: 14px;
+}
+*/
+
+#previousSearches {
+	float: left;
+	width: 950px;
+	margin: 0 10px 10px 10px;
+	padding: 0;
+	min-height: 300px;
+/* 	background-color: blue;
+ */	position: relative;
+ 	border-top: 1px solid #333;
+}
+
+#content h1 {
+	margin: 10px 0 10px 10px;
+	padding: 0;
+	display: block;	
+	font-size: 18px;
+}
+
+#panelbar {
+	width: 440px;
+	padding: 0;
+	margin: 0 0 0 0;
+	/* height: 300px; */
+}
+
+#panelbar2 {
+	width: 440px;
+	padding: 0;
+	margin: 0 0 0 0;
+	/* height: 300px; */
+}
+
+	label.searchForLabel {
+		font-size: 16px;
+		font-weight: bold;
+		padding: 0;
+		margin: 10px 5px 0 0px;
+	}
+	
+	#searchTerms {
+		height: 33px;
+		font-size: 16px;
+		-webkit-border-radius: 5px;
+		-moz-border-radius: 5px;
+		border-radius: 5px;
+		border: 0;
+		margin: 11px 0 0 0;
+		padding: 1px 4px;
+		-webkit-box-shadow: inset 1px 2px 1px 1px rgba(0, 0, 0, 0.34);
+		-moz-box-shadow: inset 1px 2px 1px 1px rgba(0, 0, 0, 0.34);
+		box-shadow: inset 1px 2px 1px 1px rgba(0, 0, 0, 0.34);	
+	}
+
+	input.twitter {
+		width: 335px;
+	}
+
+	input.facebook {
+		width: 305px;
+	}
+
+/* 	#locationSelectorWrapper {
+		padding: 10px;
+		
+	} */
+	
+#searchParamsDiv1 {
+	display: block;
+	float: left;
+}
+
+#searchParamsDiv2 {
+	display: block;
+	float: left;
+}
+
+	#panelbar li div.k-content,  #panelbar2 li div.k-content{
+		padding: 10px 0 10px 10px;
+	}
+	
+	#panelbar li div.k-content input, #panelbar2 li div.k-content input {
+		margin: 7px 0;
+	}
+	
+ 	.radioButtonLabels {
+		margin: 7px;
+	}
+
+/* #searchForm {
+	width: 449px;
+	margin: 20px 0 0 0;
+	padding: 0;
+	text-align: right;
+}
+
+	#searchForm label {
+		font-size: 18px;
+		margin: 5px 12px 0 0;
+		padding: 0;
+		width: 130px;
+		height: 33px;
+		text-align: right;
+		float: left;
+	}
+	
+	#searchForm input[type=text] {
+		width: 290px;
+		height: 33px;
+		font-size: 16px;
+		-webkit-border-radius: 5px;
+		-moz-border-radius: 5px;
+		border-radius: 5px;
+		border: 0;
+		margin: 0 0 0 0;
+		padding: 1px 4px;
+		-webkit-box-shadow: inset 1px 2px 1px 1px rgba(0, 0, 0, 0.34);
+		-moz-box-shadow: inset 1px 2px 1px 1px rgba(0, 0, 0, 0.34);
+		box-shadow: inset 1px 2px 1px 1px rgba(0, 0, 0, 0.34);	
+		float: left;
+	}
+	
+	#searchForm input[type=radio] {
+		clear: both;
+		margin: 10px 0 0 130px;
+		float: left;
+		width: 14px;
+	}
+	
+	#searchForm span.radioButtonLabels {
+		margin: 10px 0 0 5px;
+		float: left;
+		width: 300px;
+		text-align: left;	
+	} */
+	
+	#whereIsNearMe {
+/* 		clear: both;
+		float: left; */
+		width: 390px;
+		height: 240px;
+		margin: 10px 0 10px 20px;	
+	}
+	
+	#whereIsNearMe2 {
+/* 		clear: both;
+		float: left; */
+		width: 390px;
+		height: 380px;
+		margin: 10px 0 10px 20px;	
+	}
+	
+	.formButtonsDiv {
+		/* position: absolute;
+		bottom: 10px;
+		right: 10px; */
+		width: 100%;
+		text-align: right;
+		padding: 0;
+		margin: 20px 0;
+	}
+	
+	.formButtonsDiv p {
+		display: inline-block;
+		margin: 0 5px;
+		padding: 0;
+	}
+
+	#checkFbDetailsButton {
+		color: white;
+			margin: 0 15px 0 5px;
+			padding: 6px 15px;
+			text-decoration: none;
+			font-size: 14px;
+			font-weight: normal;
+			border: 0;
+			background: #E99520 url('../../img/loginbtn_bg.png') repeat-x;
+			-webkit-border-radius: 8px;
+			-moz-border-radius: 8px;
+			border-radius: 8px;		
+			-webkit-box-shadow: 0px 2px 1px 2px rgba(0, 0, 0, 0.34);
+			-moz-box-shadow: 0px 2px 1px 2px rgba(0, 0, 0, 0.34);
+			box-shadow: 0px 2px 1px 2px rgba(0, 0, 0, 0.34);	
+			cursor: pointer;	
+	}
+
+	#runButton {
+		color: white;
+			margin: 0 15px 0 5px;
+			padding: 6px 15px;
+			text-decoration: none;
+			font-size: 22px;
+			font-weight: normal;
+			border: 0;
+			background: #E99520 url('../../img/loginbtn_bg.png') repeat-x;
+			-webkit-border-radius: 8px;
+			-moz-border-radius: 8px;
+			border-radius: 8px;		
+			-webkit-box-shadow: 0px 2px 1px 2px rgba(0, 0, 0, 0.34);
+			-moz-box-shadow: 0px 2px 1px 2px rgba(0, 0, 0, 0.34);
+			box-shadow: 0px 2px 1px 2px rgba(0, 0, 0, 0.34);	
+			cursor: pointer;	
+	}
+
+	#testButton {
+		color: white;
+			margin: 0 0 0 5px;
+			padding: 6px 15px;
+			text-decoration: none;
+			font-size: 22px;
+			font-weight: normal;
+			border: 0;
+			background: #E99520 url('../../img/loginbtn_bg.png') repeat-x;
+			-webkit-border-radius: 8px;
+			-moz-border-radius: 8px;
+			border-radius: 8px;		
+			-webkit-box-shadow: 0px 2px 1px 2px rgba(0, 0, 0, 0.34);
+			-moz-box-shadow: 0px 2px 1px 2px rgba(0, 0, 0, 0.34);
+			box-shadow: 0px 2px 1px 2px rgba(0, 0, 0, 0.34);	
+			cursor: pointer;	
+	}
+	
+	#resetButton {
+		color: white;
+			margin: 0 0 0 5px;
+			padding: 6px 15px;
+			text-decoration: none;
+			font-size: 22px;
+			font-weight: normal;
+			border: 0;
+			background: #E99520 url('../../img/loginbtn_bg_grey.png') repeat-x;
+			-webkit-border-radius: 8px;
+			-moz-border-radius: 8px;
+			border-radius: 8px;		
+			-webkit-box-shadow: 0px 2px 1px 2px rgba(0, 0, 0, 0.34);
+			-moz-box-shadow: 0px 2px 1px 2px rgba(0, 0, 0, 0.34);
+			box-shadow: 0px 2px 1px 2px rgba(0, 0, 0, 0.34);	
+			cursor: pointer;	
+	}
+
+#searchHistoryLabel {
+	float:left;
+}
+
+#previousSearchesControls {
+	float:right;
+	width:750px;
+}
+
+#scheduledJobsButton {
+    background: url("../../img/loginbtn_bg_grey.png") repeat-x scroll 0 0 #E99520;
+    border: 0 none;
+    border-radius: 8px 8px 8px 8px;
+    box-shadow: 0 2px 1px 2px rgba(0, 0, 0, 0.34);
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: normal;
+    margin: 0 0 0 5px;
+    padding: 4px 8px;
+    text-decoration: none;
+	float:left;
+}
+
+#refreshButton {
+    background: url("../../img/loginbtn_bg_grey.png") repeat-x scroll 0 0 #E99520;
+    border: 0 none;
+    border-radius: 8px 8px 8px 8px;
+    box-shadow: 0 2px 1px 2px rgba(0, 0, 0, 0.34);
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: normal;
+    margin: 0 0 0 5px;
+    padding: 4px 8px;
+    text-decoration: none;
+	float:left;
+}
+
+#analyseButton {
+    background: url("../../img/loginbtn_bg.png") repeat-x scroll 0 0 #E99520;
+    border: 0 none;
+    border-radius: 8px 8px 8px 8px;
+    box-shadow: 0 2px 1px 2px rgba(0, 0, 0, 0.34);
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: normal;
+    margin: 0 5 0 5px;
+    padding: 4px 8px;
+    text-decoration: none;
+/*	float:right; */
+}
+
+#autoRefreshSearchHistory {
+	float:left;
+	margin-left: 15px;
+}
+
+#refreshDelaySecs {
+	width: 20px;
+}
+
+#numberOfTopics {
+	width: 20px;
+}
+
+#previousSearchesControls .radioButtonLabels {
+	margin-left: 0px;
+}
+
+.ui-widget {
+	font-family: inherit;
+}
+
+.ui-tabs-nav {
+	font-size: 1.1em;
+}
+
+.ui-tabs .ui-tabs-panel {
+	padding: 0;
+	margin: 0 10px 0 10px;
+}
+	
+	div.widgetTweet {
+		width: 100%;
+		margin: 0 0 10px 0;
+	}
+	
+	div.widgetTweet p {
+		padding: 0;
+		margin: 0;
+		width: 340px;
+		font-size: 11px;
+		display: block;
+		float: left;
+		word-wrap: break-word;
+	}
+	
+	div.widgetTweet img {
+		width: 48px;
+		height: 48px;
+		margin: 0 4px 0 0;
+		padding: 0;
+		display: block;
+		float: left;
+	}
+	
+p.koblenzTopicKeywords {
+	font-weight: bold;
+	width: 400px;
+	margin: 0;
+	padding: 1em 0;
+	display: block;
+}
+
+p.koblenzTopicMetrics {
+	width: 400px;
+	margin: 0 0 0 10px;
+	padding: 0 0 0.5em 0;
+	display: block;
+}
+
+p.koblenzTopicKeyusersHeader {
+	width: 400px;
+	margin: 0 0 0 10px;
+	padding: 0;
+	display: block;
+}
+
+p.koblenzTopicKeyPostHeader {
+	width: 400px;
+	margin: 20px 0 0 10px;
+	padding: 0;
+	display: block;	
+}
+
+div.koblenzUserWrapper, div.koblenzPostWrapper {
+	width: 400px;
+	padding: 0;
+	margin: 5px 0 5px 15px;
+	display: block;
+}
+
+	div.koblenzUserWrapper img {
+		float: left;
+		width: 48px;
+		padding: 0;
+		margin: 0;
+		display: inline-block;
+	}
+	
+	div.koblenzUserWrapper p {
+		float: left;
+		width: 340px;
+		display: inline-block;
+		padding: 0;
+		margin: 0 0 5px 5px;
+	}
+	
+	div.koblenzPostWrapper p {
+		float: left;
+		width: 370px;
+		display: inline-block;
+		padding: 0;
+		margin: 0 0 5px 5px;	
+	}
+	
+#userRolesDistributionChart {
+	width: 405px;
+	height: 300px;
+	margin: 0;
+	padding: 0;
+}
+
+#discussionActivityChartDescription {
+	width: 405px;
+	margin: 15px 0 0 0;
+	padding: 0;	
+}
+
+	#discussionActivityChartDescription p {
+		margin: 0;
+		padding: 0 0 1em 0;
+	}
+
+#userRolesDescriptions {
+	width: 405px;
+	margin: 0;
+	padding: 0;	
+}
+	#userRolesDescriptions p {
+		margin: 0;
+		padding: 0 0 1em 0;
+	}
+	
+#discussionActivityChart {
+	width: 395px;
+	height: 300px;
+	margin: 0;
+	padding: 0;
+}
+
+	div.jqplot-data-label {
+		font-size: 14px;
+	}
+	
+	p.userRolesDistributionHeader {
+		padding-bottom: 0;
+		margin: 0;
+		font-size: 14px;
+		font-weight: bold;
+	}
+	
+	p.buzzHeader {
+		padding: 0;
+		margin: 15px 0 0 0;
+		font-size: 14px;
+		font-weight: bold;
+	}
+
+#buzzUsersWrapper {
+	margin: 0;
+	padding: 0;
+	width: 395px;
+}
+	.buzzUserContainer {
+		width: 395px;
+		margin: 10px 0 0 0;
+		padding: 0;
+	}
+	
+	.buzzUserContainer img {
+		float: left;
+		width: 48px;
+		margin: 0 5px 0 0;
+		padding: 0;
+		display: block;
+	}
+	
+	.buzzUserContainer p {
+		float: left;
+		width: 310px;
+		margin: 0 5px 0 0;
+		padding: 0;
+		word-wrap: break-word;
+		display: block;
+	}
+	
+	.buzzUserDescription {
+		font-size: 11px;
+	}
+	
+#buzzPostsWrapper {
+	margin: 0;
+	padding: 0;
+	width: 395px;	
+}	
+	.buzzPostContainer {
+		width: 395px;
+		margin: 10px 0 0 0;
+		padding: 0;
+	}
+	
+#schedulerPopup {
+	width: 900px;
+	border: 1px solid #333;
+	padding: 5px;
+	margin: 0;
+	display: none;
+	position: fixed;
+	z-index: 500; 
+	background: rgb(250, 250, 250);
+	padding: 10px;
+}
+
+#scheduledJobsPopup {
+	width: 900px;
+	border: 1px solid #333;
+	padding: 5px;
+	margin: 0;
+	display: none;
+	position: fixed;
+	z-index: 500; 
+	background: rgb(250, 250, 250);
+	padding: 10px;
+}
+
+	div.schedulingOption {
+		width: 100%;
+		margin: 30px 0;
+	}
+	
+	div.schedulingOption p {
+		/* height: 40px; */
+		position: relative;
+	}
+	
+	div.schedulingOption p  {
+		display: inline-block;
+		padding: 0;
+		font-size: 14px;
+		height: 26px;
+		line-height: 26px;
+		vertical-align: top;
+		margin: 0 5px;
+	}	
+	
+	div.schedulingOption input {
+		display: inline;
+		padding: 0;
+		vertical-align: top;
+	}
+	
+	div.schedulingOption input[type="radio"] {
+ 		height: 26px;
+		margin: 0 5px;		
+	}
+	
+	.k-timepicker {
+		vertical-align: top;
+		width: 90px;
+	}
+	
+	.k-datepicker {
+		vertical-align: top;
+		width: 110px;
+	}
+	
+	.k-numerictextbox {
+		vertical-align: top;
+		width: 50px;
+	}
+
+	.numericUnits {
+		width: 66px;
+	}
+
+	#repeatedDataCollectionOptions {
+		width: 300px;
+		float: left;
+	}
+
+	div.schedulerControls {
+		display: block;
+		width: 400px;
+		text-align: right;
+		float: right;
+	}
+	
+	div.schedulerControls p, div.scheduledJobsControls p {
+		float: right;
+		display: block;
+		padding: 10px 0; 
+		color: white;
+			margin: 30px 15px 5px 5px;
+			padding: 6px 15px;
+			text-decoration: none;
+			font-size: 16px;
+			font-weight: normal;
+			border: 0;
+			
+			-webkit-border-radius: 8px;
+			-moz-border-radius: 8px;
+			border-radius: 8px;		
+			-webkit-box-shadow: 0px 2px 1px 2px rgba(0, 0, 0, 0.34);
+			-moz-box-shadow: 0px 2px 1px 2px rgba(0, 0, 0, 0.34);
+			box-shadow: 0px 2px 1px 2px rgba(0, 0, 0, 0.34);	
+			cursor: pointer;		
+		
+	}
+	
+	#addNewSchedulerButton {
+		background: #E99520 url('../../img/loginbtn_bg.png') repeat-x;
+		margin-right: 2;
+	}
+	
+	#cancelSchedulerButton {
+		background: url('../../img/loginbtn_bg_grey.png') repeat-x;
+	}
+
+	#closeScheduledJobsButton {
+		background: url('../../img/loginbtn_bg_grey.png') repeat-x;
+		float: right;
+	}
+
+.inputfield3 {
+    margin-right: 10px;
+    min-width: 20px;
+    width: 20px;
+}
+
+#radiusLabel, #radius {
+	vertical-align: middle;
+}
+
+#radius {
+	margin-top: 6px;
+}
+
+#locationSelectorWrapper .k-dropdown-wrap {
+	padding-top: 1px;
+	padding-bottom: 1px;
+}
+
+#max-per-page {
+    width: 30px;
+}
+
+#max-results {
+    width: 37px;
+}
+
+legend {
+    font-size: 13px;
+}
+
+#fbGroupInfo {
+	margin-left: 12px;
+	display: block;
+	width: 440px;
+	margin-top: 10px;
+	margin-right: 16px;
+}
+
+#fbGroupInfo p {
+	font-size: 14px;
+}
+
+#fbGroupInfo a {
+	font-size: 12px;
+}
+
+#fbGroupDetails {
+	width: 390px;
+	float: left;
+}
+
+#fbGroupImage {
+	width: 50px;
+	height: 50px;
+	float: right;
+}
+
+#fbGroupImage img {
+	width: 100%;
+	height: 100%;
+}
+
+p.fbGroupInfoName {
+	font-weight: bold;
+	color: #1C2A47;
+	margin-top: 0px;
+}
+
+#whatToFindRadioWrapper {
+	width: 150px;
+}
+
+#collectCommentsDiv {
+	width: 300px;
+}
+
+span.results {
+	font-weight: bold;
+	color: #2B2A2A;
+}
+
+
+
+/*
+.k-master-row:hover, .k-alt:hover {
+	background-color: #E3E3E3
+}
+*/
+
+tr:hover {
+	/* background-color: #E3E3E3 */
+	background-color: #B2D9E6
+}
+
+tr.k-detail-row {
+	background-color: white
+}

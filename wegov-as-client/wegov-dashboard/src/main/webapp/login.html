@@ -1,0 +1,107 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Login | WeGov Prototype 3.0</title>
+
+<link rel="stylesheet" type="text/css" href="css/common.css" media="all">
+<link rel="stylesheet" type="text/css" href="css/login.css" media="all">
+<script type="text/javascript" src="js-lib/jquery-1.6.2.js"></script>
+<script type="text/javascript" src="js-lib/jquery-lang.js"></script>
+<script type="text/javascript" src="languages/login-de.js" charset="utf-8"></script>
+<!-- <script type="text/javascript" src="js-lib/jquery.sha256.js"></script> -->
+<script type="text/javascript" src="js-lib/jQuery.encoding.digests.sha1.js"></script>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/login.js"></script>
+
+</head>
+<body>
+	<div id="wrapper">
+		<div id="header">
+			<div id="langChanger">
+				<p>Ich spreche Deutsch</p>
+			</div>
+			<div class="loginFormBgBg">
+				<div class="loginFormBg">
+					<form id="loginForm" action="j_spring_security_check" method="POST">
+						<div class="inputsAndLabelsDiv">
+							<div class="inputAndLabelDiv">
+								<label for="login"><span lang="en">Username:</span></label><input
+									type="text" id="login" name="j_username" value="" />
+							</div>
+							<div class="inputAndLabelDiv">
+								<label for="password"><span lang="en">Password:</span></label><input
+									type="password" id="password" name="j_password" value="" />
+							</div>
+              <!--
+							<div class="registerOrLoginDiv">
+								<p>
+									<span lang="en" id="registerLink">Register</span> <span
+										lang="en">or</span> <span lang="en" id="loginButton" class="loginButtonDown">Login</span>
+								</p>
+							</div>
+              -->
+							<div class="registerOrLoginDiv">
+								<p>
+									<span lang="en" id="loginButton" class="loginButtonDown">Login</span>
+								</p>
+							</div>
+							<div id="loginerror">
+								<p></p>
+							</div>
+
+						</div>
+					</form>
+				</div>
+			</div>
+
+
+		</div>
+		<div id="content">
+			<h1>
+				<span lang="en">What can I do here?</span>
+			</h1>
+			<div id="thingsToDoDivWrapper">
+				<div class="thingsToDoDiv">
+					<h2>
+						<span lang="en">Find the Right People</span>
+					</h2>
+					<p>
+						<span lang="en">Discover the right audience for your policies: active users, groups, forums and more</span>
+					</p>
+				</div>
+				<div class="thingsToDoDiv">
+					<h2>
+						<span lang="en">Start a Conversation</span>
+					</h2>
+					<p>
+						<span lang="en">Put your tweets, posts, news stories in front of people most interested in them</span>
+					</p>
+				</div>
+				<div class="thingsToDoDiv norightborder">
+					<h2>
+						<span lang="en">Get Feedback</span>
+					</h2>
+					<p>
+						<span lang="en">Using our unique analysis tools quickly gather and analyse feedback, identify key users and messages</span>
+					</p>
+				</div>
+			</div>
+			<div class="clearfix"></div>
+		</div>
+		<div id="footer">
+			<div id="footerCopyright">
+				<p>2012 &copy; <span lang="en">WeGov Consortium</span></p>
+			</div>
+			<div id="footerAboutEtc">
+				<a href="about.html"><span lang="en">About</span></a>
+        <!--
+        <a href="#"><span lang="en">Terms of Use</span></a>
+        <a href="#"><span lang="en">Privacy</span></a>
+        -->
+        <a href="contact.html"><span lang="en">Contact</span></a>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

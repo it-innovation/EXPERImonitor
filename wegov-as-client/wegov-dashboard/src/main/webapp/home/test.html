@@ -1,0 +1,21 @@
+<html>
+<head>
+<script type="text/javascript" src="js-lib/date.js"></script>
+<script type="text/javascript">
+	
+if (navigator.geolocation) // check if browser support this feature or not
+{
+    navigator.geolocation.getCurrentPosition(function(position)
+        {
+              var lat = position.coords.latitude;
+              var lng = position.coords.longitude;
+              alert("Latitude:"+lat+" Longitude:"+lng);
+         }
+    );
+}
+</script>
+</head>
+<body>
+	<p></p>
+</body>
+</html>
