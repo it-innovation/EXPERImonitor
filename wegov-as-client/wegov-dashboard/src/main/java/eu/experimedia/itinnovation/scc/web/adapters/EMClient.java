@@ -31,17 +31,17 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasicChannel;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPConnectionFactory;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMDataBatch;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMPhase;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMPostReportSummary;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared.EMIAdapterListener;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared.EMInterfaceAdapter;
-
 
 @Service
 public class EMClient implements EMIAdapterListener {
 
-    private static final Logger logger = Logger.getLogger(EMClient.class);
+    private static final Logger clientLogger = Logger.getLogger(EMClient.class);
     private AMQPBasicChannel amqpChannel;
     private WeGovEMInterfaceAdapter emiAdapter;
     private String clientName;
@@ -55,24 +55,23 @@ public class EMClient implements EMIAdapterListener {
     private Measurement currentMeasurement;
     private String numWidgetsAttributeUuid = "";
     private boolean dataPushEnabled = false;
-
     @Autowired
     @Qualifier("wegovLoginService")
     WegovLoginService loginService;
 
     public EMClient() {
-        logger.debug("Creating new EM client...");
-        
+        clientLogger.debug("Creating new EM client...");
+
         // Have to call this here because it's better if this
         // class is initialized by Spring so all autowiring works
         // TODO: move config etc. to bean definition
         try {
             this.start("127.0.0.1", UUID.fromString("00000000-0000-0000-0000-000000000000"), "WeGov 3.0 EM Client");
-        } catch(Throwable ex) {
+        } catch (Throwable ex) {
             throw new RuntimeException("Failed to start EM client", ex);
         }
-        
-        logger.debug("Successfully created new EM client");
+
+        clientLogger.debug("Successfully created new EM client");
     }
 
     public UUID getClientId() {
@@ -88,52 +87,52 @@ public class EMClient implements EMIAdapterListener {
         this.clientName = clientName;
         this.clientId = UUID.randomUUID();
 
-        logger.debug("Starting EM client with rabbitServerIP: " + rabbitServerIP + ", expMonitorID: " + expMonitorID.toString() + ", clientName: " + clientName + ", clientId: " + clientId.toString() + "...");
+        clientLogger.debug("Starting EM client with rabbitServerIP: " + rabbitServerIP + ", expMonitorID: " + expMonitorID.toString() + ", clientName: " + clientName + ", clientId: " + clientId.toString() + "...");
 
         AMQPConnectionFactory amqpFactory = new AMQPConnectionFactory();
         amqpFactory.setAMQPHostIPAddress(rabbitServerIP);
 
-        logger.debug("Connecting to AMQPHost...");
+        clientLogger.debug("Connecting to AMQPHost...");
         try {
             amqpFactory.connectToAMQPHost();
             amqpChannel = amqpFactory.createNewChannel();
         } catch (Throwable e) {
-            logger.error("Failed to connect to AMQP Host and create new channel", e);
+            clientLogger.error("Failed to connect to AMQP Host and create new channel", e);
             throw e;
         }
-        logger.debug("Successfully connected to AMQPHost");
+        clientLogger.debug("Successfully connected to AMQPHost");
 
         emiAdapter = new WeGovEMInterfaceAdapter(this);
 
-        logger.debug("Registering with EM...");
+        clientLogger.debug("Registering with EM...");
         try {
             emiAdapter.registerWithEM(clientName, amqpChannel, expMonitorID, clientId);
         } catch (Throwable e) {
-            logger.error("WeGov EM Client failed to register with EM", e);
+            clientLogger.error("WeGov EM Client failed to register with EM", e);
             throw e;
         }
 
-        logger.debug("Successfully registered with EM");
-        logger.debug("Successfully started EM client with clientId: " + clientId.toString());
+        clientLogger.debug("Successfully registered with EM");
+        clientLogger.debug("Successfully started EM client with clientId: " + clientId.toString());
 
         return clientId.toString();
     }
 
     public void onEMConnectionResult(boolean connected) {
 
-        logger.debug("onEMConnectionResult");
+        clientLogger.debug("onEMConnectionResult");
 
         if (connected) {
-            logger.debug("Connected to EM");
+            clientLogger.debug("Connected to EM");
         } else {
-            logger.error("EM connection failure");
+            clientLogger.error("EM connection failure");
             throw new RuntimeException("Failed to connected to EM");
         }
     }
 
     public void onPopulateMetricGeneratorInfo() {
 
-        logger.debug("onPopulateMetricGeneratorInfo");
+        clientLogger.debug("onPopulateMetricGeneratorInfo");
 
         MetricGenerator mg = makeWegovMetricGenerator();
         metricGenerators.put(mg.getUUID(), mg);
@@ -142,37 +141,37 @@ public class EMClient implements EMIAdapterListener {
         mgSet.addAll(metricGenerators.values());
         emiAdapter.setMetricGenerators(mgSet);
 
-        logger.debug("Returning generated metric generators:");
+        clientLogger.debug("Returning generated metric generators:");
         for (MetricGenerator tempMg : mgSet) {
-            logger.debug("\t- " + tempMg.getUUID().toString() + ": " + tempMg.getName() + " (" + tempMg.getDescription() + ")");
+            clientLogger.debug("\t- " + tempMg.getUUID().toString() + ": " + tempMg.getName() + " (" + tempMg.getDescription() + ")");
         }
     }
 
     public void onSetupMetricGenerator(UUID generatorSetID, Boolean[] resultOUT) {
-        logger.debug("onSetupMetricGenerator, generatorSetID: " + generatorSetID.toString());
+        clientLogger.debug("onSetupMetricGenerator, generatorSetID: " + generatorSetID.toString());
 
         // Just signal that the metric generator is ready
         resultOUT[0] = true;
     }
 
     public void onStartPushingMetricData() {
-        logger.debug("onStartPushingMetricData");
+        clientLogger.debug("onStartPushingMetricData");
         dataPushEnabled = true;
 //        pushData("data");
     }
-    
+
     public void pushData(String value) {
         if (dataPushEnabled) {
             MeasurementSet measurementSet = allMeasurementSets.get(0);
-            logger.debug("Starting to push data for measurement set: [" + measurementSet.getUUID().toString() + "] " + measurementSet.getMetric().getUnit().getName() + " (" + measurementSet.getMetric().getMetricType().name() + ")");
+            clientLogger.debug("Starting to push data for measurement set: [" + measurementSet.getUUID().toString() + "] " + measurementSet.getMetric().getUnit().getName() + " (" + measurementSet.getMetric().getMetricType().name() + ")");
 
             Measurement theMeasurement = new Measurement();
 
             theMeasurement.setMeasurementSetUUID(measurementSet.getUUID());
             theMeasurement.setTimeStamp(new Date());
-            
+
             theMeasurement.setValue(value);
-            
+
             measurementSet.addMeasurement(theMeasurement);
 
             Date date = new Date();
@@ -184,20 +183,20 @@ public class EMClient implements EMIAdapterListener {
             sampleReport.setToDate(date);
             sampleReport.setNumberOfMeasurements(1);
 
-            emiAdapter.pushMetric( sampleReport );        
-            logger.debug("Finished pushing data for measurement set: [" + measurementSet.getUUID().toString() + "] " + measurementSet.getMetric().getUnit().getName() + " (" + measurementSet.getMetric().getMetricType().name() + ")");
+            emiAdapter.pushMetric(sampleReport);
+            clientLogger.debug("Finished pushing data for measurement set: [" + measurementSet.getUUID().toString() + "] " + measurementSet.getMetric().getUnit().getName() + " (" + measurementSet.getMetric().getMetricType().name() + ")");
         } else {
-            logger.error("Data pushing is disabled, please check what phase you are in. Pushing only available in Live Monitoring phase");
+            clientLogger.error("Data pushing is disabled, please check what phase you are in. Pushing only available in Live Monitoring phase");
         }
     }
 
     public void onLastPushProcessed(UUID lastReportID) {
-        logger.debug("onLastPushProcessed, lastReportID: " + lastReportID.toString());
+        clientLogger.debug("onLastPushProcessed, lastReportID: " + lastReportID.toString());
     }
 
     public void onStopPushingMetricData() {
         dataPushEnabled = false;
-        logger.debug("onStopPushingMetricData");
+        clientLogger.debug("onStopPushingMetricData");
     }
 
     public void onPullMetric(UUID measurementSetID, Report reportOUT) {
@@ -209,13 +208,13 @@ public class EMClient implements EMIAdapterListener {
         MetricGenerator mg;
         MeasurementSet theMeasurementSet = new MeasurementSet();
         boolean foundMatchingMeasurementSet = false;
-        while(it.hasNext()) {
+        while (it.hasNext()) {
             mgUUID = (UUID) it.next();
             mg = metricGenerators.get(mgUUID);
 //            logger.debug("\t- Metric generator [" + mg.getUUID().toString() + "] " + mg.getName() + " (" + mg.getDescription() + ")");
 
             for (MetricGroup mGroup : mg.getMetricGroups()) {
-                for (MeasurementSet mSet : mGroup.getMeasurementSets()){
+                for (MeasurementSet mSet : mGroup.getMeasurementSets()) {
                     if (mSet.getUUID().toString().equals(measurementSetID.toString())) {
 //                        logger.debug("Found requested measurement set: [" + mSet.getUUID().toString() + "] " + mSet.getMetric().getUnit().getName() + " (" + mSet.getMetric().getMetricType().name() + ")");
                         theMeasurementSet = mSet;
@@ -240,12 +239,12 @@ public class EMClient implements EMIAdapterListener {
 
             Attribute theAttribute = measurementSetsAndAttributes.get(theMeasurementSet.getUUID());
 
-            logger.debug("onPullMetric, matching attribute: [" + theAttribute.getUUID().toString() + "] " + theAttribute.getName() + " (" + theAttribute.getDescription() +")");
+            clientLogger.debug("onPullMetric, matching attribute: [" + theAttribute.getUUID().toString() + "] " + theAttribute.getName() + " (" + theAttribute.getDescription() + ")");
 
             // Only report the number of widgets for now
             if (numWidgetsAttributeUuid.equals(theAttribute.getUUID().toString())) {
 
-                logger.debug("Reporting the number of widgets...");
+                clientLogger.debug("Reporting the number of widgets...");
 
                 // Get number of widgets from wegov, it's ok if we fail
                 int numberOfWidgets = 0;
@@ -258,8 +257,8 @@ public class EMClient implements EMIAdapterListener {
                     throw new RuntimeException("Failed to return number of widgets from WeGov", ex);
                 }
 
-                logger.debug("Found " + numberOfWidgets + " widgets");
-                
+                clientLogger.debug("Found " + numberOfWidgets + " widgets");
+
                 Measurement theMeasurement = new Measurement();
 
                 theMeasurement.setMeasurementSetUUID(theMeasurementSet.getUUID());
@@ -276,7 +275,7 @@ public class EMClient implements EMIAdapterListener {
                 reportOUT.setMeasurementSet(theMeasurementSet);
                 reportOUT.setNumberOfMeasurements(1);
 
-                logger.debug("Finished reporting the number of widgets");
+                clientLogger.debug("Finished reporting the number of widgets");
             }
         }
 
@@ -284,10 +283,10 @@ public class EMClient implements EMIAdapterListener {
     }
 
     private Measurement createTestMeasurementForMeasurementSet(MeasurementSet measurementSet) {
-        logger.debug("Creating new measurement for measurement set with ID: " + measurementSet.getUUID().toString() + " ...");
+        clientLogger.debug("Creating new measurement for measurement set with ID: " + measurementSet.getUUID().toString() + " ...");
 
         Runtime rt = Runtime.getRuntime();
-        String memVal = Long.toString( rt.totalMemory() - rt.freeMemory() );
+        String memVal = Long.toString(rt.totalMemory() - rt.freeMemory());
 
         Measurement theMeasurement = new Measurement();
 
@@ -295,27 +294,27 @@ public class EMClient implements EMIAdapterListener {
         theMeasurement.setTimeStamp(new Date());
         theMeasurement.setValue(memVal);
 
-        logger.debug("Successfully created new measurement for measurement set with ID: " + measurementSet.getUUID().toString() + ", measurement value: " + memVal);
+        clientLogger.debug("Successfully created new measurement for measurement set with ID: " + measurementSet.getUUID().toString() + ", measurement value: " + memVal);
 
         return theMeasurement;
     }
 
     public void onPopulateSummaryReport(EMPostReportSummary summaryOUT) {
-        logger.debug("onPopulateSummaryReport");
+        clientLogger.debug("onPopulateSummaryReport");
     }
 
     public void onPopulateDataBatch(EMDataBatch batchOut) {
-        logger.debug("onPopulateDataBatch");
+        clientLogger.debug("onPopulateDataBatch");
     }
 
     public void onGetTearDownResult(Boolean[] resultOUT) {
 
-        logger.debug("onGetTearDownResult");
+        clientLogger.debug("onGetTearDownResult");
         resultOUT[0] = true;
     }
 
     public MetricGenerator makeWegovMetricGenerator() {
-        logger.debug("makeWegovMetricGenerator");
+        clientLogger.debug("makeWegovMetricGenerator");
 
         MetricGenerator theMetricGenerator = new MetricGenerator();
         theMetricGenerator.setName("Wegov Metric Generator");
@@ -451,7 +450,7 @@ public class EMClient implements EMIAdapterListener {
         theMeasuringSet.setMetricGroupUUID(metricGroup.getUUID());
         theMeasuringSet.setAttributeUUID(attribute.getUUID());
         metricGroup.addMeasurementSets(theMeasuringSet);
-        
+
         allMeasurementSets.add(theMeasuringSet);
         measurementSetsAndAttributes.put(theMeasuringSet.getUUID(), attribute);
 
@@ -462,30 +461,79 @@ public class EMClient implements EMIAdapterListener {
     }
 
     public void onPushReportReceived(UUID lastReportID) {
-        logger.debug("onPushReportReceived");
+        clientLogger.debug("onPushReportReceived, lastReportID: " + lastReportID);
     }
 
     public void onPullReportReceived(UUID reportID) {
-        logger.debug("onPullReportReceived");
+        clientLogger.debug("onPullReportReceived, reportID: " + reportID);
     }
 
     public void onDiscoveryTimeOut() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        clientLogger.debug("onDiscoveryTimeOut");
     }
 
     public void onSetupTimeOut(UUID metricGeneratorID) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        clientLogger.debug("onSetupTimeOut, metricGeneratorID: " + metricGeneratorID);
     }
 
     public void onPullMetricTimeOut(UUID measurementSetID) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        clientLogger.debug("onPullMetricTimeOut, measurementSetID: " + measurementSetID);
     }
 
     public void onReportBatchTimeOut(UUID batchID) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        clientLogger.debug("onReportBatchTimeOut, batchID: " + batchID);
     }
 
     public void onTearDownTimeOut() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        clientLogger.debug("onTearDownTimeOut");
+    }
+
+    public void onEMConnectionResult(boolean connected, Experiment expInfo) {
+        clientLogger.debug("onEMConnectionResult");
+        if (connected) {
+            if (expInfo != null)
+                clientLogger.debug("Connected to EM, linked to experiment: " + expInfo.getName());
+            else
+                clientLogger.error("Connected to EM, linked to NULL experiment");
+        } else {
+            clientLogger.error("Refused connection to EM");
+        }
+    }
+
+    @Override
+    public void onEMDeregistration(String reason) {
+        clientLogger.debug("Got disconnected from EM with reason: " + reason);
+        try {
+            emiAdapter.disconnectFromEM();
+        } catch (Exception e) {
+            clientLogger.error("Had problems disconnecting from EM: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void onDescribePushPullBehaviours(Boolean[] pushPullOUT) {
+        clientLogger.debug("onDescribePushPullBehaviours");
+        pushPullOUT[0] = true;
+        pushPullOUT[1] = true;
+    }
+
+    @Override
+    public void onDescribeSupportedPhases(EnumSet<EMPhase> phasesOUT) {
+        clientLogger.debug("onDescribeSupportedPhases");
+
+        phasesOUT.add(EMPhase.eEMSetUpMetricGenerators);
+        phasesOUT.add(EMPhase.eEMLiveMonitoring);
+        phasesOUT.add(EMPhase.eEMPostMonitoringReport);
+        phasesOUT.add(EMPhase.eEMTearDown);
+    }
+
+    @Override
+    public void onLiveMonitoringStarted() {
+        clientLogger.debug("onLiveMonitoringStarted");
+    }
+
+    @Override
+    public void onPullingStopped() {
+        clientLogger.debug("onPullingStopped");
     }
 }
