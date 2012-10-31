@@ -18,32 +18,39 @@
 // the software.
 //
 //      Created By :            Simon Crowle
-//      Created Date :          11-Oct-2012
+//      Created Date :          26-Oct-2012
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.headerlessECCClient.tools;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
-
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared.ITakeMeasurement;
+import java.util.*;
 
 
 
 
-public class MemoryUsageTool implements ITakeMeasurement
+public class MetricHelper
 {
-    private final Runtime rt = Runtime.getRuntime();
-              
-    @Override
-    public void takeMeasure( Report reportOUT )
+    public static Set<MeasurementSet> getAllMeasurementSets( Set<MetricGenerator> mgenSet )
     {
-        String memVal = Long.toString( rt.totalMemory() - rt.freeMemory() );
-        Measurement measure = new Measurement( memVal );
+        HashSet<MeasurementSet> mSets = new HashSet<MeasurementSet>();
         
-        reportOUT.getMeasurementSet().addMeasurement( measure );
-        reportOUT.setFromDate( measure.getTimeStamp() );
-        reportOUT.setToDate( measure.getTimeStamp() );
+        if ( mgenSet != null )
+        {
+            Iterator<MetricGenerator> mgenIt = mgenSet.iterator();
+            while ( mgenIt.hasNext() )
+            {
+                Iterator<MetricGroup> mgIt = mgenIt.next().getMetricGroups().iterator();
+                while ( mgIt.hasNext() )
+                {
+                    Iterator<MeasurementSet> msIt = mgIt.next().getMeasurementSets().iterator();
+                    while ( msIt.hasNext() )
+                    { mSets.add( msIt.next() ); }
+                }
+            }
+        }
+        
+        return mSets;        
     }
 }

@@ -27,10 +27,18 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
 
+import java.util.Date;
+
 
 
 
 public interface ITakeMeasurement
 {
     void takeMeasure( Report reportOUT );
+    
+    int getMeasurementCount();
+    
+    Date getFirstMeasurementDate();
+    
+    Date getLastMeasurementDate();
 }

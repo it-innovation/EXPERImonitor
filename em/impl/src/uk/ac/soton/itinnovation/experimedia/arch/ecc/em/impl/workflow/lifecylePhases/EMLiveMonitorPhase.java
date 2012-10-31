@@ -25,7 +25,7 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecylePhases;
 
-
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.IEMLiveMonitor;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEMLiveMonitor_ProviderListener;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
@@ -34,9 +34,10 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces.EMLiveMonitor
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 
 import java.util.*;
+
 
 
 
@@ -167,8 +168,18 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
       if ( !client.isPullingMetricData() )
         throw new Exception( "Client is not currently generating pulled metric data" );
       
+      // Time-out all currently pulling measurement sets
+      IEMLiveMonitor monitor = client.getLiveMonitorInterface();
+      
+      Iterator<UUID> msIt = client.getCopyOfCurrentMeasurementSetPullIDs().iterator();
+      while ( msIt.hasNext() )
+      {
+        UUID msID = msIt.next();
+        client.removePullingMeasurementSetID( msID );
+        monitor.pullMetricTimeOut( msID );
+      }
+      
       client.addTimeOutNotification( EMPhaseTimeOut.eEMTOLiveMonitorTimeOut );
-      client.getLiveMonitorInterface().pullMetricTimeOut( client.getPullingMeasurementSetID() );
     }
     else
       throw new Exception( "This client cannot be timed-out in Post-report phase" );
@@ -256,32 +267,34 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
     if ( phaseActive )
     {
       EMClientEx client = getClient( senderID );
-      boolean processedOK = false;
       
       // Only allow clients who have declared they are going to be pulled
-      if ( client != null && report != null &&
-           clientsStillPulling.contains( client.getID() ) )
+      if ( client != null && report != null )
       {
-        // Only pass on metric data we were expecting
-        UUID msID = report.getMeasurementSet().getUUID();
-        if ( msID.equals( client.getPullingMeasurementSetID() ) )
-        {
-          if ( phaseListener != null )
-          {
-            phaseListener.onGotMetricData( client, report );
-            processedOK = true;
-          }
-          
-          // Let client know we've received the data
-          client.getLiveMonitorInterface().notifyPullReceived( report.getUUID() );
+        MeasurementSet mSet = report.getMeasurementSet();
         
-          client.setPullingMeasurementSetID( null ); // No longer pulling data
+        // Try to get data from report
+        if ( mSet != null )
+        {
+          // Remove ID from current pulling set
+          client.removePullingMeasurementSetID( mSet.getUUID() );
+
+          // Notify listeners
+          if ( phaseListener != null ) 
+            phaseListener.onGotMetricData( client, report );
         }
+        else phaseLogger.error( "Pulled report contained NULL MeasurementSet" );
+        
+        // Tell the client we got the report
+        IEMLiveMonitor monitor = client.getLiveMonitorInterface();
+        monitor.notifyPullReceived( report.getUUID() );
+        
+        // If there are outstanding metrics to pull, make another request
+        UUID nextMSID = client.getNextMeasurementSetIDToPull();
+        
+        if ( nextMSID != null ) monitor.pullMetric( nextMSID );
       }
-      
-      // Log problems
-      if ( !processedOK )
-        phaseLogger.error( "Could not process sent pulled metric - error with client data" );
+      else phaseLogger.error( "Could not process pulled metric: NULL client or report" );
     }
   }
 }

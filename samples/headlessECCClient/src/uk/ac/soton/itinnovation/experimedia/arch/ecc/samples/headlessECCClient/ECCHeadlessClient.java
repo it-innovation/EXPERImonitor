@@ -23,8 +23,10 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.headerlessECCClient;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.headlessECCClient;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.headlessECCClient.tools.PsuedoRandomWalkTool;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.headlessECCClient.tools.MemoryUsageTool;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.*;
 
@@ -38,7 +40,6 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared.*;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.headerlessECCClient.tools.*;
 
 import java.io.InputStream;
 import java.util.*;
@@ -48,14 +49,15 @@ import org.apache.log4j.Logger;
 
 
 
-public class ECCHeaderlessClient implements EMIAdapterListener
+public class ECCHeadlessClient implements EMIAdapterListener
 {
-    private final Logger clientLogger = Logger.getLogger( ECCHeaderlessClient.class );
+    private final Logger clientLogger = Logger.getLogger( ECCHeadlessClient.class );
     private final String clientName;
     
     private AMQPBasicChannel     amqpChannel;
     private EMInterfaceAdapter   emiAdapter;
     private IMonitoringEDMAgent  edmAgent;
+    private IReportDAO           edmReportDAO;
     private MeasurementScheduler measurementScheduler;
     private boolean              edmAgentOK  = false;
     private boolean              schedulerOK = false;
@@ -66,7 +68,7 @@ public class ECCHeaderlessClient implements EMIAdapterListener
     private HashMap<UUID, ITakeMeasurement> measurementSetInstantSamplers;
     
     
-    public ECCHeaderlessClient( String name )
+    public ECCHeadlessClient( String name )
     {
         clientName = name;
         
@@ -148,20 +150,43 @@ public class ECCHeaderlessClient implements EMIAdapterListener
         return true;
     }
     
+    public boolean deleteLocalData( Properties edmProps )
+    {
+        boolean result = false;
+        
+        try
+        {
+            edmAgent   = EDMInterfaceFactory.getMonitoringEDMAgent( edmProps );
+            edmAgentOK = edmAgent.isDatabaseSetUpAndAccessible();
+            
+            if ( !edmAgentOK )
+                throw new Exception( "EDM Agent is not configured correctly" );
+            
+            edmAgent.clearMetricsDatabase();
+            result = true;
+        }
+        catch ( Exception e )
+        {
+            clientLogger.error( "Could not clear EDM data" + e.getMessage() );
+            return false;
+        }
+        
+        return result;
+    }
+    
     public boolean initialiseLocalDataManagement( Properties edmProps )
     {
         edmAgentOK  = false;
         schedulerOK = false;
-        
-        //TODO: Something with these EDM properties?
       
         // Initialise the 'mini' version of the EDM for local data management
         try
         {
-            edmAgent   = EDMInterfaceFactory.getMonitoringEDMAgent();
+            edmAgent   = EDMInterfaceFactory.getMonitoringEDMAgent( edmProps );
             edmAgentOK = edmAgent.isDatabaseSetUpAndAccessible();
             if ( !edmAgentOK ) throw new Exception( "EDM Agent is not configured correctly" );
             
+            edmReportDAO = edmAgent.getReportDAO();
         }
         catch ( Exception e )
         {
@@ -230,6 +255,9 @@ public class ECCHeaderlessClient implements EMIAdapterListener
               currentExperiment.setDescription( expInfo.getDescription() );
               currentExperiment.setStartTime( expInfo.getStartTime() );
               
+              // We will save this experiment data in the EDM Agent (if available)
+              // during the discovery phase
+              
               connectionAndExperimentOK = true;
             }
             else clientLogger.error( "Experiment information is null" );
@@ -248,10 +276,10 @@ public class ECCHeaderlessClient implements EMIAdapterListener
     }
     
     @Override
-    public void onDescribeSupportPhases( EnumSet<EMPhase> phasesOUT )
+    public void onDescribeSupportedPhases( EnumSet<EMPhase> phasesOUT )
     {
         // We're going to skip the Set-up and Tear-down phases...
-        // ... we MUST support the discovery phase by default, but don't need to include
+        // ... we MUST support the discovery phase by default.
         phasesOUT.add( EMPhase.eEMLiveMonitoring );
         phasesOUT.add( EMPhase.eEMPostMonitoringReport );
     }
@@ -261,7 +289,7 @@ public class ECCHeaderlessClient implements EMIAdapterListener
     {
         // We're just going to support pulling for this client
         pushPullOUT[0] = false; // No pushing
-        pushPullOUT[1] = true;
+        pushPullOUT[1] = true;  // Will support pulling
     }
 
     @Override
@@ -273,7 +301,7 @@ public class ECCHeaderlessClient implements EMIAdapterListener
             // Define all metric generators for this experiment
             defineExperimentMetrics( currentExperiment );
             
-            // If we have an EDMAgent available, save our experiment & metric generators
+            // If we have an EDMAgent available, save our experiment & metric generators locally
             if ( edmAgentOK )
             {
                 try
@@ -303,9 +331,7 @@ public class ECCHeaderlessClient implements EMIAdapterListener
 
     @Override
     public void onDiscoveryTimeOut()
-    { 
-        //TO DO
-    }
+    { /* Not implemented in this demo */ }
     
     @Override
     public void onSetupMetricGenerator( UUID genID, Boolean[] resultOUT )
@@ -315,6 +341,14 @@ public class ECCHeaderlessClient implements EMIAdapterListener
     public void onSetupTimeOut( UUID metricGeneratorID )
     { /* This demo has opted out of this pase */ }
 
+    @Override
+    public void onLiveMonitoringStarted()
+    {
+        // If we have an EDM Agent and scheduling, then start taking periodic measurements
+        if ( edmAgentOK && schedulerOK )
+            startMeasuring();
+    }
+    
     @Override
     public void onStartPushingMetricData()
     { /* Pushing not implemented in this demo */ }
@@ -332,13 +366,18 @@ public class ECCHeaderlessClient implements EMIAdapterListener
     * Note that 'reportOut' is an OUT parameter provided by the adapter
     */
     public void onPullMetric( UUID measurementSetID, Report reportOUT )
-    {
-        clientLogger.info( "Got pull for: " + measurementSetID.toString() );
-      
+    {      
         // If we have an EDMAgent running, then get the latest measurement from there
         if ( edmAgentOK )
-        {        
-            //TODO: Use EDMAgent to get the latest data for this MS
+        {
+            try
+            { 
+                Report edmReport = edmReportDAO.getReportForLatestMeasurement( measurementSetID, true );
+                reportOUT.copyReport( edmReport, true );
+            }
+            catch ( Exception e )
+            { clientLogger.equals( "Could not pull metric " + measurementSetID.toString() +
+                                   "from Agent EDM" ); }
             
         }
         else  // Otherwise, immediately generate the metric 'on-the-fly'
@@ -361,16 +400,29 @@ public class ECCHeaderlessClient implements EMIAdapterListener
     }
     
     @Override
+    public void onPullingStopped()
+    {
+        stopMeasuring();
+    }
+    
+    @Override
     public void onPullReportReceived( UUID reportID )
     {
-        //TODO
+        // If we had an EDM running, we can mark which reports have been successfully
+        // received by the ECC
+        if ( edmAgentOK )
+        {
+            try
+            { edmReportDAO.setReportMeasurementsSyncFlag( reportID, true ); }
+            catch ( Exception e )
+            { clientLogger.warn( "Could not mark report " + reportID.toString() +
+                                 " as received by the ECC"); }
+        }
     }
     
     @Override
     public void onPullMetricTimeOut( UUID measurementSetID )
-    { 
-        //TODO
-    }
+    { /* Not implemented for this demo */ }
 
     @Override
     /*
@@ -378,21 +430,55 @@ public class ECCHeaderlessClient implements EMIAdapterListener
     * adapter
     */
     public void onPopulateSummaryReport( EMPostReportSummary summaryOUT )
-    {
-        //TODO
+    {      
+        if ( edmAgentOK )
+        {
+            // TODO
+        }
+        else
+        {
+            // We don't have any persistence, so we'll just have to send basic
+            // summary statistics
+            Iterator<UUID> msIDIt = measurementSetInstantSamplers.keySet().iterator();
+            while ( msIDIt.hasNext() )
+            {
+                // Get measurement and measurement set for sampler
+                UUID msID                = msIDIt.next();
+                ITakeMeasurement sampler = measurementSetInstantSamplers.get( msID );
+                MeasurementSet mset      = measurementSetMap.get( msID );
+                
+                if ( sampler != null && mset != null )
+                {
+                    // Create a report for this measurement set + summary stats 
+                    Report report = new Report();
+                    report.setMeasurementSet( mset );
+                    report.setFromDate( sampler.getFirstMeasurementDate() );
+                    report.setToDate( sampler.getLastMeasurementDate() );
+                    report.setNumberOfMeasurements( sampler.getMeasurementCount() );
+                    
+                    summaryOUT.addReport( report );
+                }
+            }
+        }
     }
 
     @Override
-    public void onPopulateDataBatch( EMDataBatch batchOut )
+    public void onPopulateDataBatch( EMDataBatch batchOUT )
     {
-        //TODO
+        if ( edmAgentOK )
+        {
+            //TODO
+        }
+        else
+        {
+            // We don't have any persistence, so do nothing (effectively
+            // returning an empty data batch)
+        }
     }
     
     @Override
     public void onReportBatchTimeOut( UUID batchID )
-    { 
-        //TODO
-    }
+    { /* Not implemented in this demo */ }
 
     @Override
     public void onGetTearDownResult( Boolean[] resultOUT )
@@ -425,18 +511,18 @@ public class ECCHeaderlessClient implements EMIAdapterListener
         // Set up top-level groups ---------------------------------------------
         MetricGenerator mGen = new MetricGenerator();
         experiment.addMetricGenerator( mGen );
-        mGen.setName( "Headerless Metric Generator" );
+        mGen.setName( "Headless Metric Generator" );
         mGen.setDescription( new Date().toString() );
         
         MetricGroup resourceGroup = new MetricGroup();
         mGen.addMetricGroup( resourceGroup );
-        resourceGroup.setMetricGeneratorUUID( resourceGroup.getUUID() );
+        resourceGroup.setMetricGeneratorUUID( mGen.getUUID() );
         resourceGroup.setName( "Local data metrics" );
         resourceGroup.setDescription( "Group representing data related metrics" );
         
         MetricGroup walkGroup = new MetricGroup();
         mGen.addMetricGroup( walkGroup );
-        walkGroup.setMetricGeneratorUUID( walkGroup.getUUID() );
+        walkGroup.setMetricGeneratorUUID( mGen.getUUID() );
         walkGroup.setName( "Random walkers group" );
         walkGroup.setDescription( "Containers pseudo random number based walkers" );
 
@@ -448,6 +534,7 @@ public class ECCHeaderlessClient implements EMIAdapterListener
         
         Attribute attr = new Attribute();
         thisComputer.addAttribute( attr );
+        attr.setEntityUUID( thisComputer.getUUID() );
         attr.setName( "Available memory" );
         attr.setDescription( "Memory used by client JVM" );
         setupMeasurementForAttribute( attr,
@@ -459,6 +546,7 @@ public class ECCHeaderlessClient implements EMIAdapterListener
         
         attr = new Attribute();
         thisComputer.addAttribute( attr );
+        attr.setEntityUUID( thisComputer.getUUID() );
         attr.setName( "Walker A" );
         attr.setDescription( "Random walker starting at 90 degrees" );
         setupMeasurementForAttribute( attr,
@@ -470,6 +558,7 @@ public class ECCHeaderlessClient implements EMIAdapterListener
         
         attr = new Attribute();
         thisComputer.addAttribute( attr );
+        attr.setEntityUUID( thisComputer.getUUID() );
         attr.setName( "Walker B" );
         attr.setDescription( "Random walker starting at 10 degrees" );
         setupMeasurementForAttribute( attr,
@@ -525,5 +614,11 @@ public class ECCHeaderlessClient implements EMIAdapterListener
         {
             taskIt.next().startMeasuring();
         }
+    }
+    
+    private void stopMeasuring()
+    {
+        // Just drop our samplers
+        scheduledMeasurementTasks.clear();
     }
 }

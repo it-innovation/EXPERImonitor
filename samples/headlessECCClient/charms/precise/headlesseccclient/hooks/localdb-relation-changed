@@ -1,0 +1,15 @@
+#!/bin/sh
+
+juju-log "localdb relation changed"
+
+cd `dirname $0`/../code
+
+cat > edm.properties <<EOF
+dbURL = `relation-get host`:5432
+dbName = `relation-get database`
+dbUsername = `relation-get user`
+dbPassword = `relation-get password`
+dbType = postgresql
+EOF
+
+./restart

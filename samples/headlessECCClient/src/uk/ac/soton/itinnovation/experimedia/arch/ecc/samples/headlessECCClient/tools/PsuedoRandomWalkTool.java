@@ -23,13 +23,13 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.headerlessECCClient.tools;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.headlessECCClient.tools;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared.ITakeMeasurement;
 
-import java.util.Random;
+import java.util.*;
 
 
 
@@ -39,7 +39,12 @@ public class PsuedoRandomWalkTool implements ITakeMeasurement
 {
     private final Random random = new Random( 20121110 ); // Repeatable seed
     
+    private Date firstMeasurementDate;
+    private Date lastMeasurementDate;
+    private int  totalMeasurements;
+    
     private int directionDegrees;
+    
     
     public PsuedoRandomWalkTool( int start )
     {
@@ -52,7 +57,7 @@ public class PsuedoRandomWalkTool implements ITakeMeasurement
     @Override
     public void takeMeasure( Report reportOUT )
     {
-        // Take a random walk (var
+        // Create random walk measurement value
         if ( random.nextBoolean() )
             directionDegrees++;
         else
@@ -61,10 +66,41 @@ public class PsuedoRandomWalkTool implements ITakeMeasurement
         if ( directionDegrees < 0 )   directionDegrees = 359;
         if ( directionDegrees > 359 ) directionDegrees = 0;
 
+        // Create measurement instance
         Measurement measure = new Measurement( Integer.toString(directionDegrees) );
-        reportOUT.getMeasurementSet().addMeasurement( measure );
+        measure.setMeasurementSetUUID( reportOUT.getMeasurementSet().getUUID() );
+        Date stamp = measure.getTimeStamp();
         
-        reportOUT.setFromDate( measure.getTimeStamp() );
-        reportOUT.setToDate( measure.getTimeStamp() );
+        // Create report
+        reportOUT.getMeasurementSet().addMeasurement( measure );
+        reportOUT.setNumberOfMeasurements( 1 );
+        reportOUT.setFromDate( stamp );
+        reportOUT.setToDate( stamp );
+        
+        // Update stats
+        totalMeasurements++;
+        
+        if ( firstMeasurementDate == null )
+            firstMeasurementDate = stamp;
+        
+        lastMeasurementDate = stamp;
+    }
+    
+    @Override
+    public int getMeasurementCount()
+    {
+        return totalMeasurements;
+    }
+    
+    @Override
+    public Date getFirstMeasurementDate()
+    { 
+        return firstMeasurementDate;
+    }
+    
+    @Override
+    public Date getLastMeasurementDate()
+    {
+        return lastMeasurementDate;
     }
 }

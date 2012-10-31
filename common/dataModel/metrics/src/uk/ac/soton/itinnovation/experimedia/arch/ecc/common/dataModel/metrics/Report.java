@@ -51,6 +51,7 @@ public class Report
     public Report()
     {
         this.uuid = UUID.randomUUID();
+        this.reportDate = new Date();
     }
     
     /**
@@ -202,5 +203,18 @@ public class Report
     public void setNumberOfMeasurements(Integer num)
     {
         this.numberOfMeasurements = num;
+    }
+    
+    public void copyReport(Report repIn, boolean copyMeasurements)
+    {
+        if ( repIn != null )
+        {
+            uuid = repIn.getUUID();
+            measurementSet = new MeasurementSet(repIn.getMeasurementSet(),copyMeasurements);
+            reportDate = (Date) repIn.getReportDate().clone();
+            fromDate = (Date) repIn.getFromDate().clone();
+            toDate = (Date) repIn.getToDate().clone();
+            numberOfMeasurements = repIn.getNumberOfMeasurements();
+        }
     }
 }
