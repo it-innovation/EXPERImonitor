@@ -55,8 +55,7 @@ public class EntryPoint
                 clientLogger.error( "Could not find EDM Agent configuration" );
             
             clientLogger.info( "Now exiting headless client" );
-            System.exit( 0 );
-            
+            System.exit( 0 );    
         }
         else
             // Otherwise, initialise client and begin
@@ -79,29 +78,6 @@ public class EntryPoint
                   // Attempt to register with the Experiment Monitor
                   if ( tryRegisterWithECCMonitor( client, emProps, edmProps ) )
                       clientLogger.info( "Successfully attempteded client registration... waiting for ECC response" );
-                  
-                  // Wait for a manual exit
-                  System.out.println( "Type EXIT to stop client" );
-                  boolean continueMonitoring = true;
-                  BufferedReader br = new BufferedReader( new InputStreamReader(System.in) );
-                  
-                  while ( continueMonitoring )
-                  {
-                      String command = null;
-                      try { command = br.readLine(); }
-                      catch ( IOException ioe )
-                      {
-                          clientLogger.error( "Cannot read commands from CLI!" );
-                          continueMonitoring = false;
-                      }
-                      
-                      if ( command.contains("EXIT") ) continueMonitoring = false;                      
-                  }
-                  
-                  // Tidy up
-                  client.disconnectFromECCMonitor();
-                  
-                  System.exit( 0 );
               }  
         }
         else { clientLogger.error( "Could not find client configuration properties" ); }
@@ -122,8 +98,10 @@ public class EntryPoint
         
         // ... but if it doesn't exist, try pulling the same from internal resources
         if ( propsStream == null ) 
-          propsStream = EntryPoint.class.getResourceAsStream( "/main/resources/" +
-                                                              configName + ".properties" );
+        {
+          ClassLoader cl = EntryPoint.class.getClassLoader();
+          propsStream = cl.getResourceAsStream( configName + ".properties" );
+        }
      
         // If we've got a good stream, try loading it
         if ( propsStream != null )
@@ -215,10 +193,10 @@ public class EntryPoint
         boolean registrationAttempt = false;
         
         // Try to create local data persistence (not critical, but very useful)
-//        if ( client.initialiseLocalDataManagement(edmProps) )
-//            clientLogger.info( "Successfully created EDMAgent and measurement scheduling" );
-//        else
-//            clientLogger.warn( "Could not create local EDMAgent - will continue, but will not schedule/store measurements" );
+        if ( client.initialiseLocalDataManagement(edmProps) )
+            clientLogger.info( "Successfully created EDMAgent and measurement scheduling" );
+        else
+            clientLogger.warn( "Could not create local EDMAgent - will continue, but will not schedule/store measurements" );
 
         // Make sure we have a valid UUID to connect to EM/ECC
         UUID expMonitorID = null;

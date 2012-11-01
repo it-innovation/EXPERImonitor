@@ -51,8 +51,8 @@ public class EMClient
   protected HashSet<UUID> currentMeasurementSetPulls;
   
   // Post-report phase states
-  protected UUID                currentPostReportBatchID;
-  protected EMPostReportSummary postReportSummary;
+  protected EMPostReportSummary        postReportSummary;
+  protected HashMap<UUID, EMDataBatch> postReportOutstandingBatches; // Indexed by MeasurementSet ID
   
   // Tear-down phase
   protected boolean tearDownSuccessful = false;
@@ -195,8 +195,8 @@ public class EMClient
    * 
    * @return - Returns true if the client is generating post-report data.
    */
-  public boolean isCreatingPostReportData()
-  { return ( currentPostReportBatchID != null); }
+  public boolean isCreatingPostReportBatchData()
+  { return !postReportOutstandingBatches.isEmpty(); }
   
   /**
    * Returns the result of the tear-down process the client executed (if it supports it)
@@ -241,8 +241,9 @@ public class EMClient
     supportedPhases = EnumSet.noneOf( EMPhase.class );
     timeOutsCalled  = EnumSet.noneOf( EMPhaseTimeOut.class );
     
-    metricGenerators           = new HashSet<MetricGenerator>();
-    generatorsSetupOK          = new HashSet<UUID>();
-    currentMeasurementSetPulls = new HashSet<UUID>();
+    metricGenerators             = new HashSet<MetricGenerator>();
+    generatorsSetupOK            = new HashSet<UUID>();
+    currentMeasurementSetPulls   = new HashSet<UUID>();
+    postReportOutstandingBatches = new HashMap<UUID, EMDataBatch>();
   }
 }

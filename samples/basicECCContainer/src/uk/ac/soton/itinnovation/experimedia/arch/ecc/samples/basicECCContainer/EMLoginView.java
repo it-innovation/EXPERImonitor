@@ -18,29 +18,19 @@
 // the software.
 //
 //      Created By :            Simon Crowle
-//      Created Date :          29-Aug-2012
-//      Created for Project :   EXPERIMEDIA
+//      Created Date :          30-Oct-2012
+//      Created for Project :   experimedia-arch-ecc-samples-basicECCContainer
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecylePhases;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.basicECCContainer;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
+import javax.swing.JFrame;
 
 
 
 
-public interface EMPostReportPhaseListener
+public class EMLoginView extends JFrame
 {
-  void onGotSummaryReport( EMClientEx client, EMPostReportSummary summary );
-  
-  void onGotDataBatch( EMClientEx client, EMDataBatch batch );
-  
-  void onDataBatchMeasurementSetCompleted( EMClientEx client, MeasurementSet ms );
- 
-  void onAllDataBatchesRequestComplete( EMClientEx client );
-  
-  void onPostReportPhaseCompleted();
+
 }

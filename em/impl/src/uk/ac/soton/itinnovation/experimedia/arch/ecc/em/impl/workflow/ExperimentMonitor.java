@@ -38,6 +38,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClien
 
 import java.util.*;
 import org.apache.log4j.Logger;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
 
 
 
@@ -167,7 +168,7 @@ public class ExperimentMonitor implements IExperimentMonitor,
   public void stopCurrentPhase() throws Exception
   {
     if ( lifecycleManager.isWindingCurrentPhaseDown() )
-      throw new Exception( "Current winding down phase: " 
+      throw new Exception( "Could not stop as currently winding down phase: " 
                            + lifecycleManager.getCurrentPhase().toString() );
     
     lifecycleManager.windCurrentPhaseDown();
@@ -206,9 +207,16 @@ public class ExperimentMonitor implements IExperimentMonitor,
   }
   
   @Override
-  public void requestDataBatch( EMClient client, EMDataBatch batch ) throws Exception
+  public void requestDataBatches( EMClient client, UUID measurementSetID ) throws Exception
   {
-    try { lifecycleManager.tryRequestDataBatch( client, batch ); }
+    try { lifecycleManager.tryRequestDataBatch( client, measurementSetID ); }
+    catch ( Exception e ) { throw e; }
+  }
+  
+  @Override
+  public void getAllDataBatches( EMClient client ) throws Exception
+  {
+    try { lifecycleManager.tryGetAllDataBatches( client ); }
     catch ( Exception e ) { throw e; }
   }
   
@@ -301,6 +309,24 @@ public class ExperimentMonitor implements IExperimentMonitor,
     
     while ( listIt.hasNext() )
     { listIt.next().onGotDataBatch( client, batch ); }
+  }
+  
+  @Override
+  public void onDataBatchMeasurementSetCompleted( EMClient client, MeasurementSet ms )
+  {
+    Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
+    
+    while ( listIt.hasNext() )
+    { listIt.next().onDataBatchMeasurementSetCompleted( client, ms ); }
+  }
+  
+  @Override
+  public void onAllDataBatchesRequestComplete( EMClient client )
+  {
+    Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
+    
+    while ( listIt.hasNext() )
+    { listIt.next().onAllDataBatchesRequestComplete( client ); }
   }
   
   @Override

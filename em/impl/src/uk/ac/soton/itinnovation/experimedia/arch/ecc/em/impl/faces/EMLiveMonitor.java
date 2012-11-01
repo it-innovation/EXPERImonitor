@@ -229,7 +229,7 @@ public class EMLiveMonitor extends EMBaseInterface
         
       case ( 6 ) :
       {
-        if ( providerListener != null )
+        if ( userListener != null )
           userListener.onPullingStopped( interfaceProviderID );
         
       } break;

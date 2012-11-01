@@ -48,7 +48,6 @@ import org.apache.log4j.Logger;
 
 
 
-
 public class ECCHeadlessClient implements EMIAdapterListener
 {
     private final Logger clientLogger = Logger.getLogger( ECCHeadlessClient.class );
@@ -65,7 +64,7 @@ public class ECCHeadlessClient implements EMIAdapterListener
     private Experiment                      currentExperiment;
     private HashMap<UUID, MeasurementSet>   measurementSetMap;
     private HashSet<MeasurementTask>        scheduledMeasurementTasks;
-    private HashMap<UUID, ITakeMeasurement> measurementSetInstantSamplers;
+    private HashMap<UUID, ITakeMeasurement> instantMeasurers;
     
     
     public ECCHeadlessClient( String name )
@@ -79,7 +78,10 @@ public class ECCHeadlessClient implements EMIAdapterListener
         scheduledMeasurementTasks = new HashSet<MeasurementTask>();
         
         // For 'on-the-fly' measurements only - used when there is no persistence/scheduling support
-        measurementSetInstantSamplers = new HashMap<UUID, ITakeMeasurement>(); 
+        instantMeasurers = new HashMap<UUID, ITakeMeasurement>();
+        
+        // Add a shut-down hook for clean terminations
+        Runtime.getRuntime().addShutdownHook( new ShutdownHook() );
     }
     
     public boolean tryConnectToAMQPBus( String rabbitServerIP, 
@@ -382,7 +384,7 @@ public class ECCHeadlessClient implements EMIAdapterListener
         }
         else  // Otherwise, immediately generate the metric 'on-the-fly'
         {      
-            ITakeMeasurement sampler = measurementSetInstantSamplers.get( measurementSetID );
+            ITakeMeasurement sampler = instantMeasurers.get( measurementSetID );
             MeasurementSet   mSet    = measurementSetMap.get( measurementSetID );
           
             if ( sampler != null && mSet != null )
@@ -433,18 +435,31 @@ public class ECCHeadlessClient implements EMIAdapterListener
     {      
         if ( edmAgentOK )
         {
-            // TODO
+            Iterator<UUID> msIDIt = measurementSetMap.keySet().iterator();
+            while ( msIDIt.hasNext() )
+            {
+                UUID msID = msIDIt.next();
+                
+                // Ask the EDM for the summary report (but without actual measurements)
+                try
+                {
+                    Report report = edmReportDAO.getReportForAllMeasurements(msID, false); // No measurements
+                    summaryOUT.addReport( report );
+                }
+                catch ( Exception e )
+                { clientLogger.error( "Could not get summary report for MeasurementSet " + msID.toString()); }
+            }
         }
         else
         {
             // We don't have any persistence, so we'll just have to send basic
             // summary statistics
-            Iterator<UUID> msIDIt = measurementSetInstantSamplers.keySet().iterator();
+            Iterator<UUID> msIDIt = instantMeasurers.keySet().iterator();
             while ( msIDIt.hasNext() )
             {
                 // Get measurement and measurement set for sampler
                 UUID msID                = msIDIt.next();
-                ITakeMeasurement sampler = measurementSetInstantSamplers.get( msID );
+                ITakeMeasurement sampler = instantMeasurers.get( msID );
                 MeasurementSet mset      = measurementSetMap.get( msID );
                 
                 if ( sampler != null && mset != null )
@@ -467,13 +482,22 @@ public class ECCHeadlessClient implements EMIAdapterListener
     {
         if ( edmAgentOK )
         {
-            //TODO
+            UUID msID = batchOUT.getID();
+            
+            try
+            {
+                Report batchRep = edmReportDAO.getReportForUnsyncedMeasurementsAfterDate( msID, 
+                                                                                          batchOUT.getCopyOfExpectedDataStart(),
+                                                                                          batchOUT.getExpectedMeasurementCount(),
+                                                                                          true );
+                batchOUT.setMeasurementSet( batchRep.getMeasurementSet() );
+            }
+            catch( Exception e )
+            { clientLogger.error( "Could not get batch report for MeasurementSet " + msID.toString()); }
+            
         }
-        else
-        {
-            // We don't have any persistence, so do nothing (effectively
-            // returning an empty data batch)
-        }
+        // No EDM means we don't have any persistence, so do nothing (effectively
+        // returning an empty data batch)
     }
     
     @Override
@@ -604,7 +628,7 @@ public class ECCHeadlessClient implements EMIAdapterListener
             { clientLogger.error( "Could not define measurement task for attribute " + attr.getName() ); }
         else
             // If we can't schedule & store measurements, just have the samplers handy
-            measurementSetInstantSamplers.put( ms.getUUID(), listener );
+            instantMeasurers.put( ms.getUUID(), listener );
     }
     
     private void startMeasuring()
@@ -618,7 +642,22 @@ public class ECCHeadlessClient implements EMIAdapterListener
     
     private void stopMeasuring()
     {
-        // Just drop our samplers
-        scheduledMeasurementTasks.clear();
+        Iterator<MeasurementTask> taskIt = scheduledMeasurementTasks.iterator();
+        while ( taskIt.hasNext() )
+        {
+            taskIt.next().stopMeasuring();
+        }
+    }
+    
+    // Private shut-down hook --------------------------------------------------
+    private class ShutdownHook extends Thread
+    {
+        @Override
+        public void run()
+        {
+            clientLogger.info( "Got a terminate signal, so closing down.." );
+            stopMeasuring();
+            tryDisconnecting();
+        }
     }
 }

@@ -46,8 +46,8 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
 {
   private EMLiveMonitorPhaseListener phaseListener;
   
-  private HashSet<UUID> clientsStillPushing;
-  private HashSet<UUID> clientsStillPulling;
+  private HashSet<UUID> clientPushGroup;
+  private HashSet<UUID> clientPullGroup;
   
   private boolean       monitorStopping = false;
   private final Object  controlledStopLock = new Object();
@@ -61,8 +61,8 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
     
     phaseListener = listener;
     
-    clientsStillPushing = new HashSet<UUID>();
-    clientsStillPulling = new HashSet<UUID>();
+    clientPushGroup = new HashSet<UUID>();
+    clientPullGroup = new HashSet<UUID>();
     
     phaseState = "Ready to start live monitor";
   }
@@ -100,7 +100,7 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
   @Override
   public void controlledStop() throws Exception
   {
-    if ( !monitorStopping )
+    if ( phaseActive && !monitorStopping )
     {
       monitorStopping = true;
     
@@ -109,8 +109,8 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
       HashSet<UUID> copyOfPullers = new HashSet<UUID>();
       synchronized ( controlledStopLock )
       {
-        copyOfPushers.addAll( clientsStillPushing );
-        copyOfPullers.addAll( clientsStillPulling );
+        copyOfPushers.addAll( clientPushGroup );
+        copyOfPullers.addAll( clientPullGroup );
       }
 
       // Stop pushing clients
@@ -138,9 +138,14 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
 
         // We can clear the pulling list immediately
         synchronized( controlledStopLock )
-        { clientsStillPulling.clear(); }
+        { clientPullGroup.clear(); }
       }
+      
+      // Now call a hard-stop
+      hardStop();
+      monitorStopping = false;
     }
+    else throw new Exception( "Phase already stopped or inactive" );
   }
   
   @Override
@@ -192,8 +197,8 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
     {
       UUID clientID = client.getID();
       
-      clientsStillPushing.remove( clientID );
-      clientsStillPulling.remove( clientID );
+      clientPushGroup.remove( clientID );
+      clientPullGroup.remove( clientID );
       removeClient( clientID );
     }
   }
@@ -208,7 +213,7 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
       
       if ( client != null )
       {
-        clientsStillPushing.add( client.getID() );
+        clientPushGroup.add( client.getID() );
         client.getLiveMonitorInterface().startPushing();
       }
     }
@@ -222,7 +227,7 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
       EMClientEx client = getClient( senderID );
       
       // Only allow clients who have declared they are going to push
-      if ( client != null && clientsStillPushing.contains( client.getID() ) )
+      if ( client != null && clientPushGroup.contains( client.getID() ) )
       {
         if ( phaseListener != null )
           phaseListener.onGotMetricData( client, report );
@@ -241,11 +246,7 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
       EMClientEx client = getClient( senderID );
       
       if ( client != null )
-        clientsStillPushing.remove( client.getID() );
-      
-      // If we have no more clients pulling or pushing, phase is over
-      if ( clientsStillPushing.isEmpty() && clientsStillPulling.isEmpty() )
-        hardStop();
+        clientPushGroup.remove( client.getID() );
     }
   }
   
@@ -257,7 +258,7 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
       EMClientEx client = getClient( senderID );
       
       if ( client != null )
-        clientsStillPulling.add( client.getID() );
+        clientPullGroup.add( client.getID() );
     }
   }
   
@@ -289,10 +290,14 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
         IEMLiveMonitor monitor = client.getLiveMonitorInterface();
         monitor.notifyPullReceived( report.getUUID() );
         
-        // If there are outstanding metrics to pull, make another request
-        UUID nextMSID = client.getNextMeasurementSetIDToPull();
+        // If there are outstanding metrics to pull, make another request (if we're not stopping)
+        if ( !monitorStopping )
+        {
+          UUID nextMSID = client.getNextMeasurementSetIDToPull();
         
-        if ( nextMSID != null ) monitor.pullMetric( nextMSID );
+          if ( nextMSID != null ) monitor.pullMetric( nextMSID );
+        }
+        
       }
       else phaseLogger.error( "Could not process pulled metric: NULL client or report" );
     }

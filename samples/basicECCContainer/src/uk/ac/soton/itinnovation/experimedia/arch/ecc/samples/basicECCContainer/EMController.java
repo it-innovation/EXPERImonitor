@@ -249,23 +249,35 @@ public class EMController implements IEMLifecycleListener
   public void onGotDataBatch( EMClient client, EMDataBatch batch )
   {
     if ( client != null && batch != null )
-    {
-      int measurementCount = 0;
+    {      
+      // Push batched data into the EDM
+      Report batchReport = new Report();
+      batchReport.setMeasurementSet( batch.getMeasurementSet() );
+      batchReport.setFromDate( batch.getActualDataStart() );
+      batchReport.setToDate( batch.getActualDataStop() );
+      batchReport.setNumberOfMeasurements( batch.getActualMeasurementCount() );
       
-      MeasurementSet ms = batch.getMeasurementSet();
-      if ( ms != null )
-      {
-        Set<Measurement> measures = ms.getMeasurements();
-        if ( measures != null ) measurementCount = measures.size();
-      }
-      
-      // We could notify the EDM of this batch data here, but this demo will
-      // only send duplicated data, so we won't do this.
-      
-      // Notify UI with summary of batch
-      mainView.addLogText( client.getName() + " got batch ID: " + batch.getID().toString() + 
-                           " carrying " + measurementCount + " measures" );
+      try { expReportAccessor.saveReport( batchReport ); }
+      catch ( Exception e )
+      { emCtrlLogger.error( "Could not save batch report data: " + e.getMessage() ); }
     }
+  }
+  
+  @Override
+  public void onDataBatchMeasurementSetCompleted( EMClient client, MeasurementSet ms )
+  {
+    if ( client != null && ms != null )
+    {
+      mainView.addLogText( client.getName() + " has finished batching measurement set " + 
+                           ms.getUUID().toString() );
+    }
+  }
+  
+  @Override
+  public void onAllDataBatchesRequestComplete( EMClient client )
+  {
+    if ( client != null )
+      mainView.addLogText( "Client " + client.getName() + " has completed post-reporting phase" );
   }
   
   @Override
@@ -307,12 +319,13 @@ public class EMController implements IEMLifecycleListener
           expMonitor.stopCurrentPhase();
         }
         catch ( Exception e )
-        {}
+        { emCtrlLogger.error( "Could not stop phase: " + expMonitor.getCurrentPhase().name() +
+                              " because " + e.getMessage()); }
       }
       else
         try { expMonitor.goToNextPhase(); }
         catch ( Exception e )
-        {}
+        { emCtrlLogger.error( "Could not stop current phase: it is inactive"); }
     }  
   }
   
@@ -346,38 +359,20 @@ public class EMController implements IEMLifecycleListener
   {
     if ( expMonitor != null )
     {
-      // TODO: Visitor pattern!
       Set<EMClient> clients = expMonitor.getCurrentPhaseClients();
       Iterator<EMClient> cIt = clients.iterator();
       
       while ( cIt.hasNext() )
       {
         EMClient client = cIt.next();
-        EMPostReportSummary reportSummary = client.getPostReportSummary();
         
-        if ( reportSummary != null )
-        {
-          Iterator<UUID> reportIt = reportSummary.getReportedMeasurementSetIDs().iterator();
-          while ( reportIt.hasNext() )
-          {
-            Report report = reportSummary.getReport( reportIt.next() );
-            if ( report != null )
-            {
-              // MENTAL HEALTH WARNING: We're only going to pull a small amount 
-              // of data that will be created by the client sample demo here
-              if ( report.getNumberOfMeasurements() == 2 )
-              {
-                EMDataBatch batch = new EMDataBatch( report.getMeasurementSet(),
-                                                     report.getFromDate(),
-                                                     report.getToDate() );
-                
-                try { expMonitor.requestDataBatch( client, batch ); }
-                catch ( Exception e ) 
-                { emCtrlLogger.error( "Failed in an attempt to get post report data from client.\n" + e.getMessage() ); }
-              }
-            }
-          }
+        try
+        { 
+          expMonitor.getAllDataBatches( client );
+          mainView.addLogText( "Requesting missing data from client: " + client.getName() );
         }
+        catch ( Exception e )
+        { emCtrlLogger.error( "Could not request data batches from client: " + e.getMessage()); }
       }
     }
   }

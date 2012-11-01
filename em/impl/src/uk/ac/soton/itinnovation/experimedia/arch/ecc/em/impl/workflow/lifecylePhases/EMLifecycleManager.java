@@ -40,6 +40,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 
 import java.util.*;
 import org.apache.log4j.Logger;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMDataBatchEx;
 
 
 
@@ -51,8 +52,9 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
                                            EMPostReportPhaseListener,
                                            EMTearDownPhaseListener
 {
-  private final Logger lmLogger   = Logger.getLogger( EMLifecycleManager.class );
-  private final Object clientLock = new Object();
+  private final Logger lmLogger         = Logger.getLogger( EMLifecycleManager.class );
+  private final Object clientLock       = new Object();
+  private final int    batchRequestSize = 50;
   
   private AMQPBasicChannel emChannel;
   private UUID             emProviderID;
@@ -188,12 +190,13 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
     
     if ( windDownPhase != null )
       try 
-      { 
-        windDownPhase.controlledStop();
+      {
         windingCurrPhaseDown = true;
+        windDownPhase.controlledStop();
       }
       catch ( Exception e )
       {
+        windingCurrPhaseDown = false;
         String msg = "Did not wind-down this phase: " + windDownPhase.toString() + e.getMessage();
         lmLogger.info( msg );
         
@@ -262,24 +265,99 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
     
   }
   
-  public void tryRequestDataBatch( EMClient client, EMDataBatch batch ) throws Exception
+  public void tryRequestDataBatch( EMClient client, UUID measurementSetID ) throws Exception
   {
+    // Safety first
+    if ( currentPhase != EMPhase.eEMPostMonitoringReport )
+      throw new Exception( "Not in data batch requesting compatible phase" );
+    
+    if ( client.isCreatingPostReportBatchData() ) throw new Exception( "Client is already busy creating a post-report data batch" );    
+    if ( client == null || measurementSetID == null ) throw new Exception( "One or more batch request parameters are NULL" );
+    
+    EMPostReportSummary summary = client.getPostReportSummary();
+    if ( summary == null ) throw new Exception( "Cannot automate this measurement set batch: client has not produced a post-report summary" );
+    
+    Report targetReport = summary.getReport( measurementSetID );
+    if ( targetReport == null ) throw new Exception( "Cannot get correct report for this batch request" );
+    
+    // Create a new batch for this MeasurementSet
+    EMDataBatchEx newBatch = new EMDataBatchEx( targetReport.getMeasurementSet(),
+                                                targetReport.getFromDate(),
+                                                batchRequestSize );
+    
+    // And request it
+    synchronized ( clientLock )
+    {
+      EMClientEx clientEx = (EMClientEx) client;
+      
+      try
+      {
+        clientEx.addDataForBatching( newBatch );
+        clientEx.iterateNextMSForBatching();
+        clientEx.getPostReportInterface().requestDataBatch( newBatch );
+      }
+      catch (Exception e)
+      { lmLogger.error( "Could not request data batch from client: " + e.getMessage() ); }
+    }
+  }
+  
+  public void tryGetAllDataBatches( EMClient client ) throws Exception
+  {
+    // Safety first
     if ( currentPhase != EMPhase.eEMPostMonitoringReport )
       throw new Exception( "Not in data batch requesting compatible phase" );
     
     if ( client == null ) throw new Exception( "Client is null" );
-    if ( batch  == null ) throw new Exception( "Batch is null" );
-    if ( batch.getMeasurementSet() == null ) throw new Exception( "Batch Measurement set is null" );
-    if ( batch.getDataStart() == null ||
-         batch.getDataEnd()   == null ) throw new Exception( "Batch date stamps are null" );
+    if ( client.isCreatingPostReportBatchData() ) throw new Exception( "Client is busy creating a post-report data batch" );
     
-    synchronized ( clientLock )
+    // Create a set of batches (one per MeasurementSet) that we want
+    EMPostReportSummary summary = client.getPostReportSummary();
+    if ( summary == null ) throw new Exception( "Cannot automatically batch: client has not produced a post-report summary" );
+    
+    HashSet<EMDataBatchEx> targetBatches = new HashSet<EMDataBatchEx>();
+    
+    Iterator<UUID> msIDIt = summary.getReportedMeasurementSetIDs().iterator();
+    while ( msIDIt.hasNext() )
+    {
+      // If we have a valid report (with some potential data pending),
+      // then create an 'initial' batch
+      Report report = summary.getReport( msIDIt.next() );
+      if ( report != null && report.getNumberOfMeasurements() > 0 )
+      {
+        EMDataBatchEx newBatch = new EMDataBatchEx( report.getMeasurementSet(),
+                                                    report.getFromDate(),
+                                                    batchRequestSize );
+        
+        targetBatches.add( newBatch );
+      }
+    }
+    
+    // Duck out early if there's nothing to retrieve
+    if ( targetBatches.isEmpty() ) throw new Exception( "Client reports that there is no data to request" );
+    Iterator<EMDataBatchEx> batchIt = targetBatches.iterator();
+    
+    // Otherwise, load up all the batches, and start one off
+    synchronized( clientLock )
     {
       EMClientEx clientEx = (EMClientEx) client;
-      if ( clientEx == null ) throw new Exception( "Client is invalid" );
+        
+      while ( batchIt.hasNext() )
+      {
+        // Load up all the batches possible
+        try
+        { clientEx.addDataForBatching( batchIt.next() ); }
+        catch ( Exception e )
+        { lmLogger.error("Could not add batch request to client: " + e.getMessage()); }
+      }
       
-      clientEx.setCurrentPostReportBatchID( batch.getID() );
-      clientEx.getPostReportInterface().requestDataBatch( batch );
+      // Start a batch
+      clientEx.iterateNextMSForBatching();
+      EMDataBatch firstBatch = clientEx.getCurrentDataBatch();
+      
+      if ( firstBatch != null )
+        clientEx.getPostReportInterface().requestDataBatch( firstBatch );
+      else
+        lmLogger.error( "Expected first client data batch is NULL" );
     }
   }
   
@@ -428,6 +506,18 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   public void onGotDataBatch( EMClientEx client, EMDataBatch batch )       
   {
     lifecycleListener.onGotDataBatch( client, batch );
+  }
+  
+  @Override
+  public void onDataBatchMeasurementSetCompleted( EMClientEx client, MeasurementSet ms )
+  {
+    lifecycleListener.onDataBatchMeasurementSetCompleted( client, ms );
+  }
+  
+  @Override
+  public void onAllDataBatchesRequestComplete( EMClientEx client )
+  {
+    lifecycleListener.onAllDataBatchesRequestComplete( client );
   }
   
   @Override

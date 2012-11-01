@@ -29,12 +29,13 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEM
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces.EMPostReport;
 
-
-import java.util.UUID;
+import java.util.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMDataBatchEx;
 
 
 
@@ -42,7 +43,8 @@ import java.util.UUID;
 public class EMPostReportPhase extends AbstractEMLCPhase
                                implements IEMPostReport_ProviderListener
 {
-  private EMPostReportPhaseListener phaseListener;
+  private EMPostReportPhaseListener  phaseListener;
+  private TreeMap<Date, Measurement> batchDateTree;
   
   
   public EMPostReportPhase( AMQPBasicChannel channel,
@@ -52,6 +54,8 @@ public class EMPostReportPhase extends AbstractEMLCPhase
     super( EMPhase.eEMPostMonitoringReport, channel, providerID );
     
     phaseListener = listener;
+    
+    batchDateTree = new TreeMap<Date, Measurement>();
     
     phaseState = "Ready to start post-report process";
   }
@@ -115,11 +119,15 @@ public class EMPostReportPhase extends AbstractEMLCPhase
       if ( client.isNotifiedOfTimeOut(EMPhaseTimeOut.eEMTOPostReportTimeOut) ) 
         throw new Exception( "Time-out already sent to client" );
       
-      if ( !client.isCreatingPostReportData() )
+      if ( !client.isCreatingPostReportBatchData() )
         throw new Exception( "Client is not currently generating post-report data" );
       
       client.addTimeOutNotification( EMPhaseTimeOut.eEMTOPostReportTimeOut );
-      client.getPostReportInterface().notifyReportBatchTimeOut( client.getCurrentPostReportBatchID() );
+      
+      EMDataBatch currentBatch = client.getCurrentDataBatch();
+      if ( currentBatch == null ) throw new Exception( "Expected client batch is NULL" );
+      
+      client.getPostReportInterface().notifyReportBatchTimeOut( currentBatch.getID() );
     }
     else
       throw new Exception( "This client cannot be timed-out in Post-report phase" );
@@ -167,21 +175,97 @@ public class EMPostReportPhase extends AbstractEMLCPhase
     if ( phaseActive )
     {
       EMClientEx client = getClient( senderID );
+      boolean notifyClientAllBatchesDone = false;
       
       if ( client != null && populatedBatch != null )
       {
         // Check data ID matches the batch we expected
-        UUID thisBatchID = populatedBatch.getID();
+        UUID popBatchID             = populatedBatch.getID();
+        EMDataBatch clientDataBatch = client.getCurrentDataBatch();
         
-        if ( client.getCurrentPostReportBatchID().equals(thisBatchID) )
-          client.setCurrentPostReportBatchID( null ); // Got the right data, so clear 
-        else
-          phaseLogger.equals( "EM got a data batch it did not expect: " + thisBatchID.toString() );
-        
-        // Notify anyway! We don't want to loose data
-        if ( phaseListener != null )
+        // If this is the batch we expected, see if we need any more data
+        if ( popBatchID.equals(clientDataBatch.getID()) )
+        {
+          // Create a copy of the in-coming populated data and find out exactly
+          // what measurements we really have
+          EMDataBatchEx popBatchEx = new EMDataBatchEx( populatedBatch, true );
+          
+          // Find out exactly what measurements we actually have...
+          MeasurementSet popMS = popBatchEx.getMeasurementSet();
+          Set<Measurement> popMeasures = popMS.getMeasurements();
+          int receivedCount = popMeasures.size();
+          
+          batchDateTree.clear();
+          Iterator<Measurement> mIt = popMeasures.iterator();
+          while ( mIt.hasNext() )
+          {
+            Measurement m = mIt.next();
+            batchDateTree.put( m.getTimeStamp(), m );
+          }
+          
+          // If we received less than a full data batch, assume there is no more
+          // data for this MeasurementSet, so send remaining data and then try
+          // another MeasurementSet
+          if ( receivedCount < clientDataBatch.getExpectedMeasurementCount() )
+          {
+            // Notify we have some data (if we actually do)
+            if ( receivedCount > 0 )
+            {
+              popBatchEx.setActualMeasureInfo( receivedCount, 
+                                               batchDateTree.firstKey(), 
+                                               batchDateTree.lastKey() );
+              
+              phaseListener.onGotDataBatch( client, popBatchEx );
+            }
+            
+            // Notify we've completed a MeasurementSet
+            phaseListener.onDataBatchMeasurementSetCompleted( client, popMS );
+            
+            // Now go for another MeasurementSet, if one is waiting...
+            UUID nextMSID = client.iterateNextMSForBatching();
+            if ( nextMSID != null )
+            {
+              EMDataBatch nextBatch = client.getCurrentDataBatch();
+              client.getPostReportInterface().requestDataBatch( nextBatch );
+            }
+            else 
+              notifyClientAllBatchesDone = true; //... otherwise, we're all done!
+          }
+          else 
+          {            
+            // We're going to ignore the very last measurement, as we'll use it
+            // as the basis for the first measurement of the next batch in this series
+            NavigableSet<Date> dateNav = batchDateTree.navigableKeySet();
+            Iterator<Date> lastIt = dateNav.descendingIterator();
+            
+            Date lastStamp  = lastIt.next(); // Last date stamp
+            Date penulStamp = lastIt.next(); // Penultimate date stamp
+            
+            Measurement lastMeasure = batchDateTree.get( lastStamp );
+            popMeasures.remove( lastMeasure ); // Don't send this last measurement
+            
+            popBatchEx.setActualMeasureInfo( receivedCount -1, 
+                                             batchDateTree.firstKey(), 
+                                             penulStamp );
+            
+            // Send the data we have (minus the last measure)
+            phaseListener.onGotDataBatch( client, popBatchEx );
+
+            // Get the next lot
+            EMDataBatchEx clientDBX = (EMDataBatchEx) clientDataBatch;
+            clientDBX.resetStartDate( lastStamp );
+            client.getPostReportInterface().requestDataBatch( clientDataBatch );
+          }
+        }
+        else // If this isn't the data we expected, save it, but complain as well
+        {
           phaseListener.onGotDataBatch( client, populatedBatch );
+          phaseLogger.warn( "Got an unexpected batch report: " + populatedBatch.getID().toString() );
+        }
       }
+      
+      if ( notifyClientAllBatchesDone ) 
+        phaseListener.onAllDataBatchesRequestComplete( client );
     }
   }
 }
