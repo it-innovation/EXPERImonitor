@@ -211,7 +211,7 @@ public class EMController implements IEMLifecycleListener
         {
           // Notify EDM
           if ( expReportAccessor != null )
-            try { expReportAccessor.saveReport(report); }
+            try { expReportAccessor.saveReport(report, true); }
               catch ( Exception e )
               { emCtrlLogger.error( "Failed to store report data" ); }
           

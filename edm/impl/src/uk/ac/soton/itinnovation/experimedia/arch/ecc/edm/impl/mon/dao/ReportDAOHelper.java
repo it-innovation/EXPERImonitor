@@ -111,7 +111,7 @@ public class ReportDAOHelper
         return DBUtil.objectExistsByUUID("Report", "reportUUID", uuid, connection, false);
     }
     
-    public static void saveReport(Report report, Connection connection) throws Exception
+    public static void saveReport(Report report, boolean saveMeasurements, Connection connection) throws Exception
     {
         // should save any measurements that may be included
         // this validation will check if all the required parameters are set and if
@@ -148,30 +148,33 @@ public class ReportDAOHelper
             throw new RuntimeException("Error while saving Report: " + ex.getMessage(), ex);
         }
         
-        // save any measurements if not NULL
-        try {
-            if ((report.getMeasurementSet().getMeasurements() != null) && !report.getMeasurementSet().getMeasurements().isEmpty())
-            {
-                log.debug("Saving " + report.getMeasurementSet().getMeasurements().size() + " measurements for the report");
-                MeasurementDAOHelper.saveMeasurementsForSet(report.getMeasurementSet().getMeasurements(), report.getMeasurementSet().getUUID(), connection);
-            }
-        } catch (Exception ex) {
-            throw ex;
-        }
-        
-        // save report - measurment link(s), if any measurements
-        try {
-            if ((report.getMeasurementSet().getMeasurements() != null) && !report.getMeasurementSet().getMeasurements().isEmpty())
-            {
-                log.debug("Saving Report - Measurement links");
-                // not validating measurement here because an exception would have been thrown above if there was an issue
-                for (Measurement measurement : report.getMeasurementSet().getMeasurements())
+        if (saveMeasurements)
+        {
+            // save any measurements if not NULL
+            try {
+                if ((report.getMeasurementSet().getMeasurements() != null) && !report.getMeasurementSet().getMeasurements().isEmpty())
                 {
-                    linkReportAndMeasurement(report.getUUID(), measurement.getUUID(), connection);
+                    log.debug("Saving " + report.getMeasurementSet().getMeasurements().size() + " measurements for the report");
+                    MeasurementDAOHelper.saveMeasurementsForSet(report.getMeasurementSet().getMeasurements(), report.getMeasurementSet().getUUID(), connection);
                 }
+            } catch (Exception ex) {
+                throw ex;
             }
-        } catch (Exception ex) {
-            throw ex;
+
+            // save report - measurment link(s), if any measurements
+            try {
+                if ((report.getMeasurementSet().getMeasurements() != null) && !report.getMeasurementSet().getMeasurements().isEmpty())
+                {
+                    log.debug("Saving Report - Measurement links");
+                    // not validating measurement here because an exception would have been thrown above if there was an issue
+                    for (Measurement measurement : report.getMeasurementSet().getMeasurements())
+                    {
+                        linkReportAndMeasurement(report.getUUID(), measurement.getUUID(), connection);
+                    }
+                }
+            } catch (Exception ex) {
+                throw ex;
+            }
         }
     }
     
