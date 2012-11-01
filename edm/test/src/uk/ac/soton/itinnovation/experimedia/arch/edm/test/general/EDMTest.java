@@ -24,8 +24,10 @@
 /////////////////////////////////////////////////////////////////////////
 package uk.ac.soton.itinnovation.experimedia.arch.edm.test.general;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
@@ -103,13 +105,15 @@ public class EDMTest
         
         experimentCompleteChain(edm, expUUID, entityUUID, attributeUUID, mGenUUID, mGrpUUID, mSetUUID);
         
-        printExperimentDetails(edm, expUUID, withSubClasses);
+        //printExperimentDetails(edm, expUUID, withSubClasses);
         
         //saveReport(edm, mSetUUID, reportUUID);
         
         //getReport(edm, mSetUUID, reportUUID);
         
         //updateAndDeleteReportTests(edm, mSetUUID);
+        
+        reportSynchronisationTests(edm, mSetUUID);
     }
     
     public static void experiments(IMonitoringEDM edm, UUID expUUID) throws Exception
@@ -818,7 +822,7 @@ public class EDMTest
         
         log.info("Saving Report for measurement set " + mSetUUID.toString());
         
-        Report report = getReportWithRandomMeasurements(reportUUID, mSetUUID);
+        Report report = getReportWithRandomMeasurements(reportUUID, mSetUUID, 5);
         
         try {
             reportDAO.saveReport(report, true);
@@ -840,7 +844,7 @@ public class EDMTest
         }
         
         log.info("Saving Measurements for Report for measurement set " + mSetUUID.toString());
-        Report report2 = getReportWithRandomMeasurements(UUID.randomUUID(), mSetUUID);
+        Report report2 = getReportWithRandomMeasurements(UUID.randomUUID(), mSetUUID, 5);
         
         try {
             reportDAO.saveMeasurements(report2);
@@ -851,10 +855,9 @@ public class EDMTest
     }
     
     
-    private static Report getReportWithRandomMeasurements(UUID reportUUID, UUID mSetUUID)
+    private static Report getReportWithRandomMeasurements(UUID reportUUID, UUID mSetUUID, int numMeasurements)
     {
         MeasurementSet mSet = new MeasurementSet(mSetUUID);
-        int numMeasurements = 5;
         Random rand = new Random();
         rand.setSeed(new Date().getTime());
         long timeStampFrom = 0;
@@ -1075,7 +1078,7 @@ public class EDMTest
         log.info("Saving Report for measurement set " + mSetUUID.toString());
         
         UUID reportUUID = UUID.randomUUID();
-        Report report = getReportWithRandomMeasurements(reportUUID, mSetUUID);
+        Report report = getReportWithRandomMeasurements(reportUUID, mSetUUID, 5);
         
         try {
             reportDAO.saveReport(report, true);
@@ -1113,6 +1116,69 @@ public class EDMTest
         } catch (Exception ex) {
             log.error("Unable to delete Report: " + ex.getMessage(), ex);
         }
+    }
+    
+    public static void reportSynchronisationTests(IMonitoringEDM edm, UUID mSetUUID) throws Exception
+    {
+        IReportDAO reportDAO = null;
+        try {
+            reportDAO = edm.getReportDAO();
+        } catch (Exception ex) {
+            log.error ("Unable to get Report DAO: " + ex.getMessage(), ex);
+            throw ex;
+        }
+        
+        int numReports = 5;
+        int numMeasurements = 2;
+        
+        List<UUID> reportUUIDList = new ArrayList<UUID>();
+        log.info("Saving " + numReports + " Reports with " + numMeasurements + " measurements each for measurement set " + mSetUUID.toString());
+        for (int i = 0; i < numReports; i++)
+        {
+            UUID reportUUID = UUID.randomUUID();
+            Report report = getReportWithRandomMeasurements(reportUUID, mSetUUID, numMeasurements);
+
+            try {
+                reportDAO.saveReport(report, true);
+                reportUUIDList.add(reportUUID);
+                log.info("Report saved successfully!");
+            } catch (Exception ex) {
+                log.error("Unable to save Report: " + ex.getMessage(), ex);
+            }
+        }
+        
+//----- SET SYNCED FLAG FOR MEASUREMENTS FOR REPORT BY UUID
+        Random rand = new Random();
+        int counter = 0;
+        for (UUID reportUUID : reportUUIDList)
+        {
+            if (rand.nextBoolean())
+            {
+                log.info("Setting sync flag for measurements for report by UUID: " + reportUUID);
+                try {
+                    reportDAO.setReportMeasurementsSyncFlag(reportUUID, true);
+                    counter++;
+                    log.info("Report updated successfully");
+                } catch (Exception ex) {
+                    log.error("Unable to update Report: " + ex.getMessage(), ex);
+                }
+            }
+        }
+        log.info("Set the sync flag for " + counter + " Reports");
+        
+//----- GET REPORT FOR UNSYNC'ED MEASUREMENTS
+        log.info("Should now get a report with " + ((numReports-counter) * numMeasurements) + " unsynchronised measurements");
+        Report report = null;
+        try {
+            Date date = new Date(new Date().getTime() - 10000L);
+            log.info("Getting Report for last 100 unsync'ed measurements from date: " + date + " ("+ date.getTime() + ")");
+            report = reportDAO.getReportForUnsyncedMeasurementsFromDate(mSetUUID, date, 100, true);
+        } catch (NoDataException ex) {
+            log.error("Unable to get Report: " + ex.toString());
+        } catch (Exception ex) {
+            log.error("Unable to get Report: " + ex.toString(), ex);
+        }
+        printReportDetails(report);
     }
     
     public static void printReportDetails(Report report)
