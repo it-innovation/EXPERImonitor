@@ -22,7 +22,7 @@
 //      Created for Project :   BonFIRE
 //
 /////////////////////////////////////////////////////////////////////////
-package uk.ac.soton.itinnovation.experimedia.arch.edm.test.v1;
+package uk.ac.soton.itinnovation.experimedia.arch.edm.test.unit.v1;
 
 import junit.framework.Test;
 import junit.framework.TestCase;

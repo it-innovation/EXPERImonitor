@@ -49,8 +49,9 @@ public interface IMeasurementDAO
     void saveMeasurement(Measurement measurement) throws IllegalArgumentException, Exception;
     
     /**
-     * Saves measurements for an existing measurement set, and will create a
-     * Report for them.
+     * Saves measurements for an existing measurement set. Note that if one or 
+     * more of the measurements already exists, an exception is thrown and none
+     * will be saved as they are treated as part of one transaction.
      * @param measurements The measurements to save.
      * @param mSetUUID The UUID of the measurement set.
      * @throws IllegalArgumentException If the arguments are invalid, typically due to missing information (e.g., NULL values).

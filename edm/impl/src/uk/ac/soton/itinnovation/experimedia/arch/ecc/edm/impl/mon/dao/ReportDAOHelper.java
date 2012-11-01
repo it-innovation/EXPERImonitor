@@ -775,6 +775,7 @@ public class ReportDAOHelper
             log.error("Unable to get measurements for report: " + ex.getMessage(), ex);
             throw new RuntimeException("Unable to get measurements for report: " + ex.getMessage(), ex);
         }
+        
         if (!measurements.isEmpty())
         {
             log.debug("Updating sync flag for measurements associated with the report");

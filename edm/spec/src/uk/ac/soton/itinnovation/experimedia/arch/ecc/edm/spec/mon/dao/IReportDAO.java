@@ -55,7 +55,9 @@ public interface IReportDAO
     void saveReport(Report report, boolean saveMeasurements) throws IllegalArgumentException, Exception;
     
     /**
-     * Saves the measurements for a report, not the report itself.
+     * Saves the measurements for a report, not the report itself. Note that if one or 
+     * more of the measurements already exists, an exception is thrown and none
+     * will be saved as they are treated as part of one transaction.
      * @param report The report object, which should contain a measurement set with measurements.
      * @throws IllegalArgumentException If the Measurement objects are not valid to be saved, typically due to missing information (e.g., NULL values).
      * @throws Exception If there's a technical issue or a measurement with the same UUID already exists.
