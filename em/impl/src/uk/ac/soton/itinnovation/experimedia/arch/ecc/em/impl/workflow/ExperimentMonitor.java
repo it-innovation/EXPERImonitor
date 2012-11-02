@@ -51,6 +51,7 @@ public class ExperimentMonitor implements IExperimentMonitor,
   
   private IExperimentMonitor.eStatus monitorStatus = IExperimentMonitor.eStatus.NOT_YET_INITIALISED;
   private AMQPBasicChannel           amqpChannel;
+  private UUID                       entryPointID;
   
   private EMConnectionManager connectionManager;
   private EMLifecycleManager  lifecycleManager;
@@ -78,24 +79,35 @@ public class ExperimentMonitor implements IExperimentMonitor,
     if ( epID == null ) 
       throw new Exception( "Entry point ID is null" );
     
+    entryPointID = epID;
+    
     // Try initialising a connection with the Rabbit Server
-    try { initialise(rabbitServerIP); }
+    try
+    { 
+      basicInitialise( rabbitServerIP );
+      initialiseManagers();
+    }
     catch( Exception e ) { throw e; }
-    
-    if ( monitorStatus != IExperimentMonitor.eStatus.INITIALISED ) 
-      throw new Exception( "Not in a state to open entry point" );
-    
-    // Initialise connection manager
-    if ( !connectionManager.initialise( epID, amqpChannel ) )
-      throw new Exception( "Could not open entry point interface!" );
-    
-    // Link connection manager to lifecycle manager
-    connectionManager.setListener( lifecycleManager );
-    
-    // Initialise lifecycle manager
-    lifecycleManager.initialise( amqpChannel, epID, this );
+  }
   
-    monitorStatus = IExperimentMonitor.eStatus.ENTRY_POINT_OPEN;
+  @Override
+  public void openEntryPoint( Properties emProps ) throws Exception
+  {
+    // Safety first
+    if ( emProps == null ) throw new Exception( "Configuration properties are NULL" );
+    
+    String epVal = emProps.getProperty( "Monitor_ID" );
+    entryPointID = UUID.fromString( epVal );
+    
+    if ( entryPointID == null ) throw new Exception( "Configuration of entry point ID is invalid" );
+    
+    // Now try connecting and opening the entry point
+    try
+    {
+      configInitialise( emProps );
+      initialiseManagers();
+    }
+    catch ( Exception e ) { throw e; }
   }
   
   @Override
@@ -339,7 +351,7 @@ public class ExperimentMonitor implements IExperimentMonitor,
   }
   
   // Private methods -----------------------------------------------------------
-  private void initialise( String rabbitServerIP ) throws Exception
+  private void basicInitialise( String rabbitServerIP ) throws Exception
   {
     AMQPConnectionFactory amqpCF = new AMQPConnectionFactory();
     
@@ -347,17 +359,47 @@ public class ExperimentMonitor implements IExperimentMonitor,
       throw new Exception( "Could not set the server IP correctly" );
     
     amqpCF.connectToAMQPHost();
-    
     if ( !amqpCF.isConnectionValid() ) throw new Exception( "Could not connect to Rabbit server" );
     
     amqpChannel = amqpCF.createNewChannel();
-    
     if ( amqpChannel == null ) throw new Exception( "Could not create AMQP channel" );
-    
+  }
+  
+  private void configInitialise( Properties emProps ) throws Exception
+  {
+    AMQPConnectionFactory amqpCF = new AMQPConnectionFactory();
+    try
+    {
+      amqpCF.connectToAMQPHost( emProps );
+      if ( !amqpCF.isConnectionValid() ) throw new Exception( "Could not connect to Rabbit server" );
+      
+      amqpChannel = amqpCF.createNewChannel();
+      if ( amqpChannel == null ) throw new Exception( "Could not create AMQP channel" );
+    }
+    catch ( Exception e ) { throw e; }
+  }
+  
+  private void initialiseManagers() throws Exception
+  {
     connectionManager = new EMConnectionManager();
     lifecycleManager  = new EMLifecycleManager();
     
     monitorStatus = IExperimentMonitor.eStatus.INITIALISED;
+    
+    if ( monitorStatus != IExperimentMonitor.eStatus.INITIALISED ) 
+      throw new Exception( "Not in a state to open entry point" );
+    
+    // Initialise connection manager
+    if ( !connectionManager.initialise( entryPointID, amqpChannel ) )
+      throw new Exception( "Could not open entry point interface!" );
+    
+    // Link connection manager to lifecycle manager
+    connectionManager.setListener( lifecycleManager );
+    
+    // Initialise lifecycle manager
+    lifecycleManager.initialise( amqpChannel, entryPointID, this );
+  
+    monitorStatus = IExperimentMonitor.eStatus.ENTRY_POINT_OPEN;
   }
   
   private Set<EMClient> getSimpleClientSet( Set<EMClientEx> exClients )

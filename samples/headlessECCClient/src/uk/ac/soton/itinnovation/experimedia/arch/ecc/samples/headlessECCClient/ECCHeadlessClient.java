@@ -40,8 +40,6 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared.*;
 
-
-import java.io.InputStream;
 import java.util.*;
 import org.apache.log4j.Logger;
 
@@ -58,13 +56,15 @@ public class ECCHeadlessClient implements EMIAdapterListener
     private IMonitoringEDMAgent  edmAgent;
     private IReportDAO           edmReportDAO;
     private MeasurementScheduler measurementScheduler;
-    private boolean              edmAgentOK  = false;
-    private boolean              schedulerOK = false;
-    
+   
     private Experiment                      currentExperiment;
     private HashMap<UUID, MeasurementSet>   measurementSetMap;
     private HashSet<MeasurementTask>        scheduledMeasurementTasks;
     private HashMap<UUID, ITakeMeasurement> instantMeasurers;
+    
+    private boolean edmAgentOK  = false;
+    private boolean schedulerOK = false;
+    private boolean tryingToDisconnect = false;
     
     
     public ECCHeadlessClient( String name )
@@ -84,96 +84,22 @@ public class ECCHeadlessClient implements EMIAdapterListener
         Runtime.getRuntime().addShutdownHook( new ShutdownHook() );
     }
     
-    public boolean tryConnectToAMQPBus( String rabbitServerIP, 
-                                        int portNumber,
-                                        boolean useSSL ) throws Exception
-    {
-        // Safety first
-        if ( rabbitServerIP == null ) throw new Exception( "IP parameter is invalid" );
-        if ( portNumber < 1 ) throw new Exception( "Port number is invalid" );
+    public boolean tryConnectToAMQPBus( Properties emProps ) throws Exception
+    { 
+        boolean connectedOK = false;
         
-        AMQPConnectionFactory amqpFactory = new AMQPConnectionFactory();
-        amqpFactory.setAMQPHostIPAddress( rabbitServerIP );
-        amqpFactory.setAMQPHostPort( portNumber );
+        AMQPConnectionFactory connectFactory = new AMQPConnectionFactory();
         
         try
-        {
-            if ( useSSL )
-              amqpFactory.connectToAMQPSSLHost();
-            else
-              amqpFactory.connectToAMQPHost();
-            
-            amqpChannel = amqpFactory.createNewChannel();
-            
-            clientLogger.info( "Connected to the AMQP (using " +
-                                (useSSL ? "SSL" : "non-secured") + " channel)" );
-        }
-        catch ( Exception e )
         { 
-            clientLogger.error( "Headerless client problem: could not connect to" +
-                                (useSSL ? "SSL" : "non-secured") + " AMQP channel" ); 
-            throw e; 
+          connectFactory.connectToAMQPHost( emProps );
+          amqpChannel = connectFactory.createNewChannel();
+          connectedOK = true;
         }
+        catch (Exception e)
+        { clientLogger.error( "Could not connect to EM: " + e.getMessage()); }
         
-        return true;
-    }
-        
-    public boolean tryVerifiedConnectToAMQPBus( String      rabbitServerIP,
-                                                int         portNumber,
-                                                InputStream keystoreStream,
-                                                String      keystorePassword
-                                              ) throws Exception
-    {
-        // Safety first
-        if ( rabbitServerIP == null )   throw new Exception( "IP parameter is NULL" );
-        if ( portNumber < 1 )           throw new Exception( "Port number is invalid" );
-        if ( keystoreStream == null )   throw new Exception( "Certificate resource is NULL" );
-        if ( keystorePassword == null ) throw new Exception( "Certificate password is NULL" );
-        
-        AMQPConnectionFactory amqpFactory = new AMQPConnectionFactory();
-        amqpFactory.setAMQPHostIPAddress( rabbitServerIP );
-        amqpFactory.setAMQPHostPort( portNumber );
-        
-        try
-        {
-            amqpFactory.connectToVerifiedAMQPHost( keystoreStream,
-                                                   keystorePassword );
-
-            amqpChannel = amqpFactory.createNewChannel();
-
-            clientLogger.info( "Connected to the AMQP (using a verified SSL channel)" );
-        }
-        catch ( Exception e )
-        { 
-            clientLogger.error( "Headerless client problem: could not connect to SSL verified AMQP" ); 
-            throw e;
-        }
-        
-        return true;
-    }
-    
-    public boolean deleteLocalData( Properties edmProps )
-    {
-        boolean result = false;
-        
-        try
-        {
-            edmAgent   = EDMInterfaceFactory.getMonitoringEDMAgent( edmProps );
-            edmAgentOK = edmAgent.isDatabaseSetUpAndAccessible();
-            
-            if ( !edmAgentOK )
-                throw new Exception( "EDM Agent is not configured correctly" );
-            
-            edmAgent.clearMetricsDatabase();
-            result = true;
-        }
-        catch ( Exception e )
-        {
-            clientLogger.error( "Could not clear EDM data" + e.getMessage() );
-            return false;
-        }
-        
-        return result;
+        return connectedOK;
     }
     
     public boolean initialiseLocalDataManagement( Properties edmProps )
@@ -486,10 +412,10 @@ public class ECCHeadlessClient implements EMIAdapterListener
             
             try
             {
-                Report batchRep = edmReportDAO.getReportForUnsyncedMeasurementsAfterDate( msID, 
-                                                                                          batchOUT.getCopyOfExpectedDataStart(),
-                                                                                          batchOUT.getExpectedMeasurementCount(),
-                                                                                          true );
+                Report batchRep = edmReportDAO.getReportForUnsyncedMeasurementsFromDate( msID, 
+                                                                                         batchOUT.getCopyOfExpectedDataStart(),
+                                                                                         batchOUT.getExpectedMeasurementCount(),
+                                                                                         true );
                 batchOUT.setMeasurementSet( batchRep.getMeasurementSet() );
             }
             catch( Exception e )
@@ -513,17 +439,19 @@ public class ECCHeadlessClient implements EMIAdapterListener
     { /* This demo has opted out of this phase */ }
     
     // Private methods ---------------------------------------------------------
-    private boolean tryDisconnecting()
+    private synchronized boolean tryDisconnecting()
     {
         boolean disconnectedOK = false;
-      
-        try 
-        { 
-            emiAdapter.disconnectFromEM();
-            disconnectedOK = true;
-        }
-        catch ( Exception e )
-        { clientLogger.error( "Could not de-register with the EM/ECC" + e.getMessage() ); }
+        
+        if ( !tryingToDisconnect )
+          try 
+          { 
+              tryingToDisconnect = true;
+              emiAdapter.disconnectFromEM();
+              disconnectedOK = true;
+          }
+          catch ( Exception e )
+          { clientLogger.error( "Could not de-register with the EM/ECC" + e.getMessage() ); }
 
         return disconnectedOK;
     }
@@ -655,9 +583,9 @@ public class ECCHeadlessClient implements EMIAdapterListener
         @Override
         public void run()
         {
-            clientLogger.info( "Got a terminate signal, so closing down.." );
-            stopMeasuring();
-            tryDisconnecting();
+              clientLogger.info( "Got a terminate signal, so closing down.." );
+              stopMeasuring();
+              tryDisconnecting();  
         }
     }
 }

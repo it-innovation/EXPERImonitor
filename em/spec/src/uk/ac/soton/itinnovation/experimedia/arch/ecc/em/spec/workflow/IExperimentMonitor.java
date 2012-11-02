@@ -71,6 +71,15 @@ public interface IExperimentMonitor
   void openEntryPoint( String rabbitServerIP, UUID entryPointID ) throws Exception;
   
   /**
+   * Opens the door to clients wishing to connect to the EM; before this has been
+   * executed, the EM will not recognise client's attempts to connect.
+   * 
+   * @param emProps     - EM configuration properties for connection to the Rabbit Server
+   * @throws Exception  - Throws if properties are invalid or there is a connection problem
+   */
+  void openEntryPoint( Properties emProps ) throws Exception;
+  
+  /**
    * Use this method to get the set of all known connected clients.
    * 
    * @return - Set of EMClient instances.

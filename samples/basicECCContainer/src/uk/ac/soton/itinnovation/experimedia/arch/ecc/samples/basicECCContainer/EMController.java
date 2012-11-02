@@ -38,6 +38,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.*;
 
 import java.awt.event.*;
+import java.io.*;
 import org.apache.log4j.Logger;
 import java.util.*;
 
@@ -49,6 +50,7 @@ public class EMController implements IEMLifecycleListener
   private final Logger emCtrlLogger = Logger.getLogger( EMController.class );
   
   private IExperimentMonitor expMonitor;
+  private EMLoginView        loginView;
   private EMView             mainView;
   private boolean            waitingToStartNextPhase = false;
   
@@ -59,42 +61,36 @@ public class EMController implements IEMLifecycleListener
   
   
   public EMController()
-  {    
+  {
     expMonitor = EMInterfaceFactory.createEM();
     expMonitor.addLifecyleListener( this );
     
-    try {
-      expDataMgr = EDMInterfaceFactory.getMonitoringEDM();
-    } catch (Exception ex) {
-      emCtrlLogger.error( "Could not create Monitoring EDM", ex );
-    }
-  }
-  
-  public void start( String rabbitIP, UUID emID ) throws Exception
-  {
-    emCtrlLogger.info( "Trying to connect to Rabbit server on " + rabbitIP );
-    
-    mainView = new EMView( new MonitorViewListener() );
-    mainView.setVisible( true );
-    mainView.addWindowListener( new ViewWindowListener() );
-    
     try
-    { expMonitor.openEntryPoint( rabbitIP, emID ); }
-    catch (Exception e)
     {
-      emCtrlLogger.error( "Could not open entry point on Rabbit server" );
-      throw e; 
-    }
-    
-    boolean dmOK = createExperiment();
-    
-    if ( !dmOK )
-    {
-      emCtrlLogger.error( "Had problems setting up the EDM" );
-      throw new Exception( "Could not set up EDM" );
-    }
+      // Try getting the EDM properties from a local file
+      Properties edmProps = tryGetPropertiesFile( "edm" );
+      
+      // If available, use these properties
+      if ( edmProps != null )
+        expDataMgr = EDMInterfaceFactory.getMonitoringEDM( edmProps );
+      else
+        expDataMgr = EDMInterfaceFactory.getMonitoringEDM(); //... or go to default
+      
+      // Try starting from a local EM properties file
+      Properties emProps = tryGetPropertiesFile( "em" );
+      if ( emProps != null )
+        start( emProps );
+      else  // Otherwise, manual entry of basic configuration
+      {
+        loginView = new EMLoginView();
+        loginView.setViewListener( new LoginViewListener() );
+        loginView.setVisible( true );
+      }
+    } 
+    catch (Exception ex)
+    { emCtrlLogger.error( "Could not create Monitoring EDM", ex ); }
   }
-  
+ 
   // IEMLifecycleListener ------------------------------------------------------
   @Override
   public void onClientConnected( EMClient client )
@@ -257,7 +253,7 @@ public class EMController implements IEMLifecycleListener
       batchReport.setToDate( batch.getActualDataStop() );
       batchReport.setNumberOfMeasurements( batch.getActualMeasurementCount() );
       
-      try { expReportAccessor.saveReport( batchReport ); }
+      try { expReportAccessor.saveReport( batchReport, true ); }
       catch ( Exception e )
       { emCtrlLogger.error( "Could not save batch report data: " + e.getMessage() ); }
     }
@@ -288,6 +284,86 @@ public class EMController implements IEMLifecycleListener
   }
   
   // Private methods -----------------------------------------------------------
+  private Properties tryGetPropertiesFile( String configName )
+  {
+    Properties props        = null;
+    InputStream propsStream = null;
+    
+    // Try find the properties file
+    File propFile = new File( configName + ".properties" );
+    if ( propFile.exists() )
+      try
+      { propsStream = (InputStream) new FileInputStream( propFile ); }
+      catch ( IOException ioe )
+      { emCtrlLogger.error( "Could not open " + configName + " configuration file" ); }
+    
+    // Try load the property stream
+    if ( propsStream != null )
+    {
+      props = new Properties();
+      try { props.load( propsStream ); }
+      catch ( IOException ioe )
+      { 
+        emCtrlLogger.error( "Could not load " + configName + " configuration" );
+        props = null;
+      }
+    }
+
+    // Tidy up
+    if ( propsStream != null )
+      try 
+      { propsStream.close(); }
+      catch ( IOException ioe )
+      { emCtrlLogger.error( "Could not close " + configName + " config file" ); }
+    
+    return props; 
+  }
+  
+  private boolean clearECCEDM()
+  {
+    boolean clearedOK = false;
+    
+    if ( expDataMgr != null )
+    {
+      try 
+      {
+        expDataMgr.clearMetricsDatabase();
+        clearedOK = true;
+      }
+      catch ( Exception e )
+      { emCtrlLogger.error( "Could not clear EDM database: " + e.getLocalizedMessage()); }
+    }
+    
+    return clearedOK;
+  }
+  
+  private void start( Properties emProps ) throws Exception
+  {
+    emCtrlLogger.info( "Trying to connect to Rabbit server" );
+    
+    try
+    { 
+      expMonitor.openEntryPoint( emProps );
+      
+      mainView = new EMView( new MonitorViewListener() );
+      mainView.setVisible( true );
+      mainView.addWindowListener( new ViewWindowListener() );
+    }
+    catch (Exception e)
+    {
+      emCtrlLogger.error( "Could not open entry point on Rabbit server" );
+      throw e; 
+    }
+    
+    boolean dmOK = createExperiment();
+    
+    if ( !dmOK )
+    {
+      emCtrlLogger.error( "Had problems setting up the EDM" );
+      throw new Exception( "Could not set up EDM" );
+    }
+  }
+  
   private void onViewClosed()
   {
     try { expMonitor.endLifecycle(); }
@@ -428,6 +504,30 @@ public class EMController implements IEMLifecycleListener
     @Override
     public void windowClosed( WindowEvent we )
     { onViewClosed(); }
+  }
+  
+  private class LoginViewListener implements EMLoginViewListener
+  {
+    @Override
+    public void onStartECC( String rabbitIP, UUID emID, boolean clearEDM )
+    {
+      if ( clearEDM )
+      {
+        if ( clearECCEDM() )
+          emCtrlLogger.info( "Successfully cleared EDM data." );
+        else
+          emCtrlLogger.warn( "Could not clear EDM data" );
+      }
+      
+      try
+      { 
+        //start(rabbitIP, emID);
+        loginView.dispose();
+        loginView = null;
+      }
+      catch ( Exception e )
+      { emCtrlLogger.error( "Could not start the ECC: " + e.getMessage()); }
+    }
   }
   
   private class MonitorViewListener implements EMViewListener
