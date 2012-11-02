@@ -127,6 +127,12 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
     }
 
     @Override
+    public void openEntryPoint(Properties emProps) throws Exception
+    {
+      throw new Exception( "Not yet implemeted" );
+    }
+    
+    @Override
     public Set<EMClient> getAllConnectedClients() {
         return getSimpleClientSet(connectionManager.getConnectedClients());
     }
@@ -276,9 +282,18 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
     }
 
     @Override
-    public void requestDataBatch(EMClient client, EMDataBatch batch) throws Exception {
+    public void requestDataBatches( EMClient client, UUID measurementSetID ) throws Exception {
         try {
-            lifecycleManager.tryRequestDataBatch(client, batch);
+            lifecycleManager.tryRequestDataBatch( client, measurementSetID );
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+    
+    @Override
+    public void getAllDataBatches( EMClient client ) throws Exception {
+        try {
+            lifecycleManager.tryGetAllDataBatches( client );
         } catch (Exception e) {
             throw e;
         }
@@ -439,6 +454,24 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
 
         while (listIt.hasNext()) {
             listIt.next().onGotDataBatch(client, batch);
+        }
+    }
+    
+    @Override
+    public void onDataBatchMeasurementSetCompleted(EMClient client, MeasurementSet ms) {
+        Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
+
+        while ( listIt.hasNext() ) { 
+          listIt.next().onDataBatchMeasurementSetCompleted( client, ms ); 
+        }
+    }
+    
+    @Override
+    public void onAllDataBatchesRequestComplete(EMClient client) {
+        Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
+
+        while ( listIt.hasNext() ) { 
+            listIt.next().onAllDataBatchesRequestComplete( client ); 
         }
     }
 

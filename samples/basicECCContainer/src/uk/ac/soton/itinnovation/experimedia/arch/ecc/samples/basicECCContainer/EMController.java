@@ -520,8 +520,14 @@ public class EMController implements IEMLifecycleListener
       }
       
       try
-      { 
-        //start(rabbitIP, emID);
+      {
+        Properties basicProps = new Properties();
+        basicProps.put( "Rabbit_IP", rabbitIP );
+        basicProps.put( "Rabbit_Port", "5672" );
+        basicProps.put( "Monitor_ID", emID.toString() );
+        
+        start( basicProps );
+        
         loginView.dispose();
         loginView = null;
       }
