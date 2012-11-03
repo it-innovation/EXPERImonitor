@@ -458,11 +458,11 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
     }
     
     @Override
-    public void onDataBatchMeasurementSetCompleted(EMClient client, MeasurementSet ms) {
+    public void onDataBatchMeasurementSetCompleted(EMClient client, UUID measurementSetID ) {
         Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
 
         while ( listIt.hasNext() ) { 
-          listIt.next().onDataBatchMeasurementSetCompleted( client, ms ); 
+          listIt.next().onDataBatchMeasurementSetCompleted( client, measurementSetID ); 
         }
     }
     

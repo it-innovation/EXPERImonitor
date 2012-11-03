@@ -28,6 +28,8 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
 
+import java.util.UUID;
+
 
 
 
@@ -51,7 +53,7 @@ public interface IEMLifecycleListener
   
   void onGotDataBatch( EMClient client, EMDataBatch batch );
   
-  void onDataBatchMeasurementSetCompleted( EMClient client, MeasurementSet ms );
+  void onDataBatchMeasurementSetCompleted( EMClient client, UUID measurementSetID );
   
   void onAllDataBatchesRequestComplete( EMClient client );
   

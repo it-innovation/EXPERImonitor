@@ -24,7 +24,7 @@
 
 package eu.experimedia.itinnovation.ecc.web.listeners;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
+import java.util.UUID;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMClient;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMDataBatch;
@@ -73,7 +73,7 @@ public class EMListener implements IEMLifecycleListener {
         throw new UnsupportedOperationException("Not supported yet.");
     }
     
-    public void onDataBatchMeasurementSetCompleted( EMClient client, MeasurementSet ms ) {
+    public void onDataBatchMeasurementSetCompleted( EMClient client, UUID measurementSetID ) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
   

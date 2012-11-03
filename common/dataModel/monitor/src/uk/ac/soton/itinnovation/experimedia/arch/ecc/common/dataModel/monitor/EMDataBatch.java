@@ -25,7 +25,7 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 
 import java.util.*;
 
@@ -43,11 +43,9 @@ public class EMDataBatch
   protected UUID batchID;
   protected Date expectedStartStamp;
   protected int  expectedMeasurementCount;
+  protected UUID expectedMeasurementSetID;
   
-  protected MeasurementSet measurementSet;
-  protected int            actualMeasurementCount;
-  protected Date           actualStartStamp;
-  protected Date           actualStopStamp;
+  protected Report batchReport;
   
   
   /**
@@ -76,23 +74,25 @@ public class EMDataBatch
    * 
    * @return - Instance of the MeasurementSet
    */
-  public MeasurementSet getMeasurementSet()
-  { return measurementSet; }
+  public UUID getExpectedMeasurementSetID()
+  { return expectedMeasurementSetID; }
   
-  public int getActualMeasurementCount()
-  { return actualMeasurementCount; }
-  
-  public Date getActualDataStart()
-  { return actualStartStamp; }
-  
-  public Date getActualDataStop()
-  { return actualStopStamp; }
+  /**
+   * Get the report reflecting the data that was requested for this batch. This
+   * report may not necessarily contain all the data that was requested by the
+   * ECC.
+   * 
+   * @return - SHould return a fully specified Report instance. 
+   */
+  public Report getBatchReport()
+  { return batchReport; }
   
   /**
    * Set the MeasurementSet associated with this batch. This instance
-   * should contain all the measurements within the range indicated by the start
-   * and the end date
+   * should be fully specified, by not necessarily have to contain all the
+   * data that was requested by the parent data batch.
    */
-  public void setMeasurementSet( MeasurementSet set )
-  { if ( set != null ) measurementSet = set; }
+  public void setBatchReport( Report report )
+  { batchReport = report; }
+  
 }

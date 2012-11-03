@@ -247,25 +247,19 @@ public class EMController implements IEMLifecycleListener
     if ( client != null && batch != null )
     {      
       // Push batched data into the EDM
-      Report batchReport = new Report();
-      batchReport.setMeasurementSet( batch.getMeasurementSet() );
-      batchReport.setFromDate( batch.getActualDataStart() );
-      batchReport.setToDate( batch.getActualDataStop() );
-      batchReport.setNumberOfMeasurements( batch.getActualMeasurementCount() );
-      
-      try { expReportAccessor.saveReport( batchReport, true ); }
+      try { expReportAccessor.saveReport( batch.getBatchReport(), true ); }
       catch ( Exception e )
       { emCtrlLogger.error( "Could not save batch report data: " + e.getMessage() ); }
     }
   }
   
   @Override
-  public void onDataBatchMeasurementSetCompleted( EMClient client, MeasurementSet ms )
+  public void onDataBatchMeasurementSetCompleted( EMClient client, UUID measurementSetID )
   {
-    if ( client != null && ms != null )
+    if ( client != null && measurementSetID != null )
     {
       mainView.addLogText( client.getName() + " has finished batching measurement set " + 
-                           ms.getUUID().toString() );
+                           measurementSetID.toString() );
     }
   }
   

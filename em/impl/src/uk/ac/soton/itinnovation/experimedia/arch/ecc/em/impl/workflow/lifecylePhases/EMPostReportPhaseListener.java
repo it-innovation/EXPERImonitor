@@ -25,9 +25,10 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecylePhases;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
+
+import java.util.UUID;
 
 
 
@@ -38,7 +39,7 @@ public interface EMPostReportPhaseListener
   
   void onGotDataBatch( EMClientEx client, EMDataBatch batch );
   
-  void onDataBatchMeasurementSetCompleted( EMClientEx client, MeasurementSet ms );
+  void onDataBatchMeasurementSetCompleted( EMClientEx client, UUID measurementSetID );
  
   void onAllDataBatchesRequestComplete( EMClientEx client );
   

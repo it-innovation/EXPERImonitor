@@ -184,7 +184,7 @@ public class EMClientEx extends EMClient
     if ( batch == null ) throw new Exception( "Data batch is NULL" );
     
     // Check we're not already trying to batch this MeasurementSet
-    UUID msID = batch.getMeasurementSet().getUUID();
+    UUID msID = batch.getExpectedMeasurementSetID();
     
     if ( postReportOutstandingBatches.containsKey( batch.getID()) )
       throw new Exception( "Client is already waiting to batch measurement set: " + msID.toString() );

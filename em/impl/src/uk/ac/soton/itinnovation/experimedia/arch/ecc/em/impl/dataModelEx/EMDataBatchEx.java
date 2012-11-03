@@ -27,6 +27,7 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMDataBatch;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
 
 import java.util.*;
 
@@ -35,42 +36,37 @@ import java.util.*;
 
 public class EMDataBatchEx extends EMDataBatch
 {
-  public EMDataBatchEx( MeasurementSet mSet, Date expStart, int numOfExpMeasures )
+  
+  public EMDataBatchEx( UUID msID, Date expStart, int numOfExpMeasures )
   {
     super();
     
     batchID                  = UUID.randomUUID();
-    measurementSet           = mSet;
+    expectedMeasurementSetID = msID;
     expectedStartStamp       = expStart;
     expectedMeasurementCount = numOfExpMeasures;
   }
   
-  public EMDataBatchEx( EMDataBatch batch, boolean useSourceMSet )
+  public EMDataBatchEx( EMDataBatchEx batch, boolean copyReportData )
   {
     super();
     
     batchID                  = batch.getID();
-    measurementSet           = useSourceMSet ? batch.getMeasurementSet()
-                                             : new MeasurementSet( measurementSet, true ); 
-                                                  
+    expectedMeasurementSetID = batch.getExpectedMeasurementSetID();
     expectedStartStamp       = batch.getCopyOfExpectedDataStart();
     expectedMeasurementCount = batch.getExpectedMeasurementCount();
+    
+    if ( copyReportData )
+    {
+      Report srcReport = batch.getBatchReport();
+      if ( srcReport != null )
+        batchReport = new Report( srcReport );
+    }
   }
   
   public void resetStartDate( Date startDate )
   { expectedStartStamp = startDate; }
   
-  public void resetActualData()
-  {
-    actualMeasurementCount = 0;
-    actualStartStamp       = null;
-    actualStopStamp        = null;
-  }
- 
-  public void setActualMeasureInfo( int count, Date start, Date stop )
-  {
-    actualMeasurementCount = count;
-    actualStartStamp       = start;
-    actualStopStamp        = stop;
-  }
+  public void resetReportData()
+  { batchReport = null; }
 }

@@ -174,98 +174,121 @@ public class EMPostReportPhase extends AbstractEMLCPhase
   {
     if ( phaseActive )
     {
-      EMClientEx client = getClient( senderID );
-      boolean notifyClientAllBatchesDone = false;
+      EMClientEx client            = getClient( senderID );
+      boolean notifyOfClientMSDone = false;
       
       if ( client != null && populatedBatch != null )
       {
-        // Check data ID matches the batch we expected
-        UUID popBatchID             = populatedBatch.getID();
-        EMDataBatch clientDataBatch = client.getCurrentDataBatch();
+        EMDataBatchEx currExpectedClientBatch = (EMDataBatchEx) client.getCurrentDataBatch();
         
+        // Get the basic information from this batch and check it's OK
+        UUID popBatchID  = populatedBatch.getID();
+        Report popReport = populatedBatch.getBatchReport();
+                
         // If this is the batch we expected, see if we need any more data
-        if ( popBatchID.equals(clientDataBatch.getID()) )
+        if ( popBatchID.equals(currExpectedClientBatch.getID()) )
         {
-          // Create a copy of the in-coming populated data and find out exactly
-          // what measurements we really have
-          EMDataBatchEx popBatchEx = new EMDataBatchEx( populatedBatch, true );
-          
-          // Find out exactly what measurements we actually have...
-          MeasurementSet popMS = popBatchEx.getMeasurementSet();
-          Set<Measurement> popMeasures = popMS.getMeasurements();
-          int receivedCount = popMeasures.size();
-          
-          batchDateTree.clear();
-          Iterator<Measurement> mIt = popMeasures.iterator();
-          while ( mIt.hasNext() )
-          {
-            Measurement m = mIt.next();
-            batchDateTree.put( m.getTimeStamp(), m );
-          }
-          
-          // If we received less than a full data batch, assume there is no more
-          // data for this MeasurementSet, so send remaining data and then try
-          // another MeasurementSet
-          if ( receivedCount < clientDataBatch.getExpectedMeasurementCount() )
-          {
-            // Notify we have some data (if we actually do)
-            if ( receivedCount > 0 )
+          if ( popReport != null ) // Assume we have some data
+          {    
+            // Take a look at the current data to see what we need to do with it;
+            // Either a) we've got less (or zero) than we expected, in which case
+            // the current MeasurementSet is considered 'complete' or b) we've got
+            // as much data as we expected in this batch, so ask for some more
+            int receivedCount = popReport.getNumberOfMeasurements();
+
+            if ( receivedCount < currExpectedClientBatch.getExpectedMeasurementCount() )
             {
-              popBatchEx.setActualMeasureInfo( receivedCount, 
-                                               batchDateTree.firstKey(), 
-                                               batchDateTree.lastKey() );
-              
-              phaseListener.onGotDataBatch( client, popBatchEx );
-            }
-            
-            // Notify we've completed a MeasurementSet
-            phaseListener.onDataBatchMeasurementSetCompleted( client, popMS );
-            
-            // Now go for another MeasurementSet, if one is waiting...
-            UUID nextMSID = client.iterateNextMSForBatching();
-            if ( nextMSID != null )
-            {
-              EMDataBatch nextBatch = client.getCurrentDataBatch();
-              client.getPostReportInterface().requestDataBatch( nextBatch );
+              // Notify we have some data (if we actually do)
+              if ( receivedCount > 0 )
+                phaseListener.onGotDataBatch( client, populatedBatch );
+
+              // Flag to notify we've completed a MeasurementSet
+              notifyOfClientMSDone = true;
             }
             else 
-              notifyClientAllBatchesDone = true; //... otherwise, we're all done!
-          }
-          else 
-          {            
-            // We're going to ignore the very last measurement, as we'll use it
-            // as the basis for the first measurement of the next batch in this series
-            NavigableSet<Date> dateNav = batchDateTree.navigableKeySet();
-            Iterator<Date> lastIt = dateNav.descendingIterator();
-            
-            Date lastStamp  = lastIt.next(); // Last date stamp
-            Date penulStamp = lastIt.next(); // Penultimate date stamp
-            
-            Measurement lastMeasure = batchDateTree.get( lastStamp );
-            popMeasures.remove( lastMeasure ); // Don't send this last measurement
-            
-            popBatchEx.setActualMeasureInfo( receivedCount -1, 
-                                             batchDateTree.firstKey(), 
-                                             penulStamp );
-            
-            // Send the data we have (minus the last measure)
-            phaseListener.onGotDataBatch( client, popBatchEx );
+            {
+              // We're not going to send the last measurement - it will be used
+              // as the basis for start of the next batch. So modified the report
+              // by removing the very last measurement
+              Date lastStamp = popReport.getToDate();
+              amendReportMinusOne( popReport );
 
-            // Get the next lot
-            EMDataBatchEx clientDBX = (EMDataBatchEx) clientDataBatch;
-            clientDBX.resetStartDate( lastStamp );
-            client.getPostReportInterface().requestDataBatch( clientDataBatch );
+              // Send the data we have (minus the last measure)
+              phaseListener.onGotDataBatch( client, populatedBatch );
+
+              // Get the next lot
+              EMDataBatchEx clientDBX = (EMDataBatchEx) currExpectedClientBatch;
+              clientDBX.resetStartDate( lastStamp );
+              clientDBX.resetReportData();
+              client.getPostReportInterface().requestDataBatch( currExpectedClientBatch );
+            }
           }
+          else
+            notifyOfClientMSDone = true; // (Report was NULL, so assume no data)
+          
         }
-        else // If this isn't the data we expected, save it, but complain as well
+        else // If this isn't the data we expected, save it (if data exists), but complain as well
         {
-          phaseListener.onGotDataBatch( client, populatedBatch );
-          phaseLogger.warn( "Got an unexpected batch report: " + populatedBatch.getID().toString() );
+          if ( popReport != null )
+          {
+            phaseListener.onGotDataBatch( client, populatedBatch );
+            phaseLogger.warn( "Got an unexpected batch report: " + populatedBatch.getID().toString() );
+          }
+          else
+            phaseLogger.warn( "Got an unexpected batch report (with no data): " + populatedBatch.getID().toString() );
         }
       }
       
-      if ( notifyClientAllBatchesDone ) 
-        phaseListener.onAllDataBatchesRequestComplete( client );
+      // Notify of completion events if required
+      if ( notifyOfClientMSDone )
+      {
+        phaseListener.onDataBatchMeasurementSetCompleted( client, 
+                                                          populatedBatch.getExpectedMeasurementSetID() );
+        
+        // Now try to go for another MeasurementSet, if one is waiting...
+        UUID nextMSID = client.iterateNextMSForBatching();
+        if ( nextMSID != null )
+        {
+          EMDataBatch nextBatch = client.getCurrentDataBatch();
+          client.getPostReportInterface().requestDataBatch( nextBatch );
+        }
+        else //... otherwise, notify that we're all done!
+          phaseListener.onAllDataBatchesRequestComplete( client );
+      }
+    }
+  }
+  
+  // Private methods -----------------------------------------------------------
+  private void amendReportMinusOne( Report popRepOUT )
+  {
+    // We're going to clip the very last measurement away by first ordering
+    // all measurements, then removing the last and finally updating the report
+    // to reflect the changes
+    batchDateTree.clear();
+    
+    if ( popRepOUT.getNumberOfMeasurements() > 1 )
+    {
+      Set<Measurement> popMeasures = popRepOUT.getMeasurementSet().getMeasurements();
+      Iterator<Measurement> mIt = popMeasures.iterator();
+      while ( mIt.hasNext() )
+      {
+        Measurement m = mIt.next();
+        batchDateTree.put( m.getTimeStamp(), m );
+      }
+
+      // Find the last and penultimate measurements
+      NavigableSet<Date> dateNav = batchDateTree.navigableKeySet();
+      Iterator<Date> lastIt = dateNav.descendingIterator();
+      Date lastStamp  = lastIt.next(); // Last date stamp
+      Date penulStamp = lastIt.next(); // Penultimate date stamp
+
+      // Remove the very last one
+      Measurement lastMeasure = batchDateTree.get( lastStamp );
+      popMeasures.remove( lastMeasure ); // Don't send this last measurement
+
+      // Update the report to reflect the decrement
+      popRepOUT.setToDate( penulStamp );
+      popRepOUT.setNumberOfMeasurements( popRepOUT.getNumberOfMeasurements() -1 );
     }
   }
 }

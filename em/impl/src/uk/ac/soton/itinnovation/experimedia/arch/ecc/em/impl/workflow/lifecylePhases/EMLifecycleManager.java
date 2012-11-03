@@ -281,7 +281,7 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
     if ( targetReport == null ) throw new Exception( "Cannot get correct report for this batch request" );
     
     // Create a new batch for this MeasurementSet
-    EMDataBatchEx newBatch = new EMDataBatchEx( targetReport.getMeasurementSet(),
+    EMDataBatchEx newBatch = new EMDataBatchEx( measurementSetID,
                                                 targetReport.getFromDate(),
                                                 batchRequestSize );
     
@@ -324,7 +324,7 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
       Report report = summary.getReport( msIDIt.next() );
       if ( report != null && report.getNumberOfMeasurements() > 0 )
       {
-        EMDataBatchEx newBatch = new EMDataBatchEx( report.getMeasurementSet(),
+        EMDataBatchEx newBatch = new EMDataBatchEx( report.getMeasurementSet().getUUID(),
                                                     report.getFromDate(),
                                                     batchRequestSize );
         
@@ -509,9 +509,10 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   }
   
   @Override
-  public void onDataBatchMeasurementSetCompleted( EMClientEx client, MeasurementSet ms )
+  public void onDataBatchMeasurementSetCompleted( EMClientEx client,
+                                                  UUID measurementSetID )
   {
-    lifecycleListener.onDataBatchMeasurementSetCompleted( client, ms );
+    lifecycleListener.onDataBatchMeasurementSetCompleted( client, measurementSetID );
   }
   
   @Override

@@ -369,7 +369,7 @@ public class ECCHeadlessClient implements EMIAdapterListener
                 // Ask the EDM for the summary report (but without actual measurements)
                 try
                 {
-                    Report report = edmReportDAO.getReportForAllMeasurements(msID, false); // No measurements
+                    Report report = edmReportDAO.getReportForAllMeasurements( msID, false ); // No measurements
                     summaryOUT.addReport( report );
                 }
                 catch ( Exception e )
@@ -406,22 +406,23 @@ public class ECCHeadlessClient implements EMIAdapterListener
     @Override
     public void onPopulateDataBatch( EMDataBatch batchOUT )
     {
-        if ( edmAgentOK )
-        {
-            UUID msID = batchOUT.getID();
-            
+        // If we have been storing metrics using the EDM & Scheduler, get some
+        // previously unsent data
+        UUID msID = batchOUT.getID();
+      
+        if ( edmAgentOK && schedulerOK )
             try
             {
-                Report batchRep = edmReportDAO.getReportForUnsyncedMeasurementsFromDate( msID, 
+                Report edmBatch = edmReportDAO.getReportForUnsyncedMeasurementsFromDate( msID, 
                                                                                          batchOUT.getCopyOfExpectedDataStart(),
                                                                                          batchOUT.getExpectedMeasurementCount(),
                                                                                          true );
-                batchOUT.setMeasurementSet( batchRep.getMeasurementSet() );
+                batchOUT.setBatchReport( edmBatch );
             }
             catch( Exception e )
             { clientLogger.error( "Could not get batch report for MeasurementSet " + msID.toString()); }
             
-        }
+        
         // No EDM means we don't have any persistence, so do nothing (effectively
         // returning an empty data batch)
     }
