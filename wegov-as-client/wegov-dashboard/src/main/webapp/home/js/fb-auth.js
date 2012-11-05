@@ -7,23 +7,25 @@
 //var clientSecret = '0b011a189219a025db7967eaab2325fb';
 
 // settings for localhost
-var appId = '275750059166570';
-var clientSecret = '50567d250f129665e3e5c875c623689f';
+//var appId = '275750059166570';
+//var clientSecret = '50567d250f129665e3e5c875c623689f';
+var appId = '197483306942353';
+var clientSecret = 'aaac5731761ddfd2c7dd0fa5335ebd1e';
 
 function fbLoad(callback) {
-	console.log("Loading Facebook functions");
-	window.fbAsyncInit = function() {
-		console.log("Facebook functions loaded");
-		fbInit(callback);
-	};
+    console.log("Loading Facebook functions");
+    window.fbAsyncInit = function() {
+            console.log("Facebook functions loaded");
+            fbInit(callback);
+    };
 
-	(function() {
-		var e = document.createElement('script');
-		e.async = true;
-		e.src = document.location.protocol
-		+ '//connect.facebook.net/en_US/all.js';
-		document.getElementById('fb-root').appendChild(e);
-	}());
+    (function() {
+            var e = document.createElement('script');
+            e.async = true;
+            e.src = document.location.protocol
+            + '//connect.facebook.net/en_US/all.js';
+            document.getElementById('fb-root').appendChild(e);
+    }());
 }
 
 function fbInit(callback) {
@@ -37,10 +39,10 @@ function fbInit(callback) {
 	});
 	
 	if (callback) {
-		callback();
+            callback();
 	}
 	else {
-		console.log("WARNING: no callback for fbLoad/fbInit defined");
+            console.log("WARNING: no callback for fbLoad/fbInit defined");
 	}
 }
 
@@ -91,7 +93,7 @@ function updateWidgetStatus(html) {
 		var myContainer = args[0];
 		var widget = args[1];
 		var statusDiv = myContainer.find(".groupPostsStatus, .groupPostCommentsStatus");
-		console.log("statusDiv: " + statusDiv);
+		console.log(statusDiv);
 		statusDiv.html(html);
 	}
 	else {
@@ -107,10 +109,10 @@ function fbGetLoginStatus() {
 		return;
 	}
 	gettingFbLoginStatus = true;
-	console.log("Calling FB.getLoginStatus");
 	fbLoginStatusChanged("CHECKING_LOGIN_STATUS");
 	
-	FB.getLoginStatus(fbLoginStatusCallback);
+	console.log("Calling FB.getLoginStatus");
+	FB.getLoginStatus(fbLoginStatusCallback, true);
 	//FB.Event.subscribe('auth.statusChange', fbLoginStatusCallback);
 
 

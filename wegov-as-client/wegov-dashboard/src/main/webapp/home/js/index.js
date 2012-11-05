@@ -386,134 +386,134 @@ function loadWidgets(loadFB) {
 }
 
 function loadWidgetsFbReady() {
-	console.log("Loading widgets");
-  $("#widgets").empty();
-  $("#widgets").append("<p>Loading widgets, please wait...</p>");
-
-  $.getJSON("/home/widgets/getVisibleWidgetsForDefaultWidgetSet/do.json",
-  {}, function(data) {
-    console.log(data);
-    //				console.log(data.sort(compareWidgets));
-    var widgetType;
+    console.log("Loading widgets");
     $("#widgets").empty();
-    $("#widgets").append("<div class=\"column ui-sortable\" id=\"columnleft\">");
-    $("#widgets").append("<div class=\"column ui-sortable\" id=\"columnmid\">");
-    $("#widgets").append("<div class=\"column ui-sortable\" id=\"columnright\">");
-    $("#widgets").append("<div class=\"clearfix\"></div>");
+    $("#widgets").append("<p>Loading widgets, please wait...</p>");
 
-    $.each(data.sort(compareWidgets), function(index, widget) {
-      //					console.log(widget);
-      widgetType = widget["type"];
+    $.getJSON("/home/widgets/getVisibleWidgetsForDefaultWidgetSet/do.json",
+    {}, function(data) {
+        console.log(data);
+        //				console.log(data.sort(compareWidgets));
+        var widgetType;
+        $("#widgets").empty();
+        $("#widgets").append("<div class=\"column ui-sortable\" id=\"columnleft\">");
+        $("#widgets").append("<div class=\"column ui-sortable\" id=\"columnmid\">");
+        $("#widgets").append("<div class=\"column ui-sortable\" id=\"columnright\">");
+        $("#widgets").append("<div class=\"clearfix\"></div>");
 
-      if (widgetType == "location") {
-		getCurrentLocation(function() {
-			addLocationMap(widget);
-		});
-      } else if (widgetType == "userroles") {
-        //addUserRolesWidget(widget);
-        addAnalysisUsingStoredPostData(widget);
-      }
-      else if (widgetType == "retweets") {
-        addLineAnalysisWidget(widget);
-      }
-      else if (widgetType == "twitterLocal") {
-        //addTwitter3PostsByLocationContainingTerm(widget, lat, lon, 20, "recent");
-		getCurrentLocation(function() {
-			addTwitter3PostsContainingTerm(widget, "recent", currLocation["lat"], currLocation["lon"], 5, currLocation["locationAddress"]);
-		});
-      }
-      else if (widgetType == "peerindex") {
-        addPeerindexWidget(widget);
-      }
-      else if (widgetType == "addmorewidgets") {
-        addMoreWidgetsWidget(widget);
-      }
-      else if (widgetType == "allactivities") {
-        addActivitiesWidget("all", widget);
-      }
-      else if (widgetType == "groupposts") {
-        addGroupPostsWidget(widget);
-      }
-      else if (widgetType == "groupposttopicanalysis") {
-        addGroupPostTopicAnalysisWidget(widget);
-      }
-      else if (widgetType == "grouppostcomments") {
-        addGroupPostCommentsWidget(widget);
-      }
-      /*
+        $.each(data.sort(compareWidgets), function(index, widget) {
+            //					console.log(widget);
+            widgetType = widget["type"];
+
+            if (widgetType == "location") {
+                getCurrentLocation(function() {
+                    addLocationMap(widget);
+                });
+            } else if (widgetType == "userroles") {
+                //addUserRolesWidget(widget);
+                addAnalysisUsingStoredPostData(widget);
+            }
+            else if (widgetType == "retweets") {
+                addLineAnalysisWidget(widget);
+            }
+            else if (widgetType == "twitterLocal") {
+                //addTwitter3PostsByLocationContainingTerm(widget, lat, lon, 20, "recent");
+                getCurrentLocation(function() {
+                    addTwitter3PostsContainingTerm(widget, "recent", currLocation["lat"], currLocation["lon"], 5, currLocation["locationAddress"]);
+                });
+            }
+            else if (widgetType == "peerindex") {
+                addPeerindexWidget(widget);
+            }
+            else if (widgetType == "addmorewidgets") {
+                addMoreWidgetsWidget(widget);
+            }
+            else if (widgetType == "allactivities") {
+                addActivitiesWidget("all", widget);
+            }
+            else if (widgetType == "groupposts") {
+                addGroupPostsWidget(widget);
+            }
+            else if (widgetType == "groupposttopicanalysis") {
+                addGroupPostTopicAnalysisWidget(widget);
+            }
+            else if (widgetType == "grouppostcomments") {
+                addGroupPostCommentsWidget(widget);
+            }
+            /*
 					else if (widgetType == "latestgroupposttopicanalysis") {
 						addLatestGroupPostTopicAnalysisWidget(widget);
 					}
 */
-      else if (widgetType == "trending") {
-        addTrendingWidget(widget);
-      }
-      else if (widgetType == "roleforterm") {
-        //addRoleForTermWidget(widget);
-        addAnalysisUsingStoredPostData(widget);
-      }
-      else if (widgetType == "twitterbasic") {
-        addTwitter3PostsContainingTerm(widget, "recent");
-      }
-      else if (widgetType == "topics_from_database") {
-        addAnalysisUsingStoredPostData(widget);
-      }
+            else if (widgetType == "trending") {
+                addTrendingWidget(widget);
+            }
+            else if (widgetType == "roleforterm") {
+                //addRoleForTermWidget(widget);
+                addAnalysisUsingStoredPostData(widget);
+            }
+            else if (widgetType == "twitterbasic") {
+                addTwitter3PostsContainingTerm(widget, "recent");
+            }
+            else if (widgetType == "topics_from_database") {
+                addAnalysisUsingStoredPostData(widget);
+            }
 
-      else {
-      //addEmptyWidget(widget);
-      }
+            else {
+            //addEmptyWidget(widget);
+            }
+        });
+
+        // Make widgets
+        $( ".column" ).sortable({
+            connectWith: ".column",
+            cursor: 'move',
+            revert: true,
+            start: function(event, ui) {
+                $(".column").css("padding-bottom", "50px");
+            },
+            stop: function(event, ui) {
+                $(".column").css("padding-bottom", "10px");
+            }
+        //					update: function(event, ui) {
+        //						var columnName = $(this).attr('id');
+        //						console.log("Updating db now, column: " + columnName);
+        //						var newOrder = $(this).sortable('toArray').toString();
+        //						console.log(newOrder);
+        //						$.get("/home/widgets/updateWidgetPositions/do.json", {columnName:columnName, newOrder:newOrder});
+        //					}
+        });
+
+        $( ".column" ).bind("sortupdate", function(event, ui){
+            var columnName = $(this).attr('id');
+            console.log("Updating db now, column: " + columnName);
+            var newOrder = $(this).sortable('toArray').toString();
+            console.log(newOrder);
+            $.get("/home/widgets/updateWidgetPositions/do.json", {
+                columnName:columnName,
+                newOrder:newOrder
+            });
+        });
+
+        $( ".portlet" ).addClass( "ui-widget ui-widget-content ui-helper-clearfix ui-corner-all" )
+        .find( ".portlet-header" )
+        .addClass( "ui-widget-header ui-corner-all" )
+        .prepend( "<span class='ui-icon ui-icon-minusthick'></span>")
+        .end()
+        .find( ".portlet-content" );
+
+        $( ".portlet-header .ui-icon" ).click(function() {
+            $( this ).toggleClass( "ui-icon-minusthick" ).toggleClass( "ui-icon-plusthick" );
+            $( this ).parents( ".portlet:first" ).find( ".portlet-content" ).toggle();
+        });
+
+        $( ".column" ).disableSelection();
+
+    //				$.each($( ".column" ), function(counter, column){
+    //					console.log("Initial order for column " + $(this).attr('id') + ": " + $(this).sortable('toArray').toString());
+    //				});
+
     });
-
-    // Make widgets
-    $( ".column" ).sortable({
-      connectWith: ".column",
-      cursor: 'move',
-      revert: true,
-      start: function(event, ui) {
-        $(".column").css("padding-bottom", "50px");
-      },
-      stop: function(event, ui) {
-        $(".column").css("padding-bottom", "10px");
-      }
-    //					update: function(event, ui) {
-    //						var columnName = $(this).attr('id');
-    //						console.log("Updating db now, column: " + columnName);
-    //						var newOrder = $(this).sortable('toArray').toString();
-    //						console.log(newOrder);
-    //						$.get("/home/widgets/updateWidgetPositions/do.json", {columnName:columnName, newOrder:newOrder});
-    //					}
-    });
-
-    $( ".column" ).bind("sortupdate", function(event, ui){
-      var columnName = $(this).attr('id');
-      console.log("Updating db now, column: " + columnName);
-      var newOrder = $(this).sortable('toArray').toString();
-      console.log(newOrder);
-      $.get("/home/widgets/updateWidgetPositions/do.json", {
-        columnName:columnName,
-        newOrder:newOrder
-      });
-    });
-
-    $( ".portlet" ).addClass( "ui-widget ui-widget-content ui-helper-clearfix ui-corner-all" )
-    .find( ".portlet-header" )
-    .addClass( "ui-widget-header ui-corner-all" )
-    .prepend( "<span class='ui-icon ui-icon-minusthick'></span>")
-    .end()
-    .find( ".portlet-content" );
-
-    $( ".portlet-header .ui-icon" ).click(function() {
-      $( this ).toggleClass( "ui-icon-minusthick" ).toggleClass( "ui-icon-plusthick" );
-      $( this ).parents( ".portlet:first" ).find( ".portlet-content" ).toggle();
-    });
-
-    $( ".column" ).disableSelection();
-
-  //				$.each($( ".column" ), function(counter, column){
-  //					console.log("Initial order for column " + $(this).attr('id') + ": " + $(this).sortable('toArray').toString());
-  //				});
-
-  });
 }
 
 function initWidget(widget) {
@@ -558,7 +558,7 @@ function addLineAnalysisWidget(widget) {
       markerOptions : {
         style : 'square'
       }
-    } ],
+    } ]
   });
 
 }
@@ -1139,29 +1139,29 @@ function showWidgetDefaultSettingsWindowSJT(myDiv, widget) {
   colourSelectDiv.append("<p>Widget Colour</p>");
 
   var colourData = [
-  { text: "AntiqueWhite", value: "#FAEBD7" },
-  { text: "Aquamarine",  value: "#7FFFD4" },
-  { text: "Azure", value: "#F0FFFF" },
-  { text: "Beige", value: "#F5F5DC" },
-  { text: "BlanchedAlmond", value: "#FFEBCD" },
-  { text: "CornflowerBlue", value: "#6495ED" },
-  { text: "DarkTurquoise", value: "#00CED1" },
-  { text: "FloralWhite", value: "#FFFAF0" },
-  { text: "Gold", value: "#FFD700" },
-  { text: "GoldenRod", value: "#DAA520" },
-  { text: "GreenYellow", value: "#ADFF2F" },
-  { text: "Khaki", value: "#F0E68C" },
-  { text: "LightSalmon", value: "#FFA07A" },
-  { text: "LightSteelBlue", value: "#B0C4DE" },
-  { text: "MediumAquaMarine", value: "#66CDAA" },
-  { text: "MediumTurquoise", value: "#48D1CC" },
-  { text: "NavajoWhite", value: "#FFDEAD" },
-  { text: "Orange", value: "#FFA500" },
-  { text: "Orchid", value: "#DA70D6" },
-  { text: "PaleGreen", value: "#98FB98" },
-  { text: "PaleTurquoise", value: "#AFEEEE" },
-  { text: "Pink", value: "#FFC0CB" },
-  { text: "Yellow", value: "#FFFF00" }
+  {text: "AntiqueWhite", value: "#FAEBD7"},
+  {text: "Aquamarine",  value: "#7FFFD4"},
+  {text: "Azure", value: "#F0FFFF"},
+  {text: "Beige", value: "#F5F5DC"},
+  {text: "BlanchedAlmond", value: "#FFEBCD"},
+  {text: "CornflowerBlue", value: "#6495ED"},
+  {text: "DarkTurquoise", value: "#00CED1"},
+  {text: "FloralWhite", value: "#FFFAF0"},
+  {text: "Gold", value: "#FFD700"},
+  {text: "GoldenRod", value: "#DAA520"},
+  {text: "GreenYellow", value: "#ADFF2F"},
+  {text: "Khaki", value: "#F0E68C"},
+  {text: "LightSalmon", value: "#FFA07A"},
+  {text: "LightSteelBlue", value: "#B0C4DE"},
+  {text: "MediumAquaMarine", value: "#66CDAA"},
+  {text: "MediumTurquoise", value: "#48D1CC"},
+  {text: "NavajoWhite", value: "#FFDEAD"},
+  {text: "Orange", value: "#FFA500"},
+  {text: "Orchid", value: "#DA70D6"},
+  {text: "PaleGreen", value: "#98FB98"},
+  {text: "PaleTurquoise", value: "#AFEEEE"},
+  {text: "Pink", value: "#FFC0CB"},
+  {text: "Yellow", value: "#FFFF00"}
   ];
   var colourSelectionDropDown = $(
     "<input id=\"colourChooser_"  + widgetId + "\" value = \"red\"/>"
