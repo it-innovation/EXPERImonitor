@@ -71,8 +71,7 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
 
         try {
             expDataMgr = EDMInterfaceFactory.getMonitoringEDM();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             logger.error("Could not create EDM");
         }
     }
@@ -184,9 +183,9 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
         if (lifecycleManager.isLifecycleStarted()) {
             throw new Exception("Lifecycle has already started");
         }
-        
+
 //        createExperiment();
-        
+
         // Save a list of connected clients and properties to the database?
         // Then just use that list instead of talking to EM?
 
@@ -252,11 +251,44 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
     @Override
     public void goToNextPhase() throws Exception {
         if (lifecycleManager.isWindingCurrentPhaseDown()) {
-            throw new Exception("Current winding down phase: "
-                    + lifecycleManager.getCurrentPhase().toString());
+            throw new Exception("Current winding down phase: " + lifecycleManager.getCurrentPhase().toString());
         }
 
         lifecycleManager.iterateLifecycle();
+
+        EMPhase currentPhase = lifecycleManager.getCurrentPhase();
+        logger.debug("Current phase is: [" + currentPhase.getIndex() + "] " + currentPhase.name());
+
+        // If it's live monitoring phase, start pulling data from clients
+        if (currentPhase.getIndex() == 3) {
+            logger.debug("STARTING POLL");
+            
+            // Get all clients for the live monitoring phase
+            Set<EMClient> currentPhaseClients = getCurrentPhaseClients();
+
+            Iterator<EMClient> currentPhaseClientsIterator = currentPhaseClients.iterator();
+            
+            EMClient currentPhaseClient;
+            while (currentPhaseClientsIterator.hasNext()) {
+                currentPhaseClient = currentPhaseClientsIterator.next();
+
+                // Get only ones that are not busy generating data
+                if (!currentPhaseClient.isPullingMetricData()) {
+                    try {
+                        logger.debug("Polling client: [" + currentPhaseClient.getID() + "] " + currentPhaseClient.getName());
+                        pullAllMetrics(currentPhaseClient);
+                        
+                    } catch (Exception e) {
+                        logger.error("Could not pull metrics for client: "
+                                + currentPhaseClient.getName() + ", because: "
+                                + e.getMessage());
+                    }
+                } else {
+                    logger.debug("Client " + currentPhaseClient.getName()
+                            + " is busy generating metrics");
+                }
+            }
+        }
     }
 
     @Override
@@ -276,9 +308,10 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
             throw e;
         }
     }
-    
+
     @Override
-    public void pullAllMetrics( EMClient client ) throws Exception {
+    public void pullAllMetrics(EMClient client) throws Exception {
+        logger.debug("pullAllMetrics: [" + client.getID() + "] " + client.getName());
         try {
             lifecycleManager.tryPullAllMetrics(client);
         } catch (Exception e) {
@@ -375,10 +408,10 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
 
                 if (measurementSet != null) {
 
-                    logger.debug("Received metric data from client: " + client.getName() + " [" + client.getID().toString() +
-                            "], report [" + report.getUUID().toString() + "] with " + report.getNumberOfMeasurements() +
-                            " measurement(s) for measurement set [" + measurementSet.getUUID().toString() + "]");
-                    
+                    logger.debug("Received metric data from client: " + client.getName() + " [" + client.getID().toString()
+                            + "], report [" + report.getUUID().toString() + "] with " + report.getNumberOfMeasurements()
+                            + " measurement(s) for measurement set [" + measurementSet.getUUID().toString() + "]");
+
                     String measurementSetUuid = measurementSet.getUUID().toString();
                     DashboardMeasurementSet theDashboardMeasurementSet;
                     if (reportedMeasurementSets.containsKey(measurementSetUuid)) {
@@ -386,10 +419,10 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
                         theDashboardMeasurementSet = reportedMeasurementSets.get(measurementSetUuid);
                     } else {
                         logger.debug("Tracking NEW measurementSet: [" + measurementSetUuid + "] ");
-                        theDashboardMeasurementSet = new DashboardMeasurementSet(measurementSetUuid);  
+                        theDashboardMeasurementSet = new DashboardMeasurementSet(measurementSetUuid);
                         reportedMeasurementSets.put(measurementSetUuid, theDashboardMeasurementSet);
                     }
-                    
+
                     Set<Measurement> measurements = measurementSet.getMeasurements();
 
                     if (measurements != null) {
@@ -402,13 +435,13 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
                             while (it.hasNext()) {
                                 measurement = (Measurement) it.next();
                                 measurementUUID = measurement.getUUID().toString();
-                                measurementTimestamp = measurement.getTimeStamp();                                
+                                measurementTimestamp = measurement.getTimeStamp();
                                 measurementValue = measurement.getValue();
-                                
+
                                 logger.debug("Measurement " + measurementsCounter + ": [" + measurementUUID + "] " + measurementTimestamp.toString() + " - " + measurementValue);
-                                
+
                                 theDashboardMeasurementSet.addMeasurement(measurementUUID, new DataPoint(measurementTimestamp.getTime(), measurementValue, measurementUUID));
-                                
+
                                 measurementsCounter++;
 
                             }
@@ -444,16 +477,19 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
             if (summary != null) {
 
                 Set<UUID> summaryMeasurementSetIds = summary.getReportedMeasurementSetIDs();
-                
+
                 if (!summaryMeasurementSetIds.isEmpty()) {
-                
-                    logger.debug("Received summary report from client: " + client.getName() + " [" + client.getID().toString() +
-                            "], with " + summaryMeasurementSetIds.size() + " measurement set(s)");
-                    
+
+                    logger.debug("Received summary report from client: " + client.getName() + " [" + client.getID().toString()
+                            + "], with " + summaryMeasurementSetIds.size() + " measurement set(s)");
+
                     // Go through all reported measurement sets:
-                    String summarySetUuid; Report tempSummaryReport; Set<Measurement> measurements; MeasurementSet tempMeasurementSet;
+                    String summarySetUuid;
+                    Report tempSummaryReport;
+                    Set<Measurement> measurements;
+                    MeasurementSet tempMeasurementSet;
                     for (UUID measurementSetUuid : summaryMeasurementSetIds) {
-                        
+
                         summarySetUuid = measurementSetUuid.toString();
 
                         DashboardSummarySet theDashboardSummarySet;
@@ -462,18 +498,18 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
                             theDashboardSummarySet = summarySets.get(summarySetUuid);
                         } else {
                             logger.debug("Tracking NEW summarySet: [" + summarySetUuid + "] ");
-                            theDashboardSummarySet = new DashboardSummarySet(summarySetUuid);  
+                            theDashboardSummarySet = new DashboardSummarySet(summarySetUuid);
                             summarySets.put(summarySetUuid, theDashboardSummarySet);
                         }
-                        
+
                         tempSummaryReport = summary.getReport(measurementSetUuid);
-                        
+
                         if (tempSummaryReport != null) {
-                            
+
                             tempMeasurementSet = tempSummaryReport.getMeasurementSet();
-                            
+
                             if (tempMeasurementSet != null) {
-                                
+
                                 measurements = tempMeasurementSet.getMeasurements();
 
                                 if (measurements != null) {
@@ -486,7 +522,7 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
                                         while (it.hasNext()) {
                                             measurement = (Measurement) it.next();
                                             measurementUUID = measurement.getUUID().toString();
-                                            measurementTimestamp = measurement.getTimeStamp();                                
+                                            measurementTimestamp = measurement.getTimeStamp();
                                             measurementValue = measurement.getValue();
 
                                             logger.debug("Summary measurement " + measurementsCounter + ": [" + measurementUUID + "] " + measurementTimestamp.toString() + " - " + measurementValue);
@@ -496,7 +532,7 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
                                             measurementsCounter++;
 
                                         }
-            //                            mainView.addLogText(client.getName() + " got metric data: " + measurements.iterator().next().getValue());
+                                        //                            mainView.addLogText(client.getName() + " got metric data: " + measurements.iterator().next().getValue());
                                     } else {
                                         logger.error("Measurements for measurement set [" + tempMeasurementSet.getUUID().toString() + "] are EMPTY");
                                     }
@@ -504,25 +540,25 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
                                     logger.error("Measurements for measurement set [" + tempMeasurementSet.getUUID().toString() + "] are NULL");
                                 }
                             } else {
-                                logger.error("Measurement set for summary report [" + tempSummaryReport.getUUID().toString() + "] is NULL");                            
+                                logger.error("Measurement set for summary report [" + tempSummaryReport.getUUID().toString() + "] is NULL");
                             }
                         } else {
-                            logger.error("Summary report for measurement set [" + measurementSetUuid + "] is NULL");                            
+                            logger.error("Summary report for measurement set [" + measurementSetUuid + "] is NULL");
                         }
-                    } 
-                
+                    }
+
                 } else {
                     logger.error("Received EMPTY summary report (no measurement set UUIDs) from client: " + client.getName() + " [" + client.getID().toString() + "]");
                 }
-                
+
             } else {
                 logger.error("Received NULL summary report from client: " + client.getName() + " [" + client.getID().toString() + "]");
             }
         } else {
             logger.error("Received summary report from NULL client!");
-        }        
-        
-        
+        }
+
+
 //        Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
 //
 //        while (listIt.hasNext()) {
