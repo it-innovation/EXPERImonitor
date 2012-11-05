@@ -37,41 +37,40 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EM
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMPhase;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMPostReportSummary;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared.EMIAdapterListener;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared.EMInterfaceAdapter;
 
 @Service
 public class EMClient implements EMIAdapterListener {
 
     private static final Logger clientLogger = Logger.getLogger(EMClient.class);
+    
     private AMQPBasicChannel amqpChannel;
-    private WeGovEMInterfaceAdapter emiAdapter;
+    private EMInterfaceAdapter emiAdapter;
     private String clientName;
     private UUID clientId;
-    private Entity entityBeingObserved;
-    private Attribute entityAttribute;
     private HashMap<UUID, MetricGenerator> metricGenerators = new HashMap<UUID, MetricGenerator>();
+    private HashMap<UUID, MeasurementSet> measurementSets = new HashMap<UUID, MeasurementSet>();
     private HashMap<UUID, Attribute> measurementSetsAndAttributes = new HashMap<UUID, Attribute>();
     private ArrayList<MeasurementSet> allMeasurementSets = new ArrayList<MeasurementSet>();
-    private Measurement firstMeasurement;
-    private Measurement currentMeasurement;
-    private String numWidgetsAttributeUuid = "";
     private boolean dataPushEnabled = false;
+    
     @Autowired
     @Qualifier("wegovLoginService")
     WegovLoginService loginService;
 
     public EMClient() {
-        clientLogger.debug("Creating new EM client...");
+        clientLogger.debug("Creating new WeGov 3.1 EM Client ...");
 
         // Have to call this here because it's better if this
         // class is initialized by Spring so all autowiring works
         // TODO: move config etc. to bean definition
         try {
-            this.start("127.0.0.1", UUID.fromString("00000000-0000-0000-0000-000000000000"), "WeGov 3.0 EM Client");
+            this.start("127.0.0.1", UUID.fromString("00000000-0000-0000-0000-000000000000"), "WeGov 3.1 EM Client");
         } catch (Throwable ex) {
-            throw new RuntimeException("Failed to start EM client", ex);
+            throw new RuntimeException("Failed to start new WeGov 3.1 EM Client", ex);
         }
 
-        clientLogger.debug("Successfully created new EM client");
+        clientLogger.debug("Successfully created new WeGov 3.1 EM Client");
     }
 
     public UUID getClientId() {
@@ -87,7 +86,10 @@ public class EMClient implements EMIAdapterListener {
         this.clientName = clientName;
         this.clientId = UUID.randomUUID();
 
-        clientLogger.debug("Starting EM client with rabbitServerIP: " + rabbitServerIP + ", expMonitorID: " + expMonitorID.toString() + ", clientName: " + clientName + ", clientId: " + clientId.toString() + "...");
+        clientLogger.debug("Starting EM client with rabbitServerIP: " + rabbitServerIP +
+                ", expMonitorID: " + expMonitorID.toString() +
+                ", clientName: " + clientName +
+                ", clientId: " + clientId.toString() + "...");
 
         AMQPConnectionFactory amqpFactory = new AMQPConnectionFactory();
         amqpFactory.setAMQPHostIPAddress(rabbitServerIP);
@@ -102,7 +104,7 @@ public class EMClient implements EMIAdapterListener {
         }
         clientLogger.debug("Successfully connected to AMQPHost");
 
-        emiAdapter = new WeGovEMInterfaceAdapter(this);
+        emiAdapter = new EMInterfaceAdapter(this);
 
         clientLogger.debug("Registering with EM...");
         try {
@@ -118,34 +120,69 @@ public class EMClient implements EMIAdapterListener {
         return clientId.toString();
     }
 
-    public void onEMConnectionResult(boolean connected) {
-
-        clientLogger.debug("onEMConnectionResult");
-
-        if (connected) {
-            clientLogger.debug("Connected to EM");
-        } else {
-            clientLogger.error("EM connection failure");
-            throw new RuntimeException("Failed to connected to EM");
-        }
-    }
-
     public void onPopulateMetricGeneratorInfo() {
 
         clientLogger.debug("onPopulateMetricGeneratorInfo");
 
+        // Create metric generator
         MetricGenerator mg = makeWegovMetricGenerator();
         metricGenerators.put(mg.getUUID(), mg);
 
+        // Report measurement sets
         HashSet<MetricGenerator> mgSet = new HashSet<MetricGenerator>();
         mgSet.addAll(metricGenerators.values());
         emiAdapter.setMetricGenerators(mgSet);
 
         clientLogger.debug("Returning generated metric generators:");
-        for (MetricGenerator tempMg : mgSet) {
-            clientLogger.debug("\t- " + tempMg.getUUID().toString() + ": " + tempMg.getName() + " (" + tempMg.getDescription() + ")");
+        // Populate measurement sets into separate map for pull methods
+        for (MetricGenerator theMg : mgSet) {
+            printMetricGenerator(theMg);
+            for (MetricGroup mGroup : theMg.getMetricGroups()) {
+                for (MeasurementSet mSet : mGroup.getMeasurementSets()) {
+                    measurementSets.put(mSet.getUUID(), mSet);
+                }
+            }
+        }
+
+//        for (MetricGenerator tempMg : mgSet) {
+//            clientLogger.debug("\t- " + tempMg.getUUID().toString() + ": " + tempMg.getName() + " (" + tempMg.getDescription() + ")");
+//        }
+    }
+    
+    private static void printMetricGenerator(MetricGenerator mg) {
+        pr(mg.getName() + " (" + mg.getDescription() + ") [" + mg.getUUID() + "]", 0);
+        Set<MeasurementSet> allMeasurementSets = new HashSet<MeasurementSet>();
+
+        for (MetricGroup mgroup : mg.getMetricGroups()) {
+            allMeasurementSets.addAll(mgroup.getMeasurementSets());
+        }
+
+        for (Entity e : mg.getEntities()) {
+            pr("Entity: " + e.getName() + " (" + e.getDescription() + ") [" + e.getUUID() + "]", 1);
+            for (Attribute a : e.getAttributes()) {
+                pr("Attribute: " + a.getName() + " (" + a.getDescription() + ") [" + a.getUUID() +"]", 2);
+
+                for (MeasurementSet ms : allMeasurementSets) {
+                    if (ms.getAttributeUUID().toString().equals(a.getUUID().toString())) {
+                        pr("Metric type: " + ms.getMetric().getMetricType() + ", unit: " + ms.getMetric().getUnit() + ", measurement set [" + ms.getUUID() +"]", 3);
+                    }
+                }
+            }
         }
     }
+    
+    private static void pr(Object o, int indent) {
+        String indentString = "";
+        for (int i = 0; i < indent; i++) {
+            indentString += "\t";
+        }
+
+        if (indent > 0) {
+            clientLogger.debug(indentString + "- " + o);
+        } else {
+            clientLogger.debug(o);
+        }
+    }    
 
     public void onSetupMetricGenerator(UUID generatorSetID, Boolean[] resultOUT) {
         clientLogger.debug("onSetupMetricGenerator, generatorSetID: " + generatorSetID.toString());
@@ -195,11 +232,31 @@ public class EMClient implements EMIAdapterListener {
     }
 
     public void onStopPushingMetricData() {
-        dataPushEnabled = false;
         clientLogger.debug("onStopPushingMetricData");
+        dataPushEnabled = false;
     }
 
     public void onPullMetric(UUID measurementSetID, Report reportOUT) {
+        clientLogger.debug("onPullMetric, measurementSetID: " + measurementSetID);
+        
+        // Check if we have that measurement set first
+        if (!measurementSets.containsKey(measurementSetID)) {
+            clientLogger.error("Requested measurement set [" + measurementSetID + "] does not exist.");
+            
+        } else {
+            
+            // Figure out what needs reporting            
+            MeasurementSet theMeasurementSet = measurementSets.get(measurementSetID);
+            Attribute theAttribute = measurementSetsAndAttributes.get(measurementSetID);
+            
+            int measurementSetIndex = allMeasurementSets.indexOf(theMeasurementSet);
+            
+            clientLogger.debug("Reporting measurement set with index: " + measurementSetIndex +
+                    ", attribute: " + theAttribute.getName() + " (" + theAttribute.getDescription() + ")");
+
+        }
+        
+/*        
 //        logger.debug("onPullMetric, measurementSetID: " + measurementSetID.toString());
 
         Iterator it = metricGenerators.keySet().iterator();
@@ -279,7 +336,7 @@ public class EMClient implements EMIAdapterListener {
             }
         }
 
-
+*/
     }
 
     private Measurement createTestMeasurementForMeasurementSet(MeasurementSet measurementSet) {
@@ -440,7 +497,6 @@ public class EMClient implements EMIAdapterListener {
         wegovUsersTotalNumWidgets.setEntityUUID(wegovUsers.getUUID());
         wegovUsers.addAttribute(wegovUsersTotalNumWidgets);
         addMetricToAttributeAndMetricGroup(wegovMetricGroup, wegovUsersTotalNumWidgets, MetricType.INTERVAL, new Unit("Widget"));
-        numWidgetsAttributeUuid = wegovUsersTotalNumWidgets.getUUID().toString();
 
         return theMetricGenerator;
     }
@@ -491,10 +547,11 @@ public class EMClient implements EMIAdapterListener {
     public void onEMConnectionResult(boolean connected, Experiment expInfo) {
         clientLogger.debug("onEMConnectionResult");
         if (connected) {
-            if (expInfo != null)
+            if (expInfo != null) {
                 clientLogger.debug("Connected to EM, linked to experiment: " + expInfo.getName());
-            else
+            } else {
                 clientLogger.error("Connected to EM, linked to NULL experiment");
+            }
         } else {
             clientLogger.error("Refused connection to EM");
         }
