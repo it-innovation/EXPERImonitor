@@ -272,14 +272,14 @@
                             <port>8080</port>
                             <maxIdleTime>6000000</maxIdleTime>
                         </connector>
-                        <connector implementation="org.mortbay.jetty.security.SslSocketConnector">
+<!--                        <connector implementation="org.mortbay.jetty.security.SslSocketConnector">
                             <port>8443</port>
                             <maxIdleTime>6000000</maxIdleTime>
-							<!-- <keystore>${project.build.directory}/wegov-ssl.keystore</keystore> -->
+							 <keystore>${project.build.directory}/wegov-ssl.keystore</keystore> 
                             <keystore>./wegov-dev-ssl.keystore</keystore>
                             <password>JPzQ8jTK694FL7bctqW3ypBhX</password>
                             <keyPassword>JPzQ8jTK694FL7bctqW3ypBhX</keyPassword>
-                        </connector>
+                        </connector>-->
                     </connectors>
                     <systemProperties>
                         <systemProperty>
