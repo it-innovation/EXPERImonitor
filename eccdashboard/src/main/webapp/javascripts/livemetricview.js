@@ -924,7 +924,7 @@ function showMetricGeneratorsWithPostReportData() {
 
             if (metricGenerators.length < 1) {
                 console.debug("No metric generators found, retrying in 2 seconds");
-                setTimeout(function(){showMetricGenerators()}, 2000);
+                setTimeout(function(){showMetricGeneratorsWithPostReportData()}, 2000);
             } else {
                 var mgObj;
                 var md = $(".metricgendetails");
@@ -1029,9 +1029,12 @@ function prepareTearDownPhase(actionButton) {
 
 function doTearDownPhase(actionButton, currentPhase){
     console.log('In TEAR-DOWN PHASE');
+    
     actionButton.text('Experiment finished');
     actionButton.addClass('alert');
     actionButton.unbind('click');
+
+    // Stop summary polling
 
     actionButton.click(function(e){
         e.preventDefault();
