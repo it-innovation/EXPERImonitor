@@ -44,7 +44,11 @@ public class EMClientEx extends EMClient
   private IEMPostReport     postFace;
   private IEMTearDown       tearDownFace;
  
+  // Internal Set-up stage support
   private ArrayList<UUID> generatorsToSetup;
+  
+  // Internal Post-report stage support
+  private UUID currentPostReportMSID;
  
   
   public EMClientEx( UUID id, String name )
@@ -164,11 +168,45 @@ public class EMClientEx extends EMClient
   public void setPostReportSummary( EMPostReportSummary report )
   { postReportSummary = report; }
   
-  public UUID getCurrentPostReportBatchID()
-  { return currentPostReportBatchID; }
+  public EMDataBatch getCurrentDataBatch()
+  {
+    EMDataBatch targetBatch = null;
+    
+    if ( currentPostReportMSID != null )
+      targetBatch = postReportOutstandingBatches.get( currentPostReportMSID );
+    
+    return targetBatch;
+  }
   
-  public void setCurrentPostReportBatchID( UUID batchID )
-  { currentPostReportBatchID = batchID; }
+  public void addDataForBatching( EMDataBatchEx batch ) throws Exception
+  {
+    // Safety first
+    if ( batch == null ) throw new Exception( "Data batch is NULL" );
+    
+    // Check we're not already trying to batch this MeasurementSet
+    UUID msID = batch.getExpectedMeasurementSetID();
+    
+    if ( postReportOutstandingBatches.containsKey( batch.getID()) )
+      throw new Exception( "Client is already waiting to batch measurement set: " + msID.toString() );
+    
+    postReportOutstandingBatches.put( msID, batch );
+  }
+  
+  public UUID iterateNextMSForBatching()
+  {
+    if ( currentPostReportMSID != null )
+      postReportOutstandingBatches.remove( currentPostReportMSID );
+    
+    currentPostReportMSID = null;
+    
+    if ( !postReportOutstandingBatches.isEmpty() )
+    {
+      Iterator<UUID> msIDIt = postReportOutstandingBatches.keySet().iterator();
+      currentPostReportMSID = msIDIt.next();
+    }
+    
+    return currentPostReportMSID;
+  }
   
   // Tear-down phase state -----------------------------------------------------
   public void setTearDownResult( boolean success )

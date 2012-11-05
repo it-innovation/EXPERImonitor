@@ -332,13 +332,21 @@ public class ECCClientController implements EMIAdapterListener,
     }
 
     @Override
-    public void onPopulateDataBatch( EMDataBatch batchOut )
+    public void onPopulateDataBatch( EMDataBatch batchOUT )
     {
         // We've only stored the first and the last measurements of a single
         // MeasurementSet, so just send that
-        MeasurementSet ms = batchOut.getMeasurementSet();
+        MeasurementSet ms = createMeasurementSetEmptySample();
         ms.addMeasurement( firstMeasurement );
         ms.addMeasurement( currentMeasurement );
+        
+        Report batchRep = new Report();
+        batchRep.setFromDate( firstMeasurement.getTimeStamp() );
+        batchRep.setToDate( currentMeasurement.getTimeStamp() );
+        batchRep.setMeasurementSet( ms );
+        batchRep.setNumberOfMeasurements( 2 );
+        
+        batchOUT.setBatchReport( batchRep );
     }
     
     @Override

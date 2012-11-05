@@ -25,8 +25,10 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
+
+import java.util.UUID;
 
 
 
@@ -41,6 +43,8 @@ public interface IEMLifecycleListener
   
   void onLifecyclePhaseCompleted( EMPhase phase );
   
+  void onNoFurtherLifecyclePhases();
+  
   void onFoundClientWithMetricGenerators( EMClient client );
   
   void onClientSetupResult( EMClient client, boolean success );
@@ -49,7 +53,11 @@ public interface IEMLifecycleListener
   
   void onGotSummaryReport( EMClient client, EMPostReportSummary summary );
   
-  void onGotDataBatch( EMClient client, EMDataBatch batch );  
+  void onGotDataBatch( EMClient client, EMDataBatch batch );
+  
+  void onDataBatchMeasurementSetCompleted( EMClient client, UUID measurementSetID );
+  
+  void onAllDataBatchesRequestComplete( EMClient client );
   
   void onClientTearDownResult( EMClient client, boolean success );
 }

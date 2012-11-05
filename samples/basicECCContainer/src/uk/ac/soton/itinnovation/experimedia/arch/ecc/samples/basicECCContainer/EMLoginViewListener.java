@@ -18,20 +18,19 @@
 // the software.
 //
 //      Created By :            Simon Crowle
-//      Created Date :          15-Aug-2012
-//      Created for Project :   EXPERIMEDIA
+//      Created Date :          01-Nov-2012
+//      Created for Project :   experimedia-arch-ecc-samples-basicECCContainer
 //
 /////////////////////////////////////////////////////////////////////////
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.basicECCContainer;
 
+import java.util.UUID;
 
 
 
-public class EMContainer
+
+public interface EMLoginViewListener
 {
-  public static void main( String args[] )
-  {
-    EMController ctrl = new EMController();
-  }
+  void onStartECC( String rabbitIP, UUID emID, boolean clearEDM );
 }

@@ -71,6 +71,15 @@ public interface IExperimentMonitor
   void openEntryPoint( String rabbitServerIP, UUID entryPointID ) throws Exception;
   
   /**
+   * Opens the door to clients wishing to connect to the EM; before this has been
+   * executed, the EM will not recognise client's attempts to connect.
+   * 
+   * @param emProps     - EM configuration properties for connection to the Rabbit Server
+   * @throws Exception  - Throws if properties are invalid or there is a connection problem
+   */
+  void openEntryPoint( Properties emProps ) throws Exception;
+  
+  /**
    * Use this method to get the set of all known connected clients.
    * 
    * @return - Set of EMClient instances.
@@ -183,15 +192,27 @@ public interface IExperimentMonitor
   void pullAllMetrics( EMClient client ) throws Exception;
   
   /**
-   * Requests a batch of report data from the client - see EMDataBatch for further
-   * information on requesting metric data batches.
+   * Requests batch data be gathered from the client for the MeasurementSet
+   * specified by the ID supplied.
    * 
-   * @param client     - Client from which the batched data is required.
-   * @param batch      - Description of the data batch required.
-   * @throws Exception - Throws if the parameters are invalid or if the EM is not
+   * @param client           - Client from which the batched data is required.
+   * @param measurementSetID - ID of the MeasurementSet to retrieve data from
+   * @throws Exception       - Throws if the parameters are invalid or if the EM is not
    * currently running a phase that is appropriate for requesting data batches.
    */
-  void requestDataBatch( EMClient client, EMDataBatch batch ) throws Exception;
+  void requestDataBatches( EMClient client, UUID measurementSetID ) throws Exception;
+  
+  /**
+   * Use this method to automate the retrieval of all missing data from the 
+   * connected client. Once all of the data has been retrieved, the 
+   * IEMLifecycleListener.onAllDataBatchesRequestComplete(..) method will be 
+   * called by the EM.
+   * 
+   * @param client      - Client from which the batches should be retrieved
+   * @throws Exception  - Throws if the client is either invalid or already busy
+   *                      generating data batches
+   */
+  void getAllDataBatches( EMClient client ) throws Exception;
   
   /**
    * Notifies the client of a time-out for the currently running phase.

@@ -730,7 +730,7 @@ public class PopulateDB
         Report report = new Report(UUID.randomUUID(), mSet, new Date(), new Date(timeStampFrom), new Date(timeStampTo), mSet.getMeasurements().size());
         
         try {
-            reportDAO.saveMeasurementsForReport(report);
+            reportDAO.saveMeasurements(report);
             log.info("Measurements saved successfully!");
         } catch (Exception ex) {
             log.error("Unable to save measurements: " + ex.getMessage(), ex);
