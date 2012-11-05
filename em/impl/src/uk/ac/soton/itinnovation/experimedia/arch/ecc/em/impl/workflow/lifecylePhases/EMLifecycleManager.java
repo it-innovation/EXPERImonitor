@@ -150,34 +150,41 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   {
     if ( currentPhase != EMPhase.eEMProtocolComplete && !lifecyclePhases.isEmpty() )
     {
-      // Stop current phase
+      // try to stop current phase
       AbstractEMLCPhase killPhase = lifecyclePhases.get( currentPhase );
       
-      if ( killPhase != null ) killPhase.hardStop();
+      if ( killPhase != null && killPhase.isActive() ) 
+        killPhase.hardStop();
       
+      // Find out what the next phase is
       currentPhase = currentPhase.nextPhase();
       
-      AbstractEMLCPhase lcPhase = lifecyclePhases.get( currentPhase );
-      if ( lcPhase != null )
-        try
-        { 
-          lcPhase.start();
-          
-          // Notify listener
-          lifecycleListener.onLifecyclePhaseStarted( lcPhase.getPhaseType() );
-        }
-        catch( Exception e ) 
-        {
-          String msg = "Could not start lifecycle phase: " + lcPhase.getPhaseType() + "\n"
-                     + "Life-cycle exception: " + e.getMessage();
-          
-          lmLogger.warn( msg );
-          
-          // Try the next phase automatically
-          lmLogger.info( "Trying next phase: " + currentPhase.nextPhase() );
-          
-          currentPhase = iterateLifecycle();
-        }
+      // If there are no more phases to execute, notify we're done
+      if ( currentPhase.equals(EMPhase.eEMProtocolComplete) )
+      {
+        lifecycleListener.onNoFurtherLifecyclePhases();
+      }
+      else // Otherwise, try the next phase
+      {
+        AbstractEMLCPhase lcPhase = lifecyclePhases.get( currentPhase );
+        if ( lcPhase != null )
+          try
+          { 
+            lcPhase.start();
+
+            // Notify listener
+            lifecycleListener.onLifecyclePhaseStarted( lcPhase.getPhaseType() );
+          }
+          catch( Exception e ) 
+          {
+            String msg = "Could not start lifecycle phase: " + lcPhase.getPhaseType() + "\n"
+                       + "Life-cycle exception: " + e.getMessage();
+
+            lmLogger.warn( msg );
+            lmLogger.info( "Trying next phase: " + currentPhase.nextPhase() );
+            currentPhase = iterateLifecycle();
+          }
+      }
     }
     
     return currentPhase;
@@ -185,32 +192,33 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   
   public void windCurrentPhaseDown()
   {
-    AbstractEMLCPhase windDownPhase = lifecyclePhases.get( currentPhase );
-    windingCurrPhaseDown            = false;
-    
-    if ( windDownPhase != null )
-      try 
-      {
-        windingCurrPhaseDown = true;
-        windDownPhase.controlledStop();
-      }
-      catch ( Exception e )
-      {
-        windingCurrPhaseDown = false;
-        String msg = "Did not wind-down this phase: " + windDownPhase.toString() + e.getMessage();
-        lmLogger.info( msg );
-        
-        try { windDownPhase.hardStop(); }
-        catch ( Exception hs )
-        { lmLogger.error( "Could not stop phase " + windDownPhase.toString() ); }
-      }
+    if ( !windingCurrPhaseDown )
+    {
+      AbstractEMLCPhase windDownPhase = lifecyclePhases.get( currentPhase );
+      if ( windDownPhase != null )
+        try 
+        {
+          windingCurrPhaseDown = true;
+          windDownPhase.controlledStop();
+        }
+        catch ( Exception e )
+        {
+          windingCurrPhaseDown = false;
+          String msg = "Did not wind-down this phase: " + windDownPhase.toString() + e.getMessage();
+          lmLogger.info( msg );
+
+          try { windDownPhase.hardStop(); }
+          catch ( Exception hs )
+          { lmLogger.error( "Could not stop phase " + windDownPhase.toString() ); }
+        }
+    }
+    else
+      lmLogger.warn( "Request to wind-down ignored: already winding current phase down" );
   }
   
   public void endLifecycle()
   {
     currentPhase = EMPhase.eEMUnknownPhase;
-    
-    //TODO: Tidy up
   }
   
   public void tryPullMetric( EMClient client, UUID measurementSetID ) throws Exception

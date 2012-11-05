@@ -38,7 +38,6 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClien
 
 import java.util.*;
 import org.apache.log4j.Logger;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
 
 
 
@@ -180,20 +179,24 @@ public class ExperimentMonitor implements IExperimentMonitor,
   public void stopCurrentPhase() throws Exception
   {
     if ( lifecycleManager.isWindingCurrentPhaseDown() )
+    {
       throw new Exception( "Could not stop as currently winding down phase: " 
                            + lifecycleManager.getCurrentPhase().toString() );
-    
-    lifecycleManager.windCurrentPhaseDown();
+    }
+    else
+      lifecycleManager.windCurrentPhaseDown();
   }
   
   @Override
   public void goToNextPhase() throws Exception
   {
     if ( lifecycleManager.isWindingCurrentPhaseDown() )
+    {
       throw new Exception( "Current winding down phase: " 
                            + lifecycleManager.getCurrentPhase().toString() );
-    
-    lifecycleManager.iterateLifecycle();
+    }
+    else
+      lifecycleManager.iterateLifecycle();
   }
   
   @Override
@@ -276,6 +279,15 @@ public class ExperimentMonitor implements IExperimentMonitor,
     
     while ( listIt.hasNext() )
     { listIt.next().onLifecyclePhaseCompleted( phase ); }
+  }
+  
+  @Override
+  public void onNoFurtherLifecyclePhases()
+  {
+    Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
+    
+    while ( listIt.hasNext() )
+    { listIt.next().onNoFurtherLifecyclePhases(); }
   }
   
   @Override

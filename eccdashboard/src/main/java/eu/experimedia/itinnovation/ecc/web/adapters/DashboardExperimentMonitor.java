@@ -348,6 +348,15 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
             listIt.next().onLifecyclePhaseCompleted(phase);
         }
     }
+    
+    @Override
+    public void onNoFurtherLifecyclePhases() {
+        Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
+
+        while (listIt.hasNext()) {
+            listIt.next().onNoFurtherLifecyclePhases();
+        }
+    }
 
     @Override
     public void onFoundClientWithMetricGenerators(EMClient client) {

@@ -108,7 +108,7 @@ public class EMController implements IEMLifecycleListener
   
   @Override
   public void onLifecyclePhaseStarted( EMPhase phase )
-  {
+  {    
     // Manage modal behaviour of the view
     switch ( phase )
     {
@@ -139,7 +139,7 @@ public class EMController implements IEMLifecycleListener
   
   @Override
   public void onLifecyclePhaseCompleted( EMPhase phase )
-  {
+  {    
     mainView.setNextPhaseValue( expMonitor.getNextPhase().toString() );
     
     if ( waitingToStartNextPhase )
@@ -152,6 +152,13 @@ public class EMController implements IEMLifecycleListener
     }
     else
       mainView.enableTimeOuts( false );
+  }
+  
+  @Override
+  public void onNoFurtherLifecyclePhases()
+  {
+    mainView.setMonitoringPhaseValue( "Experiment process complete",
+                                      "No further phases" );
   }
   
   @Override
