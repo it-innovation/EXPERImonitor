@@ -25,11 +25,11 @@
     </bean>
         
         
-    <bean id="experimentMonitorService" class="eu.experimedia.itinnovation.scc.web.services.ExperimentMonitorService">
+<!--    <bean id="experimentMonitorService" class="eu.experimedia.itinnovation.scc.web.services.ExperimentMonitorService">
     </bean>        
 
     <bean id="experimentHelper" class="eu.experimedia.itinnovation.scc.web.helpers.ExperimentHelper">
-    </bean>         
+    </bean>         -->
 
     <bean id="EMClient" class="eu.experimedia.itinnovation.scc.web.adapters.EMClient">
     </bean>         
