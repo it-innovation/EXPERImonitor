@@ -23,6 +23,7 @@
 /////////////////////////////////////////////////////////////////////////
 package eu.wegov.coordinator;
 
+import eu.wegov.coordinator.dao.data.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -39,35 +40,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import net.sf.json.JSONObject;
-import net.sf.json.JSONSerializer;
-
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
-import eu.wegov.coordinator.dao.data.WegovAnalysisKmiBuzzTopPost;
-import eu.wegov.coordinator.dao.data.WegovAnalysisKmiBuzzTopUser;
-import eu.wegov.coordinator.dao.data.WegovAnalysisKmiDa;
-import eu.wegov.coordinator.dao.data.WegovAnalysisKmiDaMostActiveUser;
-import eu.wegov.coordinator.dao.data.WegovAnalysisKoblenzMessage;
-import eu.wegov.coordinator.dao.data.WegovAnalysisKoblenzTopic;
-import eu.wegov.coordinator.dao.data.WegovAnalysisKoblenzUser;
-import eu.wegov.coordinator.dao.data.WegovAnalysisKoblenzViewpoint;
-import eu.wegov.coordinator.dao.data.WegovFollower;
-import eu.wegov.coordinator.dao.data.WegovFriend;
-import eu.wegov.coordinator.dao.data.WegovGroupAdmin;
-import eu.wegov.coordinator.dao.data.WegovGroupMember;
-import eu.wegov.coordinator.dao.data.WegovGroupPost;
-import eu.wegov.coordinator.dao.data.WegovLike;
-import eu.wegov.coordinator.dao.data.WegovMentionedUser;
-import eu.wegov.coordinator.dao.data.WegovPostComment;
-import eu.wegov.coordinator.dao.data.WegovPostItem;
-import eu.wegov.coordinator.dao.data.WegovPostTag;
-import eu.wegov.coordinator.dao.data.WegovSNS;
-import eu.wegov.coordinator.dao.data.WegovSnsGroup;
-import eu.wegov.coordinator.dao.data.WegovSnsUserAccount;
-import eu.wegov.coordinator.dao.data.WegovTag;
-import eu.wegov.coordinator.dao.data.WegovWidgetDataAsJson;
 import eu.wegov.coordinator.dao.data.twitter.Hashtag;
 import eu.wegov.coordinator.dao.data.twitter.Tweet;
 import eu.wegov.coordinator.dao.data.twitter.Url;
@@ -1684,6 +1658,8 @@ public class Coordinator {
         dataSchema.getTable(new WegovAnalysisKmiBuzzTopPost());
 
         dataSchema.getTable(new WegovWidgetDataAsJson());
+        
+        dataSchema.getTable(new ExperimediaTopicOpinion());
 
         logger.debug("Database data tables setup complete.");
 
