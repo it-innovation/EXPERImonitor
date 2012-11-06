@@ -305,7 +305,51 @@ public class ExperimentMonitorController {
             return null;
         }
     }
+    
+    Comparator<DataPoint> comparator = new Comparator<DataPoint>(){
 
+        public int compare(DataPoint t, DataPoint t1) {
+            Date tdate = new Date(t.getTime());
+            Date t1date = new Date(t1.getTime());
+            return tdate.compareTo(t1date);
+        }
+        
+    };
+
+
+    @RequestMapping(method = RequestMethod.POST, value = "/gettextformeasurementset/do.json")
+    public @ResponseBody DataPoint[] getTextForMeasurementSet(@RequestBody final String inputData) throws Throwable {
+
+        logger.debug("Returning text for a measurement set. Input data: " + inputData);
+
+        try {
+
+            JSONObject inputDataAsJSON = (JSONObject) JSONSerializer.toJSON(inputData);
+            String measurementSetUuid = inputDataAsJSON.getString("measurementSetUuid");
+
+            LinkedHashMap<String, DataPoint> data = emService.getMeasurementsForMeasurementSet(measurementSetUuid);
+            logger.debug("Measurement set [" + measurementSetUuid + "] has " + data.size() + " data point(s)");
+
+            DataPoint[] result = new DataPoint[data.keySet().size()];
+
+            Iterator it = data.keySet().iterator();
+            String measurementUUID;
+            int counter = 0;
+            while(it.hasNext()) {
+                measurementUUID = (String) it.next();
+                result[counter] = data.get(measurementUUID);
+                counter++;
+            }
+            
+            Arrays.sort(result, comparator);
+
+            return result;
+        } catch (Throwable ex) {
+            logger.error("Failed to return text for a measurement set.");
+            ex.printStackTrace();
+            return null;
+        }
+    }
 
     @RequestMapping(method = RequestMethod.POST, value = "/getmeasurementsformeasurementset/do.json")
     public @ResponseBody DataPoint[] getMeasurementsForMeasurementSet(@RequestBody final String inputData) throws Throwable {

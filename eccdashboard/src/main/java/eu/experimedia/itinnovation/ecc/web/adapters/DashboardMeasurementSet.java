@@ -33,12 +33,13 @@ public class DashboardMeasurementSet {
     private final Logger logger = Logger.getLogger(DashboardMeasurementSet.class);
     
     private String UUID;
-    private LinkedHashMap<String, DataPoint> measurements = new LinkedHashMap<String, DataPoint>(){
-        @Override
-        protected boolean removeEldestEntry(Entry eldest) {
-                return size() > 5; // This is the map size. New entries remove eldest entries
-        }        
-    };
+    private LinkedHashMap<String, DataPoint> measurements = new LinkedHashMap<String, DataPoint>();
+//    {
+//        @Override
+//        protected boolean removeEldestEntry(Entry eldest) {
+//                return size() > 5; // This is the map size. New entries remove eldest entries
+//        }        
+//    };
 
     public DashboardMeasurementSet(String UUID) {
         this.UUID = UUID;
