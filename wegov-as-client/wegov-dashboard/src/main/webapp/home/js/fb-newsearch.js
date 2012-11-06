@@ -137,29 +137,30 @@ function setFbGroupInfo(response, callback) {
 	var fbGroupDetails = $('<div id="fbGroupDetails"></div>').appendTo("#fbGroupInfo");
 	fbGroupDetails.append('<p id="fbGroupInfoName" class="fbGroupInfoName">' + response.name + '</p>');
 	//fbGroupDetails.append('<p>' + response.type + '</p>');
-	fbGroupDetails.append('<a href=' + response.link + ' target="_blank">' + decodeURI(response.link)+ '</a>');
+        var pageLink = "https://www.facebook.com/events/" + response.id;
+	fbGroupDetails.append('<a href=' + pageLink + ' target="_blank">' + decodeURI(pageLink)+ '</a>');
 
 	var fbGroupImage = $('<div id="fbGroupImage"></div>').appendTo("#fbGroupInfo");
 
-	if (response.picture) {
-		fbGroupImage.append('<img src="' + response.picture + '" />');
+	if (response.metadata.connections.picture) {
+		fbGroupImage.append('<img src="' + response.metadata.connections.picture + '" />');
 	}
-	else {
-		console.log("WARNING: response.picture is undefined. Tring new API call...");
-		var url = response.id + "/picture";
-		console.log(url);
-		FB.api(url, function(resp) {
-			console.log(resp);
-			if (resp) {
-				if (resp.indexOf("http") == 0) {
-					fbGroupImage.append('<img src="' +resp + '" />');
-				}
-				else {
-					console.log("Cannot get picture from response");
-				}
-			}
-		});
-	}
+//	else {
+//		console.log("WARNING: response.picture is undefined. Trying new API call...");
+//		var url = response.id + "/picture";
+//		console.log(url);
+//		FB.api(url, function(resp) {
+//			console.log(resp);
+//			if (resp) {
+//				if (resp.indexOf("http") == 0) {
+//					fbGroupImage.append('<img src="' +resp + '" />');
+//				}
+//				else {
+//					console.log("Cannot get picture from response");
+//				}
+//			}
+//		});
+//	}
 
 	$('<div class="clearfix"></div>').appendTo("#fbGroupInfo");
 

@@ -23,6 +23,9 @@
 /////////////////////////////////////////////////////////////////////////
 package eu.experimedia.itinnovation.scc.web.adapters;
 
+import eu.wegov.coordinator.Coordinator;
+import eu.wegov.coordinator.dao.data.ExperimediaTopicOpinion;
+import eu.wegov.helper.CoordinatorHelper;
 import eu.wegov.web.security.WegovLoginService;
 import java.util.*;
 import org.apache.log4j.Logger;
@@ -57,6 +60,10 @@ public class EMClient implements EMIAdapterListener {
     @Autowired
     @Qualifier("wegovLoginService")
     WegovLoginService loginService;
+    
+    @Autowired
+    @Qualifier("coordinatorHelper")
+    private transient CoordinatorHelper helper;    
 
     public EMClient() {
         clientLogger.debug("Creating new WeGov 3.1 EM Client ...");
@@ -247,12 +254,58 @@ public class EMClient implements EMIAdapterListener {
             
             // Figure out what needs reporting            
             MeasurementSet theMeasurementSet = measurementSets.get(measurementSetID);
+            theMeasurementSet.setMeasurements(new HashSet<Measurement>());
             Attribute theAttribute = measurementSetsAndAttributes.get(measurementSetID);
             
             int measurementSetIndex = allMeasurementSets.indexOf(theMeasurementSet);
             
             clientLogger.debug("Reporting measurement set with index: " + measurementSetIndex +
                     ", attribute: " + theAttribute.getName() + " (" + theAttribute.getDescription() + ")");
+            
+            
+            try {
+
+                Coordinator coordinator = helper.getStaticCoordinator();
+                
+                ArrayList<ExperimediaTopicOpinion> topics = coordinator.getDataSchema().getAll(new ExperimediaTopicOpinion());
+                
+                if (topics.isEmpty()) {
+                    reportOUT.setNumberOfMeasurements(0);            
+                    reportOUT.setMeasurementSet(theMeasurementSet);
+                    clientLogger.debug("Nothing to report");
+                    
+                } else {
+                    Measurement theMeasurement = new Measurement();
+                    ExperimediaTopicOpinion topicDao;
+                    int numTopics = topics.size();
+                    clientLogger.debug("Reporting " + numTopics + " measurements");
+                    for (int k = 0; k < numTopics; k++) {                        
+                        topicDao = topics.get(k);
+                        
+                        clientLogger.debug("\t" + topicDao.getTimeCollectedAsTimestamp() + " - " + topicDao.getKeyTerms());
+                        
+                        theMeasurement.setMeasurementSetUUID(theMeasurementSet.getUUID());
+                        theMeasurement.setTimeStamp(topicDao.getTimeCollectedAsTimestamp());                    
+                        theMeasurement.setValue(topicDao.getKeyTerms());
+                        
+                        theMeasurementSet.addMeasurement(theMeasurement);
+                        theMeasurement = new Measurement();
+                    }
+                    
+                    reportOUT.setNumberOfMeasurements(numTopics);            
+                    reportOUT.setMeasurementSet(theMeasurementSet);
+                    
+                }
+                
+
+                Date date = new Date();
+                reportOUT.setReportDate(date);
+                reportOUT.setFromDate(date);
+                reportOUT.setToDate(date);
+                
+            } catch (Throwable ex) {
+                throw new RuntimeException("Failed to read metric values from the WeGov database", ex);
+            }
 
         }
         
@@ -388,115 +441,123 @@ public class EMClient implements EMIAdapterListener {
         twitterSchladming.setDescription("People found in Schladming Twitter search for keyword Schladming");
         theMetricGenerator.addEntity(twitterSchladming);
 
-        // NUMBER OF PEOPLE
-        Attribute twitterSchladmingNumPeople = new Attribute();
-        twitterSchladmingNumPeople.setName("Number of people");
-        twitterSchladmingNumPeople.setDescription("Number of people who tweeted about Schladming");
-        twitterSchladmingNumPeople.setEntityUUID(twitterSchladming.getUUID());
-        twitterSchladming.addAttribute(twitterSchladmingNumPeople);
-        addMetricToAttributeAndMetricGroup(wegovMetricGroup, twitterSchladmingNumPeople, MetricType.INTERVAL, new Unit("Person"));
+//        // NUMBER OF PEOPLE
+//        Attribute twitterSchladmingNumPeople = new Attribute();
+//        twitterSchladmingNumPeople.setName("Number of people");
+//        twitterSchladmingNumPeople.setDescription("Number of people who tweeted about Schladming");
+//        twitterSchladmingNumPeople.setEntityUUID(twitterSchladming.getUUID());
+//        twitterSchladming.addAttribute(twitterSchladmingNumPeople);
+//        addMetricToAttributeAndMetricGroup(wegovMetricGroup, twitterSchladmingNumPeople, MetricType.INTERVAL, new Unit("Person"));
+//
+//        // NUMBER OF TWEETS
+//        Attribute twitterSchladmingNumTweets = new Attribute();
+//        twitterSchladmingNumTweets.setName("Number of tweets");
+//        twitterSchladmingNumTweets.setDescription("Number of tweets collected about Schladming");
+//        twitterSchladmingNumTweets.setEntityUUID(twitterSchladming.getUUID());
+//        twitterSchladming.addAttribute(twitterSchladmingNumTweets);
+//        addMetricToAttributeAndMetricGroup(wegovMetricGroup, twitterSchladmingNumTweets, MetricType.INTERVAL, new Unit("Tweet"));
+//
+//        // AVERAGE NUMBER OF TWEETS PER MINUTE
+//        Attribute twitterSchladmingAverageNumTweetsperMinute = new Attribute();
+//        twitterSchladmingAverageNumTweetsperMinute.setName("Average number of tweets per minute");
+//        twitterSchladmingAverageNumTweetsperMinute.setDescription("Average number of tweets collected about Schladming per minute");
+//        twitterSchladmingAverageNumTweetsperMinute.setEntityUUID(twitterSchladming.getUUID());
+//        twitterSchladming.addAttribute(twitterSchladmingAverageNumTweetsperMinute);
+//        addMetricToAttributeAndMetricGroup(wegovMetricGroup, twitterSchladmingAverageNumTweetsperMinute, MetricType.RATIO, new Unit("Tweets per minute"));
 
-        // NUMBER OF TWEETS
-        Attribute twitterSchladmingNumTweets = new Attribute();
-        twitterSchladmingNumTweets.setName("Number of tweets");
-        twitterSchladmingNumTweets.setDescription("Number of tweets collected about Schladming");
-        twitterSchladmingNumTweets.setEntityUUID(twitterSchladming.getUUID());
-        twitterSchladming.addAttribute(twitterSchladmingNumTweets);
-        addMetricToAttributeAndMetricGroup(wegovMetricGroup, twitterSchladmingNumTweets, MetricType.INTERVAL, new Unit("Tweet"));
-
-        // AVERAGE NUMBER OF TWEETS PER MINUTE
-        Attribute twitterSchladmingAverageNumTweetsperMinute = new Attribute();
-        twitterSchladmingAverageNumTweetsperMinute.setName("Average number of tweets per minute");
-        twitterSchladmingAverageNumTweetsperMinute.setDescription("Average number of tweets collected about Schladming per minute");
-        twitterSchladmingAverageNumTweetsperMinute.setEntityUUID(twitterSchladming.getUUID());
-        twitterSchladming.addAttribute(twitterSchladmingAverageNumTweetsperMinute);
-        addMetricToAttributeAndMetricGroup(wegovMetricGroup, twitterSchladmingAverageNumTweetsperMinute, MetricType.RATIO, new Unit("Tweets per minute"));
-
-        // TOPIC ANALYSIS TOPIC #1
+        // TOPIC ANALYSIS TOPICS
         Attribute twitterSchladmingDiscussionTopic1 = new Attribute();
-        twitterSchladmingDiscussionTopic1.setName("Topic analysis #1");
-        twitterSchladmingDiscussionTopic1.setDescription("First topic of discussion on Twitter about Schladming");
+        twitterSchladmingDiscussionTopic1.setName("Topic analysis topics");
+        twitterSchladmingDiscussionTopic1.setDescription("Topic of discussion in a Facebook group");
         twitterSchladmingDiscussionTopic1.setEntityUUID(twitterSchladming.getUUID());
         twitterSchladming.addAttribute(twitterSchladmingDiscussionTopic1);
         addMetricToAttributeAndMetricGroup(wegovMetricGroup, twitterSchladmingDiscussionTopic1, MetricType.NOMINAL, new Unit("Keyword"));
-
-        // TOPIC ANALYSIS TOPIC #2
-        Attribute twitterSchladmingDiscussionTopic2 = new Attribute();
-        twitterSchladmingDiscussionTopic2.setName("Topic analysis #2");
-        twitterSchladmingDiscussionTopic2.setDescription("Second topic of discussion on Twitter about Schladming");
-        twitterSchladmingDiscussionTopic2.setEntityUUID(twitterSchladming.getUUID());
-        twitterSchladming.addAttribute(twitterSchladmingDiscussionTopic2);
-        addMetricToAttributeAndMetricGroup(wegovMetricGroup, twitterSchladmingDiscussionTopic2, MetricType.NOMINAL, new Unit("Keyword"));
-
-        // TOPIC ANALYSIS TOPIC #3
-        Attribute twitterSchladmingDiscussionTopic3 = new Attribute();
-        twitterSchladmingDiscussionTopic3.setName("Topic analysis #3");
-        twitterSchladmingDiscussionTopic3.setDescription("Third topic of discussion on Twitter about Schladming");
-        twitterSchladmingDiscussionTopic3.setEntityUUID(twitterSchladming.getUUID());
-        twitterSchladming.addAttribute(twitterSchladmingDiscussionTopic3);
-        addMetricToAttributeAndMetricGroup(wegovMetricGroup, twitterSchladmingDiscussionTopic3, MetricType.NOMINAL, new Unit("Keyword"));
-
-        // BROADCASTERS
-        Attribute twitterSchladmingBroadcasterRoleNumPeople = new Attribute();
-        twitterSchladmingBroadcasterRoleNumPeople.setName("Broadcaster role representation");
-        twitterSchladmingBroadcasterRoleNumPeople.setDescription("Number of people identified as Broadcaster by Role analysis");
-        twitterSchladmingBroadcasterRoleNumPeople.setEntityUUID(twitterSchladming.getUUID());
-        twitterSchladming.addAttribute(twitterSchladmingBroadcasterRoleNumPeople);
-        addMetricToAttributeAndMetricGroup(wegovMetricGroup, twitterSchladmingBroadcasterRoleNumPeople, MetricType.INTERVAL, new Unit("Person"));
-
-        // DAILY USERS
-        Attribute twitterSchladmingDailyUserRoleNumPeople = new Attribute();
-        twitterSchladmingDailyUserRoleNumPeople.setName("Daily user role representation");
-        twitterSchladmingDailyUserRoleNumPeople.setDescription("Number of people identified as Daily users by Role analysis");
-        twitterSchladmingDailyUserRoleNumPeople.setEntityUUID(twitterSchladming.getUUID());
-        twitterSchladming.addAttribute(twitterSchladmingDailyUserRoleNumPeople);
-        addMetricToAttributeAndMetricGroup(wegovMetricGroup, twitterSchladmingDailyUserRoleNumPeople, MetricType.INTERVAL, new Unit("Person"));
-
-        // INFORMATION SEEKERS
-        Attribute twitterSchladmingInformationSeekerRoleNumPeople = new Attribute();
-        twitterSchladmingInformationSeekerRoleNumPeople.setName("Information Seeker role representation");
-        twitterSchladmingInformationSeekerRoleNumPeople.setDescription("Number of people identified as Information seekers by Role analysis");
-        twitterSchladmingInformationSeekerRoleNumPeople.setEntityUUID(twitterSchladming.getUUID());
-        twitterSchladming.addAttribute(twitterSchladmingInformationSeekerRoleNumPeople);
-        addMetricToAttributeAndMetricGroup(wegovMetricGroup, twitterSchladmingInformationSeekerRoleNumPeople, MetricType.INTERVAL, new Unit("Person"));
-
-        // INFORMATION SOURCES
-        Attribute twitterSchladmingInformationSourceRoleNumPeople = new Attribute();
-        twitterSchladmingInformationSourceRoleNumPeople.setName("Information Source role representation");
-        twitterSchladmingInformationSourceRoleNumPeople.setDescription("Number of people identified as Information sources by Role analysis");
-        twitterSchladmingInformationSourceRoleNumPeople.setEntityUUID(twitterSchladming.getUUID());
-        twitterSchladming.addAttribute(twitterSchladmingInformationSourceRoleNumPeople);
-        addMetricToAttributeAndMetricGroup(wegovMetricGroup, twitterSchladmingInformationSourceRoleNumPeople, MetricType.INTERVAL, new Unit("Person"));
-
-        // RARE POSTERS
-        Attribute twitterSchladmingRarePosterRoleNumPeople = new Attribute();
-        twitterSchladmingRarePosterRoleNumPeople.setName("Rare Poster role representation");
-        twitterSchladmingRarePosterRoleNumPeople.setDescription("Number of people identified as Rare posters by Role analysis");
-        twitterSchladmingRarePosterRoleNumPeople.setEntityUUID(twitterSchladming.getUUID());
-        twitterSchladming.addAttribute(twitterSchladmingRarePosterRoleNumPeople);
-        addMetricToAttributeAndMetricGroup(wegovMetricGroup, twitterSchladmingRarePosterRoleNumPeople, MetricType.INTERVAL, new Unit("Person"));
-
-
-        Entity wegovUsers = new Entity();
-        wegovUsers.setName("Users of Wegov Dashboard");
-        wegovUsers.setDescription("People using Wegov Dashboard");
-        theMetricGenerator.addEntity(wegovUsers);
-
-        // NUMBER OF PEOPLE USING WEGOV
-        Attribute wegovUsersNumPeople = new Attribute();
-        wegovUsersNumPeople.setName("Number of people");
-        wegovUsersNumPeople.setDescription("Number of people who are using Wegov dashboard");
-        wegovUsersNumPeople.setEntityUUID(wegovUsers.getUUID());
-        wegovUsers.addAttribute(wegovUsersNumPeople);
-        addMetricToAttributeAndMetricGroup(wegovMetricGroup, wegovUsersNumPeople, MetricType.INTERVAL, new Unit("Person"));
-
-        // TOTAL NUMBER OF WIDGETS
-        Attribute wegovUsersTotalNumWidgets = new Attribute();
-        wegovUsersTotalNumWidgets.setName("Number of widgets");
-        wegovUsersTotalNumWidgets.setDescription("Total number of widgets created by people who are using Wegov dashboard");
-        wegovUsersTotalNumWidgets.setEntityUUID(wegovUsers.getUUID());
-        wegovUsers.addAttribute(wegovUsersTotalNumWidgets);
-        addMetricToAttributeAndMetricGroup(wegovMetricGroup, wegovUsersTotalNumWidgets, MetricType.INTERVAL, new Unit("Widget"));
+        
+//        // TOPIC ANALYSIS TOPIC #1
+//        Attribute twitterSchladmingDiscussionTopic1 = new Attribute();
+//        twitterSchladmingDiscussionTopic1.setName("Topic analysis #1");
+//        twitterSchladmingDiscussionTopic1.setDescription("First topic of discussion on Twitter about Schladming");
+//        twitterSchladmingDiscussionTopic1.setEntityUUID(twitterSchladming.getUUID());
+//        twitterSchladming.addAttribute(twitterSchladmingDiscussionTopic1);
+//        addMetricToAttributeAndMetricGroup(wegovMetricGroup, twitterSchladmingDiscussionTopic1, MetricType.NOMINAL, new Unit("Keyword"));
+//
+//        // TOPIC ANALYSIS TOPIC #2
+//        Attribute twitterSchladmingDiscussionTopic2 = new Attribute();
+//        twitterSchladmingDiscussionTopic2.setName("Topic analysis #2");
+//        twitterSchladmingDiscussionTopic2.setDescription("Second topic of discussion on Twitter about Schladming");
+//        twitterSchladmingDiscussionTopic2.setEntityUUID(twitterSchladming.getUUID());
+//        twitterSchladming.addAttribute(twitterSchladmingDiscussionTopic2);
+//        addMetricToAttributeAndMetricGroup(wegovMetricGroup, twitterSchladmingDiscussionTopic2, MetricType.NOMINAL, new Unit("Keyword"));
+//
+//        // TOPIC ANALYSIS TOPIC #3
+//        Attribute twitterSchladmingDiscussionTopic3 = new Attribute();
+//        twitterSchladmingDiscussionTopic3.setName("Topic analysis #3");
+//        twitterSchladmingDiscussionTopic3.setDescription("Third topic of discussion on Twitter about Schladming");
+//        twitterSchladmingDiscussionTopic3.setEntityUUID(twitterSchladming.getUUID());
+//        twitterSchladming.addAttribute(twitterSchladmingDiscussionTopic3);
+//        addMetricToAttributeAndMetricGroup(wegovMetricGroup, twitterSchladmingDiscussionTopic3, MetricType.NOMINAL, new Unit("Keyword"));
+//
+//        // BROADCASTERS
+//        Attribute twitterSchladmingBroadcasterRoleNumPeople = new Attribute();
+//        twitterSchladmingBroadcasterRoleNumPeople.setName("Broadcaster role representation");
+//        twitterSchladmingBroadcasterRoleNumPeople.setDescription("Number of people identified as Broadcaster by Role analysis");
+//        twitterSchladmingBroadcasterRoleNumPeople.setEntityUUID(twitterSchladming.getUUID());
+//        twitterSchladming.addAttribute(twitterSchladmingBroadcasterRoleNumPeople);
+//        addMetricToAttributeAndMetricGroup(wegovMetricGroup, twitterSchladmingBroadcasterRoleNumPeople, MetricType.INTERVAL, new Unit("Person"));
+//
+//        // DAILY USERS
+//        Attribute twitterSchladmingDailyUserRoleNumPeople = new Attribute();
+//        twitterSchladmingDailyUserRoleNumPeople.setName("Daily user role representation");
+//        twitterSchladmingDailyUserRoleNumPeople.setDescription("Number of people identified as Daily users by Role analysis");
+//        twitterSchladmingDailyUserRoleNumPeople.setEntityUUID(twitterSchladming.getUUID());
+//        twitterSchladming.addAttribute(twitterSchladmingDailyUserRoleNumPeople);
+//        addMetricToAttributeAndMetricGroup(wegovMetricGroup, twitterSchladmingDailyUserRoleNumPeople, MetricType.INTERVAL, new Unit("Person"));
+//
+//        // INFORMATION SEEKERS
+//        Attribute twitterSchladmingInformationSeekerRoleNumPeople = new Attribute();
+//        twitterSchladmingInformationSeekerRoleNumPeople.setName("Information Seeker role representation");
+//        twitterSchladmingInformationSeekerRoleNumPeople.setDescription("Number of people identified as Information seekers by Role analysis");
+//        twitterSchladmingInformationSeekerRoleNumPeople.setEntityUUID(twitterSchladming.getUUID());
+//        twitterSchladming.addAttribute(twitterSchladmingInformationSeekerRoleNumPeople);
+//        addMetricToAttributeAndMetricGroup(wegovMetricGroup, twitterSchladmingInformationSeekerRoleNumPeople, MetricType.INTERVAL, new Unit("Person"));
+//
+//        // INFORMATION SOURCES
+//        Attribute twitterSchladmingInformationSourceRoleNumPeople = new Attribute();
+//        twitterSchladmingInformationSourceRoleNumPeople.setName("Information Source role representation");
+//        twitterSchladmingInformationSourceRoleNumPeople.setDescription("Number of people identified as Information sources by Role analysis");
+//        twitterSchladmingInformationSourceRoleNumPeople.setEntityUUID(twitterSchladming.getUUID());
+//        twitterSchladming.addAttribute(twitterSchladmingInformationSourceRoleNumPeople);
+//        addMetricToAttributeAndMetricGroup(wegovMetricGroup, twitterSchladmingInformationSourceRoleNumPeople, MetricType.INTERVAL, new Unit("Person"));
+//
+//        // RARE POSTERS
+//        Attribute twitterSchladmingRarePosterRoleNumPeople = new Attribute();
+//        twitterSchladmingRarePosterRoleNumPeople.setName("Rare Poster role representation");
+//        twitterSchladmingRarePosterRoleNumPeople.setDescription("Number of people identified as Rare posters by Role analysis");
+//        twitterSchladmingRarePosterRoleNumPeople.setEntityUUID(twitterSchladming.getUUID());
+//        twitterSchladming.addAttribute(twitterSchladmingRarePosterRoleNumPeople);
+//        addMetricToAttributeAndMetricGroup(wegovMetricGroup, twitterSchladmingRarePosterRoleNumPeople, MetricType.INTERVAL, new Unit("Person"));
+//
+//
+//        Entity wegovUsers = new Entity();
+//        wegovUsers.setName("Users of Wegov Dashboard");
+//        wegovUsers.setDescription("People using Wegov Dashboard");
+//        theMetricGenerator.addEntity(wegovUsers);
+//
+//        // NUMBER OF PEOPLE USING WEGOV
+//        Attribute wegovUsersNumPeople = new Attribute();
+//        wegovUsersNumPeople.setName("Number of people");
+//        wegovUsersNumPeople.setDescription("Number of people who are using Wegov dashboard");
+//        wegovUsersNumPeople.setEntityUUID(wegovUsers.getUUID());
+//        wegovUsers.addAttribute(wegovUsersNumPeople);
+//        addMetricToAttributeAndMetricGroup(wegovMetricGroup, wegovUsersNumPeople, MetricType.INTERVAL, new Unit("Person"));
+//
+//        // TOTAL NUMBER OF WIDGETS
+//        Attribute wegovUsersTotalNumWidgets = new Attribute();
+//        wegovUsersTotalNumWidgets.setName("Number of widgets");
+//        wegovUsersTotalNumWidgets.setDescription("Total number of widgets created by people who are using Wegov dashboard");
+//        wegovUsersTotalNumWidgets.setEntityUUID(wegovUsers.getUUID());
+//        wegovUsers.addAttribute(wegovUsersTotalNumWidgets);
+//        addMetricToAttributeAndMetricGroup(wegovMetricGroup, wegovUsersTotalNumWidgets, MetricType.INTERVAL, new Unit("Widget"));
 
         return theMetricGenerator;
     }

@@ -191,12 +191,12 @@ $(document).ready(function() {
     $("#datePicker1").kendoDatePicker({
     	value: new Date(),
     	min: new Date(),
-    	format: "dd/MM/yyyy",
+    	format: "dd/MM/yyyy"
     });
     $("#datePicker2").kendoDatePicker({
     	value: new Date(),
     	min: new Date(),
-    	format: "dd/MM/yyyy",
+    	format: "dd/MM/yyyy"
     });
 
 	var todaysDate = $("#datePicker2").val();
@@ -205,12 +205,12 @@ $(document).ready(function() {
     $("#datePicker3").kendoDatePicker({
     	value: new Date(),
     	min: new Date(),
-    	format: "dd/MM/yyyy",
+    	format: "dd/MM/yyyy"
     });
     $("#datePicker4").kendoDatePicker({
     	value: new Date(),
     	min: new Date(),
-    	format: "dd/MM/yyyy",
+    	format: "dd/MM/yyyy"
     });
     
     //$("#numberOfRunsPicker1").kendoNumericTextBox({
@@ -229,7 +229,7 @@ $(document).ready(function() {
     	value: 1,
 		min: 1,
 		step: 1,
-    	format: "#",
+    	format: "#"
     });
 
 	var timeUnitsDs = new kendo.data.DataSource({
@@ -660,7 +660,7 @@ $(document).ready(function() {
 			$("#collectCommentsDiv").show();
 			$("#maxPostsToCollectCommentsFor").val(10);
 
-			$("#searchTermsLabel").text("Group ID/URL:");
+			$("#searchTermsLabel").text("Event ID:");
 			$("#searchTerms").removeClass("twitter").addClass("facebook");
 			$("#checkFbDetailsButton").show();
 
@@ -728,7 +728,8 @@ $(document).ready(function() {
 	// Create new search activity and run
 	function createNewSearchActivityAndRun(clientSearch, config) {
 		//myRunId = -1;
-
+                console.log('createNewSearchActivityAndRun');
+                console.log(config);
 		$.ajax({
 			  type: 'POST',
 			  url: "/home/search/createNewSearch/do.json",
@@ -1587,7 +1588,7 @@ function validateGroupId(searchTerms, callback) {
 		getGroupInfo(groupId, callback)
 	}
 	else {
-		alert('Invalid Facebook group id or URL: ' + searchTerms);
+		alert('Invalid Facebook event/group id or URL: ' + searchTerms);
 	}
 	
 	//return groupId;
@@ -1856,7 +1857,7 @@ function displayKmiAnalysisResults(runId, result){
 					seriesDefaults : {
 						renderer : jQuery.jqplot.PieRenderer,
 						rendererOptions : {
-							showDataLabels : true,
+							showDataLabels : true
 							
 						}
 					},
@@ -2464,7 +2465,7 @@ function addSearchesWidget(whichActivities) {
 			filter: { field: "name", operator: "startswith", value: "Twitter" }, // filter Twitter results initially
             sort: {
             	field: "whenCreated", dir : "desc"
-            },
+            }
             //pageSize: 10
         },
         columns: [
@@ -2536,7 +2537,7 @@ function addAnalysisHistoryWidget(whichActivities) {
             },
             sort: {
             	field: "whenCreated", dir : "desc"
-            },
+            }
             //pageSize: 10
         },
         columns: [
@@ -3270,7 +3271,7 @@ function detailInit(e, type) {
             filter: { field: "activityid", operator: "eq", value: e.data.id },
             sort: {
             	field: "whenStarted", dir : "desc"
-            },
+            }
             //pageSize: 10
         },
 		/*
