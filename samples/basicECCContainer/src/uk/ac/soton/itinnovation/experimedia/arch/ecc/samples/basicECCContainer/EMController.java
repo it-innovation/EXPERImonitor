@@ -233,6 +233,8 @@ public class EMController implements IEMLifecycleListener
     if ( client != null && summary != null )
     {
       // Just notify UI
+      boolean gotMeasurementSets = false;
+      
       Iterator<UUID> idIt = summary.getReportedMeasurementSetIDs().iterator();
       while( idIt.hasNext() )
       {
@@ -243,8 +245,14 @@ public class EMController implements IEMLifecycleListener
                                report.getFromDate().toString() + " to: "       +
                                report.getToDate().toString()                   +
                                " count[" + report.getNumberOfMeasurements() + "]" );
+          
+          gotMeasurementSets = true;
         }
       }
+      
+      // If we didn't get anything, mention it to the user
+      if ( !gotMeasurementSets )
+        mainView.addLogText( client.getName() + " reported no measurements" );
     }
   }
   

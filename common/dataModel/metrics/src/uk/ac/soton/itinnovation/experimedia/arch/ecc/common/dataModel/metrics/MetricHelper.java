@@ -32,7 +32,7 @@ import java.util.*;
 
 public class MetricHelper
 {
-    public static Set<MeasurementSet> getAllMeasurementSets( Set<MetricGenerator> mgenSet )
+    public static Set<MeasurementSet> getAllMeasurementSets( Collection<MetricGenerator> mgenSet )
     {
         HashSet<MeasurementSet> mSets = new HashSet<MeasurementSet>();
         
@@ -52,5 +52,35 @@ public class MetricHelper
         }
         
         return mSets;        
+    }
+    
+    public static MeasurementSet getMeasurementSet( Collection<MetricGenerator> mgenSet,
+                                                    UUID measurementSetID )
+    {
+        MeasurementSet targetSet = null;
+      
+        if ( mgenSet != null || measurementSetID != null )
+        {
+            Iterator<MetricGenerator> mgenIt = mgenSet.iterator();
+            while ( mgenIt.hasNext() )
+            {
+                Iterator<MetricGroup> mgIt = mgenIt.next().getMetricGroups().iterator();
+                while ( mgIt.hasNext() )
+                {
+                    Iterator<MeasurementSet> msIt = mgIt.next().getMeasurementSets().iterator();
+                    while ( msIt.hasNext() )
+                    { 
+                        MeasurementSet ms = msIt.next();
+                        if ( ms.getUUID().equals( measurementSetID) )
+                        {
+                            targetSet = ms;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        
+        return targetSet;        
     }
 }
