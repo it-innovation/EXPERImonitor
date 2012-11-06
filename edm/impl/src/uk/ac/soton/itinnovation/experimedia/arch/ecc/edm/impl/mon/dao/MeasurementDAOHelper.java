@@ -24,14 +24,19 @@
 /////////////////////////////////////////////////////////////////////////
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.mon.dao;
 
+import java.sql.BatchUpdateException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import org.apache.log4j.Logger;
+import org.postgresql.util.PSQLException;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Measurement;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DBUtil;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.NoDataException;
@@ -193,6 +198,10 @@ public class MeasurementDAOHelper
             pstmt.setBoolean(5, false);
             
             pstmt.executeUpdate();
+        } catch (PSQLException psqlEx) {
+            if (!psqlEx.getMessage().contains("duplicate key")) {
+                throw psqlEx;
+            }
         } catch (Exception ex) {
             log.error("Error while saving Measurement: " + ex.getMessage());
             throw new RuntimeException("Error while saving Measurement: " + ex.getMessage(), ex);
@@ -201,8 +210,18 @@ public class MeasurementDAOHelper
     
     public static void saveMeasurementsForSet(Set<Measurement> measurements, UUID mSetUUID, Connection connection) throws Exception
     {
+        if ((measurements != null) && (measurements.size() == 1)) // likely case where we deal with reports with one measurement
+        {
+            try {
+                saveMeasurement(measurements.iterator().next(), connection);
+                return;
+            } catch (Exception ex) {
+                log.warn("Failed to save measurement - " + ex.toString());
+            }
+        }
+        
         // this validation will check if all the required parameters are set and if
-        // there isn't already a duplicate instance in the DB
+        // the measurement set exists in the database already
         ValidationReturnObject returnObj = MeasurementDAOHelper.areObjectsValidForSave(measurements, mSetUUID, true, true, connection);
         if (!returnObj.valid)
         {
@@ -222,25 +241,92 @@ public class MeasurementDAOHelper
             
             // iterate over each measurement and save
             int counter = 0;
+            int maxBatchSize = 1000;
+            List<Measurement> measurementBatch = new ArrayList<Measurement>();
+            
             for (Measurement measurement : measurements)
             {
                 counter++;
+                measurementBatch.add(measurement);
+                
                 pstmt.setObject(1, measurement.getUUID(), java.sql.Types.OTHER);
                 pstmt.setObject(2, measurement.getMeasurementSetUUID(), java.sql.Types.OTHER);
                 pstmt.setLong(3, measurement.getTimeStamp().getTime());
                 pstmt.setString(4, measurement.getValue());
                 pstmt.setBoolean(5, false);
                 pstmt.addBatch();
-                
+
                 // execute batch for every 10,000 measurements
-                if (counter % 10000 == 0) {
-                    pstmt.executeBatch();
+                if (counter == maxBatchSize)
+                {
+                    counter = 0; // resetting the counter
+                    try {
+                        pstmt.executeBatch();
+                    } catch (BatchUpdateException bux) {
+                        log.warn("Caught a batch update exception when trying to save measurements - will now try to save all other measurements in the batch");
+                        saveNonErroronousBatchMeasurements(measurementBatch, bux.getUpdateCounts(), pstmt);
+                    } finally {
+                        measurementBatch.clear();
+                    }
                 }
+            } // end for each measurement
+            
+            // executing final batch
+            try {
+                pstmt.executeBatch();
+            } catch (BatchUpdateException bux) {
+                log.warn("Caught a batch update exception when trying to save measurements - will now try to save all other measurements in the batch");
+                saveNonErroronousBatchMeasurements(measurementBatch, bux.getUpdateCounts(), pstmt);
             }
-            // executing final batch of measurements
-            pstmt.executeBatch();
         } catch (Exception ex) {
             log.error("Error while saving Measurement: " + ex.getMessage(), ex);
+            throw new RuntimeException("Error while saving Measurement: " + ex.getMessage(), ex);
+        }
+    }
+    
+    private static void saveNonErroronousBatchMeasurements(List<Measurement> measurementBatch, int[] batchUpdateCounts, PreparedStatement pstmt)
+    {
+        List<Measurement> newMeasurementBatch = new ArrayList<Measurement>();
+        
+        try {
+            pstmt.clearBatch();
+            for (int i = 0; i < measurementBatch.size(); i++)
+            {
+                // check if statement failed:
+                //   - if end of array (in postgres batchUpdateCounts contains only the valid records until the erroronous)
+                //   - if statement equals EXECUTE_FAILED (in postgres this is a superfluous check)
+                boolean failedStatement = false;
+                if (i == batchUpdateCounts.length) {
+                    failedStatement = true;
+                } else if ((i < batchUpdateCounts.length) && (batchUpdateCounts[i] == Statement.EXECUTE_FAILED) ){
+                    failedStatement = true;
+                }
+                
+                if (!failedStatement)
+                {
+                    Measurement measurement = measurementBatch.get(i);
+                    newMeasurementBatch.add(measurement);
+
+                    pstmt.setObject(1, measurement.getUUID(), java.sql.Types.OTHER);
+                    pstmt.setObject(2, measurement.getMeasurementSetUUID(), java.sql.Types.OTHER);
+                    pstmt.setLong(3, measurement.getTimeStamp().getTime());
+                    pstmt.setString(4, measurement.getValue());
+                    pstmt.setBoolean(5, false);
+                    pstmt.addBatch();
+                }
+            }
+            
+            if (!newMeasurementBatch.isEmpty())
+            {
+                try {
+                    pstmt.executeBatch();
+                } catch (BatchUpdateException bux) {
+                    log.warn("Caught a batch update exception when trying to save measurements - will now try to save all other measurements in the batch");
+                    saveNonErroronousBatchMeasurements(newMeasurementBatch, bux.getUpdateCounts(), pstmt);
+                }
+            }
+        } catch (Exception ex) {
+            log.error("Error while saving Measurement: " + ex.getMessage());
             throw new RuntimeException("Error while saving Measurement: " + ex.getMessage(), ex);
         }
     }
@@ -277,14 +363,17 @@ public class MeasurementDAOHelper
                 Date timeStamp = null;
                 UUID mSetUUID = null;
                 
-                if (timeStampStr == null)
+                if (timeStampStr == null) {
                     throw new RuntimeException("Could not get the time stamp from the Measurement instance");
+                }
                 
-                if (mSetUUIDstr == null)
+                if (mSetUUIDstr == null) {
                     throw new RuntimeException("Could not get the measurement set UUID from the Measurement instance");
+                }
                 
-                if (value == null)
+                if (value == null) {
                     throw new RuntimeException("Could not get the value from the Measurement instance");
+                }
                 
                 try {
                     timeStamp = new Date(Long.parseLong(timeStampStr));
@@ -417,8 +506,8 @@ public class MeasurementDAOHelper
     {
         if ((measurements == null) || measurements.isEmpty())
         {
-            log.error("Cannot delete measurements, because the set of IDs is NULL or empty");
-            throw new IllegalArgumentException("Cannot delete measurements, because the set of IDs is NULL or empty");
+            log.error("Cannot set the sync flag for the  measurements, because the set of IDs is NULL or empty");
+            throw new IllegalArgumentException("Cannot set the sync flag for the  measurements, because the set of IDs is NULL or empty");
         }
         
         if (DBUtil.isClosed(connection))

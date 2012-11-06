@@ -38,15 +38,14 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.NoDataException;
  * methods need to be called, passing on the UUID of the measurement set (and
  * any other arguments for the respective method).
  * 
- * OBS: no update methods yet.
- * 
  * @author Vegard Engen
  */
 public interface IReportDAO
 {
     /**
      * Saves a report, which must have a unique UUID and refer to an existing
-     * measurement set (by its UUID).
+     * measurement set (by its UUID). Any measurements already in the database
+     * will be ignored.
      * @param report The report object to be saved.
      * @param saveMeasurements Boolean to flag whether measurements should be saved too.
      * @throws IllegalArgumentException If the Report is not valid to be saved, typically due to missing information (e.g., NULL values).
@@ -56,11 +55,10 @@ public interface IReportDAO
     
     /**
      * Saves the measurements for a report, not the report itself. Note that if one or 
-     * more of the measurements already exists, an exception is thrown and none
-     * will be saved as they are treated as part of one transaction.
+     * more of the measurements already exists, they will simply be ignored.
      * @param report The report object, which should contain a measurement set with measurements.
      * @throws IllegalArgumentException If the Measurement objects are not valid to be saved, typically due to missing information (e.g., NULL values).
-     * @throws Exception If there's a technical issue or a measurement with the same UUID already exists.
+     * @throws Exception If there's a technical issue.
      */
     void saveMeasurements(Report report) throws IllegalArgumentException, Exception;
     
@@ -78,8 +76,12 @@ public interface IReportDAO
     
     /**
      * Get a report for the latest measurement for a particular measurement set.
-     * Will contain a MeasurementSet with the UUID to identify it, and measurements 
-     * if the respective flag is true.
+     * This does not return the last Report saved in the database, but will create
+     * a new Report instance based on the last Measurement in the database. This
+     * Report instance will not be saved in the database, so you must save it with the
+     * saveReport() method if this is desirable.
+     * The Report instance will contain a MeasurementSet with the UUID to identify 
+     * it, and measurements if the respective flag is true.
      * @param measurementSetUUID The measurement set UUID.
      * @param withMeasurements Will include the measurements if this flag is set to true.
      * @return A report object, if the measurement set exists, and there are measurements.
@@ -91,8 +93,12 @@ public interface IReportDAO
     
     /**
      * Get a report for all measurements for a particular measurement set.
-     * Will contain a MeasurementSet with the UUID to identify it, and measurements
-     * if the respective flag is true.
+     * This does not return any existing Report saved in the database, but will create
+     * a new Report instance based on the last Measurement in the database. This
+     * Report instance will not be saved in the database, so you must save it with the
+     * saveReport() method if this is desirable.
+     * The Report instance will contain a MeasurementSet with the UUID to identify 
+     * it, and measurements if the respective flag is true.
      * @param measurementSetUUID The measurement set UUID.
      * @param withMeasurements Will include the measurements if this flag is set to true.
      * @return A report object, if the measurement set exists, and there are measurements.
@@ -105,8 +111,12 @@ public interface IReportDAO
     /**
      * Get a report for all measurements for a particular measurement set from
      * a given date. This is inclusive the given date.
-     * Will contain a MeasurementSet with the UUID to identify it, and measurements
-     * if the respective flag is true.
+     * This does not return any existing Report saved in the database, but will create
+     * a new Report instance based on the last Measurement in the database. This
+     * Report instance will not be saved in the database, so you must save it with the
+     * saveReport() method if this is desirable.
+     * The Report instance will contain a MeasurementSet with the UUID to identify 
+     * it, and measurements if the respective flag is true.
      * @param measurementSetUUID The measurement set UUID.
      * @param fromDate The date from which measurements should be given.
      * @param withMeasurements Will include the measurements if this flag is set to true.
@@ -117,11 +127,15 @@ public interface IReportDAO
      */
     Report getReportForMeasurementsFromDate(UUID measurementSetUUID, Date fromDate, boolean withMeasurements) throws IllegalArgumentException, NoDataException, Exception;
     
-    
     /**
      * Get a report for the measurements for a particular measurement set within a given time
-     * period. Will contain a MeasurementSet with the UUID to identify it, and 
-     * measurements if the respective flag is true.
+     * period. 
+     * This does not return any existing Report saved in the database, but will create
+     * a new Report instance based on the last Measurement in the database. This
+     * Report instance will not be saved in the database, so you must save it with the
+     * saveReport() method if this is desirable.
+     * The Report instance will contain a MeasurementSet with the UUID to identify 
+     * it, and measurements if the respective flag is true.
      * @param measurementSetUUID The measurement set UUID.
      * @param fromDate The from date of the time period.
      * @param toDate The to date of the time period.
@@ -133,12 +147,15 @@ public interface IReportDAO
      */
     Report getReportForMeasurementsForTimePeriod(UUID measurementSetUUID, Date fromDate, Date toDate, boolean withMeasurements) throws IllegalArgumentException, NoDataException, Exception;
     
-    
     /**
      * Get a report for unsynchronised measurements for a particular measurement 
      * set from the given given date. This is inclusive the date given.
-     * Will contain a MeasurementSet with the UUID to identify it, and
-     * measurements if the respective flag is set to true.
+     * This does not return any existing Report saved in the database, but will create
+     * a new Report instance based on the last Measurement in the database. This
+     * Report instance will not be saved in the database, so you must save it with the
+     * saveReport() method if this is desirable.
+     * The Report instance will contain a MeasurementSet with the UUID to identify 
+     * it, and measurements if the respective flag is true.
      * @param measurementSetUUID The measurement set UUID.
      * @param fromDate The date from which measurements should be given.
      * @param numMeasurements The number of measurements after the date that should be included.

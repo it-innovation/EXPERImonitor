@@ -113,7 +113,9 @@ public class EDMTest
         
         //updateAndDeleteReportTests(edm, mSetUUID);
         
-        reportSynchronisationTests(edm, mSetUUID);
+        //reportSynchronisationTests(edm, mSetUUID);
+        
+        reportDuplicateMeasurementsTests(edm, mSetUUID);
     }
     
     public static void experiments(IMonitoringEDM edm, UUID expUUID) throws Exception
@@ -1181,6 +1183,66 @@ public class EDMTest
         printReportDetails(report);
     }
     
+    public static void reportDuplicateMeasurementsTests(IMonitoringEDM edm, UUID mSetUUID) throws Exception
+    {
+        IReportDAO reportDAO = null;
+        try {
+            reportDAO = edm.getReportDAO();
+        } catch (Exception ex) {
+            log.error ("Unable to get Report DAO: " + ex.getMessage(), ex);
+            throw ex;
+        }
+        
+        int numMeasurements = 2;
+        log.info("Saving a Report with " + numMeasurements + " measurements for measurement set " + mSetUUID.toString());
+
+        Report report1 = getReportWithRandomMeasurements(UUID.randomUUID(), mSetUUID, numMeasurements);
+        Report report2 = getReportWithRandomMeasurements(UUID.randomUUID(), mSetUUID, numMeasurements);
+        Report report3 = getReportWithRandomMeasurements(UUID.randomUUID(), mSetUUID, numMeasurements);
+        try {
+            reportDAO.saveReport(report1, true);
+            reportDAO.saveReport(report2, true);
+            reportDAO.saveReport(report3, true);
+            log.info("Report saved successfully!");
+        } catch (Exception ex) {
+            log.error("Unable to save Report: " + ex.getMessage(), ex);
+        }
+        
+//----- SAVING REPORT WITH DUPLICATE MEASUREMENT
+        log.info("Creating and saving Measurements for new Report and adding a measurement already saved in the DB");
+        Report reportWithDuplicates = getReportWithRandomMeasurements(UUID.randomUUID(), mSetUUID, 11);
+        reportWithDuplicates.getMeasurementSet().addMeasurement(report1.getMeasurementSet().getMeasurements().iterator().next());
+        reportWithDuplicates.getMeasurementSet().addMeasurements(getReportWithRandomMeasurements(UUID.randomUUID(), mSetUUID, 11).getMeasurementSet().getMeasurements());
+        reportWithDuplicates.getMeasurementSet().addMeasurement(report2.getMeasurementSet().getMeasurements().iterator().next());
+        reportWithDuplicates.getMeasurementSet().addMeasurements(getReportWithRandomMeasurements(UUID.randomUUID(), mSetUUID, 11).getMeasurementSet().getMeasurements());
+        reportWithDuplicates.getMeasurementSet().addMeasurement(report3.getMeasurementSet().getMeasurements().iterator().next());
+        reportWithDuplicates.getMeasurementSet().addMeasurements(getReportWithRandomMeasurements(UUID.randomUUID(), mSetUUID, 11).getMeasurementSet().getMeasurements());
+        
+        printReportDetails(reportWithDuplicates);
+        
+        try {
+            reportDAO.saveMeasurements(reportWithDuplicates);
+            log.info("Measurements for Report saved successfully!");
+        } catch (Exception ex) {
+            log.error("Unable to save Measurements for Report: " + ex.getMessage(), ex);
+        }
+        
+//----- NEED TO TEST THIS TOO
+        log.info("Creating and saving Report with a measurement already saved in the DB");
+        Report reportWithDuplicates2 = getReportWithRandomMeasurements(UUID.randomUUID(), mSetUUID, 11);
+        reportWithDuplicates2.getMeasurementSet().addMeasurement(report1.getMeasurementSet().getMeasurements().iterator().next());
+        try {
+            reportDAO.saveReport(reportWithDuplicates2, true);
+            log.info("Report saved successfully!");
+        } catch (Exception ex) {
+            log.error("Unable to save Report: " + ex.getMessage(), ex);
+        }
+        
+        log.info("Trying to save a measurement that's already in the database");
+        IMeasurementDAO measurementDAO = edm.getMeasurementDAO();
+        measurementDAO.saveMeasurement(report1.getMeasurementSet().getMeasurements().iterator().next());
+    }
+    
     public static void printReportDetails(Report report)
     {
         if (report != null)
@@ -1200,7 +1262,7 @@ public class EDMTest
                 
                 for (Measurement m : report.getMeasurementSet().getMeasurements())
                 {
-                    log.info("      - " + m.getValue() + "\t" + m.getTimeStamp() + "(" + m.getTimeStamp().getTime() + ")");
+                    log.info("      - " + m.getUUID() + "\t" + m.getValue() + "\t" + m.getTimeStamp() + "(" + m.getTimeStamp().getTime() + ")");
                 }
             }
         }
