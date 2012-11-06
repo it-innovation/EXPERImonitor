@@ -5,13 +5,13 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
   <artifactId>experimedia-arch-ecc-em-impl</artifactId>
-  <version>0.9-SNAPSHOT</version>
+  <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
   
   <parent>
     <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
     <artifactId>experimedia-arch-ecc-em</artifactId>
-    <version>0.9-SNAPSHOT</version>
+    <version>1.0-SNAPSHOT</version>
   </parent>
   
   <build>
@@ -46,31 +46,31 @@
     <dependency>
       <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
       <artifactId>experimedia-arch-ecc-amqpAPI-spec</artifactId>
-      <version>0.9-SNAPSHOT</version>
+      <version>1.0-SNAPSHOT</version>
     </dependency>
     
     <dependency>
       <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
       <artifactId>experimedia-arch-ecc-em-spec</artifactId>
-      <version>0.9-SNAPSHOT</version>
+      <version>1.0-SNAPSHOT</version>
     </dependency>
         
     <dependency>
       <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
       <artifactId>experimedia-arch-ecc-amqpAPI-impl</artifactId>
-      <version>0.9-SNAPSHOT</version>
+      <version>1.0-SNAPSHOT</version>
     </dependency>
     
     <dependency>
       <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
       <artifactId>experimedia-arch-ecc-common-dataModel-experiment</artifactId>
-      <version>0.9-SNAPSHOT</version>
+      <version>1.0-SNAPSHOT</version>
     </dependency>
     
     <dependency>
       <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
       <artifactId>experimedia-arch-ecc-common-dataModel-monitor</artifactId>
-      <version>0.9-SNAPSHOT</version>
+      <version>1.0-SNAPSHOT</version>
     </dependency>
     
     <!-- 3rd party dependencies ____________________________________________ -->    
