@@ -154,7 +154,7 @@ public class EMClientEx extends EMClient
   public void removePullingMeasurementSetID( UUID msID )
   { if ( msID != null ) currentMeasurementSetPulls.remove(msID); }
   
-  public UUID getNextMeasurementSetIDToPull()
+  public UUID iterateNextMSForPulling()
   {
     if ( currentMeasurementSetPulls.isEmpty() )
     {

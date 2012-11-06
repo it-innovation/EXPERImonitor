@@ -301,6 +301,12 @@ public class ECCHeadlessClient implements EMIAdapterListener
             try
             { 
                 Report edmReport = edmReportDAO.getReportForLatestMeasurement( measurementSetID, true );
+                
+                // Save this report internally (without data - we already have it)
+                // we'll retrieve this report after acknowledgement of the report by the ECC later
+                edmReportDAO.saveReport( edmReport, false );
+                
+                // And copy it out to be sent to the ECC
                 reportOUT.copyReport( edmReport, true );
             }
             catch ( Exception e )
@@ -335,13 +341,23 @@ public class ECCHeadlessClient implements EMIAdapterListener
     
     @Override
     public void onPullReportReceived( UUID reportID )
-    {
+    {      
         // If we had an EDM running, we can mark which reports have been successfully
         // received by the ECC
         if ( edmAgentOK )
         {
             try
-            { edmReportDAO.setReportMeasurementsSyncFlag( reportID, true ); }
+            {
+              // If we have previously stored this report, mark the measurements
+              // as synchronized with the ECC
+              Report ackRep = edmReportDAO.getReport( reportID, false );
+              
+              if ( ackRep != null )
+              {
+                  edmReportDAO.setReportMeasurementsSyncFlag( reportID, true );
+                  edmReportDAO.deleteReport(reportID, false); // Delete the report (but keep the measurements)
+              }
+            }
             catch ( Exception e )
             { clientLogger.warn( "Could not mark report " + reportID.toString() +
                                  " as received by the ECC"); }

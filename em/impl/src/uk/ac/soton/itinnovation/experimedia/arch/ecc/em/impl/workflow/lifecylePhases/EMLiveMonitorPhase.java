@@ -302,7 +302,7 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
         // If there are outstanding metrics to pull, make another request (if we're not stopping)
         if ( !monitorStopping )
         {
-          UUID nextMSID = client.getNextMeasurementSetIDToPull();
+          UUID nextMSID = client.iterateNextMSForPulling();
         
           if ( nextMSID != null ) monitor.pullMetric( nextMSID );
         }
