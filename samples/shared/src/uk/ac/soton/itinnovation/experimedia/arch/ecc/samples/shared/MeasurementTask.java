@@ -134,13 +134,6 @@ public class MeasurementTask
     
   
     // Protected methods -------------------------------------------------------    
-    @Override
-    protected void finalize() throws Throwable
-    {
-        stopMeasuring();
-        super.finalize();
-    }
-    
     protected TimerTask getTimerTask()
     { return timedMeasurementTask; }
     

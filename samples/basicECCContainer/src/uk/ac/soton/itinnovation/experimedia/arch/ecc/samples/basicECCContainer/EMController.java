@@ -38,6 +38,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.*;
 
 import java.awt.event.*;
+import java.io.*;
 import org.apache.log4j.Logger;
 import java.util.*;
 
@@ -49,6 +50,7 @@ public class EMController implements IEMLifecycleListener
   private final Logger emCtrlLogger = Logger.getLogger( EMController.class );
   
   private IExperimentMonitor expMonitor;
+  private EMLoginView        loginView;
   private EMView             mainView;
   private boolean            waitingToStartNextPhase = false;
   
@@ -59,42 +61,36 @@ public class EMController implements IEMLifecycleListener
   
   
   public EMController()
-  {    
+  {
     expMonitor = EMInterfaceFactory.createEM();
     expMonitor.addLifecyleListener( this );
     
-    try {
-      expDataMgr = EDMInterfaceFactory.getMonitoringEDM();
-    } catch (Exception ex) {
-      emCtrlLogger.error( "Could not create Monitoring EDM", ex );
-    }
-  }
-  
-  public void start( String rabbitIP, UUID emID ) throws Exception
-  {
-    emCtrlLogger.info( "Trying to connect to Rabbit server on " + rabbitIP );
-    
-    mainView = new EMView( new MonitorViewListener() );
-    mainView.setVisible( true );
-    mainView.addWindowListener( new ViewWindowListener() );
-    
     try
-    { expMonitor.openEntryPoint( rabbitIP, emID ); }
-    catch (Exception e)
     {
-      emCtrlLogger.error( "Could not open entry point on Rabbit server" );
-      throw e; 
-    }
-    
-    boolean dmOK = createExperiment();
-    
-    if ( !dmOK )
-    {
-      emCtrlLogger.error( "Had problems setting up the EDM" );
-      throw new Exception( "Could not set up EDM" );
-    }
+      // Try getting the EDM properties from a local file
+      Properties edmProps = tryGetPropertiesFile( "edm" );
+      
+      // If available, use these properties
+      if ( edmProps != null )
+        expDataMgr = EDMInterfaceFactory.getMonitoringEDM( edmProps );
+      else
+        expDataMgr = EDMInterfaceFactory.getMonitoringEDM(); //... or go to default
+      
+      // Try starting from a local EM properties file
+      Properties emProps = tryGetPropertiesFile( "em" );
+      if ( emProps != null )
+        start( emProps );
+      else  // Otherwise, manual entry of basic configuration
+      {
+        loginView = new EMLoginView();
+        loginView.setViewListener( new LoginViewListener() );
+        loginView.setVisible( true );
+      }
+    } 
+    catch (Exception ex)
+    { emCtrlLogger.error( "Could not create Monitoring EDM", ex ); }
   }
-  
+ 
   // IEMLifecycleListener ------------------------------------------------------
   @Override
   public void onClientConnected( EMClient client )
@@ -112,7 +108,7 @@ public class EMController implements IEMLifecycleListener
   
   @Override
   public void onLifecyclePhaseStarted( EMPhase phase )
-  {
+  {    
     // Manage modal behaviour of the view
     switch ( phase )
     {
@@ -143,7 +139,7 @@ public class EMController implements IEMLifecycleListener
   
   @Override
   public void onLifecyclePhaseCompleted( EMPhase phase )
-  {
+  {    
     mainView.setNextPhaseValue( expMonitor.getNextPhase().toString() );
     
     if ( waitingToStartNextPhase )
@@ -156,6 +152,13 @@ public class EMController implements IEMLifecycleListener
     }
     else
       mainView.enableTimeOuts( false );
+  }
+  
+  @Override
+  public void onNoFurtherLifecyclePhases()
+  {
+    mainView.setMonitoringPhaseValue( "Experiment process complete",
+                                      "No further phases" );
   }
   
   @Override
@@ -230,6 +233,8 @@ public class EMController implements IEMLifecycleListener
     if ( client != null && summary != null )
     {
       // Just notify UI
+      boolean gotMeasurementSets = false;
+      
       Iterator<UUID> idIt = summary.getReportedMeasurementSetIDs().iterator();
       while( idIt.hasNext() )
       {
@@ -240,8 +245,14 @@ public class EMController implements IEMLifecycleListener
                                report.getFromDate().toString() + " to: "       +
                                report.getToDate().toString()                   +
                                " count[" + report.getNumberOfMeasurements() + "]" );
+          
+          gotMeasurementSets = true;
         }
       }
+      
+      // If we didn't get anything, mention it to the user
+      if ( !gotMeasurementSets )
+        mainView.addLogText( client.getName() + " reported no measurements" );
     }
   }
   
@@ -249,23 +260,29 @@ public class EMController implements IEMLifecycleListener
   public void onGotDataBatch( EMClient client, EMDataBatch batch )
   {
     if ( client != null && batch != null )
-    {
-      int measurementCount = 0;
-      
-      MeasurementSet ms = batch.getMeasurementSet();
-      if ( ms != null )
-      {
-        Set<Measurement> measures = ms.getMeasurements();
-        if ( measures != null ) measurementCount = measures.size();
-      }
-      
-      // We could notify the EDM of this batch data here, but this demo will
-      // only send duplicated data, so we won't do this.
-      
-      // Notify UI with summary of batch
-      mainView.addLogText( client.getName() + " got batch ID: " + batch.getID().toString() + 
-                           " carrying " + measurementCount + " measures" );
+    {      
+      // Push batched data into the EDM
+      try { expReportAccessor.saveReport( batch.getBatchReport(), true ); }
+      catch ( Exception e )
+      { emCtrlLogger.error( "Could not save batch report data: " + e.getMessage() ); }
     }
+  }
+  
+  @Override
+  public void onDataBatchMeasurementSetCompleted( EMClient client, UUID measurementSetID )
+  {
+    if ( client != null && measurementSetID != null )
+    {
+      mainView.addLogText( client.getName() + " has finished batching measurement set " + 
+                           measurementSetID.toString() );
+    }
+  }
+  
+  @Override
+  public void onAllDataBatchesRequestComplete( EMClient client )
+  {
+    if ( client != null )
+      mainView.addLogText( "Client " + client.getName() + " has completed post-reporting phase" );
   }
   
   @Override
@@ -276,6 +293,86 @@ public class EMController implements IEMLifecycleListener
   }
   
   // Private methods -----------------------------------------------------------
+  private Properties tryGetPropertiesFile( String configName )
+  {
+    Properties props        = null;
+    InputStream propsStream = null;
+    
+    // Try find the properties file
+    File propFile = new File( configName + ".properties" );
+    if ( propFile.exists() )
+      try
+      { propsStream = (InputStream) new FileInputStream( propFile ); }
+      catch ( IOException ioe )
+      { emCtrlLogger.error( "Could not open " + configName + " configuration file" ); }
+    
+    // Try load the property stream
+    if ( propsStream != null )
+    {
+      props = new Properties();
+      try { props.load( propsStream ); }
+      catch ( IOException ioe )
+      { 
+        emCtrlLogger.error( "Could not load " + configName + " configuration" );
+        props = null;
+      }
+    }
+
+    // Tidy up
+    if ( propsStream != null )
+      try 
+      { propsStream.close(); }
+      catch ( IOException ioe )
+      { emCtrlLogger.error( "Could not close " + configName + " config file" ); }
+    
+    return props; 
+  }
+  
+  private boolean clearECCEDM()
+  {
+    boolean clearedOK = false;
+    
+    if ( expDataMgr != null )
+    {
+      try 
+      {
+        expDataMgr.clearMetricsDatabase();
+        clearedOK = true;
+      }
+      catch ( Exception e )
+      { emCtrlLogger.error( "Could not clear EDM database: " + e.getLocalizedMessage()); }
+    }
+    
+    return clearedOK;
+  }
+  
+  private void start( Properties emProps ) throws Exception
+  {
+    emCtrlLogger.info( "Trying to connect to Rabbit server" );
+    
+    try
+    { 
+      expMonitor.openEntryPoint( emProps );
+      
+      mainView = new EMView( new MonitorViewListener() );
+      mainView.setVisible( true );
+      mainView.addWindowListener( new ViewWindowListener() );
+    }
+    catch (Exception e)
+    {
+      emCtrlLogger.error( "Could not open entry point on Rabbit server" );
+      throw e; 
+    }
+    
+    boolean dmOK = createExperiment();
+    
+    if ( !dmOK )
+    {
+      emCtrlLogger.error( "Had problems setting up the EDM" );
+      throw new Exception( "Could not set up EDM" );
+    }
+  }
+  
   private void onViewClosed()
   {
     try { expMonitor.endLifecycle(); }
@@ -307,12 +404,13 @@ public class EMController implements IEMLifecycleListener
           expMonitor.stopCurrentPhase();
         }
         catch ( Exception e )
-        {}
+        { emCtrlLogger.error( "Could not stop phase: " + expMonitor.getCurrentPhase().name() +
+                              " because " + e.getMessage()); }
       }
       else
         try { expMonitor.goToNextPhase(); }
         catch ( Exception e )
-        {}
+        { emCtrlLogger.error( "Could not stop current phase: it is inactive"); }
     }  
   }
   
@@ -346,38 +444,20 @@ public class EMController implements IEMLifecycleListener
   {
     if ( expMonitor != null )
     {
-      // TODO: Visitor pattern!
       Set<EMClient> clients = expMonitor.getCurrentPhaseClients();
       Iterator<EMClient> cIt = clients.iterator();
       
       while ( cIt.hasNext() )
       {
         EMClient client = cIt.next();
-        EMPostReportSummary reportSummary = client.getPostReportSummary();
         
-        if ( reportSummary != null )
-        {
-          Iterator<UUID> reportIt = reportSummary.getReportedMeasurementSetIDs().iterator();
-          while ( reportIt.hasNext() )
-          {
-            Report report = reportSummary.getReport( reportIt.next() );
-            if ( report != null )
-            {
-              // MENTAL HEALTH WARNING: We're only going to pull a small amount 
-              // of data that will be created by the client sample demo here
-              if ( report.getNumberOfMeasurements() == 2 )
-              {
-                EMDataBatch batch = new EMDataBatch( report.getMeasurementSet(),
-                                                     report.getFromDate(),
-                                                     report.getToDate() );
-                
-                try { expMonitor.requestDataBatch( client, batch ); }
-                catch ( Exception e ) 
-                { emCtrlLogger.error( "Failed in an attempt to get post report data from client.\n" + e.getMessage() ); }
-              }
-            }
-          }
+        try
+        { 
+          expMonitor.getAllDataBatches( client );
+          mainView.addLogText( "Requesting missing data from client: " + client.getName() );
         }
+        catch ( Exception e )
+        { emCtrlLogger.error( "Could not request data batches from client: " + e.getMessage()); }
       }
     }
   }
@@ -433,6 +513,36 @@ public class EMController implements IEMLifecycleListener
     @Override
     public void windowClosed( WindowEvent we )
     { onViewClosed(); }
+  }
+  
+  private class LoginViewListener implements EMLoginViewListener
+  {
+    @Override
+    public void onStartECC( String rabbitIP, UUID emID, boolean clearEDM )
+    {
+      if ( clearEDM )
+      {
+        if ( clearECCEDM() )
+          emCtrlLogger.info( "Successfully cleared EDM data." );
+        else
+          emCtrlLogger.warn( "Could not clear EDM data" );
+      }
+      
+      try
+      {
+        Properties basicProps = new Properties();
+        basicProps.put( "Rabbit_IP", rabbitIP );
+        basicProps.put( "Rabbit_Port", "5672" );
+        basicProps.put( "Monitor_ID", emID.toString() );
+        
+        start( basicProps );
+        
+        loginView.dispose();
+        loginView = null;
+      }
+      catch ( Exception e )
+      { emCtrlLogger.error( "Could not start the ECC: " + e.getMessage()); }
+    }
   }
   
   private class MonitorViewListener implements EMViewListener

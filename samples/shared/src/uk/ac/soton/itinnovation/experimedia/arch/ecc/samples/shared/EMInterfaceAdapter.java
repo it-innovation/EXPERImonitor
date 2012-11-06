@@ -440,14 +440,14 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
     {
         if ( senderID.equals(expMonitorID) && liveMonitorFace != null )
         {
-            Report reportOut = new Report();
+            Report reportOUT = new Report();
 
             if ( emiListener != null )
-                emiListener.onPullMetric( measurementSetID, reportOut );
+                emiListener.onPullMetric( measurementSetID, reportOUT );
             else
-                emiLegListener.onPullMetric( measurementSetID, reportOut );
+                emiLegListener.onPullMetric( measurementSetID, reportOUT );
 
-            liveMonitorFace.sendPulledMetric( reportOut );
+            liveMonitorFace.sendPulledMetric( reportOUT );
         }
     }
 
