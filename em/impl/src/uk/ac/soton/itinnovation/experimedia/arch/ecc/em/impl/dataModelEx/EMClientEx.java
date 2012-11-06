@@ -47,8 +47,8 @@ public class EMClientEx extends EMClient
   // Internal Set-up stage support
   private ArrayList<UUID> generatorsToSetup;
   
-  // Internal Post-report stage support
-  private UUID currentPostReportMSID;
+  // Internal Shared state support
+  private UUID currentRequestedMSID;
  
   
   public EMClientEx( UUID id, String name )
@@ -156,13 +156,22 @@ public class EMClientEx extends EMClient
   
   public UUID getNextMeasurementSetIDToPull()
   {
-    if ( currentMeasurementSetPulls.isEmpty() ) return null;
+    if ( currentMeasurementSetPulls.isEmpty() )
+    {
+      currentRequestedMSID = null;
+      return null;
+    }
     
-    return currentMeasurementSetPulls.iterator().next();
+    currentRequestedMSID = currentMeasurementSetPulls.iterator().next();
+    
+    return currentRequestedMSID;
   }
   
-  public void clearAllMeasurementSetPulls()
-  { currentMeasurementSetPulls.clear(); }
+  public void clearAllLiveMeasurementSetPulls()
+  { 
+    currentMeasurementSetPulls.clear(); 
+    currentRequestedMSID = null;
+  }
   
   // Post-report phase state ---------------------------------------------------
   public void setPostReportSummary( EMPostReportSummary report )
@@ -172,8 +181,8 @@ public class EMClientEx extends EMClient
   {
     EMDataBatch targetBatch = null;
     
-    if ( currentPostReportMSID != null )
-      targetBatch = postReportOutstandingBatches.get( currentPostReportMSID );
+    if ( currentRequestedMSID != null )
+      targetBatch = postReportOutstandingBatches.get( currentRequestedMSID );
     
     return targetBatch;
   }
@@ -194,21 +203,29 @@ public class EMClientEx extends EMClient
   
   public UUID iterateNextMSForBatching()
   {
-    if ( currentPostReportMSID != null )
-      postReportOutstandingBatches.remove( currentPostReportMSID );
+    if ( currentRequestedMSID != null )
+      postReportOutstandingBatches.remove( currentRequestedMSID );
     
-    currentPostReportMSID = null;
+    currentRequestedMSID = null;
     
     if ( !postReportOutstandingBatches.isEmpty() )
     {
       Iterator<UUID> msIDIt = postReportOutstandingBatches.keySet().iterator();
-      currentPostReportMSID = msIDIt.next();
+      currentRequestedMSID = msIDIt.next();
     }
     
-    return currentPostReportMSID;
+    return currentRequestedMSID;
   }
   
   // Tear-down phase state -----------------------------------------------------
   public void setTearDownResult( boolean success )
   { tearDownSuccessful = success; }
+  
+  // Shared phase state --------------------------------------------------------
+  public UUID getCurrentRequestedMeasurementSetID()
+  { return currentRequestedMSID; }
+  
+  public void setCurrentRequestedMeasurementSetID( UUID id )
+  { currentRequestedMSID = id; }
 }
+ 
