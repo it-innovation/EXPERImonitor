@@ -277,6 +277,8 @@ public class MeasurementDAOHelper
             } catch (BatchUpdateException bux) {
                 log.warn("Caught a batch update exception when trying to save measurements - will now try to save all other measurements in the batch");
                 saveNonErroronousBatchMeasurements(measurementBatch, bux.getUpdateCounts(), pstmt);
+            } finally {
+                measurementBatch.clear();
             }
         } catch (Exception ex) {
             log.error("Error while saving Measurement: " + ex.getMessage(), ex);

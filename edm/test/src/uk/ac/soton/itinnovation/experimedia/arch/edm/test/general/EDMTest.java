@@ -115,7 +115,7 @@ public class EDMTest
         
         //reportSynchronisationTests(edm, mSetUUID);
         
-        reportDuplicateMeasurementsTests(edm, mSetUUID);
+        duplicateMeasurementsTests(edm, mSetUUID);
     }
     
     public static void experiments(IMonitoringEDM edm, UUID expUUID) throws Exception
@@ -1183,7 +1183,7 @@ public class EDMTest
         printReportDetails(report);
     }
     
-    public static void reportDuplicateMeasurementsTests(IMonitoringEDM edm, UUID mSetUUID) throws Exception
+    public static void duplicateMeasurementsTests(IMonitoringEDM edm, UUID mSetUUID) throws Exception
     {
         IReportDAO reportDAO = null;
         try {
@@ -1193,32 +1193,40 @@ public class EDMTest
             throw ex;
         }
         
-        int numMeasurements = 2;
-        log.info("Saving a Report with " + numMeasurements + " measurements for measurement set " + mSetUUID.toString());
+        Report report = null;
+        int numMeasurements = 1;
+        log.info("Saving 2 Reports with " + numMeasurements + " measurement(s) for measurement set " + mSetUUID.toString());
 
         Report report1 = getReportWithRandomMeasurements(UUID.randomUUID(), mSetUUID, numMeasurements);
         Report report2 = getReportWithRandomMeasurements(UUID.randomUUID(), mSetUUID, numMeasurements);
-        Report report3 = getReportWithRandomMeasurements(UUID.randomUUID(), mSetUUID, numMeasurements);
         try {
             reportDAO.saveReport(report1, true);
             reportDAO.saveReport(report2, true);
-            reportDAO.saveReport(report3, true);
-            log.info("Report saved successfully!");
+            log.info("Reports saved successfully!");
         } catch (Exception ex) {
             log.error("Unable to save Report: " + ex.getMessage(), ex);
         }
         
+        // should now be 2 measurements in the DB - no reports
+        try {
+            report = reportDAO.getReportForAllMeasurements(mSetUUID, true);
+            
+            if (report.getNumberOfMeasurements() == null) {
+                log.error("Got a report, but the number of measurements argument is NULL");
+            } else if (report.getNumberOfMeasurements() != 2) {
+                log.error("Should have been 2 measurements in the database, but got a report with " + report.getNumberOfMeasurements());
+            }
+        } catch (Exception ex) {
+            log.error("Failed to get a report for all measurements: " + ex.toString());
+        }
+        
 //----- SAVING REPORT WITH DUPLICATE MEASUREMENT
         log.info("Creating and saving Measurements for new Report and adding a measurement already saved in the DB");
-        Report reportWithDuplicates = getReportWithRandomMeasurements(UUID.randomUUID(), mSetUUID, 11);
+        Report reportWithDuplicates = getReportWithRandomMeasurements(UUID.randomUUID(), mSetUUID, 10);
         reportWithDuplicates.getMeasurementSet().addMeasurement(report1.getMeasurementSet().getMeasurements().iterator().next());
-        reportWithDuplicates.getMeasurementSet().addMeasurements(getReportWithRandomMeasurements(UUID.randomUUID(), mSetUUID, 11).getMeasurementSet().getMeasurements());
+        reportWithDuplicates.getMeasurementSet().addMeasurements(getReportWithRandomMeasurements(UUID.randomUUID(), mSetUUID, 10).getMeasurementSet().getMeasurements());
         reportWithDuplicates.getMeasurementSet().addMeasurement(report2.getMeasurementSet().getMeasurements().iterator().next());
-        reportWithDuplicates.getMeasurementSet().addMeasurements(getReportWithRandomMeasurements(UUID.randomUUID(), mSetUUID, 11).getMeasurementSet().getMeasurements());
-        reportWithDuplicates.getMeasurementSet().addMeasurement(report3.getMeasurementSet().getMeasurements().iterator().next());
-        reportWithDuplicates.getMeasurementSet().addMeasurements(getReportWithRandomMeasurements(UUID.randomUUID(), mSetUUID, 11).getMeasurementSet().getMeasurements());
-        
-        printReportDetails(reportWithDuplicates);
+        reportWithDuplicates.getMeasurementSet().addMeasurements(getReportWithRandomMeasurements(UUID.randomUUID(), mSetUUID, 10).getMeasurementSet().getMeasurements());
         
         try {
             reportDAO.saveMeasurements(reportWithDuplicates);
@@ -1227,9 +1235,22 @@ public class EDMTest
             log.error("Unable to save Measurements for Report: " + ex.getMessage(), ex);
         }
         
+        // should now be 32 measurements in the DB - no reports
+        try {
+            report = reportDAO.getReportForAllMeasurements(mSetUUID, true);
+            
+            if (report.getNumberOfMeasurements() == null) {
+                log.error("Got a report, but the number of measurements argument is NULL");
+            } else if (report.getNumberOfMeasurements() != 32) {
+                log.error("Should have been 32 measurements in the database, but got a report with " + report.getNumberOfMeasurements());
+            }
+        } catch (Exception ex) {
+            log.error("Failed to get a report for all measurements: " + ex.toString());
+        }
+        
 //----- NEED TO TEST THIS TOO
         log.info("Creating and saving Report with a measurement already saved in the DB");
-        Report reportWithDuplicates2 = getReportWithRandomMeasurements(UUID.randomUUID(), mSetUUID, 11);
+        Report reportWithDuplicates2 = getReportWithRandomMeasurements(UUID.randomUUID(), mSetUUID, 10);
         reportWithDuplicates2.getMeasurementSet().addMeasurement(report1.getMeasurementSet().getMeasurements().iterator().next());
         try {
             reportDAO.saveReport(reportWithDuplicates2, true);
@@ -1238,9 +1259,32 @@ public class EDMTest
             log.error("Unable to save Report: " + ex.getMessage(), ex);
         }
         
+        // should now be 42 measurements in the DB - and 1 report
+        try {
+            report = reportDAO.getReportForAllMeasurements(mSetUUID, true);
+            
+            if (report.getNumberOfMeasurements() == null) {
+                log.error("Got a report, but the number of measurements argument is NULL");
+            } else if (report.getNumberOfMeasurements() != 42) {
+                log.error("Should have been 42 measurements in the database, but got a report with " + report.getNumberOfMeasurements());
+            }
+        } catch (Exception ex) {
+            log.error("Failed to get a report for all measurements: " + ex.toString());
+        }
+        
         log.info("Trying to save a measurement that's already in the database");
-        IMeasurementDAO measurementDAO = edm.getMeasurementDAO();
-        measurementDAO.saveMeasurement(report1.getMeasurementSet().getMeasurements().iterator().next());
+        IMeasurementDAO measurementDAO = null;
+        try {
+            measurementDAO = edm.getMeasurementDAO();
+        } catch (Exception ex) {
+            log.error ("Unable to get Measurement DAO: " + ex.getMessage(), ex);
+            throw ex;
+        }
+        try {
+            measurementDAO.saveMeasurement(report1.getMeasurementSet().getMeasurements().iterator().next());
+        } catch (Exception ex) {
+            log.error("Unable to save measurement: " + ex.toString());
+        }
     }
     
     public static void printReportDetails(Report report)
