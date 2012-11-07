@@ -115,19 +115,11 @@ public class EMController implements IEMLifecycleListener
       case eEMLiveMonitoring : 
       {
         mainView.enablePulling( true );
-        mainView.enabledPostReportPulling( false );
       } break;
         
       case eEMPostMonitoringReport : 
       {
-        mainView.enablePulling( false );
         mainView.enabledPostReportPulling( true );
-      } break;
-        
-      default:
-      {
-        mainView.enablePulling( false );
-        mainView.enabledPostReportPulling( false );
       } break;
     }
     
@@ -141,6 +133,11 @@ public class EMController implements IEMLifecycleListener
   public void onLifecyclePhaseCompleted( EMPhase phase )
   {    
     mainView.setNextPhaseValue( expMonitor.getNextPhase().toString() );
+    
+    // Switch off all UI controls here - they will be separately switched on
+    // when a new phase starts
+    mainView.enablePulling( false );
+    mainView.enabledPostReportPulling( false );
     
     if ( waitingToStartNextPhase )
     {
@@ -261,10 +258,11 @@ public class EMController implements IEMLifecycleListener
   {
     if ( client != null && batch != null )
     {      
-      // Push batched data into the EDM
-      try { expReportAccessor.saveReport( batch.getBatchReport(), true ); }
-      catch ( Exception e )
-      { emCtrlLogger.error( "Could not save batch report data: " + e.getMessage() ); }
+      // Push batched data into the EDM (if we can)
+      if ( expReportAccessor != null )
+        try { expReportAccessor.saveReport( batch.getBatchReport(), true ); }
+        catch ( Exception e )
+        { emCtrlLogger.error( "Could not save batch report data: " + e.getMessage() ); }
     }
   }
   
@@ -472,24 +470,30 @@ public class EMController implements IEMLifecycleListener
       return false;
     }
     
-    try
+    Date expDate = new Date();
+    expInstance  = new Experiment();
+    expInstance.setName( UUID.randomUUID().toString() );
+    expInstance.setDescription( "Sample ExperimentMonitor based experiment" );
+    expInstance.setStartTime( expDate );
+    expInstance.setExperimentID( expDate.toString() );
+    
+    // If we have a working EDM, set up the EDM interfaces
+    if ( expDataMgr.isDatabaseSetUpAndAccessible() )
     {
-      expMGAccessor     = expDataMgr.getMetricGeneratorDAO();
-      expReportAccessor = expDataMgr.getReportDAO();
+      try
+      {
+        expMGAccessor     = expDataMgr.getMetricGeneratorDAO();
+        expReportAccessor = expDataMgr.getReportDAO();
 
-      Date expDate = new Date();
-      expInstance  = new Experiment();
-      expInstance.setName( UUID.randomUUID().toString() );
-      expInstance.setDescription( "Sample ExperimentMonitor based experiment" );
-      expInstance.setStartTime( expDate );
-      expInstance.setExperimentID( expDate.toString() );
-
-      IExperimentDAO expDAO = expDataMgr.getExperimentDAO();
-      expDAO.saveExperiment( expInstance );
-      result = true;
+        IExperimentDAO expDAO = expDataMgr.getExperimentDAO();
+        expDAO.saveExperiment( expInstance );
+        result = true;
+      }
+      catch ( Exception e )
+      { emCtrlLogger.error( "Could not initialise experiment"); }
     }
-    catch ( Exception e )
-    { emCtrlLogger.error( "Could not initialise experiment"); }
+    else
+      emCtrlLogger.error( "Could not access EDM database" );
     
     return result;
   }
