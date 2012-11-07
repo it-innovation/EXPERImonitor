@@ -32,9 +32,6 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.NoDataException;
 /**
  * A DAO to save and get Measurement objects from storage.
  * 
- * OBS: no delete methods yet.
- * OBS: no update methods yet.
- * 
  * @author Vegard Engen
  */
 public interface IMeasurementDAO
@@ -49,12 +46,13 @@ public interface IMeasurementDAO
     void saveMeasurement(Measurement measurement) throws IllegalArgumentException, Exception;
     
     /**
-     * Saves measurements for an existing measurement set, and will create a
-     * Report for them.
+     * Saves measurements for an existing measurement set. Note that if one or 
+     * more of the measurements already exists in the database, they are simply 
+     * ignored.
      * @param measurements The measurements to save.
      * @param mSetUUID The UUID of the measurement set.
      * @throws IllegalArgumentException If the arguments are invalid, typically due to missing information (e.g., NULL values).
-     * @throws Exception If there's a technical issue, if the measurement set does not exist, or a measurement with the same UUID already exists.
+     * @throws Exception If there's a technical issue or if the measurement set does not exist.
      */
     void saveMeasurementsForSet(Set<Measurement> measurements, UUID mSetUUID) throws IllegalArgumentException, NoDataException, Exception;
     

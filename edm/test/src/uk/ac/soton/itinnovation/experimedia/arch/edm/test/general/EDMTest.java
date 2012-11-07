@@ -22,10 +22,12 @@
 //      Created for Project :   BonFIRE
 //
 /////////////////////////////////////////////////////////////////////////
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.test;
+package uk.ac.soton.itinnovation.experimedia.arch.edm.test.general;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
@@ -41,7 +43,8 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Me
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricType;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Unit;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.MonitoringEDM;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMInterfaceFactory;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDM;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.NoDataException;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IEntityDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IExperimentDAO;
@@ -61,7 +64,6 @@ public class EDMTest
     
     public static void main(String[] args) throws Exception
     {
-        
         UUID expUUID = UUID.fromString("bfe4c710-61ba-46f8-a519-be2f7808192e");
         UUID entityUUID = UUID.fromString("5718cd67-4310-4b2c-aeb9-9b72314630ca");
         UUID attributeUUID = UUID.fromString("4f2817b5-603a-4d02-a032-62cfca314962");
@@ -72,7 +74,7 @@ public class EDMTest
         
         boolean withSubClasses = true;
         
-        MonitoringEDM edm = new MonitoringEDM();
+        IMonitoringEDM edm = EDMInterfaceFactory.getMonitoringEDM();
         if (!edm.isDatabaseSetUpAndAccessible())
         {
             log.error("EDM not set up properly!");
@@ -103,16 +105,20 @@ public class EDMTest
         
         experimentCompleteChain(edm, expUUID, entityUUID, attributeUUID, mGenUUID, mGrpUUID, mSetUUID);
         
-        printExperimentDetails(edm, expUUID, withSubClasses);
+        //printExperimentDetails(edm, expUUID, withSubClasses);
         
         //saveReport(edm, mSetUUID, reportUUID);
         
         //getReport(edm, mSetUUID, reportUUID);
         
         //updateAndDeleteReportTests(edm, mSetUUID);
+        
+        //reportSynchronisationTests(edm, mSetUUID);
+        
+        duplicateMeasurementsTests(edm, mSetUUID);
     }
     
-    public static void experiments(MonitoringEDM edm, UUID expUUID) throws Exception
+    public static void experiments(IMonitoringEDM edm, UUID expUUID) throws Exception
     {
         boolean withSubClasses = true;
         IExperimentDAO expDAO = null;
@@ -204,7 +210,7 @@ public class EDMTest
         }
     }
     
-    public static void entities(MonitoringEDM edm, UUID entityUUID, UUID attributeUUID, UUID expUUID, boolean withSubClasses) throws Exception
+    public static void entities(IMonitoringEDM edm, UUID entityUUID, UUID attributeUUID, UUID expUUID, boolean withSubClasses) throws Exception
     {
         IEntityDAO entityDAO = null;
         try {
@@ -352,7 +358,7 @@ public class EDMTest
         } // end if entities == null
     }
     
-    public static void metricGenerator(MonitoringEDM edm, UUID expUUID, UUID entityUUID, UUID mGenUUID, boolean withSubClasses) throws Exception
+    public static void metricGenerator(IMonitoringEDM edm, UUID expUUID, UUID entityUUID, UUID mGenUUID, boolean withSubClasses) throws Exception
     {
         IMetricGeneratorDAO metricGeneratorDAO = null;
         try {
@@ -449,7 +455,7 @@ public class EDMTest
         }
     }
     
-    public static void metricGeneratorCompleteChain(MonitoringEDM edm, UUID expUUID, UUID entityUUID, UUID attribUUID, UUID mGenUUID, UUID mGrpUUID, UUID mSetUUID) throws Exception
+    public static void metricGeneratorCompleteChain(IMonitoringEDM edm, UUID expUUID, UUID entityUUID, UUID attribUUID, UUID mGenUUID, UUID mGrpUUID, UUID mSetUUID) throws Exception
     {
         IMetricGeneratorDAO metricGeneratorDAO = null;
         try {
@@ -511,7 +517,7 @@ public class EDMTest
     }
     
     
-    public static void metricGroup(MonitoringEDM edm, UUID mGenUUID, UUID mGrpUUID, boolean withSubClasses) throws Exception
+    public static void metricGroup(IMonitoringEDM edm, UUID mGenUUID, UUID mGrpUUID, boolean withSubClasses) throws Exception
     {
         IMetricGroupDAO metricGroupDAO = null;
         try {
@@ -573,7 +579,7 @@ public class EDMTest
         }
     }
     
-    public static void metricGroupCompleteChain(MonitoringEDM edm, UUID attribUUID, UUID mGenUUID, UUID mGrpUUID, UUID mSetUUID) throws Exception
+    public static void metricGroupCompleteChain(IMonitoringEDM edm, UUID attribUUID, UUID mGenUUID, UUID mGrpUUID, UUID mSetUUID) throws Exception
     {
         IMetricGroupDAO metricGroupDAO = null;
         try {
@@ -618,7 +624,7 @@ public class EDMTest
         }
     }
     
-    public static void measurementSet(MonitoringEDM edm, UUID attribUUID, UUID mGrpUUID, UUID mSetUUID, boolean withSubClasses) throws Exception
+    public static void measurementSet(IMonitoringEDM edm, UUID attribUUID, UUID mGrpUUID, UUID mSetUUID, boolean withSubClasses) throws Exception
     {
         IMeasurementSetDAO mSetDAO = null;
         try {
@@ -675,7 +681,7 @@ public class EDMTest
         
     }
     
-    public static void measurementSetViolation(MonitoringEDM edm, UUID attribUUID, UUID mGrpUUID, UUID mSetUUID) throws Exception
+    public static void measurementSetViolation(IMonitoringEDM edm, UUID attribUUID, UUID mGrpUUID, UUID mSetUUID) throws Exception
     {
         boolean withSubClasses = false;
         IMeasurementSetDAO mSetDAO = null;
@@ -709,7 +715,7 @@ public class EDMTest
         }
     }
     
-    public static void measurement(MonitoringEDM edm, UUID mSetUUID) throws Exception
+    public static void measurement(IMonitoringEDM edm, UUID mSetUUID) throws Exception
     {
         IMeasurementDAO measurementDAO = null;
         try {
@@ -732,7 +738,7 @@ public class EDMTest
         }
     }
     
-    public static void experimentCompleteChain(MonitoringEDM edm, UUID expUUID, UUID entityUUID, UUID attribUUID, UUID mGenUUID, UUID mGrpUUID, UUID mSetUUID) throws Exception
+    public static void experimentCompleteChain(IMonitoringEDM edm, UUID expUUID, UUID entityUUID, UUID attribUUID, UUID mGenUUID, UUID mGrpUUID, UUID mSetUUID) throws Exception
     {
         boolean withSubClasses = true;
         
@@ -806,7 +812,7 @@ public class EDMTest
     }
     
     
-    public static void saveReport(MonitoringEDM edm, UUID mSetUUID, UUID reportUUID) throws Exception
+    public static void saveReport(IMonitoringEDM edm, UUID mSetUUID, UUID reportUUID) throws Exception
     {
         IReportDAO reportDAO = null;
         try {
@@ -818,7 +824,7 @@ public class EDMTest
         
         log.info("Saving Report for measurement set " + mSetUUID.toString());
         
-        Report report = getReportWithRandomMeasurements(reportUUID, mSetUUID);
+        Report report = getReportWithRandomMeasurements(reportUUID, mSetUUID, 5);
         
         try {
             reportDAO.saveReport(report, true);
@@ -840,7 +846,7 @@ public class EDMTest
         }
         
         log.info("Saving Measurements for Report for measurement set " + mSetUUID.toString());
-        Report report2 = getReportWithRandomMeasurements(UUID.randomUUID(), mSetUUID);
+        Report report2 = getReportWithRandomMeasurements(UUID.randomUUID(), mSetUUID, 5);
         
         try {
             reportDAO.saveMeasurements(report2);
@@ -851,10 +857,9 @@ public class EDMTest
     }
     
     
-    private static Report getReportWithRandomMeasurements(UUID reportUUID, UUID mSetUUID)
+    private static Report getReportWithRandomMeasurements(UUID reportUUID, UUID mSetUUID, int numMeasurements)
     {
         MeasurementSet mSet = new MeasurementSet(mSetUUID);
-        int numMeasurements = 5;
         Random rand = new Random();
         rand.setSeed(new Date().getTime());
         long timeStampFrom = 0;
@@ -884,7 +889,7 @@ public class EDMTest
         return report;
     }
     
-    public static void getReport(MonitoringEDM edm, UUID mSetUUID, UUID reportUUID) throws Exception
+    public static void getReport(IMonitoringEDM edm, UUID mSetUUID, UUID reportUUID) throws Exception
     {
         IReportDAO reportDAO = null;
         try {
@@ -1062,7 +1067,7 @@ public class EDMTest
     }
     
     
-    public static void updateAndDeleteReportTests(MonitoringEDM edm, UUID mSetUUID) throws Exception
+    public static void updateAndDeleteReportTests(IMonitoringEDM edm, UUID mSetUUID) throws Exception
     {
         IReportDAO reportDAO = null;
         try {
@@ -1075,7 +1080,7 @@ public class EDMTest
         log.info("Saving Report for measurement set " + mSetUUID.toString());
         
         UUID reportUUID = UUID.randomUUID();
-        Report report = getReportWithRandomMeasurements(reportUUID, mSetUUID);
+        Report report = getReportWithRandomMeasurements(reportUUID, mSetUUID, 5);
         
         try {
             reportDAO.saveReport(report, true);
@@ -1115,6 +1120,173 @@ public class EDMTest
         }
     }
     
+    public static void reportSynchronisationTests(IMonitoringEDM edm, UUID mSetUUID) throws Exception
+    {
+        IReportDAO reportDAO = null;
+        try {
+            reportDAO = edm.getReportDAO();
+        } catch (Exception ex) {
+            log.error ("Unable to get Report DAO: " + ex.getMessage(), ex);
+            throw ex;
+        }
+        
+        int numReports = 5;
+        int numMeasurements = 2;
+        
+        List<UUID> reportUUIDList = new ArrayList<UUID>();
+        log.info("Saving " + numReports + " Reports with " + numMeasurements + " measurements each for measurement set " + mSetUUID.toString());
+        for (int i = 0; i < numReports; i++)
+        {
+            UUID reportUUID = UUID.randomUUID();
+            Report report = getReportWithRandomMeasurements(reportUUID, mSetUUID, numMeasurements);
+
+            try {
+                reportDAO.saveReport(report, true);
+                reportUUIDList.add(reportUUID);
+                log.info("Report saved successfully!");
+            } catch (Exception ex) {
+                log.error("Unable to save Report: " + ex.getMessage(), ex);
+            }
+        }
+        
+//----- SET SYNCED FLAG FOR MEASUREMENTS FOR REPORT BY UUID
+        Random rand = new Random();
+        int counter = 0;
+        for (UUID reportUUID : reportUUIDList)
+        {
+            if (rand.nextBoolean())
+            {
+                log.info("Setting sync flag for measurements for report by UUID: " + reportUUID);
+                try {
+                    reportDAO.setReportMeasurementsSyncFlag(reportUUID, true);
+                    counter++;
+                    log.info("Report updated successfully");
+                } catch (Exception ex) {
+                    log.error("Unable to update Report: " + ex.getMessage(), ex);
+                }
+            }
+        }
+        log.info("Set the sync flag for " + counter + " Reports");
+        
+//----- GET REPORT FOR UNSYNC'ED MEASUREMENTS
+        log.info("Should now get a report with " + ((numReports-counter) * numMeasurements) + " unsynchronised measurements");
+        Report report = null;
+        try {
+            Date date = new Date(new Date().getTime() - 10000L);
+            log.info("Getting Report for last 100 unsync'ed measurements from date: " + date + " ("+ date.getTime() + ")");
+            report = reportDAO.getReportForUnsyncedMeasurementsFromDate(mSetUUID, date, 100, true);
+        } catch (NoDataException ex) {
+            log.error("Unable to get Report: " + ex.toString());
+        } catch (Exception ex) {
+            log.error("Unable to get Report: " + ex.toString(), ex);
+        }
+        printReportDetails(report);
+    }
+    
+    public static void duplicateMeasurementsTests(IMonitoringEDM edm, UUID mSetUUID) throws Exception
+    {
+        IReportDAO reportDAO = null;
+        try {
+            reportDAO = edm.getReportDAO();
+        } catch (Exception ex) {
+            log.error ("Unable to get Report DAO: " + ex.getMessage(), ex);
+            throw ex;
+        }
+        
+        Report report = null;
+        int numMeasurements = 1;
+        log.info("Saving 2 Reports with " + numMeasurements + " measurement(s) for measurement set " + mSetUUID.toString());
+
+        Report report1 = getReportWithRandomMeasurements(UUID.randomUUID(), mSetUUID, numMeasurements);
+        Report report2 = getReportWithRandomMeasurements(UUID.randomUUID(), mSetUUID, numMeasurements);
+        try {
+            reportDAO.saveReport(report1, true);
+            reportDAO.saveReport(report2, true);
+            log.info("Reports saved successfully!");
+        } catch (Exception ex) {
+            log.error("Unable to save Report: " + ex.getMessage(), ex);
+        }
+        
+        // should now be 2 measurements in the DB - no reports
+        try {
+            report = reportDAO.getReportForAllMeasurements(mSetUUID, true);
+            
+            if (report.getNumberOfMeasurements() == null) {
+                log.error("Got a report, but the number of measurements argument is NULL");
+            } else if (report.getNumberOfMeasurements() != 2) {
+                log.error("Should have been 2 measurements in the database, but got a report with " + report.getNumberOfMeasurements());
+            }
+        } catch (Exception ex) {
+            log.error("Failed to get a report for all measurements: " + ex.toString());
+        }
+        
+//----- SAVING REPORT WITH DUPLICATE MEASUREMENT
+        log.info("Creating and saving Measurements for new Report and adding a measurement already saved in the DB");
+        Report reportWithDuplicates = getReportWithRandomMeasurements(UUID.randomUUID(), mSetUUID, 10);
+        reportWithDuplicates.getMeasurementSet().addMeasurement(report1.getMeasurementSet().getMeasurements().iterator().next());
+        reportWithDuplicates.getMeasurementSet().addMeasurements(getReportWithRandomMeasurements(UUID.randomUUID(), mSetUUID, 10).getMeasurementSet().getMeasurements());
+        reportWithDuplicates.getMeasurementSet().addMeasurement(report2.getMeasurementSet().getMeasurements().iterator().next());
+        reportWithDuplicates.getMeasurementSet().addMeasurements(getReportWithRandomMeasurements(UUID.randomUUID(), mSetUUID, 10).getMeasurementSet().getMeasurements());
+        
+        try {
+            reportDAO.saveMeasurements(reportWithDuplicates);
+            log.info("Measurements for Report saved successfully!");
+        } catch (Exception ex) {
+            log.error("Unable to save Measurements for Report: " + ex.getMessage(), ex);
+        }
+        
+        // should now be 32 measurements in the DB - no reports
+        try {
+            report = reportDAO.getReportForAllMeasurements(mSetUUID, true);
+            
+            if (report.getNumberOfMeasurements() == null) {
+                log.error("Got a report, but the number of measurements argument is NULL");
+            } else if (report.getNumberOfMeasurements() != 32) {
+                log.error("Should have been 32 measurements in the database, but got a report with " + report.getNumberOfMeasurements());
+            }
+        } catch (Exception ex) {
+            log.error("Failed to get a report for all measurements: " + ex.toString());
+        }
+        
+//----- NEED TO TEST THIS TOO
+        log.info("Creating and saving Report with a measurement already saved in the DB");
+        Report reportWithDuplicates2 = getReportWithRandomMeasurements(UUID.randomUUID(), mSetUUID, 10);
+        reportWithDuplicates2.getMeasurementSet().addMeasurement(report1.getMeasurementSet().getMeasurements().iterator().next());
+        try {
+            reportDAO.saveReport(reportWithDuplicates2, true);
+            log.info("Report saved successfully!");
+        } catch (Exception ex) {
+            log.error("Unable to save Report: " + ex.getMessage(), ex);
+        }
+        
+        // should now be 42 measurements in the DB - and 1 report
+        try {
+            report = reportDAO.getReportForAllMeasurements(mSetUUID, true);
+            
+            if (report.getNumberOfMeasurements() == null) {
+                log.error("Got a report, but the number of measurements argument is NULL");
+            } else if (report.getNumberOfMeasurements() != 42) {
+                log.error("Should have been 42 measurements in the database, but got a report with " + report.getNumberOfMeasurements());
+            }
+        } catch (Exception ex) {
+            log.error("Failed to get a report for all measurements: " + ex.toString());
+        }
+        
+        log.info("Trying to save a measurement that's already in the database");
+        IMeasurementDAO measurementDAO = null;
+        try {
+            measurementDAO = edm.getMeasurementDAO();
+        } catch (Exception ex) {
+            log.error ("Unable to get Measurement DAO: " + ex.getMessage(), ex);
+            throw ex;
+        }
+        try {
+            measurementDAO.saveMeasurement(report1.getMeasurementSet().getMeasurements().iterator().next());
+        } catch (Exception ex) {
+            log.error("Unable to save measurement: " + ex.toString());
+        }
+    }
+    
     public static void printReportDetails(Report report)
     {
         if (report != null)
@@ -1134,13 +1306,13 @@ public class EDMTest
                 
                 for (Measurement m : report.getMeasurementSet().getMeasurements())
                 {
-                    log.info("      - " + m.getValue() + "\t" + m.getTimeStamp() + "(" + m.getTimeStamp().getTime() + ")");
+                    log.info("      - " + m.getUUID() + "\t" + m.getValue() + "\t" + m.getTimeStamp() + "(" + m.getTimeStamp().getTime() + ")");
                 }
             }
         }
     }
     
-    public static void printExperimentDetails(MonitoringEDM edm, UUID expUUID, boolean withSubClasses) throws Exception
+    public static void printExperimentDetails(IMonitoringEDM edm, UUID expUUID, boolean withSubClasses) throws Exception
     {
         IExperimentDAO expDAO = null;
         try {
