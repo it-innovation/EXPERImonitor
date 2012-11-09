@@ -13,12 +13,10 @@ fi
 cd `dirname $0`/../code
 
 cat > em.properties <<EOF
-MonitorID=00000000-0000-0000-0000-000000000000
-Monitor_IP=`relation-get hostname`
-MonitorPort=5672
-Monitor_Use_SSL=false
-#Keystore=/main/resources/rabbitKeyStore.jks
-#KeystorePassword=rabbit
+# EXPERIMEDIA RabbitMQ (unsecured) configuration
+Rabbit_IP=`relation-get hostname`
+Rabbit_Port=5672
+Monitor_ID=00000000-0000-0000-0000-000000000000
 EOF
 
 ./restart

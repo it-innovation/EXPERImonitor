@@ -2,6 +2,8 @@
 
 juju-log "localdb relation changed"
 
+relation-set database=headless
+
 if [ "`relation-get host`" == "" ]; then
 	juju-log "Waiting for postgres database..."
 	exit 0
