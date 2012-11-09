@@ -1,12 +1,12 @@
-#!/bin/sh
+#!/bin/bash
 
 juju-log "rabbit relation changed"
 
 relation-set username=headless
 relation-set vhost=/
 
-if [ `relation-get hostname` == "" ]; then
-	juju-info "Waiting for rabbit hostname..."
+if [ "`relation-get hostname`" == "" ]; then
+	juju-log "Waiting for rabbit hostname..."
 	exit 0
 fi
 
