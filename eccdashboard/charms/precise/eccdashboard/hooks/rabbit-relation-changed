@@ -1,0 +1,22 @@
+#!/bin/bash
+
+set -eux
+
+juju-log "rabbit relation changed"
+
+relation-set username=eccdashboard
+relation-set vhost=/
+
+if [ "`relation-get hostname`" == "" ]; then
+	juju-log "Waiting for rabbit hostname..."
+	exit 0
+fi
+
+cat > ./deploy/eccdashboard/WEB-INF/classes/em.properties <<EOF
+# EXPERIMEDIA RabbitMQ (unsecured) configuration
+Rabbit_IP=`relation-get hostname`
+Rabbit_Port=5672
+Monitor_ID=00000000-0000-0000-0000-000000000000
+EOF
+
+./maybe-restart.sh
