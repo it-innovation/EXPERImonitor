@@ -11,7 +11,7 @@ juju destroy-service headless
 set -eu
 
 echo "Building charm..."
-if [ ! -d lib ]; then
+if [ ! -d lib/dependency ]; then
 	mvn install
 	mvn dependency:copy-dependencies
 fi
