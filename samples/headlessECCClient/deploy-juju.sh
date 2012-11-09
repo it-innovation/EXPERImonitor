@@ -10,10 +10,13 @@ juju destroy-service headless
 
 set -eu
 
-echo "Building charm..."
 if [ ! -d lib/dependency ]; then
+	echo "Building charm..."
 	mvn install
 	mvn dependency:copy-dependencies
+else
+	echo "Waiting for undeploy..."
+	sleep 4
 fi
 rm -rf charms/precise/headlesseccclient/code/lib/
 cp -r lib charms/precise/headlesseccclient/code/lib
@@ -24,4 +27,10 @@ juju add-relation headless:localdb postgresql:db
 juju add-relation headless:rabbit rabbitmq-server
 
 echo "Tailing log... (CTRL-C to exit)"
-juju debug-log
+#juju debug-log
+
+unit=`juju status | grep "\<headless/\(.*\):$" | sed 's/\s*\(.*\):/\1/'`
+for x in seq 10; do
+  sleep 5
+  juju ssh $unit tail -f /var/lib/juju/units/headless-\*/charm/code/headless.log
+done
