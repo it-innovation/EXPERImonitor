@@ -199,6 +199,20 @@ public class EMController implements IEMLifecycleListener
   }
   
   @Override
+  public void onClientDeclaredCanPush( EMClient client )
+  {
+    if ( client != null )
+      mainView.addLogText( client.getName() + " has declared PUSHing capable" );
+  }
+  
+  @Override
+  public void onClientDeclaredCanBePulled( EMClient client )
+  {
+    if ( client != null )
+      mainView.addLogText( client.getName() + " has declared PULLable capable" );
+  }
+  
+  @Override
   public void onGotMetricData( EMClient client, Report report )
   {
     if ( client != null && report != null )

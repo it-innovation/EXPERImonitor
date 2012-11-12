@@ -49,6 +49,10 @@ public interface IEMLifecycleListener
   
   void onClientSetupResult( EMClient client, boolean success );
   
+  void onClientDeclaredCanPush( EMClient client );
+  
+  void onClientDeclaredCanBePulled( EMClient client );
+  
   void onGotMetricData( EMClient client, Report report );
   
   void onGotSummaryReport( EMClient client, EMPostReportSummary summary );

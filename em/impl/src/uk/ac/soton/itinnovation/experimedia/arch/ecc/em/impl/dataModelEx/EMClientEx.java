@@ -145,6 +145,12 @@ public class EMClientEx extends EMClient
   { if ( genID != null ) generatorsSetupOK.add( genID ); }
   
   // Live monitoring phase (and post-reporting) states -------------------------  
+  public void setIsPushCapable( boolean push )
+  { isPushCapable = push; }
+  
+  public void setIsPullCapable( boolean pull )
+  { isPullCapable = pull; }
+  
   public void addPullingMeasurementSetID( UUID msID )
   { currentMeasurementSetPulls.add( msID ); }
   
