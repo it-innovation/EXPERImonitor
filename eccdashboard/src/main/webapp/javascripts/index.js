@@ -556,6 +556,7 @@ function getClients() {
             success: function(clients){
     //            console.log(clients);
                 if (clients.length == 0) {
+                    $(".clientlist").empty();
                     $(".clientdetails").empty();
                     $(".clientdetails").append('<h6>No clients detected</h6>');
 
