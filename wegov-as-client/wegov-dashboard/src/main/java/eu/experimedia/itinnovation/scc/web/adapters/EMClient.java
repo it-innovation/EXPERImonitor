@@ -28,6 +28,7 @@ import eu.wegov.coordinator.dao.data.ExperimediaTopicOpinion;
 import eu.wegov.helper.CoordinatorHelper;
 import eu.wegov.web.security.WegovLoginService;
 import java.util.*;
+import javax.annotation.PostConstruct;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -42,7 +43,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EM
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared.EMIAdapterListener;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared.EMInterfaceAdapter;
 
-@Service
+@Service("EMClient")
 public class EMClient implements EMIAdapterListener {
 
     private static final Logger clientLogger = Logger.getLogger(EMClient.class);
@@ -56,6 +57,7 @@ public class EMClient implements EMIAdapterListener {
     private HashMap<UUID, Attribute> measurementSetsAndAttributes = new HashMap<UUID, Attribute>();
     private ArrayList<MeasurementSet> allMeasurementSets = new ArrayList<MeasurementSet>();
     private boolean dataPushEnabled = false;
+    private Coordinator coordinator;
     
     @Autowired
     @Qualifier("wegovLoginService")
@@ -63,9 +65,10 @@ public class EMClient implements EMIAdapterListener {
     
     @Autowired
     @Qualifier("coordinatorHelper")
-    private transient CoordinatorHelper helper;    
+    CoordinatorHelper helper;    
 
     public EMClient() {
+        
         clientLogger.debug("Creating new WeGov 3.1 EM Client ...");
 
         // Have to call this here because it's better if this
@@ -76,8 +79,29 @@ public class EMClient implements EMIAdapterListener {
         } catch (Throwable ex) {
             throw new RuntimeException("Failed to start new WeGov 3.1 EM Client", ex);
         }
-
+        
         clientLogger.debug("Successfully created new WeGov 3.1 EM Client");
+    }
+    
+    @PostConstruct
+    public void init() {
+        clientLogger.debug("Initializing WeGov coordinator ...");        
+
+        try {
+            coordinator = helper.getStaticCoordinator();
+        } catch (Throwable ex) {
+            throw new RuntimeException("Failed to initialise WeGov Coordinator", ex);
+        }
+        
+        clientLogger.debug("Resetting WeGov database");
+        
+        // Remove all old entries from ExperimediaTopicOpinion for now
+        try {
+            coordinator.getDataSchema().deleteAll(new ExperimediaTopicOpinion());
+        } catch (Throwable ex) {
+            throw new RuntimeException("Failed to clear ExperimediaTopicOpinion table", ex);
+        }         
+        
     }
 
     public UUID getClientId() {
@@ -265,7 +289,7 @@ public class EMClient implements EMIAdapterListener {
             
             try {
 
-                Coordinator coordinator = helper.getStaticCoordinator();
+                
                 
                 ArrayList<ExperimediaTopicOpinion> topics = coordinator.getDataSchema().getAll(new ExperimediaTopicOpinion());
                 

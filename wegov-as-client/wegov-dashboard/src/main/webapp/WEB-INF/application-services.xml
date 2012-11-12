@@ -12,27 +12,23 @@
 					    http://www.springframework.org/schema/aop
 					    http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
 
+
+<!--<bean class="org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor"/>-->
+
     <bean id="wegovSecurityService" class="eu.wegov.web.security.WegovSecurityService">
     </bean>
 
-    <bean id="wegovLoginService" class="eu.wegov.web.security.WegovLoginService">
-    </bean>
+<!--    <bean id="wegovLoginService" class="eu.wegov.web.security.WegovLoginService">
+    </bean>-->
 
-    <bean id="coordinatorHelper" class="eu.wegov.helper.CoordinatorHelper">
-    </bean>
+<!--    <bean id="coordinatorHelper" class="eu.wegov.helper.CoordinatorHelper">
+    </bean>-->
 
     <bean id="schedulerService" class="eu.wegov.web.service.impl.SchedulerServiceImpl">
     </bean>
         
-        
-<!--    <bean id="experimentMonitorService" class="eu.experimedia.itinnovation.scc.web.services.ExperimentMonitorService">
-    </bean>        
-
-    <bean id="experimentHelper" class="eu.experimedia.itinnovation.scc.web.helpers.ExperimentHelper">
+<!--    <bean id="EMClient" class="eu.experimedia.itinnovation.scc.web.adapters.EMClient">
     </bean>         -->
-
-    <bean id="EMClient" class="eu.experimedia.itinnovation.scc.web.adapters.EMClient">
-    </bean>         
 
     <!-- Quartz Scheduler Configuration -->
     <bean id="theScheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">

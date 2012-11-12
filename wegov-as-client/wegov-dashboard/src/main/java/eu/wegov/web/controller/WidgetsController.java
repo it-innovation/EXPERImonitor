@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import eu.wegov.coordinator.web.Widget;
 import eu.wegov.coordinator.web.WidgetDataAsJson;
 import eu.wegov.coordinator.web.WidgetSet;
+import eu.wegov.helper.CoordinatorHelper;
 import eu.wegov.web.security.WegovLoginService;
 
 @Controller
@@ -29,9 +30,9 @@ public class WidgetsController {
     @Qualifier("wegovLoginService")
     WegovLoginService loginService;
 
-    @Autowired
-    @Qualifier("EMClient")
-    EMClient emClient;
+//    @Autowired
+//    @Qualifier("EMClient")
+//    EMClient emClient;
 
     @RequestMapping(method = RequestMethod.GET, value = "/getWidget/do.json")
     public @ResponseBody
@@ -318,7 +319,7 @@ public class WidgetsController {
             throws Exception {
         loginService.updateWidgetParameters(wId, newParametersValue);
         
-        emClient.pushData("Updated parameters for widget [" + Integer.toString(wId) + "]: " + newParametersValue);
+//        emClient.pushData("Updated parameters for widget [" + Integer.toString(wId) + "]: " + newParametersValue);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/hideWidget/do.json")
