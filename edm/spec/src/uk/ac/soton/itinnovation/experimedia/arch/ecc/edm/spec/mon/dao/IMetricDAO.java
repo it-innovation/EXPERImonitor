@@ -31,9 +31,6 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.NoDataException;
 /**
  * A DAO to save and get Metric objects from storage.
  * 
- * OBS: no delete methods yet.
- * OBS: no update methods yet.
- * 
  * @author Vegard Engen
  */
 public interface IMetricDAO

@@ -5,21 +5,21 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
     <artifactId>experimedia-arch-ecc-common-dataModel</artifactId>
-    <version>0.9-SNAPSHOT</version> 
+    <version>1.0-SNAPSHOT</version> 
     <name>ECC Common Data Model</name> 
     <packaging>pom</packaging>
   
     <parent>
     <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
     <artifactId>experimedia-arch-ecc-common</artifactId>
-    <version>0.9-SNAPSHOT</version>
+    <version>1.0-SNAPSHOT</version>
   </parent>
   
     <modules>
         <module>metrics</module>
         <module>experiment</module>
         <module>provenance</module>
-		<module>monitor</module>
+        <module>monitor</module>
     </modules>
     
 </project>

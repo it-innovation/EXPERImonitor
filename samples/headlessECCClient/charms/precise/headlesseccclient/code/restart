@@ -15,4 +15,4 @@ fi
 
 juju-log "START headless client"
 
-(echo $$ >> pid && exec java -cp '.:lib/dependency/*:lib/experimedia-arch-ecc-samples-headlessECCClient-0.9-SNAPSHOT.jar' uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.headlessECCClient.EntryPoint) > headless.log 2>&1 &
+(echo $$ >> pid && exec java -cp '.:lib/dependency/*:lib/experimedia-arch-ecc-samples-headlessECCClient-1.0-SNAPSHOT.jar' uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.headlessECCClient.EntryPoint) > headless.log 2>&1 &

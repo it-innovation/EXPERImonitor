@@ -37,9 +37,6 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.NoDataException;
  * methods need to be called, passing on the UUID of the measurement set (and
  * any other arguments for the respective method).
  * 
- * OBS: no delete methods yet.
- * OBS: no update methods yet.
- * 
  * @author Vegard Engen
  */
 public interface IMetricGroupDAO

@@ -33,14 +33,14 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.EMConnectionManagerListener;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 
 import java.util.*;
 import org.apache.log4j.Logger;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMDataBatchEx;
+
 
 
 
@@ -234,7 +234,7 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
       if ( clientEx == null ) throw new Exception( "Client is invalid" );
 
       clientEx.addPullingMeasurementSetID( measurementSetID );
-      clientEx.getLiveMonitorInterface().pullMetric( measurementSetID );
+      clientEx.getLiveMonitorInterface().pullMetric( clientEx.iterateNextMSForPulling() );
     }
   }
   
@@ -258,16 +258,11 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
         EMClientEx clientEx = (EMClientEx) client;
         if ( clientEx == null ) throw new Exception( "Client is invalid" );
         
-        Iterator<MeasurementSet> msIt = targetMSets.iterator();
-        UUID lastMSID = null;
-        
+        Iterator<MeasurementSet> msIt = targetMSets.iterator();       
         while ( msIt.hasNext() )
-        {
-          lastMSID = msIt.next().getUUID();
-          clientEx.addPullingMeasurementSetID( lastMSID ); 
-        }
+        { clientEx.addPullingMeasurementSetID( msIt.next().getUUID() ); }
         
-        clientEx.getLiveMonitorInterface().pullMetric( lastMSID );
+        clientEx.getLiveMonitorInterface().pullMetric( clientEx.iterateNextMSForPulling() );
       }
     }
     

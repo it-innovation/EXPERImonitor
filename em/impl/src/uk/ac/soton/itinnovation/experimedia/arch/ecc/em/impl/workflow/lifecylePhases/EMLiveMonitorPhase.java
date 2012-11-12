@@ -229,7 +229,11 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
       // Only allow clients who have declared they are going to push
       if ( client != null && clientPushGroup.contains( client.getID() ) )
       {
-        if ( phaseListener != null )
+        // Make sure we don't have any empty report...
+        MeasurementSet mSet = report.getMeasurementSet();
+        
+        //... before sending
+        if ( phaseListener != null && mSet != null )
           phaseListener.onGotMetricData( client, report );
         
         // Let client know we've received the data
@@ -274,7 +278,7 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
       {
         MeasurementSet mSet = report.getMeasurementSet();
         
-        // Try to get data from report
+        // Check we don't have an empty report...
         if ( mSet != null )
         {
           // Remove ID from current pulling set
@@ -284,7 +288,12 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
           if ( phaseListener != null ) 
             phaseListener.onGotMetricData( client, report );
         }
-        else phaseLogger.error( "Pulled report contained NULL MeasurementSet" );
+        else // We didn't get any actual data, so we'll have to assume that
+             // this was the report we asked for
+        {
+          phaseLogger.error( "Pulled report contained NULL MeasurementSet" );
+          client.removePullingMeasurementSetID( client.getCurrentRequestedMeasurementSetID() );
+        }
         
         // Tell the client we got the report
         IEMLiveMonitor monitor = client.getLiveMonitorInterface();
@@ -293,7 +302,7 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
         // If there are outstanding metrics to pull, make another request (if we're not stopping)
         if ( !monitorStopping )
         {
-          UUID nextMSID = client.getNextMeasurementSetIDToPull();
+          UUID nextMSID = client.iterateNextMSForPulling();
         
           if ( nextMSID != null ) monitor.pullMetric( nextMSID );
         }

@@ -109,7 +109,7 @@ public class MeasurementScheduler
         {
             synchronized( edmLock )
             {
-              try { edmReportDAO.saveReport(report, true); }
+              try { edmReportDAO.saveMeasurements(report); }
               catch ( Exception e )
               { schedulerLogger.error( "EDM save report problem: " + e.getMessage() ); }
             }

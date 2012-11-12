@@ -759,30 +759,16 @@ public class ReportDAOHelper
             throw new RuntimeException("Cannot set the sync flag for the Measurement of the Report because the connection to the DB is closed");
         }
         
-        // get the measurement UUIDs for the Report, if any
-        Set<UUID> measurements = new HashSet<UUID>();
         try {
-            String query = "SELECT measurementUUID FROM Report_Measurement where reportUUID = ?";
+            log.debug("Setting sync flag to " + syncFlag + " for measurements belonging to Report with UUID " + reportUUID.toString());
+            String query = "UPDATE Measurement SET synchronised = ? WHERE measurementUUID IN (SELECT measurementUUID FROM Report_Measurement where reportUUID = ?)";
             PreparedStatement pstmt = connection.prepareStatement(query);
-            pstmt.setObject(1, reportUUID, java.sql.Types.OTHER);
-            ResultSet rs = pstmt.executeQuery();
-
-            while (rs.next())
-            {
-                measurements.add(UUID.fromString(rs.getString("measurementUUID")));
-            }
+            pstmt.setBoolean(1, syncFlag);
+            pstmt.setObject(2, reportUUID, java.sql.Types.OTHER);
+            pstmt.executeUpdate();
         } catch (Exception ex) {
-            log.error("Unable to get measurements for report: " + ex.getMessage(), ex);
-            throw new RuntimeException("Unable to get measurements for report: " + ex.getMessage(), ex);
-        }
-        if (!measurements.isEmpty())
-        {
-            log.debug("Updating sync flag for measurements associated with the report");
-            MeasurementDAOHelper.setSyncFlagForMeasurements(measurements, syncFlag, connection);
-        }
-        else
-        {
-            log.debug("There are no measurements associated with the report to set the sync flag for");
+            log.error("Cannot set the sync flag for the Measurement of the Report: " + ex.getMessage(), ex);
+            throw new RuntimeException("Cannot set the sync flag for the Measurement of the Report: " + ex.getMessage(), ex);
         }
     }
 
