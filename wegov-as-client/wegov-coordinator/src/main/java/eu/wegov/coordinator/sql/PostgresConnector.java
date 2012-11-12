@@ -847,6 +847,28 @@ public class PostgresConnector {
         p.execute();
 
     }
+    
+    public void deleteAll(SqlDatabase database, SqlSchema schema, Dao object) throws SQLException {
+
+        String databaseName = database.getName();
+        String schemaName = schema.getName();
+        String tableName = object.getTableName();
+
+        this.useDatabase(databaseName);
+        this.useSchema(schemaName);
+
+        String preparedCommand = "DELETE FROM \"" + tableName + "\"";
+
+        logger.debug("Deleting all objects: " + object.getClass().getName() + " from database: " + databaseName + ", schema: " + schemaName
+                + ", table: " + tableName);
+
+        PreparedStatement p = getConnection().prepareStatement(preparedCommand + ";");
+
+        logger.debug(p.toString());
+
+        p.execute();
+
+    }    
 
     public void updateRow(SqlDatabase database, SqlSchema schema, Dao object, String fieldToEdit, Object newValue, String identifyingField, Object identifyingValue) throws SQLException {
         String databaseName = database.getName();

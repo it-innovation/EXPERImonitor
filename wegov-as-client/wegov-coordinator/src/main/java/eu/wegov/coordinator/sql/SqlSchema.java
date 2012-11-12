@@ -144,6 +144,10 @@ public class SqlSchema {
     public void deleteAllWhere(Dao object, HashMap<String, Object> map) throws SQLException {
         connector.deleteAllWhere(parent, this, object, map);
     }
+
+    public void deleteAll(Dao object) throws SQLException {
+        connector.deleteAll(parent, this, object);
+    }
     
     public void updateRow(Dao object, String fieldToEdit, Object newValue, String identifyingField, Object identifyingValue) throws SQLException {
         connector.updateRow(parent, this, object, fieldToEdit, newValue, identifyingField, identifyingValue);
