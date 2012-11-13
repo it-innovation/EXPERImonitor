@@ -24,10 +24,12 @@
 package eu.experimedia.itinnovation.ecc.web.adapters;
 
 import eu.experimedia.itinnovation.ecc.web.data.DataPoint;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 import org.apache.log4j.Logger;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasicChannel;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPConnectionFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Measurement;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
@@ -39,55 +41,190 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EM
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMInterfaceFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDM;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IExperimentDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IMeasurementSetDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IMetricGeneratorDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IReportDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.EMConnectionManager;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecylePhases.EMLifecycleManager;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.factory.EMInterfaceFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.IEMLifecycleListener;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.IExperimentMonitor;
 
-public class DashboardExperimentMonitor implements IExperimentMonitor,
-        IEMLifecycleListener {
+public class DashboardExperimentMonitor implements IEMLifecycleListener {
 
     private final Logger logger = Logger.getLogger(DashboardExperimentMonitor.class);
-    private IExperimentMonitor.eStatus monitorStatus = IExperimentMonitor.eStatus.NOT_YET_INITIALISED;
-    private AMQPBasicChannel amqpChannel;
-    private EMConnectionManager connectionManager;
-    private EMLifecycleManager lifecycleManager;
+    private IExperimentMonitor expMonitor;
+    private boolean waitingToStartNextPhase = false;
     private IMonitoringEDM expDataMgr;
     private IMetricGeneratorDAO expMGAccessor;
-    private UUID entryPointID;
     private IReportDAO expReportAccessor;
-    private IMeasurementSetDAO expMSAccessor;
     private Experiment expInstance;
-//    private ArrayList<DashboardMeasurementSet> reportedMeasurementSets = new ArrayList<DashboardMeasurementSet>();
     private HashMap<String, DashboardMeasurementSet> reportedMeasurementSets = new HashMap<String, DashboardMeasurementSet>();
     private HashMap<String, DashboardSummarySet> summarySets = new HashMap<String, DashboardSummarySet>();
     private ArrayList<String> measurementSetsWaitingForData = new ArrayList<String>();
 
     public DashboardExperimentMonitor() {
 
+        expMonitor = EMInterfaceFactory.createEM();
+        expMonitor.addLifecyleListener(this);
+
         try {
-            expDataMgr = EDMInterfaceFactory.getMonitoringEDM();
-        } catch (Exception e) {
-            logger.error("Could not create EDM");
+            // Try getting the EDM properties from a local file
+            Properties edmProps = tryGetPropertiesFile("edm");
+
+            // If available, use these properties
+            if (edmProps != null) {
+                expDataMgr = EDMInterfaceFactory.getMonitoringEDM(edmProps);
+            } else {
+                expDataMgr = EDMInterfaceFactory.getMonitoringEDM(); //... or go to default
+            }
+            // Try starting from a local EM properties file
+            Properties emProps = tryGetPropertiesFile("em");
+            if (emProps != null) {
+                start(emProps);
+            } else {
+                throw new RuntimeException("Failed to find configuration files");
+            }
+        } catch (Exception ex) {
+            logger.error("Could not create Monitoring EDM", ex);
         }
+    }
+
+    // Private methods -----------------------------------------------------------
+    private Properties tryGetPropertiesFile(String configName) {
+        Properties props = null;
+        InputStream propsStream = null;
+
+        // Try find the properties file
+        File propFile = new File(configName + ".properties");
+        if (propFile.exists()) {
+            try {
+                propsStream = (InputStream) new FileInputStream(propFile);
+            } catch (IOException ioe) {
+                logger.error("Could not open " + configName + " configuration file");
+            }
+        }
+
+        // Try load the property stream
+        if (propsStream != null) {
+            props = new Properties();
+            try {
+                props.load(propsStream);
+            } catch (IOException ioe) {
+                logger.error("Could not load " + configName + " configuration");
+                props = null;
+            }
+        }
+
+        // Tidy up
+        if (propsStream != null) {
+            try {
+                propsStream.close();
+            } catch (IOException ioe) {
+                logger.error("Could not close " + configName + " config file");
+            }
+        }
+
+        return props;
+    }
+
+    private boolean clearECCEDM() {
+        boolean clearedOK = false;
+
+        if (expDataMgr != null) {
+            try {
+                expDataMgr.clearMetricsDatabase();
+                clearedOK = true;
+            } catch (Exception e) {
+                logger.error("Could not clear EDM database: " + e.getLocalizedMessage());
+            }
+        }
+
+        return clearedOK;
+    }
+
+    private void start(Properties emProps) throws Exception {
+        logger.info("Trying to connect to Rabbit server");
+
+        try {
+            expMonitor.openEntryPoint(emProps);
+
+        } catch (Exception e) {
+            logger.error("Could not open entry point on Rabbit server");
+            throw e;
+        }
+
+        boolean dmOK = createExperiment();
+
+        if (!dmOK) {
+            logger.error("Had problems setting up the EDM");
+            throw new Exception("Could not set up EDM");
+        }
+    }
+
+    private boolean createExperiment() {
+        boolean result = false;
+
+        if (expDataMgr == null) {
+            logger.error("EDM not created");
+            return false;
+        }
+
+        Date expDate = new Date();
+        expInstance = new Experiment();
+        expInstance.setName(UUID.randomUUID().toString());
+        expInstance.setDescription("Sample ExperimentMonitor based experiment");
+        expInstance.setStartTime(expDate);
+        expInstance.setExperimentID(expDate.toString());
+
+        // If we have a working EDM, set up the EDM interfaces
+        if (expDataMgr.isDatabaseSetUpAndAccessible()) {
+            try {
+                expMGAccessor = expDataMgr.getMetricGeneratorDAO();
+                expReportAccessor = expDataMgr.getReportDAO();
+
+                IExperimentDAO expDAO = expDataMgr.getExperimentDAO();
+                expDAO.saveExperiment(expInstance);
+                result = true;
+            } catch (Exception e) {
+                logger.error("Could not initialise experiment");
+            }
+        } else {
+            logger.error("Could not access EDM database");
+        }
+
+        return result;
+    }
+    
+    public EMPhase getCurrentPhase() {
+        return expMonitor.getCurrentPhase();
+    }
+    
+    public void goToNextPhase() throws Exception {
+        expMonitor.goToNextPhase();
+    }
+    
+    public Set<EMClient> getAllConnectedClients() {
+        return expMonitor.getAllConnectedClients();
+    }
+    
+    public Set<EMClient> getCurrentPhaseClients() {
+        return expMonitor.getCurrentPhaseClients();
+    }
+    
+    public EMPhase startLifecycle(Experiment expInfo) throws Exception {
+        return expMonitor.startLifecycle(expInfo);
     }
 
     public LinkedHashMap<String, DataPoint> getMeasurementsForMeasurementSet(String measurementSetUuid) {
         if (reportedMeasurementSets.containsKey(measurementSetUuid)) {
-            
+
             DashboardMeasurementSet theMeasurementSet = reportedMeasurementSets.get(measurementSetUuid);
-            
-            EMPhase thePhase = getCurrentPhase();
+
+            EMPhase thePhase = expMonitor.getCurrentPhase();
 
             // If it's live monitoring phase, start pulling data from clients
             if (thePhase.getIndex() == 3) {
 
                 // Get all clients for the live monitoring phase
-                Set<EMClient> currentPhaseClients = getCurrentPhaseClients();
+                Set<EMClient> currentPhaseClients = expMonitor.getCurrentPhaseClients();
 
                 Iterator<EMClient> currentPhaseClientsIterator = currentPhaseClients.iterator();
 
@@ -100,7 +237,7 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
                         try {
                             if (!measurementSetsWaitingForData.contains(measurementSetUuid)) {
                                 logger.debug("Pulling metrics from client: [" + currentPhaseClient.getID() + "], measurement set [" + measurementSetUuid + "]");
-                                pullMetric(currentPhaseClient, UUID.fromString(measurementSetUuid));
+                                expMonitor.pullMetric(currentPhaseClient, UUID.fromString(measurementSetUuid));
                                 measurementSetsWaitingForData.add(measurementSetUuid);
                             } else {
                                 logger.debug("Metrics from client: [" + currentPhaseClient.getID() + "], measurement set [ " + measurementSetUuid + "] currently being pulled");
@@ -116,20 +253,20 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
                                 + " is busy generating metrics");
                     }
                 }
-            }             
-            
+            }
+
             return theMeasurementSet.getMeasurements();
         } else {
-            
+
             DashboardMeasurementSet theMeasurementSet = reportedMeasurementSets.get(measurementSetUuid);
-            
-            EMPhase thePhase = getCurrentPhase();
+
+            EMPhase thePhase = expMonitor.getCurrentPhase();
 
             // If it's live monitoring phase, start pulling data from clients
             if (thePhase.getIndex() == 3) {
 
                 // Get all clients for the live monitoring phase
-                Set<EMClient> currentPhaseClients = getCurrentPhaseClients();
+                Set<EMClient> currentPhaseClients = expMonitor.getCurrentPhaseClients();
 
                 Iterator<EMClient> currentPhaseClientsIterator = currentPhaseClients.iterator();
 
@@ -141,7 +278,7 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
                     if (!currentPhaseClient.isPullingMetricData()) {
                         try {
                             logger.debug("Pulling metrics from client: [" + currentPhaseClient.getID() + "] " + currentPhaseClient.getName());
-                            pullAllMetrics(currentPhaseClient);
+                            expMonitor.pullAllMetrics(currentPhaseClient);
 
                         } catch (Exception e) {
                             logger.error("Could not pull metrics from client: "
@@ -153,12 +290,12 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
                                 + " is busy generating metrics");
                     }
                 }
-            }            
-            
+            }
+
             return new LinkedHashMap<String, DataPoint>();
         }
-        
-         
+
+
     }
 
     public LinkedHashMap<String, DataPoint> getMeasurementsForSummarySet(String summarySetUuid) {
@@ -167,235 +304,6 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
             return theSummarySet.getMeasurements();
         } else {
             return new LinkedHashMap<String, DataPoint>();
-        }
-    }
-
-    // IExperimentMonitor --------------------------------------------------------
-    @Override
-    public eStatus getStatus() {
-        return monitorStatus;
-    }
-
-    @Override
-    public void openEntryPoint(String rabbitServerIP, UUID epID) throws Exception {
-        // Safety first
-        if (rabbitServerIP == null || rabbitServerIP.equals("")) {
-            throw new Exception("Rabbit server IP is invalid");
-        }
-
-        if (epID == null) {
-            throw new Exception("Entry point ID is null");
-        }
-
-        entryPointID = epID;
-
-        // Try initialising a connection with the Rabbit Server
-        try {
-            basicInitialise(rabbitServerIP);
-            initialiseManagers();
-        } catch (Exception e) {
-            throw e;
-        }
-    }
-
-    @Override
-    public void openEntryPoint(Properties emProps) throws Exception {
-        // Safety first
-        if (emProps == null) {
-            throw new Exception("Configuration properties are NULL");
-        }
-
-        String epVal = emProps.getProperty("Monitor_ID");
-        entryPointID = UUID.fromString(epVal);
-
-        if (entryPointID == null) {
-            throw new Exception("Configuration of entry point ID is invalid");
-        }
-
-        // Now try connecting and opening the entry point
-        try {
-            configInitialise(emProps);
-            initialiseManagers();
-        } catch (Exception e) {
-            throw e;
-        }
-    }
-
-    @Override
-    public Set<EMClient> getAllConnectedClients() {
-        return getSimpleClientSet(connectionManager.getConnectedClients());
-    }
-
-    @Override
-    public Set<EMClient> getCurrentPhaseClients() {
-        HashSet<EMClient> clients = new HashSet<EMClient>();
-
-        Set<EMClientEx> exClients = lifecycleManager.getCopySetOfCurrentPhaseClients();
-        Iterator<EMClientEx> exIt = exClients.iterator();
-
-        while (exIt.hasNext()) {
-            clients.add(exIt.next());
-        }
-
-        return clients;
-    }
-
-    @Override
-    public void addLifecyleListener(IEMLifecycleListener listener) {
-    }
-
-    @Override
-    public void removeLifecycleListener(IEMLifecycleListener listener) {
-    }
-
-    @Override
-    public EMPhase startLifecycle(Experiment expInfo) throws Exception {
-
-        if (expInfo == null) {
-            throw new Exception("Experiment info is NULL");
-        }
-
-        if (monitorStatus != IExperimentMonitor.eStatus.ENTRY_POINT_OPEN) {
-            throw new Exception("Not in a state ready to start lifecycle");
-        }
-
-        if (connectionManager.getConnectedClientCount() == 0) {
-            throw new Exception("No clients connected to monitor");
-        }
-
-        if (lifecycleManager.isLifecycleStarted()) {
-            throw new Exception("Lifecycle has already started");
-        }
-
-//        createExperiment();
-
-        // Save a list of connected clients and properties to the database?
-        // Then just use that list instead of talking to EM?
-
-        lifecycleManager.setExperimentInfo(expInfo);
-
-        return lifecycleManager.iterateLifecycle();
-    }
-
-    private void createExperiment() {
-        logger.debug("Creating new experiment in the database");
-
-        try {
-            expMGAccessor = expDataMgr.getMetricGeneratorDAO();
-            expReportAccessor = expDataMgr.getReportDAO();
-            expMSAccessor = expDataMgr.getMeasurementSetDAO();
-
-            Date expDate = new Date();
-            expInstance = new Experiment();
-            expInstance.setName("Test Experiment");
-            expInstance.setDescription("Test Experimedia experiment");
-            expInstance.setStartTime(expDate);
-            expInstance.setExperimentID("1");
-
-            IExperimentDAO expDAO = expDataMgr.getExperimentDAO();
-            expDAO.saveExperiment(expInstance);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to create new experiment in the database");
-        }
-
-    }
-
-    @Override
-    public EMPhase getCurrentPhase() {
-        EMPhase currentPhase = EMPhase.eEMUnknownPhase;
-
-        if (lifecycleManager != null) {
-            currentPhase = lifecycleManager.getCurrentPhase();
-        }
-
-        return currentPhase;
-    }
-
-    @Override
-    public EMPhase getNextPhase() {
-        return lifecycleManager.getCurrentPhase().nextPhase();
-    }
-
-    @Override
-    public boolean isCurrentPhaseActive() {
-        return lifecycleManager.isCurrentPhaseActive();
-    }
-
-    @Override
-    public void stopCurrentPhase() throws Exception {
-        if (lifecycleManager.isWindingCurrentPhaseDown()) {
-            throw new Exception("Current winding down phase: "
-                    + lifecycleManager.getCurrentPhase().toString());
-        }
-        else
-            lifecycleManager.windCurrentPhaseDown();
-    }
-
-    @Override
-    public void goToNextPhase() throws Exception {
-        if (lifecycleManager.isWindingCurrentPhaseDown()) {
-            throw new Exception("Current winding down phase: " + lifecycleManager.getCurrentPhase().toString());
-        } else {
-            lifecycleManager.iterateLifecycle();
-
-            EMPhase currentPhase = lifecycleManager.getCurrentPhase();
-            logger.debug("Current phase is: [" + currentPhase.getIndex() + "] " + currentPhase.name());
-
-        }
-    }
-
-    @Override
-    public void endLifecycle() throws Exception {
-        lifecycleManager.endLifecycle();
-
-        if (amqpChannel != null) {
-            amqpChannel.close();
-        }
-    }
-
-    @Override
-    public void pullMetric(EMClient client, UUID measurementSetID) throws Exception {
-        try {
-            lifecycleManager.tryPullMetric(client, measurementSetID);
-        } catch (Exception e) {
-            throw e;
-        }
-    }
-
-    @Override
-    public void pullAllMetrics(EMClient client) throws Exception {
-        logger.debug("pullAllMetrics: [" + client.getID() + "] " + client.getName());
-        try {
-            lifecycleManager.tryPullAllMetrics(client);
-        } catch (Exception e) {
-            throw e;
-        }
-    }
-
-    @Override
-    public void requestDataBatches(EMClient client, UUID measurementSetID) throws Exception {
-        try {
-            lifecycleManager.tryRequestDataBatch(client, measurementSetID);
-        } catch (Exception e) {
-            throw e;
-        }
-    }
-
-    @Override
-    public void getAllDataBatches(EMClient client) throws Exception {
-        try {
-            lifecycleManager.tryGetAllDataBatches(client);
-        } catch (Exception e) {
-            throw e;
-        }
-    }
-
-    @Override
-    public void notifyClientOfTimeOut(EMClient client) throws Exception {
-        try {
-            lifecycleManager.tryClientTimeOut(client);
-        } catch (Exception e) {
-            throw e;
         }
     }
 
@@ -409,8 +317,7 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
     @Override
     public void onClientDisconnected(EMClient client) {
         logger.debug("Client disconnected: " + client.getName() + " [" + client.getID().toString() + "]");
-        connectionManager.removeClient(client.getID());
-        
+
     }
 
     @Override
@@ -444,16 +351,16 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
             if (report != null) {
 
                 MeasurementSet measurementSet = report.getMeasurementSet();
-                
 
                 if (measurementSet != null) {
 
                     logger.debug("Received metric data from client: " + client.getName() + " [" + client.getID().toString()
                             + "], report [" + report.getUUID().toString() + "] with " + report.getNumberOfMeasurements()
                             + " measurement(s) for measurement set [" + measurementSet.getUUID().toString() + "]");
-                    
-                    if (measurementSetsWaitingForData.contains(measurementSet.getUUID().toString()))
+
+                    if (measurementSetsWaitingForData.contains(measurementSet.getUUID().toString())) {
                         measurementSetsWaitingForData.remove(measurementSet.getUUID().toString());
+                    }
 
                     String measurementSetUuid = measurementSet.getUUID().toString();
                     DashboardMeasurementSet theDashboardMeasurementSet;
@@ -487,17 +394,17 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
                                 measurementValue = measurement.getValue();
 
                                 logger.debug("Measurement " + measurementsCounter + ": [" + measurementUUID + "] " + measurementTimestamp.toString() + " - " + measurementValue);
-                                
+
                                 itCurrent = currentMeasurements.keySet().iterator();
-                                while(itCurrent.hasNext()) {
+                                while (itCurrent.hasNext()) {
                                     currentMeasurementUUID = (String) itCurrent.next();
                                     currentDatapoint = currentMeasurements.get(currentMeasurementUUID);
-                                    if ( (currentDatapoint.getTime() == measurementTimestamp.getTime()) && (currentDatapoint.getValue().equals(measurementValue) )) {
+                                    if ((currentDatapoint.getTime() == measurementTimestamp.getTime()) && (currentDatapoint.getValue().equals(measurementValue))) {
                                         pointExists = true;
                                         break;
                                     }
-                                }                                
-                                
+                                }
+
                                 if (pointExists) {
                                     logger.debug("Measurement already exists");
                                     pointExists = false;
@@ -648,76 +555,5 @@ public class DashboardExperimentMonitor implements IExperimentMonitor,
     @Override
     public void onClientTearDownResult(EMClient client, boolean success) {
         logger.debug("onClientTearDownResult");
-    }
-
-    // Private methods -----------------------------------------------------------
-    private void basicInitialise(String rabbitServerIP) throws Exception {
-        AMQPConnectionFactory amqpCF = new AMQPConnectionFactory();
-
-        if (!amqpCF.setAMQPHostIPAddress(rabbitServerIP)) {
-            throw new Exception("Could not set the server IP correctly");
-        }
-
-        amqpCF.connectToAMQPHost();
-        if (!amqpCF.isConnectionValid()) {
-            throw new Exception("Could not connect to Rabbit server");
-        }
-
-        amqpChannel = amqpCF.createNewChannel();
-        if (amqpChannel == null) {
-            throw new Exception("Could not create AMQP channel");
-        }
-    }
-
-    private void configInitialise(Properties emProps) throws Exception {
-        AMQPConnectionFactory amqpCF = new AMQPConnectionFactory();
-        try {
-            amqpCF.connectToAMQPHost(emProps);
-            if (!amqpCF.isConnectionValid()) {
-                throw new Exception("Could not connect to Rabbit server");
-            }
-
-            amqpChannel = amqpCF.createNewChannel();
-            if (amqpChannel == null) {
-                throw new Exception("Could not create AMQP channel");
-            }
-        } catch (Exception e) {
-            throw e;
-        }
-    }
-
-    private void initialiseManagers() throws Exception {
-        connectionManager = new EMConnectionManager();
-        lifecycleManager = new EMLifecycleManager();
-
-        monitorStatus = IExperimentMonitor.eStatus.INITIALISED;
-
-        if (monitorStatus != IExperimentMonitor.eStatus.INITIALISED) {
-            throw new Exception("Not in a state to open entry point");
-        }
-
-        // Initialise connection manager
-        if (!connectionManager.initialise(entryPointID, amqpChannel)) {
-            throw new Exception("Could not open entry point interface!");
-        }
-
-        // Link connection manager to lifecycle manager
-        connectionManager.setListener(lifecycleManager);
-
-        // Initialise lifecycle manager
-        lifecycleManager.initialise(amqpChannel, entryPointID, this);
-
-        monitorStatus = IExperimentMonitor.eStatus.ENTRY_POINT_OPEN;
-    }
-
-    private Set<EMClient> getSimpleClientSet(Set<EMClientEx> exClients) {
-        HashSet<EMClient> simpleClients = new HashSet<EMClient>();
-        Iterator<EMClientEx> exIt = exClients.iterator();
-
-        while (exIt.hasNext()) {
-            simpleClients.add((EMClient) exIt.next());
-        }
-
-        return simpleClients;
     }
 }
