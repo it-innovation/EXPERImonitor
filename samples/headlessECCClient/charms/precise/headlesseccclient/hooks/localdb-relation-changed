@@ -1,6 +1,13 @@
-#!/bin/sh
+#!/bin/bash
 
 juju-log "localdb relation changed"
+
+relation-set database=headless
+
+if [ "`relation-get host`" == "" ]; then
+	juju-log "Waiting for postgres database..."
+	exit 0
+fi
 
 cd `dirname $0`/../code
 

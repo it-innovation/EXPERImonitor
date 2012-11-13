@@ -213,7 +213,13 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
       
       if ( client != null )
       {
+        client.setIsPushCapable( true );
         clientPushGroup.add( client.getID() );
+        
+        // Notify of client behaviour
+        phaseListener.onClientDeclaredCanPush( client );
+        
+        // Tell client to start pushing
         client.getLiveMonitorInterface().startPushing();
       }
     }
@@ -262,7 +268,13 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
       EMClientEx client = getClient( senderID );
       
       if ( client != null )
+      {
+        client.setIsPullCapable( true );
         clientPullGroup.add( client.getID() );
+        
+        // Notify of client behaviour
+        phaseListener.onClientDeclaredCanBePulled( client );
+      }
     }
   }
   

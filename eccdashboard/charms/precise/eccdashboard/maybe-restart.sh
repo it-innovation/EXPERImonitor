@@ -1,0 +1,17 @@
+#!/bin/bash
+
+set -xu
+
+cd /var/lib/tomcat7/webapps/eccdashboard/WEB-INF/classes
+
+if [ -f edm.properties -a -f em.properties ]; then
+  juju-log "Configuration done"
+  if [ ! -d /var/lib/tomcat7/webapps/eccdashboard ]; then
+    juju-log "Deploying web-app..."
+    ln -s `pwd`/deploy/*.war /var/lib/tomcat7/webapps
+  fi
+  juju-log "Restarting tomcat"
+  /etc/init.d/tomcat7 restart
+else
+  juju-log "Not fully configured yet..."
+fi
