@@ -25,9 +25,10 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 
 import java.util.*;
+
 
 
 
@@ -64,8 +65,12 @@ public class EMPostReportSummary
   public void addReport( Report report )
   {
     if ( report != null )
-     reportsByMeasurementSetID.put( report.getMeasurementSet().getUUID(), 
-                                    report );
+    {
+      MeasurementSet ms = report.getMeasurementSet();
+      
+      if ( ms != null )
+        reportsByMeasurementSetID.put( ms.getUUID(), report );
+    }
   }
   
   /**

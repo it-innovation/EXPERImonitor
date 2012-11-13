@@ -195,7 +195,7 @@ public class EMClientEx extends EMClient
     // Check we're not already trying to batch this MeasurementSet
     UUID msID = batch.getExpectedMeasurementSetID();
     
-    if ( postReportOutstandingBatches.containsKey( batch.getID()) )
+    if ( postReportOutstandingBatches.containsKey( msID ) )
       throw new Exception( "Client is already waiting to batch measurement set: " + msID.toString() );
     
     postReportOutstandingBatches.put( msID, batch );
