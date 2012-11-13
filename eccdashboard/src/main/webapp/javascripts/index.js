@@ -48,7 +48,7 @@ $(document).ready(function() {
                 $("#currentPhaseName").text(currentPhase.description);
                 $("#currentPhaseID").text(currentPhase.index);
                 $("#currentPhaseDescription").text("Waiting for clients to connect");
-                
+
                 displayExperimentInfo();
 
                 // RELOAD CLIENTS LIST FOR EVERY PHASE AS
@@ -114,7 +114,7 @@ $(document).ready(function() {
 });
 
 function displayExperimentInfo() {
-    // Get experiment info    
+    // Get experiment info
     if (internalPhase > 0) {
         $.ajax({
             type: 'GET',
@@ -155,7 +155,7 @@ function displayExperimentInfo() {
                 console.error(thrownError);
                 console.error(xhr.status);
             }
-        });    
+        });
     }
 }
 
@@ -209,13 +209,13 @@ function doDiscoveryPhase(actionButton, currentPhase) {
     isClientMonitoringOn = false;
 
     $(".clientlist .clientitem").first().trigger('click');
-    
+
     // Show experiment details
-    displayExperimentInfo();        
-    
+    displayExperimentInfo();
+
     // Get list of clients
     getCurrentPhaseClients();
-    
+
     prepareSetupPhase(actionButton);
 
 }
@@ -258,10 +258,10 @@ function doSetupPhase(actionButton, currentPhase) {
 
     // Client monitoring OFF
     isClientMonitoringOn = false;
-    
+
     // Get list of clients
-    getCurrentPhaseClients();    
-    
+    getCurrentPhaseClients();
+
     prepareLiveMonitoringPhase(actionButton);
 }
 
@@ -303,11 +303,11 @@ function doLiveMonitoringPhase(actionButton, currentPhase){
 
     // Client monitoring OFF
     isClientMonitoringOn = false;
-    
+
     // Get list of clients
-    getCurrentPhaseClients();    
-    
-    preparePostReportPhase(actionButton);    
+    getCurrentPhaseClients();
+
+    preparePostReportPhase(actionButton);
 }
 
 function preparePostReportPhase(actionButton) {
@@ -349,16 +349,16 @@ function doPostReportPhase(actionButton, currentPhase){
 
     // Client monitoring OFF
     isClientMonitoringOn = false;
-    
+
     // Get list of clients
-    getCurrentPhaseClients();    
-    
-    prepareTearDownPhase(actionButton);    
+    getCurrentPhaseClients();
+
+    prepareTearDownPhase(actionButton);
 }
 
 
 function prepareTearDownPhase(actionButton) {
-    actionButton.text('Start Tear Down Phase');    
+    actionButton.text('Start Tear Down Phase');
     actionButton.unbind('click');
     actionButton.click(function(e){
         e.preventDefault();
@@ -392,7 +392,7 @@ function doTearDownPhase(actionButton, currentPhase){
     actionButton.text('Experiment finished');
     actionButton.addClass('alert');
     actionButton.unbind('click');
-    
+
     actionButton.click(function(e){
         e.preventDefault();
         alert('Experiment is complete, no phases left');
@@ -404,17 +404,17 @@ function doTearDownPhase(actionButton, currentPhase){
 
     // Client monitoring OFF
     isClientMonitoringOn = false;
-    
+
     // Get list of clients
-    getCurrentPhaseClients();    
-    
+    getCurrentPhaseClients();
+
 }
 
 function getMetricGeneratorsForClient(clientUUID) {
-        
+
         if (!isClientMonitoringOn) {
             console.log('Getting metric generators for client with UUID: ' + clientUUID);
-        
+
             $.ajax({
                 type: 'POST',
                 url: "/em/getmmetricgeneratorsforclient/do.json",
@@ -488,20 +488,22 @@ function getMetricGeneratorsForClient(clientUUID) {
 
                                         infoList.append('<p class="noextrawhitespace">UUID: ' + attribute.uuid + '</p>');
                                         infoList.append('<p class="noextrawhitespace">Name: ' + attribute.name + '</p>');
-                                        
+
                                         theAttributeDescription = attribute.description;
                                         infoList.append('<p class="noextrawhitespace">Description: ' + theAttributeDescription + '</p>');
-                                        
-                                        $.each(theAttributeDescription.split(" "), function(index, value){
-                                            // console.log(value);
 
-                                            if ( value.indexOf('http') == 0 && ( ( value.match('.jpg$') == '.jpg') || ( value.match('.png$') == '.png' ) ) ) {
-                                                // console.log('Image url: ' + value);
-                                                infoList.append("<img src='" + value + "'>");
-                                            }
+                                        if (entity.description) {
+                                            $.each(entity.description.split(" "), function(index, value){
+                                                // console.log(value);
 
-                                        });                                        
-                                        
+                                                if ( value.indexOf('http') == 0 && ( ( value.match('.jpg$') == '.jpg') || ( value.match('.png$') == '.png' ) ) ) {
+                                                    // console.log('Image url: ' + value);
+                                                    infoList.append("<img src='" + value + "'>");
+                                                }
+
+                                            });
+                                        }
+
                                     });
                                 });
 
@@ -543,7 +545,7 @@ function getCurrentPhaseClients() {
         contentType: "application/json; charset=utf-8",
         success: function(clients){
             console.log(clients);
-        }   
+        }
     });
 }
 
