@@ -28,8 +28,6 @@
 
     </head>
     <body>
-
-
         <div class="row" id="header"><!-- Header -->
             <div class="twelve columns extraspacebottom">
                 <div class="row">
@@ -40,36 +38,28 @@
                 </div>
                 <div class="row experimentMetadata">
                     <div class="six columns">
+                        <div class="row">
+                            <div class="twelve columns">
+                                <h4 class="monitorControl">Monitor control</h4>
+                                <p class="noextrawhitespace">Current phase: <span id="currentPhaseName"></span></p>
+                                <p class="noextrawhitespace">Phase index: <span id="currentPhaseID"></span></p>
+                                <p>Phase description: <span id="currentPhaseDescription"></span></p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="twelve columns">
+                                <a href="#" class="large button" id="actionButton">Start Discovery Phase</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="six columns experimentInfo">
                         <h4 id="experimentName">Experiment Name Placeholder</h4>
-                        <p class="noextrawhitespace">UUID: <span id="experimentUUID">UUID placeholder</span></p>
                         <p class="noextrawhitespace">Description: <span id="experimentDescription">Description placeholder</span></p>
+                        <p class="noextrawhitespace">UUID: <span id="experimentUUID">UUID placeholder</span></p>
                         <p class="noextrawhitespace">Experiment ID: <span id="experimentExperimentID">ID placeholder</span></p>
                         <p class="noextrawhitespace">Start time: <span id="experimentStartTime">Start time</span></p>
                         <p class="noextrawhitespace">End time: <span id="experimentEndTime">End time</span></p>
                     </div>
-                    <div class="six columns">
-                        <div class="row">
-                            <div class="twelve columns">
-                                <h4>Monitor control</h4>
-                                <p class="noextrawhitespace">Current phase: <strong>Metric Generator Discovery Phase</strong></p>
-                                <p>Phase status: <strong>Waiting for discovery responses</strong></p>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="twelve columns">
-                                <div class="medium normal button split dropdown">
-                                    <a href="#">Take action</a>
-                                    <span></span>
-                                    <ul>
-                                        <li><a href="#">Start set-up phase</a></li>
-                                        <li><a href="#">Buy more milk</a></li>
-                                        <li class="divider"></li>
-                                        <li><a href="#">Abandon monitoring</a></li>
-                                    </ul>                                
-                                </div>
-                            </div>
-                        </div>
-                    </div>                    
                 </div>
             </div>
 
@@ -85,10 +75,12 @@
                     <dd><a href="livemetricview.html">Live Metric View</a></dd>
                 </dl>   
                 
-<!--                <a href="#" id ="nagiosconnector" class="normal button radius">Connect to Nagios</a>-->
-<!--                <div id="nagioscontainer"></div>-->
-                <iframe src="http://buronga/nagios3/" frameborder="0" name="mainframe" vspace="0" hspace="0" marginwidth="0" marginheight="0" width="100%" height="800px" scrolling="no" noresize id="mainframe"></iframe>
+<!--                <a href="#" id="nagiosconnector" class="normal button radius">Connect to Nagios</a>-->
                 
+                <div id="nagiosinfo"></div>
+                <div id="nagioscontainer"></div>
+                
+<!--                <iframe src="http://buronga/nagios3/" frameborder="0" name="mainframe" vspace="0" hspace="0" marginwidth="0" marginheight="0" width="100%" height="800px" scrolling="no" noresize id="mainframe"></iframe>-->
             </div>
         </div><!-- Content Wrapper End -->
 

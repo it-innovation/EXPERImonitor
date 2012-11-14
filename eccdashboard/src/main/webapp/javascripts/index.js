@@ -91,7 +91,7 @@ $(document).ready(function() {
                         actionButton.text('ERROR');
                         actionButton.click(function(e){
                             e.preventDefault();
-                        })
+                        });
                         console.error('Current phase is ' + internalPhase + ', not sure what to do with it, will stop now.');
                         $("#currentPhaseName").text("ERROR - current phase is unknown (" + internalPhase + ")");
                         $("#currentPhaseID").text(internalPhase);

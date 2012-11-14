@@ -24,6 +24,7 @@
 package eu.experimedia.itinnovation.ecc.web.adapters;
 
 import eu.experimedia.itinnovation.ecc.web.data.DataPoint;
+import eu.experimedia.itinnovation.ecc.web.data.EccPropertiesAsJson;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -59,6 +60,7 @@ public class DashboardExperimentMonitor implements IEMLifecycleListener {
     private HashMap<String, DashboardMeasurementSet> reportedMeasurementSets = new HashMap<String, DashboardMeasurementSet>();
     private HashMap<String, DashboardSummarySet> summarySets = new HashMap<String, DashboardSummarySet>();
     private ArrayList<String> measurementSetsWaitingForData = new ArrayList<String>();
+    private Properties eccdashboard;
 
     public DashboardExperimentMonitor() {
 
@@ -66,6 +68,12 @@ public class DashboardExperimentMonitor implements IEMLifecycleListener {
         expMonitor.addLifecyleListener(this);
 
         try {
+            // Get ECC Dashboard properties
+            eccdashboard = tryGetPropertiesFile("eccdashboard");
+            String error = verifyProperties(eccdashboard);
+            if (error != null)
+                throw new RuntimeException(error);
+
             // Try getting the EDM properties from a local file
             Properties edmProps = tryGetPropertiesFile("edm");
 
@@ -75,6 +83,7 @@ public class DashboardExperimentMonitor implements IEMLifecycleListener {
             } else {
                 expDataMgr = EDMInterfaceFactory.getMonitoringEDM(); //... or go to default
             }
+
             // Try starting from a local EM properties file
             Properties emProps = tryGetPropertiesFile("em");
             if (emProps != null) {
@@ -82,9 +91,36 @@ public class DashboardExperimentMonitor implements IEMLifecycleListener {
             } else {
                 throw new RuntimeException("Failed to find configuration files");
             }
-        } catch (Exception ex) {
-            logger.error("Could not create Monitoring EDM", ex);
+
+        } catch (Throwable ex) {
+            throw new RuntimeException("Could not create Monitoring EDM", ex);
         }
+    }
+
+    private String verifyProperties(Properties properties) {
+        String result = null;
+
+        String[] mustHaveProperties = new String[]{
+          "nagios.fullurl"};
+
+        for (String mustHaveproperty : mustHaveProperties) {
+            if (!properties.containsKey(mustHaveproperty)) {
+                result = "Missing key: " + mustHaveproperty;
+                break;
+            } else {
+                if (properties.getProperty(mustHaveproperty).equals("")) {
+                    result = "Missing property for key: " + mustHaveproperty;
+                    break;
+                }
+            }
+        }
+
+        return result;
+
+    }
+    
+    public EccPropertiesAsJson getEccProperties() {
+        return new EccPropertiesAsJson(eccdashboard.getProperty("nagios.fullurl"));
     }
 
     // Private methods -----------------------------------------------------------
@@ -192,25 +228,33 @@ public class DashboardExperimentMonitor implements IEMLifecycleListener {
 
         return result;
     }
-    
+
     public EMPhase getCurrentPhase() {
-        return expMonitor.getCurrentPhase();
+        EMPhase currentPhase = expMonitor.getCurrentPhase();
+        logger.debug("Returning current phase: [" + currentPhase.getIndex() + "] " + currentPhase.name());
+        EMPhase nextPhase = expMonitor.getNextPhase();
+        logger.debug("The next phase will be: [" + nextPhase.getIndex() + "] " + nextPhase.name());
+        return currentPhase;
     }
-    
+
     public void goToNextPhase() throws Exception {
         expMonitor.goToNextPhase();
     }
-    
+
     public Set<EMClient> getAllConnectedClients() {
         return expMonitor.getAllConnectedClients();
     }
-    
+
     public Set<EMClient> getCurrentPhaseClients() {
         return expMonitor.getCurrentPhaseClients();
     }
-    
+
     public EMPhase startLifecycle(Experiment expInfo) throws Exception {
-        return expMonitor.startLifecycle(expInfo);
+        EMPhase currentPhase = expMonitor.startLifecycle(expInfo);
+        logger.debug("Started the lifecycle with the phase: [" + currentPhase.getIndex() + "] " + currentPhase.name());
+        EMPhase nextPhase = expMonitor.getNextPhase();
+        logger.debug("The next phase will be: [" + nextPhase.getIndex() + "] " + nextPhase.name());
+        return currentPhase;
     }
 
     public LinkedHashMap<String, DataPoint> getMeasurementsForMeasurementSet(String measurementSetUuid) {

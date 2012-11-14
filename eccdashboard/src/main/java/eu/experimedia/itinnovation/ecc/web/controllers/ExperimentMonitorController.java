@@ -272,6 +272,20 @@ public class ExperimentMonitorController {
         }
     }
 
+    @RequestMapping(method = RequestMethod.GET, value = "/geteccproperties/do.json")
+    public @ResponseBody EccPropertiesAsJson getEccProperties() throws Throwable {
+        logger.debug("Returning Ecc Properties");
+        try {
+
+            return emService.getEccProperties();
+            
+        } catch (Throwable ex) {
+            logger.error("Failed to return current experiment phase");
+            ex.printStackTrace();
+            return null;
+        }
+    }
+
     @RequestMapping(method = RequestMethod.GET, value = "/startlifecycle/do.json")
     public @ResponseBody EMPhaseAsJson startLifeCycle() throws Throwable {
         logger.debug("Starting experiment lifecycle");

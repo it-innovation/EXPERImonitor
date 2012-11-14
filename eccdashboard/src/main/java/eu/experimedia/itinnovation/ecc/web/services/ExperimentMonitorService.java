@@ -25,6 +25,7 @@
 package eu.experimedia.itinnovation.ecc.web.services;
 
 import eu.experimedia.itinnovation.ecc.web.data.DataPoint;
+import eu.experimedia.itinnovation.ecc.web.data.EccPropertiesAsJson;
 import eu.experimedia.itinnovation.ecc.web.helpers.ExperimentMonitorHelper;
 import java.util.Date;
 import java.util.HashSet;
@@ -106,8 +107,11 @@ public class ExperimentMonitorService {
     }
     
     public EMPhase getCurrentPhase() throws Throwable {
-        logger.debug("Returning current phase");
         return emHelper.getExperimentMonitor().getCurrentPhase();
+    }
+    
+    public EccPropertiesAsJson getEccProperties() throws Throwable {
+        return emHelper.getExperimentMonitor().getEccProperties();
     }
     
     public EMPhase startLifeCycle() throws Throwable {

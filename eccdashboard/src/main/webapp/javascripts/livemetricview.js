@@ -53,8 +53,7 @@ $(document).ready(function() {
                 // NOT ALL CLIENTS SUPPORT ALL PHASES
                 switch(internalPhase) {
                     // CLIENTS CONNECTING PHASE
-                    case 0:
-                        // TEST DISCONNECTING CLIENTS - does not work for some reason, works on Simon's computer
+                    case 0:                        
                         doClientsConnectingPhase(actionButton, currentPhase);
                         break;
                     // DISCOVERY PHASE
@@ -588,7 +587,7 @@ function pollDataForMeasurementSet(measurementSetUuid) {
                     console.log(measurementSetData);
 
                     if (measurementSetData == null) {
-                        alert("Server error retrieving measurement set data");
+//                        alert("Server error retrieving measurement set data");
                         console.error("Server error retrieving measurement set data");
                         return;
                     } else {
@@ -666,7 +665,7 @@ function pollDataForMeasurementSet(measurementSetUuid) {
                 }
             },
             error: function(xhr, ajaxOptions, thrownError){
-                alert('Failed to get retrieving measurement set data');
+//                alert('Failed to get retrieving measurement set data');
                 console.error('Failed to get retrieving measurement set data');
                 console.error(thrownError);
                 console.error(xhr.status);
@@ -698,7 +697,7 @@ function pollTextForMeasurementSet(measurementSetUuid) {
                     console.log(measurementSetData);
 
                     if (measurementSetData == null) {
-                        alert("Server error retrieving measurement set text");
+//                        alert("Server error retrieving measurement set text");
                         console.error("Server error retrieving measurement set text");
                         return;
                     } else {
@@ -745,7 +744,7 @@ function pollTextForMeasurementSet(measurementSetUuid) {
                 }
             },
             error: function(xhr, ajaxOptions, thrownError){
-                alert('Failed to get retrieving measurement set text');
+//                alert('Failed to get retrieving measurement set text');
                 console.error('Failed to get retrieving measurement set text');
                 console.error(thrownError);
                 console.error(xhr.status);
@@ -905,7 +904,7 @@ function pollDataForSummarySet(measurementSetUuid) {
                 console.log(measurementSetData);
 
                 if (measurementSetData == null) {
-                    alert("Server error retrieving summary set data");
+//                    alert("Server error retrieving summary set data");
                     console.error("Server error retrieving summary set data");
                     return;
                 } else {
@@ -965,7 +964,7 @@ function pollDataForSummarySet(measurementSetUuid) {
 //            }
         },
         error: function(xhr, ajaxOptions, thrownError){
-            alert('Failed to get retrieving summary set data');
+//            alert('Failed to get retrieving summary set data');
             console.error('Failed to get retrieving summary set data');
             console.error(thrownError);
             console.error(xhr.status);
