@@ -25,6 +25,7 @@
 var isClientMonitoringOn = true;
 var internalPhase = -1;
 var actionButton;
+var connectedClientsIDs = [];
 
 $(document).ready(function() {
 
@@ -549,6 +550,24 @@ function getCurrentPhaseClients() {
     });
 }
 
+function addToConnectedClientsIDs(clientUuid) {
+//    console.log("Adding new client to connectedClientsIDs: " + clientUuid);
+    connectedClientsIDs.push(clientUuid);
+//    console.log("ConnectedClientsIDs now: ");
+//    console.log(connectedClientsIDs);
+}
+
+function removeFromConnectedClientsIDs(clientUuid) {
+//    console.log("Removing a client from connectedClientsIDs: " + clientUuid);
+    connectedClientsIDs.splice($.inArray(clientUuid, connectedClientsIDs) , 1); 
+//    console.log("ConnectedClientsIDs now: ");
+//    console.log(connectedClientsIDs);    
+}
+
+function isClientOnTheList(clientUuid) {
+    return ($.inArray(clientUuid, connectedClientsIDs) > -1);
+}
+
 function getClients() {
     if (isClientMonitoringOn) {
         $.ajax({
@@ -556,22 +575,35 @@ function getClients() {
             url: "/em/getclients/do.json",
             contentType: "application/json; charset=utf-8",
             success: function(clients){
-    //            console.log(clients);
+                
+//                console.log("Clients from server:");
+//                console.log(clients);
+                
                 if (clients.length == 0) {
+                    
                     $(".clientlist").empty();
                     $(".clientdetails").empty();
                     $(".clientdetails").append('<h6>No clients detected</h6>');
-
+                    connectedClientsIDs = [];
+                    
                 } else {
-                    $(".clientlist").empty();
+
+                    // Add new clients
                     var theClient;
+                    var reportedClientsUuid = []; // To disconnect clients below
                     $.each(clients, function(indexClient, client){
-    //                    if (jQuery.inArray(client.uuid, currentClientsUuids) < 0) {
-
-                            console.log("Client: " + client.uuid);
-                            console.log(client);
-
-    //                        currentClientsUuids.push(client.uuid);
+                        
+                        reportedClientsUuid.push(client.uuid);
+                        
+                        if (isClientOnTheList(client.uuid)) {
+                            
+                            console.log("Client already on the list [" + client.uuid + "]");
+                            
+                        } else {
+                            
+                            console.log("Detected new client: " + client.uuid);
+                            
+                            addToConnectedClientsIDs(client.uuid);
 
                             theClient = $('<p class="clientitem">' + client.name + '<span>' + client.uuid + '</span></p>').appendTo($('.clientlist'));
                             theClient.data('client', client);
@@ -589,44 +621,47 @@ function getClients() {
 
                                 getMetricGeneratorsForClient(clientData.uuid);
 
-    //                            $.ajax({
-    //                                type: 'POST',
-    //                                url: "/em/getmeasurementsetsforclient/do.json",
-    //                                data: JSON.stringify({clientUUID: clientData.uuid}),
-    //                                contentType: "application/json; charset=utf-8",
-    //                                success: function(measurementSets){
-    //                                    if (measurementSets == null) {
-    //                                        console.error('Failed to retrieve measurement sets for client ' + clientData.uuid + ' because the client is no longer connected.');
-    //                                    } else {
-    //                                        console.log(measurementSets);
-    //                                    }
-    //
-    //                                    $.each(measurementSets, function(indexMeasurementSet, measurementSet){
-    //                                        var detailsRow = $('<div class="row"></div>').appendTo(".clientdetails");
-    //                                        var measurementSetDetailsContainer = $('<div class="twelve columns"></div>').appendTo(detailsRow);
-    //                                        measurementSetDetailsContainer.data('measurementSet', measurementSet);
-    //
-    //                                        measurementSetDetailsContainer.append('<p class="metricMonitorHeader">Measurement Set ' + (indexMeasurementSet + 1) + ':</p>');
-    //                                        measurementSetDetailsContainer.append('<p class="metricMonitorDescription">UUID: ' + measurementSet.uuid + '</p>');
-    //                                        measurementSetDetailsContainer.append('<p class="metricMonitorDescription">Metric Unit: ' + measurementSet.metricUnit + '</p>');
-    //                                        measurementSetDetailsContainer.append('<p class="metricMonitorDescription">Metric UUID: ' + measurementSet.metricUUID + '</p>');
-    //                                        measurementSetDetailsContainer.append('<p class="metricMonitorDescription">Metric Type: ' + measurementSet.metricType + '</p>');
-    //
-    //                                    });
-    //                                },
-    //                                error: function() {
-    //                                    console.error('Failed to retrieve measurement sets for client ' + clientData.uuid);
-    //                                }
-    //                            });
-
                             });
+                        }
 
-                            // If no clients selected, select the first one
-                            if ($(".clientlist .active").size() < 1)
-                                $(".clientlist .clientitem").first().trigger('click');
-
-    //                    }
                     });
+                    
+//                    console.log("Looking for clients to remove. Clients in connectedClientsIDs:");
+//                    console.log(connectedClientsIDs);
+//                    console.log("Looking for clients to remove. Clients in reportedClientsUuid:");
+//                    console.log(reportedClientsUuid);
+                    
+                    // Remove disconnected clients
+                    var clientIdsToRemove = [];
+                    $.each(connectedClientsIDs, function(indexClientUuid, clientUuid){
+                        if ( ! ($.inArray(clientUuid, reportedClientsUuid) > -1) ) {
+                            
+                            console.log("Detected disconnected client [" + clientUuid + "]");                            
+                            
+                            clientIdsToRemove.push(clientUuid);
+                            
+                            // remove from .clientlist
+                            $('.clientlist .clientitem').each(function(){
+                                if ($(this).data().client.uuid == clientUuid) {
+                                    $(this).remove();
+                                }
+                            });
+                            
+                        }
+                    });                    
+                    $.each(clientIdsToRemove, function(indexToRemove, toRemove){
+                        removeFromConnectedClientsIDs(toRemove);
+                    });
+                    
+                    // If no clients selected, select the first one
+                    if ($(".clientlist .active").size() < 1)
+                        $(".clientlist .clientitem").first().trigger('click');
+                    
+                    // If no clients connected, show "No clients detected" message - just in case
+                    if ($(".clientlist .clientitem").size() < 1) {
+                        $(".clientdetails").empty();
+                        $(".clientdetails").append('<h6>No clients detected</h6>');                        
+                    }
                 }
 
                 if (isClientMonitoringOn) {
