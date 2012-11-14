@@ -23,23 +23,34 @@
 /////////////////////////////////////////////////////////////////////////
 package eu.experimedia.itinnovation.ecc.web.adapters;
 
-import java.util.Date;
-import java.util.HashMap;
+import eu.experimedia.itinnovation.ecc.web.data.DataPoint;
+import java.util.LinkedHashMap;
+import java.util.Map.Entry;
+import org.apache.log4j.Logger;
 
 public class DashboardMeasurementSet {
-
+    
+    private final Logger logger = Logger.getLogger(DashboardMeasurementSet.class);
+    
     private String UUID;
-    private HashMap<Date, String> measurements = new HashMap<Date, String>();
+    private LinkedHashMap<String, DataPoint> measurements = new LinkedHashMap<String, DataPoint>();
+//    {
+//        @Override
+//        protected boolean removeEldestEntry(Entry eldest) {
+//                return size() > 5; // This is the map size. New entries remove eldest entries
+//        }        
+//    };
 
     public DashboardMeasurementSet(String UUID) {
         this.UUID = UUID;
     }
 
-    public void addMeasurement(Date timestamp, String value) {
-        measurements.put(timestamp, value);
+    public void addMeasurement(String measurementUuid, DataPoint dataPoint) {
+        logger.debug("Adding new data point " + dataPoint.getValue() + " to measurement set [" + this.UUID + "]");
+        measurements.put(measurementUuid, dataPoint);
     }
 
-    public HashMap<Date, String> getMeasurements() {
+    public LinkedHashMap<String, DataPoint> getMeasurements() {
         return measurements;
     }
 

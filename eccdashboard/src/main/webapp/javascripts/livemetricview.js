@@ -278,7 +278,7 @@ function showMetricGenerators() {
                                     measurementSet.attribute + ' (' + measurementSet.metricUnit + ', ' +
                                     measurementSet.metricType + ')</p>');
                                 ad.append('<p class="parameters">UUID: ' + measurementSet.uuid + '</p>');
-
+                                
                                 counter++;
                             });
                         });
@@ -334,6 +334,9 @@ function getMetricGeneratorsPollFirstOne() {
                         md.empty();
                         $(".metricgenlist .metricgenitem").removeClass('active');
                         $(this).addClass('active');
+                        
+                        // Stop all polling
+                        measurementSetsToMonitorLive = [];
 
                         var mgdata = $(this).data().mg;
 //                        console.log(mgdata);
@@ -358,7 +361,7 @@ function getMetricGeneratorsPollFirstOne() {
                                 var measurementSetContainerLiveDataSwitch = $('<span id="measurementSetMonitorSwitch_' + measurementSetUuid +
                                     '" class="measurementSetMonitorSwitch">show live data</span>').appendTo(measurementSetContainerHeader);
 
-                                measurementSetContainerLiveDataSwitch.data('measurementSetUuid', measurementSetUuid);
+                                measurementSetContainerLiveDataSwitch.data('measurementSet', measurementSet);
                                 measurementSetContainerLiveDataSwitch.data('live', true);
 
                                 measurementSetContainer.append('<p class="parameters">UUID: ' + measurementSetUuid + '</p>');
@@ -367,22 +370,28 @@ function getMetricGeneratorsPollFirstOne() {
                                 measurementSetContainerLiveDataSwitch.click(function(e){
 
                                     e.preventDefault();
-
-                                    var measurementSetUuid = $(this).data().measurementSetUuid;
+                                    
+                                    var measurementSet = $(this).data().measurementSet;
+                                    var metricType = measurementSet.metricType;
+                                    var measurementSetUuid = measurementSet.uuid;
                                     var measurementSetDataContainer = $('#measurementSetDataContainer_' + measurementSetUuid);
 
                                     if ($(this).data().live) {
 
                                         // start monitoring
-                                        console.log('Monitoring ON for measurement set: ' + measurementSetUuid);
+                                        console.log('Monitoring ON for measurement set: ' + measurementSetUuid + ", metric type: " + metricType);
                                         
                                         measurementSetDataContainer.append('<p class="parameters">Last metric report: <span id="lastMetricReport_' + measurementSetUuid + '">N/A</span></p>');
                                         measurementSetDataContainer.append('<p class="parameters">Total number of reports: <span id="totalNumReports_' + measurementSetUuid + '">0<span></p>');
-                                        measurementSetDataContainer.append('<p id ="measurementSetTip_' + measurementSetUuid + '" class="parameters">Live data will be displayed below as soon as it is received from EM Clients.</p>');
+                                        measurementSetDataContainer.append('<p id ="measurementSetTip_' + measurementSetUuid + '" class="parameters">Live data will be displayed below as soon as it is received from the EM Client.</p>');
                                         
                                         addToMonitoredMeasurementSets(measurementSetUuid);
                                         
-                                        pollDataForMeasurementSet(measurementSetUuid);
+                                        if (metricType === "NOMINAL") {
+                                            pollTextForMeasurementSet(measurementSetUuid);
+                                        } else {
+                                            pollDataForMeasurementSet(measurementSetUuid);                                            
+                                        }
 
                                         // update control name and next status
                                         $(this).data('live', false);
@@ -459,7 +468,7 @@ function isMeasurementSetMonitored(measurementSetUuid) {
     return ($.inArray(measurementSetUuid, measurementSetsToMonitorLive) > -1);
 }
 
-function pollAndReplotGraph(jqplotGraph, measurementSetUuid) {
+function pollAndReplotGraph(jqplotGraph, measurementSetUuid, lastMeasurementUUID) {
 
     if (isMeasurementSetMonitored(measurementSetUuid)) {
 
@@ -475,17 +484,22 @@ function pollAndReplotGraph(jqplotGraph, measurementSetUuid) {
                 
                 if (isMeasurementSetMonitored(measurementSetUuid)) {
                     var oldData = jqplotGraph.series[0].data;
+                    var newMeasurementUUID = measurementSetData[measurementSetData.length - 1].measurementUUID;
 
                     var newData = new Array();
                     var tempArray;
                     $.each(measurementSetData, function(dataPointIndex, dataPoint){
                         tempArray = new Array();
-                        tempArray[0] = dataPoint.time; // Has to be in msec for some reason!
+                        tempArray[0] = dataPoint.time;
                         tempArray[1] = parseInt(dataPoint.value);
                         newData[dataPointIndex] = tempArray;
                     });
 
-                    if (newData.length > oldData.length) {
+//                    console.log('New data length: ' + newData.length);
+//                    console.log('Old data length: ' + oldData.length);
+//                    console.log('LastMeasurementUUID: ' + lastMeasurementUUID);
+//                    console.log('NewMeasurementUUID: ' + newMeasurementUUID);
+                    if ( (newData.length > oldData.length) || ( (newData.length == oldData.length) && (lastMeasurementUUID !== newMeasurementUUID) ) )  {
                         console.log('NEW DATA for measurement set: ' + measurementSetUuid);
 
                         $('#lastMetricReport_' + measurementSetUuid).text(longToDate(measurementSetData[measurementSetData.length - 1].time));
@@ -499,7 +513,7 @@ function pollAndReplotGraph(jqplotGraph, measurementSetUuid) {
                         console.log('No new points for measurement set: ' + measurementSetUuid);
                     }
 
-                    setTimeout(function(){pollAndReplotGraph(jqplotGraph, measurementSetUuid)}, 2000);
+                    setTimeout(function(){pollAndReplotGraph(jqplotGraph, measurementSetUuid, newMeasurementUUID)}, 2000);
                 } else {
                     console.log('Received measurementSetData but ignored it as refreshing graph data is OFF for measurement set: ' + measurementSetUuid);
                 }
@@ -508,6 +522,48 @@ function pollAndReplotGraph(jqplotGraph, measurementSetUuid) {
         });
     } else {
         console.log('Refreshing graph data is OFF for measurement set: ' + measurementSetUuid);
+    }
+
+}
+
+function pollAndReplotText(dataTable, measurementSetUuid, lastMeasurementUUID) {
+
+    if (isMeasurementSetMonitored(measurementSetUuid)) {
+
+        console.log('Refreshing graph data for measurement set: ' + measurementSetUuid);
+
+        $.ajax({
+            type: 'POST',
+            url: "/em/gettextformeasurementset/do.json",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({measurementSetUuid: measurementSetUuid}),
+            dataType: 'json',            
+            success: function(measurementSetData){
+                
+                
+                if (isMeasurementSetMonitored(measurementSetUuid)) {
+                    console.log(measurementSetData);
+                    dataTable.empty();
+                    dataTable.append('<tr><th>Timestamp, dd/mm/yyyy HH:MM:SS</th><th>Topic keywords</th></tr>');
+                    var previousTopicTime = -1;
+                    $.each(measurementSetData, function(key, entry){
+                        if (previousTopicTime == entry.time)
+                            dataTable.append('<tr><td> </td><td>' + entry.value + '</td></tr>');
+                        else
+                            dataTable.append('<tr><td>' + longToDate(entry.time) + '</td><td>' + entry.value + '</td></tr>');
+
+                        previousTopicTime = entry.time;
+                    }); 
+
+                    setTimeout(function(){pollAndReplotText(dataTable, measurementSetUuid, -1)}, 2000);
+                } else {
+                    console.log('Received measurementSetData but ignored it as refreshing text is OFF for measurement set: ' + measurementSetUuid);
+                }
+
+            }
+        });
+    } else {
+        console.log('Refreshing text is OFF for measurement set: ' + measurementSetUuid);
     }
 
 }
@@ -582,7 +638,7 @@ function pollDataForMeasurementSet(measurementSetUuid) {
                                 plotdata[dataPointIndex] = tempArray;
                             });
 
-                            console.log(plotdata);
+//                            console.log(plotdata);
 
     //                        var dataTable = $('<table class="metricstable"><tbody></tbody></table>').appendTo($('<div id="datatablecontainer' + counter + '" class="extraspacebottom"></div>').appendTo(dataDivGraphsAndHistory));
     //                        dataTable.append('<tr><th>Timestamp, yyyy-mm-dd HH:MM:SS</th><th>Value, ms</th></tr>');
@@ -602,7 +658,7 @@ function pollDataForMeasurementSet(measurementSetUuid) {
                                 }
                             });
 
-                            setTimeout(function(){pollAndReplotGraph(jqplotGraph, measurementSetUuid)}, 2000);
+                            setTimeout(function(){pollAndReplotGraph(jqplotGraph, measurementSetUuid, -1)}, 2000);
                         }
                     }
                 } else {
@@ -621,69 +677,85 @@ function pollDataForMeasurementSet(measurementSetUuid) {
         
         console.log('Polling data is OFF for measurement set: ' + measurementSetUuid);
     }
+}
 
-//    $.getJSON('/em/gettestdata/do.json', function(measurements) {
-//            console.log(measurements);
-//        });
-//
+function pollTextForMeasurementSet(measurementSetUuid) {
+    
+    if (isMeasurementSetMonitored(measurementSetUuid)) {
+        
+        console.log('Polling text for measurement set: ' + measurementSetUuid);
+        
+        $.ajax({
+            type: 'POST',
+            url: "/em/gettextformeasurementset/do.json",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({measurementSetUuid: measurementSetUuid}),
+            dataType: 'json',
+            success: function(measurementSetData){
+                
+                if (isMeasurementSetMonitored(measurementSetUuid)) {
+                    
+                    console.log(measurementSetData);
+
+                    if (measurementSetData == null) {
+                        alert("Server error retrieving measurement set text");
+                        console.error("Server error retrieving measurement set text");
+                        return;
+                    } else {
+                        if (measurementSetData.length < 1) {
+
+                            console.debug("No text found, retrying in 2 seconds");
+
+                            setTimeout(function(){pollTextForMeasurementSet(measurementSetUuid)}, 2000);
+
+                        } else {
+
+                            $('#measurementSetTip_' + measurementSetUuid).remove();
+
+                            $('#lastMetricReport_' + measurementSetUuid).text(longToDate(measurementSetData[measurementSetData.length - 1].time));
+                            $('#totalNumReports_' + measurementSetUuid).text(measurementSetData.length);
 
 
-    /*
-    var jqplotContainerID = "representationContainer" + counter;
-    var graphSelectorID = "graphselector" + counter;
-    var tableSelectorID = "tableselector" + counter;
+                            var jqplotContainerID = "representationContainer_" + measurementSetUuid;
 
-    var graphDataSwitcher = $('<div class="graphDataSwitcher"></div>').appendTo(ad);
-    var graphSelectorButton = $('<div id="' + graphSelectorID + '" class="switchbutton"><p>Graph</p></div>').appendTo(graphDataSwitcher);
-    var tableSelectorButton = $('<div id="' + tableSelectorID + '" class="switchbutton"><p>History data</p></div>').appendTo(graphDataSwitcher);
+                            var measurementSetDataContainer = $('#measurementSetDataContainer_' + measurementSetUuid);
+                            $('<div id="'+ jqplotContainerID + '" class="row"></div>').appendTo(measurementSetDataContainer);
 
-    graphSelectorButton.data('counter', counter);
-    graphSelectorButton.data('jqplotContainerID', jqplotContainerID);
-    tableSelectorButton.data('counter', counter);
-    tableSelectorButton.data('jqplotContainerID', jqplotContainerID);
+                            $('#' + jqplotContainerID).empty();
 
-    $('<div id="'+ jqplotContainerID + '" class="row"></div>').appendTo(ad);
+                            var dataDivGraphsAndHistory = $('<div class="eleven columns centered"></div>').appendTo($('#' + jqplotContainerID));
 
-    $(".graphDataSwitcher .switchbutton").click(function(){
-        $(this).parent().find('.switchbutton').removeClass('active');
-        $(this).addClass('active');
+                            var dataTable = $('<table class="metricstable"><tbody></tbody></table>').appendTo($('<div id="datatablecontainer_' + measurementSetUuid + '" class="extraspacebottom"></div>').appendTo(dataDivGraphsAndHistory));
+                            dataTable.append('<tr><th>Timestamp, dd/mm/yyyy HH:MM:SS</th><th>Topic keywords</th></tr>');
+                            var previousTopicTime = -1;
+                            $.each(measurementSetData, function(key, entry){
+                                if (previousTopicTime == entry.time)
+                                    dataTable.append('<tr><td> </td><td>' + entry.value + '</td></tr>');
+                                else
+                                    dataTable.append('<tr><td>' + longToDate(entry.time) + '</td><td>' + entry.value + '</td></tr>');
+                                
+                                previousTopicTime = entry.time;
+                            });                            
 
-        $.getJSON('/em/gettestdata/do.json', function(measurements) {
-            console.log(measurements);
-        });
-
-        var counter = $(this).data().counter;
-        var jqplotContainerID = $(this).data().jqplotContainerID;
-
-        $('#' + jqplotContainerID).empty();
-        var dataDivGraphsAndHistory = $('<div class="eleven columns centered"></div>').appendTo($('#' + jqplotContainerID));
-        var plotdata = [['2008-09-30 4:00PM',4], ['2008-10-30 4:00PM',6.5], ['2008-11-30 4:00PM',5.7], ['2008-12-30 4:00PM',9]];
-
-        if ($(this).attr('id').indexOf('g') === 0) {
-            dataDivGraphsAndHistory.append('<div id="dataplot' + counter + '" class="extraspacebottom"></div>');
-
-            $.jqplot ('dataplot' + counter, [plotdata], {
-                title:'Latency (ms)',
-                axes:{
-                    xaxis:{
-                        label:'Timestamp (mmm dd, yy)',
-                        renderer:$.jqplot.DateAxisRenderer,
-                        tickOptions:{formatString:'%b %#d, %y'}
+                            setTimeout(function(){pollAndReplotText(dataTable, measurementSetUuid, -1)}, 2000);
+                        }
                     }
-
+                } else {
+                    console.log('Received measurementSetData but ignored it as polling text is OFF for measurement set: ' + measurementSetUuid);
                 }
-            });
-        } else {
-            var dataTable = $('<table class="metricstable"><tbody></tbody></table>').appendTo($('<div id="datatablecontainer' + counter + '" class="extraspacebottom"></div>').appendTo(dataDivGraphsAndHistory));
-            dataTable.append('<tr><th>Timestamp, yyyy-mm-dd HH:MM</th><th>Value, ms</th></tr>');
-            $.each(plotdata, function(key, value){
-                dataTable.append('<tr><td>' + value[0] + '</td><td>' + value[1] + '</td></tr>');
-            });
-
-        }
-    });
-
-    */
+            },
+            error: function(xhr, ajaxOptions, thrownError){
+                alert('Failed to get retrieving measurement set text');
+                console.error('Failed to get retrieving measurement set text');
+                console.error(thrownError);
+                console.error(xhr.status);
+            }
+        });
+    
+    } else {
+        
+        console.log('Polling text is OFF for measurement set: ' + measurementSetUuid);
+    }
 }
 
 function prepareSetupPhase(actionButton) {
@@ -802,15 +874,190 @@ function preparePostReportPhase(actionButton) {
 
 function doPostReportPhase(actionButton, currentPhase){
     console.log('In POST REPORT PHASE');
+    
+    // Stop all polling from live monitoring
+    measurementSetsToMonitorLive = [];
 
     $("#currentPhaseName").text(currentPhase.description);
     $("#currentPhaseID").text(currentPhase.index);
     $("#currentPhaseDescription").text("Collecting post reports from clients");
 
-    // Show the list of metric generators with live post report
-    showMetricGenerators();
+    // Show the list of metric generators with post report data
+    showMetricGeneratorsWithPostReportData();
 
     prepareTearDownPhase(actionButton);
+}
+
+function pollDataForSummarySet(measurementSetUuid) {
+    
+    console.log('Polling data for summary set: ' + measurementSetUuid);
+
+    $.ajax({
+        type: 'POST',
+        url: "/em/getsummaryformeasurementset/do.json",
+        contentType: "application/json; charset=utf-8",
+        data: JSON.stringify({measurementSetUuid: measurementSetUuid}),
+        dataType: 'json',
+        success: function(measurementSetData){
+
+//            if (isMeasurementSetMonitored(measurementSetUuid)) {
+
+                console.log(measurementSetData);
+
+                if (measurementSetData == null) {
+                    alert("Server error retrieving summary set data");
+                    console.error("Server error retrieving summary set data");
+                    return;
+                } else {
+                    if (measurementSetData.length < 1) {
+
+                        console.debug("No data found, retrying in 2 seconds");
+
+                        setTimeout(function(){pollDataForSummarySet(measurementSetUuid)}, 2000);
+
+                    } else {
+
+                        $('#measurementSetTip_' + measurementSetUuid).remove();
+
+                        $('#lastMetricReport_' + measurementSetUuid).text(longToDate(measurementSetData[measurementSetData.length - 1].time));
+                        $('#totalNumReports_' + measurementSetUuid).text(measurementSetData.length);
+
+
+                        var jqplotContainerID = "representationContainer_" + measurementSetUuid;
+                        var graphSelectorID = "graphselector_" + measurementSetUuid;
+                        var tableSelectorID = "tableselector_" + measurementSetUuid;
+
+                        var measurementSetDataContainer = $('#measurementSetDataContainer_' + measurementSetUuid);
+                        $('<div id="'+ jqplotContainerID + '" class="row"></div>').appendTo(measurementSetDataContainer);
+
+                        $('#' + jqplotContainerID).empty();
+
+                        var dataDivGraphsAndHistory = $('<div class="eleven columns centered"></div>').appendTo($('#' + jqplotContainerID));
+
+                        dataDivGraphsAndHistory.append('<div id="dataplot_' + measurementSetUuid + '" class="extraspacebottom"></div>');
+//                        var plotdata = [['2008-09-30 4:00PM',4], ['2008-10-30 4:00PM',6.5], ['2008-11-30 4:00PM',5.7], ['2008-12-30 4:00PM',9]];
+
+                        var plotdata = new Array();
+                        var tempArray;
+                        $.each(measurementSetData, function(dataPointIndex, dataPoint){
+                            tempArray = new Array();
+                            tempArray[0] = dataPoint.time;
+                            tempArray[1] = parseInt(dataPoint.value);
+                            plotdata[dataPointIndex] = tempArray;
+                        });
+
+                        var jqplotGraph = $.jqplot ('dataplot_' + measurementSetUuid, [plotdata], {
+                            axes:{
+                                xaxis:{
+//                                    min: plotdata[0][0],
+//                                    max: plotdata[plotdata.length - 1][0],
+                                    renderer:$.jqplot.DateAxisRenderer,
+                                    tickOptions:{formatString:'%b %#d<br/> %T'}
+
+                                }
+                            }
+                        });
+
+                    }
+                }
+//            } else {
+//                console.log('Received summarySetData but ignored it as polling data is OFF for summary set: ' + measurementSetUuid);
+//            }
+        },
+        error: function(xhr, ajaxOptions, thrownError){
+            alert('Failed to get retrieving summary set data');
+            console.error('Failed to get retrieving summary set data');
+            console.error(thrownError);
+            console.error(xhr.status);
+        }
+    });
+    
+}
+
+function showMetricGeneratorsWithPostReportData() {
+
+    $.ajax({
+        type: 'GET',
+        url: "/em/getmetricgenerators/do.json",
+        contentType: "application/json; charset=utf-8",
+        success: function(metricGenerators){
+
+            console.log(metricGenerators);
+
+            $(".metricgenlist").empty();
+
+            if (metricGenerators.length < 1) {
+                console.debug("No metric generators found, retrying in 2 seconds");
+                setTimeout(function(){showMetricGeneratorsWithPostReportData()}, 2000);
+            } else {
+                var mgObj;
+                var md = $(".metricgendetails");
+                $.each(metricGenerators, function(index, mg){
+
+                    // Create entities string with names/descriptions
+                    var entitiesNameList = "";
+                    var entitiesNameListWithDescriptions = "";
+                    $.each(mg.listOfEntities, function(entityIndex, entityItem){
+                        if ( entityIndex < mg.listOfEntities.length - 1 ) {
+                            entitiesNameList += entityItem.name + ", ";
+                            entitiesNameListWithDescriptions += entityItem.name + " (" + entityItem.description + "), ";
+                        } else {
+                            entitiesNameList += entityItem.name;
+                            entitiesNameListWithDescriptions += entityItem.name + " (" + entityItem.description + ")";
+                        }
+                    });
+
+                    // Sidebar metric generator element
+                    mgObj = $('<p class="metricgenitem">' + mg.name + '<span>' + entitiesNameList + '</span></p>').appendTo(".metricgenlist");
+
+                    mgObj.data('mg', mg);
+
+                    mgObj.click(function(){
+                        md.empty();
+                        $(".metricgenlist .metricgenitem").removeClass('active');
+                        $(this).addClass('active');
+
+                        var mgdata = $(this).data().mg;
+//                        console.log(mgdata);
+
+                        md.append('<p class="metricGeneratorHeader">' + mgdata.name + ' (' + mgdata.description + ')</p>');
+                        md.append('<p class="metricGeneratorDescription">UUID: ' + mgdata.uuid + '</p>');
+                        md.append('<p class="metricGeneratorDescription">Entities: ' + entitiesNameListWithDescriptions + '</p>');
+
+                        $.each(mgdata.listOfMetricGroups, function(indexMetricGroup, metricGroup){
+                            md.append('<p class="metricGroupHeader">Metric Group ' + (indexMetricGroup + 1) + ': ' + metricGroup.name + ' (' + metricGroup.description + ')</p>');
+                            md.append('<p class="metricGroupSubheader">UUID: ' + metricGroup.uuid + '</p>');
+                            
+                            var measurementSetWrapper = $('<div class="twelve columns"></div>').appendTo($('<div class="row"></div>').appendTo(md));
+                            
+                            var measurementSetContainer = $('<div class="twelve columns"></div>').appendTo($('<div class="row"></div>').appendTo(md));
+                            $.each(metricGroup.measurementSets, function(indexMeasurementSet, measurementSet){
+                                var measurementSetUuid = measurementSet.uuid;
+                                var measurementSetContainer = $('<div id="measurementSetContainer_' + measurementSetUuid + '" class="attributediv"></div>').appendTo(measurementSetWrapper);
+
+                                var measurementSetContainerHeader = $('<p class="header">Measurement Set ' + (indexMeasurementSet + 1) + ': ' +
+                                    measurementSet.attribute + ' (' + measurementSet.metricUnit + ', ' + measurementSet.metricType +
+                                    ')</p>').appendTo(measurementSetContainer);
+
+                                measurementSetContainer.append('<p class="parameters">UUID: ' + measurementSetUuid + '</p>');
+                                var measurementSetDataContainer = $('<div id="measurementSetDataContainer_' + measurementSetUuid + '"></div>').appendTo(measurementSetContainer);
+                                
+                                measurementSetDataContainer.append('<p class="parameters">Last metric report: <span id="lastMetricReport_' + measurementSetUuid + '">N/A</span></p>');
+                                measurementSetDataContainer.append('<p class="parameters">Total number of reports: <span id="totalNumReports_' + measurementSetUuid + '">0<span></p>');
+                                measurementSetDataContainer.append('<p id ="measurementSetTip_' + measurementSetUuid + '" class="parameters">Post report data will be displayed below as soon as it is received from the EM Client.</p>');
+                                
+                                pollDataForSummarySet(measurementSetUuid);
+
+                            });
+                        });
+                    });
+                });
+
+                $(".metricgenlist .metricgenitem").first().trigger('click');
+            }
+        }
+    });
+
 }
 
 
@@ -846,14 +1093,19 @@ function prepareTearDownPhase(actionButton) {
 
 function doTearDownPhase(actionButton, currentPhase){
     console.log('In TEAR-DOWN PHASE');
+    
     actionButton.text('Experiment finished');
     actionButton.addClass('alert');
     actionButton.unbind('click');
+
+    // Stop summary polling
 
     actionButton.click(function(e){
         e.preventDefault();
         alert('Experiment is complete, no phases left');
     });
+    
+    $("#experimentEndTime").text(longToDate( (new Date()).getTime() ));
 
     $("#currentPhaseName").text(currentPhase.description);
     $("#currentPhaseID").text(currentPhase.index);

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<!--<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">-->
+<html>
+ <!-- <head>-->
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Dashboard | WeGov Prototype 3.0</title>
+<link rel="stylesheet" type="text/css" href="css/kendo.common.min.css"
+	media="all">
+<link rel="stylesheet" type="text/css" href="css/kendo.default.min.css"
+	media="all">
+<link rel="stylesheet" type="text/css" href="css/jquery.jqplot.min.css"
+	media="all">
+<link rel="stylesheet" type="text/css" href="css/common.css" media="all">
+<link rel="stylesheet" type="text/css" href="css/main.css" media="all">
+
+<script type="text/javascript" src="js-lib/jquery-1.7.1.min.js"></script>
+<script type="text/javascript" src="js-lib/jquery-ui-1.8.17.custom.min.js"></script>
+<script type="text/javascript" src="js-lib/kendo.all.min.js"></script>
+<!-- script type="text/javascript" src="js-lib/jquery-lang.js"></script>
+<script type="text/javascript" src="languages/index-de.js" charset="utf-8"></script -->
+<script type="text/javascript" src="js-lib/twitter-text.js"></script>
+<!--
+<script type="text/javascript"
+	src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC97RRRpBC-CNpBcgM0VvxAila1AoMsUfw&sensor=false&libraries=places"
+	charset="utf-8"></script>
+-->
+<script type="text/javascript"
+	src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC97RRRpBC-CNpBcgM0VvxAila1AoMsUfw&amp;sensor=false&amp;libraries=places"
+	charset="utf-8"></script>
+
+<script src="js-lib/StyledMarker.js" type="text/javascript"></script>
+<!-- old geoplugin location detection
+<script language="JavaScript" src="https://ssl.geoplugin.net/javascript.gp" type="text/javascript"></script>
+-->
+
+<script type="text/javascript" src="js-lib/jquery.jqplot.min.js"></script>
+<script type="text/javascript"
+	src="js-lib/plugins/jqplot.barRenderer.min.js"></script>
+<script type="text/javascript"
+	src="js-lib/plugins/jqplot.categoryAxisRenderer.min.js"></script>
+<script type="text/javascript"
+	src="js-lib/plugins/jqplot.dateAxisRenderer.min.js"></script>
+<script type="text/javascript"
+	src="js-lib/plugins/jqplot.pointLabels.min.js"></script>
+<script type="text/javascript"
+	src="js-lib/plugins/jqplot.pieRenderer.min.js"></script>
+
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/location.js"></script>
+<script type="text/javascript" src="js/index.js"></script>
+
+<!-- Facebook widgets -->
+<div id="fb-root"></div>
+<!-- <script type="text/javascript" src="js/fb-authSJT.js"></script> -->
+<script type="text/javascript" src="js/fb-auth.js"></script>
+<script type="text/javascript" src="js/fb-group-posts-widgetSJT2.js"></script>
+<!--<script type="text/javascript" src="js/fb-group-post-topic-analysis-widgetSJT.js"></script> -->
+<script type="text/javascript" src="js/fb-group-post-comments-widgetSJT.js"></script>
+
+<!-- SJT -->
+<script type="text/javascript" src="js/basicTwitterSearchSJT.js"></script>
+<script type="text/javascript" src="js/analysisFromDatabaseSJT.js"></script>
+<script type="text/javascript" src="js/peerindex-widgetSJT.js"></script>
+
+<!-- HeadsUp analysis -->
+<!--
+<script type="text/javascript" src="headsup/js/headsup.js"></script>
+-->
+
+<!--
+<script type="text/javascript" src="js/behaviourAnalysisWidget.js"></script>
+-->
+
+
+<!--<body> -->
+	<div id="wrapper">
+		<div id="header">
+			<div id="invislink"></div>
+			<div id="headerOptions">
+				<p id="username"></p>
+				<a href="/j_spring_security_logout">Logout</a>
+			</div>
+		</div>
+
+		<div id="nav">
+			<ul>
+				<li class="selected"><a href="./index.html"><span lang="en">Home</span></a></li>
+				<li><a id="createWidget" href="#"><span lang="en">Create Widget</span></a></li>
+				<li><a href="newsearch.html"><span lang="en">Advanced search</span></a></li>
+        <!--
+				<li><a href="#"><span lang="en">Advanced analysis</span></a></li>
+        -->
+				<!-- <li><a href="./headsup/index.html"><span lang="en">HeadsUp Analyser</span></a></li> -->
+
+
+			</ul>
+		</div>
+
+		<div id="content">
+			<div id="displayArea">
+				<div id="widgets">
+				</div>
+			</div>
+
+			<div class="clearfix"></div>
+
+		</div>
+
+		<div id="footer">
+			<div id="footerCopyright">
+				<p>
+					2012 &copy; <span lang="en">WeGov Consortium</span>
+				</p>
+			</div>
+			<div id="footerAboutEtc">
+				<a href="../about.html"><span lang="en">About</span></a>
+        <!--<a href="#"><span lang="en">Terms of Use</span></a>
+        <a href="#"><span lang="en">Privacy</span></a> -->
+        <a href="../contact.html"><span lang="en">Contact</span></a>
+			</div>
+		</div>
+	</div>
+	<div id="dialog-overlay" class="closed-by-escape"></div>
+	<!-- Old widget for geoplugin
+	<div id="name-location-dialog-holder" class="closed-by-escape">
+		<h1>Save this location as:</h1>
+		<input id="newLocationName" type="text">
+		<div class="clearfix"></div>
+		<p id="newLocationNameSaveButton">
+			<span lang="en">Save</span>
+		</p>
+		<p id="newLocationNameCancelButton">
+			<span lang="en">Cancel</span>
+		</p>
+	</div>
+	-->
+	<div id="add-new-location-dialog-holder" class="closed-by-escape">
+		<h1>Start typing to find a new location:</h1>
+		<div>
+			<input id="searchTextField" type="text" size="50"> <input
+				type="radio" name="type" id="changetype-all" checked="checked">
+			<label for="changetype-all">All</label> <input type="radio"
+				name="type" id="changetype-establishment"> <label
+				for="changetype-establishment">Establishments</label> <input
+				type="radio" name="type" id="changetype-geocode"> <label
+				for="changetype-geocode">Geocodes</label>
+		</div>
+		<div id="map_canvas"></div>
+		<div id="add-new-location-dialog-holder-locationname">
+			<p >
+				<span lang="en">Name your new location:</span>
+			</p>
+			<input id="addNewLocationName" type="text">
+		</div>
+		<div id="add-new-location-dialog-holder-controls">
+			<p id="addNewLocationDialogNameSaveButton">
+				<span lang="en">Add to My Locations</span>
+			</p>
+			<p id="addNewLocationDialogNameCancelButton">
+				<span lang="en">Cancel</span>
+			</p>
+		</div>
+	</div>
+	<div id="fb-root"></div>
+</body>
+</html>

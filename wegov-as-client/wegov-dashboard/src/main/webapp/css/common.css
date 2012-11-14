@@ -1,0 +1,96 @@
+body{
+	font-family:"Lucida Grande", "Lucida Sans Unicode", Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	background: rgb(234, 233, 233) url('../img/cross_scratches.png') repeat;
+	margin: 0;
+	padding: 0;
+}
+
+#wrapper {
+	width: 970px;
+	margin: 0 auto;
+	background-color: #fff;
+	padding: 0;
+	min-height: 400px;
+	position: relative;
+}
+
+#header {
+	width: 100%;
+	position: relative;
+}
+
+#invislink {
+	position: absolute;
+	/* border: 1px solid red; */
+	top: 0px;
+	left: 0px;
+	width: 220px;
+	height: 70px;
+	cursor: pointer;
+}
+	
+	#langChanger p {
+		position: absolute;
+		cursor: pointer;
+		top: 0;
+		right: 200px;
+		margin: 0;
+		padding: 10px 20px;
+		background: #90C8DB url('../img/form_bg.png') no-repeat;
+		border: 0;
+		color: #fff;
+		-webkit-border-bottom-right-radius: 10px;
+		-webkit-border-bottom-left-radius: 10px;
+		-moz-border-radius-bottomright: 10px;
+		-moz-border-radius-bottomleft: 10px;
+		border-bottom-right-radius: 10px;
+		border-bottom-left-radius: 10px;
+		-webkit-box-shadow: 0px 2px 1px 1px rgba(0, 0, 0, 0.25);
+		-moz-box-shadow: 0px 2px 1px 1px rgba(0, 0, 0, 0.25);
+		box-shadow: 0px 2px 1px 1px rgba(0, 0, 0, 0.25);
+		z-index: 10;
+	}
+	#langChanger p:hover {
+		text-decoration: underline;
+	}
+
+#footer {
+	width: 100%;
+	height: 60px;
+	background: white url('../img/footer_bg.png') no-repeat;
+	margin: 0;
+	padding:0;
+	position: absolute;
+	left:0;
+	bottom: -60px;
+	color: #333;
+}
+
+#footerCopyright {
+	margin: 30px 0 0 25px;
+}
+
+#footerAboutEtc {
+	position: absolute;
+	right: 5px;
+	top: 30px;
+}
+
+	#footerAboutEtc a, #footerAboutEtc a:active {
+		text-decoration: underline;
+		color: #333;
+		padding: 0 25px 0 0;
+		margin: 0;
+	}
+	
+	
+	
+.clearfix:after {
+	visibility: hidden;
+	display: block;
+	font-size: 0;
+	content: " ";
+	clear: both;
+	height: 0;
+}
