@@ -1,0 +1,103 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Topic Opinion Analysis | WeGov Prototype 3.0</title>
+<link rel="stylesheet" type="text/css" href="css/kendo.common.min.css"
+	media="all">
+<link rel="stylesheet" type="text/css" href="css/kendo.default.min.css"
+	media="all">
+<link rel="stylesheet" type="text/css" href="css/jquery.jqplot.min.css"
+	media="all">
+<link rel="stylesheet" type="text/css"
+	href="css/jquery-ui-1.8.17.custom.css" media="all">
+<link rel="stylesheet" type="text/css" href="css/common.css" media="all">
+<link rel="stylesheet" type="text/css" href="css/topics-opinions.css" media="all">
+
+<!-- <script type="text/javascript" src="js-lib/jquery.min.js"></script> -->
+<script type="text/javascript" src="js-lib/jquery-1.7.1.min.js"></script>
+<script type="text/javascript"
+	src="js-lib/jquery-ui-1.8.17.custom.min.js"></script>
+<script type="text/javascript" src="js-lib/date.js"></script>
+<!-- <script type="text/javascript" src="js-lib/kendo.all.min.js"></script> -->
+<script type="text/javascript" src="http://cdn.kendostatic.com/2012.1.515/js/kendo.all.min.js"></script>
+<script type="text/javascript" src="http://demos.kendoui.com/content/shared/js/people.js"></script>
+
+
+<script type="text/javascript" src="js-lib/twitter-text.js"></script>
+
+<script type="text/javascript" src="js-lib/jquery.jqplot.min.js"></script>
+<script type="text/javascript"
+	src="js-lib/plugins/jqplot.barRenderer.min.js"></script>
+<script type="text/javascript"
+	src="js-lib/plugins/jqplot.categoryAxisRenderer.min.js"></script>
+<script type="text/javascript"
+	src="js-lib/plugins/jqplot.dateAxisRenderer.min.js"></script>
+<script type="text/javascript"
+	src="js-lib/plugins/jqplot.pointLabels.min.js"></script>
+<script type="text/javascript"
+	src="js-lib/plugins/jqplot.pieRenderer.min.js"></script>
+<script type="text/javascript"
+	src="js-lib/plugins/jqplot.canvasTextRenderer.min.js"></script>
+<script type="text/javascript"
+	src="js-lib/plugins/jqplot.canvasAxisLabelRenderer.min.js"></script>
+
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript" src="js/topics-opinions.js"></script>
+<script type="text/javascript" src="js/topics-opinions-services.js"></script>
+<script type="text/javascript" src="js/topics-summary-table.js"></script>
+<!--
+<script type="text/javascript" src="js/results.js"></script>
+<script type="text/javascript" src="js/newsearch.js"></script>
+-->
+</head>
+
+<body>
+	<div id="wrapper">
+		<div id="header">
+			<div id="invislink"></div>
+			<div id="headerOptions">
+				<p id="username"></p>
+				<a href="/j_spring_security_logout">Logout</a>
+			</div>
+		</div>
+
+		<div id="nav">
+			<ul>
+				<li><a href="./index.html"><span lang="en">Back to Home</span></a></li>
+				<li><a href="./newsearch.html"><span lang="en">Advanced search</span></a></li>
+			</ul>
+		</div>
+
+		<div id="content">
+			<div id="titlePanel"></div>
+			<div id="resultsPanel">
+				<div id="topicsTableDiv" class="closed-by-escape">
+					<div id="topicsTableTitleBar" style="height:40px;">
+						<h2>Topics Summary</h2>
+					</div>
+					<div id="topicsTable"></div>
+					<div id="topicsTable2"></div>
+					<p style="margin-top: 30px;"></p>
+				</div>
+			</div>
+			<!-- <div id="otherPanel"></div> -->
+			<div class="clearfix"></div>
+		</div>
+
+		<div id="footer">
+			<div id="footerCopyright">
+				<p>
+					2012 &copy; <span lang="en">WeGov Consortium</span>
+				</p>
+			</div>
+			<div id="footerAboutEtc">
+				<a href="../about.html"><span lang="en">About</span></a> <a
+					href="#"><span lang="en">Terms of Use</span></a> <a
+					href="#"><span lang="en">Privacy</span></a> <a
+					href="../contact.html"><span lang="en">Contact</span></a>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

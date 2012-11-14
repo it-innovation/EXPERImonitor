@@ -1,0 +1,374 @@
+body{
+	font-family:"Lucida Grande", "Lucida Sans Unicode", Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	background: rgb(234, 233, 233) url('../bg/cross_scratches.png') repeat;
+	margin: 0;
+	padding: 0;
+}
+
+#wrapper {
+	width: 1011px;
+	margin: 0 auto;
+	background-color: #fff;
+	padding: 0;
+	min-height: 400px;
+	position: relative;
+}
+
+#forumsWrapper {
+	margin: 0;
+	padding: 0;
+	width: 540px;
+	float: left;
+}
+
+#resultsWrapper {
+	margin: 0;
+	padding: 0;
+	width: 480px;
+	float: left;
+}
+
+#header {
+	width: 100%;
+	height: 80px;
+	background: #90C8DB url('../bg/header_bg.png') no-repeat;
+	margin:0 0 10px 0;
+	padding:0;
+	cursor: pointer;
+}
+
+#footer {
+	width: 100%;
+	height: 80px;
+	background: white url('../bg/footer_bg.png') no-repeat;
+	margin: 0;
+	padding:0;
+	position: absolute;
+	left:0;
+	bottom: -80px;
+
+}
+
+#forums {
+	clear: both;
+	float: left;
+	width: 520px;
+	border-right: 1px solid #222;
+	margin: 0 20px 0 0;
+	padding: 7px;
+	min-height: 400px;
+
+}
+
+#results {
+	float: left;
+	width: 500px;
+	min-height: 400px;
+	padding: 7px;
+	/* border-left: 1px solid red; */
+}
+
+	p.waitMessage {
+		margin: 0;
+		padding: 0;
+	}
+
+h1#pageTitle {
+	padding: 10px 7px;
+	margin: 0;
+	font-size: 18px;
+}
+
+h2#forumsTitle {
+	padding: 10px 7px;
+	margin: 0;
+	font-size: 16px;
+}
+
+h2#resultsTitle {
+	padding: 10px 7px;
+	margin: 0;
+	font-size: 16px;
+}
+
+
+
+label {
+	margin-left: 3px;
+}
+
+	label span.stats {
+		font-size: 11px;
+		font-weight: normal;
+		font-style: italic;
+		margin: 3px 0;
+		padding: 0;
+	}
+
+div.forumDiv {
+	margin: 10px 0 0 0;
+	padding: 0;
+	position: relative;
+
+}
+
+ 	div.forumDiv div.singleForumThreadsDisplayControl {
+		margin: 3px;
+		padding: 0;
+		position: absolute;
+		right: 0;
+		top: 0;
+		z-index: 10;
+		cursor: pointer;
+		border-style: solid;
+		height: 0px;
+		width: 0px;
+	}
+
+ 	div.forumDiv div.singleForumThreadsDisplayControlShowThreads {
+		border-color: #666 transparent transparent transparent;
+		border-width: 5px 5px 0px 5px;
+	}
+
+ 	div.forumDiv div.singleForumThreadsDisplayControlHideThreads {
+		border-color: transparent #666 transparent transparent;
+		border-width: 5px 5px 5px 5px;
+	}
+
+
+div.topicsDiv div {
+	margin: 10px 0 0 20px;
+	padding: 0;
+	width: 100%;
+}
+
+	div.topicsDiv div input {
+		display: inline-block;
+		vertical-align: top;
+		height: 16px;
+		width: 16px;
+		margin: 0;
+		padding: 0;
+	}
+
+	div.topicsDiv div label {
+		width: 380px;
+		display: inline-block;
+		vertical-align: middle;
+		padding: 0;
+		margin: 0 0 0 4px;
+	}
+
+div.forumCheckboxAndLabelDiv {
+	display: table-cell;
+    height: 30px;
+    margin: 0 0 0 10px;
+    padding: 0;
+
+}
+
+	div.forumCheckboxAndLabelDiv > input {
+		display: inline-block;
+		vertical-align: top;
+		height: 16px;
+		width: 16px;
+		margin: 2px 0 0 0;
+		padding: 0;
+	}
+
+	div.forumCheckboxAndLabelDiv > label {
+		font-weight: bold;
+		font-size: 14px;
+		display: inline-block;
+		vertical-align: middle;
+		width: 400px;
+		margin: 0;
+		margin: 0 0 0 6px;
+	}
+
+
+div.checkTopicDiv {
+	width: 400px;
+}
+
+
+#mainForm {
+	clear: both;
+	width: 100%;
+	padding: 0;
+	margin: 0;
+}
+
+div.koblenzTopicDiv {
+	width: 480px;
+	margin: 5px 0 5px 0;
+	padding: 0;
+	position: relative;
+}
+
+ 	div.koblenzTopicDiv div.topicContentsDisplayControl {
+		margin: 3px;
+		padding: 0;
+		position: absolute;
+		right: 0;
+		top: 0;
+		z-index: 10;
+		cursor: pointer;
+		border-style: solid;
+		height: 0px;
+		width: 0px;
+	}
+
+ 	div.koblenzTopicDiv div.topicContentsDisplayControlShowContent {
+		border-color: #666 transparent transparent transparent;
+		border-width: 5px 5px 0px 5px;
+	}
+
+ 	div.koblenzTopicDiv div.topicContentsDisplayControlHideContent {
+		border-color: transparent #666 transparent transparent;
+		border-width: 5px 5px 5px 5px;
+	}
+
+div.koblenzTopicDiv:hover {
+	/* background-color: #90C8DB; */
+	cursor: pointer;
+}
+
+/*div.ui-state-highlight {
+	background-color: #90C8DB;
+}*/
+
+div.koblenzTopicKeytermsDiv h3 {
+    margin-bottom: 0;
+    margin-top: 0;
+}
+
+div.koblenzUsers, div.koblenzRelevantDocs {
+	padding-left: 20px;
+}
+
+p.koblenzKeyUsersLabel, p.koblenzRelevantDocsDivLabel {
+	font-weight: bold;
+	margin: 10px 0 0 0;
+	padding: 0;
+}
+
+p.koblenzUser {
+	margin: 10px 0 0 20px;
+	padding: 0;
+}
+
+p.koblenzRelevantDocTimeAndUser {
+	margin: 3px 0 0 20px;
+	padding: 0;
+	font-style: italic;
+}
+
+p.koblenzRelevantDocMessageAndCount {
+	margin: 7px 0 10px 20px;
+	padding: 0;
+}
+
+p.koblenzRelevantDocSubject {
+	margin: 7px 0 0 20px;
+	padding: 0;
+	font-style: italic;
+	width: 420px;
+}
+
+div.selectionControlBar {
+	width: 100%;
+	height: 40px;
+	padding: 0;
+	margin: 0;
+}
+
+div.scoresTable {
+	width: 90%;
+	border: 1px solid #222;
+	margin: 2px;
+	padding: 2px;
+	min-height: 50px;
+}
+
+.scoresTableCellText {
+
+ 	display: table-cell;
+  text-align: right;
+	border: 1px solid #222;
+	margin-top:2px;
+  margin-bottom:2px;
+  margin-right:0px;
+  margin-left:2px;
+	padding: 3px;
+	min-height: 30px;
+  font-size: 12px;
+}
+
+.scoresTableCellValue {
+
+ 	display: table-cell;
+  text-align: center;
+	border: 1px solid #222;
+	margin-top:2px;
+  margin-bottom:2px;
+  margin-right:2px;
+  margin-left:0px;
+	padding: 3px;
+	min-height: 30px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #444;
+}
+
+.boxLabelRight {
+  text-align: right;
+}
+
+.boxLabelLeft {
+  text-align: left;
+}
+
+
+
+	div.selectionControlBar ul {
+		list-style-type: none;
+		width: 100%;
+		margin: 0;
+		padding: 0 0 0 10px;
+
+	}
+
+	div.selectionControlBar ul li {
+		float: left;
+		padding: 0;
+		margin: 0 20px 0 0;
+		cursor: pointer;
+		text-decoration: underline;
+		color: #444;
+		text-align: center;
+
+	}
+
+	div.selectionControlBar ul li:hover {
+		color: #111;
+	}
+
+	div.selectionControlBar ul li.highlighted {
+		font-weight: bold;
+	}
+
+  	div.sortControlBar {
+		float: left;
+		padding: 0;
+		margin-top:0px;
+    margin-bottom:0px;
+    margin-right:0px;
+    margin-left:0px;
+		cursor: pointer;
+		text-decoration: underline;
+		color: #444;
+		text-align: center;
+
+	}

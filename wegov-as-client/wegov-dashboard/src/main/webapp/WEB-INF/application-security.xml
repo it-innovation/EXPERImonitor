@@ -1,0 +1,38 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:security="http://www.springframework.org/schema/security"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+                           http://www.springframework.org/schema/security 
+                           http://www.springframework.org/schema/security/spring-security-3.0.xsd">
+
+	<security:http auto-config="true" disable-url-rewriting="true"
+		access-denied-page="/access-denied.html" use-expressions="true">
+<!--		<security:intercept-url pattern="/**"
+			filters="none" requires-channel="https"/>-->
+		<security:intercept-url pattern="/home/**"
+			access="hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')"/>
+		<security:intercept-url pattern="/admin/**"
+			access="hasRole('ROLE_ADMIN')"/>
+<!--		<security:intercept-url pattern="/home/**"
+			access="hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')" requires-channel="https"/>
+		<security:intercept-url pattern="/admin/**"
+			access="hasRole('ROLE_ADMIN')" requires-channel="https"/>-->
+
+		<security:form-login login-page="/login.html" authentication-failure-url="/login.html?result=error"
+			default-target-url="/home/index.html" always-use-default-target="false" />
+		<security:logout logout-success-url="/login.html"
+			invalidate-session="true" />
+	</security:http>
+	
+	<bean id="wegovAuthenticationProvider" class="eu.wegov.web.security.WegovAuthenticationProvider">
+		<property name="userDetailsService" ref="wegovSecurityService" />
+	</bean>
+	
+	<security:authentication-manager>
+		<security:authentication-provider
+			ref="wegovAuthenticationProvider" />
+	</security:authentication-manager>
+
+</beans>

@@ -24,13 +24,12 @@
 package eu.experimedia.itinnovation.ecc.web.helpers;
 
 import eu.experimedia.itinnovation.ecc.web.adapters.DashboardExperimentMonitor;
-import java.util.UUID;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.MonitoringEDM;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDM;
 
-@Service
+@Service("experimentMonitorHelper")
 public class ExperimentMonitorHelper {
     private static final Logger logger = Logger.getLogger(ExperimentMonitorHelper.class);
 
@@ -47,12 +46,12 @@ public class ExperimentMonitorHelper {
             logger.debug("Creating new Experiment Monitor");
             
             // Clear database
-            expDataMgr = new MonitoringEDM();
-            expDataMgr.clearMetricsDatabase();
+//            expDataMgr = new MonitoringEDM();
+//            expDataMgr.clearMetricsDatabase();
             
             // Create new Experiment monitor
             em = new DashboardExperimentMonitor();
-            em.openEntryPoint("127.0.0.1", UUID.fromString("00000000-0000-0000-0000-000000000000"));
+            //em.openEntryPoint("127.0.0.1", UUID.fromString("00000000-0000-0000-0000-000000000000"));
             
         }
 

@@ -1,0 +1,422 @@
+body{
+	font-family:"Lucida Grande", "Lucida Sans Unicode", Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	background: rgb(234, 233, 233) url('../img/cross_scratches.png') repeat;
+	margin: 0;
+	padding: 0;
+}
+
+#wrapper {
+	width: 970px;
+	margin: 0 auto;
+	background-color: #fff;
+	padding: 0;
+	min-height: 400px;
+	position: relative;
+}
+
+#header {
+	width: 100%;
+	height: 82px;
+	background: #90C8DB url('../img/header_small_bg.png') no-repeat;
+	margin:0 0 10px 0;
+	padding:0;
+	position: relative;
+}
+
+p {
+	word-wrap: break-word;
+}
+
+#headerOptions {
+	position: absolute;
+	right: 0;
+	top: 0;
+	padding: 0;
+	margin: 0;
+	height: 70px;
+	width: 300px;
+	text-align: right;
+}
+
+	#headerOptions p, #headerOptions a, #headerOptions a:hover, #headerOptions a:active {
+		display: inline-block;
+		margin: 0;
+		padding: 25px 15px 0 0;
+		text-decoration: underline;
+		color: #eee;
+		cursor: pointer;
+	}
+
+#invislink {
+	position: absolute;
+	/* border: 1px solid red; */
+	top: 0px;
+	left: 0px;
+	width: 220px;
+	height: 70px;
+	cursor: pointer;
+}
+
+#nav {	
+	background-color: #444;
+	width: 952px;
+	height: 50px;
+	margin: 0 0 0 9px;
+	padding: 0;
+	-webkit-border-top-left-radius: 20px;
+	-moz-border-radius-topleft: 20px;
+	border-top-left-radius: 20px;	
+	-webkit-border-top-right-radius: 20px;
+	-moz-border-radius-topright: 20px;
+	border-top-right-radius: 20px;	
+}
+
+	#nav ul {
+		list-style-type: none;
+		margin: 0;
+		padding: 0;
+		height: 50px;
+		width: 100%;
+	}
+	
+	#nav li {
+		display: inline;
+	}
+	
+	#nav li a {
+		margin: 0;
+		padding: 15px 15px;
+		border-right: solid 1px #eee;
+		height: 50px;
+		line-height: 50px;
+		font-size: 14px;
+		color: white;
+		text-decoration: none;
+	}
+	
+	#nav li a:hover {
+		text-decoration: underline;
+	}
+
+#content {
+	width: 100%;
+	
+}
+	
+/* 	#langChanger p {
+		position: absolute;
+		cursor: pointer;
+		top: 0;
+		right: 200px;
+		margin: 0;
+		padding: 10px 20px;
+		background: #90C8DB url('../img/form_bg.png') no-repeat;
+		border: 0;
+		color: #fff;
+		-webkit-border-bottom-right-radius: 10px;
+		-webkit-border-bottom-left-radius: 10px;
+		-moz-border-radius-bottomright: 10px;
+		-moz-border-radius-bottomleft: 10px;
+		border-bottom-right-radius: 10px;
+		border-bottom-left-radius: 10px;
+		-webkit-box-shadow: 0px 2px 1px 1px rgba(0, 0, 0, 0.25);
+		-moz-box-shadow: 0px 2px 1px 1px rgba(0, 0, 0, 0.25);
+		box-shadow: 0px 2px 1px 1px rgba(0, 0, 0, 0.25);
+		z-index: 10;
+	}
+	#langChanger p:hover {
+		text-decoration: underline;
+	} */
+
+#footer {
+	width: 100%;
+	height: 60px;
+	background: white url('../img/footer_bg.png') no-repeat;
+	margin: 0;
+	padding:0;
+	position: absolute;
+	left:0;
+	bottom: -60px;
+	color: #333;
+}
+
+#footerCopyright {
+	margin: 30px 0 0 25px;
+}
+
+#footerAboutEtc {
+	position: absolute;
+	right: 5px;
+	top: 30px;
+}
+
+	#footerAboutEtc a, #footerAboutEtc a:active {
+		text-decoration: underline;
+		color: #333;
+		padding: 0 25px 0 0;
+		margin: 0;
+	}
+	
+#dialog-overlay {
+     width:100%; 
+     height:100%;
+  		   
+   	 filter:alpha(opacity=50); 
+   	 -moz-opacity:0.5; 
+  	 -khtml-opacity: 0.5; 
+  	 opacity: 0.5; 
+  	 background:#000; 
+
+   	 position:fixed; 
+  	 top:0; left:0; 
+   	 z-index:300; 
+ 
+   	 display:none;
+}
+
+#add-new-location-dialog-holder {
+    background: rgb(250, 250, 250);
+    border: solid 1px #333;
+    position:fixed;
+/*     width: 400px;
+    height: 250px; */
+    z-index: 500; 
+    display: none;
+    overflow: auto;
+    margin: 0;
+    padding: 10px;	
+}
+
+#name-location-dialog-holder {
+    background: rgb(250, 250, 250);
+    border:solid 1px #333;
+    position:fixed;
+/*     width: 400px;
+    height: 250px; */
+    z-index:5000; 
+    display:none;
+    overflow: auto;
+    margin: 0;
+    padding: 10px;
+}
+
+	#name-location-dialog-holder h1 {
+		font-size: 16px;
+		padding: 0;
+		font-weight: bold;
+		width: 400px;
+		position: relative;
+	}
+	
+	#name-location-dialog-holder input[type=text] {
+		width: 390px;
+		height: 33px;
+		font-size: 16px;
+		-webkit-border-radius: 5px;
+		-moz-border-radius: 5px;
+		border-radius: 5px;
+		border: 0;
+		margin: 0;
+		padding: 1px 4px;
+		-webkit-box-shadow: inset 1px 2px 1px 1px rgba(0, 0, 0, 0.34);
+		-moz-box-shadow: inset 1px 2px 1px 1px rgba(0, 0, 0, 0.34);
+		box-shadow: inset 1px 2px 1px 1px rgba(0, 0, 0, 0.34);		
+	}
+	
+	#name-location-dialog-holder p, #add-new-location-dialog-holder-controls p {
+		display: block;
+		float: right;
+		text-align: right;
+		padding: 10px 0; 
+		color: white;
+			margin: 10px 15px 0 5px;
+			padding: 6px 15px;
+			text-decoration: none;
+			font-size: 16px;
+			font-weight: normal;
+			border: 0;
+			
+			-webkit-border-radius: 8px;
+			-moz-border-radius: 8px;
+			border-radius: 8px;		
+			-webkit-box-shadow: 0px 2px 1px 2px rgba(0, 0, 0, 0.34);
+			-moz-box-shadow: 0px 2px 1px 2px rgba(0, 0, 0, 0.34);
+			box-shadow: 0px 2px 1px 2px rgba(0, 0, 0, 0.34);	
+			cursor: pointer;		
+	}
+	
+	#newLocationNameSaveButton, #addNewLocationDialogNameSaveButton {
+		background: #E99520 url('../../img/loginbtn_bg.png') repeat-x;
+		margin-right: 0;
+	}
+	
+	#newLocationNameCancelButton, #addNewLocationDialogNameCancelButton {
+		background: #E99520 url('../../img/loginbtn_bg_grey.png') repeat-x;
+	}
+	
+	#add-new-location-dialog-holder-locationname {
+		width: 100%;
+	}
+	
+	#add-new-location-dialog-holder-locationname p {
+		width: 100%;
+		font-size: 14px;
+		padding: 10px 0 5px 0;
+		font-weight: bold;	
+	}
+	
+	#addNewLocationName {
+		width: 590px;
+		height: 33px;
+		font-size: 16px;
+		-webkit-border-radius: 5px;
+		-moz-border-radius: 5px;
+		border-radius: 5px;
+		border: 0;
+		margin: 0;
+		padding: 1px 4px;
+		-webkit-box-shadow: inset 1px 2px 1px 1px rgba(0, 0, 0, 0.34);
+		-moz-box-shadow: inset 1px 2px 1px 1px rgba(0, 0, 0, 0.34);
+		box-shadow: inset 1px 2px 1px 1px rgba(0, 0, 0, 0.34);		
+	}
+	
+#userSettings {
+	width: 400px;
+	margin: 0;
+	padding: 10px;
+	background: rgb(250, 250, 250);
+    border:solid 1px #333;	
+	position: fixed;
+	z-index: 500;    
+	display: none;
+}
+
+	div.userSettingsWrapper {
+		width: 100%;
+	}
+	
+	p.myDetailLabel {
+		text-align: right;
+		width: 110px;
+		padding: 5px 0;
+		margin: 5px 10px 5px 0;
+		float: left;
+		clear: both;
+		font-size: 14px;
+		height: 28px;
+	}
+	
+	input.myDetailInput {
+		float: left;
+		width: 250px;
+		height: 25px;
+		font-size: 14px;
+		-webkit-border-radius: 5px;
+		-moz-border-radius: 5px;
+		border-radius: 5px;
+		border: 0;
+		margin: 5px 0;
+		padding: 1px 4px;
+		-webkit-box-shadow: inset 1px 2px 1px 1px rgba(0, 0, 0, 0.34);
+		-moz-box-shadow: inset 1px 2px 1px 1px rgba(0, 0, 0, 0.34);
+		box-shadow: inset 1px 2px 1px 1px rgba(0, 0, 0, 0.34);		
+	}
+	
+	p.myWidgetsLabel {
+		clear: both;
+		width: 320px;
+		float: left;
+		font-size: 14px;
+		padding: 0;
+		margin: 0 0 5px 20px;
+		height: 14px;
+		display: block;
+		height: auto;
+	}
+	
+	input.myWidgetsInput {
+		float: left;
+		width: 14px;
+		height: 14px;
+		margin: 0 0 5px 0;
+		padding: 0;
+	}
+	
+	p.myWidgetsInputLabel {
+		float: left;
+		font-size: 11px;
+		height: 14px;
+		margin: 0px 0 5px 5px;
+		padding: 0;
+		width: 40px;
+		display: block;
+	}
+	
+	div.userSettingsControlsWrapper {
+		width: 100%;
+		text-align: right;
+		margin: 10px 0;
+		padding: 10px 0 0 0;
+	}
+	
+	#userSettingsSaveButton {
+		color: white;
+			margin: 0 0 0 10px;
+			padding: 6px 15px;
+			text-decoration: none;
+			font-size: 18px;
+			font-weight: normal;
+			border: 0;
+			background: #E99520 url('../../img/loginbtn_bg.png') repeat-x;
+			-webkit-border-radius: 8px;
+			-moz-border-radius: 8px;
+			border-radius: 8px;		
+			-webkit-box-shadow: 0px 2px 1px 2px rgba(0, 0, 0, 0.34);
+			-moz-box-shadow: 0px 2px 1px 2px rgba(0, 0, 0, 0.34);
+			box-shadow: 0px 2px 1px 2px rgba(0, 0, 0, 0.34);	
+			cursor: pointer;	
+			display: inline;
+	}
+	
+	#userSettingsSaveButton:active {
+		background: #E99520 url('../../img/loginbtn_bg_inv.png') repeat-x;
+		-webkit-box-shadow: 0px 1px 1px 2px rgba(0, 0, 0, 0.34);
+		-moz-box-shadow: 0px 1px 1px 2px rgba(0, 0, 0, 0.34);
+		box-shadow: 0px 1px 1px 2px rgba(0, 0, 0, 0.34);		
+	}
+	
+	#userSettingsCancelButton {
+		color: white;
+			margin: 0 0 0 5px;
+			padding: 6px 15px;
+			text-decoration: none;
+			font-size: 18px;
+			font-weight: normal;
+			border: 0;
+			background: #eee url('../../img/loginbtn_bg_grey.png') repeat-x;
+			-webkit-border-radius: 8px;
+			-moz-border-radius: 8px;
+			border-radius: 8px;		
+			-webkit-box-shadow: 0px 2px 1px 2px rgba(0, 0, 0, 0.34);
+			-moz-box-shadow: 0px 2px 1px 2px rgba(0, 0, 0, 0.34);
+			box-shadow: 0px 2px 1px 2px rgba(0, 0, 0, 0.34);	
+			cursor: pointer;
+			display: inline;	
+	}	
+	
+	#userSettingsCancelButton:active {
+		background: #eee url('../../img/loginbtn_bg_grey_inv.png') repeat-x;
+		-webkit-box-shadow: 0px 1px 1px 2px rgba(0, 0, 0, 0.34);
+		-moz-box-shadow: 0px 1px 1px 2px rgba(0, 0, 0, 0.34);
+		box-shadow: 0px 1px 1px 2px rgba(0, 0, 0, 0.34);		
+	}
+		
+.clearfix:after {
+	visibility: hidden;
+	display: block;
+	font-size: 0;
+	content: " ";
+	clear: both;
+	height: 0;
+}
