@@ -49,50 +49,7 @@ $(document).ready(function() {
 
                 displayExperimentInfo();
 
-                // RELOAD CLIENTS LIST FOR EVERY PHASE AS
-                // NOT ALL CLIENTS SUPPORT ALL PHASES
-                switch(internalPhase) {
-                    // CLIENTS CONNECTING PHASE
-                    case 0:                        
-                        doClientsConnectingPhase(actionButton, currentPhase);
-                        break;
-                    // DISCOVERY PHASE
-                    case 1:
-                        doDiscoveryPhase(actionButton, currentPhase);
-                        break;
-
-                    // SET-UP PHASE
-                    case 2:
-                        doSetupPhase(actionButton, currentPhase);
-                        break;
-
-                    // LIVE MONITORING PHASE
-                    case 3:
-                        doLiveMonitoringPhase(actionButton, currentPhase)
-                        break;
-
-                    // POST REPORT PHASE
-                    case 4:
-                        doPostReportPhase(actionButton, currentPhase)
-                        break;
-
-                    // TEAR-DOWN PHASE
-                    case 5:
-                        doTearDownPhase(actionButton, currentPhase)
-                        break;
-
-                    // UNKNOWN PHASE
-                    default:
-                        console.log('ERROR: UNKNOWN PHASE');
-                        actionButton.text('ERROR');
-                        actionButton.click(function(e){
-                            e.preventDefault();
-                        })
-                        console.error('Current phase is ' + internalPhase + ', not sure what to do with it, will stop now.');
-                        $("#currentPhaseName").text("ERROR - current phase is unknown (" + internalPhase + ")");
-                        $("#currentPhaseID").text(internalPhase);
-                        break;
-                }
+                executePhase(currentPhase);
 
             } else {
                 console.error("Current phase is NULL, will stop now.");
@@ -109,52 +66,6 @@ $(document).ready(function() {
     });
 
 });
-
-function displayExperimentInfo() {
-    // Get experiment info
-    if (internalPhase > 0) {
-        $.ajax({
-            type: 'GET',
-            url: "/da/getexperiments/do.json",
-            contentType: "application/json; charset=utf-8",
-            success: function(experiments){
-                console.log(experiments);
-
-                if (experiments == null) {
-                    alert("Server error retrieving experiments");
-                    console.error("Server error retrieving experiments");
-                    return;
-                } else {
-                    if (experiments.length < 1) {
-                        console.debug("No experiments found, retrying in 2 seconds");
-                        setTimeout(function(){displayExperimentInfo()}, 2000);
-                        // alert("No experiments found");
-                    } else {
-
-                        $(".experimentInfo").css('display', 'block');
-                        theExperiment = experiments[0]; // we are only going to have one per dashboard for now
-                        $("#experimentName").text(theExperiment.name);
-                        $("#experimentUUID").text(theExperiment.uuid);
-                        $("#experimentDescription").text(theExperiment.description);
-                        $("#experimentExperimentID").text(theExperiment.experimentID);
-                        $("#experimentStartTime").text(longToDate(theExperiment.startTime));
-                        if (theExperiment.endTime == 0)
-                            $("#experimentEndTime").text('In progress');
-                        else
-                            $("#experimentEndTime").text(longToDate(theExperiment.endTime));
-
-                    }
-                }
-            },
-            error: function(xhr, ajaxOptions, thrownError){
-                alert('Failed to get a list of experiments');
-                console.error('Failed to get a list of experiments');
-                console.error(thrownError);
-                console.error(xhr.status);
-            }
-        });
-    }
-}
 
 function doClientsConnectingPhase(actionButton, currentPhase) {
     console.log('In CLIENTS CONNECTING PHASE');
@@ -179,8 +90,9 @@ function prepareDiscoveryPhase(actionButton) {
                 console.log(currentPhase);
                 if (currentPhase != null) {
                     console.log('Experiment started, returned phase is: ' + currentPhase.description + ' (' + currentPhase.index + ')');
-                    internalPhase = currentPhase.index;
-                    doDiscoveryPhase(actionButton, currentPhase);
+//                    internalPhase = currentPhase.index;
+                    executePhase(currentPhase);
+//                    doDiscoveryPhase(actionButton, currentPhase);
                 } else {
                     console.error('Failed to start the experiment: next phase is NULL. Stopped');
                 }
@@ -771,10 +683,11 @@ function prepareSetupPhase(actionButton) {
                 console.log(currentPhase);
                 if (currentPhase != null) {
                     console.log('Set-up phase started, returned phase is: ' + currentPhase.description + ' (' + currentPhase.index + ')');
-                    internalPhase = currentPhase.index;
+//                    internalPhase = currentPhase.index;
                     $("#currentPhaseName").text(currentPhase.description);
                     $("#currentPhaseID").text(currentPhase.index);
-                    doSetupPhase(actionButton, currentPhase);
+//                    doSetupPhase(actionButton, currentPhase);
+                    executePhase(currentPhase);
                 } else {
                     console.error('Failed to start the set-up phase: next phase is NULL. Stopped');
                 }
@@ -813,10 +726,11 @@ function prepareLiveMonitoringPhase(actionButton) {
                 console.log(currentPhase);
                 if (currentPhase != null) {
                     console.log('Live monitoring phase started, returned phase is: ' + currentPhase.description + ' (' + currentPhase.index + ')');
-                    internalPhase = currentPhase.index;
+//                    internalPhase = currentPhase.index;
                     $("#currentPhaseName").text(currentPhase.description);
                     $("#currentPhaseID").text(currentPhase.index);
-                    doLiveMonitoringPhase(actionButton, currentPhase);
+//                    doLiveMonitoringPhase(actionButton, currentPhase);
+                    executePhase(currentPhase);
                 } else {
                     console.error('Failed to start live monitoring phase: next phase is NULL. Stopped');
                 }
@@ -855,10 +769,11 @@ function preparePostReportPhase(actionButton) {
                 console.log(currentPhase);
                 if (currentPhase != null) {
                     console.log('Post report phase started, returned phase is: ' + currentPhase.description + ' (' + currentPhase.index + ')');
-                    internalPhase = currentPhase.index;
+//                    internalPhase = currentPhase.index;
                     $("#currentPhaseName").text(currentPhase.description);
                     $("#currentPhaseID").text(currentPhase.index);
-                    doPostReportPhase(actionButton, currentPhase);
+//                    doPostReportPhase(actionButton, currentPhase);
+                    executePhase(currentPhase);
                 } else {
                     console.error('Failed to start post report phase: next phase is NULL. Stopped');
                 }
@@ -1074,10 +989,11 @@ function prepareTearDownPhase(actionButton) {
                 console.log(currentPhase);
                 if (currentPhase != null) {
                     console.log('Tear down phase started, returned phase is: ' + currentPhase.description + ' (' + currentPhase.index + ')');
-                    internalPhase = currentPhase.index;
+//                    internalPhase = currentPhase.index;
                     $("#currentPhaseName").text(currentPhase.description);
                     $("#currentPhaseID").text(currentPhase.index);
-                    doTearDownPhase(actionButton, currentPhase);
+//                    doTearDownPhase(actionButton, currentPhase);
+                    executePhase(currentPhase);
                 } else {
                     console.error('Failed to start tear down phase: next phase is NULL. Stopped');
                 }
