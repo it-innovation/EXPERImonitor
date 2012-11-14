@@ -309,6 +309,24 @@ public class ExperimentMonitor implements IExperimentMonitor,
   }
   
   @Override
+  public void onClientDeclaredCanPush( EMClient client )
+  {
+    Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
+    
+    while ( listIt.hasNext() )
+    { listIt.next().onClientDeclaredCanPush(client); }
+  }
+  
+  @Override
+  public void onClientDeclaredCanBePulled( EMClient client )
+  {
+    Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
+    
+    while ( listIt.hasNext() )
+    { listIt.next().onClientDeclaredCanBePulled(client); }
+  }
+  
+  @Override
   public void onGotMetricData( EMClient client, Report report )
   {
     Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();

@@ -486,6 +486,18 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   
   // EMLiveMonitorPhaseListener ------------------------------------------------
   @Override
+  public void onClientDeclaredCanPush( EMClientEx client )
+  {
+    lifecycleListener.onClientDeclaredCanPush( client );
+  }
+  
+  @Override
+  public void onClientDeclaredCanBePulled( EMClientEx client )
+  {
+    lifecycleListener.onClientDeclaredCanBePulled( client );
+  }
+  
+  @Override
   public void onGotMetricData( EMClientEx client, Report report )
   {
     lifecycleListener.onGotMetricData( client, report );

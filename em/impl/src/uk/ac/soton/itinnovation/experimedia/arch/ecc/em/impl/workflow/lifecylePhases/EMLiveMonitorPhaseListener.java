@@ -25,14 +25,18 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecylePhases;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
 
 
 
 public interface EMLiveMonitorPhaseListener
 {
+  void onClientDeclaredCanPush( EMClientEx client );
+  
+  void onClientDeclaredCanBePulled( EMClientEx client );
+  
   void onGotMetricData( EMClientEx client, Report report );
   
   void onLiveMonitorPhaseCompleted();

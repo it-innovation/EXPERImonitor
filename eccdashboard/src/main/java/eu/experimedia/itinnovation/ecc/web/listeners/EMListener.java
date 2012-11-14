@@ -60,6 +60,14 @@ public class EMListener implements IEMLifecycleListener {
     public void onFoundClientWithMetricGenerators(EMClient client) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+    
+    public void onClientDeclaredCanPush(EMClient client) {
+       throw new UnsupportedOperationException("Not supported yet.");
+    }
+    
+    public void onClientDeclaredCanBePulled(EMClient client) {
+       throw new UnsupportedOperationException("Not supported yet.");
+    }
 
     public void onClientSetupResult(EMClient client, boolean success) {
         throw new UnsupportedOperationException("Not supported yet.");

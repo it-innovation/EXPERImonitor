@@ -40,8 +40,10 @@ public class EMClient
   
   // Discovery phase states
   protected EnumSet<EMPhase>         supportedPhases;
-  protected boolean                  discoveredGenerators = false;
   protected HashSet<MetricGenerator> metricGenerators;
+  protected boolean                  discoveredGenerators = false;
+  protected boolean                  isPushCapable        = false;
+  protected boolean                  isPullCapable        = false;
   
   // Setup phase states
   protected UUID          currentMGSetupID;
@@ -129,6 +131,23 @@ public class EMClient
     
     return mgCopies;
   }
+  
+  /**
+   * Returns whether the client has declared it is capable of pushing. This
+   * information is only updated after starting the Live Monitoring phase.
+   * 
+   * @return 
+   */
+  public boolean isPushCapable()
+  { return isPushCapable; }
+  
+  /**
+   * Returns whether the client has declared it is capable of being pulled.
+   * This information is only updated after starting the Live Monitoring phase.
+   * @return 
+   */
+  public boolean isPullCapable()
+  { return isPullCapable; }
   
   /**
    * Use this method to determine whether the client is currently setting up

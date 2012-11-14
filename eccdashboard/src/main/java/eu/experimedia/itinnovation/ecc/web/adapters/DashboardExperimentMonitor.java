@@ -388,6 +388,16 @@ public class DashboardExperimentMonitor implements IEMLifecycleListener {
     public void onClientSetupResult(EMClient client, boolean success) {
         logger.debug("onClientSetupResult");
     }
+    
+    @Override
+    public void onClientDeclaredCanPush(EMClient client) {
+      logger.debug("onClientDeclaredCanPush");
+    }
+    
+    @Override
+    public void onClientDeclaredCanBePulled(EMClient client) {
+      logger.debug("onClientDeclaredCanBePulled");
+    }
 
     @Override
     public void onGotMetricData(EMClient client, Report report) {

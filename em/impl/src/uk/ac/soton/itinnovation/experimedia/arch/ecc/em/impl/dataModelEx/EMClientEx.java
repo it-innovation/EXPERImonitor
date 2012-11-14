@@ -145,6 +145,12 @@ public class EMClientEx extends EMClient
   { if ( genID != null ) generatorsSetupOK.add( genID ); }
   
   // Live monitoring phase (and post-reporting) states -------------------------  
+  public void setIsPushCapable( boolean push )
+  { isPushCapable = push; }
+  
+  public void setIsPullCapable( boolean pull )
+  { isPullCapable = pull; }
+  
   public void addPullingMeasurementSetID( UUID msID )
   { currentMeasurementSetPulls.add( msID ); }
   
@@ -195,7 +201,7 @@ public class EMClientEx extends EMClient
     // Check we're not already trying to batch this MeasurementSet
     UUID msID = batch.getExpectedMeasurementSetID();
     
-    if ( postReportOutstandingBatches.containsKey( batch.getID()) )
+    if ( postReportOutstandingBatches.containsKey( msID ) )
       throw new Exception( "Client is already waiting to batch measurement set: " + msID.toString() );
     
     postReportOutstandingBatches.put( msID, batch );
