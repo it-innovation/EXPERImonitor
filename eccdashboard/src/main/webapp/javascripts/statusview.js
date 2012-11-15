@@ -75,13 +75,13 @@ $(document).ready(function() {
                         console.log(properties);
 
                         if (properties == null) {
-                            alert("Server error retrieving nagios details");
-                            console.error("Server error retrieving nagios details");
+                            alert("Eccdashboard.properties was not found or malformed. Unable to connect to nagios");
+                            console.error("Eccdashboard.properties was not found or malformed. Unable to connect to nagios");
                             return;
                         } else {
                             if (properties.length < 1) {
-                                alert("No nagios details found");
-                                console.error("No nagios details found");                        
+                                alert("Eccdashboard.properties was not found or malformed. Unable to connect to nagios");
+                                console.error("Eccdashboard.properties was not found or malformed. Unable to connect to nagios");
                             } else {
                                 // Display info
                                 $("#nagiosinfo").append("<p>Nagios URL: " + properties.nagios_fullurl + "</p>");

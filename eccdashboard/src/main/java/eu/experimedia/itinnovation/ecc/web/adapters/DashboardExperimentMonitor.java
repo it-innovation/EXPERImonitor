@@ -68,11 +68,15 @@ public class DashboardExperimentMonitor implements IEMLifecycleListener {
         expMonitor.addLifecyleListener(this);
 
         try {
-            // Get ECC Dashboard properties
-            eccdashboard = tryGetPropertiesFile("eccdashboard");
-            String error = verifyProperties(eccdashboard);
-            if (error != null)
-                throw new RuntimeException(error);
+            // Get ECC Dashboard properties - can do without nagios
+            if ( (new File("eccdashboard.properties")).exists() ) {
+                eccdashboard = tryGetPropertiesFile("eccdashboard");
+                String error = verifyProperties(eccdashboard);
+                if (error != null)
+                    logger.warn("Error processing eccdashboard.properties: \'" + error + "\', will not connect to nagios ");
+            } else {
+                logger.warn("Eccdashboard.properties file was not found, will not connect to nagios");
+            }
 
             // Try getting the EDM properties from a local file
             Properties edmProps = tryGetPropertiesFile("edm");
@@ -120,7 +124,10 @@ public class DashboardExperimentMonitor implements IEMLifecycleListener {
     }
     
     public EccPropertiesAsJson getEccProperties() {
-        return new EccPropertiesAsJson(eccdashboard.getProperty("nagios.fullurl"));
+        if (eccdashboard != null)
+            return new EccPropertiesAsJson(eccdashboard.getProperty("nagios.fullurl"));
+        else
+            return null;
     }
 
     // Private methods -----------------------------------------------------------
