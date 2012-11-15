@@ -2,7 +2,7 @@
 
 set -xu
 
-cd /var/lib/tomcat7/webapps/eccdashboard/WEB-INF/classes
+cd /var/lib/tomcat7/
 
 if [ -f edm.properties -a -f em.properties ]; then
   juju-log "Configuration done"
