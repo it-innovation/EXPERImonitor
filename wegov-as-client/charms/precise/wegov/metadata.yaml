@@ -1,0 +1,14 @@
+name: wegov
+summary: Experimedia WeGov Dashboard as ECC client
+maintainer: Thomas Leonard <tal@it-innovation.soton.ac.uk>
+description: |
+  The Experimedia WeGov Dashboard.
+subordinate: true
+requires:
+  juju-info:
+    interface: juju-info
+    scope: container
+  rabbit:
+    interface: rabbitmq
+  edm:
+    interface: pgsql
