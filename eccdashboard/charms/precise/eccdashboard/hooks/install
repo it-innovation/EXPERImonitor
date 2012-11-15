@@ -3,4 +3,4 @@ set -eu
 
 apt-get -y install postgresql-client-9.1
 
-ln -s `pwd`/deploy/eccdashboard /var/lib/tomcat7/webapps
+ln -s `pwd`/deploy/eccdashboard /var/lib/tomcat7/

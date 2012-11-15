@@ -12,7 +12,7 @@ if [ "`relation-get hostname`" == "" ]; then
 	exit 0
 fi
 
-cat > ./deploy/eccdashboard/WEB-INF/classes/em.properties <<EOF
+cat > ./deploy/eccdashboard/em.properties <<EOF
 # EXPERIMEDIA RabbitMQ (unsecured) configuration
 Rabbit_IP=`relation-get hostname`
 Rabbit_Port=5672
