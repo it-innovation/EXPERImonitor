@@ -12,7 +12,7 @@ if [ "`relation-get hostname`" == "" ]; then
 	exit 0
 fi
 
-cat > ./deploy/eccdashboard/em.properties <<EOF
+cat > /var/lib/tomcat7/em.properties <<EOF
 # EXPERIMEDIA RabbitMQ (unsecured) configuration
 Rabbit_IP=`relation-get hostname`
 Rabbit_Port=5672
