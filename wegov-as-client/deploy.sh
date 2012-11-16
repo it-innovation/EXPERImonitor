@@ -30,6 +30,6 @@ juju add-relation wegov tomcat-wegov
 juju add-relation wegov:edm postgresql-wegov:db
 juju add-relation wegov:rabbit rabbitmq-server
 
-juju expose tomcat
+juju expose tomcat-wegov
 
 juju debug-log
