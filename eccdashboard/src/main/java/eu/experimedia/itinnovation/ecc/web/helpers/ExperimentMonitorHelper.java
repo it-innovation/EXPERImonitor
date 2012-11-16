@@ -26,15 +26,12 @@ package eu.experimedia.itinnovation.ecc.web.helpers;
 import eu.experimedia.itinnovation.ecc.web.adapters.DashboardExperimentMonitor;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.MonitoringEDM;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDM;
 
 @Service("experimentMonitorHelper")
 public class ExperimentMonitorHelper {
     private static final Logger logger = Logger.getLogger(ExperimentMonitorHelper.class);
 
     private static DashboardExperimentMonitor em;
-    private IMonitoringEDM expDataMgr;
 
     public synchronized DashboardExperimentMonitor getExperimentMonitor() throws Throwable {
         return getStaticExperimentMonitor();

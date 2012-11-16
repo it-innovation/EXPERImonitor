@@ -24,7 +24,7 @@
 
 package eu.experimedia.itinnovation.ecc.web.services;
 
-import eu.experimedia.itinnovation.ecc.web.helpers.DatabaseAccessHelper;
+import eu.experimedia.itinnovation.ecc.web.helpers.ExperimentMonitorHelper;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -38,34 +38,34 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Me
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGroup;
 
 @Service("databaseAccessService")
-public class DatabaseAccessService {
+public class DatabaseAccessService {  
     
     @Autowired
-    @Qualifier("databaseAccessHelper")
-    private transient DatabaseAccessHelper daHelper;  
+    @Qualifier("experimentMonitorHelper")
+    private transient ExperimentMonitorHelper emHelper;
     
     public Experiment[] getExperiments() throws Throwable {
-        return daHelper.getExperimentDataManager().getExperimentDAO().getExperiments(false).toArray(new Experiment[0]);
+        return emHelper.getExperimentMonitor().getExpDataMgr().getExperimentDAO().getExperiments(false).toArray(new Experiment[0]);
     }
     
     public MetricGenerator[] getMetricGeneratorsForExperiment(String experimentUUID) throws Throwable {
-        Experiment e = daHelper.getExperimentDataManager().getExperimentDAO().getExperiment(UUID.fromString(experimentUUID), true);
+        Experiment e = emHelper.getExperimentMonitor().getExpDataMgr().getExperimentDAO().getExperiment(UUID.fromString(experimentUUID), true);
         return e.getMetricGenerators().toArray(new MetricGenerator[0]);
     }
     
     public MetricGroup[] getMetricGroupsForMetricGenerator(String metricGeneratorUUID) throws Throwable {
-        Set<MetricGroup> mg = daHelper.getExperimentDataManager().getMetricGroupDAO().getMetricGroupsForMetricGenerator(UUID.fromString(metricGeneratorUUID), true);
+        Set<MetricGroup> mg = emHelper.getExperimentMonitor().getExpDataMgr().getMetricGroupDAO().getMetricGroupsForMetricGenerator(UUID.fromString(metricGeneratorUUID), true);
         
         return mg.toArray(new MetricGroup[0]);
     }
     
     public Entity[] getAllEntities() throws Throwable {
-        Set<Entity> entities = daHelper.getExperimentDataManager().getEntityDAO().getEntities(false);
+        Set<Entity> entities = emHelper.getExperimentMonitor().getExpDataMgr().getEntityDAO().getEntities(false);
         return entities.toArray(new Entity[0]);
     }
     
     public Attribute[] getAllAttributes() throws Throwable {
-        Set<Entity> entities = daHelper.getExperimentDataManager().getEntityDAO().getEntities(true);
+        Set<Entity> entities = emHelper.getExperimentMonitor().getExpDataMgr().getEntityDAO().getEntities(true);
         Set<Attribute> allAttributes = new HashSet<Attribute>();
         for (Entity entity : entities) {
             allAttributes.addAll(entity.getAttributes());

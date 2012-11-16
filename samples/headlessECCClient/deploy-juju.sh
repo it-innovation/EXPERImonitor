@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Note: this script assumes you already have Rabbit deployed, e.g.
+# Note: this script assumes you already have Rabbit deployed!
 
 while :; do
   if juju status | grep -q headless; then
