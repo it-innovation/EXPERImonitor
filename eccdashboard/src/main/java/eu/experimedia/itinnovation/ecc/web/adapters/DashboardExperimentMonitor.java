@@ -148,6 +148,10 @@ public class DashboardExperimentMonitor implements IEMLifecycleListener {
         }
     }
 
+    public IMonitoringEDM getExpDataMgr() {
+        return expDataMgr;
+    }
+
     private String verifyProperties(Properties properties) {
         String result = null;
 

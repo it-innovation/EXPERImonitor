@@ -117,8 +117,7 @@ public class ExperimentMonitorService {
     public EMPhase startLifeCycle() throws Throwable {
         logger.debug("Starting lifecycle");
         
-        // Create experiment - only temp fix!
-        IMonitoringEDM expDataMgr = new MonitoringEDM();
+        IMonitoringEDM expDataMgr = emHelper.getExperimentMonitor().getExpDataMgr();
         Date expDate = new Date();
         Experiment expInstance = new Experiment();
         expInstance.setName("Test Experiment");
