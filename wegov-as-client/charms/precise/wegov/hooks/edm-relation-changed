@@ -4,7 +4,7 @@ set -eux
 
 juju-log "edm relation changed"
 
-relation-set database=WeGov
+relation-set database=wegov
 
 if [ "`relation-get host`" == "" ]; then
 	juju-log "Waiting for postgres database..."
@@ -23,12 +23,12 @@ cat > /var/lib/tomcat7/coordinator.properties << EOF
 # Properties for WeGov Coordinator
 
 # POSTGRESQL SERVER CONFIGURATION (admin access)
-postgres.url=jdbc:postgresql://`relation-get host`:5432/WeGov
+postgres.url=jdbc:postgresql://`relation-get host`:5432/wegov
 postgres.login=`relation-get user`
 postgres.pass=`relation-get password`
 
 # POSTGRESQL DATABASES AND SCHEMAS CONFIGURATION
-postgres.database.name=WeGov
+postgres.database.name=wegov
 postgres.database.mgt.name=WeGovManagement
 postgres.database.data.name=WeGovRawData
 
@@ -86,6 +86,6 @@ echo `relation-get host`:5432:`relation-get database`:`relation-get user`:`relat
 chmod 0600 ~/.pgpass
 psql -w -h `relation-get host` -d `relation-get database` -U `relation-get user` -f edm-metrics-postgres.sql
 
-psql -U `relation-get user` -d "WeGov" -h `relation-get host` -f tables_postgres.sql
+psql -U `relation-get user` -d "wegov" -h `relation-get host` -f tables_postgres.sql
 
 ./maybe-restart.sh
