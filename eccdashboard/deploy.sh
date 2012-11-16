@@ -18,6 +18,9 @@ juju deploy postgresql postgresql-eccdashboard
 juju deploy rabbitmq-server
 
 set -eu
+if [ ! -d target ]; then
+	mvn install
+fi
 rm -rf charms/precise/eccdashboard/deploy
 mkdir -p charms/precise/eccdashboard/deploy/eccdashboard
 (cd charms/precise/eccdashboard/deploy/eccdashboard && unzip ../../../../../target/prototype.war)
