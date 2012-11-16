@@ -69,6 +69,8 @@ public class DashboardExperimentMonitor implements IEMLifecycleListener {
 
         try {
             // Get ECC Dashboard properties - can do without nagios
+            File currentDir = new File(".");
+            logger.warn("Initialising DashboardExperimentMonitor, path is: " + currentDir.getAbsolutePath());
             if ( (new File("eccdashboard.properties")).exists() ) {
                 eccdashboard = tryGetPropertiesFile("eccdashboard");
                 String error = verifyProperties(eccdashboard);
@@ -77,24 +79,69 @@ public class DashboardExperimentMonitor implements IEMLifecycleListener {
             } else {
                 logger.warn("Eccdashboard.properties file was not found, will not connect to nagios");
             }
+            
+            File edmPropertiesFile = new File("edm.properties");
+            File emPropertiesFile = new File("em.properties");
+            
+            if (!edmPropertiesFile.exists())
+                throw new RuntimeException("EDM properties file is missing");
+
+            if (!emPropertiesFile.exists())
+                throw new RuntimeException("EM properties file is missing");
+            
+            InputStream edmPropsStream = (InputStream) new FileInputStream(edmPropertiesFile);
+            Properties edmProps = new Properties();
+            edmProps.load(edmPropsStream);
+            
+            if (edmProps == null)
+                throw new RuntimeException("Failed to read EDM properties, edmProps == null");
+            
+            logger.debug("Loaded EDM properties:");
+            Iterator it = edmProps.keySet().iterator();
+            String key, value;
+            while(it.hasNext()) {
+                key = (String) it.next();
+                value = edmProps.getProperty(key);
+                logger.debug("\t- " + key + " : " + value);
+            }
+            
+            InputStream emPropsStream = (InputStream) new FileInputStream(emPropertiesFile);
+            Properties emProps = new Properties();
+            emProps.load(emPropsStream);
+            
+            logger.debug("Loaded EM properties:");
+            it = emProps.keySet().iterator();
+            while(it.hasNext()) {
+                key = (String) it.next();
+                value = emProps.getProperty(key);
+                logger.debug("\t- " + key + " : " + value);
+            }            
+            
+            logger.debug("Creating MonitoringEDM");
+            expDataMgr = EDMInterfaceFactory.getMonitoringEDM(edmProps);
+            
+            logger.debug("Connecting to EM");
+            start(emProps);
+            
 
             // Try getting the EDM properties from a local file
-            Properties edmProps = tryGetPropertiesFile("edm");
+//            Properties edmProps = tryGetPropertiesFile("edm");
 
             // If available, use these properties
-            if (edmProps != null) {
-                expDataMgr = EDMInterfaceFactory.getMonitoringEDM(edmProps);
-            } else {
-                expDataMgr = EDMInterfaceFactory.getMonitoringEDM(); //... or go to default
-            }
+//            if (edmProps != null) {
+//                expDataMgr = EDMInterfaceFactory.getMonitoringEDM(edmProps);
+//            }
+//            else {
+//                expDataMgr = EDMInterfaceFactory.getMonitoringEDM(); //... or go to default
+//            }
 
             // Try starting from a local EM properties file
-            Properties emProps = tryGetPropertiesFile("em");
-            if (emProps != null) {
-                start(emProps);
-            } else {
-                throw new RuntimeException("Failed to find configuration files");
-            }
+//            Properties emProps = tryGetPropertiesFile("em");
+//            if (emProps != null) {
+//                start(emProps);
+//            } else {
+//                throw new RuntimeException("Failed to find configuration files");
+//            }
 
         } catch (Throwable ex) {
             throw new RuntimeException("Could not create Monitoring EDM", ex);
