@@ -4,7 +4,7 @@ set -eux
 
 juju-log "edm relation changed"
 
-relation-set database=edm-metrics
+relation-set database=WeGov
 
 if [ "`relation-get host`" == "" ]; then
 	juju-log "Waiting for postgres database..."
