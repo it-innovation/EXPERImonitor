@@ -23,7 +23,7 @@ cat > /var/lib/tomcat7/coordinator.properties << EOF
 # Properties for WeGov Coordinator
 
 # POSTGRESQL SERVER CONFIGURATION (admin access)
-postgres.url=jdbc:postgresql://`relation-get host`:5432/
+postgres.url=jdbc:postgresql://`relation-get host`:5432/WeGov
 postgres.login=`relation-get user`
 postgres.pass=`relation-get password`
 
