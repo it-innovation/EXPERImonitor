@@ -2,13 +2,16 @@
 
 while :; do
   if juju status | grep -q eccdashboard; then
+	
+	echo Updating charm
+	juju upgrade-charm --repository=./charms eccdashboard
+		
     echo Waiting for old service to finish...
     juju destroy-service tomcat
     juju destroy-service eccdashboard
 	juju destroy-service postgresql-eccdashboard
 	juju destroy-service rabbitmq-server
-	echo Updating charm
-	juju upgrade-charm --repository=./charms eccdashboard	
+	
   else
     break
   fi

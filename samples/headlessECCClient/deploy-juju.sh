@@ -4,11 +4,14 @@
 
 while :; do
   if juju status | grep -q headless; then
+
+	echo Updating charm
+	juju upgrade-charm --repository=./charms headless
+
     echo Waiting for old service to finish...
 	juju destroy-service headless
 	juju destroy-service postgresql-headless
-	echo Updating charm
-	juju upgrade-charm --repository=./charms headless
+
   else
     break
   fi
