@@ -29,7 +29,7 @@ public class DatabaseMaintenance {
         Coordinator coordinator = new Coordinator("/var/lib/tomcat7/coordinator.properties");
         String wegovToolsHome = (new File("/var/lib/tomcat7/")).getCanonicalPath();
 
-        coordinator.wipeDatabase();
+        //coordinator.wipeDatabase();
         coordinator.setupWegovDatabase();
 
         Role userRole = coordinator.getDefaultUserRole();
