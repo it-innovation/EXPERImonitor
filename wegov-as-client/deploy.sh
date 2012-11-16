@@ -25,7 +25,7 @@ cp wegov-database-maintenance/target/wegov-database-maintenance-1.0-jar-with-dep
 cp wegov-tools/search-analysis/target/wegov-search-analysis-tool-2.0-jar-with-dependencies.jar charms/precise/wegov/
 
 juju deploy cs:~robert-ayres/precise/tomcat tomcat-wegov
-juju deploy --repository=. local:wegov wegov
+juju deploy --repository=./charms local:wegov wegov
 juju add-relation wegov tomcat-wegov
 juju add-relation wegov:edm postgresql-wegov:db
 juju add-relation wegov:rabbit rabbitmq-server
