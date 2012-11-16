@@ -6,12 +6,14 @@ while :; do
     juju destroy-service tomcat-wegov
     juju destroy-service wegov
 	juju destroy-service postgresql-wegov
+	juju destroy-service rabbitmq-server
   else
     break
   fi
 done
 
 juju deploy postgresql postgresql-wegov
+juju deploy rabbitmq-server
 
 set -eu
 rm -rf charms/precise/wegov/deploy
@@ -24,8 +26,8 @@ cp wegov-tools/search-analysis/target/wegov-search-analysis-tool-2.0-jar-with-de
 
 juju deploy cs:~robert-ayres/precise/tomcat tomcat-wegov
 juju deploy --repository=. local:wegov wegov
-juju add-relation wegov tomcat
-juju add-relation wegov:edm postgresql:db
+juju add-relation wegov tomcat-wegov
+juju add-relation wegov:edm postgresql-wegov:db
 juju add-relation wegov:rabbit rabbitmq-server
 
 juju expose tomcat
