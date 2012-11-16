@@ -13,6 +13,11 @@ if [ ! -f em.properties ]; then
 	exit 0
 fi
 
+if [ ! -f edm.properties ]; then
+	juju-log "Waiting for Posgresql relation to be set up..."
+	exit 0
+fi
+
 juju-log "START headless client"
 
 cat > headless.log <<EOF

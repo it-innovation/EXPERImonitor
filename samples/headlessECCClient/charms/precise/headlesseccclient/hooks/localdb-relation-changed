@@ -9,6 +9,10 @@ if [ "`relation-get host`" == "" ]; then
 	exit 0
 fi
 
+echo `relation-get host`:5432:`relation-get database`:`relation-get user`:`relation-get password` > ~/.pgpass
+chmod 0600 ~/.pgpass
+psql -w -h `relation-get host` -d `relation-get database` -U `relation-get user` -f edm-metrics-postgres.sql
+
 cd `dirname $0`/../code
 
 cat > edm.properties <<EOF

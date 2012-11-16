@@ -17,6 +17,8 @@ while :; do
   fi
 done
 
+cp ../../edm/resources/edm-metrics-postgres.sql charms/precise/headlesseccclient/
+
 juju deploy postgresql postgresql-headless
 
 set -eu
