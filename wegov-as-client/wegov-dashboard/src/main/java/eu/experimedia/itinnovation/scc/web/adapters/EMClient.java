@@ -27,6 +27,9 @@ import eu.wegov.coordinator.Coordinator;
 import eu.wegov.coordinator.dao.data.ExperimediaTopicOpinion;
 import eu.wegov.helper.CoordinatorHelper;
 import eu.wegov.web.security.WegovLoginService;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.*;
 import javax.annotation.PostConstruct;
 import org.apache.log4j.Logger;
@@ -75,7 +78,23 @@ public class EMClient implements EMIAdapterListener {
         // class is initialized by Spring so all autowiring works
         // TODO: move config etc. to bean definition
         try {
-            this.start("127.0.0.1", UUID.fromString("00000000-0000-0000-0000-000000000000"), "WeGov 3.1 EM Client");
+            
+            File emPropertiesFile = new File("em.properties");
+            
+            InputStream emPropsStream = (InputStream) new FileInputStream(emPropertiesFile);
+            Properties emProps = new Properties();
+            emProps.load(emPropsStream);
+            
+            clientLogger.debug("Loaded EM properties:");
+            Iterator it = emProps.keySet().iterator();
+            String key, value;
+            while(it.hasNext()) {
+                key = (String) it.next();
+                value = emProps.getProperty(key);
+                clientLogger.debug("\t- " + key + " : " + value);
+            }
+            
+            this.start(emProps.getProperty("Rabbit_IP"), UUID.fromString(emProps.getProperty("Monitor_ID")), "WeGov 3.1 EM Client");
         } catch (Throwable ex) {
             throw new RuntimeException("Failed to start new WeGov 3.1 EM Client", ex);
         }
