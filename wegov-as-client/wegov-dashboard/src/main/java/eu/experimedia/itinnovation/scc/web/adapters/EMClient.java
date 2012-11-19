@@ -24,6 +24,7 @@
 package eu.experimedia.itinnovation.scc.web.adapters;
 
 import eu.wegov.coordinator.Coordinator;
+import eu.wegov.coordinator.dao.data.ExperimediaPostsCounter;
 import eu.wegov.coordinator.dao.data.ExperimediaTopicOpinion;
 import eu.wegov.helper.CoordinatorHelper;
 import eu.wegov.web.security.WegovLoginService;
@@ -114,11 +115,12 @@ public class EMClient implements EMIAdapterListener {
 
         clientLogger.debug("Resetting WeGov database");
 
-        // Remove all old entries from ExperimediaTopicOpinion for now
+        // Remove all old entries from ExperimediaTopicOpinion and ExperimediaPostsCounter for now
         try {
             coordinator.getDataSchema().deleteAll(new ExperimediaTopicOpinion());
+            coordinator.getDataSchema().deleteAll(new ExperimediaPostsCounter());
         } catch (Throwable ex) {
-            throw new RuntimeException("Failed to clear ExperimediaTopicOpinion table", ex);
+            throw new RuntimeException("Failed to clear ExperimediaTopicOpinion or ExperimediaPostsCounter table", ex);
         }
 
     }
@@ -306,37 +308,67 @@ public class EMClient implements EMIAdapterListener {
                     ", attribute: " + theAttribute.getName() + " (" + theAttribute.getDescription() + ")");
 
             try {
+                if (measurementSetIndex == 0) {
+                    ArrayList<ExperimediaTopicOpinion> topics = coordinator.getDataSchema().getAll(new ExperimediaTopicOpinion());
 
-                ArrayList<ExperimediaTopicOpinion> topics = coordinator.getDataSchema().getAll(new ExperimediaTopicOpinion());
+                    if (topics.isEmpty()) {
+                        reportOUT.setNumberOfMeasurements(0);
+                        reportOUT.setMeasurementSet(theMeasurementSet);
+                        clientLogger.debug("Nothing to report");
 
-                if (topics.isEmpty()) {
-                    reportOUT.setNumberOfMeasurements(0);
-                    reportOUT.setMeasurementSet(theMeasurementSet);
-                    clientLogger.debug("Nothing to report");
+                    } else {
+                        Measurement theMeasurement = new Measurement();
+                        ExperimediaTopicOpinion topicDao;
+                        int numTopics = topics.size();
+                        clientLogger.debug("Reporting " + numTopics + " topic measurements");
+                        for (int k = 0; k < numTopics; k++) {
+                            topicDao = topics.get(k);
 
-                } else {
-                    Measurement theMeasurement = new Measurement();
-                    ExperimediaTopicOpinion topicDao;
-                    int numTopics = topics.size();
-                    clientLogger.debug("Reporting " + numTopics + " measurements");
-                    for (int k = 0; k < numTopics; k++) {
-                        topicDao = topics.get(k);
+                            clientLogger.debug("\t" + topicDao.getTimeCollectedAsTimestamp() + " - " + topicDao.getKeyTerms());
 
-                        clientLogger.debug("\t" + topicDao.getTimeCollectedAsTimestamp() + " - " + topicDao.getKeyTerms());
+                            theMeasurement.setMeasurementSetUUID(theMeasurementSet.getUUID());
+                            theMeasurement.setTimeStamp(topicDao.getTimeCollectedAsTimestamp());
+                            theMeasurement.setValue(topicDao.getKeyTerms());
 
-                        theMeasurement.setMeasurementSetUUID(theMeasurementSet.getUUID());
-                        theMeasurement.setTimeStamp(topicDao.getTimeCollectedAsTimestamp());
-                        theMeasurement.setValue(topicDao.getKeyTerms());
+                            theMeasurementSet.addMeasurement(theMeasurement);
+                            theMeasurement = new Measurement();
+                        }
 
-                        theMeasurementSet.addMeasurement(theMeasurement);
-                        theMeasurement = new Measurement();
+                        reportOUT.setNumberOfMeasurements(numTopics);
+                        reportOUT.setMeasurementSet(theMeasurementSet);
+
                     }
+                } else {
+                    ArrayList<ExperimediaPostsCounter> posts = coordinator.getDataSchema().getAll(new ExperimediaPostsCounter());
 
-                    reportOUT.setNumberOfMeasurements(numTopics);
-                    reportOUT.setMeasurementSet(theMeasurementSet);
+                    if (posts.isEmpty()) {
+                        reportOUT.setNumberOfMeasurements(0);
+                        reportOUT.setMeasurementSet(theMeasurementSet);
+                        clientLogger.debug("Nothing to report");
 
+                    } else {
+                        Measurement theMeasurement = new Measurement();
+                        ExperimediaPostsCounter postDao;
+                        int numPosts = posts.size();
+                        clientLogger.debug("Reporting " + numPosts + " post measurements");
+                        for (int k = 0; k < numPosts; k++) {
+                            postDao = posts.get(k);
+
+                            clientLogger.debug("\t" + postDao.getTimeCollectedAsTimestamp() + " - " + Integer.toString(postDao.getNumPosts()));
+
+                            theMeasurement.setMeasurementSetUUID(theMeasurementSet.getUUID());
+                            theMeasurement.setTimeStamp(postDao.getTimeCollectedAsTimestamp());
+                            theMeasurement.setValue(Integer.toString(postDao.getNumPosts()));
+
+                            theMeasurementSet.addMeasurement(theMeasurement);
+                            theMeasurement = new Measurement();
+                        }
+
+                        reportOUT.setNumberOfMeasurements(numPosts);
+                        reportOUT.setMeasurementSet(theMeasurementSet);
+
+                    }                    
                 }
-
 
                 Date date = new Date();
                 reportOUT.setReportDate(date);
@@ -462,6 +494,8 @@ public class EMClient implements EMIAdapterListener {
         clientLogger.debug("onPopulateSummaryReport");
 
         Report reportOUT = new Report();
+        
+        // Topics first
         MeasurementSet theMeasurementSet = allMeasurementSets.get(0);
         theMeasurementSet.setMeasurements(new HashSet<Measurement>());
         Measurement[] measurements = new Measurement[0];
@@ -480,7 +514,7 @@ public class EMClient implements EMIAdapterListener {
                 ExperimediaTopicOpinion topicDao;
                 int numTopics = topics.size();
                 measurements = new Measurement[numTopics];
-                clientLogger.debug("Reporting " + numTopics + " measurements");
+                clientLogger.debug("Reporting " + numTopics + " topic measurements");
                 for (int k = 0; k < numTopics; k++) {
                     topicDao = topics.get(k);
 
@@ -497,7 +531,7 @@ public class EMClient implements EMIAdapterListener {
             }
 
         } catch (Throwable ex) {
-            throw new RuntimeException("Failed to read metric values from the WeGov database", ex);
+            throw new RuntimeException("Failed to read topic metric values from the WeGov database", ex);
         }
 
         Date date = new Date();
@@ -521,6 +555,68 @@ public class EMClient implements EMIAdapterListener {
         }
         
         summaryOUT.addReport(reportOUT);
+        
+        // Number of posts second
+        theMeasurementSet = allMeasurementSets.get(1);
+        theMeasurementSet.setMeasurements(new HashSet<Measurement>());
+        measurements = new Measurement[0];        
+        reportOUT = new Report();
+        
+        try {
+
+            ArrayList<ExperimediaPostsCounter> posts = coordinator.getDataSchema().getAll(new ExperimediaPostsCounter());
+
+            if (posts.isEmpty()) {
+                reportOUT.setNumberOfMeasurements(0);
+                reportOUT.setMeasurementSet(theMeasurementSet);
+                clientLogger.debug("Nothing to report");
+
+            } else {
+                Measurement theMeasurement = new Measurement();
+                ExperimediaPostsCounter postDao;
+                int numTopics = posts.size();
+                measurements = new Measurement[numTopics];
+                clientLogger.debug("Reporting " + numTopics + " post measurements");
+                for (int k = 0; k < numTopics; k++) {
+                    postDao = posts.get(k);
+
+                    clientLogger.debug("\t" + postDao.getTimeCollectedAsTimestamp() + " - " + Integer.toString(postDao.getNumPosts()));
+
+                    theMeasurement.setMeasurementSetUUID(theMeasurementSet.getUUID());
+                    theMeasurement.setTimeStamp(postDao.getTimeCollectedAsTimestamp());
+                    theMeasurement.setValue(Integer.toString(postDao.getNumPosts()));
+                    measurements[k] = theMeasurement;
+
+                    theMeasurement = new Measurement();
+                }
+
+            }
+
+        } catch (Throwable ex) {
+            throw new RuntimeException("Failed to read posts metric values from the WeGov database", ex);
+        }
+
+        reportOUT.setReportDate(date);
+        
+        if (measurements.length > 0) {
+            Arrays.sort(measurements, comparator);
+            int numTopics = measurements.length;
+            
+            for (int k = 0; k < numTopics; k++) {
+                theMeasurementSet.addMeasurement(measurements[k]);
+            }
+            
+            reportOUT.setMeasurementSet(theMeasurementSet);
+            reportOUT.setNumberOfMeasurements(numTopics);
+            reportOUT.setFromDate(measurements[0].getTimeStamp());
+            reportOUT.setToDate(measurements[numTopics - 1].getTimeStamp());
+        } else {
+            reportOUT.setFromDate(date);
+            reportOUT.setToDate(date);
+        }
+        
+        summaryOUT.addReport(reportOUT);        
+        
     }
 
     public void onPopulateDataBatch(EMDataBatch batchOut) {
@@ -547,9 +643,14 @@ public class EMClient implements EMIAdapterListener {
         theMetricGenerator.addMetricGroup(wegovMetricGroup);
 
         Entity twitterSchladming = new Entity();
-        twitterSchladming.setName("Schladming Twitter Group");
-        twitterSchladming.setDescription("People found in Schladming Twitter search for keyword Schladming");
+        twitterSchladming.setName("Facebook event");
+        twitterSchladming.setDescription("Facebook event of interest http://upload.wikimedia.org/wikipedia/commons/8/82/Facebook_icon.jpg");
         theMetricGenerator.addEntity(twitterSchladming);
+        
+//        Entity twitterSchladming = new Entity();
+//        twitterSchladming.setName("Schladming Twitter Group");
+//        twitterSchladming.setDescription("People found in Schladming Twitter search for keyword Schladming");
+//        theMetricGenerator.addEntity(twitterSchladming);
 
 //        // NUMBER OF PEOPLE
 //        Attribute twitterSchladmingNumPeople = new Attribute();
@@ -577,11 +678,18 @@ public class EMClient implements EMIAdapterListener {
 
         // TOPIC ANALYSIS TOPICS
         Attribute twitterSchladmingDiscussionTopic1 = new Attribute();
-        twitterSchladmingDiscussionTopic1.setName("Topic analysis topics");
-        twitterSchladmingDiscussionTopic1.setDescription("Topic of discussion in a Facebook group");
+        twitterSchladmingDiscussionTopic1.setName("Topic analysis topics from Facebook event search");
+        twitterSchladmingDiscussionTopic1.setDescription("Topic of discussion in a Facebook event");
         twitterSchladmingDiscussionTopic1.setEntityUUID(twitterSchladming.getUUID());
         twitterSchladming.addAttribute(twitterSchladmingDiscussionTopic1);
         addMetricToAttributeAndMetricGroup(wegovMetricGroup, twitterSchladmingDiscussionTopic1, MetricType.NOMINAL, new Unit("Keyword"));
+        
+        Attribute wegovNumPosts = new Attribute();
+        wegovNumPosts.setName("Number of posts in a Facebook event search");
+        wegovNumPosts.setDescription("Number of posts collected from a Facebook group");
+        wegovNumPosts.setEntityUUID(twitterSchladming.getUUID());
+        twitterSchladming.addAttribute(wegovNumPosts);
+        addMetricToAttributeAndMetricGroup(wegovMetricGroup, wegovNumPosts, MetricType.INTERVAL, new Unit("Post"));        
 
 //        // TOPIC ANALYSIS TOPIC #1
 //        Attribute twitterSchladmingDiscussionTopic1 = new Attribute();
