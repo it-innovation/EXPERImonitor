@@ -30,20 +30,17 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.logging.Level;
 import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Measurement;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMClient;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMDataBatch;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMPhase;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMPostReportSummary;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMInterfaceFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDM;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IExperimentDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IMetricGeneratorDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IReportDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.factory.EMInterfaceFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.IEMLifecycleListener;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.IExperimentMonitor;
@@ -55,6 +52,10 @@ public class DashboardExperimentMonitor implements IEMLifecycleListener {
     private boolean waitingToStartNextPhase = false;
     private IMonitoringEDM expDataMgr;
     private IMetricGeneratorDAO expMGAccessor;
+//    private IEntityDAO expEntityAccessor;
+//    private IMetricGroupDAO expMetricGroupAccessor;
+//    private IMeasurementSetDAO expMeasurementSetAccessor;
+//    private IMetricDAO expMetricAccessor;
     private IReportDAO expReportAccessor;
     private Experiment expInstance;
     private HashMap<String, DashboardMeasurementSet> reportedMeasurementSets = new HashMap<String, DashboardMeasurementSet>();
@@ -119,6 +120,9 @@ public class DashboardExperimentMonitor implements IEMLifecycleListener {
             
             logger.debug("Creating MonitoringEDM");
             expDataMgr = EDMInterfaceFactory.getMonitoringEDM(edmProps);
+            
+            logger.debug("Clearing experiment database");
+            clearECCEDM();
             
             logger.debug("Connecting to EM");
             start(emProps);
@@ -227,7 +231,7 @@ public class DashboardExperimentMonitor implements IEMLifecycleListener {
                 expDataMgr.clearMetricsDatabase();
                 clearedOK = true;
             } catch (Exception e) {
-                logger.error("Could not clear EDM database: " + e.getLocalizedMessage());
+                throw new RuntimeException("Could not clear EDM database: " + e.getLocalizedMessage());
             }
         }
 
@@ -263,16 +267,20 @@ public class DashboardExperimentMonitor implements IEMLifecycleListener {
 
         Date expDate = new Date();
         expInstance = new Experiment();
-        expInstance.setName(UUID.randomUUID().toString());
-        expInstance.setDescription("Sample ExperimentMonitor based experiment");
+        expInstance.setName("Test Experiment");
+        expInstance.setDescription("Sample Experimedia experiment");
         expInstance.setStartTime(expDate);
-        expInstance.setExperimentID(expDate.toString());
+        expInstance.setExperimentID("1");
 
         // If we have a working EDM, set up the EDM interfaces
         if (expDataMgr.isDatabaseSetUpAndAccessible()) {
             try {
                 expMGAccessor = expDataMgr.getMetricGeneratorDAO();
                 expReportAccessor = expDataMgr.getReportDAO();
+//                expEntityAccessor = expDataMgr.getEntityDAO();
+//                expMetricGroupAccessor = expDataMgr.getMetricGroupDAO();
+//                expMeasurementSetAccessor = expDataMgr.getMeasurementSetDAO();
+//                expMetricAccessor = expDataMgr.getMetricDAO();
 
                 IExperimentDAO expDAO = expDataMgr.getExperimentDAO();
                 expDAO.saveExperiment(expInstance);
@@ -307,8 +315,8 @@ public class DashboardExperimentMonitor implements IEMLifecycleListener {
         return expMonitor.getCurrentPhaseClients();
     }
 
-    public EMPhase startLifecycle(Experiment expInfo) throws Exception {
-        EMPhase currentPhase = expMonitor.startLifecycle(expInfo);
+    public EMPhase startLifecycle() throws Exception {
+        EMPhase currentPhase = expMonitor.startLifecycle(expInstance);
         logger.debug("Started the lifecycle with the phase: [" + currentPhase.getIndex() + "] " + currentPhase.name());
         EMPhase nextPhase = expMonitor.getNextPhase();
         logger.debug("The next phase will be: [" + nextPhase.getIndex() + "] " + nextPhase.name());
@@ -439,7 +447,71 @@ public class DashboardExperimentMonitor implements IEMLifecycleListener {
 
     @Override
     public void onFoundClientWithMetricGenerators(EMClient client) {
-        logger.debug("onFoundClientWithMetricGenerators");
+
+        if (client != null) {
+            
+            logger.debug("onFoundClientWithMetricGenerators: " + client.getName() + " [" + client.getID().toString() + "]");
+            
+            Set<MetricGenerator> generators = client.getCopyOfMetricGenerators();
+            Iterator<MetricGenerator> mgIt = generators.iterator();
+            
+            // Pass to EDM
+            if (expMGAccessor != null && expInstance != null) {
+                UUID expID = expInstance.getUUID();
+
+                Set<Entity> entities; Set<Attribute> attributes;
+                Set<MetricGroup> metricGroups; Set<MeasurementSet> measurementSets;
+                while (mgIt.hasNext()) {
+                    
+                    MetricGenerator mg = mgIt.next();
+                    try {
+                        
+                        expMGAccessor.saveMetricGenerator(mg, expID);
+                        
+//                        entities = mg.getEntities();
+//                        
+//                        for (Entity entity : entities) {
+//                            
+//                            expEntityAccessor.saveEntity(entity);
+//                            
+//                            attributes = entity.getAttributes();
+//                            for (Attribute attribute : attributes) {
+//                                expEntityAccessor.saveAttribute(attribute);                                
+//                            }
+//                        }
+//                        
+//                        metricGroups = mg.getMetricGroups();
+//                        
+//                        for (MetricGroup metricGroup : metricGroups) {
+//                            expMetricGroupAccessor.saveMetricGroup(metricGroup);
+//                            
+//                            measurementSets = metricGroup.getMeasurementSets();
+//                            
+//                            for (MeasurementSet measurementSet : measurementSets) {
+//                                expMeasurementSetAccessor.saveMeasurementSet(measurementSet);                                
+//                                expMetricAccessor.saveMetric(measurementSet.getMetric());
+//                            }
+//                        }
+                    
+                    } catch (Exception e) {
+                        throw new RuntimeException("Failed to store metric generator", e);
+                    }
+                }
+                
+                
+            } else {
+                logger.error("Unable to save metric generator data for client : "
+                        + client.getName() + " [" + client.getID().toString()
+                        + "], reason: expMGAccessor or expInstance is NULL");
+            }
+
+//            mgIt = generators.iterator();
+//            while (mgIt.hasNext()) {
+//                MetricGenerator mg = mgIt.next();
+//            }
+        } else {
+            logger.error("onFoundClientWithMetricGenerators: client is NULL");
+        }
     }
 
     @Override
@@ -486,9 +558,10 @@ public class DashboardExperimentMonitor implements IEMLifecycleListener {
                     }
 
                     Set<Measurement> measurements = measurementSet.getMeasurements();
-
+                    
                     if (measurements != null) {
                         if (!measurements.isEmpty()) {
+                            
                             Iterator it = measurements.iterator();
                             Measurement measurement;
                             int measurementsCounter = 1;
@@ -523,6 +596,14 @@ public class DashboardExperimentMonitor implements IEMLifecycleListener {
                                 } else {
                                     logger.debug("Measurement is NEW");
                                     theDashboardMeasurementSet.addMeasurement(measurementUUID, new DataPoint(measurementTimestamp.getTime(), measurementValue, measurementUUID));
+                                    try {
+                                        
+                                        // Save just the measurement - ignore reports etc.
+                                        expDataMgr.getMeasurementDAO().saveMeasurement(measurement);
+                                        
+                                    } catch (Exception ex) {
+                                        logger.error("Failed to save measurement [" + measurement.getUUID().toString() + "] to the database", ex);
+                                    }
                                 }
 
                                 measurementsCounter++;
@@ -547,11 +628,6 @@ public class DashboardExperimentMonitor implements IEMLifecycleListener {
             logger.error("Received metric data from NULL client!");
         }
 
-//        Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
-//
-//        while (listIt.hasNext()) {
-//            listIt.next().onGotMetricData(client, report);
-//        }
     }
 
     @Override

@@ -117,18 +117,18 @@ public class ExperimentMonitorService {
     public EMPhase startLifeCycle() throws Throwable {
         logger.debug("Starting lifecycle");
         
-        IMonitoringEDM expDataMgr = emHelper.getExperimentMonitor().getExpDataMgr();
-        Date expDate = new Date();
-        Experiment expInstance = new Experiment();
-        expInstance.setName("Test Experiment");
-        expInstance.setDescription("Test Experimedia experiment");
-        expInstance.setStartTime(expDate);
-        expInstance.setExperimentID("1");
-
-        IExperimentDAO expDAO = expDataMgr.getExperimentDAO();
-        expDAO.saveExperiment(expInstance);
+//        IMonitoringEDM expDataMgr = emHelper.getExperimentMonitor().getExpDataMgr();
+//        Date expDate = new Date();
+//        Experiment expInstance = new Experiment();
+//        expInstance.setName("Test Experiment");
+//        expInstance.setDescription("Test Experimedia experiment");
+//        expInstance.setStartTime(expDate);
+//        expInstance.setExperimentID("1");
+//
+//        IExperimentDAO expDAO = expDataMgr.getExperimentDAO();
+//        expDAO.saveExperiment(expInstance);
         
-        return emHelper.getExperimentMonitor().startLifecycle(expInstance);
+        return emHelper.getExperimentMonitor().startLifecycle();
     }
     
     public void goToNextPhase() throws Throwable {
