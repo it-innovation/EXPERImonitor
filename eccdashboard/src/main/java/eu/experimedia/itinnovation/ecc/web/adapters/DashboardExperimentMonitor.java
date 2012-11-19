@@ -662,6 +662,11 @@ public class DashboardExperimentMonitor implements IEMLifecycleListener {
                         }
 
                         tempSummaryReport = summary.getReport(measurementSetUuid);
+                        logger.debug("Report UUID: " + tempSummaryReport.getUUID().toString());
+                        logger.debug("\t- from date: " + tempSummaryReport.getFromDate());
+                        logger.debug("\t- to date: " + tempSummaryReport.getToDate());
+                        logger.debug("\t- number of measurements: " + tempSummaryReport.getNumberOfMeasurements());
+                        logger.debug("\t- report date: " + tempSummaryReport.getReportDate());
 
                         if (tempSummaryReport != null) {
 
@@ -687,8 +692,6 @@ public class DashboardExperimentMonitor implements IEMLifecycleListener {
                                             logger.debug("Summary measurement " + measurementsCounter + ": [" + measurementUUID + "] " + measurementTimestamp.toString() + " - " + measurementValue);
 
                                             theDashboardSummarySet.addMeasurement(measurementUUID, new DataPoint(measurementTimestamp.getTime(), measurementValue, measurementUUID));
-                                            
-                                            // Check we don't already have the measurement:
                                             
                                             measurementsCounter++;
 
