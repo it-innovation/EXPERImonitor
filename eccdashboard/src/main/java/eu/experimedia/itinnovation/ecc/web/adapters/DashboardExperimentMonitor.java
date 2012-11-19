@@ -687,11 +687,13 @@ public class DashboardExperimentMonitor implements IEMLifecycleListener {
                                             logger.debug("Summary measurement " + measurementsCounter + ": [" + measurementUUID + "] " + measurementTimestamp.toString() + " - " + measurementValue);
 
                                             theDashboardSummarySet.addMeasurement(measurementUUID, new DataPoint(measurementTimestamp.getTime(), measurementValue, measurementUUID));
-
+                                            
+                                            // Check we don't already have the measurement:
+                                            
                                             measurementsCounter++;
 
                                         }
-                                        //                            mainView.addLogText(client.getName() + " got metric data: " + measurements.iterator().next().getValue());
+
                                     } else {
                                         logger.error("Measurements for measurement set [" + tempMeasurementSet.getUUID().toString() + "] are EMPTY");
                                     }
@@ -717,12 +719,6 @@ public class DashboardExperimentMonitor implements IEMLifecycleListener {
             logger.error("Received summary report from NULL client!");
         }
 
-
-//        Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
-//
-//        while (listIt.hasNext()) {
-//            listIt.next().onGotSummaryReport(client, summary);
-//        }
     }
 
     @Override
