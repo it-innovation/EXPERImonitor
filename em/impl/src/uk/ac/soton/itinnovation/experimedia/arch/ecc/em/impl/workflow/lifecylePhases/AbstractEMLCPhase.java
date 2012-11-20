@@ -92,6 +92,8 @@ public abstract class AbstractEMLCPhase
   }
   
   // Deriving classes must implement phase start/stopping behaviour ------------
+  public abstract void reset();
+  
   public abstract void start() throws Exception;
   
   public abstract void controlledStop() throws Exception;
@@ -100,7 +102,7 @@ public abstract class AbstractEMLCPhase
   
   public abstract void timeOutClient( EMClientEx client ) throws Exception;
   
-  public abstract void onClientUnexpectedlyRemoved( EMClientEx client );
+  public abstract void onClientHasBeenDeregistered( EMClientEx client );
   
   // Protected methods ---------------------------------------------------------
   protected AbstractEMLCPhase( EMPhase phase,
@@ -150,6 +152,12 @@ public abstract class AbstractEMLCPhase
     }
    
     return result;
+  }
+  
+  protected void clearAllClients()
+  {
+    synchronized (clientLock)
+    { phaseClients.clear(); }
   }
   
   protected boolean isClientRegisteredInPhase( EMClientEx client )

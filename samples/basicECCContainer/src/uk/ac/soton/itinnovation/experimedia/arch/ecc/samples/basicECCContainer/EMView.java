@@ -52,6 +52,7 @@ public class EMView extends javax.swing.JFrame
   private Entity           currSelectedEntity;
   
   private EMViewListener   viewListener;
+  private boolean          monitoringStarted = false;
   
   public EMView( EMViewListener listener )
   {
@@ -68,6 +69,26 @@ public class EMView extends javax.swing.JFrame
     
     entityList.setModel( entityListModel );
     attributeList.setModel( attributeListModel );
+  }
+  
+  public void resetView()
+  {
+    clientListModel.clear();
+    entityListModel.clear();
+    attributeListModel.clear();
+    currSelectedClient = null;
+    currSelectedEntity = null;
+    monitoringStarted  = false;
+    
+    beginMonitoringProcButton.setText( "Begin monitoring process" );
+    beginMonitoringProcButton.setEnabled( true );
+    nextPhaseButton.setEnabled( false );
+    loggingText.setText( "" );
+    phaseLabel.setText( "Waiting for clients" );
+    nextPhaseLabel.setText( "Not available" );
+    postReportButton.setEnabled( false );
+    pullMetricButton.setEnabled( false );
+    timeOutButton.setEnabled( false );
   }
   
   public synchronized void setMonitoringPhaseValue( String phase, String nextPhase )
@@ -234,11 +255,7 @@ public class EMView extends javax.swing.JFrame
             .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
             .addGap(67, 67, 67))
           .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-            .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-              .addComponent(jScrollPane2)
-              .addGroup(jPanel2Layout.createSequentialGroup()
-                .addComponent(jLabel6)
-                .addGap(0, 0, Short.MAX_VALUE)))
+            .addComponent(jScrollPane2)
             .addContainerGap())
           .addGroup(jPanel2Layout.createSequentialGroup()
             .addComponent(jLabel2)
@@ -249,6 +266,9 @@ public class EMView extends javax.swing.JFrame
             .addComponent(jLabel7)
             .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
           .addGroup(jPanel2Layout.createSequentialGroup()
+            .addComponent(jLabel6)
+            .addGap(0, 0, Short.MAX_VALUE))
+          .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
             .addComponent(jScrollPane3)
             .addContainerGap())))
     );
@@ -259,15 +279,15 @@ public class EMView extends javax.swing.JFrame
         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
           .addComponent(jLabel2)
           .addComponent(clientNameField))
-        .addGap(33, 33, 33)
+        .addGap(18, 18, 18)
         .addComponent(jLabel6)
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 58, javax.swing.GroupLayout.PREFERRED_SIZE)
-        .addGap(18, 18, 18)
+        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE)
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addComponent(jLabel7)
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE)
-        .addGap(212, 212, 212)
+        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+        .addGap(97, 97, 97)
         .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
     );
@@ -294,10 +314,10 @@ public class EMView extends javax.swing.JFrame
         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         .addComponent(jLabel1)
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-          .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 429, javax.swing.GroupLayout.PREFERRED_SIZE)
-          .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 441, Short.MAX_VALUE))
-        .addGap(82, 82, 82))
+        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+          .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 395, javax.swing.GroupLayout.PREFERRED_SIZE)
+          .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 351, javax.swing.GroupLayout.PREFERRED_SIZE))
+        .addGap(128, 128, 128))
     );
 
     jTabbedPane1.addTab("Connected to the ECC", jPanel1);
@@ -341,10 +361,10 @@ public class EMView extends javax.swing.JFrame
         .addGap(9, 9, 9)
         .addComponent(jLabel3)
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 285, javax.swing.GroupLayout.PREFERRED_SIZE)
-        .addGap(11, 11, 11)
+        .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 302, javax.swing.GroupLayout.PREFERRED_SIZE)
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
         .addComponent(timeOutButton)
-        .addContainerGap(88, Short.MAX_VALUE))
+        .addContainerGap(34, Short.MAX_VALUE))
     );
 
     javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
@@ -360,11 +380,11 @@ public class EMView extends javax.swing.JFrame
     );
     jPanel5Layout.setVerticalGroup(
       jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel5Layout.createSequentialGroup()
+      .addGroup(jPanel5Layout.createSequentialGroup()
         .addContainerGap()
-        .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-          .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-          .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 460, Short.MAX_VALUE))
+        .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+          .addComponent(jScrollPane4)
+          .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         .addContainerGap())
     );
 
@@ -394,6 +414,8 @@ public class EMView extends javax.swing.JFrame
     });
 
     nextPhaseLabel.setText("Not available");
+    nextPhaseLabel.setMaximumSize(new java.awt.Dimension(200, 14));
+    nextPhaseLabel.setMinimumSize(new java.awt.Dimension(200, 14));
 
     pullMetricButton.setText("Pull client metric data");
     pullMetricButton.setEnabled(false);
@@ -423,11 +445,11 @@ public class EMView extends javax.swing.JFrame
           .addGroup(jPanel4Layout.createSequentialGroup()
             .addComponent(nextPhaseButton, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-            .addComponent(nextPhaseLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 267, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addComponent(nextPhaseLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
           .addGroup(jPanel4Layout.createSequentialGroup()
             .addComponent(jLabel8)
             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-            .addComponent(phaseLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+            .addComponent(phaseLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 225, javax.swing.GroupLayout.PREFERRED_SIZE)))
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
           .addComponent(pullMetricButton, javax.swing.GroupLayout.DEFAULT_SIZE, 183, Short.MAX_VALUE)
@@ -437,9 +459,14 @@ public class EMView extends javax.swing.JFrame
     jPanel4Layout.setVerticalGroup(
       jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(jPanel4Layout.createSequentialGroup()
+        .addGap(22, 22, 22)
+        .addComponent(pullMetricButton)
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addComponent(postReportButton)
+        .addGap(0, 0, Short.MAX_VALUE))
+      .addGroup(jPanel4Layout.createSequentialGroup()
         .addContainerGap()
-        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-          .addComponent(beginMonitoringProcButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
           .addGroup(jPanel4Layout.createSequentialGroup()
             .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
               .addComponent(jLabel8)
@@ -447,13 +474,9 @@ public class EMView extends javax.swing.JFrame
             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
               .addComponent(nextPhaseButton)
-              .addComponent(nextPhaseLabel))))
-        .addContainerGap())
-      .addGroup(jPanel4Layout.createSequentialGroup()
-        .addGap(22, 22, 22)
-        .addComponent(pullMetricButton)
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        .addComponent(postReportButton))
+              .addComponent(nextPhaseLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+          .addComponent(beginMonitoringProcButton, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE))
+        .addContainerGap(14, Short.MAX_VALUE))
     );
 
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -466,9 +489,9 @@ public class EMView extends javax.swing.JFrame
     layout.setVerticalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-        .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        .addGap(18, 18, 18)
-        .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 510, javax.swing.GroupLayout.PREFERRED_SIZE))
+        .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+        .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 477, javax.swing.GroupLayout.PREFERRED_SIZE))
     );
 
     jTabbedPane1.getAccessibleContext().setAccessibleName("Connected ECC Clients");
@@ -478,11 +501,21 @@ public class EMView extends javax.swing.JFrame
 
   private void onBeginMonitoringButtonClicked(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_onBeginMonitoringButtonClicked
     
-    if ( viewListener != null )
-      viewListener.onStartPhasesButtonClicked();
+    if ( monitoringStarted )
+    {
+      monitoringStarted = false;
+      beginMonitoringProcButton.setEnabled( false );
+      beginMonitoringProcButton.setText( "Waiting to finish reset..." );
+      
+      viewListener.onRestartMonitoringClicked();
+    }
+    else
+    {
+      beginMonitoringProcButton.setText( "Re-start monitoring process" );
+      viewListener.onStartMonitoringClicked();
+      monitoringStarted = true;
+    }
     
-    nextPhaseButton.setEnabled( true );
-    beginMonitoringProcButton.setEnabled( false );
     
   }//GEN-LAST:event_onBeginMonitoringButtonClicked
 

@@ -69,6 +69,16 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
   
   // AbstractEMLCPhase ---------------------------------------------------------
   @Override
+  public void reset()
+  {
+    clearAllClients();
+    
+    clientPushGroup.clear();
+    clientPullGroup.clear();
+    monitorStopping = false;
+  }
+  
+  @Override
   public void start() throws Exception
   {
     if ( phaseActive ) throw new Exception( "Phase already active" );
@@ -191,7 +201,7 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
   }
   
   @Override
-  public void onClientUnexpectedlyRemoved( EMClientEx client )
+  public void onClientHasBeenDeregistered( EMClientEx client )
   {
     if ( client != null )
     {

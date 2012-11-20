@@ -32,6 +32,8 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
 
 import java.util.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.faces.AbstractAMQPInterface;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces.EMBaseInterface;
 
 
 
@@ -60,6 +62,21 @@ public class EMClientEx extends EMClient
   
   public void destroyAllInterfaces()
   {
+    EMBaseInterface face = (EMBaseInterface) discoveryFace;
+    if ( face != null ) face.shutdown();
+    
+    face = (EMBaseInterface) setupFace;
+    if ( face != null ) face.shutdown();
+    
+    face = (EMBaseInterface) liveFace;
+    if ( face != null ) face.shutdown();
+    
+    face = (EMBaseInterface) postFace;
+    if ( face != null ) face.shutdown();
+    
+    face = (EMBaseInterface) tearDownFace;
+    if ( face != null ) face.shutdown();
+    
     discoveryFace = null;
     setupFace     = null;
     liveFace      = null;
@@ -102,7 +119,10 @@ public class EMClientEx extends EMClient
   
   // Discovery phase state -----------------------------------------------------
   public void setIsConnected( boolean connected )
-  { clientConnected = connected; }
+  { isConnected = connected; }
+  
+  public void setIsDisconnecting( boolean disCon )
+  { isDisconnecting = disCon; }
   
   public void setSupportedPhases( EnumSet<EMPhase> phases )
   { supportedPhases = phases; }

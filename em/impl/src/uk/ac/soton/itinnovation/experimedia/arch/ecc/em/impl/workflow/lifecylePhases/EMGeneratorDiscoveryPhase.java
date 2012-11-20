@@ -77,6 +77,15 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
   
   // AbstractEMLCPhase ---------------------------------------------------------
   @Override
+  public void reset()
+  {
+    clearAllClients();
+    
+    currentExperiment = null;
+    clientsExpectingGeneratorInfo.clear();
+  }
+  
+  @Override
   public boolean addClient( EMClientEx client )
   {
     boolean result = false;
@@ -168,7 +177,7 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
   }
   
   @Override
-  public void onClientUnexpectedlyRemoved( EMClientEx client )
+  public void onClientHasBeenDeregistered( EMClientEx client )
   {
     if ( client != null )
     {

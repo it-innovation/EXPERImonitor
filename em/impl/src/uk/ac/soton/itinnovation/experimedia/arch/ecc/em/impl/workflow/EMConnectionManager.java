@@ -97,8 +97,19 @@ public class EMConnectionManager implements IEMMonitorEntryPoint_ProviderListene
   public boolean isEntryPointOpen()
   { return entryPointOpen; }
   
-  public void disconnectClients()
-  { entryPointPump.stopPump(); }
+  public void disconnectAllClients()
+  { 
+    // Get copy of all clients to remove
+    HashSet<UUID> clientIDs = new HashSet<UUID>();
+    Iterator<EMClientEx> cIt = connectedClients.values().iterator();
+    while ( cIt.hasNext() )
+    { clientIDs.add( cIt.next().getID() ); }
+    
+    // Disconnect and remove clients
+    Iterator<UUID> idIt = clientIDs.iterator();
+    while ( idIt.hasNext() )
+    { disconnectAndRemoveClient( idIt.next() ); }
+  }
   
   public int getConnectedClientCount()
   { return connectedClients.size(); }
@@ -106,10 +117,22 @@ public class EMConnectionManager implements IEMMonitorEntryPoint_ProviderListene
   public EMClientEx getClient( UUID clientID )
   { return connectedClients.get( clientID ); }
   
-  public void removeClient( UUID clientID )
-  { connectedClients.remove( clientID ); }
+  public void disconnectAndRemoveClient( UUID clientID )
+  {
+    // Destroy all ECC interfaces and set as disconnected
+    EMClientEx client = connectedClients.get( clientID );
+    
+    if ( client != null && client.isConnected() )
+    {
+      client.setIsDisconnecting( false );
+      client.setIsConnected( false );
+      client.destroyAllInterfaces(); 
+
+      connectedClients.remove( clientID ); 
+    }
+  }
   
-  public Set<EMClientEx> getConnectedClients()
+  public Set<EMClientEx> getCopyOfConnectedClients()
   {
     HashSet<EMClientEx> currClients = new HashSet<EMClientEx>();
     currClients.addAll( connectedClients.values() );

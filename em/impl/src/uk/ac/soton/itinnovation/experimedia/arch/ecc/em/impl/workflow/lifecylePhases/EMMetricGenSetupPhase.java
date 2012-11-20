@@ -63,6 +63,14 @@ public class EMMetricGenSetupPhase extends AbstractEMLCPhase
   
   // AbstractEMLCPhase ---------------------------------------------------------
   @Override
+  public void reset()
+  {
+    clearAllClients();
+    
+    clientsSettingUp.clear();
+  }
+  
+  @Override
   public void start() throws Exception
   {
     if ( phaseActive ) throw new Exception( "Phase already active" );
@@ -135,7 +143,7 @@ public class EMMetricGenSetupPhase extends AbstractEMLCPhase
   }
   
   @Override
-  public void onClientUnexpectedlyRemoved( EMClientEx client )
+  public void onClientHasBeenDeregistered( EMClientEx client )
   {
     if ( client != null )
     {

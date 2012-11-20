@@ -159,6 +159,19 @@ public class EMController implements IEMLifecycleListener
   }
   
   @Override
+  public void onLifecycleReset()
+  {
+    // Reset to start and wait for new connections
+    waitingToStartNextPhase = false;
+    
+    // Create a new experiment
+    createExperiment();
+    
+    // Reset the view
+    mainView.resetView();
+  }
+  
+  @Override
   public void onFoundClientWithMetricGenerators( EMClient client )
   {
     if ( client != null )
@@ -404,6 +417,22 @@ public class EMController implements IEMLifecycleListener
       catch ( Exception e ) { throw e; }
   }
   
+  private void restartMonitoringProcess()
+  {
+    if ( expMonitor != null )
+    {
+      try
+      {
+        mainView.addLogText( "Re-starting the experiment monitor..." );
+        expMonitor.resetLifecycle();
+      }
+      catch (Exception e )
+      { mainView.addLogText( "Had problems resetting the monitor: " + e.getMessage() ); }
+    } 
+    else
+      mainView.addLogText( "Could not re-start experiment monitor - monitor is NULL" );
+  }
+  
   private void startUpNextPhase()
   {
     if ( expMonitor != null && !waitingToStartNextPhase )
@@ -566,12 +595,16 @@ public class EMController implements IEMLifecycleListener
   private class MonitorViewListener implements EMViewListener
   {
     @Override
-    public void onStartPhasesButtonClicked()
+    public void onStartMonitoringClicked()
     { 
       try { startMonitoringProcess(); }
       catch ( Exception e )
       { emCtrlLogger.error( "Could not start the monitoring process: " + e.getMessage() ); }
     }
+    
+    @Override
+    public void onRestartMonitoringClicked()
+    { restartMonitoringProcess(); }
     
     @Override
     public void onNextPhaseButtonClicked()

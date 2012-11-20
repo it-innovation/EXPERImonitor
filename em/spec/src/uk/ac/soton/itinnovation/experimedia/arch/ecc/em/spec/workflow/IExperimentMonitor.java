@@ -95,6 +95,16 @@ public interface IExperimentMonitor
   Set<EMClient> getCurrentPhaseClients();
   
   /**
+   * Attempts to de-register client by sending them a de-registration message.
+   * Client should then respond with a disconnection message.
+   * 
+   * @param client     - instance of client to de-register
+   * @throws Exception - throws if client is invalid or already in a de-registration
+   *                     process.
+   */
+  void deregisterClient( EMClient client, String reason ) throws Exception;
+  
+  /**
    * Adds a class the is interested in the life-cycle events specified by the listener.
    * 
    * @param listener - Class instance implementing the listener interface.
@@ -169,6 +179,15 @@ public interface IExperimentMonitor
    * @throws Exception
    */
   void endLifecycle() throws Exception;
+  
+  /**
+   * Forcefully resets the life-cycle process to the beginning where the EM waits for clients
+   * to connect. Any currently connected clients will be sent de-registration
+   * messages, but the EM will not wait for a response.
+   * 
+   * @throws Exception - throws if no clients are currently connected.
+   */
+  void resetLifecycle() throws Exception;
   
   /**
    * Attempts to pull the latest measurement for a specified MeasurementSet ID.

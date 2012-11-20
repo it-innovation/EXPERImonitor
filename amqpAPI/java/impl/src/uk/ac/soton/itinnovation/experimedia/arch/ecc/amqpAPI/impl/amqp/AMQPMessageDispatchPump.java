@@ -42,8 +42,10 @@ public class AMQPMessageDispatchPump implements Runnable,
   private final Object listLock    = new Object();
   private final Object waitingLock = new Object();
   
-  private String  pumpName;
-  private Thread  pumpThread;
+  private String                                 pumpName;
+  private Thread                                 pumpThread;
+  private IAMQPMessageDispatchPump.ePumpPriority pumpPriority;
+  
   private boolean isPumping         = false;
   private boolean dispatchesWaiting = false;
   
@@ -53,19 +55,8 @@ public class AMQPMessageDispatchPump implements Runnable,
   public AMQPMessageDispatchPump( String pName, 
                                   IAMQPMessageDispatchPump.ePumpPriority priority )
   {
-    pumpName = pName;
-    pumpThread = new Thread( this, "DispatchPump (" + pumpName + ")" );
-    
-    switch ( priority )
-    {
-      case HIGH    : pumpThread.setPriority( Thread.MAX_PRIORITY ); break;
-      
-      case NORMAL  : pumpThread.setPriority( Thread.NORM_PRIORITY ); break;
-      
-      case MINIMUM:
-           default : pumpThread.setPriority( Thread.MIN_PRIORITY ); break;
-    }
-    
+    pumpName     = pName;
+    pumpPriority = priority;    
     dispatchList = new LinkedList<AMQPMessageDispatch>();
   }
   
@@ -75,9 +66,7 @@ public class AMQPMessageDispatchPump implements Runnable,
   {
     if ( !isPumping )
     {
-      isPumping = true;
-      pumpThread.start();
-      
+      startPumpThread();
       return true;
     }
     
@@ -87,6 +76,13 @@ public class AMQPMessageDispatchPump implements Runnable,
   @Override
   public synchronized void stopPump()
   { isPumping = false; }
+  
+  @Override
+  public void emptyPump()
+  {
+    synchronized ( listLock )
+    { dispatchList.clear(); } 
+  }
   
   @Override
   public synchronized boolean isPumping()
@@ -157,5 +153,24 @@ public class AMQPMessageDispatchPump implements Runnable,
   { 
     synchronized ( waitingLock ) 
     { dispatchesWaiting = true; } 
+  }
+  
+  // Private methods -----------------------------------------------------------
+  private void startPumpThread()
+  {
+    pumpThread = new Thread( this, "DispatchPump (" + pumpName + ")" );
+    
+    switch ( pumpPriority )
+    {
+      case HIGH    : pumpThread.setPriority( Thread.MAX_PRIORITY ); break;
+      
+      case NORMAL  : pumpThread.setPriority( Thread.NORM_PRIORITY ); break;
+      
+      case MINIMUM:
+           default : pumpThread.setPriority( Thread.MIN_PRIORITY ); break;
+    }
+    
+    isPumping = true;
+    pumpThread.start();
   }
 }
