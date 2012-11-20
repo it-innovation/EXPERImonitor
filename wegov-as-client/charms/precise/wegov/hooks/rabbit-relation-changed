@@ -4,7 +4,7 @@ set -eux
 
 juju-log "rabbit relation changed"
 
-relation-set username=wegov
+relation-set username=guest
 relation-set vhost=/
 
 if [ "`relation-get hostname`" == "" ]; then
