@@ -163,7 +163,7 @@ public class AMQPConnectionFactory
         String rabbitServerIP   = emProps.getProperty( "Rabbit_IP" );
         String rabbitServerPort = emProps.getProperty( "Rabbit_Port" );
         
-        if (emProps.contains("password")) {
+        if (emProps.containsKey("password")) {
             factoryLog.info("Will be using password to connect to AMQP");
             userPass = emProps.getProperty("password");
         } else {
