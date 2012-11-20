@@ -95,7 +95,8 @@ public class EMClient implements EMIAdapterListener {
                 clientLogger.debug("\t- " + key + " : " + value);
             }
 
-            this.start(emProps.getProperty("Rabbit_IP"), UUID.fromString(emProps.getProperty("Monitor_ID")), "WeGov 3.1 EM Client");
+//            this.start(emProps.getProperty("Rabbit_IP"), UUID.fromString(emProps.getProperty("Monitor_ID")), "WeGov 3.1 EM Client");
+            this.start(emProps, "WeGov 3.1 EM Client");
         } catch (Throwable ex) {
             throw new RuntimeException("Failed to start new WeGov 3.1 EM Client", ex);
         }
@@ -133,18 +134,32 @@ public class EMClient implements EMIAdapterListener {
         return clientName;
     }
 
-    public String start(String rabbitServerIP, UUID expMonitorID, String clientName) throws Throwable {
+    public String start(Properties emProps, String clientName) throws Throwable {
+//    public String start(String rabbitServerIP, UUID expMonitorID, String clientName) throws Throwable {
 
         this.clientName = clientName;
         this.clientId = UUID.randomUUID();
 
+        String rabbitServerIP = emProps.getProperty("Rabbit_IP");
+        String rabbitServerPort = emProps.getProperty("Rabbit_Port");
+        UUID expMonitorID = UUID.fromString( emProps.getProperty( "Monitor_ID" ) );
+        String userPass = null;
+        
+        if (emProps.containsKey("password")) {
+            clientLogger.info("Will be using password to connect to AMQP");
+            userPass = emProps.getProperty("password");
+        } else {
+            clientLogger.info("No password provided, let's hope AMQP does not require authentication");
+            
+        }        
+        
         clientLogger.debug("Starting EM client with rabbitServerIP: " + rabbitServerIP +
                 ", expMonitorID: " + expMonitorID.toString() +
                 ", clientName: " + clientName +
                 ", clientId: " + clientId.toString() + "...");
 
         AMQPConnectionFactory amqpFactory = new AMQPConnectionFactory();
-        amqpFactory.setAMQPHostIPAddress(rabbitServerIP);
+        amqpFactory.connectToAMQPHost(emProps);
 
         clientLogger.debug("Connecting to AMQPHost...");
         try {

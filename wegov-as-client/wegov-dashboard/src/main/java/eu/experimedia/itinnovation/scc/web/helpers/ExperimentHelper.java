@@ -42,7 +42,7 @@ public class ExperimentHelper {
 
         if (client == null) {
             client = new EMClient();
-            client.start("127.0.0.1", UUID.fromString("00000000-0000-0000-0000-000000000000"), "WeGov 3.0 EM Client");
+//            client.start("127.0.0.1", UUID.fromString("00000000-0000-0000-0000-000000000000"), "WeGov 3.0 EM Client");
 
         }
 
