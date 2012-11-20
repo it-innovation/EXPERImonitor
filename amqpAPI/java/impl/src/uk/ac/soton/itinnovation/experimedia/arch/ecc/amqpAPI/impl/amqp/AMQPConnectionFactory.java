@@ -44,6 +44,7 @@ public class AMQPConnectionFactory
     private InetAddress amqpHostIP;
     private int         amqpPortNumber = 5672;
     private Connection  amqpConnection;
+    private String userPass = null;
 
 
     public AMQPConnectionFactory()
@@ -94,6 +95,11 @@ public class AMQPConnectionFactory
         ConnectionFactory amqpFactory = new ConnectionFactory();
         amqpFactory.setHost( amqpHostIP.getHostAddress() );
         amqpFactory.setPort( amqpPortNumber );
+        if (userPass != null) {
+            factoryLog.info("Will try to login as guest");
+            amqpFactory.setUsername("guest");
+            amqpFactory.setPassword(userPass);
+        }
 
         try { amqpConnection = amqpFactory.newConnection(); }
         catch ( Exception e )
@@ -157,7 +163,15 @@ public class AMQPConnectionFactory
         String rabbitServerIP   = emProps.getProperty( "Rabbit_IP" );
         String rabbitServerPort = emProps.getProperty( "Rabbit_Port" );
         
-        factoryLog.info( "Trying to conenct to AMQP bus..." );
+        if (emProps.contains("password")) {
+            factoryLog.info("Will be using password to connect to AMQP");
+            userPass = emProps.getProperty("password");
+        } else {
+            factoryLog.info("No password provided, let's hope AMQP does not require authentication");
+            
+        }
+        
+        factoryLog.info( "Trying to connect to AMQP bus..." );
         
         // Proceed only if these at least exist
         if ( rabbitServerIP != null && rabbitServerPort != null )
