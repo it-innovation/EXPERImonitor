@@ -29,8 +29,9 @@ cp ../edm/resources/edm-metrics-postgres.sql charms/precise/eccdashboard/
 juju deploy cs:~robert-ayres/precise/tomcat
 juju deploy --repository=./charms local:eccdashboard eccdashboard
 juju add-relation eccdashboard tomcat
-juju deploy postgresql postgresql-eccdashboard
-juju add-relation eccdashboard:edm postgresql-eccdashboard:db
+#juju deploy postgresql postgresql-eccdashboard
+juju deploy --repository=~/charms local:postgresql postgresql-eccdashboard
+juju add-relation eccdashboard:edm postgresql-eccdashboard:db-admin
 juju deploy rabbitmq-server
 juju add-relation eccdashboard:rabbit rabbitmq-server
 
