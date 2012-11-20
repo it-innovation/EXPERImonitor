@@ -30,9 +30,9 @@ public class DatabaseMaintenance {
         String wegovToolsHome = (new File("/var/lib/tomcat7/")).getCanonicalPath();
 
         //coordinator.wipeDatabase();
-        coordinator.setupWegovDatabase();
+        coordinator.setupWegovDatabase(); // Creates a new user - omg
         
-        if (coordinator.getPolicymakers().isEmpty()) {
+        if (coordinator.getPolicymakers().size() < 2) {
             Role userRole = coordinator.getDefaultUserRole();
 
             addTemplateWidgetWegovUser(coordinator);
