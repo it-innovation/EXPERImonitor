@@ -6,7 +6,7 @@ while :; do
     juju destroy-service tomcat-wegov
     juju destroy-service wegov
 	juju destroy-service postgresql-wegov
-	#juju destroy-service rabbitmq-server
+	juju destroy-service rabbitmq-server
   else
     break
   fi
@@ -26,8 +26,8 @@ juju deploy --repository=./charms local:wegov wegov
 juju add-relation wegov tomcat-wegov
 juju add-relation wegov:rabbit rabbitmq-server
 juju deploy postgresql postgresql-wegov
-juju add-relation wegov:edm postgresql-wegov:db
-#juju deploy rabbitmq-server
+juju add-relation wegov:edm postgresql-wegov:db-admin
+juju deploy rabbitmq-server
 
 
 juju expose tomcat-wegov
