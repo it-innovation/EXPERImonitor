@@ -23,6 +23,7 @@
 /////////////////////////////////////////////////////////////////////////
 package eu.wegov.tools.searchandanalysis;
 
+import eu.wegov.coordinator.dao.data.ExperimediaPostsCounter;
 import eu.wegov.coordinator.dao.data.ExperimediaTopicOpinion;
 import java.util.ArrayList;
 
@@ -184,6 +185,9 @@ public class WegovSearchTool extends WegovTool {
                                 Integer.toString(topicId), tempKeyTerm, timeCollected, Integer.parseInt(getMyRunId())));
                     topicId++;
                 }
+
+                getCoordinator().getDataSchema().insertObject(
+                        new ExperimediaPostsCounter(numMessages, timeCollected, Integer.parseInt(getMyRunId())));
                 
 
             } catch (Exception e) {

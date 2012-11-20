@@ -1660,6 +1660,7 @@ public class Coordinator {
         dataSchema.getTable(new WegovWidgetDataAsJson());
         
         dataSchema.getTable(new ExperimediaTopicOpinion());
+        dataSchema.getTable(new ExperimediaPostsCounter());
 
         logger.debug("Database data tables setup complete.");
 

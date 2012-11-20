@@ -24,6 +24,7 @@
 package eu.experimedia.itinnovation.scc.web.adapters;
 
 import eu.wegov.coordinator.Coordinator;
+import eu.wegov.coordinator.dao.data.ExperimediaPostsCounter;
 import eu.wegov.coordinator.dao.data.ExperimediaTopicOpinion;
 import eu.wegov.helper.CoordinatorHelper;
 import eu.wegov.web.security.WegovLoginService;
@@ -50,7 +51,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared.EMInterfaceA
 public class EMClient implements EMIAdapterListener {
 
     private static final Logger clientLogger = Logger.getLogger(EMClient.class);
-    
+
     private AMQPBasicChannel amqpChannel;
     private EMInterfaceAdapter emiAdapter;
     private String clientName;
@@ -61,30 +62,30 @@ public class EMClient implements EMIAdapterListener {
     private ArrayList<MeasurementSet> allMeasurementSets = new ArrayList<MeasurementSet>();
     private boolean dataPushEnabled = false;
     private Coordinator coordinator;
-    
+
     @Autowired
     @Qualifier("wegovLoginService")
     WegovLoginService loginService;
-    
+
     @Autowired
     @Qualifier("coordinatorHelper")
-    CoordinatorHelper helper;    
+    CoordinatorHelper helper;
 
     public EMClient() {
-        
+
         clientLogger.debug("Creating new WeGov 3.1 EM Client ...");
 
         // Have to call this here because it's better if this
         // class is initialized by Spring so all autowiring works
         // TODO: move config etc. to bean definition
         try {
-            
+
             File emPropertiesFile = new File("em.properties");
-            
+
             InputStream emPropsStream = (InputStream) new FileInputStream(emPropertiesFile);
             Properties emProps = new Properties();
             emProps.load(emPropsStream);
-            
+
             clientLogger.debug("Loaded EM properties:");
             Iterator it = emProps.keySet().iterator();
             String key, value;
@@ -93,34 +94,35 @@ public class EMClient implements EMIAdapterListener {
                 value = emProps.getProperty(key);
                 clientLogger.debug("\t- " + key + " : " + value);
             }
-            
+
             this.start(emProps.getProperty("Rabbit_IP"), UUID.fromString(emProps.getProperty("Monitor_ID")), "WeGov 3.1 EM Client");
         } catch (Throwable ex) {
             throw new RuntimeException("Failed to start new WeGov 3.1 EM Client", ex);
         }
-        
+
         clientLogger.debug("Successfully created new WeGov 3.1 EM Client");
     }
-    
+
     @PostConstruct
     public void init() {
-        clientLogger.debug("Initializing WeGov coordinator ...");        
+        clientLogger.debug("Initializing WeGov coordinator ...");
 
         try {
             coordinator = helper.getStaticCoordinator();
         } catch (Throwable ex) {
             throw new RuntimeException("Failed to initialise WeGov Coordinator", ex);
         }
-        
+
         clientLogger.debug("Resetting WeGov database");
-        
-        // Remove all old entries from ExperimediaTopicOpinion for now
+
+        // Remove all old entries from ExperimediaTopicOpinion and ExperimediaPostsCounter for now
         try {
             coordinator.getDataSchema().deleteAll(new ExperimediaTopicOpinion());
+            coordinator.getDataSchema().deleteAll(new ExperimediaPostsCounter());
         } catch (Throwable ex) {
-            throw new RuntimeException("Failed to clear ExperimediaTopicOpinion table", ex);
-        }         
-        
+            throw new RuntimeException("Failed to clear ExperimediaTopicOpinion or ExperimediaPostsCounter table", ex);
+        }
+
     }
 
     public UUID getClientId() {
@@ -198,7 +200,7 @@ public class EMClient implements EMIAdapterListener {
 //            clientLogger.debug("\t- " + tempMg.getUUID().toString() + ": " + tempMg.getName() + " (" + tempMg.getDescription() + ")");
 //        }
     }
-    
+
     private static void printMetricGenerator(MetricGenerator mg) {
         pr(mg.getName() + " (" + mg.getDescription() + ") [" + mg.getUUID() + "]", 0);
         Set<MeasurementSet> allMeasurementSets = new HashSet<MeasurementSet>();
@@ -220,7 +222,7 @@ public class EMClient implements EMIAdapterListener {
             }
         }
     }
-    
+
     private static void pr(Object o, int indent) {
         String indentString = "";
         for (int i = 0; i < indent; i++) {
@@ -232,7 +234,7 @@ public class EMClient implements EMIAdapterListener {
         } else {
             clientLogger.debug(o);
         }
-    }    
+    }
 
     public void onSetupMetricGenerator(UUID generatorSetID, Boolean[] resultOUT) {
         clientLogger.debug("onSetupMetricGenerator, generatorSetID: " + generatorSetID.toString());
@@ -288,71 +290,98 @@ public class EMClient implements EMIAdapterListener {
 
     public void onPullMetric(UUID measurementSetID, Report reportOUT) {
         clientLogger.debug("onPullMetric, measurementSetID: " + measurementSetID);
-        
+
         // Check if we have that measurement set first
         if (!measurementSets.containsKey(measurementSetID)) {
             clientLogger.error("Requested measurement set [" + measurementSetID + "] does not exist.");
-            
+
         } else {
-            
-            // Figure out what needs reporting            
+
+            // Figure out what needs reporting
             MeasurementSet theMeasurementSet = measurementSets.get(measurementSetID);
             theMeasurementSet.setMeasurements(new HashSet<Measurement>());
             Attribute theAttribute = measurementSetsAndAttributes.get(measurementSetID);
-            
+
             int measurementSetIndex = allMeasurementSets.indexOf(theMeasurementSet);
-            
+
             clientLogger.debug("Reporting measurement set with index: " + measurementSetIndex +
                     ", attribute: " + theAttribute.getName() + " (" + theAttribute.getDescription() + ")");
-            
-            
-            try {
 
-                
-                
-                ArrayList<ExperimediaTopicOpinion> topics = coordinator.getDataSchema().getAll(new ExperimediaTopicOpinion());
-                
-                if (topics.isEmpty()) {
-                    reportOUT.setNumberOfMeasurements(0);            
-                    reportOUT.setMeasurementSet(theMeasurementSet);
-                    clientLogger.debug("Nothing to report");
-                    
-                } else {
-                    Measurement theMeasurement = new Measurement();
-                    ExperimediaTopicOpinion topicDao;
-                    int numTopics = topics.size();
-                    clientLogger.debug("Reporting " + numTopics + " measurements");
-                    for (int k = 0; k < numTopics; k++) {                        
-                        topicDao = topics.get(k);
-                        
-                        clientLogger.debug("\t" + topicDao.getTimeCollectedAsTimestamp() + " - " + topicDao.getKeyTerms());
-                        
-                        theMeasurement.setMeasurementSetUUID(theMeasurementSet.getUUID());
-                        theMeasurement.setTimeStamp(topicDao.getTimeCollectedAsTimestamp());                    
-                        theMeasurement.setValue(topicDao.getKeyTerms());
-                        
-                        theMeasurementSet.addMeasurement(theMeasurement);
-                        theMeasurement = new Measurement();
+            try {
+                if (measurementSetIndex == 0) {
+                    ArrayList<ExperimediaTopicOpinion> topics = coordinator.getDataSchema().getAll(new ExperimediaTopicOpinion());
+
+                    if (topics.isEmpty()) {
+                        reportOUT.setNumberOfMeasurements(0);
+                        reportOUT.setMeasurementSet(theMeasurementSet);
+                        clientLogger.debug("Nothing to report");
+
+                    } else {
+                        Measurement theMeasurement = new Measurement();
+                        ExperimediaTopicOpinion topicDao;
+                        int numTopics = topics.size();
+                        clientLogger.debug("Reporting " + numTopics + " topic measurements");
+                        for (int k = 0; k < numTopics; k++) {
+                            topicDao = topics.get(k);
+
+                            clientLogger.debug("\t" + topicDao.getTimeCollectedAsTimestamp() + " - " + topicDao.getKeyTerms());
+
+                            theMeasurement.setMeasurementSetUUID(theMeasurementSet.getUUID());
+                            theMeasurement.setTimeStamp(topicDao.getTimeCollectedAsTimestamp());
+                            theMeasurement.setValue(topicDao.getKeyTerms());
+
+                            theMeasurementSet.addMeasurement(theMeasurement);
+                            theMeasurement = new Measurement();
+                        }
+
+                        reportOUT.setNumberOfMeasurements(numTopics);
+                        reportOUT.setMeasurementSet(theMeasurementSet);
+
                     }
-                    
-                    reportOUT.setNumberOfMeasurements(numTopics);            
-                    reportOUT.setMeasurementSet(theMeasurementSet);
-                    
+                } else {
+                    ArrayList<ExperimediaPostsCounter> posts = coordinator.getDataSchema().getAll(new ExperimediaPostsCounter());
+
+                    if (posts.isEmpty()) {
+                        reportOUT.setNumberOfMeasurements(0);
+                        reportOUT.setMeasurementSet(theMeasurementSet);
+                        clientLogger.debug("Nothing to report");
+
+                    } else {
+                        Measurement theMeasurement = new Measurement();
+                        ExperimediaPostsCounter postDao;
+                        int numPosts = posts.size();
+                        clientLogger.debug("Reporting " + numPosts + " post measurements");
+                        for (int k = 0; k < numPosts; k++) {
+                            postDao = posts.get(k);
+
+                            clientLogger.debug("\t" + postDao.getTimeCollectedAsTimestamp() + " - " + Integer.toString(postDao.getNumPosts()));
+
+                            theMeasurement.setMeasurementSetUUID(theMeasurementSet.getUUID());
+                            theMeasurement.setTimeStamp(postDao.getTimeCollectedAsTimestamp());
+                            theMeasurement.setValue(Integer.toString(postDao.getNumPosts()));
+
+                            theMeasurementSet.addMeasurement(theMeasurement);
+                            theMeasurement = new Measurement();
+                        }
+
+                        reportOUT.setNumberOfMeasurements(numPosts);
+                        reportOUT.setMeasurementSet(theMeasurementSet);
+
+                    }                    
                 }
-                
 
                 Date date = new Date();
                 reportOUT.setReportDate(date);
                 reportOUT.setFromDate(date);
                 reportOUT.setToDate(date);
-                
+
             } catch (Throwable ex) {
                 throw new RuntimeException("Failed to read metric values from the WeGov database", ex);
             }
 
         }
-        
-/*        
+
+/*
 //        logger.debug("onPullMetric, measurementSetID: " + measurementSetID.toString());
 
         Iterator it = metricGenerators.keySet().iterator();
@@ -451,9 +480,143 @@ public class EMClient implements EMIAdapterListener {
 
         return theMeasurement;
     }
+    
+    Comparator<Measurement> comparator = new Comparator<Measurement>(){
+        public int compare(Measurement t, Measurement t1) {
+            Date tdate = t.getTimeStamp();
+            Date t1date = t1.getTimeStamp();
+            return tdate.compareTo(t1date);
+        }
+        
+    };    
 
     public void onPopulateSummaryReport(EMPostReportSummary summaryOUT) {
         clientLogger.debug("onPopulateSummaryReport");
+
+        Report reportOUT = new Report();
+        
+        // Topics first
+        MeasurementSet theMeasurementSet = allMeasurementSets.get(0);
+        theMeasurementSet.setMeasurements(new HashSet<Measurement>());
+        Measurement[] measurements = new Measurement[0];
+
+        try {
+
+            ArrayList<ExperimediaTopicOpinion> topics = coordinator.getDataSchema().getAll(new ExperimediaTopicOpinion());
+
+            if (topics.isEmpty()) {
+                reportOUT.setNumberOfMeasurements(0);
+                reportOUT.setMeasurementSet(theMeasurementSet);
+                clientLogger.debug("Nothing to report");
+
+            } else {
+                Measurement theMeasurement = new Measurement();
+                ExperimediaTopicOpinion topicDao;
+                int numTopics = topics.size();
+                measurements = new Measurement[numTopics];
+                clientLogger.debug("Reporting " + numTopics + " topic measurements");
+                for (int k = 0; k < numTopics; k++) {
+                    topicDao = topics.get(k);
+
+                    clientLogger.debug("\t" + topicDao.getTimeCollectedAsTimestamp() + " - " + topicDao.getKeyTerms());
+
+                    theMeasurement.setMeasurementSetUUID(theMeasurementSet.getUUID());
+                    theMeasurement.setTimeStamp(topicDao.getTimeCollectedAsTimestamp());
+                    theMeasurement.setValue(topicDao.getKeyTerms());
+                    measurements[k] = theMeasurement;
+
+                    theMeasurement = new Measurement();
+                }
+
+            }
+
+        } catch (Throwable ex) {
+            throw new RuntimeException("Failed to read topic metric values from the WeGov database", ex);
+        }
+
+        Date date = new Date();
+        reportOUT.setReportDate(date);
+        
+        if (measurements.length > 0) {
+            Arrays.sort(measurements, comparator);
+            int numTopics = measurements.length;
+            
+            for (int k = 0; k < numTopics; k++) {
+                theMeasurementSet.addMeasurement(measurements[k]);
+            }
+            
+            reportOUT.setMeasurementSet(theMeasurementSet);
+            reportOUT.setNumberOfMeasurements(numTopics);
+            reportOUT.setFromDate(measurements[0].getTimeStamp());
+            reportOUT.setToDate(measurements[numTopics - 1].getTimeStamp());
+        } else {
+            reportOUT.setFromDate(date);
+            reportOUT.setToDate(date);
+        }
+        
+        summaryOUT.addReport(reportOUT);
+        
+        // Number of posts second
+        theMeasurementSet = allMeasurementSets.get(1);
+        theMeasurementSet.setMeasurements(new HashSet<Measurement>());
+        measurements = new Measurement[0];        
+        reportOUT = new Report();
+        
+        try {
+
+            ArrayList<ExperimediaPostsCounter> posts = coordinator.getDataSchema().getAll(new ExperimediaPostsCounter());
+
+            if (posts.isEmpty()) {
+                reportOUT.setNumberOfMeasurements(0);
+                reportOUT.setMeasurementSet(theMeasurementSet);
+                clientLogger.debug("Nothing to report");
+
+            } else {
+                Measurement theMeasurement = new Measurement();
+                ExperimediaPostsCounter postDao;
+                int numTopics = posts.size();
+                measurements = new Measurement[numTopics];
+                clientLogger.debug("Reporting " + numTopics + " post measurements");
+                for (int k = 0; k < numTopics; k++) {
+                    postDao = posts.get(k);
+
+                    clientLogger.debug("\t" + postDao.getTimeCollectedAsTimestamp() + " - " + Integer.toString(postDao.getNumPosts()));
+
+                    theMeasurement.setMeasurementSetUUID(theMeasurementSet.getUUID());
+                    theMeasurement.setTimeStamp(postDao.getTimeCollectedAsTimestamp());
+                    theMeasurement.setValue(Integer.toString(postDao.getNumPosts()));
+                    measurements[k] = theMeasurement;
+
+                    theMeasurement = new Measurement();
+                }
+
+            }
+
+        } catch (Throwable ex) {
+            throw new RuntimeException("Failed to read posts metric values from the WeGov database", ex);
+        }
+
+        reportOUT.setReportDate(date);
+        
+        if (measurements.length > 0) {
+            Arrays.sort(measurements, comparator);
+            int numTopics = measurements.length;
+            
+            for (int k = 0; k < numTopics; k++) {
+                theMeasurementSet.addMeasurement(measurements[k]);
+            }
+            
+            reportOUT.setMeasurementSet(theMeasurementSet);
+            reportOUT.setNumberOfMeasurements(numTopics);
+            reportOUT.setFromDate(measurements[0].getTimeStamp());
+            reportOUT.setToDate(measurements[numTopics - 1].getTimeStamp());
+        } else {
+            reportOUT.setFromDate(date);
+            reportOUT.setToDate(date);
+        }
+        
+        summaryOUT.addReport(reportOUT);        
+        
     }
 
     public void onPopulateDataBatch(EMDataBatch batchOut) {
@@ -480,9 +643,14 @@ public class EMClient implements EMIAdapterListener {
         theMetricGenerator.addMetricGroup(wegovMetricGroup);
 
         Entity twitterSchladming = new Entity();
-        twitterSchladming.setName("Schladming Twitter Group");
-        twitterSchladming.setDescription("People found in Schladming Twitter search for keyword Schladming");
+        twitterSchladming.setName("Facebook event");
+        twitterSchladming.setDescription("Facebook event of interest http://upload.wikimedia.org/wikipedia/commons/8/82/Facebook_icon.jpg");
         theMetricGenerator.addEntity(twitterSchladming);
+        
+//        Entity twitterSchladming = new Entity();
+//        twitterSchladming.setName("Schladming Twitter Group");
+//        twitterSchladming.setDescription("People found in Schladming Twitter search for keyword Schladming");
+//        theMetricGenerator.addEntity(twitterSchladming);
 
 //        // NUMBER OF PEOPLE
 //        Attribute twitterSchladmingNumPeople = new Attribute();
@@ -510,12 +678,19 @@ public class EMClient implements EMIAdapterListener {
 
         // TOPIC ANALYSIS TOPICS
         Attribute twitterSchladmingDiscussionTopic1 = new Attribute();
-        twitterSchladmingDiscussionTopic1.setName("Topic analysis topics");
-        twitterSchladmingDiscussionTopic1.setDescription("Topic of discussion in a Facebook group");
+        twitterSchladmingDiscussionTopic1.setName("Topic analysis topics from Facebook event search");
+        twitterSchladmingDiscussionTopic1.setDescription("Topic of discussion in a Facebook event");
         twitterSchladmingDiscussionTopic1.setEntityUUID(twitterSchladming.getUUID());
         twitterSchladming.addAttribute(twitterSchladmingDiscussionTopic1);
         addMetricToAttributeAndMetricGroup(wegovMetricGroup, twitterSchladmingDiscussionTopic1, MetricType.NOMINAL, new Unit("Keyword"));
         
+        Attribute wegovNumPosts = new Attribute();
+        wegovNumPosts.setName("Number of posts in a Facebook event search");
+        wegovNumPosts.setDescription("Number of posts collected from a Facebook group");
+        wegovNumPosts.setEntityUUID(twitterSchladming.getUUID());
+        twitterSchladming.addAttribute(wegovNumPosts);
+        addMetricToAttributeAndMetricGroup(wegovMetricGroup, wegovNumPosts, MetricType.INTERVAL, new Unit("Post"));        
+
 //        // TOPIC ANALYSIS TOPIC #1
 //        Attribute twitterSchladmingDiscussionTopic1 = new Attribute();
 //        twitterSchladmingDiscussionTopic1.setName("Topic analysis #1");

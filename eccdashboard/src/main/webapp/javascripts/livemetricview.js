@@ -516,19 +516,7 @@ function pollDataForMeasurementSet(measurementSetUuid) {
                             $('#lastMetricReport_' + measurementSetUuid).text(longToDate(measurementSetData[measurementSetData.length - 1].time));
                             $('#totalNumReports_' + measurementSetUuid).text(measurementSetData.length);
 
-
                             var jqplotContainerID = "representationContainer_" + measurementSetUuid;
-                            var graphSelectorID = "graphselector_" + measurementSetUuid;
-                            var tableSelectorID = "tableselector_" + measurementSetUuid;
-
-    //                        var graphDataSwitcher = $('<div class="graphDataSwitcher"></div>').appendTo(ad);
-    //                        var graphSelectorButton = $('<div id="' + graphSelectorID + '" class="switchbutton"><p>Graph</p></div>').appendTo(graphDataSwitcher);
-    //                        var tableSelectorButton = $('<div id="' + tableSelectorID + '" class="switchbutton"><p>History data</p></div>').appendTo(graphDataSwitcher);
-    //
-    //                        graphSelectorButton.data('counter', counter);
-    //                        graphSelectorButton.data('jqplotContainerID', jqplotContainerID);
-    //                        tableSelectorButton.data('counter', counter);
-    //                        tableSelectorButton.data('jqplotContainerID', jqplotContainerID);
 
                             var measurementSetDataContainer = $('#measurementSetDataContainer_' + measurementSetUuid);
                             $('<div id="'+ jqplotContainerID + '" class="row"></div>').appendTo(measurementSetDataContainer);
@@ -838,8 +826,6 @@ function pollDataForSummarySet(measurementSetUuid) {
 
 
                         var jqplotContainerID = "representationContainer_" + measurementSetUuid;
-                        var graphSelectorID = "graphselector_" + measurementSetUuid;
-                        var tableSelectorID = "tableselector_" + measurementSetUuid;
 
                         var measurementSetDataContainer = $('#measurementSetDataContainer_' + measurementSetUuid);
                         $('<div id="'+ jqplotContainerID + '" class="row"></div>').appendTo(measurementSetDataContainer);
@@ -871,6 +857,7 @@ function pollDataForSummarySet(measurementSetUuid) {
                                 }
                             }
                         });
+                        
 
                     }
                 }
@@ -881,6 +868,77 @@ function pollDataForSummarySet(measurementSetUuid) {
         error: function(xhr, ajaxOptions, thrownError){
 //            alert('Failed to get retrieving summary set data');
             console.error('Failed to get retrieving summary set data');
+            console.error(thrownError);
+            console.error(xhr.status);
+        }
+    });
+    
+}
+
+function pollTextForSummarySet(measurementSetUuid) {
+    
+    console.log('Polling text for summary set: ' + measurementSetUuid);
+
+    $.ajax({
+        type: 'POST',
+        url: "/em/getsummaryformeasurementset/do.json",
+        contentType: "application/json; charset=utf-8",
+        data: JSON.stringify({measurementSetUuid: measurementSetUuid}),
+        dataType: 'json',
+        success: function(measurementSetData){
+
+//            if (isMeasurementSetMonitored(measurementSetUuid)) {
+
+                console.log(measurementSetData);
+
+                if (measurementSetData == null) {
+//                    alert("Server error retrieving summary set data");
+                    console.error("Server error retrieving summary set text");
+                    return;
+                } else {
+                    if (measurementSetData.length < 1) {
+
+                        console.debug("No text found, retrying in 2 seconds");
+
+                        setTimeout(function(){pollTextForSummarySet(measurementSetUuid)}, 2000);
+
+                    } else {
+
+                        $('#measurementSetTip_' + measurementSetUuid).remove();
+
+                        $('#lastMetricReport_' + measurementSetUuid).text(longToDate(measurementSetData[measurementSetData.length - 1].time));
+                        $('#totalNumReports_' + measurementSetUuid).text(measurementSetData.length);
+
+                        var jqplotContainerID = "representationContainer_" + measurementSetUuid;
+
+                        var measurementSetDataContainer = $('#measurementSetDataContainer_' + measurementSetUuid);
+                        $('<div id="'+ jqplotContainerID + '" class="row"></div>').appendTo(measurementSetDataContainer);
+
+                        $('#' + jqplotContainerID).empty();
+
+                        var dataDivGraphsAndHistory = $('<div class="eleven columns centered"></div>').appendTo($('#' + jqplotContainerID));
+
+                        var dataTable = $('<table class="metricstable"><tbody></tbody></table>').appendTo($('<div id="datatablecontainer_' + measurementSetUuid + '" class="extraspacebottom"></div>').appendTo(dataDivGraphsAndHistory));
+                        dataTable.append('<tr><th>Timestamp, dd/mm/yyyy HH:MM:SS</th><th>Topic keywords</th></tr>');
+                        var previousTopicTime = -1;
+                        $.each(measurementSetData, function(key, entry){
+                            if (previousTopicTime == entry.time)
+                                dataTable.append('<tr><td> </td><td>' + entry.value + '</td></tr>');
+                            else
+                                dataTable.append('<tr><td>' + longToDate(entry.time) + '</td><td>' + entry.value + '</td></tr>');
+
+                            previousTopicTime = entry.time;
+                        }); 
+
+                    }
+                }
+//            } else {
+//                console.log('Received summarySetData but ignored it as polling data is OFF for summary set: ' + measurementSetUuid);
+//            }
+        },
+        error: function(xhr, ajaxOptions, thrownError){
+//            alert('Failed to get retrieving summary set data');
+            console.error('Failed to get retrieving summary set text');
             console.error(thrownError);
             console.error(xhr.status);
         }
@@ -947,6 +1005,7 @@ function showMetricGeneratorsWithPostReportData() {
                             var measurementSetContainer = $('<div class="twelve columns"></div>').appendTo($('<div class="row"></div>').appendTo(md));
                             $.each(metricGroup.measurementSets, function(indexMeasurementSet, measurementSet){
                                 var measurementSetUuid = measurementSet.uuid;
+                                var metricType = measurementSet.metricType;
                                 var measurementSetContainer = $('<div id="measurementSetContainer_' + measurementSetUuid + '" class="attributediv"></div>').appendTo(measurementSetWrapper);
 
                                 var measurementSetContainerHeader = $('<p class="header">Measurement Set ' + (indexMeasurementSet + 1) + ': ' +
@@ -960,7 +1019,11 @@ function showMetricGeneratorsWithPostReportData() {
                                 measurementSetDataContainer.append('<p class="parameters">Total number of reports: <span id="totalNumReports_' + measurementSetUuid + '">0<span></p>');
                                 measurementSetDataContainer.append('<p id ="measurementSetTip_' + measurementSetUuid + '" class="parameters">Post report data will be displayed below as soon as it is received from the EM Client.</p>');
                                 
-                                pollDataForSummarySet(measurementSetUuid);
+                                if (metricType === "NOMINAL") {
+                                    pollTextForSummarySet(measurementSetUuid);
+                                } else {
+                                    pollDataForSummarySet(measurementSetUuid);
+                                }                                
 
                             });
                         });

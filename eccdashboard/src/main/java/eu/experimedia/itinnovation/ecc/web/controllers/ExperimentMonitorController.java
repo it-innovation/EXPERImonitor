@@ -388,6 +388,8 @@ public class ExperimentMonitorController {
                 result[counter] = data.get(measurementUUID);
                 counter++;
             }
+            
+            Arrays.sort(result, comparator);
 
             return result;
         } catch (Throwable ex) {
@@ -420,6 +422,8 @@ public class ExperimentMonitorController {
                 result[counter] = data.get(measurementUUID);
                 counter++;
             }
+            
+            Arrays.sort(result, comparator);
 
             return result;
         } catch (Throwable ex) {

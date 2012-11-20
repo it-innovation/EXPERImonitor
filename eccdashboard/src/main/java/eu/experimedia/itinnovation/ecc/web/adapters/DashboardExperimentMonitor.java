@@ -30,7 +30,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
-import java.util.logging.Level;
 import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
@@ -281,7 +280,7 @@ public class DashboardExperimentMonitor implements IEMLifecycleListener {
 //                expMetricGroupAccessor = expDataMgr.getMetricGroupDAO();
 //                expMeasurementSetAccessor = expDataMgr.getMeasurementSetDAO();
 //                expMetricAccessor = expDataMgr.getMetricDAO();
-
+                
                 IExperimentDAO expDAO = expDataMgr.getExperimentDAO();
                 expDAO.saveExperiment(expInstance);
                 result = true;
@@ -652,8 +651,22 @@ public class DashboardExperimentMonitor implements IEMLifecycleListener {
                     Report tempSummaryReport;
                     Set<Measurement> measurements;
                     MeasurementSet tempMeasurementSet;
+                    IMeasurementDAO measurementAccessor = null;
+                    
+//                    try {
+//                        measurementAccessor = expDataMgr.getMeasurementDAO();
+//                    } catch (Exception ex) {
+//                        logger.error("Failed to get MeasurementDAO", ex);
+//                    }
+                    
+                    Set<Measurement> measurementsInDatabase = null;
                     for (UUID measurementSetUuid : summaryMeasurementSetIds) {
-
+                        try {
+                            measurementsInDatabase = expReportAccessor.getReportForAllMeasurements(measurementSetUuid, true).getMeasurementSet().getMeasurements();
+                        } catch (Throwable e) {
+                            logger.error("Failed to get measurements in the database for measurement set [" + measurementSetUuid.toString() + "]", e);
+                        }
+                        
                         summarySetUuid = measurementSetUuid.toString();
 
                         DashboardSummarySet theDashboardSummarySet;
@@ -667,6 +680,11 @@ public class DashboardExperimentMonitor implements IEMLifecycleListener {
                         }
 
                         tempSummaryReport = summary.getReport(measurementSetUuid);
+                        logger.debug("Report UUID: " + tempSummaryReport.getUUID().toString());
+                        logger.debug("\t- from date: " + tempSummaryReport.getFromDate());
+                        logger.debug("\t- to date: " + tempSummaryReport.getToDate());
+                        logger.debug("\t- number of measurements: " + tempSummaryReport.getNumberOfMeasurements());
+                        logger.debug("\t- report date: " + tempSummaryReport.getReportDate());
 
                         if (tempSummaryReport != null) {
 
@@ -683,6 +701,7 @@ public class DashboardExperimentMonitor implements IEMLifecycleListener {
                                         int measurementsCounter = 1;
                                         String measurementUUID, measurementValue;
                                         Date measurementTimestamp;
+                                        boolean inDatabase = false;
                                         while (it.hasNext()) {
                                             measurement = (Measurement) it.next();
                                             measurementUUID = measurement.getUUID().toString();
@@ -692,11 +711,51 @@ public class DashboardExperimentMonitor implements IEMLifecycleListener {
                                             logger.debug("Summary measurement " + measurementsCounter + ": [" + measurementUUID + "] " + measurementTimestamp.toString() + " - " + measurementValue);
 
                                             theDashboardSummarySet.addMeasurement(measurementUUID, new DataPoint(measurementTimestamp.getTime(), measurementValue, measurementUUID));
+                                            
+                                            for (Measurement databaseMeasurement : measurementsInDatabase) {
+                                                if ((databaseMeasurement.getTimeStamp().getTime() == measurementTimestamp.getTime()) && (databaseMeasurement.getValue().equals(measurementValue))) {
+                                                    inDatabase = true;
+                                                    logger.debug("Measurement [" + measurementUUID + "] already in the database");
+                                                    break;
+                                                }
+                                            }
+                                            
+                                            if (!inDatabase) {
+                                                logger.debug("Measurement [" + measurementUUID + "] not in database, saving");
 
+                                                try {
+                                                    measurementAccessor.saveMeasurement(measurement);
+                                                } catch (Throwable e) {
+                                                    logger.error("Failed to save missing summary measurement [" + measurementUUID + "] to the database", e);
+                                                }
+                                            }
+                                            
+                                            inDatabase = false;
+                                            
+//                                            if (measurementAccessor != null) {
+//                                                try {
+//                                                    measurementAccessor.getMeasurement(measurement.getUUID());
+//                                                } catch (IllegalArgumentException ex) {
+//                                                    logger.error("Failed to get summary measurement [" + measurementUUID + "] (IllegalArgumentException) from the database", ex);
+//                                                } catch (NoDataException ex) {
+//                                                    logger.debug("Measurement [" + measurementUUID + "] not in database, saving");
+//                                                    
+//                                                    try {
+//                                                        measurementAccessor.saveMeasurement(measurement);
+//                                                    } catch (Throwable ex1) {
+//                                                        logger.error("Failed to save missing summary measurement [" + measurementUUID + "] to the database", ex1);
+//                                                    }
+//                                                    
+//                                                } catch (Exception ex) {
+//                                                    logger.error("Failed to get summary measurement [" + measurementUUID + "] (Exception) from the database", ex);
+//                                                }
+//                                                    
+//                                            }
+                                            
                                             measurementsCounter++;
 
                                         }
-                                        //                            mainView.addLogText(client.getName() + " got metric data: " + measurements.iterator().next().getValue());
+
                                     } else {
                                         logger.error("Measurements for measurement set [" + tempMeasurementSet.getUUID().toString() + "] are EMPTY");
                                     }
@@ -722,12 +781,6 @@ public class DashboardExperimentMonitor implements IEMLifecycleListener {
             logger.error("Received summary report from NULL client!");
         }
 
-
-//        Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
-//
-//        while (listIt.hasNext()) {
-//            listIt.next().onGotSummaryReport(client, summary);
-//        }
     }
 
     @Override
