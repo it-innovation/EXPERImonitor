@@ -31,30 +31,32 @@ public class DatabaseMaintenance {
 
         //coordinator.wipeDatabase();
         coordinator.setupWegovDatabase();
-
-        Role userRole = coordinator.getDefaultUserRole();
-
-        addTemplateWidgetWegovUser(coordinator);
-
-        coordinator.createPolicyMaker("Test user", userRole, "Experimedia", "user", "test");
-
-        addSearchTool(coordinator, wegovToolsHome + "wegov-search-tool-2.0-jar-with-dependencies.jar");
-        addGroupsSearchTool(coordinator, wegovToolsHome + "wegov-search-tool-2.0-jar-with-dependencies.jar");
-        addGroupsSearchAndAnalysisTool(coordinator, wegovToolsHome + "wegov-search-analysis-tool-2.0-jar-with-dependencies.jar");
-        addInjectTool(coordinator, wegovToolsHome + "wegov-inject-tool-2.0-jar-with-dependencies.jar");
-        addTopicOpinionTool(coordinator, wegovToolsHome + "wegov-analysis-tool-2.0-jar-with-dependencies.jar");
-        addKMITool(coordinator, wegovToolsHome + "wegov-analysis-tool-2.0-jar-with-dependencies.jar");
         
-//        addSearchTool(coordinator, wegovToolsHome + "/search/target/wegov-search-tool-2.0-jar-with-dependencies.jar");
-//        addGroupsSearchTool(coordinator, wegovToolsHome + "/search/target/wegov-search-tool-2.0-jar-with-dependencies.jar");
-//        addGroupsSearchAndAnalysisTool(coordinator, wegovToolsHome + "/search-analysis/target/wegov-search-analysis-tool-2.0-jar-with-dependencies.jar");
-//        addInjectTool(coordinator, wegovToolsHome + "/inject/target/wegov-inject-tool-2.0-jar-with-dependencies.jar");
-//        addTopicOpinionTool(coordinator, wegovToolsHome + "/analysis/target/wegov-analysis-tool-2.0-jar-with-dependencies.jar");
-//        addKMITool(coordinator, wegovToolsHome + "/analysis/target/wegov-analysis-tool-2.0-jar-with-dependencies.jar");
+        if (coordinator.getPolicymakers().isEmpty()) {
+            Role userRole = coordinator.getDefaultUserRole();
+
+            addTemplateWidgetWegovUser(coordinator);
+
+            coordinator.createPolicyMaker("Test user", userRole, "Experimedia", "user", "test");
+
+            addSearchTool(coordinator, wegovToolsHome + "wegov-search-tool-2.0-jar-with-dependencies.jar");
+            addGroupsSearchTool(coordinator, wegovToolsHome + "wegov-search-tool-2.0-jar-with-dependencies.jar");
+            addGroupsSearchAndAnalysisTool(coordinator, wegovToolsHome + "wegov-search-analysis-tool-2.0-jar-with-dependencies.jar");
+            addInjectTool(coordinator, wegovToolsHome + "wegov-inject-tool-2.0-jar-with-dependencies.jar");
+            addTopicOpinionTool(coordinator, wegovToolsHome + "wegov-analysis-tool-2.0-jar-with-dependencies.jar");
+            addKMITool(coordinator, wegovToolsHome + "wegov-analysis-tool-2.0-jar-with-dependencies.jar");
+
+    //        addSearchTool(coordinator, wegovToolsHome + "/search/target/wegov-search-tool-2.0-jar-with-dependencies.jar");
+    //        addGroupsSearchTool(coordinator, wegovToolsHome + "/search/target/wegov-search-tool-2.0-jar-with-dependencies.jar");
+    //        addGroupsSearchAndAnalysisTool(coordinator, wegovToolsHome + "/search-analysis/target/wegov-search-analysis-tool-2.0-jar-with-dependencies.jar");
+    //        addInjectTool(coordinator, wegovToolsHome + "/inject/target/wegov-inject-tool-2.0-jar-with-dependencies.jar");
+    //        addTopicOpinionTool(coordinator, wegovToolsHome + "/analysis/target/wegov-analysis-tool-2.0-jar-with-dependencies.jar");
+    //        addKMITool(coordinator, wegovToolsHome + "/analysis/target/wegov-analysis-tool-2.0-jar-with-dependencies.jar");
 
 
-        for (Policymaker pm : coordinator.getPolicymakers()) {
-            System.out.println(pm);
+            for (Policymaker pm : coordinator.getPolicymakers()) {
+                System.out.println(pm);
+            }
         }
 
         System.out.println("Done");
