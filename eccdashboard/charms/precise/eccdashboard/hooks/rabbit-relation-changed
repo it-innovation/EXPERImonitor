@@ -4,8 +4,8 @@ set -eux
 
 juju-log "rabbit relation changed"
 
-relation-set username=eccdashboard
-relation-set vhost=/
+#relation-set username=eccdashboard
+#relation-set vhost=/
 
 if [ "`relation-get hostname`" == "" ]; then
 	juju-log "Waiting for rabbit hostname..."
