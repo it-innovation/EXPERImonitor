@@ -301,7 +301,7 @@ public class DashboardExperimentMonitor implements IEMLifecycleListener {
         logger.debug("The next phase will be: [" + nextPhase.getIndex() + "] " + nextPhase.name());
         return currentPhase;
     }
-
+    
     public void goToNextPhase() throws Exception {
         expMonitor.goToNextPhase();
     }
@@ -337,29 +337,32 @@ public class DashboardExperimentMonitor implements IEMLifecycleListener {
 
                 Iterator<EMClient> currentPhaseClientsIterator = currentPhaseClients.iterator();
 
-                EMClient currentPhaseClient;
+                EMClient currentPhaseClient; String currentPhaseClientUuid;
                 while (currentPhaseClientsIterator.hasNext()) {
                     currentPhaseClient = currentPhaseClientsIterator.next();
+                    currentPhaseClientUuid = currentPhaseClient.getID().toString();
+                    
+                    if (currentPhaseClientUuid.equals(theMeasurementSet.getClientUUID())) {
+                        // Get only ones that are not busy generating data
+                        if (!currentPhaseClient.isPullingMetricData()) {
+                            try {
+                                if (!measurementSetsWaitingForData.contains(measurementSetUuid)) {
+                                    logger.debug("Pulling metrics from client: [" + currentPhaseClient.getID() + "], measurement set [" + measurementSetUuid + "]");
+                                    expMonitor.pullMetric(currentPhaseClient, UUID.fromString(measurementSetUuid));
+                                    measurementSetsWaitingForData.add(measurementSetUuid);
+                                } else {
+                                    logger.debug("Metrics from client: [" + currentPhaseClient.getID() + "], measurement set [ " + measurementSetUuid + "] currently being pulled");
+                                }
 
-                    // Get only ones that are not busy generating data
-                    if (!currentPhaseClient.isPullingMetricData()) {
-                        try {
-                            if (!measurementSetsWaitingForData.contains(measurementSetUuid)) {
-                                logger.debug("Pulling metrics from client: [" + currentPhaseClient.getID() + "], measurement set [" + measurementSetUuid + "]");
-                                expMonitor.pullMetric(currentPhaseClient, UUID.fromString(measurementSetUuid));
-                                measurementSetsWaitingForData.add(measurementSetUuid);
-                            } else {
-                                logger.debug("Metrics from client: [" + currentPhaseClient.getID() + "], measurement set [ " + measurementSetUuid + "] currently being pulled");
+                            } catch (Exception e) {
+                                logger.error("Could not pull metrics from client: "
+                                        + currentPhaseClient.getName() + ", because: "
+                                        + e.getMessage());
                             }
-
-                        } catch (Exception e) {
-                            logger.error("Could not pull metrics from client: "
-                                    + currentPhaseClient.getName() + ", because: "
-                                    + e.getMessage());
+                        } else {
+                            logger.debug("Client " + currentPhaseClient.getName()
+                                    + " is busy generating metrics");
                         }
-                    } else {
-                        logger.debug("Client " + currentPhaseClient.getName()
-                                + " is busy generating metrics");
                     }
                 }
             }
@@ -367,43 +370,9 @@ public class DashboardExperimentMonitor implements IEMLifecycleListener {
             return theMeasurementSet.getMeasurements();
         } else {
 
-            DashboardMeasurementSet theMeasurementSet = reportedMeasurementSets.get(measurementSetUuid);
-
-            EMPhase thePhase = expMonitor.getCurrentPhase();
-
-            // If it's live monitoring phase, start pulling data from clients
-            if (thePhase.getIndex() == 3) {
-
-                // Get all clients for the live monitoring phase
-                Set<EMClient> currentPhaseClients = expMonitor.getCurrentPhaseClients();
-
-                Iterator<EMClient> currentPhaseClientsIterator = currentPhaseClients.iterator();
-
-                EMClient currentPhaseClient;
-                while (currentPhaseClientsIterator.hasNext()) {
-                    currentPhaseClient = currentPhaseClientsIterator.next();
-
-                    // Get only ones that are not busy generating data
-                    if (!currentPhaseClient.isPullingMetricData()) {
-                        try {
-                            logger.debug("Pulling metrics from client: [" + currentPhaseClient.getID() + "] " + currentPhaseClient.getName());
-                            expMonitor.pullAllMetrics(currentPhaseClient);
-
-                        } catch (Exception e) {
-                            logger.error("Could not pull metrics from client: "
-                                    + currentPhaseClient.getName() + ", because: "
-                                    + e.getMessage());
-                        }
-                    } else {
-                        logger.debug("Client " + currentPhaseClient.getName()
-                                + " is busy generating metrics");
-                    }
-                }
-            }
-
+            logger.error("Unknown measurement set [" + measurementSetUuid + "]");
             return new LinkedHashMap<String, DataPoint>();
         }
-
 
     }
 
@@ -449,7 +418,9 @@ public class DashboardExperimentMonitor implements IEMLifecycleListener {
 
         if (client != null) {
             
-            logger.debug("onFoundClientWithMetricGenerators: " + client.getName() + " [" + client.getID().toString() + "]");
+            String clientUuid = client.getID().toString();
+            
+            logger.debug("onFoundClientWithMetricGenerators: " + client.getName() + " [" + clientUuid + "]");
             
             Set<MetricGenerator> generators = client.getCopyOfMetricGenerators();
             Iterator<MetricGenerator> mgIt = generators.iterator();
@@ -457,40 +428,23 @@ public class DashboardExperimentMonitor implements IEMLifecycleListener {
             // Pass to EDM
             if (expMGAccessor != null && expInstance != null) {
                 UUID expID = expInstance.getUUID();
-
-                Set<Entity> entities; Set<Attribute> attributes;
-                Set<MetricGroup> metricGroups; Set<MeasurementSet> measurementSets;
+                String measurementSetUuid;
                 while (mgIt.hasNext()) {
                     
                     MetricGenerator mg = mgIt.next();
                     try {
                         
+                        for (MetricGroup metricGroup : mg.getMetricGroups()) {
+                            for (MeasurementSet measurementSet : metricGroup.getMeasurementSets()) {
+                                // Save metric generator for client UUID
+                                measurementSetUuid = measurementSet.getUUID().toString();
+                                
+                                // Might need to synchronise?
+                                reportedMeasurementSets.put(measurementSetUuid, new DashboardMeasurementSet(measurementSetUuid, clientUuid));
+                            }
+                        }
                         expMGAccessor.saveMetricGenerator(mg, expID);
                         
-//                        entities = mg.getEntities();
-//                        
-//                        for (Entity entity : entities) {
-//                            
-//                            expEntityAccessor.saveEntity(entity);
-//                            
-//                            attributes = entity.getAttributes();
-//                            for (Attribute attribute : attributes) {
-//                                expEntityAccessor.saveAttribute(attribute);                                
-//                            }
-//                        }
-//                        
-//                        metricGroups = mg.getMetricGroups();
-//                        
-//                        for (MetricGroup metricGroup : metricGroups) {
-//                            expMetricGroupAccessor.saveMetricGroup(metricGroup);
-//                            
-//                            measurementSets = metricGroup.getMeasurementSets();
-//                            
-//                            for (MeasurementSet measurementSet : measurementSets) {
-//                                expMeasurementSetAccessor.saveMeasurementSet(measurementSet);                                
-//                                expMetricAccessor.saveMetric(measurementSet.getMetric());
-//                            }
-//                        }
                     
                     } catch (Exception e) {
                         throw new RuntimeException("Failed to store metric generator", e);
@@ -504,10 +458,6 @@ public class DashboardExperimentMonitor implements IEMLifecycleListener {
                         + "], reason: expMGAccessor or expInstance is NULL");
             }
 
-//            mgIt = generators.iterator();
-//            while (mgIt.hasNext()) {
-//                MetricGenerator mg = mgIt.next();
-//            }
         } else {
             logger.error("onFoundClientWithMetricGenerators: client is NULL");
         }
@@ -547,74 +497,74 @@ public class DashboardExperimentMonitor implements IEMLifecycleListener {
 
                     String measurementSetUuid = measurementSet.getUUID().toString();
                     DashboardMeasurementSet theDashboardMeasurementSet;
-                    if (reportedMeasurementSets.containsKey(measurementSetUuid)) {
-                        logger.debug("Already tracking measurementSet: [" + measurementSetUuid + "] ");
-                        theDashboardMeasurementSet = reportedMeasurementSets.get(measurementSetUuid);
-                    } else {
-                        logger.debug("Tracking NEW measurementSet: [" + measurementSetUuid + "] ");
-                        theDashboardMeasurementSet = new DashboardMeasurementSet(measurementSetUuid);
-                        reportedMeasurementSets.put(measurementSetUuid, theDashboardMeasurementSet);
-                    }
-
-                    Set<Measurement> measurements = measurementSet.getMeasurements();
                     
-                    if (measurements != null) {
-                        if (!measurements.isEmpty()) {
-                            
-                            Iterator it = measurements.iterator();
-                            Measurement measurement;
-                            int measurementsCounter = 1;
-                            String measurementUUID, measurementValue;
-                            Date measurementTimestamp;
-                            LinkedHashMap<String, DataPoint> currentMeasurements = theDashboardMeasurementSet.getMeasurements();
-                            Iterator itCurrent;
-                            String currentMeasurementUUID;
-                            DataPoint currentDatapoint;
-                            boolean pointExists = false;
-                            while (it.hasNext()) {
-                                measurement = (Measurement) it.next();
-                                measurementUUID = measurement.getUUID().toString();
-                                measurementTimestamp = measurement.getTimeStamp();
-                                measurementValue = measurement.getValue();
+                    if (reportedMeasurementSets.containsKey(measurementSetUuid)) {
+                        logger.debug("Received data for measurementSet: [" + measurementSetUuid + "] ");
+                        
+                        theDashboardMeasurementSet = reportedMeasurementSets.get(measurementSetUuid);
 
-                                logger.debug("Measurement " + measurementsCounter + ": [" + measurementUUID + "] " + measurementTimestamp.toString() + " - " + measurementValue);
+                        Set<Measurement> measurements = measurementSet.getMeasurements();
 
-                                itCurrent = currentMeasurements.keySet().iterator();
-                                while (itCurrent.hasNext()) {
-                                    currentMeasurementUUID = (String) itCurrent.next();
-                                    currentDatapoint = currentMeasurements.get(currentMeasurementUUID);
-                                    if ((currentDatapoint.getTime() == measurementTimestamp.getTime()) && (currentDatapoint.getValue().equals(measurementValue))) {
-                                        pointExists = true;
-                                        break;
+                        if (measurements != null) {
+                            if (!measurements.isEmpty()) {
+
+                                Iterator it = measurements.iterator();
+                                Measurement measurement;
+                                int measurementsCounter = 1;
+                                String measurementUUID, measurementValue;
+                                Date measurementTimestamp;
+                                LinkedHashMap<String, DataPoint> currentMeasurements = theDashboardMeasurementSet.getMeasurements();
+                                Iterator itCurrent;
+                                String currentMeasurementUUID;
+                                DataPoint currentDatapoint;
+                                boolean pointExists = false;
+                                while (it.hasNext()) {
+                                    measurement = (Measurement) it.next();
+                                    measurementUUID = measurement.getUUID().toString();
+                                    measurementTimestamp = measurement.getTimeStamp();
+                                    measurementValue = measurement.getValue();
+
+                                    logger.debug("Measurement " + measurementsCounter + ": [" + measurementUUID + "] " + measurementTimestamp.toString() + " - " + measurementValue);
+
+                                    itCurrent = currentMeasurements.keySet().iterator();
+                                    while (itCurrent.hasNext()) {
+                                        currentMeasurementUUID = (String) itCurrent.next();
+                                        currentDatapoint = currentMeasurements.get(currentMeasurementUUID);
+                                        if ((currentDatapoint.getTime() == measurementTimestamp.getTime()) && (currentDatapoint.getValue().equals(measurementValue))) {
+                                            pointExists = true;
+                                            break;
+                                        }
                                     }
-                                }
 
-                                if (pointExists) {
-                                    logger.debug("Measurement already exists");
-                                    pointExists = false;
-                                } else {
-                                    logger.debug("Measurement is NEW");
-                                    theDashboardMeasurementSet.addMeasurement(measurementUUID, new DataPoint(measurementTimestamp.getTime(), measurementValue, measurementUUID));
-                                    try {
-                                        
-                                        // Save just the measurement - ignore reports etc.
-                                        expDataMgr.getMeasurementDAO().saveMeasurement(measurement);
-                                        
-                                    } catch (Exception ex) {
-                                        logger.error("Failed to save measurement [" + measurement.getUUID().toString() + "] to the database", ex);
+                                    if (pointExists) {
+                                        logger.debug("Measurement already exists");
+                                        pointExists = false;
+                                    } else {
+                                        logger.debug("Measurement is NEW");
+                                        theDashboardMeasurementSet.addMeasurement(measurementUUID, new DataPoint(measurementTimestamp.getTime(), measurementValue, measurementUUID));
+                                        try {
+
+                                            // Save just the measurement - ignore reports etc.
+                                            expDataMgr.getMeasurementDAO().saveMeasurement(measurement);
+
+                                        } catch (Exception ex) {
+                                            logger.error("Failed to save measurement [" + measurement.getUUID().toString() + "] to the database", ex);
+                                        }
                                     }
+
+                                    measurementsCounter++;
+
                                 }
-
-                                measurementsCounter++;
-
+    //                            mainView.addLogText(client.getName() + " got metric data: " + measurements.iterator().next().getValue());
+                            } else {
+                                logger.error("Measurements for measurement set [" + measurementSet.getUUID().toString() + "] are EMPTY");
                             }
-//                            mainView.addLogText(client.getName() + " got metric data: " + measurements.iterator().next().getValue());
                         } else {
-                            logger.error("Measurements for measurement set [" + measurementSet.getUUID().toString() + "] are EMPTY");
+                            logger.error("Measurements for measurement set [" + measurementSet.getUUID().toString() + "] are NULL");
                         }
                     } else {
-                        logger.error("Measurements for measurement set [" + measurementSet.getUUID().toString() + "] are NULL");
-                    }
+                        logger.error("Received data for unknown measurementSet: [" + measurementSetUuid + "] ");
+                    }                        
 
                 } else {
                     logger.error("Measurement set for report [" + report.getUUID().toString() + "] is NULL");
