@@ -150,7 +150,13 @@ public class EMClient implements EMIAdapterListener {
             userPass = emProps.getProperty("password");
         } else {
             clientLogger.info("No password provided, let's hope AMQP does not require authentication");
-            
+        }        
+        
+        if (emProps.containsKey("username")) {
+            clientLogger.info("Will be using username \'" + emProps.getProperty("username") + "\' to connect to AMQP");
+//            userPass = emProps.getProperty("password");
+        } else {
+            clientLogger.info("No password provided, let's hope AMQP does not require authentication");
         }        
         
         clientLogger.debug("Starting EM client with rabbitServerIP: " + rabbitServerIP +

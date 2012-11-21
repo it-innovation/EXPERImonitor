@@ -16,6 +16,7 @@ cat > /var/lib/tomcat7/em.properties <<EOF
 # EXPERIMEDIA RabbitMQ (unsecured) configuration
 Rabbit_IP=`relation-get hostname`
 Rabbit_Port=5672
+username=`relation-get username`
 password=`relation-get password`
 Monitor_ID=00000000-0000-0000-0000-000000000000
 EOF

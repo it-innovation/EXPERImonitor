@@ -44,6 +44,7 @@ public class AMQPConnectionFactory
     private InetAddress amqpHostIP;
     private int         amqpPortNumber = 5672;
     private Connection  amqpConnection;
+    private String userName = null;
     private String userPass = null;
 
 
@@ -96,8 +97,15 @@ public class AMQPConnectionFactory
         amqpFactory.setHost( amqpHostIP.getHostAddress() );
         amqpFactory.setPort( amqpPortNumber );
         if (userPass != null) {
-            factoryLog.info("Will try to login as guest");
-            amqpFactory.setUsername("guest");
+            
+            if (userName != null) {
+                factoryLog.info("Will try to login as \'" + userName + "\'");
+                amqpFactory.setUsername(userName);
+            } else {
+                factoryLog.info("Will try to login as guest");
+                amqpFactory.setUsername("guest");
+            }
+            
             amqpFactory.setPassword(userPass);
         }
 
@@ -168,6 +176,14 @@ public class AMQPConnectionFactory
             userPass = emProps.getProperty("password");
         } else {
             factoryLog.info("No password provided, let's hope AMQP does not require authentication");
+            
+        }
+        
+        if (emProps.containsKey("username")) {
+            userName = emProps.getProperty("username");
+            factoryLog.info("Will be using username \'" + userName + "\' to connect to AMQP");
+        } else {
+            factoryLog.info("No username provided, let's hope AMQP has user \'guest\'");
             
         }
         
