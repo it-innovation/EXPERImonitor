@@ -25,7 +25,7 @@ juju deploy cs:~robert-ayres/precise/tomcat tomcat-wegov
 juju deploy --repository=./charms local:wegov wegov
 juju add-relation wegov tomcat-wegov
 #juju deploy postgresql postgresql-wegov
-juju deploy --repository=~/charms local:postgresql postgresql-wegov
+juju deploy --repository=../charm-postgres local:postgresql postgresql-wegov
 juju add-relation wegov:edm postgresql-wegov:db-admin
 #juju deploy rabbitmq-server
 juju add-relation wegov:rabbit rabbitmq-server
