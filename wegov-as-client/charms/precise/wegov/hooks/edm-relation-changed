@@ -82,6 +82,8 @@ EOF
 
 java -jar wegov-database-maintenance-1.0-jar-with-dependencies.jar
 
+cp wegov-search-analysis-tool-2.0-jar-with-dependencies.jar /var/lib/tomcat7/wegov-search-analysis-tool-2.0-jar-with-dependencies.jar
+
 echo `relation-get host`:5432:*:`relation-get user`:`relation-get password` > ~/.pgpass
 chmod 0600 ~/.pgpass
 
