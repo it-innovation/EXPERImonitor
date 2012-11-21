@@ -1,0 +1,86 @@
+#!/bin/bash
+
+set -e
+
+export LANG=C
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+usage () {
+    echo "usage: $0 <retain_days>"
+}
+
+typeset -i DAYS=$1
+shift
+if [ $DAYS -le 0 ]; then
+    usage
+    exit 1
+fi
+
+set -u
+
+backup_success () {
+    echo "Last successful backup \$(date)" > {{logs_dir}}/backups.log
+    # Now because the umask is set to 0077, we need to grant read access to the log
+    chmod a+r "{{logs_dir}}/backups.log"
+}
+
+DATABASES=$(psql -tAc "select datname from pg_database where datname not in ('template0','template1','postgres')")
+if [ -z "${DATABASES}" ]; then
+    # nothing to back up
+    backup_success
+    exit 0
+fi
+
+# Set umask so backups are automatically created without group and other
+umask 0077
+
+echo backups started `date`
+
+export PGPORT=5432 
+
+ROOT={{base_dir}}
+DUMP_DIR={{backups_dir}}
+SCRIPTS={{scripts_dir}}
+cd ${ROOT}
+
+# Clean up archived WAL files.
+WALBACKUPS=${ROOT}/walbackups
+
+# Cleanup old archived WAL files and base backups. These should have
+# already been shipped to external disk via rsync.
+find ${WALBACKUPS} -type f -ctime +${DAYS} -exec rm \{\} \;
+
+# Check the size of the last backup, and that we have enough space
+# to do a backup
+TOTAL_SIZE=0
+for DATABASE in ${DATABASES}; do
+    DUMP_SIZE=\$(ls -lrt ${DUMP_DIR}/${DATABASE}* | tail -1 | awk '{ print $5 }')
+    let TOTAL_SIZE=${TOTAL_SIZE}+${DUMP_SIZE}
+done
+let TOTAL_SIZE=${TOTAL_SIZE}*13/10
+let TOTAL_SIZE=${TOTAL_SIZE}/1024
+
+FREE_SPACE=\$(df -k ${DUMP_DIR} | sed -e 1d | awk '{ print $4 }')
+
+echo "Free Space: $FREE_SPACE"
+echo "Last Backups (x1.3): $TOTAL_SIZE"
+
+if [ $FREE_SPACE -lt $TOTAL_SIZE ]; then
+    echo "Not enough free space"
+    exit 1
+fi
+
+# Backup our databases. Go no further if this fails.
+# And let's nice it too, since bzip has a tendency 
+# to spike the load average
+nice -n 19 ${SCRIPTS}/dump-pg-db --dir=${DUMP_DIR} --compression=postgres ${DATABASES}
+
+# Prune old backups:
+# - Delete anything older than $DAYS days
+find ${DUMP_DIR}/ -mtime +${DAYS} -delete
+
+TODAY=`date +'%Y%m%d'`
+
+echo backups completed `date`
+
+backup_success

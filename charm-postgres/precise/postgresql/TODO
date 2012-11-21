@@ -1,0 +1,2 @@
+- Fix "run" function in hooks.py to log error rather than exiting silently
+- Pick a better way to get machine specs than hacky bash functions - facter?

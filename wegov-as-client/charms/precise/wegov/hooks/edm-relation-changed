@@ -4,7 +4,7 @@ set -eux
 
 juju-log "edm relation changed"
 
-relation-set database=wegov
+relation-set database=postgres
 
 if [ "`relation-get host`" == "" ]; then
 	juju-log "Waiting for postgres database..."
@@ -13,7 +13,7 @@ fi
 
 cat > /var/lib/tomcat7/edm.properties <<EOF
 dbURL = `relation-get host`:5432
-dbName = wegov
+dbName = postgres
 dbUsername = `relation-get user`
 dbPassword = `relation-get password`
 dbType = postgresql
@@ -28,7 +28,7 @@ postgres.login=`relation-get user`
 postgres.pass=`relation-get password`
 
 # POSTGRESQL DATABASES AND SCHEMAS CONFIGURATION
-postgres.database.name=wegov
+postgres.database.name=postgres
 postgres.database.mgt.name=WeGovManagement
 postgres.database.data.name=WeGovRawData
 
@@ -70,7 +70,7 @@ org.quartz.dataSource.WEGOVDS.driver = org.postgresql.Driver
 org.quartz.jobStore.driverDelegateClass=org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
 org.quartz.jobStore.tablePrefix = qrtz_
 # N.B. You must ensure that database matches that defined in coordinator.properties!
-org.quartz.dataSource.WEGOVDS.URL = jdbc:postgresql://`relation-get host`:5432/wegov
+org.quartz.dataSource.WEGOVDS.URL = jdbc:postgresql://`relation-get host`:5432/postgres
 org.quartz.dataSource.WEGOVDS.user = `relation-get user`
 org.quartz.dataSource.WEGOVDS.password = `relation-get password`
 
@@ -82,11 +82,13 @@ EOF
 
 java -jar wegov-database-maintenance-1.0-jar-with-dependencies.jar
 
+cp wegov-search-analysis-tool-2.0-jar-with-dependencies.jar /var/lib/tomcat7/wegov-search-analysis-tool-2.0-jar-with-dependencies.jar
+
 echo `relation-get host`:5432:*:`relation-get user`:`relation-get password` > ~/.pgpass
 chmod 0600 ~/.pgpass
 
-psql -w -h `relation-get host` -d wegov -U `relation-get user` -f edm-metrics-postgres.sql
+psql -w -h `relation-get host` -d postgres -U `relation-get user` -f edm-metrics-postgres.sql
 
-psql -U `relation-get user` -d "wegov" -h `relation-get host` -f tables_postgres.sql
+psql -U `relation-get user` -d "postgres" -h `relation-get host` -f tables_postgres.sql
 
 ./maybe-restart.sh

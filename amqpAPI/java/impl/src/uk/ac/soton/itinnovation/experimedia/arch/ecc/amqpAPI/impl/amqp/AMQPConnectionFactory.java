@@ -44,6 +44,8 @@ public class AMQPConnectionFactory
     private InetAddress amqpHostIP;
     private int         amqpPortNumber = 5672;
     private Connection  amqpConnection;
+    private String userName = null;
+    private String userPass = null;
 
 
     public AMQPConnectionFactory()
@@ -94,6 +96,18 @@ public class AMQPConnectionFactory
         ConnectionFactory amqpFactory = new ConnectionFactory();
         amqpFactory.setHost( amqpHostIP.getHostAddress() );
         amqpFactory.setPort( amqpPortNumber );
+        if (userPass != null) {
+            
+            if (userName != null) {
+                factoryLog.info("Will try to login as \'" + userName + "\'");
+                amqpFactory.setUsername(userName);
+            } else {
+                factoryLog.info("Will try to login as guest");
+                amqpFactory.setUsername("guest");
+            }
+            
+            amqpFactory.setPassword(userPass);
+        }
 
         try { amqpConnection = amqpFactory.newConnection(); }
         catch ( Exception e )
@@ -157,7 +171,23 @@ public class AMQPConnectionFactory
         String rabbitServerIP   = emProps.getProperty( "Rabbit_IP" );
         String rabbitServerPort = emProps.getProperty( "Rabbit_Port" );
         
-        factoryLog.info( "Trying to conenct to AMQP bus..." );
+        if (emProps.containsKey("password")) {
+            factoryLog.info("Will be using password to connect to AMQP");
+            userPass = emProps.getProperty("password");
+        } else {
+            factoryLog.info("No password provided, let's hope AMQP does not require authentication");
+            
+        }
+        
+        if (emProps.containsKey("username")) {
+            userName = emProps.getProperty("username");
+            factoryLog.info("Will be using username \'" + userName + "\' to connect to AMQP");
+        } else {
+            factoryLog.info("No username provided, let's hope AMQP has user \'guest\'");
+            
+        }
+        
+        factoryLog.info( "Trying to connect to AMQP bus..." );
         
         // Proceed only if these at least exist
         if ( rabbitServerIP != null && rabbitServerPort != null )
