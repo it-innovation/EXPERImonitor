@@ -45,8 +45,9 @@ function amqp_changed() {
   # In reponse, we generate a password for new users,
   # grant the user access on the default vhost "/",
   # and tell it where to reach us.
-  RABBIT_USER=`relation-get username`
-  VHOST=`relation-get vhost`
+  #RABBIT_USER=`relation-get username`
+  RABBIT_USER="guest"
+  VHOST="/"
   if [[ -z $RABBIT_USER ]] || [[ -z $VHOST ]] ; then
     juju-log "rabbitmq-server: RABBIT_USER||VHOST not yet received from peer."
     exit 0
@@ -59,13 +60,16 @@ function amqp_changed() {
     echo $PASSWORD >$PASSWD_FILE
     chmod 0400 $PASSWD_FILE
   fi
+
+  PASSWORD="guest"
+
   if ! vhost_exists ; then
     juju-log "rabbitmq-server: Creating vhost $VHOST"
-    #create_vhost
+    create_vhost
   fi
   if ! user_exists $RABBIT_USER ; then
     juju-log "rabbitmq-server: Creating user $RABBIT_USER"
-    #user_create $RABBIT_USER admin || exit 1
+    user_create $RABBIT_USER admin || exit 1
   else
     juju-log "rabbitmq-server: user $RABBIT_USER already exists."
   fi
