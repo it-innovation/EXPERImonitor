@@ -165,11 +165,10 @@ public class EMClient implements EMIAdapterListener {
                 ", clientId: " + clientId.toString() + "...");
 
         AMQPConnectionFactory amqpFactory = new AMQPConnectionFactory();
-        amqpFactory.connectToAMQPHost(emProps);
 
         clientLogger.debug("Connecting to AMQPHost...");
         try {
-            amqpFactory.connectToAMQPHost();
+            amqpFactory.connectToAMQPHost(emProps);
             amqpChannel = amqpFactory.createNewChannel();
         } catch (Throwable e) {
             clientLogger.error("Failed to connect to AMQP Host and create new channel", e);
