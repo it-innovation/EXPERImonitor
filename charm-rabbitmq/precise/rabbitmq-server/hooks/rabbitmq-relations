@@ -56,12 +56,11 @@ function amqp_changed() {
   if [[ -e $PASSWD_FILE ]] ; then
     PASSWORD=$(cat $PASSWD_FILE)
   else
-    PASSWORD=$(pwgen 10 1)
+    #PASSWORD=$(pwgen 10 1)
+	PASSWORD="guest"
     echo $PASSWORD >$PASSWD_FILE
     chmod 0400 $PASSWD_FILE
   fi
-
-  PASSWORD="guest"
 
   if ! vhost_exists ; then
     juju-log "rabbitmq-server: Creating vhost $VHOST"
