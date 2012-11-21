@@ -30,7 +30,7 @@ juju deploy cs:~robert-ayres/precise/tomcat
 juju deploy --repository=./charms local:eccdashboard eccdashboard
 juju add-relation eccdashboard tomcat
 #juju deploy postgresql postgresql-eccdashboard
-juju deploy --repository=~../charm-postgres local:postgresql postgresql-eccdashboard
+juju deploy --repository=../charm-postgres local:postgresql postgresql-eccdashboard
 juju add-relation eccdashboard:edm postgresql-eccdashboard:db-admin
 #juju deploy rabbitmq-server
 juju deploy --repository=../charm-rabbitmq local:rabbitmq-server rabbitmq-server
