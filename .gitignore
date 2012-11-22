@@ -18,3 +18,4 @@
 /samples/basicECCContainer/lib/
 /samples/headlessECCClient/lib/
 *.log
+/charm-rabbitmq-tal/precise/management/.bzr/
