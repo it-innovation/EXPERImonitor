@@ -51,6 +51,7 @@ public class EMClient
   protected HashSet<UUID> generatorsSetupOK;
   
   // Live monitoring phase states
+  protected final Object  pullLock = new Object();
   protected HashSet<UUID> currentMeasurementSetPulls;
   
   // Post-report phase states
@@ -193,7 +194,14 @@ public class EMClient
    * @return - true if currently generating data
    */
   public boolean isPullingMetricData()
-  { return !currentMeasurementSetPulls.isEmpty(); }
+  {
+    boolean isPulling;
+    
+    synchronized ( pullLock )
+    { isPulling = !currentMeasurementSetPulls.isEmpty(); }
+    
+    return isPulling;
+  }
   
   /**
    * Returns the IDs of all MeasurementSet IDs that have been requested by the EM
