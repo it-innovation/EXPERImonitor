@@ -32,7 +32,9 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EM
 
 public interface EMViewListener
 {
-  void onStartPhasesButtonClicked();
+  void onStartMonitoringClicked();
+  
+  void onRestartMonitoringClicked();
   
   void onNextPhaseButtonClicked();
   

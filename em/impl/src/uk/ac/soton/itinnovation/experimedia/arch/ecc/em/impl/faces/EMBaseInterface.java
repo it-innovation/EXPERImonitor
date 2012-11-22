@@ -54,6 +54,12 @@ public abstract class EMBaseInterface implements IAMQPMessageDispatchListener
   protected UUID                  interfaceProviderID;
   
   
+  public void shutdown()
+  {
+    if ( amqpChannel != null && amqpInterface != null )
+      amqpInterface.shutdown();
+  }
+  
   // IAMQPMessageDispatchListener ----------------------------------------------
   @Override
   public void onSimpleMessageDispatched( String queueName, byte[] data )

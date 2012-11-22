@@ -30,12 +30,15 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 import com.rabbitmq.client.*;
 
 import java.io.*;
+import org.apache.log4j.Logger;
 
 
 
 
 public abstract class AbstractAMQPInterface
 {
+  private final Logger amqpIntLogger = Logger.getLogger( AbstractAMQPInterface.class );
+  
   private AMQPBasicSubscriptionProcessor subProcessor;
   
   protected AMQPBasicChannel    amqpChannel;
@@ -49,6 +52,30 @@ public abstract class AbstractAMQPInterface
   protected boolean interfaceReady = false;
   protected boolean actingAsProvider;
   
+  public void shutdown()
+  {
+    if ( amqpChannel != null && subListenQueue != null )
+    {
+      Channel channel = (Channel) amqpChannel.getChannelImpl();
+      
+      try
+      {
+        channel.queueDelete( subListenQueue );
+        
+        interfaceName        = null;
+        providerExchangeName = null;
+        userExchangeName     = null;
+        providerQueueName    = null;
+        userQueueName        = null;
+        providerRoutingKey   = null;
+        userRoutingKey       = null;
+        subListenQueue       = null;
+        interfaceReady       = false;
+      }
+      catch (IOException ioe)
+      { amqpIntLogger.error( "Could not delete AMQP queue: " + ioe.getMessage() ); }
+    }
+  }
   
   public synchronized boolean sendBasicMessage( String message )
   {
@@ -119,10 +146,11 @@ public abstract class AbstractAMQPInterface
                          targetExchange,
                          targetRouteKey ); // Args
     }
-    catch (IOException ioe) {}
+    catch (IOException ioe)
+    { amqpIntLogger.error( "Could not create AMQP queue: " + ioe.getMessage() ); }
     
   }
-
+  
   protected void createSubscriptionComponent()
   {
     Channel channel = (Channel) amqpChannel.getChannelImpl();    

@@ -56,6 +56,11 @@ public interface IAMQPMessageDispatchPump
     void stopPump();
     
     /**
+     * Stops the pump and empties any queued messages not currently being sent
+     */
+    void emptyPump();
+    
+    /**
      * Returns the state of the pump.
      * 
      * @return - Returns true if the pump is active.

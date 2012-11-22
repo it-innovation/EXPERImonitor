@@ -407,6 +407,11 @@ public class DashboardExperimentMonitor implements IEMLifecycleListener {
     public void onLifecyclePhaseCompleted(EMPhase phase) {
         logger.debug("onLifecyclePhaseCompleted");
     }
+    
+    @Override
+    public void onLifecycleReset() {
+        logger.debug("onLifecycleReset");
+    }
 
     @Override
     public void onNoFurtherLifecyclePhases() {

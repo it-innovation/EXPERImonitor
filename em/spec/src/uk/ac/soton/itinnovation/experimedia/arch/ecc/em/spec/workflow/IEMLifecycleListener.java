@@ -45,6 +45,8 @@ public interface IEMLifecycleListener
   
   void onNoFurtherLifecyclePhases();
   
+  void onLifecycleReset();
+  
   void onFoundClientWithMetricGenerators( EMClient client );
   
   void onClientSetupResult( EMClient client, boolean success );

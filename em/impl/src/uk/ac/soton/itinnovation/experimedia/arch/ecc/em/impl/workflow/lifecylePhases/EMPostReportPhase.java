@@ -62,6 +62,14 @@ public class EMPostReportPhase extends AbstractEMLCPhase
   
   // AbstractEMLCPhase ---------------------------------------------------------
   @Override
+  public void reset()
+  {
+    clearAllClients();
+    
+    batchDateTree.clear();
+  }
+  
+  @Override
   public void start() throws Exception
   {
     if ( phaseActive ) throw new Exception( "Phase already active" );
@@ -134,7 +142,7 @@ public class EMPostReportPhase extends AbstractEMLCPhase
   }
   
   @Override
-  public void onClientUnexpectedlyRemoved( EMClientEx client )
+  public void onClientHasBeenDeregistered( EMClientEx client )
   {
     if ( client != null ) removeClient( client.getID() );
   }

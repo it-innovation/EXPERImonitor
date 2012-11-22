@@ -65,8 +65,6 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   private EMPhase currentPhase         = EMPhase.eEMUnknownPhase;
   private boolean windingCurrPhaseDown = false;
  
-  
-  
   private IEMLifecycleListener lifecycleListener;
   
   
@@ -103,8 +101,29 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
     lifecyclePhases.put( EMPhase.eEMTearDown, tdp );
   }
   
-  public boolean isLifecycleStarted()
-  { return (!currentPhase.equals(EMPhase.eEMUnknownPhase)); }
+  public void resetLifecycle()
+  {
+    // Clear all phases of all clients
+    synchronized ( clientLock )
+    {
+      Iterator<AbstractEMLCPhase> phaseIt = lifecyclePhases.values().iterator();
+      while ( phaseIt.hasNext() )
+      {
+        AbstractEMLCPhase phase = phaseIt.next();
+        phase.reset();
+      }
+    }
+    
+    currentExperiment    = null;
+    windingCurrPhaseDown = false;
+    currentPhase         = EMPhase.eEMUnknownPhase;
+  }
+  
+  public boolean isLifecycleActive()
+  { 
+    return ( !currentPhase.equals(EMPhase.eEMUnknownPhase) &&
+             !currentPhase.equals(EMPhase.eEMProtocolComplete) ); 
+  }
   
   public void setExperimentInfo( Experiment expInfo ) throws Exception
   { 
@@ -121,6 +140,28 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   
   public EMPhase getCurrentPhase()
   { return currentPhase; }
+  
+  public EMPhase getNextActivePhase()
+  {
+    EMPhase activePhase = currentPhase.nextPhase();
+    
+    // Iterate through the following phases until we find clients or run out
+    // of phases
+    while ( activePhase != EMPhase.eEMProtocolComplete )
+    {
+      Set<EMClientEx> clients = null;
+    
+      AbstractEMLCPhase currPhase = lifecyclePhases.get( activePhase );
+      if ( currPhase != null )
+        clients = currPhase.getCopySetOfCurrentClients();
+      
+      if ( clients != null && !clients.isEmpty() ) break;
+      
+      activePhase = activePhase.nextPhase();
+    }
+    
+    return activePhase;
+  }
   
   public Set<EMClientEx> getCopySetOfCurrentPhaseClients()
   {
@@ -218,7 +259,21 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   
   public void endLifecycle()
   {
-    currentPhase = EMPhase.eEMUnknownPhase;
+    // Tidy up current phase, if we have one in progress
+    if ( isLifecycleActive() )
+    {
+      AbstractEMLCPhase phase = lifecyclePhases.get( currentPhase );
+      if ( phase != null )
+      {
+        // Reset the phase...
+        currentPhase = EMPhase.eEMUnknownPhase;
+        
+        // ...before trying a controlled stop
+        try
+        { phase.controlledStop(); } 
+        catch ( Exception e ) { phase.hardStop(); }
+      }
+    }
   }
   
   public void tryPullMetric( EMClient client, UUID measurementSetID ) throws Exception
@@ -448,7 +503,7 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
       AbstractEMLCPhase cleanPhase = lifecyclePhases.get( nextPhase );
       
       // Remove the client from this phase
-      if ( cleanPhase != null ) cleanPhase.onClientUnexpectedlyRemoved( client );
+      if ( cleanPhase != null ) cleanPhase.onClientHasBeenDeregistered( client );
       
       // Go to the next phase
       nextPhase = nextPhase.nextPhase();
@@ -456,10 +511,9 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
     
     // Next, remove the client from the current phase
     AbstractEMLCPhase thisPhase = lifecyclePhases.get( currentPhase );
-    if ( thisPhase != null ) thisPhase.onClientUnexpectedlyRemoved( client );
+    if ( thisPhase != null ) thisPhase.onClientHasBeenDeregistered( client );
     
     // Finally, notify listener of this disconnection
-    client.setIsConnected( false );
     lifecycleListener.onClientDisconnected( client );
   }
   

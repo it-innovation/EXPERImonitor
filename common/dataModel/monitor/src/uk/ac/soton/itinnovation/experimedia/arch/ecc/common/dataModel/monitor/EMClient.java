@@ -36,7 +36,8 @@ public class EMClient
 {  
   protected UUID    clientID;
   protected String  clientName;
-  protected boolean clientConnected = false;
+  protected boolean isDisconnecting = false;
+  protected boolean isConnected     = false;
   
   // Discovery phase states
   protected EnumSet<EMPhase>         supportedPhases;
@@ -89,7 +90,16 @@ public class EMClient
    * @return - True if connected.
    */
   public boolean isConnected()
-  { return clientConnected; }
+  { return isConnected; }
+  
+  /**
+   * Return true if the client is currently in the process of being disconnected
+   * from the EM.
+   * 
+   * @return 
+   */
+  public boolean isDisconnecting()
+  { return isDisconnecting; }
   
   /**
    * Returns the client's support for the phases the EM executes.
