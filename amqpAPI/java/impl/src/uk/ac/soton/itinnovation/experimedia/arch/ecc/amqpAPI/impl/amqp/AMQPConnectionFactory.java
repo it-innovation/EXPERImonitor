@@ -44,8 +44,8 @@ public class AMQPConnectionFactory
     private InetAddress amqpHostIP;
     private int         amqpPortNumber = 5672;
     private Connection  amqpConnection;
-    private String userName = null;
-    private String userPass = null;
+    private String      userName = null;
+    private String      userPass = null;
 
 
     public AMQPConnectionFactory()
@@ -171,21 +171,23 @@ public class AMQPConnectionFactory
         String rabbitServerIP   = emProps.getProperty( "Rabbit_IP" );
         String rabbitServerPort = emProps.getProperty( "Rabbit_Port" );
         
-        if (emProps.containsKey("password")) {
-            factoryLog.info("Will be using password to connect to AMQP");
-            userPass = emProps.getProperty("password");
-        } else {
-            factoryLog.info("No password provided, let's hope AMQP does not require authentication");
-            
-        }
+        // If a password exists for the Rabbit connection, use it
+        if ( emProps.containsKey("password") ) 
+        {
+            factoryLog.info( "Will be using password to connect to AMQP" );
+            userPass = emProps.getProperty( "password" );
+        } 
+        else
+          factoryLog.info( "No password provided, let's hope AMQP does not require authentication" );
         
-        if (emProps.containsKey("username")) {
+        // If username and password are supplied, use these
+        if ( emProps.containsKey("username") )
+        {
             userName = emProps.getProperty("username");
             factoryLog.info("Will be using username \'" + userName + "\' to connect to AMQP");
-        } else {
+        } 
+        else 
             factoryLog.info("No username provided, let's hope AMQP has user \'guest\'");
-            
-        }
         
         factoryLog.info( "Trying to connect to AMQP bus..." );
         

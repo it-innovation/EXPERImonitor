@@ -26,14 +26,14 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces.EMBaseInterface;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
 
 import java.util.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.faces.AbstractAMQPInterface;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces.EMBaseInterface;
+
 
 
 
@@ -172,31 +172,40 @@ public class EMClientEx extends EMClient
   { isPullCapable = pull; }
   
   public void addPullingMeasurementSetID( UUID msID )
-  { currentMeasurementSetPulls.add( msID ); }
+  {
+    synchronized ( pullLock )
+    { currentMeasurementSetPulls.add( msID ); }
+  }
   
   public boolean isCurrentlyPullingMeasurementSetID( UUID msID )
   { return currentMeasurementSetPulls.contains( msID ); }
   
   public void removePullingMeasurementSetID( UUID msID )
-  { if ( msID != null ) currentMeasurementSetPulls.remove(msID); }
+  {
+    synchronized ( pullLock )
+    { if ( msID != null ) currentMeasurementSetPulls.remove(msID); }
+  }
   
   public UUID iterateNextMSForPulling()
   {
-    if ( currentMeasurementSetPulls.isEmpty() )
+    synchronized ( pullLock )
     {
-      currentRequestedMSID = null;
-      return null;
+      if ( currentMeasurementSetPulls.isEmpty() )
+        currentRequestedMSID = null;
+      else
+        currentRequestedMSID = currentMeasurementSetPulls.iterator().next();
     }
-    
-    currentRequestedMSID = currentMeasurementSetPulls.iterator().next();
     
     return currentRequestedMSID;
   }
   
   public void clearAllLiveMeasurementSetPulls()
-  { 
-    currentMeasurementSetPulls.clear(); 
-    currentRequestedMSID = null;
+  {
+    synchronized ( pullLock )
+    {
+      currentMeasurementSetPulls.clear(); 
+      currentRequestedMSID = null;
+    }
   }
   
   // Post-report phase state ---------------------------------------------------
