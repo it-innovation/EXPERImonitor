@@ -159,6 +159,7 @@
         <module>edm</module>
         <module>samples</module>
         <module>build-tools</module>
+        <module>eccdashboard</module>
     </modules>
     
 </project>
