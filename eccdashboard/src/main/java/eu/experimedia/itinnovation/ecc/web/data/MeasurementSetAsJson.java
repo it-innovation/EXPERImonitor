@@ -30,17 +30,20 @@ public class MeasurementSetAsJson {
     private String metricUUID;
     private String metricType;
     private String metricUnit;
+    private String entityName;
 
     public MeasurementSetAsJson() {
     }
 
-    public MeasurementSetAsJson(String uuid, String attribute, String metricUUID, String metricType, String metricUnit) {
+    public MeasurementSetAsJson(String uuid, String attribute, String metricUUID, String metricType, String metricUnit, String entityName) {
         this.uuid = uuid;
         this.attribute = attribute;
         this.metricUUID = metricUUID;
         this.metricType = metricType;
         this.metricUnit = metricUnit;
+        this.entityName = entityName;
     }
+
 
     public String getAttribute() {
         return attribute;
@@ -80,5 +83,13 @@ public class MeasurementSetAsJson {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    public String getEntityName() {
+        return entityName;
+    }
+
+    public void setEntityName(String entityName) {
+        this.entityName = entityName;
     }
 }

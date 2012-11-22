@@ -275,7 +275,8 @@ function getMetricGeneratorsPollFirstOne() {
                                 measurementSetContainerLiveDataSwitch.data('measurementSet', measurementSet);
                                 measurementSetContainerLiveDataSwitch.data('live', true);
 
-                                measurementSetContainer.append('<p class="parameters">UUID: ' + measurementSetUuid + '</p>');
+//                                measurementSetContainer.append('<p class="parameters">UUID: ' + measurementSetUuid + '</p>');
+                                measurementSetContainer.append('<p class="parameters">Entity name: ' + measurementSet.entityName + '</p>');
                                 measurementSetContainer.append('<div id="measurementSetDataContainer_' + measurementSetUuid + '"></div>');
 
                                 measurementSetContainerLiveDataSwitch.click(function(e){

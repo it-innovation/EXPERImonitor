@@ -162,6 +162,7 @@ public class ExperimentMonitorController {
                 Set<MetricGroupAsJson> tempMetricGroupAsJsonSet = new HashSet<MetricGroupAsJson>();
                 Set<MeasurementSetAsJson> tempMeasurementSetAsJsonSet = new HashSet<MeasurementSetAsJson>();
 
+                Set<Entity> allEntities = new HashSet<Entity>();
                 Set<Attribute> allAttributes = new HashSet<Attribute>();
                 for (EMClient client : clients) {
 
@@ -172,7 +173,8 @@ public class ExperimentMonitorController {
                         desc = metricGenerator.getDescription();
 
                         // Entities
-                        for (Entity entity : metricGenerator.getEntities()) {
+                        allEntities = metricGenerator.getEntities();
+                        for (Entity entity : allEntities) {
 
                             tempEntityAsJson.setUuid(entity.getUUID().toString());
                             tempEntityAsJson.setName(entity.getName());
@@ -198,6 +200,7 @@ public class ExperimentMonitorController {
                                 tempMeasurementSetAsJson.setMetricUUID(measurementSet.getMetric().getUUID().toString());
                                 tempMeasurementSetAsJson.setMetricType(measurementSet.getMetric().getMetricType().name());
                                 tempMeasurementSetAsJson.setMetricUnit(measurementSet.getMetric().getUnit().getName());
+                                tempMeasurementSetAsJson.setEntityName(this.getEntityNameForMeasurementSet(measurementSet, allAttributes.toArray(new Attribute[0]), allEntities.toArray(new Entity[0])));
 
                                 tempMeasurementSetAsJsonSet.add(tempMeasurementSetAsJson);
                                 tempMeasurementSetAsJson = new MeasurementSetAsJson();
@@ -221,6 +224,7 @@ public class ExperimentMonitorController {
 
                         resultingMgSet.add(tempMetricGeneratorAsJson);
 
+                        allEntities = new HashSet<Entity>();
                         allAttributes = new HashSet<Attribute>();
                         tempEntityAsJsonSet = new HashSet<EntityAsJson>();
                         tempMetricGroupAsJsonSet = new HashSet<MetricGroupAsJson>();
@@ -250,6 +254,32 @@ public class ExperimentMonitorController {
         }
 
         return attributeName;
+    }
+
+    // temp fix = combine with the one above TODO
+    private String getEntityNameForMeasurementSet(MeasurementSet measurementSet, Attribute[] allAttributes, Entity[] allEntities) {
+        String attributeSetUUID = measurementSet.getAttributeUUID().toString();
+        String entityName = "unknown entity";
+        String attributeUuid = null;
+
+        for (Attribute attribute : allAttributes) {
+            if (attribute.getUUID().toString().equals(attributeSetUUID)) {
+                attributeUuid = attribute.getUUID().toString();
+                break;
+            }
+        }
+
+        if (attributeUuid != null) {
+            for (Entity entity : allEntities) {
+                for (Attribute attribute : entity.getAttributes()) {
+                    if (attribute.getUUID().toString().equals(attributeUuid)) {
+                        entityName = entity.getName();
+                        break;
+                    }
+                }
+            }
+        }
+        return entityName;
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/getcurrentphase/do.json")
