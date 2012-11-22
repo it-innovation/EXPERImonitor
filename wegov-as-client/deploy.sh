@@ -21,7 +21,7 @@ cp wegov-dashboard/src/main/resources/quartz/tables_postgres.sql charms/precise/
 cp wegov-database-maintenance/target/wegov-database-maintenance-1.0-jar-with-dependencies.jar charms/precise/wegov/
 cp wegov-tools/search-analysis/target/wegov-search-analysis-tool-2.0-jar-with-dependencies.jar charms/precise/wegov/
 
-juju deploy cs:~robert-ayres/precise/tomcat tomcat-wegov
+juju deploy --constraints='mem=2G' cs:~robert-ayres/precise/tomcat tomcat-wegov
 juju deploy --repository=./charms local:wegov wegov
 juju add-relation wegov tomcat-wegov
 #juju deploy postgresql postgresql-wegov

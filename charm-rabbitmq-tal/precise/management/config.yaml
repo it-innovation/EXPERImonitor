@@ -1,0 +1,19 @@
+options:
+  ssl_enabled:
+    type: boolean
+    default: False
+    description: enable SSL
+  management_plugin:
+    type: boolean
+    default: False
+    description: enable the management plugin
+  ssl_port:
+    type: int
+    default: 5671
+    description: SSL port
+  ssl_key:
+    type: string
+    description: private unencrypted key in PEM format (starts "-----BEGIN RSA PRIVATE KEY-----")
+  ssl_cert:
+    type: string
+    description: X.509 certificate in PEM format (starts "-----BEGIN CERTIFICATE-----")

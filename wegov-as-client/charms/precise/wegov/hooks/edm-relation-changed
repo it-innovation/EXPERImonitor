@@ -19,7 +19,7 @@ dbPassword = `relation-get password`
 dbType = postgresql
 EOF
 
-cat > /var/lib/tomcat7/coordinator.properties << EOF
+cat > /var/lib/tomcat7/coordinator.properties <<EOF
 # Properties for WeGov Coordinator
 
 # POSTGRESQL SERVER CONFIGURATION (admin access)
@@ -52,7 +52,7 @@ oauthConsumerAccessToken=380850453-JEserFePITVZa63nYXiun7bwaOsoJdwYNzi4vMEx
 oauthConsumerAccessTokenSecret=JYGZXw2YsdahbVvf782Az2Cj4bO3Yk3VcsNcl6s6AE
 EOF
 
-cat > /var/lib/tomcat7/webapps/ROOT/WEB-INF/classes/quartz/quartz.properties << EOF
+cat > /var/lib/tomcat7/webapps/ROOT/WEB-INF/classes/quartz/quartz.properties <<EOF
 org.quartz.scheduler.instanceName = theScheduler
 org.quartz.threadPool.threadCount = 5
 org.quartz.scheduler.skipUpdateCheck=true
