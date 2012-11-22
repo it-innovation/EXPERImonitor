@@ -14,3 +14,5 @@ machines:
 3. Run script buildAll.sh in this folder
 
 4. Run script deployDashboard.sh in this folder to deploy ECC Dashboard
+
+5. Run script deployWegov.sh in this folder to deploy WeGov
