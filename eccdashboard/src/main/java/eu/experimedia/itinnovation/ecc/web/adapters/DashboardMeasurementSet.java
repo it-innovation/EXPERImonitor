@@ -33,6 +33,7 @@ public class DashboardMeasurementSet {
     private final Logger logger = Logger.getLogger(DashboardMeasurementSet.class);
     
     private String UUID;
+    private String clientUUID;
     private LinkedHashMap<String, DataPoint> measurements = new LinkedHashMap<String, DataPoint>()
     {
         @Override
@@ -41,8 +42,9 @@ public class DashboardMeasurementSet {
         }        
     };
 
-    public DashboardMeasurementSet(String UUID) {
+    public DashboardMeasurementSet(String UUID, String clientUUID) {
         this.UUID = UUID;
+        this.clientUUID = clientUUID;
     }
 
     public void addMeasurement(String measurementUuid, DataPoint dataPoint) {
@@ -56,5 +58,13 @@ public class DashboardMeasurementSet {
 
     public String getUUID() {
         return UUID;
+    }
+
+    public String getClientUUID() {
+        return clientUUID;
+    }
+
+    public void setClientUUID(String clientUUID) {
+        this.clientUUID = clientUUID;
     }
 }
