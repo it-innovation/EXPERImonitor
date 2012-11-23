@@ -425,7 +425,7 @@ function pollAndReplotGraph(jqplotGraph, measurementSetUuid, lastMeasurementUUID
                         console.log('No new points for measurement set: ' + measurementSetUuid);
                     }
 
-                    setTimeout(function(){pollAndReplotGraph(jqplotGraph, measurementSetUuid, newMeasurementUUID)}, 4000);
+                    setTimeout(function(){pollAndReplotGraph(jqplotGraph, measurementSetUuid, newMeasurementUUID)}, 5000);
                 } else {
                     console.log('Received measurementSetData but ignored it as refreshing graph data is OFF for measurement set: ' + measurementSetUuid);
                 }
@@ -467,7 +467,7 @@ function pollAndReplotText(dataTable, measurementSetUuid, lastMeasurementUUID) {
                         previousTopicTime = entry.time;
                     }); 
 
-                    setTimeout(function(){pollAndReplotText(dataTable, measurementSetUuid, -1)}, 4000);
+                    setTimeout(function(){pollAndReplotText(dataTable, measurementSetUuid, -1)}, 5000);
                 } else {
                     console.log('Received measurementSetData but ignored it as refreshing text is OFF for measurement set: ' + measurementSetUuid);
                 }
@@ -558,7 +558,7 @@ function pollDataForMeasurementSet(measurementSetUuid) {
                                 }
                             });
 
-                            setTimeout(function(){pollAndReplotGraph(jqplotGraph, measurementSetUuid, -1)}, 4000);
+                            setTimeout(function(){pollAndReplotGraph(jqplotGraph, measurementSetUuid, -1)}, 5000);
                         }
                     }
                 } else {
@@ -637,7 +637,7 @@ function pollTextForMeasurementSet(measurementSetUuid) {
                                 previousTopicTime = entry.time;
                             });                            
 
-                            setTimeout(function(){pollAndReplotText(dataTable, measurementSetUuid, -1)}, 4000);
+                            setTimeout(function(){pollAndReplotText(dataTable, measurementSetUuid, -1)}, 5000);
                         }
                     }
                 } else {
