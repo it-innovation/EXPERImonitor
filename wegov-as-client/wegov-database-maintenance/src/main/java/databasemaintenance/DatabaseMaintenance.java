@@ -39,8 +39,8 @@ public class DatabaseMaintenance {
 
             coordinator.createPolicyMaker("Test user", userRole, "Experimedia", "user", "test");
 
-            addSearchTool(coordinator, wegovToolsHome + "/wegov-search-tool-2.0-jar-with-dependencies.jar");
-            addGroupsSearchTool(coordinator, wegovToolsHome + "/wegov-search-tool-2.0-jar-with-dependencies.jar");
+            addSearchTool(coordinator, wegovToolsHome + "/wegov-search-analysis-tool-2.0-jar-with-dependencies.jar");
+            addGroupsSearchTool(coordinator, wegovToolsHome + "/wegov-search-analysis-tool-2.0-jar-with-dependencies.jar");
             addGroupsSearchAndAnalysisTool(coordinator, wegovToolsHome + "/wegov-search-analysis-tool-2.0-jar-with-dependencies.jar");
             addInjectTool(coordinator, wegovToolsHome + "/wegov-inject-tool-2.0-jar-with-dependencies.jar");
             addTopicOpinionTool(coordinator, wegovToolsHome + "/wegov-analysis-tool-2.0-jar-with-dependencies.jar");
