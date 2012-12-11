@@ -1,0 +1,31 @@
+{% extends "!layout.html" %}
+
+{% block extrahead %}
+{{ super() }}
+{%- if not embedded %}
+<style type="text/css">
+  table.right { float: right; margin-left: 20px; }
+  table.right td { border: 1px solid #ccc; }
+  body { margin-top: 20px }
+</style>
+{%- endif %}
+{% endblock %}
+
+{% block rootrellink %}
+  <li><a href="{{ pathto('index') }}">ECC Documentation</a></li>
+{% endblock %}
+
+{% block header %}
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+<a href="http://www.experimedia.eu/"><img src="{{ pathto("_static/img/experimedia.png", 1) }}" alt="EXPERIMEDIA logo and link to EXPERIMEDIA project website" /></a>
+</div>
+{% endblock %}
+
+
+{% block document %}
+
+{{ super() }}
+
+&nbsp;
+
+{% endblock %}
