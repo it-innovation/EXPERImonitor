@@ -145,12 +145,34 @@
                 </configuration>
             </plugin>
         </plugins>
+
+	<extensions>
+	  <!-- Allow deployment with SCP -->
+	  <extension>
+	    <groupId>org.apache.maven.wagon</groupId>
+	    <artifactId>wagon-ssh-external</artifactId>
+	    <version>1.0-beta-6</version>
+	  </extension>
+	</extensions>
     </build>
   
     <!-- 3rd party repositories -->
     <repositories>
 
     </repositories>
+
+    <distributionManagement>
+      <repository>
+	<id>barooga</id>
+	<name>IT Innovation hosted public repository</name>
+	<url>scpexe://barooga.it-innovation.soton.ac.uk/srv/software/experimedia/maven</url>
+      </repository>
+      <snapshotRepository>
+	<id>barooga</id>
+	<name>IT Innovation hosted public repository</name>
+	<url>scpexe://barooga.it-innovation.soton.ac.uk/srv/software/experimedia/maven-snapshots</url>
+      </snapshotRepository>
+    </distributionManagement>
   
     <modules>
         <module>common</module>
