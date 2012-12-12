@@ -14,12 +14,6 @@ We also provide an EDM Agent, which can be used for local storage of monitoring 
 The EDM in the ECC is stores the monitoring data in a PostgreSQL database. The  current version of the EDM Agent also uses PostgreSQL, but other implementations are planned to give options for devices that cannot run such a database solution.
 
 
-Software dependencies
-=====================
-
-TODO
-
-
 API
 ===
 

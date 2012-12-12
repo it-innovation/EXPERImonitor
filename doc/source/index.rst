@@ -46,7 +46,7 @@ Welcome to the EXPERIMEDIA ECC documentation!
 |                                        |                                        |
 |    reference/ecc-protocol              |    faq                                 |
 |    reference/metric-data-model         |                                        |
-|                                        | * :ref:`search`                        |
+|    reference/dependencies-licences     | * :ref:`search`                        |
 |                                        |                                        |
 |                                        |                                        |
 +----------------------------------------+----------------------------------------+
