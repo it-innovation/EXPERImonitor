@@ -1,0 +1,88 @@
+/////////////////////////////////////////////////////////////////////////
+//
+// © University of Southampton IT Innovation Centre, 2012
+//
+// Copyright in this software belongs to University of Southampton
+// IT Innovation Centre of Gamma House, Enterprise Road, 
+// Chilworth Science Park, Southampton, SO16 7NS, UK.
+//
+// This software may not be used, sold, licensed, transferred, copied
+// or reproduced in whole or in part in any manner or form or in or
+// on any media by any person other than in accordance with the terms
+// of the Licence Agreement supplied with the software, or otherwise
+// without the prior written consent of the copyright owners.
+//
+// This software is distributed WITHOUT ANY WARRANTY, without even the
+// implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+// PURPOSE, except where stated in the Licence Agreement supplied with
+// the software.
+//
+//      Created By :            Vegard Engen
+//      Created Date :          2012-12-12
+//      Created for Project :   BonFIRE
+//
+/////////////////////////////////////////////////////////////////////////
+package test.java.uk.ac.soton.itinnovation.experimedia.arch.edm.test.unit;
+
+import java.util.Date;
+import java.util.Set;
+import junit.framework.*;
+import org.junit.Test;
+import org.apache.log4j.Logger;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMInterfaceFactory;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDM;
+
+/**
+ *
+ * @author Vegard Engen
+ */
+public class GeneralTest extends TestCase
+{
+    static Logger log = Logger.getLogger(GeneralTest.class);
+    
+    public static void main(String[] args)
+    {
+        junit.textui.TestRunner.run(GeneralTest.class);
+
+        log.info("EDM General Test Complete");
+        System.exit(0);
+    }
+    
+    public GeneralTest()
+    {
+        super();
+    }
+    
+    @Test
+    public void testDatabaseConnection()
+    {
+        IMonitoringEDM edm = null;
+        try {
+            edm = EDMInterfaceFactory.getMonitoringEDM();
+        } catch (Exception ex) {
+            fail("Unable to get Monitoring EDM: " + ex.toString());
+        }
+        
+        if (!edm.isDatabaseSetUpAndAccessible())
+        {
+            fail("A connection to the database couldn't be made, or the correct schema is not in place.");
+        }
+    }
+    
+    @Test
+    public void testClearDatabase()
+    {
+        IMonitoringEDM edm = null;
+        try {
+            edm = EDMInterfaceFactory.getMonitoringEDM();
+        } catch (Exception ex) {
+            fail("Unable to get Monitoring EDM: " + ex.toString());
+        }
+        
+        try {
+            edm.clearMetricsDatabase();
+        } catch (Throwable t) {
+            fail("Unable to clear the database: " + t.toString());
+        }
+    }
+}

@@ -51,7 +51,7 @@ public class EDMTestSuite extends TestCase
     {
         TestSuite suite = new TestSuite("EDM Tests");
 
-        // ECCMonitorInterface
+        suite.addTestSuite(GeneralTest.class);
         suite.addTestSuite(ExperimentTest.class);
 
         return suite;

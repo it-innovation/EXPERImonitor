@@ -628,8 +628,8 @@ public class ReportDAOHelper
             // check if anything got returned
             if (!rs.next())
             {
-                log.debug("There are no measurements in the database for the given time period of the measurement set to generate a report from");
-                throw new NoDataException("There are no measurements in the database for the given time period of the measurement set to generate a report from");
+                log.debug("There are no measurements in the database for the given measurement set / time period of the measurement set to generate a report from");
+                throw new NoDataException("There are no measurements in the database for the given measurement set / time period of the measurement set to generate a report from");
             }
             
             // process each result item
@@ -696,20 +696,26 @@ public class ReportDAOHelper
     {
         if (measurementSetUUID == null)
         {
-            log.error("Cannot generate a Report object for the MeasurementSet with the given UUID because it is NULL!");
+            log.warn("Cannot generate a Report object for the MeasurementSet with the given UUID because it is NULL!");
             throw new IllegalArgumentException("Cannot generate a Report object for the MeasurementSet with the given UUID because it is NULL!");
         }
         
         if (fromDate == null)
         {
-            log.error("Cannot generate a Report object for the MeasurementSet from the given date because it is NULL!");
+            log.warn("Cannot generate a Report object for the MeasurementSet from the given date because it is NULL!");
             throw new IllegalArgumentException("Cannot generate a Report object for the MeasurementSet from the given date because it is NULL!");
         }
         
         if (DBUtil.isClosed(connection))
         {
-            log.error("Cannot get the Report because the connection to the DB is closed");
-            throw new RuntimeException("Cannot get the Report because the connection to the DB is closed");
+            log.error("Cannot generate the Report because the connection to the DB is closed");
+            throw new RuntimeException("Cannot generate the Report because the connection to the DB is closed");
+        }
+        
+        if (!MeasurementSetDAOHelper.objectExists(measurementSetUUID, connection))
+        {
+            log.warn("Cannot generate the report because the given MeasurementSet UUID does not exist in the database (" + measurementSetUUID + ")");
+            throw new IllegalArgumentException("Cannot generate the report because the given MeasurementSet UUID does not exist in the database (" + measurementSetUUID + ")");
         }
         
         Report report = null;

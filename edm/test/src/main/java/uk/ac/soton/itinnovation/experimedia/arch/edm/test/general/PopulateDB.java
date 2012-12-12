@@ -22,7 +22,7 @@
 //      Created for Project :   BonFIRE
 //
 /////////////////////////////////////////////////////////////////////////
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.test;
+package uk.ac.soton.itinnovation.experimedia.arch.edm.test.general;
 
 import java.util.Date;
 import java.util.Random;

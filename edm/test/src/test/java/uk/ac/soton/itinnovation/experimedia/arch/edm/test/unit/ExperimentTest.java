@@ -30,7 +30,9 @@ import junit.framework.*;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMInterfaceFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.MonitoringEDM;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDM;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IExperimentDAO;
 
 public class ExperimentTest extends TestCase
@@ -53,18 +55,18 @@ public class ExperimentTest extends TestCase
     @Test
     public void testSaveExperiment_valid()
     {
-        MonitoringEDM edm = null;
+        IMonitoringEDM edm = null;
         try {
-            edm = new MonitoringEDM();
+            edm = EDMInterfaceFactory.getMonitoringEDM();
         } catch (Exception ex) {
-            fail ("Unable to get Monitoring EDM");
+            fail("Unable to get Monitoring EDM");
         }
         
         IExperimentDAO expDAO = null;
         try {
             expDAO = edm.getExperimentDAO();
         } catch (Exception ex) {
-            fail ("Unable to get Experiment DAO");
+            fail("Unable to get Experiment DAO");
         }
         
         Experiment exp1 = new Experiment();
@@ -84,18 +86,18 @@ public class ExperimentTest extends TestCase
     @Test
     public void testSaveExperiment_duplicateUUID()
     {
-        MonitoringEDM edm = null;
+        IMonitoringEDM edm = null;
         try {
-            edm = new MonitoringEDM();
+            edm = EDMInterfaceFactory.getMonitoringEDM();
         } catch (Exception ex) {
-            fail ("Unable to get Monitoring EDM");
+            fail("Unable to get Monitoring EDM");
         }
         
         IExperimentDAO expDAO = null;
         try {
             expDAO = edm.getExperimentDAO();
         } catch (Exception ex) {
-            fail ("Unable to get Experiment DAO");
+            fail("Unable to get Experiment DAO");
         }
         
         Experiment exp2 = new Experiment();
@@ -119,17 +121,18 @@ public class ExperimentTest extends TestCase
     @Test
     public void testSaveExperiment_noName()
     {
-        MonitoringEDM edm = null;
+        IMonitoringEDM edm = null;
         try {
-            edm = new MonitoringEDM();
+            edm = EDMInterfaceFactory.getMonitoringEDM();
         } catch (Exception ex) {
-            fail ("Unable to get Monitoring EDM");
+            fail("Unable to get Monitoring EDM");
         }
+        
         IExperimentDAO expDAO = null;
         try {
             expDAO = edm.getExperimentDAO();
         } catch (Exception ex) {
-            fail ("Unable to get Experiment DAO");
+            fail("Unable to get Experiment DAO");
         }
         
         // should not save because of missinng information (UUID generated, but name not set)
@@ -143,17 +146,18 @@ public class ExperimentTest extends TestCase
     @Test
     public void testGetExperiment()
     {
-        MonitoringEDM edm = null;
+        IMonitoringEDM edm = null;
         try {
-            edm = new MonitoringEDM();
+            edm = EDMInterfaceFactory.getMonitoringEDM();
         } catch (Exception ex) {
-            fail ("Unable to get Monitoring EDM");
+            fail("Unable to get Monitoring EDM");
         }
+        
         IExperimentDAO expDAO = null;
         try {
             expDAO = edm.getExperimentDAO();
         } catch (Exception ex) {
-            fail ("Unable to get Experiment DAO");
+            fail("Unable to get Experiment DAO");
         }
         
         Experiment exp1 = new Experiment();
@@ -187,17 +191,18 @@ public class ExperimentTest extends TestCase
     @Test
     public void testGetExperiments()
     {
-        MonitoringEDM edm = null;
+        IMonitoringEDM edm = null;
         try {
-            edm = new MonitoringEDM();
+            edm = EDMInterfaceFactory.getMonitoringEDM();
         } catch (Exception ex) {
-            fail ("Unable to get Monitoring EDM");
+            fail("Unable to get Monitoring EDM");
         }
+        
         IExperimentDAO expDAO = null;
         try {
             expDAO = edm.getExperimentDAO();
         } catch (Exception ex) {
-            fail ("Unable to get Experiment DAO");
+            fail("Unable to get Experiment DAO");
         }
         
         Set<Experiment> experiments = null;

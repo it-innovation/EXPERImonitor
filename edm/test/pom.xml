@@ -61,9 +61,6 @@
           </configuration>
         </plugin>
     </plugins>
-  
-    <directory>lib</directory>
-    <sourceDirectory>src</sourceDirectory>
   </build>
   
   <dependencies>
