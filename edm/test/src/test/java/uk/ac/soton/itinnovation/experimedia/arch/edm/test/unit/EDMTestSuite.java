@@ -28,14 +28,17 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.apache.log4j.Logger;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
+import uk.ac.soton.itinnovation.experimedia.arch.edm.test.unit.APopulateDBTest;
 
 /**
  *
  * @author Vegard Engen
  */
+@RunWith(JUnit4.class)
 public class EDMTestSuite extends TestCase
 {
-
     static Logger log = Logger.getLogger(EDMTestSuite.class);
 
     public static void main(String[] args)
@@ -51,7 +54,8 @@ public class EDMTestSuite extends TestCase
     {
         TestSuite suite = new TestSuite("EDM Tests");
 
-        suite.addTestSuite(GeneralTest.class);
+        suite.addTestSuite(AGeneralTest.class);
+        suite.addTestSuite(APopulateDBTest.class);
         suite.addTestSuite(ExperimentTest.class);
 
         return suite;

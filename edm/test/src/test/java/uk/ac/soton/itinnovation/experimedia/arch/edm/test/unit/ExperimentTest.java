@@ -28,15 +28,22 @@ import java.util.Date;
 import java.util.Set;
 import junit.framework.*;
 import org.apache.log4j.Logger;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMInterfaceFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.MonitoringEDM;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDM;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IExperimentDAO;
 
+@RunWith(JUnit4.class)
 public class ExperimentTest extends TestCase
 {
+    IMonitoringEDM edm = null;
+    IExperimentDAO expDAO = null;
     static Logger log = Logger.getLogger(ExperimentTest.class);
     
     public static void main(String[] args)
@@ -52,22 +59,24 @@ public class ExperimentTest extends TestCase
         super();
     }
     
+    @BeforeClass
+    public static void beforeClass()
+    {
+        log.info("Experiment tests");
+    }
+    
+    @Before
+    public void beforeEachTest() throws Exception
+    {
+        edm = EDMInterfaceFactory.getMonitoringEDM();
+        edm.clearMetricsDatabase();
+        expDAO = edm.getExperimentDAO();
+    }
+    
     @Test
     public void testSaveExperiment_valid()
     {
-        IMonitoringEDM edm = null;
-        try {
-            edm = EDMInterfaceFactory.getMonitoringEDM();
-        } catch (Exception ex) {
-            fail("Unable to get Monitoring EDM");
-        }
-        
-        IExperimentDAO expDAO = null;
-        try {
-            expDAO = edm.getExperimentDAO();
-        } catch (Exception ex) {
-            fail("Unable to get Experiment DAO");
-        }
+        log.info(" - saving valid experiment");
         
         Experiment exp1 = new Experiment();
         exp1.setName("Test 1");
@@ -80,25 +89,12 @@ public class ExperimentTest extends TestCase
         } catch (Exception ex) {
             fail("Unable to save experiment");
         }
-        assertTrue(true);
     }
     
     @Test
     public void testSaveExperiment_duplicateUUID()
     {
-        IMonitoringEDM edm = null;
-        try {
-            edm = EDMInterfaceFactory.getMonitoringEDM();
-        } catch (Exception ex) {
-            fail("Unable to get Monitoring EDM");
-        }
-        
-        IExperimentDAO expDAO = null;
-        try {
-            expDAO = edm.getExperimentDAO();
-        } catch (Exception ex) {
-            fail("Unable to get Experiment DAO");
-        }
+        log.info(" - saving experiment with duplicate UUID");
         
         Experiment exp2 = new Experiment();
         exp2.setName("Test 2");
@@ -121,19 +117,7 @@ public class ExperimentTest extends TestCase
     @Test
     public void testSaveExperiment_noName()
     {
-        IMonitoringEDM edm = null;
-        try {
-            edm = EDMInterfaceFactory.getMonitoringEDM();
-        } catch (Exception ex) {
-            fail("Unable to get Monitoring EDM");
-        }
-        
-        IExperimentDAO expDAO = null;
-        try {
-            expDAO = edm.getExperimentDAO();
-        } catch (Exception ex) {
-            fail("Unable to get Experiment DAO");
-        }
+        log.info(" - saving experiment with no name");
         
         // should not save because of missinng information (UUID generated, but name not set)
         Experiment exp4 = new Experiment();
@@ -146,30 +130,18 @@ public class ExperimentTest extends TestCase
     @Test
     public void testGetExperiment()
     {
-        IMonitoringEDM edm = null;
-        try {
-            edm = EDMInterfaceFactory.getMonitoringEDM();
-        } catch (Exception ex) {
-            fail("Unable to get Monitoring EDM");
-        }
-        
-        IExperimentDAO expDAO = null;
-        try {
-            expDAO = edm.getExperimentDAO();
-        } catch (Exception ex) {
-            fail("Unable to get Experiment DAO");
-        }
+        log.info(" - saving and retrieving an experiment");
         
         Experiment exp1 = new Experiment();
-        exp1.setName("Test 1");
-        exp1.setDescription("A very boring description...");
+        exp1.setName("Experiment");
+        exp1.setDescription("A description...");
         exp1.setStartTime(new Date(Long.parseLong("1345642421005")));
         exp1.setEndTime(new Date());
         exp1.setExperimentID("3543");
         try {
             expDAO.saveExperiment(exp1);
         } catch (Exception ex) {
-            fail("Unable to save experiment");
+            fail("Unable to save experiment: " + ex.toString());
         }
         
         Experiment exp = null;
@@ -179,41 +151,53 @@ public class ExperimentTest extends TestCase
             fail("Unable to get experiment due to an exception: " + ex.getMessage());
         }
         
-        assertNotNull(exp);
-        assertNotNull(exp.getUUID());
-        assertNotNull(exp.getName());
-        assertNotNull(exp.getDescription());
-        assertNotNull(exp.getStartTime());
-        assertNotNull(exp.getEndTime());
-        assertNotNull(exp.getExperimentID());
+        assertNotNull("Experiment tretrieved from the DB is NULL", exp);
+        assertNotNull("Experiment tretrieved from the DB doesn't have the UUID set", exp.getUUID());
+        assertNotNull("Experiment tretrieved from the DB doesn't have the name set", exp.getName());
+        assertNotNull("Experiment tretrieved from the DB doesn't have the description set", exp.getDescription());
+        assertNotNull("Experiment tretrieved from the DB doesn't have the start time set", exp.getStartTime());
+        assertNotNull("Experiment tretrieved from the DB doesn't have the end time set", exp.getEndTime());
+        assertNotNull("Experiment tretrieved from the DB doesn't have the experiment ID set", exp.getExperimentID());
     }
     
     @Test
     public void testGetExperiments()
     {
-        IMonitoringEDM edm = null;
+        log.info(" - saving and retrieving all experiments");
+        
+        Experiment exp1 = new Experiment();
+        exp1.setName("Experiment 1");
+        exp1.setDescription("A description...");
+        exp1.setStartTime(new Date(Long.parseLong("1345642421005")));
+        exp1.setEndTime(new Date());
+        exp1.setExperimentID("3543");
         try {
-            edm = EDMInterfaceFactory.getMonitoringEDM();
+            expDAO.saveExperiment(exp1);
         } catch (Exception ex) {
-            fail("Unable to get Monitoring EDM");
+            fail("Unable to save experiment");
         }
         
-        IExperimentDAO expDAO = null;
+        Experiment exp2 = new Experiment();
+        exp2.setName("Experiment 2");
+        exp2.setDescription("A description...");
+        exp2.setStartTime(new Date(Long.parseLong("1345642421005")));
+        exp2.setEndTime(new Date());
+        exp2.setExperimentID("5740");
         try {
-            expDAO = edm.getExperimentDAO();
+            expDAO.saveExperiment(exp2);
         } catch (Exception ex) {
-            fail("Unable to get Experiment DAO");
+            fail("Unable to save experiment");
         }
         
         Set<Experiment> experiments = null;
         
         try {
             experiments = expDAO.getExperiments(false);
-            
-            assertNotNull(experiments);
-            assertFalse(experiments.isEmpty());
         } catch (Exception ex) {
             fail("Unable to get experiments from DB");
         }
+        
+        assertNotNull("Experiment set returned from DB is NULL", experiments);
+        assertTrue("Experiment set returned from DB should have contained 2 experiments, but contained " + experiments.size() + " experiment(s)", experiments.size() == 2);
     }
 }

@@ -24,38 +24,44 @@
 /////////////////////////////////////////////////////////////////////////
 package test.java.uk.ac.soton.itinnovation.experimedia.arch.edm.test.unit;
 
-import java.util.Date;
-import java.util.Set;
 import junit.framework.*;
 import org.junit.Test;
 import org.apache.log4j.Logger;
+import org.junit.BeforeClass;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMInterfaceFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDM;
+import uk.ac.soton.itinnovation.experimedia.arch.edm.test.general.PopulateDB;
 
-/**
- *
- * @author Vegard Engen
- */
-public class GeneralTest extends TestCase
+@RunWith(JUnit4.class)
+public class AGeneralTest extends TestCase
 {
-    static Logger log = Logger.getLogger(GeneralTest.class);
+    static Logger log = Logger.getLogger(AGeneralTest.class);
     
     public static void main(String[] args)
     {
-        junit.textui.TestRunner.run(GeneralTest.class);
+        junit.textui.TestRunner.run(AGeneralTest.class);
 
         log.info("EDM General Test Complete");
         System.exit(0);
     }
     
-    public GeneralTest()
+    public AGeneralTest()
     {
         super();
+    }
+    
+    @BeforeClass
+    public static void beforeClass()
+    {
+        log.info("General tests");
     }
     
     @Test
     public void testDatabaseConnection()
     {
+        log.info(" - testDatabaseConnection");
         IMonitoringEDM edm = null;
         try {
             edm = EDMInterfaceFactory.getMonitoringEDM();
@@ -63,15 +69,13 @@ public class GeneralTest extends TestCase
             fail("Unable to get Monitoring EDM: " + ex.toString());
         }
         
-        if (!edm.isDatabaseSetUpAndAccessible())
-        {
-            fail("A connection to the database couldn't be made, or the correct schema is not in place.");
-        }
+        assertTrue("A connection to the database couldn't be made, or the correct schema is not in place", edm.isDatabaseSetUpAndAccessible());
     }
     
     @Test
     public void testClearDatabase()
     {
+        log.info(" - testClearDatabase");
         IMonitoringEDM edm = null;
         try {
             edm = EDMInterfaceFactory.getMonitoringEDM();
@@ -83,6 +87,19 @@ public class GeneralTest extends TestCase
             edm.clearMetricsDatabase();
         } catch (Throwable t) {
             fail("Unable to clear the database: " + t.toString());
+        }
+    }
+    
+    @Test
+    public void testPopulateDB()
+    {
+        log.info(" - testPopulateDB");
+        try {
+            //edm.clearMetricsDatabase();
+            PopulateDB.populateWithTestData();
+        } catch (Exception ex) {
+            log.error("Unable to populate the DB with test data: " + ex.toString(), ex);
+            fail("Unable to populate the DB with test data: " + ex.toString());
         }
     }
 }
