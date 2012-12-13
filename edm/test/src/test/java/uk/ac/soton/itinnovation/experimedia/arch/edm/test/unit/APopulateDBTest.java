@@ -67,19 +67,6 @@ public class APopulateDBTest extends TestCase
     IMonitoringEDM edm = null;
     static Logger log = Logger.getLogger(APopulateDBTest.class);
     
-    public static void main(String[] args)
-    {
-        junit.textui.TestRunner.run(APopulateDBTest.class);
-
-        log.info("EDM PopulateDB Test Complete");
-        System.exit(0);
-    }
-    
-    public APopulateDBTest()
-    {
-        super();
-    }
-    
     @BeforeClass
     public static void populateDB() throws Exception
     {
@@ -94,7 +81,7 @@ public class APopulateDBTest extends TestCase
         
         try {
             edm.clearMetricsDatabase();
-            PopulateDB.populateWithTestData();
+            PopulateDB.populateWithTestData(edm);
         } catch (Exception ex) {
             log.error("Unable to clear the metrics database and populate it: " + ex.toString());
             throw ex;
@@ -188,9 +175,9 @@ public class APopulateDBTest extends TestCase
     public void testGetMetricGenerators()
     {
         log.info(" - checking metric generators");
-        IMetricGeneratorDAO metricGeneratorDAO = null;
+        IMetricGeneratorDAO mGenDAO = null;
         try {
-            metricGeneratorDAO = edm.getMetricGeneratorDAO();
+            mGenDAO = edm.getMetricGeneratorDAO();
         } catch (Exception ex) {
             fail("Unable to get MetricGenerator DAO: " + ex.toString());
         }
@@ -198,7 +185,7 @@ public class APopulateDBTest extends TestCase
         Set<MetricGenerator> metricGenerators = null;
         
         try {
-            metricGenerators = metricGeneratorDAO.getMetricGenerators(false);
+            metricGenerators = mGenDAO.getMetricGenerators(false);
         } catch (Exception ex) {
             fail("Unable to get metric generators due to an exception: " + ex.getMessage());
         }

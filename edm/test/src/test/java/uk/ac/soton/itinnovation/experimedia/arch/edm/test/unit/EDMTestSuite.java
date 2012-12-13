@@ -22,7 +22,7 @@
 //      Created for Project :   BonFIRE
 //
 /////////////////////////////////////////////////////////////////////////
-package test.java.uk.ac.soton.itinnovation.experimedia.arch.edm.test.unit;
+package uk.ac.soton.itinnovation.experimedia.arch.edm.test.unit;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -30,7 +30,6 @@ import junit.framework.TestSuite;
 import org.apache.log4j.Logger;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import uk.ac.soton.itinnovation.experimedia.arch.edm.test.unit.APopulateDBTest;
 
 /**
  *

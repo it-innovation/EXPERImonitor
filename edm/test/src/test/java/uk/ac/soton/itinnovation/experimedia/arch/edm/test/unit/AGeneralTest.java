@@ -22,12 +22,12 @@
 //      Created for Project :   BonFIRE
 //
 /////////////////////////////////////////////////////////////////////////
-package test.java.uk.ac.soton.itinnovation.experimedia.arch.edm.test.unit;
+package uk.ac.soton.itinnovation.experimedia.arch.edm.test.unit;
 
 import junit.framework.*;
-import org.junit.Test;
 import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMInterfaceFactory;
@@ -38,19 +38,6 @@ import uk.ac.soton.itinnovation.experimedia.arch.edm.test.general.PopulateDB;
 public class AGeneralTest extends TestCase
 {
     static Logger log = Logger.getLogger(AGeneralTest.class);
-    
-    public static void main(String[] args)
-    {
-        junit.textui.TestRunner.run(AGeneralTest.class);
-
-        log.info("EDM General Test Complete");
-        System.exit(0);
-    }
-    
-    public AGeneralTest()
-    {
-        super();
-    }
     
     @BeforeClass
     public static void beforeClass()
@@ -94,9 +81,15 @@ public class AGeneralTest extends TestCase
     public void testPopulateDB()
     {
         log.info(" - testPopulateDB");
+        IMonitoringEDM edm = null;
         try {
-            //edm.clearMetricsDatabase();
-            PopulateDB.populateWithTestData();
+            edm = EDMInterfaceFactory.getMonitoringEDM();
+        } catch (Exception ex) {
+            fail("Unable to get Monitoring EDM: " + ex.toString());
+        }
+        
+        try {
+            PopulateDB.populateWithTestData(edm);
         } catch (Exception ex) {
             log.error("Unable to populate the DB with test data: " + ex.toString(), ex);
             fail("Unable to populate the DB with test data: " + ex.toString());

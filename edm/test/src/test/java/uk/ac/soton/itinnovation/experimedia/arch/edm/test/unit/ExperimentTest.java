@@ -22,7 +22,7 @@
 //      Created for Project :   BonFIRE
 //
 /////////////////////////////////////////////////////////////////////////
-package test.java.uk.ac.soton.itinnovation.experimedia.arch.edm.test.unit;
+package uk.ac.soton.itinnovation.experimedia.arch.edm.test.unit;
 
 import java.util.Date;
 import java.util.Set;
@@ -35,7 +35,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMInterfaceFactory;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.MonitoringEDM;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDM;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IExperimentDAO;
 
@@ -45,19 +44,6 @@ public class ExperimentTest extends TestCase
     IMonitoringEDM edm = null;
     IExperimentDAO expDAO = null;
     static Logger log = Logger.getLogger(ExperimentTest.class);
-    
-    public static void main(String[] args)
-    {
-        junit.textui.TestRunner.run(ExperimentTest.class);
-
-        log.info("EDM Experiment Test Complete");
-        System.exit(0);
-    }
-    
-    public ExperimentTest()
-    {
-        super();
-    }
     
     @BeforeClass
     public static void beforeClass()
@@ -74,20 +60,34 @@ public class ExperimentTest extends TestCase
     }
     
     @Test
-    public void testSaveExperiment_valid()
+    public void testSaveExperiment_valid_full()
     {
         log.info(" - saving valid experiment");
         
-        Experiment exp1 = new Experiment();
-        exp1.setName("Test 1");
-        exp1.setDescription("A very boring description...");
-        exp1.setStartTime(new Date(Long.parseLong("1345642421005")));
-        exp1.setEndTime(new Date());
-        exp1.setExperimentID("3543");
+        Experiment exp = new Experiment();
+        exp.setName("Test experiment");
+        exp.setDescription("A very boring description...");
+        exp.setStartTime(new Date(Long.parseLong("1345642421005")));
+        exp.setEndTime(new Date());
+        exp.setExperimentID("3543");
         try {
-            expDAO.saveExperiment(exp1);
+            expDAO.saveExperiment(exp);
         } catch (Exception ex) {
-            fail("Unable to save experiment");
+            fail("Unable to save experiment: " + ex.toString());
+        }
+    }
+    
+    @Test
+    public void testSaveExperiment_valid_minimal()
+    {
+        log.info(" - saving valid experiment (with minimal info)");
+        
+        Experiment exp = new Experiment();
+        exp.setName("Test experiment");
+        try {
+            expDAO.saveExperiment(exp);
+        } catch (Exception ex) {
+            fail("Unable to save experiment: " + ex.toString());
         }
     }
     
@@ -96,20 +96,20 @@ public class ExperimentTest extends TestCase
     {
         log.info(" - saving experiment with duplicate UUID");
         
-        Experiment exp2 = new Experiment();
-        exp2.setName("Test 2");
+        Experiment exp1 = new Experiment();
+        exp1.setName("Test experiment");
         try {
-            expDAO.saveExperiment(exp2);
+            expDAO.saveExperiment(exp1);
         } catch (Exception ex) {
-            fail("Unable to save experiment");
+            fail("Unable to save experiment: " + ex.toString());
         }
         
         // should not save because of identical UUID
-        Experiment exp3 = new Experiment();
-        exp3.setUUID(exp2.getUUID());
-        exp3.setName("Test 3");
+        Experiment exp2 = new Experiment();
+        exp2.setUUID(exp1.getUUID());
+        exp2.setName("Duplicate experiment");
         try {
-            expDAO.saveExperiment(exp3);
+            expDAO.saveExperiment(exp2);
             fail("Experiment should not have saved, it had a duplicate UUID");
         } catch (Exception ex) { }
     }
@@ -128,9 +128,9 @@ public class ExperimentTest extends TestCase
     }
     
     @Test
-    public void testGetExperiment()
+    public void testGetExperimentByUUID()
     {
-        log.info(" - saving and retrieving an experiment");
+        log.info(" - saving and retrieving an experiment by UUID");
         
         Experiment exp1 = new Experiment();
         exp1.setName("Experiment");
@@ -174,7 +174,7 @@ public class ExperimentTest extends TestCase
         try {
             expDAO.saveExperiment(exp1);
         } catch (Exception ex) {
-            fail("Unable to save experiment");
+            fail("Unable to save experiment: " + ex.toString());
         }
         
         Experiment exp2 = new Experiment();
@@ -186,7 +186,7 @@ public class ExperimentTest extends TestCase
         try {
             expDAO.saveExperiment(exp2);
         } catch (Exception ex) {
-            fail("Unable to save experiment");
+            fail("Unable to save experiment: " + ex.toString());
         }
         
         Set<Experiment> experiments = null;
@@ -194,7 +194,7 @@ public class ExperimentTest extends TestCase
         try {
             experiments = expDAO.getExperiments(false);
         } catch (Exception ex) {
-            fail("Unable to get experiments from DB");
+            fail("Unable to get experiments from DB: " + ex.toString());
         }
         
         assertNotNull("Experiment set returned from DB is NULL", experiments);

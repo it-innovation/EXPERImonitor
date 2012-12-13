@@ -39,7 +39,9 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Me
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricType;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Unit;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMInterfaceFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.MonitoringEDM;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDM;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IEntityDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IExperimentDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IMetricGeneratorDAO;
@@ -96,7 +98,15 @@ public class PopulateDB
      */
     public static void main(String[] args) throws Exception
     {
-        populateWithTestData();
+        IMonitoringEDM edm = null;
+        try {
+            edm = EDMInterfaceFactory.getMonitoringEDM();
+        } catch (Exception ex) {
+            log.error("Unable to get Monitoring EDM: " + ex.toString());
+            throw ex;
+        }
+        populateWithTestData(edm);
+        printDetailsForExperiment(edm, expUUID);
     }
     
     /**
@@ -106,10 +116,8 @@ public class PopulateDB
      * The database will be cleared first, in case there is any data there already.
      * @throws Exception 
      */
-    public static void populateWithTestData() throws Exception
+    public static void populateWithTestData(IMonitoringEDM edm) throws Exception
     {
-        MonitoringEDM edm = new MonitoringEDM();
-        
         edm.clearMetricsDatabase();
         
         saveExperiment(edm, expUUID);
@@ -132,11 +140,9 @@ public class PopulateDB
         
         saveRandomMeasurements(edm, mGrp3mSet1UUID, 20, 150, 300);
         saveRandomMeasurements(edm, mGrp3mSet2UUID, 20, 100, 999);
-        
-        printDetailsForExperiment(edm, expUUID);
     }
     
-    public static void saveExperiment(MonitoringEDM edm, UUID expUUID) throws Exception
+    public static void saveExperiment(IMonitoringEDM edm, UUID expUUID) throws Exception
     {
         IExperimentDAO expDAO = null;
         try {
@@ -173,7 +179,7 @@ public class PopulateDB
      * @param diskAttributeUUID The UUID of the Disk attribute of the entity.
      * @throws Exception 
      */
-    public static void saveEntity1(MonitoringEDM edm, UUID entityUUID, UUID cpuAttributeUUID, UUID networkAttributeUUID, UUID diskAttributeUUID) throws Exception
+    public static void saveEntity1(IMonitoringEDM edm, UUID entityUUID, UUID cpuAttributeUUID, UUID networkAttributeUUID, UUID diskAttributeUUID) throws Exception
     {
         IEntityDAO entityDAO = null;
         try {
@@ -198,33 +204,6 @@ public class PopulateDB
         } catch (Exception ex) {
             log.error("Unable to save entity: " + ex.getMessage());
         }
-        
-        /*log.info("Getting Entity from the DB");
-        Entity entityFromDB = null;
-        try {
-            entityFromDB = entityDAO.getEntity(entityUUID, true);
-        } catch (Exception ex) {
-            log.error("Unable to get entity: " + ex.getMessage());
-        }
-        
-        log.info("Entity details:");
-        if (entityFromDB.getUUID() != null) log.info("  - UUID:  " + entityFromDB.getUUID());
-        if (entityFromDB.getName() != null) log.info("  - Name:  " + entityFromDB.getName());
-        if (entityFromDB.getDescription() != null) log.info("  - Desc:  " + entityFromDB.getDescription());
-        if ((entityFromDB.getAttributes() == null) || entityFromDB.getAttributes().isEmpty()) {
-            log.info("  - There are NO attributes");
-        } else {
-            log.info("  - There are " + entityFromDB.getAttributes().size() + " attributes");
-            for (Attribute attrib : entityFromDB.getAttributes())
-            {
-                if (attrib != null) {
-                    log.info("    - Attribute details:");
-                    if (attrib.getUUID() != null) log.info("      - UUID:  " + attrib.getUUID());
-                    if (attrib.getName() != null) log.info("      - Name:  " + attrib.getName());
-                    if (attrib.getDescription() != null) log.info("      - Desc:  " + attrib.getDescription());
-                }
-            }
-        }*/
     }
     
     /**
@@ -236,7 +215,7 @@ public class PopulateDB
      * @param diskAttributeUUID The UUID of the Disk attribute of the entity.
      * @throws Exception 
      */
-    public static void saveEntity2(MonitoringEDM edm, UUID entityUUID, UUID cpuAttributeUUID, UUID networkAttributeUUID, UUID diskAttributeUUID) throws Exception
+    public static void saveEntity2(IMonitoringEDM edm, UUID entityUUID, UUID cpuAttributeUUID, UUID networkAttributeUUID, UUID diskAttributeUUID) throws Exception
     {
         IEntityDAO entityDAO = null;
         try {
@@ -261,33 +240,6 @@ public class PopulateDB
         } catch (Exception ex) {
             log.error("Unable to save entity: " + ex.getMessage());
         }
-        
-        /*log.info("Getting Entity from the DB");
-        Entity entityFromDB = null;
-        try {
-            entityFromDB = entityDAO.getEntity(entityUUID, true);
-        } catch (Exception ex) {
-            log.error("Unable to get entity: " + ex.getMessage());
-        }
-        
-        log.info("Entity details:");
-        if (entityFromDB.getUUID() != null) log.info("  - UUID:  " + entityFromDB.getUUID());
-        if (entityFromDB.getName() != null) log.info("  - Name:  " + entityFromDB.getName());
-        if (entityFromDB.getDescription() != null) log.info("  - Desc:  " + entityFromDB.getDescription());
-        if ((entityFromDB.getAttributes() == null) || entityFromDB.getAttributes().isEmpty()) {
-            log.info("  - There are NO attributes");
-        } else {
-            log.info("  - There are " + entityFromDB.getAttributes().size() + " attributes");
-            for (Attribute attrib : entityFromDB.getAttributes())
-            {
-                if (attrib != null) {
-                    log.info("    - Attribute details:");
-                    if (attrib.getUUID() != null) log.info("      - UUID:  " + attrib.getUUID());
-                    if (attrib.getName() != null) log.info("      - Name:  " + attrib.getName());
-                    if (attrib.getDescription() != null) log.info("      - Desc:  " + attrib.getDescription());
-                }
-            }
-        }*/
     }
     
     /**
@@ -299,7 +251,7 @@ public class PopulateDB
      * @param diskAttributeUUID The UUID of the Disk attribute of the entity.
      * @throws Exception 
      */
-    public static void saveEntity3(MonitoringEDM edm, UUID entityUUID, UUID cpuAttributeUUID, UUID networkAttributeUUID) throws Exception
+    public static void saveEntity3(IMonitoringEDM edm, UUID entityUUID, UUID cpuAttributeUUID, UUID networkAttributeUUID) throws Exception
     {
         IEntityDAO entityDAO = null;
         try {
@@ -323,33 +275,6 @@ public class PopulateDB
         } catch (Exception ex) {
             log.error("Unable to save entity: " + ex.getMessage());
         }
-        
-        /*log.info("Getting Entity from the DB");
-        Entity entityFromDB = null;
-        try {
-            entityFromDB = entityDAO.getEntity(entityUUID, true);
-        } catch (Exception ex) {
-            log.error("Unable to get entity: " + ex.getMessage());
-        }
-        
-        log.info("Entity details:");
-        if (entityFromDB.getUUID() != null) log.info("  - UUID:  " + entityFromDB.getUUID());
-        if (entityFromDB.getName() != null) log.info("  - Name:  " + entityFromDB.getName());
-        if (entityFromDB.getDescription() != null) log.info("  - Desc:  " + entityFromDB.getDescription());
-        if ((entityFromDB.getAttributes() == null) || entityFromDB.getAttributes().isEmpty()) {
-            log.info("  - There are NO attributes");
-        } else {
-            log.info("  - There are " + entityFromDB.getAttributes().size() + " attributes");
-            for (Attribute attrib : entityFromDB.getAttributes())
-            {
-                if (attrib != null) {
-                    log.info("    - Attribute details:");
-                    if (attrib.getUUID() != null) log.info("      - UUID:  " + attrib.getUUID());
-                    if (attrib.getName() != null) log.info("      - Name:  " + attrib.getName());
-                    if (attrib.getDescription() != null) log.info("      - Desc:  " + attrib.getDescription());
-                }
-            }
-        }*/
     }
     
     /**
@@ -368,7 +293,7 @@ public class PopulateDB
      * @param mSet3UUID The UUID of the 3rd measurement set.
      * @throws Exception 
      */
-    public static void saveMetricGenerator1(MonitoringEDM edm, UUID expUUID, UUID entityUUID, UUID attrib1UUID, UUID attrib2UUID, UUID attrib3UUID, UUID mGenUUID, UUID mGrpUUID, UUID mSet1UUID, UUID mSet2UUID, UUID mSet3UUID) throws Exception
+    public static void saveMetricGenerator1(IMonitoringEDM edm, UUID expUUID, UUID entityUUID, UUID attrib1UUID, UUID attrib2UUID, UUID attrib3UUID, UUID mGenUUID, UUID mGrpUUID, UUID mSet1UUID, UUID mSet2UUID, UUID mSet3UUID) throws Exception
     {
 //----- EXPERIMENT
         IMetricGeneratorDAO mGenDAO = null;
@@ -430,7 +355,7 @@ public class PopulateDB
      * @param mSet3UUID The UUID of the 3rd measurement set.
      * @throws Exception 
      */
-    public static void saveMetricGenerator2(MonitoringEDM edm, UUID expUUID, UUID entityUUID, UUID attrib1UUID, UUID attrib2UUID, UUID attrib3UUID, UUID mGenUUID, UUID mGrpUUID, UUID mSet1UUID, UUID mSet2UUID, UUID mSet3UUID) throws Exception
+    public static void saveMetricGenerator2(IMonitoringEDM edm, UUID expUUID, UUID entityUUID, UUID attrib1UUID, UUID attrib2UUID, UUID attrib3UUID, UUID mGenUUID, UUID mGrpUUID, UUID mSet1UUID, UUID mSet2UUID, UUID mSet3UUID) throws Exception
     {
 //----- EXPERIMENT
         IMetricGeneratorDAO mGenDAO = null;
@@ -490,7 +415,7 @@ public class PopulateDB
      * @param mSet2UUID The UUID of the 2nd measurement set.
      * @throws Exception 
      */
-    public static void saveMetricGenerator3(MonitoringEDM edm, UUID expUUID, UUID entityUUID, UUID attrib1UUID, UUID attrib2UUID, UUID mGenUUID, UUID mGrpUUID, UUID mSet1UUID, UUID mSet2UUID) throws Exception
+    public static void saveMetricGenerator3(IMonitoringEDM edm, UUID expUUID, UUID entityUUID, UUID attrib1UUID, UUID attrib2UUID, UUID mGenUUID, UUID mGrpUUID, UUID mSet1UUID, UUID mSet2UUID) throws Exception
     {
 //----- EXPERIMENT
         IMetricGeneratorDAO mGenDAO = null;
@@ -539,7 +464,7 @@ public class PopulateDB
      * @param expUUID The experiment UUID.
      * @throws Exception 
      */
-    public static void printDetailsForExperiment(MonitoringEDM edm, UUID expUUID) throws Exception
+    public static void printDetailsForExperiment(IMonitoringEDM edm, UUID expUUID) throws Exception
     {
         IExperimentDAO expDAO = null;
         try {
@@ -689,7 +614,7 @@ public class PopulateDB
      * @param max The maximum value of the range for the random measurement values.
      * @throws Exception 
      */
-    public static void saveRandomMeasurements(MonitoringEDM edm, UUID mSetUUID, int numMeasurements, int min, int max) throws Exception
+    public static void saveRandomMeasurements(IMonitoringEDM edm, UUID mSetUUID, int numMeasurements, int min, int max) throws Exception
     {
         IReportDAO reportDAO = null;
         try {
