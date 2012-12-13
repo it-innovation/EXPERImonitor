@@ -23,7 +23,7 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccMonitor;
+package uk.ac.soton.itinnovation.experimedia.arch.em.test.common;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.spec.*;
 
@@ -37,6 +37,8 @@ import org.apache.log4j.Logger;
 
 public abstract class ECCBaseTestExecutor
 {
+  private TestEventListener testListener;
+  
   protected Logger exeLogger = Logger.getLogger( ECCBaseTestExecutor.class );
   
   protected EMInterfaceFactory providerFactory;
@@ -53,9 +55,21 @@ public abstract class ECCBaseTestExecutor
   protected IAMQPMessageDispatch     userDispatch;
   
   
-  protected ECCBaseTestExecutor( AMQPBasicChannel provider,
+  public abstract boolean getTestResult();
+  
+  
+  // Protected methods ---------------------------------------------------------
+  protected synchronized void notifyTestEnds( String testName )
+  {
+    exeLogger.info( "Test ended: " + testName );
+    testListener.onTestCompleted();
+  }
+  
+  protected ECCBaseTestExecutor( TestEventListener listener,
+                                 AMQPBasicChannel provider,
                                  AMQPBasicChannel user )
   {
+    testListener    = listener;
     providerChannel = provider;
     userChannel     = user;
   }

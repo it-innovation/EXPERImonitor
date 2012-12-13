@@ -25,9 +25,8 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccMonitor;
 
-import junit.framework.TestCase;
+import uk.ac.soton.itinnovation.experimedia.arch.em.test.common.ECCBaseTest;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasicChannel;
-import uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccEntryPoint.ECCMonitorEntryPointTest;
 
 
 
@@ -66,14 +65,13 @@ public class ECCMonitorTest extends ECCBaseTest
     
     // Create the test executor
     ECCMonitorTestExecutor exe =
-            new ECCMonitorTestExecutor( providerChannel, userChannel );
+            new ECCMonitorTestExecutor( this, providerChannel, userChannel );
     
     Thread testThread = new Thread( exe );
     testThread.setPriority( Thread.MIN_PRIORITY );
     testThread.start();
     
-    // Wait for a short time
-    try { Thread.sleep( 2000 ); } catch ( InterruptedException ie ) {}
+    waitForTestToComplete();
     
     // Check result
     assertTrue( exe.getTestResult() );

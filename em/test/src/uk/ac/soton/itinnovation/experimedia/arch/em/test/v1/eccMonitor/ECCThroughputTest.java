@@ -25,6 +25,7 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccMonitor;
 
+import uk.ac.soton.itinnovation.experimedia.arch.em.test.common.ECCBaseTest;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasicChannel;
 
 
@@ -49,5 +50,18 @@ public class ECCThroughputTest extends ECCBaseTest
     // Check they are OK
     assertTrue( providerChannel != null );
     assertTrue( userChannel != null );
+    
+    // Create test executor
+    ECCThroughputTestExecutor exe =
+            new ECCThroughputTestExecutor( this, providerChannel, userChannel );
+    
+    Thread testThread = new Thread( exe );
+    testThread.setPriority( Thread.NORM_PRIORITY );
+    testThread.start();
+    
+    waitForTestToComplete();
+    
+    // Check result
+    assertTrue( exe.getTestResult() );
   }
 }

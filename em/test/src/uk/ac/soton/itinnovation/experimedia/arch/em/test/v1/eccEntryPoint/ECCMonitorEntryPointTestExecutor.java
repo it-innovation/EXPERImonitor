@@ -30,10 +30,10 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasicChannel;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.factory.EMInterfaceFactory;
+import uk.ac.soton.itinnovation.experimedia.arch.em.test.common.*;
 
 import java.util.UUID;
-import org.apache.log4j.Logger;
+
 
 
 
@@ -48,84 +48,67 @@ import org.apache.log4j.Logger;
  * 
  * @author sgc
  */
-public class ECCMonitorEntryPointTestExecutor implements Runnable,
+public class ECCMonitorEntryPointTestExecutor extends ECCBaseTestExecutor
+                                              implements Runnable,
                                                          IEMMonitorEntryPoint_ProviderListener
-{
-  private Logger           exeLogger = Logger.getLogger( ECCMonitorEntryPointTestExecutor.class );
-  private AMQPBasicChannel providerChannel;
-  private AMQPBasicChannel userChannel;
-  
-  IAMQPMessageDispatchPump providerPump;
-  IAMQPMessageDispatchPump userPump;
-  
+{  
   IEMMonitorEntryPoint providerEP;
   IEMMonitorEntryPoint userEP;
   
   private boolean gotClientRegistration = false;
   
   
-  public ECCMonitorEntryPointTestExecutor( AMQPBasicChannel provider,
+  public ECCMonitorEntryPointTestExecutor( TestEventListener listener,
+                                           AMQPBasicChannel provider,
                                            AMQPBasicChannel user )
-  {
-    providerChannel = provider;
-    userChannel     = user;
-  }
+  { super( listener, provider, user ); }
   
+  // ECCBaseTestExecutor -------------------------------------------------------
+  @Override
   public boolean getTestResult()
-  {
-    if ( gotClientRegistration ) exeLogger.info( "ECCMonitorEntryPointTest is GOOD." );
-    
+  {    
     return gotClientRegistration; 
   }
   
-  // IECCMonitorEntryPoint_ProviderListener
+  // IECCMonitorEntryPoint_ProviderListener ------------------------------------
   @Override
   public void onRegisterAsEMClient( UUID userID, String userName )
   {
     // Check we got a registration event with the correct user ID and name
     if ( userID.equals(ECCMonitorEntryPointTest.EMUserUUID) && 
          userName.equals("EM Entry Point Test User") )
+    {
       gotClientRegistration = true;
+      notifyTestEnds( "ECC Monitor Entry Point Test Execution" );
+    }
   }
   
   // Runnable ------------------------------------------------------------------
   @Override
   public void run()
   {
-    // Need two separate factories to create PROVIDER and USER interfaces
-    // Provider factory
-    EMInterfaceFactory providerFactory = new EMInterfaceFactory( providerChannel, true );
+    boolean pumpsOK = false;
+    try
+    { 
+      initialiseDispatches( IAMQPMessageDispatchPump.ePumpPriority.MINIMUM );
+      pumpsOK = true;
+    }
+    catch ( Exception e )
+    { exeLogger.error( "Test initialisation problem: " + e.getMessage() ); }
     
-    // User factory
-    EMInterfaceFactory userFactory     = new EMInterfaceFactory( userChannel, false );
-    
-    // Create pump/dispatchers for provider
-    providerPump = providerFactory.createDispatchPump( "Provider pump", 
-                                                       IAMQPMessageDispatchPump.ePumpPriority.MINIMUM );
-    
-    IAMQPMessageDispatch providerDispatch = providerFactory.createDispatch();
-    providerPump.addDispatch( providerDispatch );
-    providerPump.startPump();
-    
-    // Create pump/dispatchers for user
-    userPump = providerFactory.createDispatchPump( "User pump", 
-                                                   IAMQPMessageDispatchPump.ePumpPriority.MINIMUM );
-    
-    IAMQPMessageDispatch userDispatch = userFactory.createDispatch();
-    
-    userPump.addDispatch( userDispatch );
-    userPump.startPump();
-    
-    // Set up the provider interface (and listen for in-coming user connections)
-    providerEP = providerFactory.createEntryPoint( ECCMonitorEntryPointTest.EMProviderUUID,
-                                                   providerDispatch );
-    providerEP.setListener( this );
-    
-    // Create user interface and try to connect to the provider
-    userEP = userFactory.createEntryPoint( ECCMonitorEntryPointTest.EMProviderUUID,
-                                           userDispatch );
-    
-    // Start by trying to register as EM client
-    userEP.registerAsEMClient( ECCMonitorEntryPointTest.EMUserUUID, "EM Entry Point Test User" );
+    if ( pumpsOK )
+    {
+      // Set up the provider interface (and listen for in-coming user connections)
+      providerEP = providerFactory.createEntryPoint( ECCMonitorEntryPointTest.EMProviderUUID,
+                                                     providerDispatch );
+      providerEP.setListener( this );
+
+      // Create user interface and try to connect to the provider
+      userEP = userFactory.createEntryPoint( ECCMonitorEntryPointTest.EMProviderUUID,
+                                             userDispatch );
+
+      // Start by trying to register as EM client
+      userEP.registerAsEMClient( ECCMonitorEntryPointTest.EMUserUUID, "EM Entry Point Test User" );
+    }
   }
 }

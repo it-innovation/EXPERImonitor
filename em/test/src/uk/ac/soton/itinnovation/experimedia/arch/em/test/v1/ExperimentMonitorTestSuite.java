@@ -42,7 +42,7 @@ public class ExperimentMonitorTestSuite extends TestCase
   {
     junit.textui.TestRunner.run( getTestSuite() );
     
-    testLogger.info( "Basic protocol test completed." );
+    testLogger.info( "Experiment Monitor Test Suite has completed." );
     System.exit( 0 );
   }
   

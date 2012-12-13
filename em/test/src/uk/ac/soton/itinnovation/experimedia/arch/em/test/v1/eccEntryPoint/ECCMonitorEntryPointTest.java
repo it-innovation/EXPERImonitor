@@ -27,7 +27,7 @@ package uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccEntryPoint;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 
-import uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccMonitor.ECCBaseTest;
+import uk.ac.soton.itinnovation.experimedia.arch.em.test.common.ECCBaseTest;
 
 import java.util.*;
 
@@ -71,14 +71,16 @@ public class ECCMonitorEntryPointTest extends ECCBaseTest
     // Create Entry Point test executor (give seprate channels for provider
     // and user)
     ECCMonitorEntryPointTestExecutor exe = 
-            new ECCMonitorEntryPointTestExecutor( providerChannel, userChannel );
+            new ECCMonitorEntryPointTestExecutor( this,
+                                                  providerChannel, 
+                                                  userChannel );
     
     // Run it
     Thread testThread = new Thread( exe );
+    testThread.setPriority( Thread.MIN_PRIORITY );
     testThread.start();
     
-    // Wait for a short time
-    try { Thread.sleep( 2000 ); } catch ( InterruptedException ie ) {}
+    waitForTestToComplete();
     
     // Check result
     assertTrue( exe.getTestResult() );

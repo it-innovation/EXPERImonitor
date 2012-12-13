@@ -23,7 +23,7 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccMonitor;
+package uk.ac.soton.itinnovation.experimedia.arch.em.test.common;
 
 import java.util.*;
 import junit.framework.TestCase;
@@ -32,12 +32,15 @@ import junit.framework.TestCase;
 
 
 public class ECCBaseTest extends TestCase
+                         implements TestEventListener
 {
+  private boolean testIsRunning;
+  
   protected ECCAMQPUtility amqpUtil;
   
-  public static final UUID EMProviderUUID        = UUID.fromString( "00000000-0000-0000-0000-000000000000" );
-  public static final UUID EMUserUUID            = UUID.fromString( "00000000-0000-0000-0000-0000000000FF" );
-  public static final UUID EMExperimentUUID      = UUID.fromString( "00000000-0000-0000-0000-00000000FF00" );
+  public static final UUID   EMProviderUUID      = UUID.fromString( "00000000-0000-0000-0000-000000000000" );
+  public static final UUID   EMUserUUID          = UUID.fromString( "00000000-0000-0000-0000-0000000000FF" );
+  public static final UUID   EMExperimentUUID    = UUID.fromString( "00000000-0000-0000-0000-00000000FF00" );
   public static final String EMExperimentNamedID = "Experiment 1";
   public static final String EMExperimentName    = "JUnit test experiment";
   public static final String EMExperimentDesc    = "This isn't really an experiment";
@@ -51,13 +54,23 @@ public class ECCBaseTest extends TestCase
     amqpUtil = new ECCAMQPUtility();
   }
   
+  // TestEventListener ---------------------------------------------------------
+  @Override
+  public void onTestCompleted()
+  { setIsTestRunning( false ); }
+  
   // Protected methods ---------------------------------------------------------
   @Override
   protected void setUp() throws Exception
   { 
     super.setUp();
     
-    try { amqpUtil.setUpAMQP(); }
+    try
+    { 
+      amqpUtil.setUpAMQP();
+      
+      testIsRunning = true;
+    }
     catch ( Exception e )
     { amqpUtil.utilLogger.error( "Test set-up error: " + e.getMessage()); }
   }
@@ -70,5 +83,18 @@ public class ECCBaseTest extends TestCase
     try { amqpUtil.tearDownAMQP(); }
     catch ( Exception e )
     { amqpUtil.utilLogger.error( "Test tear-down error: " + e.getMessage() ); }
+  }
+  
+  protected synchronized void setIsTestRunning( boolean running )
+  {
+    testIsRunning = running;
+    notifyAll();
+  }
+  
+  protected synchronized void waitForTestToComplete()
+  {
+    while ( testIsRunning ) 
+      try { wait(); }
+      catch ( InterruptedException ie ) {}
   }
 }

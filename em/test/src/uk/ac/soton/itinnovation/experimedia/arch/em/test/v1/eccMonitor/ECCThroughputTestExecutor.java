@@ -27,30 +27,31 @@ package uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccMonitor;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEMTest_Listener;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.spec.IAMQPMessageDispatchPump;
-
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasicChannel;
 
+import uk.ac.soton.itinnovation.experimedia.arch.em.test.common.*;
 
 
 
 
 
-public class ECCThroughputTestExecutor implements Runnable,
+
+public class ECCThroughputTestExecutor extends ECCBaseTestExecutor
+                                       implements Runnable,
                                                   IEMTest_Listener
 {
-  private AMQPBasicChannel providerChannel;
-  private AMQPBasicChannel userChannel;
-  
-  private IAMQPMessageDispatchPump providerPump;
-  private IAMQPMessageDispatchPump userPump;
-  
-  
-  public ECCThroughputTestExecutor( AMQPBasicChannel provider,
+  public ECCThroughputTestExecutor( TestEventListener listener,
+                                    AMQPBasicChannel provider,
                                     AMQPBasicChannel user )
   {
-    providerChannel = provider;
-    userChannel     = user;
+    super( listener, provider, user );
+  }
+  
+  // ECCBaseTestExecutor -------------------------------------------------------
+  @Override
+  public boolean getTestResult()
+  {
+    return true;
   }
   
   // IEMTest_Listener ----------------------------------------------------------
@@ -64,6 +65,6 @@ public class ECCThroughputTestExecutor implements Runnable,
   @Override
   public void run()
   {
-    
+    notifyTestEnds( "ECC Throughput Test Executor" );
   }
 }

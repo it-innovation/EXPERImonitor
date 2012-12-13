@@ -25,21 +25,20 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccMonitor;
 
+import uk.ac.soton.itinnovation.experimedia.arch.em.test.common.ECCBaseTestExecutor;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.spec.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasicChannel;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.factory.EMInterfaceFactory;
-
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
 
+import uk.ac.soton.itinnovation.experimedia.arch.em.test.common.TestEventListener;
 import uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccEntryPoint.ECCMonitorEntryPointTest;
 
 import java.util.*;
-import org.apache.log4j.Logger;
 
 
 
@@ -67,8 +66,7 @@ import org.apache.log4j.Logger;
  * (5) On receipt of (4) the user creates an IECCTest interface
  * (6) The user creates some dummy byte data
  * (7) The user sends the dummy data to the provider via the IECCTest interface
- * (8) The user sends the provider a 'client disconnecting' message
- * (9) After receipt of (7) and (8) the test is completed and successful
+ * (8) After receipt of (7) the test is completed and successful
  * 
  * @author sgc
  */
@@ -92,27 +90,20 @@ public class ECCMonitorTestExecutor extends ECCBaseTestExecutor
   private boolean providerGotReadyToInit       = false;
   private boolean userGotCreateTestFaceCommand = false;
   private boolean providerGotTestBytes         = false;
-  private boolean providerGotDisconnectNotice  = false;
   
   
-  public ECCMonitorTestExecutor( AMQPBasicChannel provider,
+  public ECCMonitorTestExecutor( TestEventListener listener,
+                                 AMQPBasicChannel provider,
                                  AMQPBasicChannel user )
-  { super( provider, user ); }
+  { super( listener, provider, user ); }
   
+  @Override
   public boolean getTestResult()
   {
-    if ( userGotRegistrationConfirmed == true &&
-         providerGotReadyToInit       == true && 
-         userGotCreateTestFaceCommand == true &&
-         providerGotTestBytes         == true &&
-         providerGotDisconnectNotice  == true )
-    {
-      exeLogger.info( "ECCMonitorTest is GOOD." );
-      return true;
-    }
-      
-    
-    return false;
+    return ( userGotRegistrationConfirmed == true &&
+             providerGotReadyToInit       == true && 
+             userGotCreateTestFaceCommand == true &&
+             providerGotTestBytes         == true );
   }
   
   // IECCTest_Listener ---------------------------------------------------------
@@ -134,6 +125,8 @@ public class ECCMonitorTestExecutor extends ECCBaseTestExecutor
       
       if ( dataOK ) providerGotTestBytes = true;
     }
+    
+    notifyTestEnds( "ECC Monitor Test Execution" );
   }
   
   // IEMDiscovery_ProviderListener ---------------------------------------------
@@ -146,16 +139,12 @@ public class ECCMonitorTestExecutor extends ECCBaseTestExecutor
       providerGotReadyToInit = true;
     
       // Create dispatcher & attach dispatcher to (shared) pump
-      IAMQPMessageDispatch providerDispatch = providerFactory.createDispatch();
-      providerPump.addDispatch( providerDispatch );
-
-      userTest = providerFactory.createTest( ECCMonitorEntryPointTest.EMProviderUUID,
-                                             ECCMonitorEntryPointTest.EMUserUUID,
-                                             providerDispatch );
+      IAMQPMessageDispatch providerTestDispatch = providerFactory.createDispatch();
+      providerPump.addDispatch( providerTestDispatch );
 
       providerTest = providerFactory.createTest( ECCMonitorEntryPointTest.EMProviderUUID,
                                                  ECCMonitorEntryPointTest.EMUserUUID,
-                                                 providerDispatch );
+                                                 providerTestDispatch );
 
       providerTest.setListener( this );
 
@@ -181,34 +170,25 @@ public class ECCMonitorTestExecutor extends ECCBaseTestExecutor
   
   @Override
   public void onClientDisconnecting( UUID senderID )
-  {
-    // Make sure event is from the correct sender
-    if ( senderID.equals( ECCMonitorEntryPointTest.EMUserUUID) )
-    {
-      if ( !providerGotTestBytes )
-        exeLogger.info( "Client disconnect message received; waiting to receive bytes" );
-    
-      providerGotDisconnectNotice = true;
-    }
-  }
+  { /*Not implemented in this test*/ }
   
   // IEMDiscovery_UserListener -------------------------------------------------
   @Override
   public void onCreateInterface( UUID senderID, EMInterfaceType type )
   {
     // Make sure event is from the correct sender
-    if ( senderID.equals( ECCMonitorEntryPointTest.EMProviderUUID) )
+    if ( senderID.equals(ECCMonitorEntryPointTest.EMProviderUUID) )
     {
       if ( type == EMInterfaceType.eEMTestInterface )
       userGotCreateTestFaceCommand = true;
       
       // Create dispatcher & attach dispatcher to (shared) pump
-      IAMQPMessageDispatch userDispatch = userFactory.createDispatch();
-      providerPump.addDispatch( userDispatch );
+      IAMQPMessageDispatch userTestDispatch = userFactory.createDispatch();
+      userPump.addDispatch( userTestDispatch );
 
       userTest = userFactory.createTest( ECCMonitorEntryPointTest.EMProviderUUID,
                                          ECCMonitorEntryPointTest.EMUserUUID,
-                                         userDispatch );
+                                         userTestDispatch );
 
       // Create some test data
       testDataSize = 2048;
@@ -218,9 +198,6 @@ public class ECCMonitorTestExecutor extends ECCBaseTestExecutor
 
       // Send the data to the provider
       userTest.sendData( testDataSize, testDataBody );
-
-      // And immediately send a dis-connection notice (will it arrive before end of data?)
-      userDiscovery.clientDisconnecting();
     }
   }
   

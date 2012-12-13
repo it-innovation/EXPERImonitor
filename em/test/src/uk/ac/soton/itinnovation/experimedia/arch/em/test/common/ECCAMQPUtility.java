@@ -23,7 +23,7 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccMonitor;
+package uk.ac.soton.itinnovation.experimedia.arch.em.test.common;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 
