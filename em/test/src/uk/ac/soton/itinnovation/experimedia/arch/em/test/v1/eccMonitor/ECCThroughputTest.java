@@ -18,44 +18,36 @@
 // the software.
 //
 //      Created By :            Simon Crowle
-//      Created Date :          31-Jul-2012
+//      Created Date :          13-Dec-2012
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.em.test.v1;
+package uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccMonitor;
 
-import uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccEntryPoint.ECCMonitorEntryPointTest;
-import uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccMonitor.*;
-
-import junit.framework.*;
-import org.apache.log4j.Logger;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasicChannel;
 
 
 
 
-public class ExperimentMonitorTestSuite extends TestCase
+public class ECCThroughputTest extends ECCBaseTest
 {
-  private static Logger testLogger = Logger.getLogger( ExperimentMonitorTestSuite.class );
   
   public static void main( String[] args )
-  {
-    junit.textui.TestRunner.run( getTestSuite() );
-    
-    testLogger.info( "Basic protocol test completed." );
-    System.exit( 0 );
-  }
+  { junit.textui.TestRunner.run( ECCThroughputTest.class ); }
   
-  // Private methods -----------------------------------------------------------
-  private static Test getTestSuite()
+  public ECCThroughputTest()
+  { super(); }
+  
+  // Tests ---------------------------------------------------------------------
+  public void testHighFrequencyLowPayload()
   {
-    TestSuite suite = new TestSuite( "Experiment Monitor Test Suite" );
-    
-    // ECCMonitorInterface
-    suite.addTestSuite( ECCMonitorEntryPointTest.class );
-    suite.addTestSuite( ECCMonitorTest.class );
-    suite.addTestSuite( ECCThroughputTest.class );
-    
-    return suite;
+    // Create provider/user channels
+    AMQPBasicChannel providerChannel = amqpUtil.getProviderChannel();
+    AMQPBasicChannel userChannel     = amqpUtil.getUserChannel();
+        
+    // Check they are OK
+    assertTrue( providerChannel != null );
+    assertTrue( userChannel != null );
   }
 }

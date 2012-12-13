@@ -25,6 +25,8 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccMonitor;
 
+import junit.framework.TestCase;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasicChannel;
 import uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccEntryPoint.ECCMonitorEntryPointTest;
 
 
@@ -42,7 +44,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccEntryPoint.ECCMon
  * 
  * @author sgc
  */
-public class ECCMonitorTest extends ECCMonitorEntryPointTest
+public class ECCMonitorTest extends ECCBaseTest
 {
   public static void main( String[] args )
   { junit.textui.TestRunner.run( ECCMonitorTest.class ); }
@@ -54,13 +56,17 @@ public class ECCMonitorTest extends ECCMonitorEntryPointTest
   // Tests ---------------------------------------------------------------------
   public void testGetMonitorInterface()
   {
-    assertTrue( amqpFactory != null );
-    assertTrue( amqpProviderChannel != null );
-    assertTrue( amqpUserChannel != null );
+    // Create provider/user channels
+    AMQPBasicChannel providerChannel = amqpUtil.getProviderChannel();
+    AMQPBasicChannel userChannel     = amqpUtil.getUserChannel();
+        
+    // Check they are OK
+    assertTrue( providerChannel != null );
+    assertTrue( userChannel != null );
     
+    // Create the test executor
     ECCMonitorTestExecutor exe =
-            new ECCMonitorTestExecutor( amqpProviderChannel,
-                                        amqpUserChannel );
+            new ECCMonitorTestExecutor( providerChannel, userChannel );
     
     Thread testThread = new Thread( exe );
     testThread.setPriority( Thread.MIN_PRIORITY );
@@ -72,14 +78,4 @@ public class ECCMonitorTest extends ECCMonitorEntryPointTest
     // Check result
     assertTrue( exe.getTestResult() );
   }
-  
-  
-  // Protected methods ---------------------------------------------------------
-  @Override
-  protected void setUp() throws Exception
-  { super.setUp(); }
-  
-  @Override
-  protected void tearDown() throws Exception
-  { super.tearDown(); }
 }

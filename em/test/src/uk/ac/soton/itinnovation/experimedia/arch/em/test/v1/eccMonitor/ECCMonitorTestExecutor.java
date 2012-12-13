@@ -72,20 +72,13 @@ import org.apache.log4j.Logger;
  * 
  * @author sgc
  */
-public class ECCMonitorTestExecutor implements Runnable,
+public class ECCMonitorTestExecutor extends ECCBaseTestExecutor
+                                    implements Runnable,
                                                IEMDiscovery_ProviderListener,
                                                IEMDiscovery_UserListener,
                                                IEMTest_Listener
         
 {
-  private Logger exeLogger = Logger.getLogger( ECCMonitorTestExecutor.class );
-  
-  private AMQPBasicChannel providerChannel;
-  private AMQPBasicChannel userChannel;
-  
-  IAMQPMessageDispatchPump providerPump;
-  IAMQPMessageDispatchPump userPump;
-  
   private IEMDiscovery providerDiscovery;
   private IEMDiscovery userDiscovery;
   
@@ -104,10 +97,7 @@ public class ECCMonitorTestExecutor implements Runnable,
   
   public ECCMonitorTestExecutor( AMQPBasicChannel provider,
                                  AMQPBasicChannel user )
-  {
-    providerChannel = provider;
-    userChannel     = user;
-  }
+  { super( provider, user ); }
   
   public boolean getTestResult()
   {
@@ -155,9 +145,6 @@ public class ECCMonitorTestExecutor implements Runnable,
     {
       providerGotReadyToInit = true;
     
-      // Create a test interface here and get ready for data
-      EMInterfaceFactory providerFactory = new EMInterfaceFactory( providerChannel, true );
-      
       // Create dispatcher & attach dispatcher to (shared) pump
       IAMQPMessageDispatch providerDispatch = providerFactory.createDispatch();
       providerPump.addDispatch( providerDispatch );
@@ -214,9 +201,6 @@ public class ECCMonitorTestExecutor implements Runnable,
     {
       if ( type == EMInterfaceType.eEMTestInterface )
       userGotCreateTestFaceCommand = true;
-    
-      // Create a test interface here
-      EMInterfaceFactory userFactory = new EMInterfaceFactory( providerChannel, false );
       
       // Create dispatcher & attach dispatcher to (shared) pump
       IAMQPMessageDispatch userDispatch = userFactory.createDispatch();
@@ -294,46 +278,37 @@ public class ECCMonitorTestExecutor implements Runnable,
   @Override
   public void run()
   {
-    // Create interface factories for both provider and user
-    EMInterfaceFactory providerFactory = new EMInterfaceFactory( providerChannel, true );
-    EMInterfaceFactory userFactory     = new EMInterfaceFactory( userChannel, false );
+    boolean pumpsOK = false;
+    try
+    { 
+      initialiseDispatches( IAMQPMessageDispatchPump.ePumpPriority.MINIMUM );
+      pumpsOK = true;
+    }
+    catch ( Exception e )
+    { exeLogger.error( "Test initialisation problem: " + e.getMessage() ); }
     
-    // Create pump/dispatchers for provider
-    providerPump = providerFactory.createDispatchPump( "Provider pump", 
-                                                       IAMQPMessageDispatchPump.ePumpPriority.MINIMUM );
-    
-    IAMQPMessageDispatch providerDispatch = providerFactory.createDispatch();
-    providerPump.addDispatch( providerDispatch );
-    providerPump.startPump();
-    
-    // Create pump/dispatchers for user
-    userPump = providerFactory.createDispatchPump( "User pump", 
-                                                   IAMQPMessageDispatchPump.ePumpPriority.MINIMUM );
-    
-    IAMQPMessageDispatch userDispatch = userFactory.createDispatch();
-    
-    userPump.addDispatch( userDispatch );
-    userPump.startPump();
-    
-    // Create discovery interfaces for both provider and user
-    providerDiscovery = providerFactory.createDiscovery( ECCMonitorEntryPointTest.EMProviderUUID,
-                                                         ECCMonitorEntryPointTest.EMUserUUID,
-                                                         providerDispatch );
-    
-    userDiscovery = userFactory.createDiscovery( ECCMonitorEntryPointTest.EMProviderUUID,
-                                                 ECCMonitorEntryPointTest.EMUserUUID,
-                                                 userDispatch );
-    
-    // This class acts as BOTH provider and user
-    providerDiscovery.setProviderListener( this );
-    userDiscovery.setUserListener( this );
-    
-    // Start simulation from point of registration confirmation from provider
-    providerDiscovery.registrationConfirmed( true,
-                                             ECCMonitorEntryPointTest.EMExperimentUUID,
-                                             ECCMonitorEntryPointTest.EMExperimentNamedID,
-                                             ECCMonitorEntryPointTest.EMExperimentName,
-                                             ECCMonitorEntryPointTest.EMExperimentDesc,
-                                             ECCMonitorEntryPointTest.EMStartDate );
+    if ( pumpsOK )
+    {
+      // Create discovery interfaces for both provider and user
+      providerDiscovery = providerFactory.createDiscovery( ECCMonitorEntryPointTest.EMProviderUUID,
+                                                           ECCMonitorEntryPointTest.EMUserUUID,
+                                                           providerDispatch );
+
+      userDiscovery = userFactory.createDiscovery( ECCMonitorEntryPointTest.EMProviderUUID,
+                                                   ECCMonitorEntryPointTest.EMUserUUID,
+                                                   userDispatch );
+
+      // This class acts as BOTH provider and user
+      providerDiscovery.setProviderListener( this );
+      userDiscovery.setUserListener( this );
+
+      // Start simulation from point of registration confirmation from provider
+      providerDiscovery.registrationConfirmed( true,
+                                               ECCMonitorEntryPointTest.EMExperimentUUID,
+                                               ECCMonitorEntryPointTest.EMExperimentNamedID,
+                                               ECCMonitorEntryPointTest.EMExperimentName,
+                                               ECCMonitorEntryPointTest.EMExperimentDesc,
+                                               ECCMonitorEntryPointTest.EMStartDate );
+    }
   }
 }

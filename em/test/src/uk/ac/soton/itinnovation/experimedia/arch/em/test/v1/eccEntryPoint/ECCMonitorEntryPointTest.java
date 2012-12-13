@@ -27,7 +27,8 @@ package uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccEntryPoint;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 
-import junit.framework.*;
+import uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccMonitor.ECCBaseTest;
+
 import java.util.*;
 
 
@@ -47,24 +48,10 @@ import java.util.*;
  * 
  * @author sgc
  */
-public class ECCMonitorEntryPointTest extends TestCase
-{
-  protected AMQPConnectionFactory amqpFactory;
-  protected AMQPBasicChannel      amqpProviderChannel;
-  protected AMQPBasicChannel      amqpUserChannel;
-  
-  public static final UUID EMProviderUUID   = UUID.fromString( "00000000-0000-0000-0000-000000000000" );
-  public static final UUID EMUserUUID       = UUID.fromString( "00000000-0000-0000-0000-0000000000FF" );
-  public static final UUID EMExperimentUUID = UUID.fromString( "00000000-0000-0000-0000-00000000FF00" );
-  public static final String EMExperimentNamedID = "Experiment 1";
-  public static final String EMExperimentName    = "JUnit test experiment";
-  public static final String EMExperimentDesc    = "This isn't really an experiment";
-  public static final Date   EMStartDate         = new Date();
-  
+public class ECCMonitorEntryPointTest extends ECCBaseTest
+{  
   public static void main( String[] args )
   { junit.textui.TestRunner.run( ECCMonitorEntryPointTest.class ); }
-  
-  
   
   
   public ECCMonitorEntryPointTest()
@@ -73,16 +60,18 @@ public class ECCMonitorEntryPointTest extends TestCase
   // Tests ---------------------------------------------------------------------
   public void testProviderInit()
   {
-    // Make sure AMQP resources are OK
-    assertTrue( amqpFactory != null );
-    assertTrue( amqpProviderChannel != null );
-    assertTrue( amqpUserChannel != null );
+    // Create provider/user channels
+    AMQPBasicChannel providerChannel = amqpUtil.getProviderChannel();
+    AMQPBasicChannel userChannel     = amqpUtil.getUserChannel();
+        
+    // Check they are OK
+    assertTrue( providerChannel != null );
+    assertTrue( userChannel != null );
     
     // Create Entry Point test executor (give seprate channels for provider
     // and user)
     ECCMonitorEntryPointTestExecutor exe = 
-            new ECCMonitorEntryPointTestExecutor( amqpProviderChannel,
-                                                  amqpUserChannel );
+            new ECCMonitorEntryPointTestExecutor( providerChannel, userChannel );
     
     // Run it
     Thread testThread = new Thread( exe );
@@ -93,53 +82,5 @@ public class ECCMonitorEntryPointTest extends TestCase
     
     // Check result
     assertTrue( exe.getTestResult() );
-  }
-  
-  // Protected methods ---------------------------------------------------------
-  @Override
-  protected void setUp() throws Exception
-  {
-    try
-    { 
-      super.setUp();
-      
-      // Create AMQP factory
-      amqpFactory = new AMQPConnectionFactory();
-      if ( amqpFactory == null ) throw new Exception( "Could not create AMQP Connection factory" );
-      
-      // Get local IP (running RabbitMQ)
-      String localIP = amqpFactory.getLocalIP();
-      if ( localIP == null ) throw new Exception( "Could not get local IP" );
-      
-      // Try setting the IP for the factory to use
-      if ( !amqpFactory.setAMQPHostIPAddress( localIP ) )
-        throw new Exception( "Could not set AMQP bus IP" );
-      
-      // Try connecting to RabbitMQ (will throw if there are problems)
-      amqpFactory.connectToAMQPHost();
-      
-      // Try creating provider/user channels (will throw if there are internal problems)
-      amqpProviderChannel = amqpFactory.createNewChannel();
-      amqpUserChannel     = amqpFactory.createNewChannel();
-      
-      // Throw if we did not get a valid channel
-      if ( amqpProviderChannel == null ) throw new Exception( "Could not create provider AMQP channel" );
-      if ( amqpUserChannel == null ) throw new Exception( "Could not create user AMQP channel" );
-    }
-    catch ( Exception e ) { throw e; }
-  }
-  
-  @Override
-  protected void tearDown() throws Exception
-  {
-    try
-    {
-      super.tearDown();
-      
-      // Tidy up AMQP resources
-      if ( amqpProviderChannel != null ) amqpProviderChannel.close();
-      if ( amqpUserChannel != null )     amqpUserChannel.close();
-    }
-    catch ( Exception e ) { throw e; }
   }
 }
