@@ -58,17 +58,26 @@ public class EntityTest extends TestCase
     }
     
     @Before
-    public void beforeEachTest() throws Exception
+    public void beforeEachTest()
     {
-        edm = EDMInterfaceFactory.getMonitoringEDM();
-        edm.clearMetricsDatabase();
-        entityDAO = edm.getEntityDAO();
+        try {
+            edm = EDMInterfaceFactory.getMonitoringEDM();
+            edm.clearMetricsDatabase();
+            entityDAO = edm.getEntityDAO();
+        } catch (Exception ex) {
+            log.error("Failed to set up EDM and getting EntityDAO: " + ex.toString());
+        }
     }
 
     @Test
     public void testSaveEntity_valid_full()
     {
         log.info(" - saving entity");
+        
+        if ((edm == null) || (entityDAO == null)) {
+            fail("EDM not set up, cannot perform test");
+        }
+        
         Entity entity = new Entity();
         entity.setUUID(PopulateDB.entity1UUID);
         entity.setEntityID("/locations/epcc/3321");
@@ -86,6 +95,11 @@ public class EntityTest extends TestCase
     public void testSaveEntity_valid_minimal()
     {
         log.info(" - saving entity with minimal data");
+        
+        if ((edm == null) || (entityDAO == null)) {
+            fail("EDM not set up, cannot perform test");
+        }
+        
         Entity entity = new Entity();
         entity.setUUID(PopulateDB.entity1UUID);
         entity.setName("VM");
@@ -101,6 +115,11 @@ public class EntityTest extends TestCase
     public void testSaveEntity_withAttributes1()
     {
         log.info(" - saving entity with attributes");
+        
+        if ((edm == null) || (entityDAO == null)) {
+            fail("EDM not set up, cannot perform test");
+        }
+        
         Entity entity = new Entity();
         entity.setUUID(PopulateDB.entity1UUID);
         entity.setEntityID("/locations/epcc/3321");
@@ -121,6 +140,11 @@ public class EntityTest extends TestCase
     public void testSaveEntity_withAttributes2()
     {
         log.info(" - saving entity with attributes; and then an additional attribute");
+        
+        if ((edm == null) || (entityDAO == null)) {
+            fail("EDM not set up, cannot perform test");
+        }
+        
         Entity entity = new Entity();
         entity.setUUID(PopulateDB.entity1UUID);
         entity.setEntityID("/locations/epcc/3321");
@@ -148,6 +172,11 @@ public class EntityTest extends TestCase
     public void testSaveEntity_duplicateUUID()
     {
         log.info(" - saving duplicate entity");
+        
+        if ((edm == null) || (entityDAO == null)) {
+            fail("EDM not set up, cannot perform test");
+        }
+        
         Entity entity1 = new Entity();
         entity1.setUUID(PopulateDB.entity1UUID);
         entity1.setName("VM");
@@ -172,6 +201,11 @@ public class EntityTest extends TestCase
     public void testSaveEntity_noName()
     {
         log.info(" - saving entity with no name");
+        
+        if ((edm == null) || (entityDAO == null)) {
+            fail("EDM not set up, cannot perform test");
+        }
+        
         Entity entity = new Entity();
         entity.setUUID(PopulateDB.entity1UUID);
         
@@ -185,6 +219,11 @@ public class EntityTest extends TestCase
     public void testSaveEntity_invalidAttributes1()
     {
         log.info(" - saving entity with invalid attribute: Attribute UUID NULL");
+        
+        if ((edm == null) || (entityDAO == null)) {
+            fail("EDM not set up, cannot perform test");
+        }
+        
         Entity entity = new Entity();
         entity.setUUID(PopulateDB.entity1UUID);
         entity.setEntityID("/locations/epcc/3321");
@@ -204,6 +243,11 @@ public class EntityTest extends TestCase
     public void testSaveEntity_invalidAttributes2()
     {
         log.info(" - saving entity with invalid attribute: Entity UUID NULL");
+        
+        if ((edm == null) || (entityDAO == null)) {
+            fail("EDM not set up, cannot perform test");
+        }
+        
         Entity entity = new Entity();
         entity.setUUID(PopulateDB.entity1UUID);
         entity.setEntityID("/locations/epcc/3321");
@@ -223,6 +267,11 @@ public class EntityTest extends TestCase
     public void testSaveEntity_invalidAttributes3()
     {
         log.info(" - saving entity with invalid attribute: Attribute name NULL");
+        
+        if ((edm == null) || (entityDAO == null)) {
+            fail("EDM not set up, cannot perform test");
+        }
+        
         Entity entity = new Entity();
         entity.setUUID(PopulateDB.entity1UUID);
         entity.setEntityID("/locations/epcc/3321");
@@ -242,6 +291,11 @@ public class EntityTest extends TestCase
     public void testGetEntityByUUID()
     {
         log.info(" - getting entity from the DB by UUID");
+        
+        if ((edm == null) || (entityDAO == null)) {
+            fail("EDM not set up, cannot perform test");
+        }
+        
         // first saving the entity
         Entity entity = new Entity();
         entity.setUUID(PopulateDB.entity1UUID);
@@ -290,6 +344,10 @@ public class EntityTest extends TestCase
     public void testGetEntities()
     {
         log.info(" - getting entities");
+        
+        if ((edm == null) || (entityDAO == null)) {
+            fail("EDM not set up, cannot perform test");
+        }
         
         // saving first entity
         Entity entity1 = new Entity();

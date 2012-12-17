@@ -91,7 +91,6 @@ public class AGeneralTest extends TestCase
         try {
             PopulateDB.populateWithTestData(edm);
         } catch (Exception ex) {
-            log.error("Unable to populate the DB with test data: " + ex.toString(), ex);
             fail("Unable to populate the DB with test data: " + ex.toString());
         }
     }

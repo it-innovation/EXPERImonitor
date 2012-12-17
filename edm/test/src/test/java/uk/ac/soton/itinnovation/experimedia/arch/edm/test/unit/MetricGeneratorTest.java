@@ -57,19 +57,28 @@ public class MetricGeneratorTest extends TestCase
     }
     
     @Before
-    public void beforeEachTest() throws Exception
+    public void beforeEachTest()
     {
-        edm = EDMInterfaceFactory.getMonitoringEDM();
-        edm.clearMetricsDatabase();
-        mGenDAO = edm.getMetricGeneratorDAO();
-        PopulateDB.saveExperiment(edm, PopulateDB.expUUID);
-        PopulateDB.saveEntity1(edm, PopulateDB.entity1UUID, PopulateDB.entity1attribute1UUID, PopulateDB.entity1attribute2UUID, PopulateDB.entity1attribute3UUID);
+        try {
+            edm = EDMInterfaceFactory.getMonitoringEDM();
+            edm.clearMetricsDatabase();
+            mGenDAO = edm.getMetricGeneratorDAO();
+            PopulateDB.saveExperiment(edm, PopulateDB.expUUID);
+            PopulateDB.saveEntity1(edm, PopulateDB.entity1UUID, PopulateDB.entity1attribute1UUID, PopulateDB.entity1attribute2UUID, PopulateDB.entity1attribute3UUID);
+        } catch (Exception ex) {
+            log.error("Unable to set up EDM and populate DB with necessary data to perform the MetricGenerator tests: " + ex.toString());
+        }
     }
 
     @Test
     public void testSaveMetricGenerator_validFull()
     {
         log.info(" - saving MetricGenerator");
+        
+        if ((edm == null) || (mGenDAO == null)) {
+            fail("EDM not set up, cannot perform test");
+        }
+        
         MetricGenerator metricGenerator = new MetricGenerator(PopulateDB.mGen1UUID, "Experiment MetricGenerator", "A description");
         metricGenerator.addEntity(new Entity(PopulateDB.entity1UUID));
         
@@ -84,6 +93,11 @@ public class MetricGeneratorTest extends TestCase
     public void testSaveMetricGenerator_validMinimal()
     {
         log.info(" - saving MetricGenerator (minimal)");
+        
+        if ((edm == null) || (mGenDAO == null)) {
+            fail("EDM not set up, cannot perform test");
+        }
+        
         MetricGenerator metricGenerator = new MetricGenerator(PopulateDB.mGen1UUID, "Experiment MetricGenerator", null);
         metricGenerator.addEntity(new Entity(PopulateDB.entity1UUID));
         
@@ -98,6 +112,11 @@ public class MetricGeneratorTest extends TestCase
     public void testSaveMetricGenerator_newEntity()
     {
         log.info(" - saving MetricGenerator with a new entity");
+        
+        if ((edm == null) || (mGenDAO == null)) {
+            fail("EDM not set up, cannot perform test");
+        }
+        
         MetricGenerator metricGenerator = new MetricGenerator(PopulateDB.mGen1UUID, "Experiment MetricGenerator", null);
         metricGenerator.addEntity(new Entity(UUID.randomUUID(), "Entity", "Description"));
         
@@ -112,6 +131,11 @@ public class MetricGeneratorTest extends TestCase
     public void testSaveMetricGenerator_noUUID()
     {
         log.info(" - saving MetricGenerator with no UUID");
+        
+        if ((edm == null) || (mGenDAO == null)) {
+            fail("EDM not set up, cannot perform test");
+        }
+        
         MetricGenerator metricGenerator = new MetricGenerator(null, "Experiment MetricGenerator", null);
         metricGenerator.addEntity(new Entity(UUID.randomUUID(), "Entity", "Description"));
         
@@ -125,6 +149,11 @@ public class MetricGeneratorTest extends TestCase
     public void testSaveMetricGenerator_duplicate()
     {
         log.info(" - saving duplicate MetricGenerator");
+        
+        if ((edm == null) || (mGenDAO == null)) {
+            fail("EDM not set up, cannot perform test");
+        }
+        
         MetricGenerator metricGenerator1 = new MetricGenerator(PopulateDB.mGen1UUID, "Experiment MetricGenerator 1", null);
         metricGenerator1.addEntity(new Entity(UUID.randomUUID(), "Entity", "Description"));
         
@@ -147,6 +176,11 @@ public class MetricGeneratorTest extends TestCase
     public void testSaveMetricGenerator_noEntity()
     {
         log.info(" - saving MetricGenerator with no entity");
+        
+        if ((edm == null) || (mGenDAO == null)) {
+            fail("EDM not set up, cannot perform test");
+        }
+        
         MetricGenerator metricGenerator = new MetricGenerator(PopulateDB.mGen1UUID, "Experiment MetricGenerator", null);
         
         try {
@@ -159,6 +193,11 @@ public class MetricGeneratorTest extends TestCase
     public void testSaveMetricGenerator_errorEntity()
     {
         log.info(" - saving MetricGenerator with erroronous entity");
+        
+        if ((edm == null) || (mGenDAO == null)) {
+            fail("EDM not set up, cannot perform test");
+        }
+        
         MetricGenerator metricGenerator = new MetricGenerator(PopulateDB.mGen1UUID, "Experiment MetricGenerator", null);
         metricGenerator.addEntity(new Entity()); // missing values that cannot be null
         

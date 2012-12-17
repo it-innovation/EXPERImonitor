@@ -27,7 +27,6 @@ package uk.ac.soton.itinnovation.experimedia.arch.edm.test.unit;
 import java.util.Date;
 import java.util.Random;
 import java.util.UUID;
-import java.util.logging.Level;
 import junit.framework.TestCase;
 import org.apache.log4j.Logger;
 import org.junit.Before;
@@ -61,16 +60,20 @@ public class ReportTest extends TestCase
     }
     
     @Before
-    public void beforeEachTest() throws Exception
+    public void beforeEachTest()
     {
-        edm = EDMInterfaceFactory.getMonitoringEDM();
-        edm.clearMetricsDatabase();
-        reportDAO = edm.getReportDAO();
-        
-        // save experiment, entities, metric generators, metric groups and measurement sets
-        PopulateDB.saveExperiment(edm, PopulateDB.expUUID);
-        PopulateDB.saveEntity1(edm, PopulateDB.entity1UUID, PopulateDB.entity1attribute1UUID, PopulateDB.entity1attribute2UUID, PopulateDB.entity1attribute3UUID);
-        PopulateDB.saveMetricGenerator1(edm, PopulateDB.expUUID, PopulateDB.entity1UUID, PopulateDB.entity1attribute1UUID, PopulateDB.entity1attribute2UUID, PopulateDB.entity1attribute3UUID, PopulateDB.mGen1UUID, PopulateDB.mGrp1UUID, PopulateDB.mGrp1mSet1UUID, PopulateDB.mGrp1mSet2UUID, PopulateDB.mGrp1mSet3UUID);
+        try {
+            edm = EDMInterfaceFactory.getMonitoringEDM();
+            edm.clearMetricsDatabase();
+            reportDAO = edm.getReportDAO();
+
+            // save experiment, entities, metric generators, metric groups and measurement sets
+            PopulateDB.saveExperiment(edm, PopulateDB.expUUID);
+            PopulateDB.saveEntity1(edm, PopulateDB.entity1UUID, PopulateDB.entity1attribute1UUID, PopulateDB.entity1attribute2UUID, PopulateDB.entity1attribute3UUID);
+            PopulateDB.saveMetricGenerator1(edm, PopulateDB.expUUID, PopulateDB.entity1UUID, PopulateDB.entity1attribute1UUID, PopulateDB.entity1attribute2UUID, PopulateDB.entity1attribute3UUID, PopulateDB.mGen1UUID, PopulateDB.mGrp1UUID, PopulateDB.mGrp1mSet1UUID, PopulateDB.mGrp1mSet2UUID, PopulateDB.mGrp1mSet3UUID);
+        } catch (Exception ex) {
+            log.error("Unable to set up the EDM and populate the DB with required data before starting Report tests");
+        }
     }
     
     private static Report getReportWithRandomMeasurements(UUID reportUUID, UUID mSetUUID, int numMeasurements)
@@ -109,6 +112,11 @@ public class ReportTest extends TestCase
     public void testSaveReport_validNoMeasurements()
     {
         log.info(" - saving report without measurements");
+        
+        if ((edm == null) || (reportDAO == null)) {
+            fail("EDM not set up, cannot perform test");
+        }
+        
         Report report = getReportWithRandomMeasurements(UUID.randomUUID(), PopulateDB.mGrp1mSet1UUID, 5);
         try {
             reportDAO.saveReport(report, false);
@@ -134,6 +142,11 @@ public class ReportTest extends TestCase
     public void testSaveReport_validWithMeasurements()
     {
         log.info(" - saving report with measurements");
+        
+        if ((edm == null) || (reportDAO == null)) {
+            fail("EDM not set up, cannot perform test");
+        }
+        
         Report report = getReportWithRandomMeasurements(UUID.randomUUID(), PopulateDB.mGrp1mSet1UUID, 5);
         try {
             reportDAO.saveReport(report, true);
@@ -159,6 +172,12 @@ public class ReportTest extends TestCase
     public void testSaveReport_validOnlyMeasurements()
     {
         log.info(" - saving measurements for report");
+        
+        if ((edm == null) || (reportDAO == null)) {
+            fail("EDM not set up, cannot perform test");
+        }
+        
+        
         Report report = getReportWithRandomMeasurements(UUID.randomUUID(), PopulateDB.mGrp1mSet1UUID, 5);
         try {
             reportDAO.saveMeasurements(report);
@@ -178,6 +197,12 @@ public class ReportTest extends TestCase
     public void testSetReportMeasurementsSyncFlag()
     {
         log.info(" - setting sync flag for measurements for report");
+        
+        if ((edm == null) || (reportDAO == null)) {
+            fail("EDM not set up, cannot perform test");
+        }
+        
+        
         Report report = getReportWithRandomMeasurements(UUID.randomUUID(), PopulateDB.mGrp1mSet1UUID, 5);
         try {
             reportDAO.saveReport(report, true);
@@ -243,6 +268,12 @@ public class ReportTest extends TestCase
     public void testGetReport_byUUID_withoutMeasurements()
     {
         log.info(" - getting report by UUID without the measurements");
+        
+        if ((edm == null) || (reportDAO == null)) {
+            fail("EDM not set up, cannot perform test");
+        }
+        
+        
         Report report = getReportWithRandomMeasurements(UUID.randomUUID(), PopulateDB.mGrp1mSet1UUID, 5);
         try {
             reportDAO.saveReport(report, true);
@@ -267,6 +298,12 @@ public class ReportTest extends TestCase
     public void testGetReport_byUUID_withMeasurements()
     {
         log.info(" - getting report by UUID with measurements");
+        
+        if ((edm == null) || (reportDAO == null)) {
+            fail("EDM not set up, cannot perform test");
+        }
+        
+        
         Report report = getReportWithRandomMeasurements(UUID.randomUUID(), PopulateDB.mGrp1mSet1UUID, 5);
         try {
             reportDAO.saveReport(report, true);
@@ -291,6 +328,12 @@ public class ReportTest extends TestCase
     public void testGetReport_latest_withoutMeasurements()
     {
         log.info(" - getting report for latest measurement, but without the actual measurement");
+        
+        if ((edm == null) || (reportDAO == null)) {
+            fail("EDM not set up, cannot perform test");
+        }
+        
+        
         Report report = getReportWithRandomMeasurements(UUID.randomUUID(), PopulateDB.mGrp1mSet1UUID, 5);
         try {
             reportDAO.saveMeasurements(report);
@@ -324,6 +367,12 @@ public class ReportTest extends TestCase
     public void testGetReport_latest_withMeasurements()
     {
         log.info(" - getting report for latest measurement with the actual measurement");
+        
+        if ((edm == null) || (reportDAO == null)) {
+            fail("EDM not set up, cannot perform test");
+        }
+        
+        
         Report report = getReportWithRandomMeasurements(UUID.randomUUID(), PopulateDB.mGrp1mSet1UUID, 5);
         try {
             reportDAO.saveMeasurements(report);
@@ -357,6 +406,12 @@ public class ReportTest extends TestCase
     public void testGetReport_all_withoutMeasurements()
     {
         log.info(" - getting report for all measurements, but without the actual measurements");
+        
+        if ((edm == null) || (reportDAO == null)) {
+            fail("EDM not set up, cannot perform test");
+        }
+        
+        
         Report report = getReportWithRandomMeasurements(UUID.randomUUID(), PopulateDB.mGrp1mSet1UUID, 5);
         try {
             reportDAO.saveMeasurements(report);
@@ -390,6 +445,12 @@ public class ReportTest extends TestCase
     public void testGetReport_all_withMeasurements()
     {
         log.info(" - getting report for all measurements, with the actual measurements");
+        
+        if ((edm == null) || (reportDAO == null)) {
+            fail("EDM not set up, cannot perform test");
+        }
+        
+        
         Report report = getReportWithRandomMeasurements(UUID.randomUUID(), PopulateDB.mGrp1mSet1UUID, 5);
         try {
             reportDAO.saveMeasurements(report);
@@ -423,6 +484,12 @@ public class ReportTest extends TestCase
     public void testGetReport_fromDate_withoutMeasurements()
     {
         log.info(" - getting report for measurements after date, without the actual measurements");
+        
+        if ((edm == null) || (reportDAO == null)) {
+            fail("EDM not set up, cannot perform test");
+        }
+        
+        
         Report report = getReportWithRandomMeasurements(UUID.randomUUID(), PopulateDB.mGrp1mSet1UUID, 5);
         try {
             reportDAO.saveMeasurements(report);
@@ -469,6 +536,12 @@ public class ReportTest extends TestCase
     public void testGetReport_fromDate_withMeasurements()
     {
         log.info(" - getting report for measurements after date, with the actual measurements");
+        
+        if ((edm == null) || (reportDAO == null)) {
+            fail("EDM not set up, cannot perform test");
+        }
+        
+        
         Report report = getReportWithRandomMeasurements(UUID.randomUUID(), PopulateDB.mGrp1mSet1UUID, 5);
         try {
             reportDAO.saveMeasurements(report);
@@ -515,6 +588,12 @@ public class ReportTest extends TestCase
     public void testGetReport_forTimePeriod_withoutMeasurements()
     {
         log.info(" - getting report for measurements with a given time period, without the actual measurements");
+        
+        if ((edm == null) || (reportDAO == null)) {
+            fail("EDM not set up, cannot perform test");
+        }
+        
+        
         Report report = getReportWithRandomMeasurements(UUID.randomUUID(), PopulateDB.mGrp1mSet1UUID, 5);
         try {
             reportDAO.saveMeasurements(report);
@@ -562,6 +641,12 @@ public class ReportTest extends TestCase
     public void testGetReport_forTimePeriod_withMeasurements()
     {
         log.info(" - getting report for measurements with a given time period, with the actual measurements");
+        
+        if ((edm == null) || (reportDAO == null)) {
+            fail("EDM not set up, cannot perform test");
+        }
+        
+        
         Report report = getReportWithRandomMeasurements(UUID.randomUUID(), PopulateDB.mGrp1mSet1UUID, 5);
         try {
             reportDAO.saveMeasurements(report);
@@ -609,6 +694,12 @@ public class ReportTest extends TestCase
     public void testGetReport_UnsyncedMeasurementsFromDate_withoutMeasurements()
     {
         log.info(" - getting report for unsynchronised measurements (without actual measurements)");
+        
+        if ((edm == null) || (reportDAO == null)) {
+            fail("EDM not set up, cannot perform test");
+        }
+        
+        
         Report report = getReportWithRandomMeasurements(UUID.randomUUID(), PopulateDB.mGrp1mSet1UUID, 20);
         try {
             reportDAO.saveReport(report, true);
@@ -651,6 +742,12 @@ public class ReportTest extends TestCase
     public void testGetReport_UnsyncedMeasurementsFromDate_withMeasurements()
     {
         log.info(" - getting report for unsynchronised measurements (with actual measurements)");
+        
+        if ((edm == null) || (reportDAO == null)) {
+            fail("EDM not set up, cannot perform test");
+        }
+        
+        
         Report report = getReportWithRandomMeasurements(UUID.randomUUID(), PopulateDB.mGrp1mSet1UUID, 20);
         try {
             reportDAO.saveReport(report, true);
@@ -693,6 +790,12 @@ public class ReportTest extends TestCase
     public void testDeleteReport_noMeasurements()
     {
         log.info(" - deleting report, but not the measurements");
+        
+        if ((edm == null) || (reportDAO == null)) {
+            fail("EDM not set up, cannot perform test");
+        }
+        
+        
         Report report = getReportWithRandomMeasurements(UUID.randomUUID(), PopulateDB.mGrp1mSet1UUID, 5);
         try {
             reportDAO.saveReport(report, true);
@@ -730,6 +833,12 @@ public class ReportTest extends TestCase
     public void testDeleteReport_withMeasurements()
     {
         log.info(" - deleting report with the measurements");
+        
+        if ((edm == null) || (reportDAO == null)) {
+            fail("EDM not set up, cannot perform test");
+        }
+        
+        
         Report report = getReportWithRandomMeasurements(UUID.randomUUID(), PopulateDB.mGrp1mSet1UUID, 5);
         try {
             reportDAO.saveReport(report, true);

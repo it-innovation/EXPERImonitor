@@ -52,17 +52,25 @@ public class ExperimentTest extends TestCase
     }
     
     @Before
-    public void beforeEachTest() throws Exception
+    public void beforeEachTest()
     {
-        edm = EDMInterfaceFactory.getMonitoringEDM();
-        edm.clearMetricsDatabase();
-        expDAO = edm.getExperimentDAO();
+        try {
+            edm = EDMInterfaceFactory.getMonitoringEDM();
+            edm.clearMetricsDatabase();
+            expDAO = edm.getExperimentDAO();
+        } catch (Exception ex) {
+            log.error("Failed to set up EDM and get Experiment DAO: " + ex.toString());
+        }
     }
     
     @Test
     public void testSaveExperiment_valid_full()
     {
         log.info(" - saving valid experiment");
+        
+        if ((edm == null) || (expDAO == null)) {
+            fail("EDM not set up, cannot perform test");
+        }
         
         Experiment exp = new Experiment();
         exp.setName("Test experiment");
@@ -82,6 +90,10 @@ public class ExperimentTest extends TestCase
     {
         log.info(" - saving valid experiment (with minimal info)");
         
+        if ((edm == null) || (expDAO == null)) {
+            fail("EDM not set up, cannot perform test");
+        }
+        
         Experiment exp = new Experiment();
         exp.setName("Test experiment");
         try {
@@ -95,6 +107,10 @@ public class ExperimentTest extends TestCase
     public void testSaveExperiment_duplicateUUID()
     {
         log.info(" - saving experiment with duplicate UUID");
+        
+        if ((edm == null) || (expDAO == null)) {
+            fail("EDM not set up, cannot perform test");
+        }
         
         Experiment exp1 = new Experiment();
         exp1.setName("Test experiment");
@@ -119,6 +135,10 @@ public class ExperimentTest extends TestCase
     {
         log.info(" - saving experiment with no name");
         
+        if ((edm == null) || (expDAO == null)) {
+            fail("EDM not set up, cannot perform test");
+        }
+        
         // should not save because of missinng information (UUID generated, but name not set)
         Experiment exp4 = new Experiment();
         try {
@@ -131,6 +151,10 @@ public class ExperimentTest extends TestCase
     public void testGetExperimentByUUID()
     {
         log.info(" - saving and retrieving an experiment by UUID");
+        
+        if ((edm == null) || (expDAO == null)) {
+            fail("EDM not set up, cannot perform test");
+        }
         
         Experiment exp1 = new Experiment();
         exp1.setName("Experiment");
@@ -164,6 +188,10 @@ public class ExperimentTest extends TestCase
     public void testGetExperiments()
     {
         log.info(" - saving and retrieving all experiments");
+        
+        if ((edm == null) || (expDAO == null)) {
+            fail("EDM not set up, cannot perform test");
+        }
         
         Experiment exp1 = new Experiment();
         exp1.setName("Experiment 1");

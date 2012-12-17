@@ -64,40 +64,43 @@ import uk.ac.soton.itinnovation.experimedia.arch.edm.test.general.PopulateDB;
 @RunWith(JUnit4.class)
 public class APopulateDBTest extends TestCase
 {
+    
     IMonitoringEDM edm = null;
     static Logger log = Logger.getLogger(APopulateDBTest.class);
     
     @BeforeClass
-    public static void populateDB() throws Exception
+    public static void populateDB()
     {
         log.info("PopulateDB tests");
         IMonitoringEDM edm = null;
         try {
             edm = EDMInterfaceFactory.getMonitoringEDM();
-        } catch (Exception ex) {
-            log.error("Unable to get Monitoring EDM: " + ex.toString());
-            throw ex;
-        }
-        
-        try {
             edm.clearMetricsDatabase();
             PopulateDB.populateWithTestData(edm);
         } catch (Exception ex) {
-            log.error("Unable to clear the metrics database and populate it: " + ex.toString());
-            throw ex;
+            log.error("Unable to get Monitoring EDM and populate the DB: " + ex.toString());
         }
     }
     
     @Before
-    public void beforeEachTest() throws Exception
+    public void beforeEachTest()
     {
-        edm = EDMInterfaceFactory.getMonitoringEDM();
+        try {
+            edm = EDMInterfaceFactory.getMonitoringEDM();
+        } catch (Exception ex) {
+            log.error("Unable to get Monitoring EDM: " + ex.toString());
+        }
     }
     
     @Test
     public void testGetExperiments()
     {
         log.info(" - checking experiments");
+        
+        if (edm == null) {
+            fail("EDM not set up, cannot perform test");
+        }
+        
         IExperimentDAO expDAO = null;
         try {
             expDAO = edm.getExperimentDAO();
@@ -120,6 +123,11 @@ public class APopulateDBTest extends TestCase
     public void testGetEnties()
     {
         log.info(" - checking entities");
+        
+        if (edm == null) {
+            fail("EDM not set up, cannot perform test");
+        }
+        
         IEntityDAO entityDAO = null;
         try {
             entityDAO = edm.getEntityDAO();
@@ -142,6 +150,11 @@ public class APopulateDBTest extends TestCase
     public void testGetAttributes()
     {
         log.info(" - checking attributes for entities");
+        
+        if (edm == null) {
+            fail("EDM not set up, cannot perform test");
+        }
+        
         IEntityDAO entityDAO = null;
         try {
             entityDAO = edm.getEntityDAO();
@@ -175,6 +188,11 @@ public class APopulateDBTest extends TestCase
     public void testGetMetricGenerators()
     {
         log.info(" - checking metric generators");
+        
+        if (edm == null) {
+            fail("EDM not set up, cannot perform test");
+        }
+        
         IMetricGeneratorDAO mGenDAO = null;
         try {
             mGenDAO = edm.getMetricGeneratorDAO();
@@ -198,6 +216,11 @@ public class APopulateDBTest extends TestCase
     public void testGetMetricGroups()
     {
         log.info(" - checking metric groups for metric generators");
+        
+        if (edm == null) {
+            fail("EDM not set up, cannot perform test");
+        }
+        
         IMetricGroupDAO mGroupDAO = null;
         try {
             mGroupDAO = edm.getMetricGroupDAO();
@@ -231,6 +254,11 @@ public class APopulateDBTest extends TestCase
     public void testMeasurementSets()
     {
         log.info(" - checking measurement sets for metric groups");
+        
+        if (edm == null) {
+            fail("EDM not set up, cannot perform test");
+        }
+        
         IMeasurementSetDAO mSetDAO = null;
         try {
             mSetDAO = edm.getMeasurementSetDAO();
@@ -275,6 +303,11 @@ public class APopulateDBTest extends TestCase
     public void testReports()
     {
         log.info(" - checking reports of all measurements for measurement sets");
+        
+        if (edm == null) {
+            fail("EDM not set up, cannot perform test");
+        }
+        
         IReportDAO reportDAO = null;
         try {
             reportDAO = edm.getReportDAO();
