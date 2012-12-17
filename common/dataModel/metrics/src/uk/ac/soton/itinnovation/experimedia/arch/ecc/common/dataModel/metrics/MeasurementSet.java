@@ -198,6 +198,10 @@ public class MeasurementSet implements Serializable
     public void setMeasurements(Set<Measurement> measurements)
     {
         this.measurements = measurements;
+        
+        for (Measurement measurement : measurements) {
+            measurement.setMeasurementSetUUID(this.uuid);
+        }
     }
     
     /**
@@ -206,12 +210,15 @@ public class MeasurementSet implements Serializable
      */
     public void addMeasurement(Measurement measurement)
     {
-        if (measurement == null)
+        if (measurement == null) {
             return;
+        }
         
-        if (this.measurements == null)
+        if (this.measurements == null) {
             this.measurements = new HashSet<Measurement>();
+        }
         
+        measurement.setMeasurementSetUUID(this.uuid);
         this.measurements.add(measurement);
     }
     
@@ -221,12 +228,18 @@ public class MeasurementSet implements Serializable
      */
     public void addMeasurements(Set<Measurement> measurements)
     {
-        if ((measurements == null) || measurements.isEmpty())
+        if ((measurements == null) || measurements.isEmpty()) {
             return;
+        }
         
-        if (this.measurements == null)
+        if (this.measurements == null) {
             this.measurements = new HashSet<Measurement>();
+        }
         
-        this.measurements.addAll(measurements);
+        for (Measurement measurement : measurements)
+        {
+            measurement.setMeasurementSetUUID(this.uuid);
+            this.measurements.add(measurement);
+        }
     }
 }

@@ -379,26 +379,27 @@ public class ReportDAOHelper
                 PreparedStatement pstmt = connection.prepareStatement(query);
                 pstmt.setObject(1, reportUUID, java.sql.Types.OTHER);
                 ResultSet rs = pstmt.executeQuery();
-
+                
                 // check if anything got returned
                 if (!rs.next())
                 {
                     log.debug("There are no measurements for the report (UUID = " + reportUUID.toString() + ").");
                     throw new NoDataException("There are no measurements for the report (UUID = " + reportUUID.toString() + ").");
                 }
-
+                
                 // process each result item
                 do {
                     String measurementUUIDstr = rs.getString("measurementUUID");
                     String mSetUUIDstr = rs.getString("mSetUUID");
                     String timeStampStr = rs.getString("timeStamp");
                     String value = rs.getString("value");
-
+                    boolean synchronised = rs.getBoolean("synchronised");
+                    
                     Date timeStamp = new Date(Long.parseLong(timeStampStr));
                     UUID measurementUUID = UUID.fromString(measurementUUIDstr);
                     UUID mSetUUID = UUID.fromString(mSetUUIDstr);
-
-                    measurements.add(new Measurement(measurementUUID, mSetUUID, timeStamp, value));
+                    
+                    measurements.add(new Measurement(measurementUUID, mSetUUID, timeStamp, value, synchronised));
                 } while (rs.next());
 
             } catch (NoDataException nde) {
@@ -637,6 +638,7 @@ public class ReportDAOHelper
                 String measurementUUIDstr = rs.getString("measurementUUID");
 				String timeStampStr = rs.getString("timeStamp");
                 String value = rs.getString("value");
+                boolean synchronised = rs.getBoolean("synchronised");
                 
                 try {
                     UUID measurementUUID = UUID.fromString(measurementUUIDstr);
@@ -658,7 +660,7 @@ public class ReportDAOHelper
                     
                     if (withMeasurements)
                     {
-                        measurements.add(new Measurement(measurementUUID, mSetUUID, timeStampDate, value));
+                        measurements.add(new Measurement(measurementUUID, mSetUUID, timeStampDate, value, synchronised));
                     }
                 } catch (Exception ex) {
                     log.error("Unable to process measurement for the report (skipping): " + ex.getMessage(), ex);
