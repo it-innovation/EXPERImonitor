@@ -397,8 +397,7 @@ public class MeasurementDAOHelper
                     throw new RuntimeException("Could not get the synchronised flag from the database.", ex);
                 }
                 
-                measurement = new Measurement(measurementUUID, mSetUUID, timeStamp, value);
-                measurement.setSynchronised(synchronised);
+                measurement = new Measurement(measurementUUID, mSetUUID, timeStamp, value, synchronised);
             }
             else // nothing in the result set
             {
@@ -457,8 +456,7 @@ public class MeasurementDAOHelper
                     UUID measurementUUID = UUID.fromString(measurementUUIDstr);
                     Boolean synchronised = rs.getBoolean("synchronised");
                     
-                    Measurement measurement = new Measurement(measurementUUID, mSetUUID, timeStamp, value);
-                    measurement.setSynchronised(synchronised);
+                    Measurement measurement = new Measurement(measurementUUID, mSetUUID, timeStamp, value, synchronised);
                     measurements.add(measurement);
                 } catch (Exception ex) {
                     log.error("Unable to process a measurement, but continuing: " + ex.getMessage(), ex);

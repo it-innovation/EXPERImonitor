@@ -44,7 +44,8 @@ public interface IMetricGeneratorDAO
     /**
      * Saves a metric generator instance, which must have a unique UUID. The 
      * experiment UUID is required, which must refer to an already existing
-     * experiment.
+     * experiment. The MetricGenerator also must refer to one or more existing
+     * entities.
      * 
      * Any sub-classes of the metric generator instance will also be saved (if
      * not null).

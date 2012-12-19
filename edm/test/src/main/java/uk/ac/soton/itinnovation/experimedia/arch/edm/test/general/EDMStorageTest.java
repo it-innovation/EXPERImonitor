@@ -22,7 +22,7 @@
 //      Created for Project :   BonFIRE
 //
 /////////////////////////////////////////////////////////////////////////
-package uk.ac.soton.itinnovation.experimedia.arch.edm.test.storage;
+package uk.ac.soton.itinnovation.experimedia.arch.edm.test.general;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -74,12 +74,12 @@ public class EDMStorageTest
         UUID reportUUID = UUID.fromString("165c8058-5c67-4f92-ae34-df7ee2129821");
         
         //log.info("Clearing the database");
-        //edm.clearMetricsDatabase();
+        edm.clearMetricsDatabase();
         
 //----- CASE 1
         
         //case1noMeasurements(edm, expUUID, entityUUID, attributeUUID, mGenUUID, mGrpUUID, mSetUUID);        
-        case1withMeasurements(edm, expUUID, entityUUID, attributeUUID, mGenUUID, mGrpUUID, mSetUUID, 86400);
+        //case1withMeasurements(edm, expUUID, entityUUID, attributeUUID, mGenUUID, mGrpUUID, mSetUUID, 86400);
         //case1withMeasurements(edm, expUUID, entityUUID, attributeUUID, mGenUUID, mGrpUUID, mSetUUID, 604800);
         //case1withMeasurements(edm, expUUID, entityUUID, attributeUUID, mGenUUID, mGrpUUID, mSetUUID, 2419200);
 

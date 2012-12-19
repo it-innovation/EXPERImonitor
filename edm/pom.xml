@@ -46,7 +46,7 @@
     <module>spec</module>
     <module>impl</module>
     <module>factory</module>
-    <module>test</module>
+	<module>test</module>
   </modules>
     
 </project>

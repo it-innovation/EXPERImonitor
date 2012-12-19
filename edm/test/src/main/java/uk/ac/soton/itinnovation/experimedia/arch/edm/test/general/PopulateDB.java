@@ -22,9 +22,10 @@
 //      Created for Project :   BonFIRE
 //
 /////////////////////////////////////////////////////////////////////////
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.test;
+package uk.ac.soton.itinnovation.experimedia.arch.edm.test.general;
 
 import java.util.Date;
+import java.util.Properties;
 import java.util.Random;
 import java.util.UUID;
 import org.apache.log4j.Logger;
@@ -39,7 +40,8 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Me
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricType;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Unit;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.MonitoringEDM;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMInterfaceFactory;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDM;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IEntityDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IExperimentDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IMetricGeneratorDAO;
@@ -96,7 +98,30 @@ public class PopulateDB
      */
     public static void main(String[] args) throws Exception
     {
-        populateWithTestData();
+        Properties prop = null;
+        if ((args != null) && (args.length == 5))
+        {
+            prop = new Properties();
+            prop.setProperty("dbURL", args[0]);
+            prop.setProperty("dbName", args[1]);
+            prop.setProperty("dbUsername", args[2]);
+            prop.setProperty("dbPassword", args[3]);
+            prop.setProperty("dbType", args[4]);
+        }
+        
+        IMonitoringEDM edm = null;
+        try {
+            if (prop == null) {
+                edm = EDMInterfaceFactory.getMonitoringEDM();
+            } else {
+                edm = EDMInterfaceFactory.getMonitoringEDM(prop);
+            }
+        } catch (Exception ex) {
+            log.error("Unable to get Monitoring EDM: " + ex.toString());
+            throw ex;
+        }
+        populateWithTestData(edm);
+        printDetailsForExperiment(edm, expUUID);
     }
     
     /**
@@ -106,10 +131,8 @@ public class PopulateDB
      * The database will be cleared first, in case there is any data there already.
      * @throws Exception 
      */
-    public static void populateWithTestData() throws Exception
+    public static void populateWithTestData(IMonitoringEDM edm) throws Exception
     {
-        MonitoringEDM edm = new MonitoringEDM();
-        
         edm.clearMetricsDatabase();
         
         saveExperiment(edm, expUUID);
@@ -132,11 +155,9 @@ public class PopulateDB
         
         saveRandomMeasurements(edm, mGrp3mSet1UUID, 20, 150, 300);
         saveRandomMeasurements(edm, mGrp3mSet2UUID, 20, 100, 999);
-        
-        printDetailsForExperiment(edm, expUUID);
     }
     
-    public static void saveExperiment(MonitoringEDM edm, UUID expUUID) throws Exception
+    public static void saveExperiment(IMonitoringEDM edm, UUID expUUID) throws Exception
     {
         IExperimentDAO expDAO = null;
         try {
@@ -146,7 +167,7 @@ public class PopulateDB
             throw ex;
         }
         
-        log.info("Creating experiment");
+        //log.info("Creating experiment");
         Experiment exp = new Experiment();
         exp.setUUID(expUUID);
         exp.setName("Experiment");
@@ -155,10 +176,10 @@ public class PopulateDB
         exp.setEndTime(new Date(Long.parseLong("1440413831014")));
         exp.setExperimentID("/locations/experiment/1337");
         
-        log.info("Saving experiment");
+        //log.info("Saving experiment");
         try {
             expDAO.saveExperiment(exp);
-            log.info("Experiment '" + exp.getName() + "' saved successfully!");
+            //log.info("Experiment '" + exp.getName() + "' saved successfully!");
         } catch (Exception ex) {
             log.error("Unable to save experiment: " + ex.getMessage());
         }
@@ -173,7 +194,7 @@ public class PopulateDB
      * @param diskAttributeUUID The UUID of the Disk attribute of the entity.
      * @throws Exception 
      */
-    public static void saveEntity1(MonitoringEDM edm, UUID entityUUID, UUID cpuAttributeUUID, UUID networkAttributeUUID, UUID diskAttributeUUID) throws Exception
+    public static void saveEntity1(IMonitoringEDM edm, UUID entityUUID, UUID cpuAttributeUUID, UUID networkAttributeUUID, UUID diskAttributeUUID) throws Exception
     {
         IEntityDAO entityDAO = null;
         try {
@@ -183,7 +204,7 @@ public class PopulateDB
             throw ex;
         }
         
-        log.info("Saving VM entity");
+        //log.info("Saving VM entity");
         Entity entity = new Entity();
         entity.setUUID(entityUUID);
         entity.setName("VM");
@@ -194,37 +215,10 @@ public class PopulateDB
         
         try {
             entityDAO.saveEntity(entity);
-            log.info("Entity '" + entity.getName() + "' saved successfully!");
+            //log.info("Entity '" + entity.getName() + "' saved successfully!");
         } catch (Exception ex) {
             log.error("Unable to save entity: " + ex.getMessage());
         }
-        
-        /*log.info("Getting Entity from the DB");
-        Entity entityFromDB = null;
-        try {
-            entityFromDB = entityDAO.getEntity(entityUUID, true);
-        } catch (Exception ex) {
-            log.error("Unable to get entity: " + ex.getMessage());
-        }
-        
-        log.info("Entity details:");
-        if (entityFromDB.getUUID() != null) log.info("  - UUID:  " + entityFromDB.getUUID());
-        if (entityFromDB.getName() != null) log.info("  - Name:  " + entityFromDB.getName());
-        if (entityFromDB.getDescription() != null) log.info("  - Desc:  " + entityFromDB.getDescription());
-        if ((entityFromDB.getAttributes() == null) || entityFromDB.getAttributes().isEmpty()) {
-            log.info("  - There are NO attributes");
-        } else {
-            log.info("  - There are " + entityFromDB.getAttributes().size() + " attributes");
-            for (Attribute attrib : entityFromDB.getAttributes())
-            {
-                if (attrib != null) {
-                    log.info("    - Attribute details:");
-                    if (attrib.getUUID() != null) log.info("      - UUID:  " + attrib.getUUID());
-                    if (attrib.getName() != null) log.info("      - Name:  " + attrib.getName());
-                    if (attrib.getDescription() != null) log.info("      - Desc:  " + attrib.getDescription());
-                }
-            }
-        }*/
     }
     
     /**
@@ -236,7 +230,7 @@ public class PopulateDB
      * @param diskAttributeUUID The UUID of the Disk attribute of the entity.
      * @throws Exception 
      */
-    public static void saveEntity2(MonitoringEDM edm, UUID entityUUID, UUID cpuAttributeUUID, UUID networkAttributeUUID, UUID diskAttributeUUID) throws Exception
+    public static void saveEntity2(IMonitoringEDM edm, UUID entityUUID, UUID cpuAttributeUUID, UUID networkAttributeUUID, UUID diskAttributeUUID) throws Exception
     {
         IEntityDAO entityDAO = null;
         try {
@@ -246,7 +240,7 @@ public class PopulateDB
             throw ex;
         }
         
-        log.info("Saving AVC entity");
+        //log.info("Saving AVC entity");
         Entity entity = new Entity();
         entity.setUUID(entityUUID);
         entity.setName("AVC");
@@ -257,37 +251,10 @@ public class PopulateDB
         
         try {
             entityDAO.saveEntity(entity);
-            log.info("Entity '" + entity.getName() + "' saved successfully!");
+            //log.info("Entity '" + entity.getName() + "' saved successfully!");
         } catch (Exception ex) {
             log.error("Unable to save entity: " + ex.getMessage());
         }
-        
-        /*log.info("Getting Entity from the DB");
-        Entity entityFromDB = null;
-        try {
-            entityFromDB = entityDAO.getEntity(entityUUID, true);
-        } catch (Exception ex) {
-            log.error("Unable to get entity: " + ex.getMessage());
-        }
-        
-        log.info("Entity details:");
-        if (entityFromDB.getUUID() != null) log.info("  - UUID:  " + entityFromDB.getUUID());
-        if (entityFromDB.getName() != null) log.info("  - Name:  " + entityFromDB.getName());
-        if (entityFromDB.getDescription() != null) log.info("  - Desc:  " + entityFromDB.getDescription());
-        if ((entityFromDB.getAttributes() == null) || entityFromDB.getAttributes().isEmpty()) {
-            log.info("  - There are NO attributes");
-        } else {
-            log.info("  - There are " + entityFromDB.getAttributes().size() + " attributes");
-            for (Attribute attrib : entityFromDB.getAttributes())
-            {
-                if (attrib != null) {
-                    log.info("    - Attribute details:");
-                    if (attrib.getUUID() != null) log.info("      - UUID:  " + attrib.getUUID());
-                    if (attrib.getName() != null) log.info("      - Name:  " + attrib.getName());
-                    if (attrib.getDescription() != null) log.info("      - Desc:  " + attrib.getDescription());
-                }
-            }
-        }*/
     }
     
     /**
@@ -299,7 +266,7 @@ public class PopulateDB
      * @param diskAttributeUUID The UUID of the Disk attribute of the entity.
      * @throws Exception 
      */
-    public static void saveEntity3(MonitoringEDM edm, UUID entityUUID, UUID cpuAttributeUUID, UUID networkAttributeUUID) throws Exception
+    public static void saveEntity3(IMonitoringEDM edm, UUID entityUUID, UUID cpuAttributeUUID, UUID networkAttributeUUID) throws Exception
     {
         IEntityDAO entityDAO = null;
         try {
@@ -309,7 +276,7 @@ public class PopulateDB
             throw ex;
         }
         
-        log.info("Saving POI entity");
+        //log.info("Saving POI entity");
         Entity entity = new Entity();
         entity.setUUID(entityUUID);
         entity.setName("POI Service");
@@ -319,37 +286,10 @@ public class PopulateDB
         
         try {
             entityDAO.saveEntity(entity);
-            log.info("Entity '" + entity.getName() + "' saved successfully!");
+            //log.info("Entity '" + entity.getName() + "' saved successfully!");
         } catch (Exception ex) {
             log.error("Unable to save entity: " + ex.getMessage());
         }
-        
-        /*log.info("Getting Entity from the DB");
-        Entity entityFromDB = null;
-        try {
-            entityFromDB = entityDAO.getEntity(entityUUID, true);
-        } catch (Exception ex) {
-            log.error("Unable to get entity: " + ex.getMessage());
-        }
-        
-        log.info("Entity details:");
-        if (entityFromDB.getUUID() != null) log.info("  - UUID:  " + entityFromDB.getUUID());
-        if (entityFromDB.getName() != null) log.info("  - Name:  " + entityFromDB.getName());
-        if (entityFromDB.getDescription() != null) log.info("  - Desc:  " + entityFromDB.getDescription());
-        if ((entityFromDB.getAttributes() == null) || entityFromDB.getAttributes().isEmpty()) {
-            log.info("  - There are NO attributes");
-        } else {
-            log.info("  - There are " + entityFromDB.getAttributes().size() + " attributes");
-            for (Attribute attrib : entityFromDB.getAttributes())
-            {
-                if (attrib != null) {
-                    log.info("    - Attribute details:");
-                    if (attrib.getUUID() != null) log.info("      - UUID:  " + attrib.getUUID());
-                    if (attrib.getName() != null) log.info("      - Name:  " + attrib.getName());
-                    if (attrib.getDescription() != null) log.info("      - Desc:  " + attrib.getDescription());
-                }
-            }
-        }*/
     }
     
     /**
@@ -368,7 +308,7 @@ public class PopulateDB
      * @param mSet3UUID The UUID of the 3rd measurement set.
      * @throws Exception 
      */
-    public static void saveMetricGenerator1(MonitoringEDM edm, UUID expUUID, UUID entityUUID, UUID attrib1UUID, UUID attrib2UUID, UUID attrib3UUID, UUID mGenUUID, UUID mGrpUUID, UUID mSet1UUID, UUID mSet2UUID, UUID mSet3UUID) throws Exception
+    public static void saveMetricGenerator1(IMonitoringEDM edm, UUID expUUID, UUID entityUUID, UUID attrib1UUID, UUID attrib2UUID, UUID attrib3UUID, UUID mGenUUID, UUID mGrpUUID, UUID mSet1UUID, UUID mSet2UUID, UUID mSet3UUID) throws Exception
     {
 //----- EXPERIMENT
         IMetricGeneratorDAO mGenDAO = null;
@@ -380,35 +320,35 @@ public class PopulateDB
         }
         
 //----- METRIC GENERATOR
-        log.info("Creating VM MetricGenerator");
+        //log.info("Creating VM MetricGenerator");
         MetricGenerator metricGenerator = new MetricGenerator(mGenUUID, "VM MetricGenerator", "A metric generator");
         metricGenerator.addEntity(new Entity(entityUUID));
         
 //----- METRIC GROUP
-        log.info("Creating QoS MetricGroup");
+        //log.info("Creating QoS MetricGroup");
         MetricGroup metricGroup = new MetricGroup(mGrpUUID, mGenUUID, "Quality of Service", "A group of QoS metrics");
         metricGenerator.addMetricGroup(metricGroup);
         
 //----- MEASUREMENT SETS
-        log.info("Creating 1st QoS Measurement set");
+        //log.info("Creating 1st QoS Measurement set");
         Metric metric1 = new Metric(UUID.randomUUID(), MetricType.RATIO, new Unit("ms"));
         MeasurementSet mSet1 = new MeasurementSet(mSet1UUID, attrib1UUID, mGrpUUID, metric1);
         metricGroup.addMeasurementSets(mSet1);
         
-        log.info("Creating 2nd QoS Measurement set");
+        //log.info("Creating 2nd QoS Measurement set");
         Metric metric2 = new Metric(UUID.randomUUID(), MetricType.RATIO, new Unit("bits per second"));
         MeasurementSet mSet2 = new MeasurementSet(mSet2UUID, attrib2UUID, mGrpUUID, metric2);
         metricGroup.addMeasurementSets(mSet2);
         
-        log.info("Creating 3rd QoS Measurement set");
+        //log.info("Creating 3rd QoS Measurement set");
         Metric metric3 = new Metric(UUID.randomUUID(), MetricType.RATIO, new Unit("ms"));
         MeasurementSet mSet3 = new MeasurementSet(mSet3UUID, attrib3UUID, mGrpUUID, metric3);
         metricGroup.addMeasurementSets(mSet3);
         
-        log.info("Saving metric generator (with all sub-classes)");
+        //log.info("Saving metric generator (with all sub-classes)");
         try {
             mGenDAO.saveMetricGenerator(metricGenerator, expUUID);
-            log.info("MetricGenerator '" + metricGenerator.getName() + "' saved successfully!");
+            //log.info("MetricGenerator '" + metricGenerator.getName() + "' saved successfully!");
         } catch (Exception ex) {
             log.error("Unable to save MetricGenerator: " + ex.getMessage());
         }
@@ -430,7 +370,7 @@ public class PopulateDB
      * @param mSet3UUID The UUID of the 3rd measurement set.
      * @throws Exception 
      */
-    public static void saveMetricGenerator2(MonitoringEDM edm, UUID expUUID, UUID entityUUID, UUID attrib1UUID, UUID attrib2UUID, UUID attrib3UUID, UUID mGenUUID, UUID mGrpUUID, UUID mSet1UUID, UUID mSet2UUID, UUID mSet3UUID) throws Exception
+    public static void saveMetricGenerator2(IMonitoringEDM edm, UUID expUUID, UUID entityUUID, UUID attrib1UUID, UUID attrib2UUID, UUID attrib3UUID, UUID mGenUUID, UUID mGrpUUID, UUID mSet1UUID, UUID mSet2UUID, UUID mSet3UUID) throws Exception
     {
 //----- EXPERIMENT
         IMetricGeneratorDAO mGenDAO = null;
@@ -442,35 +382,35 @@ public class PopulateDB
         }
         
 //----- METRIC GENERATOR
-        log.info("Creating AVC MetricGenerator");
+        //log.info("Creating AVC MetricGenerator");
         MetricGenerator metricGenerator = new MetricGenerator(mGenUUID, "AVC MetricGenerator", "A metric generator");
         metricGenerator.addEntity(new Entity(entityUUID));
         
 //----- METRIC GROUP
-        log.info("Creating QoS MetricGroup");
+        //log.info("Creating QoS MetricGroup");
         MetricGroup metricGroup = new MetricGroup(mGrpUUID, mGenUUID, "Quality of Service", "A group of QoS metrics");
         metricGenerator.addMetricGroup(metricGroup);
         
 //----- MEASUREMENT SETS
-        log.info("Creating 1st QoS Measurement set");
+        //log.info("Creating 1st QoS Measurement set");
         Metric metric1 = new Metric(UUID.randomUUID(), MetricType.RATIO, new Unit("Files ingested per minute"));
         MeasurementSet mSet1 = new MeasurementSet(mSet1UUID, attrib1UUID, mGrpUUID, metric1);
         metricGroup.addMeasurementSets(mSet1);
         
-        log.info("Creating 2nd QoS Measurement set");
+        //log.info("Creating 2nd QoS Measurement set");
         Metric metric2 = new Metric(UUID.randomUUID(), MetricType.RATIO, new Unit("AV streams out per minute"));
         MeasurementSet mSet2 = new MeasurementSet(mSet2UUID, attrib2UUID, mGrpUUID, metric2);
         metricGroup.addMeasurementSets(mSet2);
         
-        log.info("Creating 3rd QoS Measurement set");
+        //log.info("Creating 3rd QoS Measurement set");
         Metric metric3 = new Metric(UUID.randomUUID(), MetricType.RATIO, new Unit("Average frame rate per second"));
         MeasurementSet mSet3 = new MeasurementSet(mSet3UUID, attrib3UUID, mGrpUUID, metric3);
         metricGroup.addMeasurementSets(mSet3);
         
-        log.info("Saving metric generator (with all sub-classes)");
+        //log.info("Saving metric generator (with all sub-classes)");
         try {
             mGenDAO.saveMetricGenerator(metricGenerator, expUUID);
-            log.info("MetricGenerator '" + metricGenerator.getName() + "' saved successfully!");
+            //log.info("MetricGenerator '" + metricGenerator.getName() + "' saved successfully!");
         } catch (Exception ex) {
             log.error("Unable to save MetricGenerator: " + ex.getMessage());
         }
@@ -490,7 +430,7 @@ public class PopulateDB
      * @param mSet2UUID The UUID of the 2nd measurement set.
      * @throws Exception 
      */
-    public static void saveMetricGenerator3(MonitoringEDM edm, UUID expUUID, UUID entityUUID, UUID attrib1UUID, UUID attrib2UUID, UUID mGenUUID, UUID mGrpUUID, UUID mSet1UUID, UUID mSet2UUID) throws Exception
+    public static void saveMetricGenerator3(IMonitoringEDM edm, UUID expUUID, UUID entityUUID, UUID attrib1UUID, UUID attrib2UUID, UUID mGenUUID, UUID mGrpUUID, UUID mSet1UUID, UUID mSet2UUID) throws Exception
     {
 //----- EXPERIMENT
         IMetricGeneratorDAO mGenDAO = null;
@@ -502,30 +442,30 @@ public class PopulateDB
         }
         
 //----- METRIC GENERATOR
-        log.info("Creating POI Service MetricGenerator");
+        //log.info("Creating POI Service MetricGenerator");
         MetricGenerator metricGenerator = new MetricGenerator(mGenUUID, "POI Service MetricGenerator", "A metric generator");
         metricGenerator.addEntity(new Entity(entityUUID));
         
 //----- METRIC GROUP
-        log.info("Creating QoS MetricGroup");
+        //log.info("Creating QoS MetricGroup");
         MetricGroup metricGroup = new MetricGroup(mGrpUUID, mGenUUID, "Quality of Service", "A group of QoS metrics");
         metricGenerator.addMetricGroup(metricGroup);
         
 //----- MEASUREMENT SETS
-        log.info("Creating 1st QoS Measurement set");
+        //log.info("Creating 1st QoS Measurement set");
         Metric metric1 = new Metric(UUID.randomUUID(), MetricType.RATIO, new Unit("POI requests per minute"));
         MeasurementSet mSet1 = new MeasurementSet(mSet1UUID, attrib1UUID, mGrpUUID, metric1);
         metricGroup.addMeasurementSets(mSet1);
         
-        log.info("Creating 2nd QoS Measurement set");
+        //log.info("Creating 2nd QoS Measurement set");
         Metric metric2 = new Metric(UUID.randomUUID(), MetricType.RATIO, new Unit("ms"));
         MeasurementSet mSet2 = new MeasurementSet(mSet2UUID, attrib2UUID, mGrpUUID, metric2);
         metricGroup.addMeasurementSets(mSet2);
         
-        log.info("Saving metric generator (with all sub-classes)");
+        //log.info("Saving metric generator (with all sub-classes)");
         try {
             mGenDAO.saveMetricGenerator(metricGenerator, expUUID);
-            log.info("MetricGenerator '" + metricGenerator.getName() + "' saved successfully!");
+            //log.info("MetricGenerator '" + metricGenerator.getName() + "' saved successfully!");
         } catch (Exception ex) {
             log.error("Unable to save MetricGenerator: " + ex.getMessage());
         }
@@ -539,7 +479,7 @@ public class PopulateDB
      * @param expUUID The experiment UUID.
      * @throws Exception 
      */
-    public static void printDetailsForExperiment(MonitoringEDM edm, UUID expUUID) throws Exception
+    public static void printDetailsForExperiment(IMonitoringEDM edm, UUID expUUID) throws Exception
     {
         IExperimentDAO expDAO = null;
         try {
@@ -557,7 +497,7 @@ public class PopulateDB
             throw ex;
         }
         
-        log.info("Getting experiment object");
+        //log.info("Getting experiment object from the database");
         Experiment expFromDB = null;
         try {
             expFromDB = expDAO.getExperiment(expUUID, true);
@@ -689,7 +629,7 @@ public class PopulateDB
      * @param max The maximum value of the range for the random measurement values.
      * @throws Exception 
      */
-    public static void saveRandomMeasurements(MonitoringEDM edm, UUID mSetUUID, int numMeasurements, int min, int max) throws Exception
+    public static void saveRandomMeasurements(IMonitoringEDM edm, UUID mSetUUID, int numMeasurements, int min, int max) throws Exception
     {
         IReportDAO reportDAO = null;
         try {
@@ -699,7 +639,7 @@ public class PopulateDB
             throw ex;
         }
         
-        log.info("Saving Report for measurement set " + mSetUUID.toString());
+        //log.info("Saving Report for measurement set " + mSetUUID.toString());
         
         MeasurementSet mSet = new MeasurementSet(mSetUUID);
         Random rand = new Random();
@@ -731,7 +671,7 @@ public class PopulateDB
         
         try {
             reportDAO.saveMeasurements(report);
-            log.info("Measurements saved successfully!");
+            //log.info("Measurements saved successfully!");
         } catch (Exception ex) {
             log.error("Unable to save measurements: " + ex.getMessage(), ex);
             throw ex;

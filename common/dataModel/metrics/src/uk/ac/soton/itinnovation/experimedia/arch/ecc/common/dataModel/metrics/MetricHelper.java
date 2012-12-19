@@ -29,7 +29,10 @@ import java.util.*;
 
 
 
-
+/**
+ * A Helper class for assisting with getting information from the metric data model.
+ * @author Simon Crowle
+ */
 public class MetricHelper
 {
     public static Set<MeasurementSet> getAllMeasurementSets( Collection<MetricGenerator> mgenSet )

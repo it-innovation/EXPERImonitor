@@ -52,6 +52,7 @@ public class Measurement implements Serializable
     public Measurement()
     {
         this.uuid = UUID.randomUUID();
+        this.timeStamp = new Date();
         this.synchronised = false;
     }
     
@@ -63,8 +64,7 @@ public class Measurement implements Serializable
      */
     public Measurement(String value)
     {
-        this.timeStamp = new Date();
-        this.uuid = UUID.randomUUID();
+        this();
         this.value = value;
     }
     
@@ -74,15 +74,19 @@ public class Measurement implements Serializable
      */
     public Measurement(Measurement m)
     {
-        if (m == null)
+        if (m == null) {
             return;
+        }
         
-        if (m.getUUID() != null)
+        if (m.getUUID() != null) {
             this.uuid = UUID.fromString(m.getUUID().toString());
-        if (m.getMeasurementSetUUID() != null)
+        }
+        if (m.getMeasurementSetUUID() != null) {
             this.measurementSetUUID = UUID.fromString(m.getMeasurementSetUUID().toString());
-        if (m.getTimeStamp() != null)
+        }
+        if (m.getTimeStamp() != null) {
             this.timeStamp = new Date(m.getTimeStamp().getTime());
+        }
         
         this.value = m.getValue();
         this.synchronised = m.isSynchronised();
@@ -101,6 +105,21 @@ public class Measurement implements Serializable
         this.measurementSetUUID = measurementSetUUID;
         this.timeStamp = timeStamp;
         this.value = value;
+        
+        this.synchronised = false;
+    }
+    
+    /**
+     * Constructor to set all the fields of the Measurement object.
+     * @param uuid The UUID used to uniquely identify a measurement in this framework.
+     * @param measurementSetUUID The UUID of the measurement set that this measurement is a part of.
+     * @param timeStamp The time stamp when the measurement was taken.
+     * @param value The measurement value
+     */
+    public Measurement(UUID uuid, UUID measurementSetUUID, Date timeStamp, String value, boolean synchronised)
+    {
+        this(uuid, measurementSetUUID, timeStamp, value);
+        this.synchronised = synchronised;
     }
 
     /**
