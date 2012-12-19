@@ -24,6 +24,7 @@
 /////////////////////////////////////////////////////////////////////////
 package uk.ac.soton.itinnovation.experimedia.arch.edm.test.unit;
 
+import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 import junit.framework.TestCase;
@@ -54,25 +55,40 @@ public class EntityTest extends TestCase
     @BeforeClass
     public static void beforeClass()
     {
-        log.info("Entity tests");
+        log.info("Entity tests executing...");
     }
     
     @Before
     public void beforeEachTest()
     {
         try {
-            edm = EDMInterfaceFactory.getMonitoringEDM();
+            Properties prop = getProperties();
+            edm = EDMInterfaceFactory.getMonitoringEDM(prop);
             edm.clearMetricsDatabase();
             entityDAO = edm.getEntityDAO();
         } catch (Exception ex) {
             log.error("Failed to set up EDM and getting EntityDAO: " + ex.toString());
         }
     }
+    
+    public Properties getProperties()
+    {
+        Properties prop = new Properties();
+        
+        try {
+            prop.load(AGeneralTest.class.getClassLoader().getResourceAsStream(EDMTestSuite.propertiesFile));
+        } catch (Exception ex) {
+            log.error("Error with loading configuration file " + EDMTestSuite.propertiesFile + ": " + ex.getMessage(), ex);
+            return null;
+        }
+        
+        return prop;
+    }
 
     @Test
     public void testSaveEntity_valid_full()
     {
-        log.info(" - saving entity");
+        //log.info(" - saving entity");
         
         if ((edm == null) || (entityDAO == null)) {
             fail("EDM not set up, cannot perform test");
@@ -94,7 +110,7 @@ public class EntityTest extends TestCase
     @Test
     public void testSaveEntity_valid_minimal()
     {
-        log.info(" - saving entity with minimal data");
+        //log.info(" - saving entity with minimal data");
         
         if ((edm == null) || (entityDAO == null)) {
             fail("EDM not set up, cannot perform test");
@@ -114,7 +130,7 @@ public class EntityTest extends TestCase
     @Test
     public void testSaveEntity_withAttributes1()
     {
-        log.info(" - saving entity with attributes");
+        //log.info(" - saving entity with attributes");
         
         if ((edm == null) || (entityDAO == null)) {
             fail("EDM not set up, cannot perform test");
@@ -139,7 +155,7 @@ public class EntityTest extends TestCase
     @Test
     public void testSaveEntity_withAttributes2()
     {
-        log.info(" - saving entity with attributes; and then an additional attribute");
+        //log.info(" - saving entity with attributes; and then an additional attribute");
         
         if ((edm == null) || (entityDAO == null)) {
             fail("EDM not set up, cannot perform test");
@@ -171,7 +187,7 @@ public class EntityTest extends TestCase
     @Test
     public void testSaveEntity_duplicateUUID()
     {
-        log.info(" - saving duplicate entity");
+        //log.info(" - saving duplicate entity");
         
         if ((edm == null) || (entityDAO == null)) {
             fail("EDM not set up, cannot perform test");
@@ -200,7 +216,7 @@ public class EntityTest extends TestCase
     @Test
     public void testSaveEntity_noName()
     {
-        log.info(" - saving entity with no name");
+        //log.info(" - saving entity with no name");
         
         if ((edm == null) || (entityDAO == null)) {
             fail("EDM not set up, cannot perform test");
@@ -218,7 +234,7 @@ public class EntityTest extends TestCase
     @Test
     public void testSaveEntity_invalidAttributes1()
     {
-        log.info(" - saving entity with invalid attribute: Attribute UUID NULL");
+        //log.info(" - saving entity with invalid attribute: Attribute UUID NULL");
         
         if ((edm == null) || (entityDAO == null)) {
             fail("EDM not set up, cannot perform test");
@@ -242,7 +258,7 @@ public class EntityTest extends TestCase
     @Test
     public void testSaveEntity_invalidAttributes2()
     {
-        log.info(" - saving entity with invalid attribute: Entity UUID NULL");
+        //log.info(" - saving entity with invalid attribute: Entity UUID NULL");
         
         if ((edm == null) || (entityDAO == null)) {
             fail("EDM not set up, cannot perform test");
@@ -266,7 +282,7 @@ public class EntityTest extends TestCase
     @Test
     public void testSaveEntity_invalidAttributes3()
     {
-        log.info(" - saving entity with invalid attribute: Attribute name NULL");
+        //log.info(" - saving entity with invalid attribute: Attribute name NULL");
         
         if ((edm == null) || (entityDAO == null)) {
             fail("EDM not set up, cannot perform test");
@@ -290,7 +306,7 @@ public class EntityTest extends TestCase
     @Test
     public void testGetEntityByUUID()
     {
-        log.info(" - getting entity from the DB by UUID");
+        //log.info(" - getting entity from the DB by UUID");
         
         if ((edm == null) || (entityDAO == null)) {
             fail("EDM not set up, cannot perform test");
@@ -321,7 +337,6 @@ public class EntityTest extends TestCase
         }
         
         // validate entity details
-        log.info("Entity details:");
         assertNotNull("Entity UUID is NULL", entityFromDB.getUUID());
         assertNotNull("Entity ID is NULL", entityFromDB.getEntityID());
         assertNotNull("Entity name is NULL", entityFromDB.getName());
@@ -343,7 +358,7 @@ public class EntityTest extends TestCase
     @Test
     public void testGetEntities()
     {
-        log.info(" - getting entities");
+        //log.info(" - getting entities");
         
         if ((edm == null) || (entityDAO == null)) {
             fail("EDM not set up, cannot perform test");

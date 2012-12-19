@@ -26,6 +26,7 @@ package uk.ac.soton.itinnovation.experimedia.arch.edm.test.unit;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 import junit.framework.*;
@@ -64,14 +65,13 @@ import uk.ac.soton.itinnovation.experimedia.arch.edm.test.general.PopulateDB;
 @RunWith(JUnit4.class)
 public class APopulateDBTest extends TestCase
 {
-    
     IMonitoringEDM edm = null;
     static Logger log = Logger.getLogger(APopulateDBTest.class);
     
     @BeforeClass
     public static void populateDB()
     {
-        log.info("PopulateDB tests");
+        log.info("PopulateDB tests executing...");
         IMonitoringEDM edm = null;
         try {
             edm = EDMInterfaceFactory.getMonitoringEDM();
@@ -86,16 +86,31 @@ public class APopulateDBTest extends TestCase
     public void beforeEachTest()
     {
         try {
-            edm = EDMInterfaceFactory.getMonitoringEDM();
+            Properties prop = getProperties();
+            edm = EDMInterfaceFactory.getMonitoringEDM(prop);
         } catch (Exception ex) {
             log.error("Unable to get Monitoring EDM: " + ex.toString());
         }
     }
     
+    public Properties getProperties()
+    {
+        Properties prop = new Properties();
+        
+        try {
+            prop.load(AGeneralTest.class.getClassLoader().getResourceAsStream(EDMTestSuite.propertiesFile));
+        } catch (Exception ex) {
+            log.error("Error with loading configuration file " + EDMTestSuite.propertiesFile + ": " + ex.getMessage(), ex);
+            return null;
+        }
+        
+        return prop;
+    }
+    
     @Test
     public void testGetExperiments()
     {
-        log.info(" - checking experiments");
+        //log.info(" - checking experiments");
         
         if (edm == null) {
             fail("EDM not set up, cannot perform test");
@@ -122,7 +137,7 @@ public class APopulateDBTest extends TestCase
     @Test
     public void testGetEnties()
     {
-        log.info(" - checking entities");
+        //log.info(" - checking entities");
         
         if (edm == null) {
             fail("EDM not set up, cannot perform test");
@@ -149,7 +164,7 @@ public class APopulateDBTest extends TestCase
     @Test
     public void testGetAttributes()
     {
-        log.info(" - checking attributes for entities");
+        //log.info(" - checking attributes for entities");
         
         if (edm == null) {
             fail("EDM not set up, cannot perform test");
@@ -187,7 +202,7 @@ public class APopulateDBTest extends TestCase
     @Test
     public void testGetMetricGenerators()
     {
-        log.info(" - checking metric generators");
+        //log.info(" - checking metric generators");
         
         if (edm == null) {
             fail("EDM not set up, cannot perform test");
@@ -215,7 +230,7 @@ public class APopulateDBTest extends TestCase
     @Test
     public void testGetMetricGroups()
     {
-        log.info(" - checking metric groups for metric generators");
+        //log.info(" - checking metric groups for metric generators");
         
         if (edm == null) {
             fail("EDM not set up, cannot perform test");
@@ -253,7 +268,7 @@ public class APopulateDBTest extends TestCase
     @Test
     public void testMeasurementSets()
     {
-        log.info(" - checking measurement sets for metric groups");
+        //log.info(" - checking measurement sets for metric groups");
         
         if (edm == null) {
             fail("EDM not set up, cannot perform test");
@@ -302,7 +317,7 @@ public class APopulateDBTest extends TestCase
     @Test
     public void testReports()
     {
-        log.info(" - checking reports of all measurements for measurement sets");
+        //log.info(" - checking reports of all measurements for measurement sets");
         
         if (edm == null) {
             fail("EDM not set up, cannot perform test");

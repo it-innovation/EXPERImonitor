@@ -24,6 +24,7 @@
 /////////////////////////////////////////////////////////////////////////
 package uk.ac.soton.itinnovation.experimedia.arch.edm.test.unit;
 
+import java.util.Properties;
 import junit.framework.*;
 import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
@@ -42,16 +43,31 @@ public class AGeneralTest extends TestCase
     @BeforeClass
     public static void beforeClass()
     {
-        log.info("General tests");
+        log.info("General tests executing...");
+    }
+    
+    public Properties getProperties()
+    {
+        Properties prop = new Properties();
+        
+        try {
+            prop.load(AGeneralTest.class.getClassLoader().getResourceAsStream(EDMTestSuite.propertiesFile));
+        } catch (Exception ex) {
+            log.error("Error with loading configuration file " + EDMTestSuite.propertiesFile + ": " + ex.getMessage(), ex);
+            return null;
+        }
+        
+        return prop;
     }
     
     @Test
     public void testDatabaseConnection()
     {
-        log.info(" - testDatabaseConnection");
+        //log.info(" - testDatabaseConnection");
         IMonitoringEDM edm = null;
+        Properties prop = getProperties();
         try {
-            edm = EDMInterfaceFactory.getMonitoringEDM();
+            edm = EDMInterfaceFactory.getMonitoringEDM(prop);
         } catch (Exception ex) {
             fail("Unable to get Monitoring EDM: " + ex.toString());
         }
@@ -62,10 +78,11 @@ public class AGeneralTest extends TestCase
     @Test
     public void testClearDatabase()
     {
-        log.info(" - testClearDatabase");
+        //log.info(" - testClearDatabase");
         IMonitoringEDM edm = null;
+        Properties prop = getProperties();
         try {
-            edm = EDMInterfaceFactory.getMonitoringEDM();
+            edm = EDMInterfaceFactory.getMonitoringEDM(prop);
         } catch (Exception ex) {
             fail("Unable to get Monitoring EDM: " + ex.toString());
         }
@@ -80,10 +97,11 @@ public class AGeneralTest extends TestCase
     @Test
     public void testPopulateDB()
     {
-        log.info(" - testPopulateDB");
+        //log.info(" - testPopulateDB");
         IMonitoringEDM edm = null;
+        Properties prop = getProperties();
         try {
-            edm = EDMInterfaceFactory.getMonitoringEDM();
+            edm = EDMInterfaceFactory.getMonitoringEDM(prop);
         } catch (Exception ex) {
             fail("Unable to get Monitoring EDM: " + ex.toString());
         }

@@ -25,6 +25,7 @@
 package uk.ac.soton.itinnovation.experimedia.arch.edm.test.unit;
 
 import java.util.Date;
+import java.util.Properties;
 import java.util.Set;
 import junit.framework.*;
 import org.apache.log4j.Logger;
@@ -48,14 +49,15 @@ public class ExperimentTest extends TestCase
     @BeforeClass
     public static void beforeClass()
     {
-        log.info("Experiment tests");
+        log.info("Experiment tests executing...");
     }
     
     @Before
     public void beforeEachTest()
     {
         try {
-            edm = EDMInterfaceFactory.getMonitoringEDM();
+            Properties prop = getProperties();
+            edm = EDMInterfaceFactory.getMonitoringEDM(prop);
             edm.clearMetricsDatabase();
             expDAO = edm.getExperimentDAO();
         } catch (Exception ex) {
@@ -63,10 +65,24 @@ public class ExperimentTest extends TestCase
         }
     }
     
+    public Properties getProperties()
+    {
+        Properties prop = new Properties();
+        
+        try {
+            prop.load(AGeneralTest.class.getClassLoader().getResourceAsStream(EDMTestSuite.propertiesFile));
+        } catch (Exception ex) {
+            log.error("Error with loading configuration file " + EDMTestSuite.propertiesFile + ": " + ex.getMessage(), ex);
+            return null;
+        }
+        
+        return prop;
+    }
+    
     @Test
     public void testSaveExperiment_valid_full()
     {
-        log.info(" - saving valid experiment");
+        log.debug(" - saving valid experiment");
         
         if ((edm == null) || (expDAO == null)) {
             fail("EDM not set up, cannot perform test");
@@ -88,7 +104,7 @@ public class ExperimentTest extends TestCase
     @Test
     public void testSaveExperiment_valid_minimal()
     {
-        log.info(" - saving valid experiment (with minimal info)");
+        log.debug(" - saving valid experiment (with minimal info)");
         
         if ((edm == null) || (expDAO == null)) {
             fail("EDM not set up, cannot perform test");
@@ -106,7 +122,7 @@ public class ExperimentTest extends TestCase
     @Test
     public void testSaveExperiment_duplicateUUID()
     {
-        log.info(" - saving experiment with duplicate UUID");
+        log.debug(" - saving experiment with duplicate UUID");
         
         if ((edm == null) || (expDAO == null)) {
             fail("EDM not set up, cannot perform test");
@@ -133,7 +149,7 @@ public class ExperimentTest extends TestCase
     @Test
     public void testSaveExperiment_noName()
     {
-        log.info(" - saving experiment with no name");
+        log.debug(" - saving experiment with no name");
         
         if ((edm == null) || (expDAO == null)) {
             fail("EDM not set up, cannot perform test");
@@ -150,7 +166,7 @@ public class ExperimentTest extends TestCase
     @Test
     public void testGetExperimentByUUID()
     {
-        log.info(" - saving and retrieving an experiment by UUID");
+        log.debug(" - saving and retrieving an experiment by UUID");
         
         if ((edm == null) || (expDAO == null)) {
             fail("EDM not set up, cannot perform test");
@@ -187,7 +203,7 @@ public class ExperimentTest extends TestCase
     @Test
     public void testGetExperiments()
     {
-        log.info(" - saving and retrieving all experiments");
+        log.debug(" - saving and retrieving all experiments");
         
         if ((edm == null) || (expDAO == null)) {
             fail("EDM not set up, cannot perform test");

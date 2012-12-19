@@ -25,6 +25,7 @@
 package uk.ac.soton.itinnovation.experimedia.arch.edm.test.unit;
 
 import java.util.Date;
+import java.util.Properties;
 import java.util.Random;
 import java.util.UUID;
 import junit.framework.TestCase;
@@ -56,14 +57,15 @@ public class ReportTest extends TestCase
     @BeforeClass
     public static void beforeClass()
     {
-        log.info("Report tests beginning");
+        log.info("Report tests executing...");
     }
     
     @Before
     public void beforeEachTest()
     {
         try {
-            edm = EDMInterfaceFactory.getMonitoringEDM();
+            Properties prop = getProperties();
+            edm = EDMInterfaceFactory.getMonitoringEDM(prop);
             edm.clearMetricsDatabase();
             reportDAO = edm.getReportDAO();
 
@@ -74,6 +76,20 @@ public class ReportTest extends TestCase
         } catch (Exception ex) {
             log.error("Unable to set up the EDM and populate the DB with required data before starting Report tests");
         }
+    }
+    
+    public Properties getProperties()
+    {
+        Properties prop = new Properties();
+        
+        try {
+            prop.load(AGeneralTest.class.getClassLoader().getResourceAsStream(EDMTestSuite.propertiesFile));
+        } catch (Exception ex) {
+            log.error("Error with loading configuration file " + EDMTestSuite.propertiesFile + ": " + ex.getMessage(), ex);
+            return null;
+        }
+        
+        return prop;
     }
     
     private static Report getReportWithRandomMeasurements(UUID reportUUID, UUID mSetUUID, int numMeasurements)
@@ -111,7 +127,7 @@ public class ReportTest extends TestCase
     @Test
     public void testSaveReport_validNoMeasurements()
     {
-        log.info(" - saving report without measurements");
+        log.debug(" - saving report without measurements");
         
         if ((edm == null) || (reportDAO == null)) {
             fail("EDM not set up, cannot perform test");
@@ -141,7 +157,7 @@ public class ReportTest extends TestCase
     @Test
     public void testSaveReport_validWithMeasurements()
     {
-        log.info(" - saving report with measurements");
+        log.debug(" - saving report with measurements");
         
         if ((edm == null) || (reportDAO == null)) {
             fail("EDM not set up, cannot perform test");
@@ -171,7 +187,7 @@ public class ReportTest extends TestCase
     @Test
     public void testSaveReport_validOnlyMeasurements()
     {
-        log.info(" - saving measurements for report");
+        log.debug(" - saving measurements for report");
         
         if ((edm == null) || (reportDAO == null)) {
             fail("EDM not set up, cannot perform test");
@@ -196,7 +212,7 @@ public class ReportTest extends TestCase
     @Test
     public void testSetReportMeasurementsSyncFlag()
     {
-        log.info(" - setting sync flag for measurements for report");
+        log.debug(" - setting sync flag for measurements for report");
         
         if ((edm == null) || (reportDAO == null)) {
             fail("EDM not set up, cannot perform test");
@@ -267,7 +283,7 @@ public class ReportTest extends TestCase
     @Test
     public void testGetReport_byUUID_withoutMeasurements()
     {
-        log.info(" - getting report by UUID without the measurements");
+        log.debug(" - getting report by UUID without the measurements");
         
         if ((edm == null) || (reportDAO == null)) {
             fail("EDM not set up, cannot perform test");
@@ -297,7 +313,7 @@ public class ReportTest extends TestCase
     @Test
     public void testGetReport_byUUID_withMeasurements()
     {
-        log.info(" - getting report by UUID with measurements");
+        log.debug(" - getting report by UUID with measurements");
         
         if ((edm == null) || (reportDAO == null)) {
             fail("EDM not set up, cannot perform test");
@@ -327,7 +343,7 @@ public class ReportTest extends TestCase
     @Test
     public void testGetReport_latest_withoutMeasurements()
     {
-        log.info(" - getting report for latest measurement, but without the actual measurement");
+        log.debug(" - getting report for latest measurement, but without the actual measurement");
         
         if ((edm == null) || (reportDAO == null)) {
             fail("EDM not set up, cannot perform test");
@@ -366,7 +382,7 @@ public class ReportTest extends TestCase
     @Test
     public void testGetReport_latest_withMeasurements()
     {
-        log.info(" - getting report for latest measurement with the actual measurement");
+        log.debug(" - getting report for latest measurement with the actual measurement");
         
         if ((edm == null) || (reportDAO == null)) {
             fail("EDM not set up, cannot perform test");
@@ -405,7 +421,7 @@ public class ReportTest extends TestCase
     @Test
     public void testGetReport_all_withoutMeasurements()
     {
-        log.info(" - getting report for all measurements, but without the actual measurements");
+        log.debug(" - getting report for all measurements, but without the actual measurements");
         
         if ((edm == null) || (reportDAO == null)) {
             fail("EDM not set up, cannot perform test");
@@ -444,7 +460,7 @@ public class ReportTest extends TestCase
     @Test
     public void testGetReport_all_withMeasurements()
     {
-        log.info(" - getting report for all measurements, with the actual measurements");
+        log.debug(" - getting report for all measurements, with the actual measurements");
         
         if ((edm == null) || (reportDAO == null)) {
             fail("EDM not set up, cannot perform test");
@@ -483,7 +499,7 @@ public class ReportTest extends TestCase
     @Test
     public void testGetReport_fromDate_withoutMeasurements()
     {
-        log.info(" - getting report for measurements after date, without the actual measurements");
+        log.debug(" - getting report for measurements after date, without the actual measurements");
         
         if ((edm == null) || (reportDAO == null)) {
             fail("EDM not set up, cannot perform test");
@@ -535,7 +551,7 @@ public class ReportTest extends TestCase
     @Test
     public void testGetReport_fromDate_withMeasurements()
     {
-        log.info(" - getting report for measurements after date, with the actual measurements");
+        log.debug(" - getting report for measurements after date, with the actual measurements");
         
         if ((edm == null) || (reportDAO == null)) {
             fail("EDM not set up, cannot perform test");
@@ -587,7 +603,7 @@ public class ReportTest extends TestCase
     @Test
     public void testGetReport_forTimePeriod_withoutMeasurements()
     {
-        log.info(" - getting report for measurements with a given time period, without the actual measurements");
+        log.debug(" - getting report for measurements with a given time period, without the actual measurements");
         
         if ((edm == null) || (reportDAO == null)) {
             fail("EDM not set up, cannot perform test");
@@ -640,7 +656,7 @@ public class ReportTest extends TestCase
     @Test
     public void testGetReport_forTimePeriod_withMeasurements()
     {
-        log.info(" - getting report for measurements with a given time period, with the actual measurements");
+        log.debug(" - getting report for measurements with a given time period, with the actual measurements");
         
         if ((edm == null) || (reportDAO == null)) {
             fail("EDM not set up, cannot perform test");
@@ -693,7 +709,7 @@ public class ReportTest extends TestCase
     @Test
     public void testGetReport_UnsyncedMeasurementsFromDate_withoutMeasurements()
     {
-        log.info(" - getting report for unsynchronised measurements (without actual measurements)");
+        log.debug(" - getting report for unsynchronised measurements (without actual measurements)");
         
         if ((edm == null) || (reportDAO == null)) {
             fail("EDM not set up, cannot perform test");
@@ -741,7 +757,7 @@ public class ReportTest extends TestCase
     @Test
     public void testGetReport_UnsyncedMeasurementsFromDate_withMeasurements()
     {
-        log.info(" - getting report for unsynchronised measurements (with actual measurements)");
+        log.debug(" - getting report for unsynchronised measurements (with actual measurements)");
         
         if ((edm == null) || (reportDAO == null)) {
             fail("EDM not set up, cannot perform test");
@@ -789,7 +805,7 @@ public class ReportTest extends TestCase
     @Test
     public void testDeleteReport_noMeasurements()
     {
-        log.info(" - deleting report, but not the measurements");
+        log.debug(" - deleting report, but not the measurements");
         
         if ((edm == null) || (reportDAO == null)) {
             fail("EDM not set up, cannot perform test");
@@ -832,7 +848,7 @@ public class ReportTest extends TestCase
     @Test
     public void testDeleteReport_withMeasurements()
     {
-        log.info(" - deleting report with the measurements");
+        log.debug(" - deleting report with the measurements");
         
         if ((edm == null) || (reportDAO == null)) {
             fail("EDM not set up, cannot perform test");

@@ -24,6 +24,7 @@
 /////////////////////////////////////////////////////////////////////////
 package uk.ac.soton.itinnovation.experimedia.arch.edm.test.unit;
 
+import java.util.Properties;
 import java.util.UUID;
 import junit.framework.TestCase;
 import org.apache.log4j.Logger;
@@ -53,14 +54,15 @@ public class MetricGeneratorTest extends TestCase
     @BeforeClass
     public static void beforeClass()
     {
-        log.info("MetricGenerator tests");
+        log.info("MetricGenerator tests executing...");
     }
     
     @Before
     public void beforeEachTest()
     {
         try {
-            edm = EDMInterfaceFactory.getMonitoringEDM();
+            Properties prop = getProperties();
+            edm = EDMInterfaceFactory.getMonitoringEDM(prop);
             edm.clearMetricsDatabase();
             mGenDAO = edm.getMetricGeneratorDAO();
             PopulateDB.saveExperiment(edm, PopulateDB.expUUID);
@@ -69,11 +71,25 @@ public class MetricGeneratorTest extends TestCase
             log.error("Unable to set up EDM and populate DB with necessary data to perform the MetricGenerator tests: " + ex.toString());
         }
     }
+    
+    public Properties getProperties()
+    {
+        Properties prop = new Properties();
+        
+        try {
+            prop.load(AGeneralTest.class.getClassLoader().getResourceAsStream(EDMTestSuite.propertiesFile));
+        } catch (Exception ex) {
+            log.error("Error with loading configuration file " + EDMTestSuite.propertiesFile + ": " + ex.getMessage(), ex);
+            return null;
+        }
+        
+        return prop;
+    }
 
     @Test
     public void testSaveMetricGenerator_validFull()
     {
-        log.info(" - saving MetricGenerator");
+        log.debug(" - saving MetricGenerator");
         
         if ((edm == null) || (mGenDAO == null)) {
             fail("EDM not set up, cannot perform test");
@@ -92,7 +108,7 @@ public class MetricGeneratorTest extends TestCase
     @Test
     public void testSaveMetricGenerator_validMinimal()
     {
-        log.info(" - saving MetricGenerator (minimal)");
+        log.debug(" - saving MetricGenerator (minimal)");
         
         if ((edm == null) || (mGenDAO == null)) {
             fail("EDM not set up, cannot perform test");
@@ -111,7 +127,7 @@ public class MetricGeneratorTest extends TestCase
     @Test
     public void testSaveMetricGenerator_newEntity()
     {
-        log.info(" - saving MetricGenerator with a new entity");
+        log.debug(" - saving MetricGenerator with a new entity");
         
         if ((edm == null) || (mGenDAO == null)) {
             fail("EDM not set up, cannot perform test");
@@ -130,7 +146,7 @@ public class MetricGeneratorTest extends TestCase
     @Test
     public void testSaveMetricGenerator_noUUID()
     {
-        log.info(" - saving MetricGenerator with no UUID");
+        log.debug(" - saving MetricGenerator with no UUID");
         
         if ((edm == null) || (mGenDAO == null)) {
             fail("EDM not set up, cannot perform test");
@@ -148,7 +164,7 @@ public class MetricGeneratorTest extends TestCase
     @Test
     public void testSaveMetricGenerator_duplicate()
     {
-        log.info(" - saving duplicate MetricGenerator");
+        log.debug(" - saving duplicate MetricGenerator");
         
         if ((edm == null) || (mGenDAO == null)) {
             fail("EDM not set up, cannot perform test");
@@ -175,7 +191,7 @@ public class MetricGeneratorTest extends TestCase
     @Test
     public void testSaveMetricGenerator_noEntity()
     {
-        log.info(" - saving MetricGenerator with no entity");
+        log.debug(" - saving MetricGenerator with no entity");
         
         if ((edm == null) || (mGenDAO == null)) {
             fail("EDM not set up, cannot perform test");
@@ -192,7 +208,7 @@ public class MetricGeneratorTest extends TestCase
     @Test
     public void testSaveMetricGenerator_errorEntity()
     {
-        log.info(" - saving MetricGenerator with erroronous entity");
+        log.debug(" - saving MetricGenerator with erroronous entity");
         
         if ((edm == null) || (mGenDAO == null)) {
             fail("EDM not set up, cannot perform test");
