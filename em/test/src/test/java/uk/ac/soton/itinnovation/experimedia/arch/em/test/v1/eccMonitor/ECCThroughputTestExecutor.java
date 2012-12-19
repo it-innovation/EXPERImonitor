@@ -23,14 +23,13 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccMonitor;
+package test.java.uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccMonitor;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEMTest_Listener;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasicChannel;
 
-import uk.ac.soton.itinnovation.experimedia.arch.em.test.common.*;
-
+import test.java.uk.ac.soton.itinnovation.experimedia.arch.em.test.common.*;
 
 
 

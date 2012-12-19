@@ -23,24 +23,25 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccMonitor;
+package test.java.uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccMonitor;
 
-import uk.ac.soton.itinnovation.experimedia.arch.em.test.common.ECCBaseTest;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasicChannel;
+
+import test.java.uk.ac.soton.itinnovation.experimedia.arch.em.test.common.ECCBaseTest;
+
+import org.junit.*;
+
 
 
 
 
 public class ECCThroughputTest extends ECCBaseTest
-{
-  
-  public static void main( String[] args )
-  { junit.textui.TestRunner.run( ECCThroughputTest.class ); }
-  
+{ 
   public ECCThroughputTest()
   { super(); }
   
   // Tests ---------------------------------------------------------------------
+  @Test
   public void testHighFrequencyLowPayload()
   {
     // Create provider/user channels
@@ -48,8 +49,8 @@ public class ECCThroughputTest extends ECCBaseTest
     AMQPBasicChannel userChannel     = amqpUtil.getUserChannel();
         
     // Check they are OK
-    assertTrue( providerChannel != null );
-    assertTrue( userChannel != null );
+    Assert.assertEquals( true, providerChannel != null );
+    Assert.assertEquals( true, userChannel != null );
     
     // Create test executor
     ECCThroughputTestExecutor exe =
@@ -62,6 +63,6 @@ public class ECCThroughputTest extends ECCBaseTest
     waitForTestToComplete();
     
     // Check result
-    assertTrue( exe.getTestResult() );
+    Assert.assertEquals( true, exe.getTestResult() );
   }
 }

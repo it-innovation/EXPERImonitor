@@ -23,16 +23,15 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.em.test.common;
+package test.java.uk.ac.soton.itinnovation.experimedia.arch.em.test.common;
 
 import java.util.*;
-import junit.framework.TestCase;
+import org.junit.*;
 
 
 
 
-public class ECCBaseTest extends TestCase
-                         implements TestEventListener
+public class ECCBaseTest implements TestEventListener
 {
   private boolean testIsRunning;
   
@@ -59,12 +58,10 @@ public class ECCBaseTest extends TestCase
   public void onTestCompleted()
   { setIsTestRunning( false ); }
   
-  // Protected methods ---------------------------------------------------------
-  @Override
-  protected void setUp() throws Exception
+
+  @Before
+  public void setUp() throws Exception
   { 
-    super.setUp();
-    
     try
     { 
       amqpUtil.setUpAMQP();
@@ -75,11 +72,9 @@ public class ECCBaseTest extends TestCase
     { amqpUtil.utilLogger.error( "Test set-up error: " + e.getMessage()); }
   }
   
-  @Override
-  protected void tearDown() throws Exception
+  @After
+  public void tearDown() throws Exception
   { 
-    super.tearDown();
-    
     try { amqpUtil.tearDownAMQP(); }
     catch ( Exception e )
     { amqpUtil.utilLogger.error( "Test tear-down error: " + e.getMessage() ); }

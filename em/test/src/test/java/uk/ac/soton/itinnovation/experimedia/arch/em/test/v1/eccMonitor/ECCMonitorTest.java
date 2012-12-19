@@ -23,10 +23,14 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccMonitor;
+package test.java.uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccMonitor;
 
-import uk.ac.soton.itinnovation.experimedia.arch.em.test.common.ECCBaseTest;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasicChannel;
+
+import test.java.uk.ac.soton.itinnovation.experimedia.arch.em.test.common.*;
+
+import org.junit.*;
+
 
 
 
@@ -44,15 +48,12 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasic
  * @author sgc
  */
 public class ECCMonitorTest extends ECCBaseTest
-{
-  public static void main( String[] args )
-  { junit.textui.TestRunner.run( ECCMonitorTest.class ); }
-  
-  
+{  
   public ECCMonitorTest()
   { super(); }
   
   // Tests ---------------------------------------------------------------------
+  @Test
   public void testGetMonitorInterface()
   {
     // Create provider/user channels
@@ -60,8 +61,8 @@ public class ECCMonitorTest extends ECCBaseTest
     AMQPBasicChannel userChannel     = amqpUtil.getUserChannel();
         
     // Check they are OK
-    assertTrue( providerChannel != null );
-    assertTrue( userChannel != null );
+    Assert.assertEquals( true, providerChannel != null );
+    Assert.assertEquals( true, userChannel != null );
     
     // Create the test executor
     ECCMonitorTestExecutor exe =
@@ -74,6 +75,6 @@ public class ECCMonitorTest extends ECCBaseTest
     waitForTestToComplete();
     
     // Check result
-    assertTrue( exe.getTestResult() );
+    Assert.assertEquals( true, exe.getTestResult() );
   }
 }

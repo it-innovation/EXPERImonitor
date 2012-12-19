@@ -23,13 +23,15 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccEntryPoint;
+package test.java.uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccEntryPoint;
 
+import org.junit.Assert;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 
-import uk.ac.soton.itinnovation.experimedia.arch.em.test.common.ECCBaseTest;
+import test.java.uk.ac.soton.itinnovation.experimedia.arch.em.test.common.*;
 
-import java.util.*;
+import org.junit.Test;
+
 
 
 
@@ -49,15 +51,13 @@ import java.util.*;
  * @author sgc
  */
 public class ECCMonitorEntryPointTest extends ECCBaseTest
-{  
-  public static void main( String[] args )
-  { junit.textui.TestRunner.run( ECCMonitorEntryPointTest.class ); }
-  
+{
   
   public ECCMonitorEntryPointTest()
   { super(); }
   
   // Tests ---------------------------------------------------------------------
+  @Test
   public void testProviderInit()
   {
     // Create provider/user channels
@@ -65,8 +65,8 @@ public class ECCMonitorEntryPointTest extends ECCBaseTest
     AMQPBasicChannel userChannel     = amqpUtil.getUserChannel();
         
     // Check they are OK
-    assertTrue( providerChannel != null );
-    assertTrue( userChannel != null );
+    Assert.assertEquals( true, providerChannel != null );
+    Assert.assertEquals( true, userChannel != null );
     
     // Create Entry Point test executor (give seprate channels for provider
     // and user)
@@ -74,7 +74,6 @@ public class ECCMonitorEntryPointTest extends ECCBaseTest
             new ECCMonitorEntryPointTestExecutor( this,
                                                   providerChannel, 
                                                   userChannel );
-    
     // Run it
     Thread testThread = new Thread( exe );
     testThread.setPriority( Thread.MIN_PRIORITY );
@@ -83,6 +82,6 @@ public class ECCMonitorEntryPointTest extends ECCBaseTest
     waitForTestToComplete();
     
     // Check result
-    assertTrue( exe.getTestResult() );
+    Assert.assertEquals( true, exe.getTestResult() );
   }
 }

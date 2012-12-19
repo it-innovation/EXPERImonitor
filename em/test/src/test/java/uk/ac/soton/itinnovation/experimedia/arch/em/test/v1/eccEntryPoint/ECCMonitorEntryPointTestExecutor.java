@@ -23,14 +23,15 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccEntryPoint;
+package test.java.uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccEntryPoint;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.spec.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasicChannel;
-import uk.ac.soton.itinnovation.experimedia.arch.em.test.common.*;
+
+import test.java.uk.ac.soton.itinnovation.experimedia.arch.em.test.common.*;
 
 import java.util.UUID;
 
