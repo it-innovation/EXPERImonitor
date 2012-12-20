@@ -56,11 +56,6 @@ public class EDMTestSuite
     public static void beforeClass()
     {
         log.info("Starting EDM Test Suite");
-        log.debug("dbURL: " + System.getProperty("dbURL"));
-        log.debug("dbName: " + System.getProperty("dbName"));
-        log.debug("dbUsername: " + System.getProperty("dbUsername"));
-        log.debug("dbPassword: " + System.getProperty("dbPassword"));
-        log.debug("dbType: " + System.getProperty("dbType"));
         
         String[] args = {System.getProperty("dbURL"), System.getProperty("dbName"), System.getProperty("dbUsername"), System.getProperty("dbPassword"), System.getProperty("dbType")};
         try {
@@ -94,7 +89,7 @@ public class EDMTestSuite
     {
         Properties prop = new Properties();
         
-        if ((args != null) && (args.length == 5))
+        if ((args != null) && (args.length == 5) && isArgsValid(args))
         {
             log.debug("Getting properties from the arguments");
             prop.setProperty("dbURL", args[0]);
@@ -114,11 +109,39 @@ public class EDMTestSuite
             }
         }
         
+        log.info("EDM database details");
+        log.info("  dbURL: " + prop.getProperty("dbURL"));
+        log.info("  dbName: " + prop.getProperty("dbName"));
+        log.info("  dbUsername: " + prop.getProperty("dbUsername"));
+        log.info("  dbPassword: " + prop.getProperty("dbPassword"));
+        log.info("  dbType: " + prop.getProperty("dbType"));
+        
         try {
             prop.store(new FileOutputStream("target/classes/" + propertiesFile), null);
         } catch (Exception ex) {
     		log.error("Unable to write properties file: " + ex.toString(), ex);
         }
+    }
+    
+    private static boolean isArgsValid(String[] args)
+    {
+        if ((args[0] == null) || args[0].isEmpty()) {
+            return false;
+        }
+        if ((args[1] == null) || args[1].isEmpty()) {
+            return false;
+        }
+        if ((args[2] == null) || args[2].isEmpty()) {
+            return false;
+        }
+        if ((args[3] == null) || args[3].isEmpty()) {
+            return false;
+        }
+        if ((args[4] == null) || args[4].isEmpty()) {
+            return false;
+        }
+        
+        return true;
     }
     
     public static boolean processResults(Result result)
