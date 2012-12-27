@@ -142,13 +142,13 @@
                             <mainClass>uk.ac.soton.itinnovation.experimedia.arch.edm.test.general.PopulateDB</mainClass>
                             <arguments>
                                 <!-- Database URL -->
-                                <argument>localhost:5432</argument>
+                                <argument>${edm.metrics.dbURL}</argument>
                                 <!-- Database name -->
-								<argument>edm-metrics</argument>
+								<argument>${edm.metrics.dbName}</argument>
                                 <!-- Database username -->
-                                <argument>postgres</argument>
+                                <argument>${edm.metrics.dbUsername}</argument>
                                 <!-- Database password -->
-                                <argument>password</argument>
+                                <argument>${edm.metrics.dbPassword}</argument>
                                 <!-- Database type -->
                                 <argument>postgresql</argument>
                             </arguments>

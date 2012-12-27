@@ -98,30 +98,66 @@ public class PopulateDB
      */
     public static void main(String[] args) throws Exception
     {
-        Properties prop = null;
-        if ((args != null) && (args.length == 5))
+        log.info("Populating the EDM metrics database with test data");
+        Properties prop = new Properties();;
+        if ((args != null) && (args.length == 5) && isArgsValid(args))
         {
-            prop = new Properties();
+            log.debug("Getting properties from the arguments");
             prop.setProperty("dbURL", args[0]);
             prop.setProperty("dbName", args[1]);
             prop.setProperty("dbUsername", args[2]);
             prop.setProperty("dbPassword", args[3]);
             prop.setProperty("dbType", args[4]);
         }
+        else
+        {
+            log.debug("Using default edm.properties file");
+            try {
+                prop.load(PopulateDB.class.getClassLoader().getResourceAsStream("edm.properties"));
+            } catch (Exception ex) {
+                log.error("Error with loading configuration file edm.properties: " + ex.getMessage(), ex);
+                throw new RuntimeException("Error with loading configuration file edm.properties: " + ex.getMessage(), ex);
+            }
+        }
+        
+        log.info("EDM database details");
+        log.info("  dbURL: " + prop.getProperty("dbURL"));
+        log.info("  dbName: " + prop.getProperty("dbName"));
+        log.info("  dbUsername: " + prop.getProperty("dbUsername"));
+        log.info("  dbPassword: " + prop.getProperty("dbPassword"));
+        log.info("  dbType: " + prop.getProperty("dbType"));
         
         IMonitoringEDM edm = null;
         try {
-            if (prop == null) {
-                edm = EDMInterfaceFactory.getMonitoringEDM();
-            } else {
-                edm = EDMInterfaceFactory.getMonitoringEDM(prop);
-            }
+            edm = EDMInterfaceFactory.getMonitoringEDM(prop);
         } catch (Exception ex) {
             log.error("Unable to get Monitoring EDM: " + ex.toString());
             throw ex;
         }
+        
         populateWithTestData(edm);
         printDetailsForExperiment(edm, expUUID);
+    }
+    
+    private static boolean isArgsValid(String[] args)
+    {
+        if ((args[0] == null) || args[0].isEmpty()) {
+            return false;
+        }
+        if ((args[1] == null) || args[1].isEmpty()) {
+            return false;
+        }
+        if ((args[2] == null) || args[2].isEmpty()) {
+            return false;
+        }
+        if ((args[3] == null) || args[3].isEmpty()) {
+            return false;
+        }
+        if ((args[4] == null) || args[4].isEmpty()) {
+            return false;
+        }
+        
+        return true;
     }
     
     /**
