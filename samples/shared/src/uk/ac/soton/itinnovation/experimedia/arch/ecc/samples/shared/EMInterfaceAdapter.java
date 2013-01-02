@@ -41,6 +41,14 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment
 
 
 
+/**
+ * Client writers can use this class as a high-level wrapper for communications with
+ * the ECC. The class using an instance of EMInterfaceAdapter should implement the EMIAdapterListener 
+ * interface so that it can respond to requests from the ECC. Writers wishing only to respond to V0.9 
+ * behaviours should instead provide a EMILegacyAdapterListener implementation.
+ * 
+ * @author Simon Crowle
+ */
 public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
                                            IEMSetup_UserListener,
                                            IEMLiveMonitor_UserListener,
@@ -74,22 +82,39 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
     protected Set<MetricGenerator> clientGenerators;
 
 
+    /**
+     * Constructor for the EMInterfaceAdapter using the most recent listener to ECC events.
+     * 
+     * @param listener - ECC event listener (V1.0)
+     */
     public EMInterfaceAdapter( EMIAdapterListener listener )
     {
-        emiListener     = listener;
-        
+        emiListener      = listener; 
         clientGenerators = new HashSet<MetricGenerator>();
         supportedPhases  = EnumSet.noneOf( EMPhase.class );
     }
     
+    /**
+     * Constructor for the EMInterfaceAdapter using an older listener to ECC events (V0.9).
+     * 
+     * @param listener - ECC event listener (V0.9)
+     */
     public EMInterfaceAdapter ( EMILegacyAdapterListener legListener )
     {
-        emiLegListener = legListener;
-        
+        emiLegListener   = legListener;
         clientGenerators = new HashSet<MetricGenerator>();
         supportedPhases  = EnumSet.noneOf( EMPhase.class );
     }
 
+    /**
+     * Use this method to try registering with the ECC.
+     * 
+     * @param name       - Name of the client attempting to register.
+     * @param channel    - AMQP channel used to connect to the ECC.
+     * @param emID       - The UUID of the ECC's monitoring system with which to connect
+     * @param ourID      - The UUID of this client (as a unique instance)
+     * @throws Exception - Registration will throw if any of the parameters are NULL.
+     */
     public void registerWithEM( String name,
                                 AMQPBasicChannel channel, 
                                 UUID emID,
@@ -135,6 +160,11 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
         entryPointFace.registerAsEMClient( clientID, clientName );
     }
     
+    /**
+     * Use this method to disconnect from the ECC's monitoring system.
+     * 
+     * @throws Exception - Disconnection will throw if the client is unable to send a disconnection message.
+     */
     public void disconnectFromEM() throws Exception
     {
         boolean sentDisconnectMessage = false;
@@ -162,14 +192,33 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
           throw new Exception( "Could not communicate disconnection with EM/ECC" );
     }
 
+    /**
+     * Use this method to get information about the current Experiment being run by
+     * the ECC. 
+     * 
+     * @return - Will return populated Experiment information after registration with the ECC
+     *           has been confirmed.
+     */
     public Experiment getExperimentInfo()
     { return currentExperiment; }
     
+    /**
+     * Use this method to set all MetricGenerators known to the client. The EMInterfaceAdapter 
+     * will then send these on the ECC.
+     * 
+     * @param generators 
+     */
     public void setMetricGenerators( Set<MetricGenerator> generators )
     {
         if ( generators != null ) clientGenerators = generators;
     }
 
+    /**
+     * Actively push a metric report to the ECC. This method should only be called during 
+     * the LiveMonitoring process.
+     * 
+     * @param report - A fully populated instance of a metric report.
+     */
     public void pushMetric( Report report )
     {
         if ( report != null && liveMonitorFace != null )

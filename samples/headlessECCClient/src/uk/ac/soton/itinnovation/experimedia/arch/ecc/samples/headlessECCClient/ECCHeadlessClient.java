@@ -51,17 +51,22 @@ public class ECCHeadlessClient implements EMIAdapterListener
     private final Logger clientLogger = Logger.getLogger( ECCHeadlessClient.class );
     private final String clientName;
     
+    // Connection to the ECC
     private AMQPBasicChannel     amqpChannel;
     private EMInterfaceAdapter   emiAdapter;
+    
+    // Local metric data storage and scheduling
     private IMonitoringEDMAgent  edmAgent;
     private IReportDAO           edmReportDAO;
     private MeasurementScheduler measurementScheduler;
    
+    // Experiment and measurement information
     private Experiment                      currentExperiment;
     private HashMap<UUID, MeasurementSet>   measurementSetMap;
     private HashSet<MeasurementTask>        scheduledMeasurementTasks;
     private HashMap<UUID, ITakeMeasurement> instantMeasurers;
     
+    // Client state
     private boolean edmAgentOK  = false;
     private boolean schedulerOK = false;
     private boolean tryingToDisconnect = false;
@@ -84,6 +89,14 @@ public class ECCHeadlessClient implements EMIAdapterListener
         Runtime.getRuntime().addShutdownHook( new ShutdownHook() );
     }
     
+    /**
+     * This method tries to connect to the ECC using the configuration specified in a properties data set.
+     * Note: if this was successful, you should then try to register with the ECC (see tryRegisteringWithECCMonitor(..) )
+     * 
+     * @param emProps     - Properties file specifying connection to the ECC.
+     * @return            - Returns true if a connection to the ECC was made
+     * @throws Exception  - throws if the properties file was erroneous or a connection could not be made
+     */
     public boolean tryConnectToAMQPBus( Properties emProps ) throws Exception
     { 
         boolean connectedOK = false;
@@ -102,6 +115,13 @@ public class ECCHeadlessClient implements EMIAdapterListener
         return connectedOK;
     }
     
+    /**
+     * This method attempts to create an EDMAgent and initialise a local PostgreSQL
+     * data in which metric data will be stored.
+     * 
+     * @param edmProps  - Properties file specifying the database resource for the EDMAgent
+     * @return          - Returns true if the EDMAgent was correctly set-up
+     */
     public boolean initialiseLocalDataManagement( Properties edmProps )
     {
         edmAgentOK  = false;
@@ -138,6 +158,14 @@ public class ECCHeadlessClient implements EMIAdapterListener
         return true;
     }
     
+    /**
+     * Attempts to register with the ECC, after a connect to the ECC has been established (see tryConnectToAMQPBus(..) ).
+     * 
+     * @param monitorID  - The UUID of the ECC monitoring system to connect to.
+     * @param clientID   - The UUID that uniquely represents this client instance.
+     * @return           - Returns true if a registration request was successfully sent.
+     * @throws Exception - Throws if a connection to the ECC is not already established or the ID parameters are NULL.
+     */
     public boolean tryRegisteringWithECCMonitor( UUID monitorID,
                                                  UUID clientID ) throws Exception
     {
@@ -163,6 +191,9 @@ public class ECCHeadlessClient implements EMIAdapterListener
         return true;
     }
     
+    /**
+     * Disconnects from the ECC.
+     */
     public void disconnectFromECCMonitor()
     {
         tryDisconnecting();
@@ -174,6 +205,7 @@ public class ECCHeadlessClient implements EMIAdapterListener
     {
         boolean connectionAndExperimentOK = false;
       
+        // If we're connected, then store some experiment data from the ECC
         if ( connected )
         {
             if ( expInfo != null )
@@ -199,6 +231,7 @@ public class ECCHeadlessClient implements EMIAdapterListener
     @Override
     public void onEMDeregistration( String reason )
     {
+        // We've been de-registered by the ECC. Display the reason and then disconnect.
         clientLogger.info( "Got disconnected from EM: " + reason );
         tryDisconnecting();
     }
@@ -291,8 +324,8 @@ public class ECCHeadlessClient implements EMIAdapterListener
     
     @Override
     /*
-    * Note that 'reportOut' is an OUT parameter provided by the adapter
-    */
+     * Note that 'reportOut' is an OUT parameter provided by the adapter
+     */
     public void onPullMetric( UUID measurementSetID, Report reportOUT )
     {      
         // If we have an EDMAgent running, then get the latest measurement from there
@@ -302,7 +335,7 @@ public class ECCHeadlessClient implements EMIAdapterListener
             { 
                 Report edmReport = edmReportDAO.getReportForLatestMeasurement( measurementSetID, true );
                 
-                // Save this report internally (without data - we already have it)
+                // Save this report internally (without data - we already have it stored in the EDMAgent)
                 // we'll retrieve this report after acknowledgement of the report by the ECC later
                 edmReportDAO.saveReport( edmReport, false );
                 
@@ -336,6 +369,7 @@ public class ECCHeadlessClient implements EMIAdapterListener
     @Override
     public void onPullingStopped()
     {
+        // No need to carry on taking measurements, so stop all scheduled activity
         stopMeasuring();
     }
     
@@ -374,9 +408,11 @@ public class ECCHeadlessClient implements EMIAdapterListener
     * adapter
     */
     public void onPopulateSummaryReport( EMPostReportSummary summaryOUT )
-    {      
+    {
+        // If we have an EDMAgent running, this will be easy
         if ( edmAgentOK )
         {
+            // Go through all our known MeasurementSets and get a summary of the data
             Iterator<UUID> msIDIt = measurementSetMap.keySet().iterator();
             while ( msIDIt.hasNext() )
             {
@@ -385,7 +421,8 @@ public class ECCHeadlessClient implements EMIAdapterListener
                 // Ask the EDM for the summary report (but without actual measurements)
                 try
                 {
-                    Report report = edmReportDAO.getReportForAllMeasurements( msID, false ); // No measurements
+                    // Don't actually retrieve all the measurement data - it's just a summary
+                    Report report = edmReportDAO.getReportForAllMeasurements( msID, false ); 
                     summaryOUT.addReport( report );
                 }
                 catch ( Exception e )
@@ -394,7 +431,7 @@ public class ECCHeadlessClient implements EMIAdapterListener
         }
         else
         {
-            // We don't have any persistence, so we'll just have to send basic
+            // We don't have any EDMAgent persistence, so we'll just have to send basic
             // summary statistics
             Iterator<UUID> msIDIt = instantMeasurers.keySet().iterator();
             while ( msIDIt.hasNext() )
@@ -429,6 +466,7 @@ public class ECCHeadlessClient implements EMIAdapterListener
         if ( edmAgentOK && schedulerOK )
             try
             {
+                // Try get some data based on the batch requested
                 Report edmBatch = edmReportDAO.getReportForUnsyncedMeasurementsFromDate( msID, 
                                                                                          batchOUT.getCopyOfExpectedDataStart(),
                                                                                          batchOUT.getExpectedMeasurementCount(),
@@ -460,6 +498,7 @@ public class ECCHeadlessClient implements EMIAdapterListener
     {
         boolean disconnectedOK = false;
         
+        // Don't repeatedly try to disconnect
         if ( !tryingToDisconnect )
           try 
           { 
@@ -475,7 +514,7 @@ public class ECCHeadlessClient implements EMIAdapterListener
     
     private void defineExperimentMetrics( Experiment experiment )
     {
-        measurementSetMap.clear(); // This map will be useful later
+        measurementSetMap.clear(); // This map will be useful later for reporting measurement summaries
       
         // Set up top-level groups ---------------------------------------------
         MetricGenerator mGen = new MetricGenerator();
@@ -578,6 +617,7 @@ public class ECCHeadlessClient implements EMIAdapterListener
     
     private void startMeasuring()
     {
+        // Run through all our measurement tasks and start them up
         Iterator<MeasurementTask> taskIt = scheduledMeasurementTasks.iterator();
         while ( taskIt.hasNext() )
         {
@@ -587,6 +627,7 @@ public class ECCHeadlessClient implements EMIAdapterListener
     
     private void stopMeasuring()
     {
+        // Run through all our measurement tasks and stop them
         Iterator<MeasurementTask> taskIt = scheduledMeasurementTasks.iterator();
         while ( taskIt.hasNext() )
         {
@@ -595,6 +636,7 @@ public class ECCHeadlessClient implements EMIAdapterListener
     }
     
     // Private shut-down hook --------------------------------------------------
+    // This class is used for emergency shut-downs
     private class ShutdownHook extends Thread
     {
         @Override

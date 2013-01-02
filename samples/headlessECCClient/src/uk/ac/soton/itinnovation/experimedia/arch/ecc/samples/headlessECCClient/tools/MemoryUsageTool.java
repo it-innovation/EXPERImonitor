@@ -33,7 +33,11 @@ import java.util.Date;
 
 
 
-
+/**
+ * A simple (and rough) memory measurement tool, implementing ITakeMeasurement.
+ * 
+ * @author Simon Crowle
+ */
 public class MemoryUsageTool implements ITakeMeasurement
 {
     private final Runtime rt = Runtime.getRuntime();

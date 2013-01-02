@@ -31,7 +31,13 @@ import java.util.*;
 
 
 
-
+/**
+ * This utility class represents a measurement task that will be carried out
+ * periodically. Use the MeasurementScheduler to construct instances of
+ * these classes.
+ * 
+ * @author Simon Crowle
+ */
 public class MeasurementTask
 {
     private MeasurementScheduler measurementScheduler;
@@ -47,6 +53,16 @@ public class MeasurementTask
                                   FINITE,
                                   INFINITE };
     
+    /**
+     * Construction of the measurement task should be carried out by the 
+     * MeasurementScheduler.
+     * 
+     * @param scheduler   - Instance of the measurement scheduler used to construct this task
+     * @param listener    - Instance of the class that actual makes a measurement for this task
+     * @param ms          - The MeasurementSet that this task is associated with
+     * @param repetitions - The number of repetitions of this task that should be carried out. -1 = infinite; 0 = once only; other positive integers for finite number
+     * @param intervalMS  - The time in milliseconds that should elapse before the task is carried out again
+     */
     public MeasurementTask( MeasurementScheduler scheduler,
                             ITakeMeasurement listener,
                             MeasurementSet ms,
@@ -77,21 +93,51 @@ public class MeasurementTask
         timedMeasurementTask = new TimedMeasurementTask();
     }
     
+    /**
+     * Returns the MeasurementSet ID for this task.
+     * 
+     * @return - UUID of the MeasurementSet
+     */
     public UUID getMeasurementSetID()
     { return measurementSet.getUUID(); }
     
+    /**
+     * Returns the recurrance type for this task
+     * 
+     * @return - eTaskRecurrance type.
+     */
     public eTaskRecurrance getTaskRecurranceType()
     { return taskRecurrance; }
     
+    /**
+     * Depending on the recurrance type for this task, the value return is either:
+     * FINITE   : The number of times the task will be executed again from this point onwards
+     * INFINITE : The number of times the task has already been executed
+     * 
+     * @return - integer representing the recurrance of this task.
+     */
     public int getRecurrances()
     { return reoccurCount; }
     
+    /**
+     * Returns the interval elapse time for this task.
+     * 
+     * @return - elapse time in milliseconds.
+     */
     public long getMeasurementInterval()
     { return intervalMilliSecs; }
     
+    /**
+     * Determines whether the task is active.
+     * 
+     * @return - returns true if the task is currently scheduled to measure.
+     */
     public boolean isMeasuring()
     { return isTakingMeasurements; }
     
+    /**
+     * Call this method to start the active scheduling of this task.
+     */
     public void startMeasuring()
     {
         if ( !isTakingMeasurements )
@@ -101,6 +147,9 @@ public class MeasurementTask
         }
     }
     
+    /**
+     * Call this method to stop the scheduled execution of this task.
+     */
     public void stopMeasuring()
     {
         if ( isTakingMeasurements )
@@ -111,6 +160,10 @@ public class MeasurementTask
         }
     }
     
+    /**
+     * Causes the task the run its measurement activity. It is not recommended to call this method; 
+     * clients should leave this up to the MeasurementScheduler.
+     */
     public void executeMeasurement()
     {
         if ( isTakingMeasurements )
@@ -146,7 +199,5 @@ public class MeasurementTask
         @Override
         public void run()
         { executeMeasurement(); }
-    }
-    
-    
+    }   
 }

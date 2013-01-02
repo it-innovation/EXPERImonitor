@@ -34,7 +34,12 @@ import java.util.*;
 
 
 
-
+/**
+ * A simple metric tool that simulates a random walk, modifying the direction of the
+ * walker (as specified using 360 degrees) in a random (but repeatable) fashion.
+ * 
+ * @author Simon Crowle
+ */
 public class PsuedoRandomWalkTool implements ITakeMeasurement
 {
     private final Random random = new Random( 20121110 ); // Repeatable seed
@@ -45,7 +50,11 @@ public class PsuedoRandomWalkTool implements ITakeMeasurement
     
     private int directionDegrees;
     
-    
+    /**
+     * Construct this class by specifying the starting angle of the walker.
+     * 
+     * @param start - The initialise direction of the walker (0-359).
+     */
     public PsuedoRandomWalkTool( int start )
     {
         if ( start < 0 )   start = 0;

@@ -36,6 +36,14 @@ import org.apache.log4j.Logger;
 
 
 
+/**
+ * ECC client writers should consider using the MeasurementScheduler as a utility to
+ * assist them in regularly taking metric measurements. A properly configured EDMAgent
+ * is required for the scheduler to run, as it uses an instance of IReportDAO to store 
+ * the measurements it receives from ITakeMeasurement instances.
+ * 
+ * @author Simon Crowle
+ */
 public class MeasurementScheduler
 {
     private final Logger schedulerLogger = Logger.getLogger( MeasurementScheduler.class );
@@ -55,6 +63,13 @@ public class MeasurementScheduler
     public MeasurementScheduler()
     {}
     
+    /**
+     * The scheduler must be initialised with a valid EDMAgent instance before it is
+     * able to operate correctly.
+     * 
+     * @param edmAgent   - EDMAgent to use for storing metric data.
+     * @throws Exception - Will throw if the scheduler is already initialised or the EDM agent is null.
+     */
     public void initialise( IMonitoringEDMAgent edmAgent ) throws Exception
     {
         initialisedOK = false;
@@ -70,6 +85,16 @@ public class MeasurementScheduler
         initialisedOK = true;
     }
     
+    /**
+     * Client writers should create new MeasurementTasks using this method.
+     * 
+     * @param measurementSet - The MeasurementSet instance associated with the measurement task.
+     * @param listener       - An instance of ITakeMeasurement that actually generates the metric data on demand
+     * @param repetitions    - The number of times this task should be carried out (-1 for infinite, 0 for just once, or a positive integer for finite)
+     * @param intervalMS     - The elapsed time (in milliseconds) between each successive task execution
+     * @return               - Returns an instance of MeasurementTask representing a scheduled task
+     * @throws Exception     - Will throw if scheduler is not initialised properly; the MeasurementSet is null or the MeasurementSet already has an associated task.
+     */
     public MeasurementTask createMeasurementTask( MeasurementSet   measurementSet,
                                                   ITakeMeasurement listener,
                                                   int repetitions,

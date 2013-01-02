@@ -38,7 +38,8 @@ import org.apache.log4j.Logger;
 public class EntryPoint
 {
     public static final Logger clientLogger = Logger.getLogger( EntryPoint.class );
-  
+
+    // Main entry point
     public static void main( String args[] )
     {
         // If have an argument to clear the EDMAgent database, do so, then exit
@@ -54,6 +55,13 @@ public class EntryPoint
     }
     
     // Private methods ---------------------------------------------------------
+    /**
+     * This method attempts to pull a properties file first from the local directory of the JAR,
+     * but if that fails, then from an internal resource, if it exists.
+     * 
+     * @param configName - Name of the properties file (such as 'em' for 'em.properties')
+     * @return           - Returns the properties requested (NULL if it cannot be found)
+     */
     private static Properties getProperties( String configName )
     {
         Properties targetProperties = null;
@@ -97,6 +105,12 @@ public class EntryPoint
         return targetProperties;
     }
     
+    /**
+     * Attempts to delete all metric data stored in the EDM database specified in the properties file.
+     * 
+     * @param edmProps  - Instance of the EDM properties connecting the EDM to a database.
+     * @return          - Returns true if successful.
+     */
     private static boolean deleteLocalData( Properties edmProps )
     {
         try
@@ -113,6 +127,10 @@ public class EntryPoint
         return false;
     }
     
+    /**
+     * Initialises a headless client. Success or failure is logged out.
+     * 
+     */
     private static void initialiseClient()
     {
         // Get some configuration information from somewhere
