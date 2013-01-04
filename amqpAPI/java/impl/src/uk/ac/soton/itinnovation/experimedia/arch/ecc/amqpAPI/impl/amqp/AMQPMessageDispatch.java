@@ -78,9 +78,10 @@ public class AMQPMessageDispatch implements IAMQPMessageDispatch
         }
         catch ( InterruptedException ie ) 
         { dispatchLogger.error( "Could not add AMQP message"); }
-          
-        dispatchPump.notifyDispatchWaiting();
       }
+      
+      // Notify of new mesage
+      if ( addResult ) dispatchPump.notifyDispatchWaiting();
     }
     
     return addResult;
@@ -98,20 +99,19 @@ public class AMQPMessageDispatch implements IAMQPMessageDispatch
   
   protected void iterateDispatch()
   {
+    Entry<String,byte[]> nextMessage = null;
+    
     synchronized( dispatchLock )
     {
-      if ( !dispatchQueue.isEmpty() && dispatchListener != null )
-      {
-        try
-        { 
-          Entry<String,byte[]> nextMessage = dispatchQueue.take();
-          
-          dispatchListener.onSimpleMessageDispatched( nextMessage.getKey(),
-                                                      nextMessage.getValue() );
-        }
-        catch ( InterruptedException ie )
-        { dispatchLogger.error( "Could not dispatch AMQP message" ); }
-      }
+      if ( !dispatchQueue.isEmpty() )
+      try
+      { nextMessage = dispatchQueue.take(); }
+      catch ( InterruptedException ie )
+      { dispatchLogger.error( "Could not dispatch AMQP message" ); }
     }
+    
+    if ( nextMessage != null && dispatchListener != null )
+      dispatchListener.onSimpleMessageDispatched( nextMessage.getKey(),
+                                                  nextMessage.getValue() );
   }
 }
