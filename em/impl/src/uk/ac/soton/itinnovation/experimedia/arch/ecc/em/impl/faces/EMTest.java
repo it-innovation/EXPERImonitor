@@ -40,7 +40,7 @@ import java.util.*;
 
 
 public class EMTest extends EMBaseInterface
-                     implements IEMTest
+                    implements IEMTest
 {
   private EMByteWrapper    byteWrapper;
   private IEMTest_Listener testListener;
@@ -74,11 +74,12 @@ public class EMTest extends EMBaseInterface
   
   @Override
   // Method ID = 1
-  public void sendData( int dataSize, byte[] dataBody )
+  public void sendData( UUID senderID, int dataSize, byte[] dataBody )
   {
     if ( dataSize > 0 && dataBody != null )
     {
       ArrayList<Object> params = new ArrayList<Object>();
+      params.add( senderID );
       params.add( new Integer(dataSize) );
       
       // Encode bytes in Base64
@@ -99,13 +100,15 @@ public class EMTest extends EMBaseInterface
       {
         if ( testListener != null )
         {
-          int dataSize = jsonMapper.fromJson( methodData.get(1), int.class );
+          UUID senderID = jsonMapper.fromJson( methodData.get(1), UUID.class );
+          
+          int dataSize = jsonMapper.fromJson( methodData.get(2), int.class );
           
           // De-encode Base64
-          String encodedData = jsonMapper.fromJson( methodData.get(2), String.class )  ;      
+          String encodedData = jsonMapper.fromJson( methodData.get(3), String.class )  ;      
           byte[] dataBody = byteWrapper.decode( encodedData );
           
-          testListener.onReceivedData( dataSize, dataBody );
+          testListener.onReceivedData( senderID, dataSize, dataBody );
         }
       } break;
     } 

@@ -55,6 +55,7 @@ public abstract class ECCBaseTestExecutor
   protected IAMQPMessageDispatch     userDispatch;
   
   
+  // Deriving classes to implement ---------------------------------------------
   public abstract boolean getTestResult();
   
   

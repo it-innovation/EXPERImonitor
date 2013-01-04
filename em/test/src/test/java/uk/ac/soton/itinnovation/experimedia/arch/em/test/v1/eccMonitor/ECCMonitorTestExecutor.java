@@ -108,7 +108,7 @@ public class ECCMonitorTestExecutor extends ECCBaseTestExecutor
   
   // IECCTest_Listener ---------------------------------------------------------
   @Override
-  public void onReceivedData( int byteCount, byte[] dataBody )
+  public void onReceivedData( UUID senderID, int byteCount, byte[] dataBody )
   {
     // Check data size
     if ( byteCount == testDataSize )
@@ -197,7 +197,9 @@ public class ECCMonitorTestExecutor extends ECCBaseTestExecutor
       rand.nextBytes( testDataBody );
 
       // Send the data to the provider
-      userTest.sendData( testDataSize, testDataBody );
+      userTest.sendData( ECCMonitorEntryPointTest.EMUserUUID,
+                         testDataSize, 
+                         testDataBody );
     }
   }
   

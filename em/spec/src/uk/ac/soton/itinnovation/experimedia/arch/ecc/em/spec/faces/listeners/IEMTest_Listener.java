@@ -25,6 +25,8 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners;
 
+import java.util.UUID;
+
 
 
 /**
@@ -43,5 +45,5 @@ public interface IEMTest_Listener
    * @param dataSize - Number of bytes sent in this event
    * @param dataBody - Array of byte data sent
    */
-  void onReceivedData( int byteCount, byte[] dataBody );
+  void onReceivedData( UUID senderID, int byteCount, byte[] dataBody );
 }

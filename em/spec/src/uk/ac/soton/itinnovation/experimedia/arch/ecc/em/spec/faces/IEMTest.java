@@ -25,6 +25,7 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces;
 
+import java.util.UUID;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEMTest_Listener;
 
 
@@ -52,9 +53,10 @@ public interface IEMTest
   /**
    * Use this method to send test data to either the user or producer instance of
    * this interface.
-   * 
+   *
+   * @param senderID  - Not usually required, but ID needed as provider or user can receive
    * @param byteCount - Number of bytes expected to be sent in this method
    * @param dataBody  - Array of byte test data being sent
    */
-  void sendData( int byteCount, byte[] dataBody );
+  void sendData( UUID senderID, int byteCount, byte[] dataBody );
 }

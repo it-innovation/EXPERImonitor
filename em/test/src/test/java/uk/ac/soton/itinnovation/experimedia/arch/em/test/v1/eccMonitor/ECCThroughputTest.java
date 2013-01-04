@@ -42,7 +42,7 @@ public class ECCThroughputTest extends ECCBaseTest
   
   // Tests ---------------------------------------------------------------------
   @Test
-  public void testHighFrequencyLowPayload()
+  public void testOrderedDataTransfer()
   {
     // Create provider/user channels
     AMQPBasicChannel providerChannel = amqpUtil.getProviderChannel();
