@@ -23,7 +23,7 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package test.java.uk.ac.soton.itinnovation.experimedia.arch.em.test.common;
+package uk.ac.soton.itinnovation.experimedia.arch.em.test.common;
 
 import java.util.*;
 import org.junit.*;

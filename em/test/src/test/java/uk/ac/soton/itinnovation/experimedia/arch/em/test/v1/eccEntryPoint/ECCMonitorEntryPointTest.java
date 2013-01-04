@@ -23,14 +23,13 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package test.java.uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccEntryPoint;
+package uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccEntryPoint;
 
-import org.junit.Assert;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 
-import test.java.uk.ac.soton.itinnovation.experimedia.arch.em.test.common.*;
+import uk.ac.soton.itinnovation.experimedia.arch.em.test.common.*;
 
-import org.junit.Test;
+import org.junit.*;
 
 
 

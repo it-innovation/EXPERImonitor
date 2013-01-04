@@ -23,7 +23,7 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package test.java.uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccMonitor;
+package uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccMonitor;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.spec.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.*;
@@ -34,8 +34,8 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasic
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
 
-import test.java.uk.ac.soton.itinnovation.experimedia.arch.em.test.common.*;
-import test.java.uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccEntryPoint.ECCMonitorEntryPointTest;
+import uk.ac.soton.itinnovation.experimedia.arch.em.test.common.*;
+import uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccEntryPoint.ECCMonitorEntryPointTest;
 
 import java.util.*;
 

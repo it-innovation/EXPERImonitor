@@ -48,8 +48,6 @@
       
     </plugins>
   
-    <directory>lib</directory>
-    <sourceDirectory>src</sourceDirectory>
   </build>
   
   <!-- Test profile ________________________________________________________ -->
