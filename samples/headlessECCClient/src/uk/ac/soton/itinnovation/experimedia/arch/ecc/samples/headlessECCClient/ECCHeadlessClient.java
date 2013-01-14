@@ -130,7 +130,8 @@ public class ECCHeadlessClient implements EMIAdapterListener
         // Initialise the 'mini' version of the EDM for local data management
         try
         {
-            edmAgent   = EDMInterfaceFactory.getMonitoringEDMAgent( edmProps );
+            edmAgent = EDMInterfaceFactory.getMonitoringEDMAgent( edmProps );
+            
             edmAgentOK = edmAgent.isDatabaseSetUpAndAccessible();
             if ( !edmAgentOK ) throw new Exception( "EDM Agent is not configured correctly" );
             
@@ -391,6 +392,8 @@ public class ECCHeadlessClient implements EMIAdapterListener
                   edmReportDAO.setReportMeasurementsSyncFlag( reportID, true );
                   edmReportDAO.deleteReport(reportID, false); // Delete the report (but keep the measurements)
               }
+              else
+                clientLogger.info( "Could not find report to sync!" );
             }
             catch ( Exception e )
             { clientLogger.warn( "Could not mark report " + reportID.toString() +
@@ -461,7 +464,7 @@ public class ECCHeadlessClient implements EMIAdapterListener
     {
         // If we have been storing metrics using the EDM & Scheduler, get some
         // previously unsent data
-        UUID msID = batchOUT.getID();
+        UUID msID = batchOUT.getExpectedMeasurementSetID();
       
         if ( edmAgentOK && schedulerOK )
             try

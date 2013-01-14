@@ -160,21 +160,21 @@ public class ReportDAOHelper
             } catch (Exception ex) {
                 throw ex;
             }
-
-            // save report - measurment link(s), if any measurements
-            try {
-                if ((report.getMeasurementSet().getMeasurements() != null) && !report.getMeasurementSet().getMeasurements().isEmpty())
+        }
+        
+        // save report - measurment link(s), if any measurements
+        try {
+            if ((report.getMeasurementSet().getMeasurements() != null) && !report.getMeasurementSet().getMeasurements().isEmpty())
+            {
+                log.debug("Saving Report - Measurement links");
+                // not validating measurement here because an exception would have been thrown above if there was an issue
+                for (Measurement measurement : report.getMeasurementSet().getMeasurements())
                 {
-                    log.debug("Saving Report - Measurement links");
-                    // not validating measurement here because an exception would have been thrown above if there was an issue
-                    for (Measurement measurement : report.getMeasurementSet().getMeasurements())
-                    {
-                        linkReportAndMeasurement(report.getUUID(), measurement.getUUID(), connection);
-                    }
+                    linkReportAndMeasurement(report.getUUID(), measurement.getUUID(), connection);
                 }
-            } catch (Exception ex) {
-                throw ex;
             }
+        } catch (Exception ex) {
+            throw ex;
         }
     }
     
