@@ -409,8 +409,9 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
       }
       
       // Start a batch
+      clientEx.clearAllLiveMeasurementSetPulls();
       clientEx.iterateNextMSForBatching();
-      EMDataBatch firstBatch = clientEx.getCurrentDataBatch();
+      EMDataBatch firstBatch = clientEx.getCurrentExpectedDataBatch();
       
       if ( firstBatch != null )
         clientEx.getPostReportInterface().requestDataBatch( firstBatch );

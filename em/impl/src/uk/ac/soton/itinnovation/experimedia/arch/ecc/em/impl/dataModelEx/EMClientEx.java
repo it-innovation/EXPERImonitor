@@ -212,7 +212,7 @@ public class EMClientEx extends EMClient
   public void setPostReportSummary( EMPostReportSummary report )
   { postReportSummary = report; }
   
-  public EMDataBatch getCurrentDataBatch()
+  public EMDataBatch getCurrentExpectedDataBatch()
   {
     EMDataBatch targetBatch = null;
     

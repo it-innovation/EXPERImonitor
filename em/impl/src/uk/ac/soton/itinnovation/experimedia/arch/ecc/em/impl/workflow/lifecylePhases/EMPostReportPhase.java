@@ -132,7 +132,7 @@ public class EMPostReportPhase extends AbstractEMLCPhase
       
       client.addTimeOutNotification( EMPhaseTimeOut.eEMTOPostReportTimeOut );
       
-      EMDataBatch currentBatch = client.getCurrentDataBatch();
+      EMDataBatch currentBatch = client.getCurrentExpectedDataBatch();
       if ( currentBatch == null ) throw new Exception( "Expected client batch is NULL" );
       
       client.getPostReportInterface().notifyReportBatchTimeOut( currentBatch.getID() );
@@ -187,7 +187,7 @@ public class EMPostReportPhase extends AbstractEMLCPhase
       
       if ( client != null && populatedBatch != null )
       {
-        EMDataBatchEx currExpectedClientBatch = (EMDataBatchEx) client.getCurrentDataBatch();
+        EMDataBatchEx currExpectedClientBatch = (EMDataBatchEx) client.getCurrentExpectedDataBatch();
         
         // Get the basic information from this batch and check it's OK
         UUID popBatchID  = populatedBatch.getID();
@@ -196,7 +196,7 @@ public class EMPostReportPhase extends AbstractEMLCPhase
         // If this is the batch we expected, see if we need any more data
         if ( popBatchID.equals(currExpectedClientBatch.getID()) )
         {
-          if ( popReport != null ) // Assume we have some data
+          if ( popReport != null ) // Check we have some data
           {    
             // Take a look at the current data to see what we need to do with it;
             // Either a) we've got less (or zero) than we expected, in which case
@@ -228,6 +228,7 @@ public class EMPostReportPhase extends AbstractEMLCPhase
               EMDataBatchEx clientDBX = (EMDataBatchEx) currExpectedClientBatch;
               clientDBX.resetStartDate( lastStamp );
               clientDBX.resetReportData();
+              
               client.getPostReportInterface().requestDataBatch( currExpectedClientBatch );
             }
           }
@@ -257,7 +258,7 @@ public class EMPostReportPhase extends AbstractEMLCPhase
         UUID nextMSID = client.iterateNextMSForBatching();
         if ( nextMSID != null )
         {
-          EMDataBatch nextBatch = client.getCurrentDataBatch();
+          EMDataBatch nextBatch = client.getCurrentExpectedDataBatch();          
           client.getPostReportInterface().requestDataBatch( nextBatch );
         }
         else //... otherwise, notify that we're all done!
