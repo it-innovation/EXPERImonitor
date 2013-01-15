@@ -59,6 +59,9 @@ public class EMController implements IEMLifecycleListener
   private IReportDAO          expReportAccessor;
   private Experiment          expInstance;
   
+  private Timer           pullMetricTimer;
+  private PullMetricsTask pullMetricsTask;
+  
   
   public EMController()
   {
@@ -132,6 +135,11 @@ public class EMController implements IEMLifecycleListener
   @Override
   public void onLifecyclePhaseCompleted( EMPhase phase )
   {    
+    switch( phase )
+    {
+      case eEMLiveMonitoring: stopAutoPulling(); break;
+    }
+    
     mainView.setNextPhaseValue( expMonitor.getNextPhase().toString() );
     
     // Switch off all UI controls here - they will be separately switched on
@@ -455,7 +463,7 @@ public class EMController implements IEMLifecycleListener
     }  
   }
   
-  private void pullMetrics()
+  private synchronized void pullMetrics( boolean noteBusyClients )
   {
     if ( expMonitor != null )
     {
@@ -475,8 +483,8 @@ public class EMController implements IEMLifecycleListener
                                 e.getMessage() ); 
           }
         }
-        else mainView.addLogText( "Client " + client.getName() + 
-                                  " is busy generating metrics" );
+        else if ( noteBusyClients ) 
+          mainView.addLogText( "Client " + client.getName() + " is busy generating metrics" );
       }
     }
   }
@@ -525,6 +533,10 @@ public class EMController implements IEMLifecycleListener
     {
       try
       {
+        // Clear old data out ------------------- REMOVE -----------------------
+        expDataMgr.clearMetricsDatabase();
+        // ---- REMOVE THIS ----------------------------------------------------
+        
         expMGAccessor     = expDataMgr.getMetricGeneratorDAO();
         expReportAccessor = expDataMgr.getReportDAO();
 
@@ -551,6 +563,34 @@ public class EMController implements IEMLifecycleListener
       mainView.addLogText( "Couldn't time-out client " +
                            client.getName() + " : " +
                            e.getLocalizedMessage() );
+    }
+  }
+  
+  private void setAutoPulling( boolean autoOn )
+  {
+    // Set up timer resource if required
+    if ( pullMetricTimer == null ) pullMetricTimer = new Timer();
+    
+    if ( autoOn )
+    {
+      // Reschedule pulling task if not already active
+      if ( pullMetricsTask == null )
+      {
+        pullMetricsTask = new PullMetricsTask();
+        pullMetricTimer.scheduleAtFixedRate(pullMetricsTask, 0, 100);
+      }
+    }
+    else
+      stopAutoPulling();
+  }
+  
+  private void stopAutoPulling()
+  {
+    if ( pullMetricTimer != null && pullMetricsTask != null )
+    {
+      pullMetricsTask.cancel();
+      pullMetricTimer.purge();
+      pullMetricsTask = null;
     }
   }
   
@@ -612,7 +652,11 @@ public class EMController implements IEMLifecycleListener
     
     @Override
     public void onPullMetricButtonClicked()
-    { pullMetrics(); }
+    { pullMetrics( true ); }
+    
+    @Override
+    public void onAutoFireClicked( boolean autoOn )
+    { setAutoPulling( autoOn ); }
     
     @Override
     public void onPullPostReportButtonClicked()
@@ -621,5 +665,16 @@ public class EMController implements IEMLifecycleListener
     @Override
     public void onSendTimeOut( EMClient client )
     { sendTimeOut( client ); }
+  }
+  
+  // Internal task handling ----------------------------------------------------
+  private class PullMetricsTask extends TimerTask
+  {
+    public PullMetricsTask()
+    { super(); }
+    
+    @Override
+    public void run()
+    { pullMetrics( false ); }
   }
 }

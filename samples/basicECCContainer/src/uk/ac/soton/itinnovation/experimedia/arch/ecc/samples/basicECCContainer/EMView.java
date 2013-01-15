@@ -88,6 +88,7 @@ public class EMView extends javax.swing.JFrame
     nextPhaseLabel.setText( "Not available" );
     postReportButton.setEnabled( false );
     pullMetricButton.setEnabled( false );
+    autoFireButton.setEnabled( false );
     timeOutButton.setEnabled( false );
   }
   
@@ -145,13 +146,19 @@ public class EMView extends javax.swing.JFrame
   }
   
   public synchronized void enablePulling( boolean enabled )
-  { pullMetricButton.setEnabled( enabled ); }
+  { 
+    pullMetricButton.setEnabled( enabled );
+    autoFireButton.setEnabled( enabled );
+  }
   
   public synchronized void enabledPostReportPulling( boolean enabled )
   { postReportButton.setEnabled( enabled ); }
   
   public synchronized void enableTimeOuts( boolean enabled )
   { timeOutButton.setEnabled( enabled ); }
+  
+  public void enanblePullAutoFire( boolean enable )
+  { autoFireButton.setEnabled(enable); }
 
   /**
    * This method is called from within the constructor to initialise the form.
@@ -193,6 +200,7 @@ public class EMView extends javax.swing.JFrame
     nextPhaseLabel = new javax.swing.JLabel();
     pullMetricButton = new javax.swing.JButton();
     postReportButton = new javax.swing.JButton();
+    autoFireButton = new javax.swing.JToggleButton();
 
     setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
     setResizable(false);
@@ -251,7 +259,7 @@ public class EMView extends javax.swing.JFrame
         .addContainerGap()
         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
           .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-            .addGap(0, 32, Short.MAX_VALUE)
+            .addGap(0, 4, Short.MAX_VALUE)
             .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
             .addGap(67, 67, 67))
           .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
@@ -433,6 +441,19 @@ public class EMView extends javax.swing.JFrame
       }
     });
 
+    autoFireButton.setText("R");
+    autoFireButton.setActionCommand("onAutoFireClicked");
+    autoFireButton.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+    autoFireButton.setEnabled(false);
+    autoFireButton.setMargin(new java.awt.Insets(0, 0, 0, 0));
+    autoFireButton.setMaximumSize(new java.awt.Dimension(32, 32));
+    autoFireButton.setMinimumSize(new java.awt.Dimension(32, 32));
+    autoFireButton.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        onRepeatPullClicked(evt);
+      }
+    });
+
     javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
     jPanel4.setLayout(jPanel4Layout);
     jPanel4Layout.setHorizontalGroup(
@@ -441,40 +462,45 @@ public class EMView extends javax.swing.JFrame
         .addContainerGap()
         .addComponent(beginMonitoringProcButton, javax.swing.GroupLayout.PREFERRED_SIZE, 167, javax.swing.GroupLayout.PREFERRED_SIZE)
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-          .addGroup(jPanel4Layout.createSequentialGroup()
-            .addComponent(nextPhaseButton, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
-            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-            .addComponent(nextPhaseLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
           .addGroup(jPanel4Layout.createSequentialGroup()
             .addComponent(jLabel8)
             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-            .addComponent(phaseLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 225, javax.swing.GroupLayout.PREFERRED_SIZE)))
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-          .addComponent(pullMetricButton, javax.swing.GroupLayout.DEFAULT_SIZE, 183, Short.MAX_VALUE)
-          .addComponent(postReportButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addComponent(phaseLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 219, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(autoFireButton, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addComponent(pullMetricButton))
+          .addGroup(jPanel4Layout.createSequentialGroup()
+            .addComponent(nextPhaseButton, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addComponent(nextPhaseLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(postReportButton, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE)))
         .addContainerGap())
     );
     jPanel4Layout.setVerticalGroup(
       jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(jPanel4Layout.createSequentialGroup()
-        .addGap(22, 22, 22)
-        .addComponent(pullMetricButton)
-        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-        .addComponent(postReportButton)
-        .addGap(0, 0, Short.MAX_VALUE))
-      .addGroup(jPanel4Layout.createSequentialGroup()
         .addContainerGap()
         .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
           .addGroup(jPanel4Layout.createSequentialGroup()
-            .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-              .addComponent(jLabel8)
-              .addComponent(phaseLabel))
-            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+              .addGroup(jPanel4Layout.createSequentialGroup()
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                  .addComponent(jLabel8)
+                  .addComponent(phaseLabel))
+                .addGap(0, 0, Short.MAX_VALUE))
+              .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                  .addComponent(pullMetricButton)
+                  .addComponent(autoFireButton, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
             .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
               .addComponent(nextPhaseButton)
-              .addComponent(nextPhaseLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+              .addComponent(nextPhaseLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+              .addComponent(postReportButton)))
           .addComponent(beginMonitoringProcButton, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE))
         .addContainerGap(14, Short.MAX_VALUE))
     );
@@ -603,8 +629,17 @@ public class EMView extends javax.swing.JFrame
     if ( client != null ) viewListener.onSendTimeOut( client );
   }//GEN-LAST:event_onSendTimeOutClicked
 
+  private void onRepeatPullClicked(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_onRepeatPullClicked
+ 
+    boolean autoFireIsOn = autoFireButton.isSelected();
+    pullMetricButton.setEnabled( !autoFireIsOn );
+    
+    viewListener.onAutoFireClicked( autoFireIsOn );
+  }//GEN-LAST:event_onRepeatPullClicked
+
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JList attributeList;
+  private javax.swing.JToggleButton autoFireButton;
   private javax.swing.JButton beginMonitoringProcButton;
   private javax.swing.JLabel clientNameField;
   private javax.swing.JList connectedClientMainList;

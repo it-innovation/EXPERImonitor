@@ -40,6 +40,8 @@ public interface EMViewListener
   
   void onPullMetricButtonClicked();
   
+  void onAutoFireClicked( boolean autoOn );
+  
   void onPullPostReportButtonClicked();
   
   void onSendTimeOut( EMClient client );
