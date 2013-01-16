@@ -50,7 +50,7 @@ public class EMController implements IEMLifecycleListener
   private final Logger emCtrlLogger = Logger.getLogger( EMController.class );
   
   private IExperimentMonitor expMonitor;
-  private EMLoginView        loginView;
+  private NewEMLoginView     loginView;
   private EMView             mainView;
   private boolean            waitingToStartNextPhase = false;
   
@@ -85,7 +85,7 @@ public class EMController implements IEMLifecycleListener
         start( emProps );
       else  // Otherwise, manual entry of basic configuration
       {
-        loginView = new EMLoginView();
+        loginView = new NewEMLoginView();
         loginView.setViewListener( new LoginViewListener() );
         loginView.setVisible( true );
       }
@@ -615,6 +615,13 @@ public class EMController implements IEMLifecycleListener
           emCtrlLogger.warn( "Could not clear EDM data" );
       }
       
+      if ( loginView != null )
+      {
+        loginView.setVisible( false );
+        loginView.dispose();
+        loginView = null;
+      }
+
       try
       {
         Properties basicProps = new Properties();
@@ -623,9 +630,6 @@ public class EMController implements IEMLifecycleListener
         basicProps.put( "Monitor_ID", emID.toString() );
         
         start( basicProps );
-        
-        loginView.dispose();
-        loginView = null;
       }
       catch ( Exception e )
       { emCtrlLogger.error( "Could not start the ECC: " + e.getMessage()); }
