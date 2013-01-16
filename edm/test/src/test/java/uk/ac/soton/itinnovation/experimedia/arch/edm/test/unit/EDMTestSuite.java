@@ -117,6 +117,7 @@ public class EDMTestSuite
         log.info("  dbType: " + prop.getProperty("dbType"));
         
         try {
+            log.debug("Writing properties file to: /target/classes/" + propertiesFile);
             prop.store(new FileOutputStream("target/classes/" + propertiesFile), null);
         } catch (Exception ex) {
     		log.error("Unable to write properties file: " + ex.toString(), ex);

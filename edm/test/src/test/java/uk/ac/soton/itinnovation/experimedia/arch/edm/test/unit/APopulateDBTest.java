@@ -72,9 +72,9 @@ public class APopulateDBTest extends TestCase
     public static void populateDB()
     {
         log.info("PopulateDB tests executing...");
-        IMonitoringEDM edm = null;
         try {
-            edm = EDMInterfaceFactory.getMonitoringEDM();
+            Properties prop = getProperties();
+            IMonitoringEDM edm = EDMInterfaceFactory.getMonitoringEDM(prop);
             edm.clearMetricsDatabase();
             PopulateDB.populateWithTestData(edm);
         } catch (Exception ex) {
@@ -93,7 +93,7 @@ public class APopulateDBTest extends TestCase
         }
     }
     
-    public Properties getProperties()
+    public static Properties getProperties()
     {
         Properties prop = new Properties();
         
