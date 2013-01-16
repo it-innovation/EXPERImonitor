@@ -29,6 +29,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.UUID;
 import org.apache.log4j.Logger;
@@ -162,19 +163,38 @@ public class ReportDAOHelper
             }
         }
         
-        // save report - measurment link(s), if any measurements
-        try {
-            if ((report.getMeasurementSet().getMeasurements() != null) && !report.getMeasurementSet().getMeasurements().isEmpty())
+        // save report - measurment link(s), if any valid measurements
+        Set<Measurement> srcMeasurements = report.getMeasurementSet().getMeasurements();
+        if (srcMeasurements != null && !srcMeasurements.isEmpty())
+        {
+            // first find which measurements actually exist
+            Iterator<Measurement> srcMit = srcMeasurements.iterator();
+            HashSet<Measurement> existingMeasurements = new HashSet<Measurement>();
+            
+            String query = "SELECT * FROM Measurement WHERE measurementUUID = ?";
+            while (srcMit.hasNext())
             {
-                log.debug("Saving Report - Measurement links");
-                // not validating measurement here because an exception would have been thrown above if there was an issue
-                for (Measurement measurement : report.getMeasurementSet().getMeasurements())
-                {
-                    linkReportAndMeasurement(report.getUUID(), measurement.getUUID(), connection);
-                }
+                Measurement measurement = srcMit.next();
+              
+                PreparedStatement pstmt = connection.prepareStatement(query);
+                pstmt.setObject(1, measurement.getUUID(), java.sql.Types.OTHER);
+                ResultSet rs = pstmt.executeQuery();
+                
+                // measurement does exist, so add for linking
+                if (rs.next())
+                    existingMeasurements.add(measurement);
             }
-        } catch (Exception ex) {
-            throw ex;
+            
+            // if we've found any, try linking them
+            if (!existingMeasurements.isEmpty())
+            {
+                srcMit = existingMeasurements.iterator();
+                while (srcMit.hasNext())
+                try {
+                        linkReportAndMeasurement(report.getUUID(), srcMit.next().getUUID(), connection);
+                    }
+                    catch (Exception ex) { throw ex; }
+            }
         }
     }
     
