@@ -33,14 +33,14 @@ import javax.swing.JOptionPane;
  * 
  * @author Simon Crowle
  */
-public class NewEMLoginView extends javax.swing.JFrame {
+public class EMLoginView extends javax.swing.JFrame {
   
   private EMLoginViewListener viewListener;
 
   /**
    * Creates new form NewEMLoginView
    */
-  public NewEMLoginView() {
+  public EMLoginView() {
     initComponents();
   }
   

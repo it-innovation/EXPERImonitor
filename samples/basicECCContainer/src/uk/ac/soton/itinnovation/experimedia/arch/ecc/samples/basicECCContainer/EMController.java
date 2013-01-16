@@ -50,7 +50,7 @@ public class EMController implements IEMLifecycleListener
   private final Logger emCtrlLogger = Logger.getLogger( EMController.class );
   
   private IExperimentMonitor expMonitor;
-  private NewEMLoginView     loginView;
+  private EMLoginView     loginView;
   private EMView             mainView;
   private boolean            waitingToStartNextPhase = false;
   
@@ -85,7 +85,7 @@ public class EMController implements IEMLifecycleListener
         start( emProps );
       else  // Otherwise, manual entry of basic configuration
       {
-        loginView = new NewEMLoginView();
+        loginView = new EMLoginView();
         loginView.setViewListener( new LoginViewListener() );
         loginView.setVisible( true );
       }
