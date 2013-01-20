@@ -54,8 +54,8 @@ public class EMPostReportPhase extends AbstractEMLCPhase
     super( EMPhase.eEMPostMonitoringReport, channel, providerID );
     
     phaseListener = listener;
-    
     batchDateTree = new TreeMap<Date, Measurement>();
+    phaseMsgPump.startPump();
     
     phaseState = "Ready to start post-report process";
   }
@@ -88,7 +88,6 @@ public class EMPostReportPhase extends AbstractEMLCPhase
       client.setPostReportInterface( face );
     }
     
-    phaseMsgPump.startPump();
     phaseActive = true;
     
     // Request clients create post-report interface

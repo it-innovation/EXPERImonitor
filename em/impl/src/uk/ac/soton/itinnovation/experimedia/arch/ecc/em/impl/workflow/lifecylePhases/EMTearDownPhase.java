@@ -52,9 +52,9 @@ public class EMTearDownPhase extends AbstractEMLCPhase
   {
     super( EMPhase.eEMTearDown, channel, providerID );
     
-    phaseListener = listener;
-    
+    phaseListener          = listener;
     clientsStillToTearDown = new HashSet<UUID>();
+    phaseMsgPump.startPump();
     
     phaseState = "Ready to start tear-down process";
   }
@@ -90,7 +90,6 @@ public class EMTearDownPhase extends AbstractEMLCPhase
       client.setTearDownInterface( face );
     }
     
-    phaseMsgPump.startPump();
     phaseActive = true;
     
     // Request clients do the same

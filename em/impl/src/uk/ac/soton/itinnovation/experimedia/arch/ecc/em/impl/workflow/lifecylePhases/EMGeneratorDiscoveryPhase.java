@@ -59,8 +59,6 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
     
     phaseListener                 = listener;
     clientsExpectingGeneratorInfo = new HashSet<UUID>();
-    
-    // Start pump early as clients connect in this phase
     phaseMsgPump.startPump();
     
     phaseState = "Waiting for clients";
@@ -83,33 +81,6 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
     
     currentExperiment = null;
     clientsExpectingGeneratorInfo.clear();
-  }
-  
-  @Override
-  public boolean addClient( EMClientEx client )
-  {
-    boolean result = false;
-    
-    if ( super.addClient(client) )
-    {
-      // Create a new IEMMonitor interface for the client
-      AMQPMessageDispatch dispatch = new AMQPMessageDispatch();
-      phaseMsgPump.addDispatch( dispatch );
-      
-      EMDiscovery discoverFace = new EMDiscovery( emChannel,
-                                                  dispatch,
-                                                  emProviderID,
-                                                  client.getID(),
-                                                  true );
-      discoverFace.setProviderListener( this );
-      client.setDiscoveryInterface( discoverFace );
-      
-      phaseState = "Waiting to start phase";
-      
-      result = true;
-    }
-    
-    return result;
   }
   
   @Override
@@ -277,5 +248,33 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
     EMClientEx client = getClient( senderID );
 
     if ( client != null ) phaseListener.onClientIsDisconnected( client );
+  }
+  
+  // Protected methods ---------------------------------------------------------
+  @Override
+  protected boolean addClient( EMClientEx client )
+  {
+    boolean result = false;
+    
+    if ( super.addClient(client) )
+    {
+      // Create a new IEMMonitor interface for the client
+      AMQPMessageDispatch dispatch = new AMQPMessageDispatch();
+      phaseMsgPump.addDispatch( dispatch );
+      
+      EMDiscovery discoverFace = new EMDiscovery( emChannel,
+                                                  dispatch,
+                                                  emProviderID,
+                                                  client.getID(),
+                                                  true );
+      discoverFace.setProviderListener( this );
+      client.setDiscoveryInterface( discoverFace );
+      
+      phaseState = "Waiting to start phase";
+      
+      result = true;
+    }
+    
+    return result;
   }
 }

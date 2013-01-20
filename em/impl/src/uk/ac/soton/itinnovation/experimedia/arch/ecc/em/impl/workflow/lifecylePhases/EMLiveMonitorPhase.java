@@ -59,10 +59,10 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
   {
     super( EMPhase.eEMLiveMonitoring, channel, providerID );
     
-    phaseListener = listener;
-    
+    phaseListener   = listener;
     clientPushGroup = new HashSet<UUID>();
     clientPullGroup = new HashSet<UUID>();
+    phaseMsgPump.startPump();
     
     phaseState = "Ready to start live monitor";
   }
@@ -97,7 +97,6 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
       client.setLiveMonitorInterface( face );
     }
     
-    phaseMsgPump.startPump();
     phaseActive = true;
     
     // Request clients do the same

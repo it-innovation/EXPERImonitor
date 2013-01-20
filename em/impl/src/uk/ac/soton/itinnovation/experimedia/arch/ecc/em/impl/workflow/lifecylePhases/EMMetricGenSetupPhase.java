@@ -54,9 +54,9 @@ public class EMMetricGenSetupPhase extends AbstractEMLCPhase
   {
     super( EMPhase.eEMSetUpMetricGenerators, channel, providerID );
     
-    phaseListener = listener;
-    
+    phaseListener    = listener;
     clientsSettingUp = new HashSet<UUID>();
+    phaseMsgPump.startPump();
     
     phaseState = "Ready to request client set-up";
   }
@@ -96,7 +96,6 @@ public class EMMetricGenSetupPhase extends AbstractEMLCPhase
       clientsSettingUp.add( clientID );
     }
     
-    phaseMsgPump.startPump();
     phaseActive = true;
     
     // Request clients do the same (and wait to start set-up process)
