@@ -31,13 +31,13 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
     <artifactId>experimedia-arch-ecc-common-dataModel-metrics</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
     <packaging>jar</packaging>
   
     <parent>
         <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
         <artifactId>experimedia-arch-ecc-common-dataModel</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0</version>
     </parent>
   
     <build>

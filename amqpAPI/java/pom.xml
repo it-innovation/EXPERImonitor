@@ -5,13 +5,14 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
   <artifactId>experimedia-arch-ecc-amqpAPI</artifactId>
-  <name>ECC AMQP Comms API</name> 
+  <name>ECC AMQP Comms API</name>
+  <version>1.0</version>
   <packaging>pom</packaging>
   
   <parent>
     <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
     <artifactId>experimedia-arch-ecc-amqp</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
   </parent>
 
   <modules>
