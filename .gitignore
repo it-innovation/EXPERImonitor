@@ -19,3 +19,7 @@
 /samples/headlessECCClient/lib/
 *.log
 /charm-rabbitmq-tal/precise/management/.bzr/
+/build-tools/target/
+/em/test/target/
+/edm/test/target/
+/eccdashboard/target/
