@@ -45,6 +45,9 @@ public class EMClientEx extends EMClient
   private IEMLiveMonitor    liveFace;
   private IEMPostReport     postFace;
   private IEMTearDown       tearDownFace;
+  
+  // Experiment state support
+  boolean isPhaseAccelerating;
  
   // Internal Set-up stage support
   private ArrayList<UUID> generatorsToSetup;
@@ -116,6 +119,16 @@ public class EMClientEx extends EMClient
   
   public void addTimeOutNotification( EMPhaseTimeOut timeoutSent )
   { timeOutsCalled.add( timeoutSent ); }
+  
+  // Experiment state ----------------------------------------------------------
+  public void setCurrentPhaseActivity( EMPhase phase )
+  { currentPhase = phase; }
+  
+  public boolean isPhaseAccelerating()
+  { return isPhaseAccelerating; }
+  
+  public void setIsPhaseAccelerating( boolean accelerate )
+  { isPhaseAccelerating = accelerate; }
   
   // Discovery phase state -----------------------------------------------------
   public void setIsConnected( boolean connected )
@@ -250,6 +263,12 @@ public class EMClientEx extends EMClient
     }
     
     return currentRequestedMSID;
+  }
+  
+  public void clearAllBatching()
+  {
+    postReportOutstandingBatches.clear();
+    currentRequestedMSID = null;
   }
   
   // Tear-down phase state -----------------------------------------------------

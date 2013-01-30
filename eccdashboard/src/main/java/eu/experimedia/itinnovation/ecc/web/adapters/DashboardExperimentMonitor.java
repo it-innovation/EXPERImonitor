@@ -387,7 +387,7 @@ public class DashboardExperimentMonitor implements IEMLifecycleListener {
 
     // IEMLifecycleListener ------------------------------------------------------
     @Override
-    public void onClientConnected(EMClient client) {
+    public void onClientConnected(EMClient client, boolean reconnected) {
         logger.debug("Client connected: " + client.getName() + " [" + client.getID().toString() + "]");
 
     }

@@ -44,19 +44,22 @@ import java.util.*;
 
 public class EMConnectionManager implements IEMMonitorEntryPoint_ProviderListener
 {
+  private final Object            clientListLock = new Object();
   private UUID                    entryPointID;
   private EMMonitorEntryPoint     entryPointInterface;
   private AMQPMessageDispatchPump entryPointPump;
   
   private boolean entryPointOpen = false;
   
-  private HashMap<UUID, EMClientEx>   connectedClients;
+  private HashMap<UUID, EMClientEx>   associatedClients;   // Clients connected at least once
+  private HashMap<UUID, EMClientEx>   connectedClients;    // Clients currently actually connected
   private EMConnectionManagerListener connectionListener;
   
   
   public EMConnectionManager()
   {
-    connectedClients    = new HashMap<UUID, EMClientEx>();
+    associatedClients = new HashMap<UUID, EMClientEx>();
+    connectedClients  = new HashMap<UUID, EMClientEx>();
   }
   
   public boolean initialise( UUID epID, 
@@ -97,13 +100,20 @@ public class EMConnectionManager implements IEMMonitorEntryPoint_ProviderListene
   public boolean isEntryPointOpen()
   { return entryPointOpen; }
   
+  public void clearAllAssociatedClients()
+  { synchronized( clientListLock ) { associatedClients.clear(); } }
+  
   public void disconnectAllClients()
   { 
     // Get copy of all clients to remove
     HashSet<UUID> clientIDs = new HashSet<UUID>();
-    Iterator<EMClientEx> cIt = connectedClients.values().iterator();
-    while ( cIt.hasNext() )
-    { clientIDs.add( cIt.next().getID() ); }
+    
+    synchronized( clientListLock )
+    {
+      Iterator<EMClientEx> cIt = connectedClients.values().iterator();
+      while ( cIt.hasNext() )
+      { clientIDs.add( cIt.next().getID() ); }
+    }
     
     // Disconnect and remove clients
     Iterator<UUID> idIt = clientIDs.iterator();
@@ -112,7 +122,14 @@ public class EMConnectionManager implements IEMMonitorEntryPoint_ProviderListene
   }
   
   public int getConnectedClientCount()
-  { return connectedClients.size(); }
+  {
+    int count = 0;
+    
+    synchronized ( clientListLock )
+    { count = connectedClients.size(); }
+    
+    return count; 
+  }
   
   public EMClientEx getClient( UUID clientID )
   { return connectedClients.get( clientID ); }
@@ -120,22 +137,28 @@ public class EMConnectionManager implements IEMMonitorEntryPoint_ProviderListene
   public void disconnectAndRemoveClient( UUID clientID )
   {
     // Destroy all ECC interfaces and set as disconnected
-    EMClientEx client = connectedClients.get( clientID );
+    EMClientEx client;
+    
+    synchronized( clientListLock )
+    { client = connectedClients.get( clientID ); }
     
     if ( client != null && client.isConnected() )
     {
       client.setIsDisconnecting( false );
       client.setIsConnected( false );
       client.destroyAllInterfaces(); 
-
-      connectedClients.remove( clientID ); 
+      
+      synchronized( clientListLock )
+      { connectedClients.remove( clientID ); }
     }
   }
   
   public Set<EMClientEx> getCopyOfConnectedClients()
   {
     HashSet<EMClientEx> currClients = new HashSet<EMClientEx>();
-    currClients.addAll( connectedClients.values() );
+    
+    synchronized( clientListLock )
+    { currClients.addAll( connectedClients.values() ); }
     
     return currClients;
   }
@@ -145,12 +168,36 @@ public class EMConnectionManager implements IEMMonitorEntryPoint_ProviderListene
   public void onRegisterAsEMClient( UUID userID, String userName )
   {
     if ( userID != null && userName != null )
-      if ( !connectedClients.containsKey(userID) )
-      {
-        EMClientEx client = new EMClientEx( userID, userName );
-        connectedClients.put( userID, client );
+    {
+      boolean    clientKnown, clientAlreadyConnected;
+      EMClientEx incomingClient = null;
+      
+      // Find out what we know about this client
+      synchronized( clientListLock )
+      { 
+        clientKnown            = associatedClients.containsKey( userID );
+        clientAlreadyConnected = connectedClients.containsKey( userID );
         
-        connectionListener.onClientRegistered( client );
+        // If unknown, create the new client
+        if ( !clientKnown )
+        {
+          incomingClient = new EMClientEx( userID, userName );
+          associatedClients.put( userID, incomingClient );
+        }
+        else
+          incomingClient = associatedClients.get( userID );
       }
+      
+      // If not already connected, put client on connected list
+      if ( incomingClient != null && !clientAlreadyConnected )
+        synchronized( clientListLock ) { connectedClients.put( userID, incomingClient ); }
+      
+      // Notify listener of new connection
+      if ( incomingClient != null )
+      {
+        incomingClient.setIsConnected( true );
+        connectionListener.onClientRegistered( incomingClient, clientKnown );
+      }
+    }
   }
 }

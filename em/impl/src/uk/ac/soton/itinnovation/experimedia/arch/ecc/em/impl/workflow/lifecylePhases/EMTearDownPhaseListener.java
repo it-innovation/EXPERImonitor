@@ -33,6 +33,8 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClien
 public interface EMTearDownPhaseListener
 {
   void onClientTearDownResult( EMClientEx client, boolean success );
+  
+  void onTearDownPhaseCompleted( EMClientEx client );
 
   void onTearDownPhaseCompleted();
 }

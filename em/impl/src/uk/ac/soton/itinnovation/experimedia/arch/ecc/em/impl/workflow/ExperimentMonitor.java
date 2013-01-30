@@ -269,12 +269,12 @@ public class ExperimentMonitor implements IExperimentMonitor,
   
   // IEMLifecycleListener ------------------------------------------------------
   @Override
-  public void onClientConnected( EMClient client )
+  public void onClientConnected( EMClient client, boolean reconnected )
   {
     Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
     
     while ( listIt.hasNext() )
-    { listIt.next().onClientConnected( client ); }
+    { listIt.next().onClientConnected( client, reconnected ); }
   }
   
   @Override

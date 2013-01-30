@@ -37,7 +37,7 @@ public class EMListener implements IEMLifecycleListener {
     
     private EMClient[] liveClientList = new EMClient[0];
 
-    public void onClientConnected(EMClient client) {
+    public void onClientConnected(EMClient client, boolean reconnected ) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

@@ -96,7 +96,7 @@ public class EMController implements IEMLifecycleListener
  
   // IEMLifecycleListener ------------------------------------------------------
   @Override
-  public void onClientConnected( EMClient client )
+  public void onClientConnected( EMClient client, boolean reconnected )
   {
     if ( mainView != null )
       mainView.addConnectedClient( client );

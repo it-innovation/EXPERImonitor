@@ -33,14 +33,18 @@ import java.util.*;
 
 
 public class EMClient
-{  
-  protected UUID    clientID;
-  protected String  clientName;
-  protected boolean isDisconnecting = false;
-  protected boolean isConnected     = false;
+{
+  protected final Object  pullLock = new Object();
+  
+  // Experiment states
+  protected UUID             clientID;
+  protected String           clientName;
+  protected boolean          isDisconnecting = false;
+  protected boolean          isConnected     = false;
+  protected EMPhase          currentPhase    = EMPhase.eEMUnknownPhase;
+  protected EnumSet<EMPhase> supportedPhases;
   
   // Discovery phase states
-  protected EnumSet<EMPhase>         supportedPhases;
   protected HashSet<MetricGenerator> metricGenerators;
   protected boolean                  discoveredGenerators = false;
   protected boolean                  isPushCapable        = false;
@@ -51,7 +55,6 @@ public class EMClient
   protected HashSet<UUID> generatorsSetupOK;
   
   // Live monitoring phase states
-  protected final Object  pullLock = new Object();
   protected HashSet<UUID> currentMeasurementSetPulls;
   
   // Post-report phase states
@@ -101,6 +104,41 @@ public class EMClient
    */
   public boolean isDisconnecting()
   { return isDisconnecting; }
+  
+  public EMPhase getCurrentPhaseActivity()
+  { return currentPhase; }
+  
+  /**
+   * Determines whether the client supports the specified experiment phase. Note:
+   * the actual phases that the client supports will only be known after the 
+   * discovery phase has completed. (It is assumed all clients support discovery).
+   * 
+   * @param  phase - phase which the client is queried to support
+   * @return       - returns true if the client supports the phase.
+   */
+  public boolean supportsPhase( EMPhase phase )
+  {
+    // All clients MUST support discovery phase
+    if ( phase.equals(EMPhase.eEMDiscoverMetricGenerators) ) return true;
+    
+    // Return bad news if we've got no supported phases
+    if ( supportedPhases.isEmpty() ) return false;
+    
+    boolean supported = false;
+    
+    Iterator<EMPhase> pIt = supportedPhases.iterator();
+    while ( pIt.hasNext() )
+    {
+      EMPhase nextPhase = pIt.next();
+      if ( phase.equals(nextPhase) )
+      {
+        supported = true;
+        break;
+      }
+    }
+    
+    return supported;
+  }
   
   /**
    * Returns the client's support for the phases the EM executes.

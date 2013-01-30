@@ -32,5 +32,5 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClien
 
 public interface EMConnectionManagerListener
 {
-  void onClientRegistered( EMClientEx client );
+  void onClientRegistered( EMClientEx client, boolean reconnected );
 }
