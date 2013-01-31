@@ -122,6 +122,7 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
   {
     if ( phaseActive && !monitorStopping )
     {
+      phaseActive     = false;
       monitorStopping = true;
       
       // Get a copy of pushers and pullers
@@ -163,8 +164,8 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
       }
       
       // Consider live monitoring phase completed
-      phaseListener.onLiveMonitorPhaseCompleted();
       monitorStopping = false;
+      phaseListener.onLiveMonitorPhaseCompleted();
     }
     else throw new Exception( "Phase already stopped or inactive" );
   }
@@ -290,11 +291,8 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
     
     if ( client != null && clientInPushGroup )
     {
-      // Make sure we don't have any empty report...
-      MeasurementSet mSet = report.getMeasurementSet();
-
-      //... before sending
-      if ( phaseListener != null && mSet != null )
+      // Make sure we don't have any empty report before sending
+      if ( report.getMeasurementSet() != null )
         phaseListener.onGotMetricData( client, report );
 
       // Let client know we've received the data

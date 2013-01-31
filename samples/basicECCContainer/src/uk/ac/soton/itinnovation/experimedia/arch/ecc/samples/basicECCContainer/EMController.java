@@ -506,7 +506,10 @@ public class EMController implements IEMLifecycleListener
           mainView.addLogText( "Requesting missing data from client: " + client.getName() );
         }
         catch ( Exception e )
-        { emCtrlLogger.error( "Could not request data batches from client: " + e.getMessage()); }
+        {
+          mainView.addLogText( "Could not get any further data from client: " + client.getName() + " because: " + e.getMessage() );
+          emCtrlLogger.error( "Could not request data batches from client: " + e.getMessage());
+        }
       }
     }
   }

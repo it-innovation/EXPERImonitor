@@ -272,8 +272,13 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
         
         // ...before trying a controlled stop
         try
-        { phase.controlledStop(); } 
-        catch ( Exception e ) { phase.hardStop(); }
+        { phase.controlledStop(); }
+        // If a controlled stop is not possible, just notify end of phase
+        catch ( Exception e )
+        { 
+          phase.hardStop();
+          lifecycleListener.onLifecyclePhaseCompleted( currentPhase );
+        }
       }
     }
     
@@ -687,6 +692,9 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
         
         // We've got the current phase (client doesn't support it, so defer)
         if ( nextPhase == currentPhase ) break;
+        
+        // Advance to next phase to test
+        nextPhase = nextPhase.nextPhase();
       }
     }   
     

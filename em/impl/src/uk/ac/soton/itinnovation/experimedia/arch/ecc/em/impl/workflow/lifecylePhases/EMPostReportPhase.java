@@ -123,6 +123,7 @@ public class EMPostReportPhase extends AbstractEMLCPhase
     {
       synchronized ( controlledStopLock )
       {
+        phaseActive       = false;
         reportingStopping = true;
         
         // Get a copy of all the clients currently trying to report
@@ -359,7 +360,11 @@ public class EMPostReportPhase extends AbstractEMLCPhase
     { noFurtherBatchingClients = stoppingReportClients.isEmpty(); }
     
     // Notify the phase has ended
-    if ( noFurtherBatchingClients ) phaseListener.onPostReportPhaseCompleted();
+    if ( noFurtherBatchingClients )
+    {
+      phaseActive = false;
+      phaseListener.onPostReportPhaseCompleted();
+    }
   }
   
   // Private methods -----------------------------------------------------------
