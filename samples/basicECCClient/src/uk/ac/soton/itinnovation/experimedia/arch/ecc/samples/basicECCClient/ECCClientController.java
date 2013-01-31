@@ -34,6 +34,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment
 import org.apache.log4j.Logger;
 
 import java.util.*;
+import javax.swing.JOptionPane;
 
 
 
@@ -130,10 +131,17 @@ public class ECCClientController implements EMIAdapterListener,
     public void onEMDeregistration( String reason )
     {
         clientView.addLogMessage( "Got disconnected from EM: " + reason );
+        
         try
         { emiAdapter.disconnectFromEM(); }
         catch ( Exception e )
         { clientLogger.error( "Had problems disconnecting from EM: " + e.getMessage() ); }
+        
+        // Apologise to the user
+        JOptionPane.showMessageDialog( null, "ECC disconnected this client: " + reason );
+        
+        clientView.dispose();
+        System.exit(0);
     }
     
     @Override
