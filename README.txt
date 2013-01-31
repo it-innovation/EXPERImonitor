@@ -4,7 +4,7 @@ Experiment Content Component
 Copyright
 ---------
 
-The source code in this distribution is © Copyright University of Southampton IT Innovation Centre 2012-2013.
+The source code in this distribution is Â© Copyright University of Southampton IT Innovation Centre 2012-2013.
 
 Licences
 --------
@@ -97,7 +97,7 @@ these steps:
 4. (Optional) Install your Tomcat server
 
 5. (Optional) If you have NAGIOS deployed:
-	5.1 Rename ./src/dashboard/_eccdashboard.properties to 'eccdashboard.properties'
+	5.1 Rename ./src/eccdashboard/_eccdashboard.properties to 'eccdashboard.properties'
 	5.2 Configure nagios credentials.
 
 6. Build everything in src. (mvn install) or use the pre-built WAR in the bin directory
@@ -106,10 +106,17 @@ these steps:
 
 	7.1 Tomcat 
 	  Step 1: Replace the contents of the ROOT directory with the contents of the WAR
-	  Step 2: Copy em.properties and edm.properties files to Tomcat 'bin' directory
+	  
+	  Step 2:
+		WINDOWS USERS: Copy em.properties and edm.properties files to Tomcat 'bin' directory
+		LINUX   USERS: Copy em.properties and edm.properties files to ROOT/WEB-INF/classes directory
+	  
 	  Step 3: Start up Tomcat
 
 	you should see the ECC dashboard running on: http://localhost:8080.
+
+8. Shutting down the ECC
+You may need to run the Tomcat shut-down script more than once to ensure a successful re-start of the ECC the next time your Tomcat server is started. This is being investigated.
 
 
 Using JuJu to deploy the ECC
