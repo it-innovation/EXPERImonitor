@@ -94,6 +94,13 @@ public class EMConnectionManager implements IEMMonitorEntryPoint_ProviderListene
     return entryPointOpen;
   }
   
+  public void shutdown()
+  {
+    disconnectAllClients();
+    entryPointPump.stopPump();
+    entryPointInterface.shutdown();
+  }
+  
   public void setListener( EMConnectionManagerListener listener )
   { connectionListener = listener; }
   

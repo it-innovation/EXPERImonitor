@@ -74,7 +74,8 @@ public class EMPostReportPhase extends AbstractEMLCPhase
   @Override
   public void reset()
   {
-    phaseActive = false;
+    phaseActive       = false;
+    reportingStopping = false;
     clearAllClients();
     
     batchDateTree.clear();
@@ -230,13 +231,10 @@ public class EMPostReportPhase extends AbstractEMLCPhase
   @Override
   public void onNotifyReadyToReport( UUID senderID )
   {
-    if ( !reportingStopping )
-    {
-      EMClientEx client = getClient( senderID );
+    EMClientEx client = getClient( senderID );
 
-      if ( client != null )
-        client.getPostReportInterface().requestPostReportSummary();
-    }
+    if ( client != null )
+      client.getPostReportInterface().requestPostReportSummary();
   }
   
   @Override

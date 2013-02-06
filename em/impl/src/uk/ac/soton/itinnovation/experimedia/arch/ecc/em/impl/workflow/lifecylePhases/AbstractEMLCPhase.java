@@ -169,4 +169,10 @@ public abstract class AbstractEMLCPhase
     
     return true;
   }
+  
+  @Override
+  protected void finalize() throws Throwable
+  {
+    phaseMsgPump.stopPump();
+  }
 }

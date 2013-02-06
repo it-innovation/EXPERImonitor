@@ -106,6 +106,15 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
     lifecyclePhases.put( EMPhase.eEMTearDown, tdp );
   }
   
+  public void shutdown()
+  {
+    Iterator<AbstractEMLCPhase> phaseIt = lifecyclePhases.values().iterator();
+    while ( phaseIt.hasNext() )
+    { phaseIt.next().hardStop(); }
+    
+    lifecyclePhases.clear();
+  }
+  
   public void resetLifecycle()
   {
     // Clear all phases of all clients
