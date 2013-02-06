@@ -54,27 +54,29 @@ public abstract class AbstractAMQPInterface
   
   public void shutdown()
   {
-    if ( amqpChannel != null && subListenQueue != null )
+    if ( amqpChannel != null )
     {
-      Channel channel = (Channel) amqpChannel.getChannelImpl();
-      
-      try
-      {
-        channel.queueDelete( subListenQueue );
-        
-        interfaceName        = null;
-        providerExchangeName = null;
-        userExchangeName     = null;
-        providerQueueName    = null;
-        userQueueName        = null;
-        providerRoutingKey   = null;
-        userRoutingKey       = null;
-        subListenQueue       = null;
-        interfaceReady       = false;
-      }
-      catch (IOException ioe)
-      { amqpIntLogger.error( "Could not delete AMQP queue: " + ioe.getMessage() ); }
+      // Clear up queue, if it exists
+      if ( subListenQueue != null )
+        try 
+        {
+          Channel channel = (Channel) amqpChannel.getChannelImpl();
+          channel.queueDelete( subListenQueue );
+        }
+        catch (IOException ioe)
+        { amqpIntLogger.error( "Could not delete AMQP queue: " + ioe.getMessage() ); }
     }
+      
+    // Tidy up (channel is managed elsewhere)     
+    interfaceName        = null;
+    providerExchangeName = null;
+    userExchangeName     = null;
+    providerQueueName    = null;
+    userQueueName        = null;
+    providerRoutingKey   = null;
+    userRoutingKey       = null;
+    subListenQueue       = null;
+    interfaceReady       = false;
   }
   
   public synchronized boolean sendBasicMessage( String message )
@@ -153,12 +155,12 @@ public abstract class AbstractAMQPInterface
   
   protected void createSubscriptionComponent()
   {
-    Channel channel = (Channel) amqpChannel.getChannelImpl();    
+    Channel channel = (Channel) amqpChannel.getChannelImpl();
     
     subProcessor = new AMQPBasicSubscriptionProcessor( channel,
                                                        subListenQueue,
                                                        msgDispatch );
-    
+  
     try { channel.basicConsume( subListenQueue, false, subProcessor ); }
     catch ( IOException ioe ) {}
   }

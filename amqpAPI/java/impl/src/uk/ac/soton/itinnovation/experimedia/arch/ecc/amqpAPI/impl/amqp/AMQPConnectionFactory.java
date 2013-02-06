@@ -39,7 +39,7 @@ import org.apache.log4j.Logger;
 
 public class AMQPConnectionFactory
 {
-    private static Logger factoryLog = Logger.getLogger( AMQPConnectionFactory.class );
+    private Logger factoryLog = Logger.getLogger( AMQPConnectionFactory.class );
 
     private InetAddress amqpHostIP;
     private int         amqpPortNumber = 5672;
@@ -63,6 +63,17 @@ public class AMQPConnectionFactory
         catch ( UnknownHostException uhe ) { amqpHostIP = null; }
 
         return ipSuccess;
+    }
+    
+    public void closeDownConnection()
+    {
+      if ( amqpConnection != null )
+        try 
+        {
+          amqpConnection.close();
+          amqpConnection = null;
+        }
+        catch (Exception e) { factoryLog.error("Could not close down connection"); }
     }
 
     public boolean setAMQPHostPort( int port )

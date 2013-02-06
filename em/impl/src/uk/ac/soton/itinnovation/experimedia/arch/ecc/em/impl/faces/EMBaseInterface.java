@@ -56,8 +56,9 @@ public abstract class EMBaseInterface implements IAMQPMessageDispatchListener
   
   public void shutdown()
   {
-    if ( amqpChannel != null && amqpInterface != null )
-      amqpInterface.shutdown();
+    if ( amqpInterface != null ) amqpInterface.shutdown();
+    
+    // Channel is managed elsewhere
   }
   
   // IAMQPMessageDispatchListener ----------------------------------------------

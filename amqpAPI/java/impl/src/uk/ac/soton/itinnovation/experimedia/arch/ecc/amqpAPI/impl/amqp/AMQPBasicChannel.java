@@ -54,7 +54,11 @@ public class AMQPBasicChannel
   {
     if ( amqpChannel != null )
       if ( amqpChannel.isOpen() )
-        try { amqpChannel.close(); }
+        try 
+        { 
+          amqpChannel.close();
+          amqpChannel = null;
+        }
         catch (IOException ioe) {}
   }
   
