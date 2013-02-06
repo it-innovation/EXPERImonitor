@@ -42,6 +42,7 @@ public class EMClient
   protected boolean          isDisconnecting = false;
   protected boolean          isConnected     = false;
   protected EMPhase          currentPhase    = EMPhase.eEMUnknownPhase;
+  protected boolean          isPhaseAccelerating;
   protected EnumSet<EMPhase> supportedPhases;
   
   // Discovery phase states
@@ -104,6 +105,9 @@ public class EMClient
    */
   public boolean isDisconnecting()
   { return isDisconnecting; }
+  
+  public boolean isPhaseAccelerating()
+  { return isPhaseAccelerating; }
   
   public EMPhase getCurrentPhaseActivity()
   { return currentPhase; }

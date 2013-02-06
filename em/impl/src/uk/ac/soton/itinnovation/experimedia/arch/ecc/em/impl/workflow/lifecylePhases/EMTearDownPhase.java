@@ -41,12 +41,13 @@ import java.util.*;
 public class EMTearDownPhase extends AbstractEMLCPhase
                                      implements IEMTearDown_ProviderListener
 {
-  private final Object tearDownLock    = new Object();
-  private final Object acceleratorLock = new Object();
+  private final Object controlledStopLock = new Object();
+  private final Object acceleratorLock    = new Object();
   
   private EMTearDownPhaseListener phaseListener;
+  private HashSet<UUID>           clientsStillToTearDown;
   
-  private HashSet<UUID> clientsStillToTearDown;
+  private volatile boolean tearingStopping; // Atomic
   
   
   public EMTearDownPhase( AMQPBasicChannel channel,
@@ -66,7 +67,9 @@ public class EMTearDownPhase extends AbstractEMLCPhase
   @Override
   public void reset()
   {
-    phaseActive = false;
+    phaseActive     = false;
+    tearingStopping = false;
+    
     clearAllClients();
     
     clientsStillToTearDown.clear();
@@ -78,7 +81,8 @@ public class EMTearDownPhase extends AbstractEMLCPhase
     if ( phaseActive ) throw new Exception( "Phase already active" );
     if ( !hasClients() ) throw new Exception( "No clients available for this phase" );
     
-    phaseActive = true;
+    phaseActive     = true;
+    tearingStopping = false;
     
     // Create tear-down interfaces
     synchronized ( acceleratorLock )
@@ -111,14 +115,28 @@ public class EMTearDownPhase extends AbstractEMLCPhase
   
   @Override
   public void controlledStop() throws Exception
-  { throw new Exception( "Not yet supported for this phase"); }
+  {
+    if ( phaseActive && !tearingStopping )
+    {
+      synchronized ( controlledStopLock )
+      {
+        phaseActive     = false;
+        tearingStopping = false;
+        
+        // Nothing else to do here actually - tearing down is a 'single interaction' phase
+        // if we're already finished, notify
+        if ( clientsStillToTearDown.isEmpty() )
+          phaseListener.onTearDownPhaseCompleted();
+      }
+    }
+  }
   
   @Override
   public void hardStop()
   {
+    phaseActive     = false;
+    tearingStopping = false;
     phaseMsgPump.stopPump();
-    phaseActive = false;
-    phaseListener.onTearDownPhaseCompleted();
   }
   
   @Override
@@ -128,17 +146,19 @@ public class EMTearDownPhase extends AbstractEMLCPhase
     
     synchronized ( acceleratorLock )
     {
-      client.setCurrentPhaseActivity( EMPhase.eEMSetUpMetricGenerators );
+      if ( !tearingStopping )
+      {
+        client.setCurrentPhaseActivity( EMPhase.eEMSetUpMetricGenerators );
       
-      // Need to manually add/setup accelerated clients
-      addClient( client );
-      setupClientInterface( client );
-      
-      synchronized( tearDownLock )
-      { clientsStillToTearDown.add( client.getID() ); }
-      
-      // Tell client to initialise their tear-down phase
-      client.getDiscoveryInterface().createInterface( EMInterfaceType.eEMTearDown );
+        // Need to manually add/setup accelerated clients
+        addClient( client );
+        setupClientInterface( client );
+        
+        clientsStillToTearDown.add( client.getID() );
+
+        // Tell client to initialise their tear-down phase
+        client.getDiscoveryInterface().createInterface( EMInterfaceType.eEMTearDown );
+      }
     }
   }
   
@@ -166,12 +186,14 @@ public class EMTearDownPhase extends AbstractEMLCPhase
   {
     if ( client != null )
     {
-      UUID clientID = client.getID();
+      synchronized ( controlledStopLock )
+      {
+        UUID clientID = client.getID();
       
-      synchronized( tearDownLock )
-      { clientsStillToTearDown.remove( clientID ); }
-      
-      removeClient( clientID );
+        clientsStillToTearDown.remove( clientID );
+
+        removeClient( clientID );
+      }
     }
   }
   
@@ -194,14 +216,14 @@ public class EMTearDownPhase extends AbstractEMLCPhase
     {
       client.setTearDownResult( success );
       
-      boolean noFurtherClientsTearingDown = false;
+      boolean noFurtherClientsTearingDown;
       
-      synchronized( tearDownLock )
-      { 
+      synchronized ( controlledStopLock )
+      {
         clientsStillToTearDown.remove( client.getID() );
         noFurtherClientsTearingDown = clientsStillToTearDown.isEmpty();
       }
-      
+     
       // Notify of tear-down result
       phaseListener.onClientTearDownResult( client, success );
       

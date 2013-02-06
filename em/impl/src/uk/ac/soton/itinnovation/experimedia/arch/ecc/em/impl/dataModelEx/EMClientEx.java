@@ -46,9 +46,6 @@ public class EMClientEx extends EMClient
   private IEMPostReport     postFace;
   private IEMTearDown       tearDownFace;
   
-  // Experiment state support
-  boolean isPhaseAccelerating;
- 
   // Internal Set-up stage support
   private ArrayList<UUID> generatorsToSetup;
   
@@ -123,9 +120,6 @@ public class EMClientEx extends EMClient
   // Experiment state ----------------------------------------------------------
   public void setCurrentPhaseActivity( EMPhase phase )
   { currentPhase = phase; }
-  
-  public boolean isPhaseAccelerating()
-  { return isPhaseAccelerating; }
   
   public void setIsPhaseAccelerating( boolean accelerate )
   { isPhaseAccelerating = accelerate; }
