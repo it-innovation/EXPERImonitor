@@ -44,10 +44,13 @@ import java.util.*;
 public class EMMetricGenSetupPhase extends AbstractEMLCPhase
                                    implements IEMSetup_ProviderListener
 {
-  private final Object acceleratorLock = new Object();
+  private final Object controlledStopLock = new Object();
+  private final Object acceleratorLock    = new Object();
   
   private EMMetricGenSetupPhaseListener phaseListener;
   private HashSet<UUID>                 clientsSettingUp;
+  
+  private volatile boolean setupStopping; // Atomic
   
   
   public EMMetricGenSetupPhase( AMQPBasicChannel channel,
@@ -67,10 +70,13 @@ public class EMMetricGenSetupPhase extends AbstractEMLCPhase
   @Override
   public void reset()
   {
-    phaseActive = false;
+    synchronized ( controlledStopLock )
+    { clientsSettingUp.clear(); }
+    
     clearAllClients();
     
-    clientsSettingUp.clear();
+    phaseActive   = false;
+    setupStopping = false;
   }
   
   @Override
@@ -112,12 +118,26 @@ public class EMMetricGenSetupPhase extends AbstractEMLCPhase
   
   @Override
   public void controlledStop() throws Exception
-  { throw new Exception( "Not yet supported for this phase"); }
+  {
+    if ( phaseActive && !setupStopping )
+    {
+      phaseActive   = false;
+      setupStopping = true;
+      
+      synchronized ( controlledStopLock )
+      {
+        if ( clientsSettingUp.isEmpty() )
+          phaseListener.onSetupPhaseCompleted();
+      }
+    }
+  }
   
   @Override
   public void hardStop()
   {
-    phaseActive = false;
+    phaseActive   = false;
+    setupStopping = false;
+    
     phaseMsgPump.stopPump();
   }
   
@@ -172,8 +192,11 @@ public class EMMetricGenSetupPhase extends AbstractEMLCPhase
     {
       UUID clientID = client.getID();
       
-      clientsSettingUp.remove( clientID );
-      removeClient( clientID );
+      synchronized( controlledStopLock )
+      {
+        clientsSettingUp.remove( clientID );
+        removeClient( clientID );
+      }
     }
   }
   
@@ -181,17 +204,20 @@ public class EMMetricGenSetupPhase extends AbstractEMLCPhase
   @Override
   public void onNotifyReadyToSetup( UUID senderID )
   {
-    EMClientEx client = getClient( senderID );
-
-    if ( client != null )
+    if ( !setupStopping )
     {
-      if ( client.hasGeneratorToSetup() )
+      EMClientEx client = getClient( senderID );
+
+      if ( client != null )
       {
-        UUID genID = client.iterateNextMGToSetup();
-        client.getSetupInterface().setupMetricGenerator( genID );
+        if ( client.hasGeneratorToSetup() )
+        {
+          UUID genID = client.iterateNextMGToSetup();
+          client.getSetupInterface().setupMetricGenerator( genID );
+        }
+        else
+          clientsSettingUp.remove( senderID ); // Don't ask again
       }
-      else
-        clientsSettingUp.remove( senderID ); // Don't ask again
     }
   }
   
