@@ -35,6 +35,89 @@ import java.util.*;
  */
 public class MetricHelper
 {
+    public static Attribute getAttributeFromID( UUID attributeID,
+                                                Collection<MetricGenerator> mgenSet )
+    {
+      Attribute attr = null;
+      
+      if ( attributeID != null && mgenSet != null )
+      {
+        Map<UUID, Attribute> attributes = getAllAttributes( mgenSet );
+        attr = attributes.get( attributeID );
+      }
+      
+      return attr;
+    }
+  
+    public static Map<UUID, MeasurementSet> getMeasurementSetsForAttribute( Attribute attr,
+                                                                            Collection<MetricGenerator> mgenSet )
+    {
+      HashMap<UUID, MeasurementSet> mSets = new HashMap<UUID, MeasurementSet>();
+      
+      if ( attr != null && mgenSet != null )
+      {
+        UUID targetAttID = attr.getUUID();
+        Set<MeasurementSet> allSets = getAllMeasurementSets( mgenSet );
+        Iterator<MeasurementSet> msIt = allSets.iterator();
+        
+        while ( msIt.hasNext() )
+        {
+          MeasurementSet ms = msIt.next();
+          
+          if ( ms.getAttributeUUID().equals(targetAttID) )
+            mSets.put( ms.getUUID(), ms );
+        }
+      }
+      
+      return mSets;
+    }
+    
+    public static Map<UUID, Attribute> getAllAttributes( Collection<MetricGenerator> mgenSet )
+    {
+      HashMap<UUID, Attribute> attributes = new HashMap<UUID, Attribute>();
+      
+      Map<UUID, Entity> entities = getAllEntities( mgenSet );
+      Iterator<Entity> entIt = entities.values().iterator();
+      
+      while ( entIt.hasNext() )
+      {
+        Iterator<Attribute> attIt = entIt.next().getAttributes().iterator();
+        while ( attIt.hasNext() )
+        {
+          Attribute attr = attIt.next();
+          attributes.put( attr.getUUID(), attr );
+        }
+      }
+      
+      return attributes;
+    }
+  
+    public static Map<UUID, Entity> getAllEntities( Collection<MetricGenerator> mgenSet )
+    {
+      HashMap<UUID, Entity> entities = new HashMap<UUID, Entity>();
+      
+      if ( mgenSet != null )
+      {
+        Iterator<MetricGenerator> mgenIt = mgenSet.iterator();
+        while ( mgenIt.hasNext() )
+        {
+          MetricGenerator mg = mgenIt.next();
+          Set<Entity> mgEnts = mg.getEntities();
+          if ( mgEnts != null )
+          {
+            Iterator<Entity> mgEntIt = mgEnts.iterator();
+            while ( mgEntIt.hasNext() )
+            {
+              Entity entity = mgEntIt.next();
+              entities.put( entity.getUUID(), entity );
+            }
+          }
+        }
+      }
+      
+      return entities;
+    }
+  
     public static Set<MeasurementSet> getAllMeasurementSets( Collection<MetricGenerator> mgenSet )
     {
         HashSet<MeasurementSet> mSets = new HashSet<MeasurementSet>();
