@@ -25,6 +25,10 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.client.ClientInfoViewListener;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.client.ClientInfoView;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.client.ClientConnectionsViewListener;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.client.ClientConnectionsView;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.processors.LiveMetricScheduler;
 import uk.ac.soton.itinnovation.robust.cat.core.components.viewEngine.spec.uif.types.UFAbstractEventManager;
 

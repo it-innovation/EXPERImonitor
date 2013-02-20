@@ -26,6 +26,8 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views;
 
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.client.ClientInfoView;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.client.ClientConnectionsView;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.SimpleView;
 
 import com.vaadin.ui.*;

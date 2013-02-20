@@ -23,7 +23,7 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.client;
 
 import com.vaadin.ui.*;
 import java.util.Collection;
