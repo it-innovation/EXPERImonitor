@@ -30,34 +30,78 @@
 
 .eccDashDefault
 {
-  background-color: #F8F8F8;
+  background-color: #E9E9E9;
   
   font-family: Arial;
   font-size: small;
   font-weight: 100;
 }
 
-.eccInfoPanel
+.eccButton
 {
-  background-color: #FAFAFA;
+  background-color: #728ac2;
+  background-image: none;
+  color: #e1eaff;
+  border: none;
+  border-radius: 0px;
+  
+  text-shadow: none;
+}
+
+.eccControlPanel
+{
+  background-color: #E0E0E0;
+  color: #404040;
+  
+  font-weight: 100;
+  font-size: medium;
+  border: none;
+}
+
+.eccControlInfoPanel
+{
+  background-color: #E5E5E5;
+  color: #303030;
   
   font-weight: 100;
   font-size: small;
   border: none;
 }
 
+.eccInfoPanelHeader
+{
+  background-color: #EDEDED;
+  
+  border-bottom-width: 2px;
+  border-bottom-color: #DDDDDD;
+}
+
+.eccInfoPanelAlert
+{
+  background-color: #d10f2b;
+  color: #ececec;
+  
+  border-bottom: 2px;
+  border-bottom-color: #840618;
+}
+
 .eccInfoSubPanel
 {
-  background-color: #FDFDFD;
+  background-color: #E6E6E6;
   
   font-weight: 100;
   font-size: small;
-  border: #FAFAFA;
+  
+  padding: 5px;
+  
+  border-color: #F2F2F2;
+  border-style: solid;
+  border-width: 1px;
 }
 
 .eccInfoPanelHighlight
 {
-  color: #EEEEEE; 
+  color: #FFFFFF; 
   background-color: #9292DE;
   
   font-weight: 200;
@@ -68,13 +112,14 @@
 
 .eccGraphPanel
 {
-  color: #EEEEEE;
-  background-color: #FAFAFF;
+  background-color: #FFFFFF;
   
-  font-family: Arial;
   font-weight: 100;
   font-size: small;
   
-  border: #9292DE;
-  border-top-style: ridge;
+  padding: 5px;
+  
+  border-color: #F2F2F2;
+  border-style: solid;
+  border-width: 1px;
 }

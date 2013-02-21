@@ -25,6 +25,7 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.client;
 
+import com.vaadin.ui.AbstractLayout;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
@@ -49,8 +50,10 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.UILayoutU
 
 public class ClientInfoView extends SimpleView
 {
-  private Label          clientMainInfo;
-  private VerticalLayout metaDataHolder;
+  private Label          clientNameLabel;
+  private Label          clientStatusLabel;
+  private Label          clientIDLabel;
+  private VerticalLayout clientInfoHolder;
   
   private transient UUID currClientID;
   
@@ -78,25 +81,29 @@ public class ClientInfoView extends SimpleView
     }
   }
   
-  public void writeClientDisconnected( EMClient client )
+  public void updateClientConnectivityStatus( EMClient client, boolean connected )
   {
     if ( client != null && client.getID().equals(currClientID) )
     {
-      String content = "<h1>" + client.getName() + " has been disconnected</h1>";
-      clientMainInfo.setValue( content );
-      metaDataHolder.removeAllComponents();
+      if ( connected )
+      {
+        clientStatusLabel.addStyleName( "eccInfoPanelHeader" );
+        clientStatusLabel.setValue( "(connected)" );
+      }
+      else
+      {
+        clientStatusLabel.addStyleName( "eccInfoPanelAlert" );
+        clientStatusLabel.setValue( "(disconnected)" );
+      }
     }
   }
   
   public void resetView()
   {
-    String content = "<div style=\"\">";
-    
-    content += "<h1>No client information available</h1>";
-    
-    content += "</div>";
-    
-    clientMainInfo.setValue( content );
+    clientNameLabel.setValue( "No client information yet" );
+    clientStatusLabel.setValue( "" );
+    clientIDLabel.setValue( "" );
+    clientInfoHolder.removeAllComponents();
   }
   
   // Private methods -----------------------------------------------------------
@@ -105,42 +112,73 @@ public class ClientInfoView extends SimpleView
     VerticalLayout vl = getViewContents();
     
     Panel panel = new Panel();
-    panel.setSizeFull();
     panel.addStyleName( "borderless light" );
+    panel.setSizeFull();
     vl.addComponent( panel );
-    VerticalLayout pVL = (VerticalLayout) panel.getContent();
-    pVL.addStyleName( "eccInfoPanel" );
     
-    clientMainInfo = new Label();
-    clientMainInfo.setSizeFull();
-    clientMainInfo.setImmediate( true );
-    clientMainInfo.setContentMode( Label.CONTENT_XHTML );
-    clientMainInfo.setStyleName( "eccInfoPanel" );
-    pVL.addComponent( clientMainInfo );
+    HorizontalLayout hl = new HorizontalLayout();
+    hl.setWidth( "100%" );
+    hl.setStyleName( "eccInfoPanelHeader" );
+    panel.addComponent( hl );
     
-    metaDataHolder = new VerticalLayout();
-    metaDataHolder.setSizeFull();
-    metaDataHolder.setImmediate( true );
-    metaDataHolder.setStyleName( "eccInfoPanel" );
-    pVL.addComponent( metaDataHolder );
+    // Space
+    hl.addComponent( UILayoutUtil.createSpace( "5px", null, true ) );
+    
+    // Main info
+    HorizontalLayout innerHL = new HorizontalLayout();
+    hl.addComponent( innerHL );
+    
+    clientNameLabel = new Label( "No client information yet" );
+    clientNameLabel.addStyleName( "h2" );
+    clientNameLabel.setImmediate( true );
+    innerHL.addComponent( clientNameLabel );
+    innerHL.setComponentAlignment( clientNameLabel, Alignment.TOP_LEFT );
+    
+    // Space
+    innerHL.addComponent( UILayoutUtil.createSpace( "50px", null, true ) );
+    
+    // Status
+    clientStatusLabel = new Label();
+    clientStatusLabel.addStyleName( "h3" );
+    clientStatusLabel.setImmediate( true );
+    innerHL.addComponent( clientStatusLabel );
+    innerHL.setComponentAlignment( clientStatusLabel, Alignment.TOP_RIGHT );
+    
+    // Space
+    innerHL.addComponent( UILayoutUtil.createSpace( "100%", null, true ) );
+    
+    // Space
+    panel.addComponent( UILayoutUtil.createSpace( "5px", null ) );
+    
+    // ID
+    clientIDLabel = new Label();
+    clientIDLabel.addStyleName( "small" );
+    clientIDLabel.setImmediate( true );
+    panel.addComponent( clientIDLabel );
+    
+    // Space
+    panel.addComponent( UILayoutUtil.createSpace( "5px", null ) );
+    
+    // Main info area
+    clientInfoHolder = new VerticalLayout();
+    clientInfoHolder.setStyleName( "eccDashDefault" );
+    clientInfoHolder.setImmediate( true );
+    clientInfoHolder.setSizeFull();
+    panel.addComponent( clientInfoHolder );
     
     resetView();
   }
   
   private void writeMainInfo( EMClient client, Set<MetricGenerator> mGens )
   {
-    String content = "<h1>" + client.getName() + "</h1>";
-    
-    if ( mGens.isEmpty() ) content += "<h2> Currently no metric meta-data </h2>";
-    
-    content += "</div>";
-    
-    clientMainInfo.setValue( content );
+    clientNameLabel.setValue( client.getName() );
+    clientStatusLabel.setValue( "(connected)" );
+    clientIDLabel.setValue( "Unique ID: " + client.getID().toString() );
   }
   
   private void writeMetricMetaData( Set<MetricGenerator> mGens )
   {
-    metaDataHolder.removeAllComponents();
+    clientInfoHolder.removeAllComponents();
     
     if ( !mGens.isEmpty() )
     {
@@ -150,76 +188,156 @@ public class ClientInfoView extends SimpleView
       {
         // Write out entity
         Entity entity = entIt.next();
-        
-        Label entityLabel = new Label();
-        entityLabel.setSizeFull();
-        entityLabel.setContentMode( Label.CONTENT_XHTML );
-        
-        String content = "<div style=\"text-indent:20px;\">";
-        
-        String val = entity.getName();
-        if ( val == null ) val = "No name provided";
-        content += "<h2>Entity: " + val + "</h2>";
-        
-        val = entity.getDescription();
-        if ( val == null ) val = "No description provided";
-        content += "<h3>Description: " + val+ "</h3>";
-        
-        content += "</div>";
-        entityLabel.setValue( content );
-        metaDataHolder.addComponent( entityLabel );
+        createEntityInfo( clientInfoHolder, entity );
         
         // Write out attributes
         Iterator<Attribute> attIt = entity.getAttributes().iterator();
         while ( attIt.hasNext() )
         {
-          Attribute att = attIt.next();
-          
+          // Indent a little
           HorizontalLayout hl = new HorizontalLayout();
-          metaDataHolder.addComponent( hl );
-          
-          // Attribute info
-          Label attLabel = new Label();
-          attLabel.setWidth( "90%" );
-          attLabel.setContentMode( Label.CONTENT_XHTML );
-          
-          String attContent = "<div style=\"eccInfoSubPanel\">";
-          attContent       +=  "<div style=\"text-indent:30px;\">";
-          
-          val = att.getName();
-          if ( val == null ) val = "No name provided";
-          attContent += "<h2>Attribute: " + val + "</h2>";
-          
-          val = att.getDescription();
-          if ( val == null ) val = "No description provided";
-          attContent += "<h3>Description: " + val + "</h2>";
-          
-          attContent += "</div></div>";
-          attLabel.setValue( attContent );
-          hl.addComponent( attLabel );
-          
-          // Space
           hl.addComponent( UILayoutUtil.createSpace( "5px", null, true ) );
+          clientInfoHolder.addComponent( hl );
           
-          // Add to metric view button
-          Button addButton = new Button( "Add to live view" );
-          addButton.addStyleName( "small" );
-          addButton.setData( att.getUUID() );
-          addButton.addListener( new AddButtonListener() );
-          hl.addComponent( addButton );
-          hl.setComponentAlignment( addButton, Alignment.BOTTOM_LEFT );
+          VerticalLayout attVL = new VerticalLayout();
+          hl.addComponent( attVL );
           
-          // Attribute HTML content (TODO)
-          VerticalLayout vl = new VerticalLayout();
-          hl.addComponent(vl);
-          
+          Attribute att = attIt.next();
+          createAttributeInfo( attVL, att );
         }
+        
+        // Space
+        clientInfoHolder.addComponent( UILayoutUtil.createSpace( "5px", null ) );
       }
     }
   }
   
+  private void createEntityInfo( AbstractLayout parent, Entity entity )
+  {
+    VerticalLayout vl = new VerticalLayout();
+    parent.addComponent( vl );
+    
+    // Header
+    HorizontalLayout hl = new HorizontalLayout();
+    hl.setWidth( "100%" );
+    hl.setStyleName( "eccInfoPanelHeader" );
+    vl.addComponent( hl );
+    
+    Label label = new Label( "Entity: " + entity.getName() );
+    label.addStyleName( "h3" );
+    hl.addComponent( label );
+    
+    // Two columns; info and controls
+    hl = new HorizontalLayout();
+    vl.addComponent( hl );
+    
+    // Info
+    VerticalLayout innerVL = new VerticalLayout();
+    innerVL.setWidth( "265px" );
+    hl.addComponent( innerVL );
+    
+    label = new Label( entity.getDescription() );
+    label.addStyleName( "small" );
+    innerVL.addComponent( label );
+    
+    // Space
+    innerVL.addComponent( UILayoutUtil.createSpace( "2px", null ) );
+    
+    label = new Label( "Number of attributes: " + entity.getAttributes().size() );
+    label.addStyleName( "small" );
+    innerVL.addComponent( label );
+    
+    // Controls
+    innerVL = new VerticalLayout();
+    innerVL.setStyleName( "eccInfoSubPanel" );
+    hl.addComponent( innerVL );
+    
+    Button button = new Button( "Add to live view" );
+    button.setWidth( "120px" );
+    button.addStyleName( "small" );
+    button.setData( entity.getUUID() );
+    button.addListener( new AddEntityToLiveButtonListener() );
+    innerVL.addComponent( button );
+    innerVL.setComponentAlignment( button, Alignment.MIDDLE_RIGHT );
+    
+    // Space
+    innerVL.addComponent( UILayoutUtil.createSpace( "2px", null ) );
+    
+    button = new Button( "Add to data export" );
+    button.setWidth( "120px" );
+    button.addStyleName( "small" );
+    innerVL.addComponent( button );
+    innerVL.setComponentAlignment( button, Alignment.MIDDLE_RIGHT );
+    
+    // Space
+    innerVL.addComponent( UILayoutUtil.createSpace( "20px", null ) );
+  }
+  
+  private void createAttributeInfo( AbstractLayout parent, Attribute attribute )
+  {
+    VerticalLayout vl = new VerticalLayout();
+    parent.addComponent( vl );
+    
+    // Header
+    HorizontalLayout hl = new HorizontalLayout();
+    hl.setStyleName( "eccInfoPanelHeader" );
+    vl.addComponent( hl );
+    
+    Label label = new Label( "Attribute: " + attribute.getName() );
+    label.addStyleName( "h4" );
+    hl.addComponent( label );
+    
+    // Two columns; info and controls
+    hl = new HorizontalLayout();
+    vl.addComponent( hl );
+    
+    // Info
+    VerticalLayout innerVL = new VerticalLayout();
+    innerVL.setWidth( "260px" );
+    hl.addComponent( innerVL );
+    
+    label = new Label( attribute.getDescription() );
+    label.addStyleName( "small" );
+    innerVL.addComponent( label );
+    
+    // Controls
+    innerVL = new VerticalLayout();
+    innerVL.setStyleName( "eccInfoSubPanel" );
+    hl.addComponent( innerVL );
+    
+    Button button = new Button( "Add to live view" );
+    button.setWidth( "120px" );
+    button.addStyleName( "small" );
+    button.setData( attribute.getUUID() );
+    button.addListener( new AddAttributeToLiveButtonListener() );
+    innerVL.addComponent( button );
+    innerVL.setComponentAlignment( button, Alignment.MIDDLE_RIGHT );
+    
+    // Space
+    innerVL.addComponent( UILayoutUtil.createSpace( "2px", null ) );
+    
+    button = new Button( "Add to data export" );
+    button.setWidth( "120px" );
+    button.addStyleName( "small" );
+    innerVL.addComponent( button );
+    innerVL.setComponentAlignment( button, Alignment.MIDDLE_RIGHT );
+    
+    // Space
+    innerVL.addComponent( UILayoutUtil.createSpace( "20px", null ) );
+  }
+  
   // Event handlers ------------------------------------------------------------
-  private void onAddToLiveViewClicked( UUID attributeID )
+  private void onAddEntityToLiveView( UUID entityID )
+  {
+    if ( entityID != null )
+    {
+      Collection<ClientInfoViewListener> listeners = getListenersByType();
+      for( ClientInfoViewListener listener : listeners )
+        listener.onAddEntityToLiveView( entityID );
+    }
+  }
+  
+  private void onAddAttributeToLiveView( UUID attributeID )
   {
     if ( attributeID != null )
     {
@@ -229,10 +347,17 @@ public class ClientInfoView extends SimpleView
     }
   }
   
-  private class AddButtonListener implements Button.ClickListener
+  private class AddEntityToLiveButtonListener implements Button.ClickListener
   {
     @Override
     public void buttonClick(Button.ClickEvent ce) 
-    { onAddToLiveViewClicked( (UUID) ce.getButton().getData() ); }
+    { onAddEntityToLiveView( (UUID) ce.getButton().getData() ); }
+  }
+  
+  private class AddAttributeToLiveButtonListener implements Button.ClickListener
+  {
+    @Override
+    public void buttonClick(Button.ClickEvent ce) 
+    { onAddAttributeToLiveView( (UUID) ce.getButton().getData() ); }
   }
 }

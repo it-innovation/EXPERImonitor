@@ -54,6 +54,7 @@ import java.util.UUID;
 import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Attribute;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Entity;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricHelper;
@@ -115,6 +116,7 @@ public class DashMainController extends UFAbstractEventManager
   public void initialise( Window rootWin )
   {
     rootWindow = rootWin;
+    rootWindow.setStyleName( "eccDashDefault" );
     
     createWelcomeView();
     
@@ -167,7 +169,7 @@ public class DashMainController extends UFAbstractEventManager
     if ( client != null )
     {
       if ( connectionsView != null ) connectionsView.removeClient( client );
-      if ( clientInfoView != null )  clientInfoView.writeClientDisconnected( client );
+      if ( clientInfoView != null )  clientInfoView.updateClientConnectivityStatus( client, false );
       if ( liveMonitorController != null ) liveMonitorController.removeClientLiveView( client );
     }
   }
@@ -484,6 +486,56 @@ public class DashMainController extends UFAbstractEventManager
   
   // ClientInfoViewListener ----------------------------------------------------
   @Override
+  public void onAddEntityToLiveView( UUID entityID )
+  {
+    String problem    = null;
+    UUID currClientID = clientInfoView.getCurrentClientID();
+    EMClient client   = null;
+    
+    if ( entityID != null && currClientID != null )
+    {
+      client = expMonitor.getClientByID( currClientID );
+      if ( client != null )
+      { 
+        Set<MetricGenerator> clientMGs = client.getCopyOfMetricGenerators();
+        
+        Map<UUID, Entity> entities = MetricHelper.getAllEntities( clientMGs );
+        if ( entities.containsKey(entityID) )
+        {
+          Entity entity = entities.get( entityID );
+          Iterator<Attribute> attIt = entity.getAttributes().iterator();
+          
+          while ( attIt.hasNext() )
+          {
+            Attribute targetAttribute = attIt.next();
+            
+            Map<UUID, MeasurementSet> setsToMonitor =
+                MetricHelper.getMeasurementSetsForAttribute( targetAttribute, 
+                                                             clientMGs );
+            
+            liveMonitorController.addliveView( client, entity, targetAttribute,
+                                               setsToMonitor.values() );
+            
+          }
+        }
+        else problem = "Could not put entity into live view: client does not hold entity";
+      }
+    }
+    
+    // Report problems, if any
+    if ( problem != null )
+    {
+      dashMainLog.error( problem );
+      mainDashView.addLogMessage( problem );
+      mainDashView.displayWarning( "Problem adding attribute to Live view", 
+                                    problem );
+    }
+    else // report success
+      clientInfoView.displayMessage( "Added entity's attributes to live view",
+                                     "For " + client.getName() );
+  }
+  
+  @Override
   public void onAddAttributeToLiveView( UUID attributeID )
   {
     String problem  = null;
@@ -500,19 +552,25 @@ public class DashMainController extends UFAbstractEventManager
                                                                      clientMGs );
         if ( targetAttribute != null )
         {
-          Map<UUID, MeasurementSet> setsToMonitor = 
+          Entity entity = MetricHelper.getEntityFromID( targetAttribute.getEntityUUID(), 
+                                                        clientMGs );
+          if ( entity != null )
+          {
+            Map<UUID, MeasurementSet> setsToMonitor = 
                 MetricHelper.getMeasurementSetsForAttribute( targetAttribute, clientMGs );
           
-          if ( !setsToMonitor.isEmpty() )
-          {
-            liveMonitorController.addliveView( client, targetAttribute,
-                                               setsToMonitor.values() );
+            if ( !setsToMonitor.isEmpty() )
+            {
+              liveMonitorController.addliveView( client, entity, targetAttribute,
+                                                 setsToMonitor.values() );
+
+              clientInfoView.displayMessage( "Added live view",
+                                             "For " + client.getName() + " : " +
+                                             targetAttribute.getName() );
+            }
+            else problem = "Could not put attribute in live view: no measurements are associated with it";
             
-            clientInfoView.displayMessage( "Added live view",
-                                           "For " + client.getName() + " : " +
-                                           targetAttribute.getName() );
-          }
-          else problem = "Could not put attribute in live view: no measurements are associated with it";
+          } else problem = "Could not put attribute into live view: attribute has no entity associated with it";
         }
         else problem = "Could not put attribute in live view: client does not hold attribute";
       }

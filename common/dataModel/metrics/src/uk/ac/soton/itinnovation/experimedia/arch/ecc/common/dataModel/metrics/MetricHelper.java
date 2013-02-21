@@ -48,6 +48,20 @@ public class MetricHelper
       
       return attr;
     }
+    
+    public static Entity getEntityFromID( UUID entityID,
+                                          Collection<MetricGenerator> mgenSet )
+    {
+      Entity entity = null;
+      
+      if ( entityID != null && mgenSet != null )
+      {
+        Map<UUID, Entity> entities = MetricHelper.getAllEntities( mgenSet );
+        entity = entities.get( entityID );
+      }
+      
+      return entity;
+    }
   
     public static Map<UUID, MeasurementSet> getMeasurementSetsForAttribute( Attribute attr,
                                                                             Collection<MetricGenerator> mgenSet )

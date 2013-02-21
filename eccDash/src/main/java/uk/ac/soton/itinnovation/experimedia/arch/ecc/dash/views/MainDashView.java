@@ -75,6 +75,8 @@ public class MainDashView extends SimpleView
     controlView.resetView();
     connectionsView.resetView();
     clientInfoView.resetView();
+    
+    liveMonitorController.reset();
   }
   
   public void shutDownUI()
@@ -129,7 +131,7 @@ public class MainDashView extends SimpleView
     
     // Horizontal: side and main content container
     HorizontalLayout hl = new HorizontalLayout();
-    hl.setSizeFull();
+    hl.setWidth( "100%" );
     hl.setSpacing( true );
     vl.addComponent( hl );
     
@@ -140,14 +142,12 @@ public class MainDashView extends SimpleView
     // Main content view
     dashContentContainer = new Panel();
     dashContentContainer.addStyleName( "borderless light" );
-    dashContentContainer.setSizeFull();
     VerticalLayout vpl = (VerticalLayout) dashContentContainer.getContent(); // Reduce internal padding here
     vpl.setMargin( false );
     hl.addComponent( dashContentContainer );
     hl.setExpandRatio( dashContentContainer, 4.0f );
     
     dashContentView = new VerticalLayout();
-    dashContentView.setSizeFull();
     dashContentContainer.addComponent( dashContentView );
     
     // Space
@@ -185,7 +185,7 @@ public class MainDashView extends SimpleView
   
   private void createSubViews()
   {
-    dashContentContainer.setCaption( "Monitoring views" );
+    dashContentContainer.setCaption( "ECC views" );
     dashContentView.removeAllComponents();
     
     // Space

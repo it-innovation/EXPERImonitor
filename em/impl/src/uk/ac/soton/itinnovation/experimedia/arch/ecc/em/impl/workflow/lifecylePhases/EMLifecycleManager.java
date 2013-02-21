@@ -224,22 +224,36 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
         // Now start the phase
         AbstractEMLCPhase lcPhase = lifecyclePhases.get( currentPhase );
         if ( lcPhase != null )
-          try
-          { 
-            lcPhase.start();
-
-            // Notify listener
-            lifecycleListener.onLifecyclePhaseStarted( lcPhase.getPhaseType() );
-          }
-          catch( Exception e ) 
+        {
+          // If there are clients in the next phase, start it
+          if ( !lcPhase.getCopySetOfCurrentClients().isEmpty() )
           {
-            String msg = "Could not start lifecycle phase: " + lcPhase.getPhaseType() + "\n"
-                       + "Life-cycle exception: " + e.getMessage();
+            try
+            { 
+              lcPhase.start();
 
-            lmLogger.warn( msg );
-            lmLogger.info( "Trying next phase: " + currentPhase.nextPhase() );
+              // Notify listener
+              lifecycleListener.onLifecyclePhaseStarted( lcPhase.getPhaseType() );
+            }
+            catch( Exception e ) 
+            {
+              String msg = "Could not start lifecycle phase: " + lcPhase.getPhaseType() + "\n"
+                         + "Life-cycle exception: " + e.getMessage();
+
+              lmLogger.warn( msg );
+              lmLogger.info( "Trying next phase: " + currentPhase.nextPhase() );
+              currentPhase = iterateLifecycle();
+            }
+          }
+          else // No clients, so move onto the next phase
+          {
+            // Notify listener phase has started and stopped
+            lifecycleListener.onLifecyclePhaseCompleted( currentPhase );
+            lifecycleListener.onLifecyclePhaseCompleted( currentPhase );
+            
             currentPhase = iterateLifecycle();
           }
+        }
       }
     }
     

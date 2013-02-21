@@ -53,8 +53,6 @@ public class EntryPoint extends Application
       setTheme( "eccDash" );
 
       Window window = new Window("ECC Dashboard");
-      window.setSizeFull();
-      window.setStyleName( "eccDashDefault" );
       setMainWindow( window );
 
       dmc.initialise( window );

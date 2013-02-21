@@ -33,9 +33,12 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.UUID;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Attribute;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Entity;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Measurement;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Metric;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricHelper;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMClient;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.visualizers.NumericTimeSeriesVisual;
@@ -47,6 +50,7 @@ import uk.ac.soton.itinnovation.robust.cat.core.components.viewEngine.spec.uif.t
 
 
 public class LiveMonitorController extends UFAbstractEventManager
+                                   implements LiveMonitorViewListener
 {
   private LiveMonitorView liveMonitorView;
   
@@ -98,12 +102,18 @@ public class LiveMonitorController extends UFAbstractEventManager
   public IUFView getLiveView()
   { return liveMonitorView; }
   
+  public void reset()
+  {
+    activeMSVisuals.clear();
+    liveMonitorView.resetView();
+  }
+  
   public void shutDown()
   {
     
   }
   
-  public void addliveView( EMClient client, Attribute attribute,
+  public void addliveView( EMClient client, Entity entity, Attribute attribute,
                            Collection<MeasurementSet> mSets )
   {
     if ( client != null && attribute != null && mSets != null )
@@ -128,7 +138,10 @@ public class LiveMonitorController extends UFAbstractEventManager
                                                    metric.getUnit().getName(),
                                                    metric.getMetricType().name() );
               
-              liveMonitorView.addMetricVisual( msID, ntsv );
+              liveMonitorView.addMetricVisual( client.getName(),
+                                               entity.getName(),
+                                               attribute.getName(),
+                                               msID, ntsv );
               activeMSVisuals.add( msID );
 
             } break;
@@ -142,7 +155,30 @@ public class LiveMonitorController extends UFAbstractEventManager
   {
     if ( client != null )
     {
-      //TODO
+      // Remove all known measurement sets from view
+      Set<MetricGenerator> msGens = client.getCopyOfMetricGenerators();
+      if ( !msGens.isEmpty() )
+      {
+        Iterator<MeasurementSet> msIt = MetricHelper.getAllMeasurementSets(msGens).iterator();
+        while ( msIt.hasNext() )
+        {
+          UUID msID = msIt.next().getUUID();
+          
+          activeMSVisuals.remove( msID );
+          liveMonitorView.removeMetricVisual( msID ); 
+        }
+      }
+    }
+  }
+  
+  // LiveMonitorViewListener ---------------------------------------------------
+  @Override
+  public void onRemoveVisualClicked( UUID msID )
+  {
+    if ( msID != null )
+    {
+      activeMSVisuals.remove( msID );
+      liveMonitorView.removeMetricVisual( msID ); 
     }
   }
   
@@ -150,6 +186,7 @@ public class LiveMonitorController extends UFAbstractEventManager
   private void createView()
   {
     liveMonitorView = new LiveMonitorView();
+    liveMonitorView.addListener( this );
   }
   
   private void removeOldMeasurements( Report report )

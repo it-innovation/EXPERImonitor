@@ -43,6 +43,7 @@ public class MonitorControlView extends SimpleView
   private Label  currentPhaseLabel;
   private Label  monitorStatus;
   private Button phaseControlButton;
+  private Button experimentStopButton;
   
   // Experiment info components
   private Label experimentNameLabel;
@@ -77,12 +78,15 @@ public class MonitorControlView extends SimpleView
   {
     currentPhase = phase;
     
-    currentPhaseLabel.setValue( "Current phase: " + phase.name() );
+    currentPhaseLabel.setValue( "Current phase: " + phase.toString() );
     
     if ( phase.nextPhase() != EMPhase.eEMProtocolComplete )
+    {
       phaseControlButton.setCaption( "Go to " + phase.nextPhase().toString() );
+      experimentStopButton.setEnabled( true );
+    }
     else
-      phaseControlButton.setCaption( "Start new experiment" );
+      phaseControlButton.setEnabled( false );
   }
   
   public void resetView()
@@ -90,31 +94,42 @@ public class MonitorControlView extends SimpleView
     currentPhase = EMPhase.eEMUnknownPhase;
     currentPhaseLabel.setValue( "Waiting for clients" );
     phaseControlButton.setCaption( "Start discovery phase" );
+    experimentStopButton.setEnabled( false );
   }
   
   // Private methods -----------------------------------------------------------
   private void createComponents()
   {
     VerticalLayout vl = getViewContents();
+    vl.setStyleName( "eccControlPanel" );
     
     // Title
+    HorizontalLayout hl = new HorizontalLayout();
+    vl.addComponent( hl );
+    hl.addComponent( UILayoutUtil.createSpace( "10px", null, true ) );
+    
     Label label = new Label( "EXPERIMEDIA Experiment monitor (v1.1)" );
     label.setStyleName( "h1 color" );
-    vl.addComponent( label );
+    hl.addComponent( label );
     
-    // Control panel
-    Panel panel = new Panel();
-    panel.setStyleName( "light borderless" );
-    panel.setCaption( "Monitoring control" );
-    panel.setWidth( "100%" );
-    vl.addComponent( panel );
+    VerticalLayout innerVL = new VerticalLayout();
+    innerVL.setStyleName( "eccControlInfoPanel" );
+    vl.addComponent( innerVL );
     
-    HorizontalLayout hl = new HorizontalLayout();
-    hl.setWidth( "100%" );
-    panel.addComponent(hl);
+    // Space
+    innerVL.addComponent( UILayoutUtil.createSpace( "10px", null ) );
     
+    hl = new HorizontalLayout();
+    innerVL.addComponent(hl);
+    hl.addComponent( UILayoutUtil.createSpace( "10px", null, true ) );
     hl.addComponent( createControlComponents() );
     hl.addComponent( createExperimentInfoComponents() );
+    
+    // Space
+    innerVL.addComponent( UILayoutUtil.createSpace( "10px", null ) );
+    
+    // Bottom border
+    vl.addComponent( UILayoutUtil.createSpace( "1px", null ) );
   }
   
   private VerticalLayout createControlComponents()
@@ -126,22 +141,37 @@ public class MonitorControlView extends SimpleView
     entryPointLabel = new Label( "Entry point ID: " );
     vl.addComponent( entryPointLabel );
     
-    // Phase items
-    currentPhaseLabel = new Label( "Waiting for clients" );
-    vl.addComponent( currentPhaseLabel );
-    
+    // Status
     monitorStatus = new Label( "Status: Monitor UP" );
     vl.addComponent( monitorStatus );
+    
+    // Phase items
+    currentPhaseLabel = new Label( "Waiting for clients" );
+    currentPhaseLabel.addStyleName( "h2" );
+    vl.addComponent( currentPhaseLabel );
     
     // Space
     vl.addComponent ( UILayoutUtil.createSpace( "10px", null ) );
     
+    // Phase control
     phaseControlButton = new Button( "Start discovery phase" );
     phaseControlButton.addStyleName( "wide tall big" );
     phaseControlButton.addListener( new PhaseControlClicked() );
     phaseControlButton.setWidth( "250px" );
     vl.addComponent( phaseControlButton );
     vl.setComponentAlignment( phaseControlButton, Alignment.BOTTOM_LEFT );
+    
+    // Space
+    vl.addComponent ( UILayoutUtil.createSpace( "2px", null ) );
+    
+    // Experiment stop
+    experimentStopButton = new Button( "Stop experiment" );
+    experimentStopButton.setStyleName( "small" );
+    experimentStopButton.setWidth( "250px" );
+    experimentStopButton.setEnabled( false );
+    experimentStopButton.addListener( new StopExpClicked() );
+    vl.addComponent( experimentStopButton );
+    vl.setComponentAlignment( experimentStopButton, Alignment.BOTTOM_LEFT );
     
     return vl;
   }
@@ -179,15 +209,6 @@ public class MonitorControlView extends SimpleView
         
       } break;
       
-        // Last phase, so go for re-start
-      case eEMTearDown :
-      {
-        Collection<MonitorControlViewListener> listeners = getListenersByType();
-        for( MonitorControlViewListener listener : listeners )
-          listener.onRestartExperimentClicked();
-        
-      } break;
-        
       default:
       {
         Collection<MonitorControlViewListener> listeners = getListenersByType();
@@ -198,9 +219,22 @@ public class MonitorControlView extends SimpleView
     }
   }
   
+  private void onStopExpClicked()
+  {
+    Collection<MonitorControlViewListener> listeners = getListenersByType();
+        for( MonitorControlViewListener listener : listeners )
+          listener.onRestartExperimentClicked();
+  }
+  
   private class PhaseControlClicked implements Button.ClickListener
   {
     @Override
     public void buttonClick(Button.ClickEvent ce) { onPhaseControlClicked(); }
+  }
+  
+  private class StopExpClicked implements Button.ClickListener
+  {
+    @Override
+    public void buttonClick(Button.ClickEvent ce) { onStopExpClicked(); }
   }
 }

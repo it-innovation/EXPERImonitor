@@ -37,9 +37,9 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.UILayoutU
 
 public abstract class BaseMetricVisual extends SimpleView
 {
-  protected String visualTitle;
-  protected String visualUnit;
-  protected String visualType;
+  protected Label visualTitle;
+  protected Label visualUnit;
+  protected Label visualType;
   
   
   private VerticalLayout vizContainer;
@@ -52,19 +52,14 @@ public abstract class BaseMetricVisual extends SimpleView
   }
   
   public void setTitle( String title )
-  { 
-    if ( title != null )
-    {
-      visualTitle = title;
-    } 
-  }
+  { if ( title != null ) visualTitle.setValue( title ); }
   
   public void setMetricInfo( String unit, String type )
   {
     if ( unit != null && type != null )
     {      
-      visualUnit = unit;
-      visualType = type;
+      visualUnit.setValue( unit );
+      visualType.setValue( "(" + type + ")" );
     }
   }
   
@@ -80,11 +75,48 @@ public abstract class BaseMetricVisual extends SimpleView
   private void createComponents()
   {
     VerticalLayout vl = super.getViewContents();
-    vl.setSizeFull();
+    vl.setWidth( "100%" );
+    
+    // Header
+    HorizontalLayout hl = new HorizontalLayout();
+    hl.setWidth( "100%" );
+    hl.setStyleName( "eccInfoPanelHeader" );
+    vl.addComponent( hl );
+    
+    // Space
+    hl.addComponent( UILayoutUtil.createSpace( "5px", null, true ) );
+    
+    // Title
+    visualTitle = new Label();
+    visualTitle.addStyleName( "h3" );
+    hl.addComponent( visualTitle );
+    
+    // Space
+    hl.addComponent( UILayoutUtil.createSpace( "20px", null, true ) );
+    
+    // Other info
+    visualUnit = new Label();
+    visualUnit.addStyleName( "h4" );
+    hl.addComponent( visualUnit );
+    
+    // Space
+    hl.addComponent( UILayoutUtil.createSpace( "5px", null, true ) );
+    
+    visualType = new Label();
+    visualType.addStyleName( "h4" );
+    hl.addComponent( visualType );
+    
+    // Space
+    vl.addComponent( UILayoutUtil.createSpace( "5px", null, true ) );
+    
+    // Internal graphing area
+    VerticalLayout innerVL = new VerticalLayout();
+    innerVL.setStyleName( "eccGraphPanel" );
+    innerVL.setSizeFull();
+    vl.addComponent( innerVL );
   
     // Graph area
     vizContainer = new VerticalLayout();
-    vizContainer.setSizeFull();
-    vl.addComponent( vizContainer );
+    innerVL.addComponent( vizContainer );
   }
 }

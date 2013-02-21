@@ -18,21 +18,19 @@
 // the software.
 //
 //      Created By :            Simon Crowle
-//      Created Date :          06-Feb-2013
-//      Created for Project :   ECC Dash
+//      Created Date :          21-Feb-2013
+//      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.client;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics;
 
 import java.util.UUID;
 
 
 
 
-public interface ClientInfoViewListener
+public interface LiveMonitorViewListener
 {
-  void onAddEntityToLiveView( UUID entityID );
-  
-  void onAddAttributeToLiveView( UUID attributeID );
+  void onRemoveVisualClicked( UUID msID );
 }

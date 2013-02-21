@@ -185,7 +185,14 @@ public class EMClientEx extends EMClient
   }
   
   public boolean isCurrentlyPullingMeasurementSetID( UUID msID )
-  { return currentMeasurementSetPulls.contains( msID ); }
+  {
+    boolean isPullingMS;
+    
+    synchronized ( pullLock )
+    { isPullingMS = currentMeasurementSetPulls.contains( msID ); }
+    
+    return isPullingMS;  
+  }
   
   public void removePullingMeasurementSetID( UUID msID )
   {

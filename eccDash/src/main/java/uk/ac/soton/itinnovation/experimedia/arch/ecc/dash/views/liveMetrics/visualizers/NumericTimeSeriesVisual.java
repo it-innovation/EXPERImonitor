@@ -31,14 +31,17 @@ import com.invient.vaadin.charts.InvientCharts.DateTimePoint;
 import com.invient.vaadin.charts.InvientCharts.DateTimeSeries;
 import com.invient.vaadin.charts.InvientCharts.SeriesType;
 import com.invient.vaadin.charts.InvientChartsConfig;
+import com.invient.vaadin.charts.InvientChartsConfig.AxisBase.AxisTitle;
 import com.invient.vaadin.charts.InvientChartsConfig.DateTimeAxis;
 import com.invient.vaadin.charts.InvientChartsConfig.LineConfig;
 import com.invient.vaadin.charts.InvientChartsConfig.MarkerState;
 import com.invient.vaadin.charts.InvientChartsConfig.NumberYAxis;
 import com.invient.vaadin.charts.InvientChartsConfig.SymbolMarker;
 import com.invient.vaadin.charts.InvientChartsConfig.SymbolMarker.Symbol;
+import com.invient.vaadin.charts.InvientChartsConfig.Title;
 import com.invient.vaadin.charts.InvientChartsConfig.XAxis;
 import com.invient.vaadin.charts.InvientChartsConfig.YAxis;
+import com.invient.vaadin.charts.InvientChartsConfig.YAxisDataLabel;
 import com.vaadin.ui.VerticalLayout;
 import java.util.Date;
 import java.util.Iterator;
@@ -55,20 +58,20 @@ public class NumericTimeSeriesVisual extends BaseMetricVisual
 {
   private InvientCharts                chart;
   private InvientChartsConfig          chartConfig;
+  private DateTimeAxis                 timeAxis;
   private DateTimeSeries               dataSeries;
   private LinkedHashSet<DateTimePoint> plotPoints;
   
   private transient LinkedList<Measurement> measurementSeries;
-  private transient int maxPoints = 50;
+  private transient int maxPoints = 20;
   
 
   public NumericTimeSeriesVisual( String title, String unit, String type )
   {
     super();
     
-    visualTitle = title;
-    visualUnit  = unit;
-    visualType  = type;
+    setTitle( title );
+    setMetricInfo( unit, type );
     
     measurementSeries = new LinkedList<Measurement>();
     
@@ -101,18 +104,29 @@ public class NumericTimeSeriesVisual extends BaseMetricVisual
       if ( !measurementSeries.isEmpty() )
       {
         chart.removeSeries( dataSeries );
+        dataSeries.removeAllPoints();
         plotPoints.clear();
+        
+        // Ranges for axes
+        Measurement first = null, min = null, max = null;
         
         Iterator<Measurement> mIt = measurementSeries.iterator();
         while ( mIt.hasNext() )
         {
           Measurement m = mIt.next();
+          
+          // Update range data
+          if ( first == null ) first = m;
+          
           plotPoints.add( new DateTimePoint( dataSeries,
                                              m.getTimeStamp(),
                                              Double.parseDouble(m.getValue())) );
         }
         
-        dataSeries.removeAllPoints();
+        // Update axes
+        timeAxis.setMin( first.getTimeStamp() );
+        
+        // Update series
         dataSeries.setSeriesPoints( plotPoints );
         chart.addSeries( dataSeries );
       }
@@ -123,19 +137,24 @@ public class NumericTimeSeriesVisual extends BaseMetricVisual
   private void createChartConfig()
   {
     chartConfig = new InvientChartsConfig();
-    chartConfig.getTitle().setText( visualTitle );
     chartConfig.getGeneralChartConfig().setType( SeriesType.LINE );
     chartConfig.getGeneralChartConfig().setReflow( false );
     chartConfig.getCredit().setEnabled( false );
+    Title title = new Title(); // Base class handles this
+    title.setText( "" );
+    chartConfig.setTitle( title );
     
     // Time axis
-    DateTimeAxis timeAxis = new DateTimeAxis();
+    timeAxis = new DateTimeAxis();
+    timeAxis.setTitle( new AxisTitle( "Time" ) ); 
     timeAxis.setMin( new Date() );
     LinkedHashSet<XAxis> xAxisData = new LinkedHashSet<InvientChartsConfig.XAxis>();
     xAxisData.add( timeAxis );
     
     // Numeric axis
     NumberYAxis yAxis = new NumberYAxis();
+    yAxis.setTitle( new AxisTitle( visualUnit.getCaption()) );
+    
     LinkedHashSet<YAxis> yAxesSet = new LinkedHashSet<InvientChartsConfig.YAxis>();
     yAxesSet.add( yAxis );
     
@@ -170,8 +189,7 @@ public class NumericTimeSeriesVisual extends BaseMetricVisual
   
   private void createComponents()
   {
-    VerticalLayout vl = getViewContents();
-    
+    VerticalLayout vl = getViewContents();    
     if ( chart != null ) vl.addComponent( chart );
   }
 }

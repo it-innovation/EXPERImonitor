@@ -176,11 +176,11 @@ public class ClientConnectionsView extends SimpleView
   
   // Private classes -----------------------------------------------------------
   private class ClientView extends HighlightView
-  {    
-    private transient EMClient client;
-    
+  {
     private Label clientName;
     private Label currentPhase;
+    
+    private transient EMClient client;
     
     
     public ClientView( EMClient emc )
@@ -207,12 +207,14 @@ public class ClientConnectionsView extends SimpleView
       VerticalLayout vl = getViewContents();
       
       clientName = new Label( client.getName() );
+      clientName.addStyleName( "small" );
       vl.addComponent( clientName );
       
       // Space
       vl.addComponent( UILayoutUtil.createSpace( "2px", null ) );
       
       currentPhase = new Label( "Connected" );
+      currentPhase.addStyleName( "tiny" );
       currentPhase.setImmediate( true );
       vl.addComponent( currentPhase );
       
