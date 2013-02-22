@@ -266,6 +266,7 @@ public class ClientInfoView extends SimpleView
     button = new Button( "Add to data export" );
     button.setWidth( "120px" );
     button.addStyleName( "small" );
+    button.setEnabled( false ); // Not ready yet
     innerVL.addComponent( button );
     innerVL.setComponentAlignment( button, Alignment.MIDDLE_RIGHT );
     
@@ -319,6 +320,7 @@ public class ClientInfoView extends SimpleView
     button = new Button( "Add to data export" );
     button.setWidth( "120px" );
     button.addStyleName( "small" );
+    button.setEnabled( false ); // Not ready yet
     innerVL.addComponent( button );
     innerVL.setComponentAlignment( button, Alignment.MIDDLE_RIGHT );
     

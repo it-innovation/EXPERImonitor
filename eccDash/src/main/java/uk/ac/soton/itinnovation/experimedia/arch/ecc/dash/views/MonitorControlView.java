@@ -123,6 +123,7 @@ public class MonitorControlView extends SimpleView
     innerVL.addComponent(hl);
     hl.addComponent( UILayoutUtil.createSpace( "10px", null, true ) );
     hl.addComponent( createControlComponents() );
+    hl.addComponent( createStatusComponents() );
     hl.addComponent( createExperimentInfoComponents() );
     
     // Space
@@ -132,7 +133,7 @@ public class MonitorControlView extends SimpleView
     vl.addComponent( UILayoutUtil.createSpace( "1px", null ) );
   }
   
-  private VerticalLayout createControlComponents()
+  private VerticalLayout createStatusComponents()
   {
     VerticalLayout vl = new VerticalLayout();
     vl.setWidth( "400px" );
@@ -150,8 +151,13 @@ public class MonitorControlView extends SimpleView
     currentPhaseLabel.addStyleName( "h2" );
     vl.addComponent( currentPhaseLabel );
     
-    // Space
-    vl.addComponent ( UILayoutUtil.createSpace( "10px", null ) );
+    return vl;
+  }
+  
+  private Component createControlComponents()
+  {
+    VerticalLayout vl = new VerticalLayout();
+    vl.setWidth( "350px" );
     
     // Phase control
     phaseControlButton = new Button( "Start discovery phase" );

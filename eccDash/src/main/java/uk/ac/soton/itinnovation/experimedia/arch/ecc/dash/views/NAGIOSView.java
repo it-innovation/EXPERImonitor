@@ -25,6 +25,11 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views;
 
+import com.vaadin.terminal.ExternalResource;
+import com.vaadin.ui.Embedded;
+import com.vaadin.ui.Panel;
+import com.vaadin.ui.VerticalLayout;
+import java.net.URL;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.SimpleView;
 
 
@@ -32,7 +37,9 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.SimpleVie
 
 public class NAGIOSView extends SimpleView
 {
-
+  private Panel    nagiosContainer;
+  private Embedded nagiosEmbedded;
+  
   
   public NAGIOSView()
   {
@@ -41,9 +48,29 @@ public class NAGIOSView extends SimpleView
     createComponents();
   }
   
+  public void pointToNAGIOS( URL fullURL )
+  {
+    if ( fullURL != null )
+    {
+      nagiosEmbedded = new Embedded( "", new ExternalResource(fullURL) );
+      nagiosEmbedded.setType( Embedded.TYPE_BROWSER );
+      nagiosEmbedded.setWidth( "800px" );
+      nagiosEmbedded.setHeight( "600px" );
+      
+      nagiosContainer.removeAllComponents();
+      nagiosContainer.addComponent( nagiosEmbedded );
+    }
+  }
+  
   // Private methods -----------------------------------------------------------
   private void createComponents()
   {
+    VerticalLayout vl = getViewContents();
     
+    nagiosContainer = new Panel( "NAGIOS systems view" );
+    nagiosContainer.addStyleName( "borderless light" );
+    nagiosContainer.setSizeFull();
+    nagiosContainer.setImmediate( true );
+    vl.addComponent( nagiosContainer );
   }
 }

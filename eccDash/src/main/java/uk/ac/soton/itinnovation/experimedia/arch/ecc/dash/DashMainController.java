@@ -45,6 +45,7 @@ import com.vaadin.Application;
 import com.vaadin.terminal.FileResource;
 
 import java.io.*;
+import java.net.URL;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
@@ -64,6 +65,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EM
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMPhase;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMPostReportSummary;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.processors.LiveMetricSchedulerListener;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.dataExport.DataExportController;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.LiveMonitorController;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IExperimentDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IMetricGeneratorDAO;
@@ -85,6 +87,7 @@ public class DashMainController extends UFAbstractEventManager
 {
   private final transient Logger dashMainLog = Logger.getLogger( DashMainController.class );
   
+  private Properties dashboardProps;
   private Properties edmProps;
   private Properties emProps;
   
@@ -122,9 +125,7 @@ public class DashMainController extends UFAbstractEventManager
     
     if ( intitialiseECCResources() )
     {
-      liveMetricScheduler   = new LiveMetricScheduler();
-      
-      
+      liveMetricScheduler = new LiveMetricScheduler();
       welcomeView.setReadyToStart( true );
     }
   }
@@ -134,8 +135,8 @@ public class DashMainController extends UFAbstractEventManager
     if ( !isShuttingDown )
     {
       isShuttingDown = true;
-      dashMainLog.info( "Shutting down the ECC dashboard" );
-    
+      
+      if ( dashMainLog != null )         dashMainLog.info( "Shutting down the ECC dashboard" );
       if ( liveMetricScheduler != null ) liveMetricScheduler.shutDown();
       if ( expMonitor != null )          expMonitor.shutDown();
       if ( mainDashView != null )        mainDashView.shutDownUI();
@@ -398,6 +399,12 @@ public class DashMainController extends UFAbstractEventManager
       liveMonitorController = mainDashView.getLiveMonitorController();
       liveMonitorController.initialse( expReportAccessor );
       
+      // Just initialise this component - don't need to hang on to it
+      DataExportController dec = mainDashView.getDataExportController();
+      dec.initialise( expMonitor, expReportAccessor );
+      
+      trySetupNAGIOSView();
+      
       if ( emProps != null && currentExperiment != null )
         monitorControlView.setExperimentInfo( emProps.getProperty( "Monitor_ID" ),
                                               currentExperiment );
@@ -643,7 +650,18 @@ public class DashMainController extends UFAbstractEventManager
   
   private boolean intitialiseECCResources()
   {
-    // EDM
+    // ECC configuration
+    dashboardProps = tryGetPropertiesFile( "dashboard" );
+    if ( dashboardProps == null )
+    {
+      String problem = "Could not find dashboard configuration - using defaults";
+      dashMainLog.info( problem );
+      welcomeView.addLogInfo( problem );
+    }
+    else
+    { welcomeView.addLogInfo( "Found dashboard configuration" ); }
+    
+    // EDM configuration
     edmProps = tryGetPropertiesFile( "edm" );
     if ( edmProps == null )
     {
@@ -654,31 +672,10 @@ public class DashMainController extends UFAbstractEventManager
     }
     welcomeView.addLogInfo( "Found EDM configuration" );
     
-    try
-    {
-      expDataManager = EDMInterfaceFactory.getMonitoringEDM( edmProps );
-      expMGAccessor  = expDataManager.getMetricGeneratorDAO();
-      expReportAccessor  = expDataManager.getReportDAO();
-      
-      if ( expDataManager.isDatabaseSetUpAndAccessible() )
-        welcomeView.addLogInfo( "Started EDM OK" );
-      else
-      {
-        String problem = "EDM database has not been setup correctly ";
-        dashMainLog.error( problem );
-        welcomeView.addLogInfo( problem );
-        return false;
-      }
-    }
-    catch ( Exception e )
-    {
-      String problem = "Could not start EDM: " + e.getMessage();
-      dashMainLog.error( problem );
-      welcomeView.addLogInfo( problem );
-      return false;
-    }
+    // Try set up the EDM (errors encapsulated in method)
+    if ( !trySetupEDM() ) return false;
     
-    // EM
+    // EM configuration
     emProps = tryGetPropertiesFile( "em" );
     if ( emProps == null )
     {
@@ -688,11 +685,71 @@ public class DashMainController extends UFAbstractEventManager
       return false;
     }
    
+    // Ready the EM for connection
     expMonitor = EMInterfaceFactory.createEM();
     expMonitor.addLifecyleListener( this );
 
     welcomeView.addLogInfo( "Waiting to open client enty point." );
     return true;
+  }
+  
+  private boolean trySetupEDM()
+  {
+    boolean result = false;
+    
+    try
+    {
+      expDataManager = EDMInterfaceFactory.getMonitoringEDM( edmProps );
+      expMGAccessor  = expDataManager.getMetricGeneratorDAO();
+      expReportAccessor  = expDataManager.getReportDAO();
+      
+      if ( expDataManager.isDatabaseSetUpAndAccessible() )
+      {
+        welcomeView.addLogInfo( "Started EDM OK" );
+        result = true;
+      }
+      else
+      {
+        String problem = "EDM database has not been setup correctly ";
+        dashMainLog.error( problem );
+        welcomeView.addLogInfo( problem );
+      }
+    }
+    catch ( Exception e )
+    {
+      String problem = "Could not start EDM: " + e.getMessage();
+      dashMainLog.error( problem );
+      welcomeView.addLogInfo( problem );
+    }
+    
+    return result;
+  }
+  
+  private boolean trySetupNAGIOSView()
+  {
+    boolean result = false;
+    
+    if ( dashboardProps != null )
+    {
+      String fullURL = dashboardProps.getProperty( "nagios.fullurl" );
+      if ( fullURL != null )
+      {
+        try
+        {
+          URL url = new URL( fullURL );
+          mainDashView.pointToNAGIOS( url );
+          result = true;
+        }
+        catch (Exception e) 
+        {
+          String problem = "Could not parse NAGIOS URL for systems monitor";
+          dashMainLog.error( problem );
+          welcomeView.addLogInfo( problem );
+        } 
+      }
+    }
+    
+    return result;
   }
   
   private Properties tryGetPropertiesFile( String configName )

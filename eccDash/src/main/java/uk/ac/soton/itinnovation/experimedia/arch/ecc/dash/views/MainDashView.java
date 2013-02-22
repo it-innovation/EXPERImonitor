@@ -31,9 +31,11 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.client.ClientCon
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.SimpleView;
 
 import com.vaadin.ui.*;
+import java.net.URL;
 import java.util.Collection;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMPhase;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.UILayoutUtil;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.dataExport.DataExportController;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.LiveMonitorController;
 
 
@@ -56,6 +58,7 @@ public class MainDashView extends SimpleView
   private TabSheet          subViewsSheet;
   
   private transient LiveMonitorController liveMonitorController;
+  private transient DataExportController  dataExportController;
 
   
   public MainDashView()
@@ -77,6 +80,7 @@ public class MainDashView extends SimpleView
     clientInfoView.resetView();
     
     liveMonitorController.reset();
+    dataExportController.reset();
   }
   
   public void shutDownUI()
@@ -89,6 +93,7 @@ public class MainDashView extends SimpleView
     }
     
     if ( liveMonitorController != null ) liveMonitorController.shutDown();
+    if ( dataExportController != null  ) dataExportController.shutDown();
   }
   
   public void addLogMessage( String message )
@@ -106,6 +111,9 @@ public class MainDashView extends SimpleView
   public LiveMonitorController getLiveMonitorController()
   { return liveMonitorController; }
   
+  public DataExportController getDataExportController()
+  { return dataExportController; }
+  
   public void setExperimentPhase( EMPhase phase )
   {
     if ( phase != EMPhase.eEMUnknownPhase )
@@ -113,6 +121,12 @@ public class MainDashView extends SimpleView
       controlView.setPhase( phase );
       connectionsView.updateClientsInPhase( phase );
     }
+  }
+  
+  public void pointToNAGIOS( URL fullURL )
+  {
+    if ( fullURL != null && nagiosView != null )
+      nagiosView.pointToNAGIOS( fullURL );
   }
   
   // Private methods -----------------------------------------------------------
@@ -203,6 +217,10 @@ public class MainDashView extends SimpleView
     liveMonitorController = new LiveMonitorController();
     subViewsSheet.addTab( (Component) liveMonitorController.getLiveView().getImplContainer(), 
                           "Metric monitor", null );
+    
+    dataExportController = new DataExportController();
+    subViewsSheet.addTab( (Component) dataExportController.getExportView().getImplContainer(), 
+                          "Data export", null );
     
     nagiosView = new NAGIOSView();
     subViewsSheet.addTab( (Component) nagiosView.getImplContainer(), "Systems monitor", null );
