@@ -29,20 +29,21 @@ import com.vaadin.Application;
 import com.vaadin.terminal.FileResource;
 import com.vaadin.terminal.gwt.server.WebApplicationContext;
 import com.vaadin.ui.Component;
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.UUID;
 import javax.servlet.ServletContext;
 import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Attribute;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Entity;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Measurement;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricHelper;
@@ -69,6 +70,7 @@ public class DataExportController extends UFAbstractEventManager
   private transient Application  dashApplication;
   private transient String       dashFilePath;
   private transient FileResource exportMetaDataFile;
+  private transient FileResource exportMetricDataFile;
   
   public DataExportController()
   {
@@ -100,7 +102,7 @@ public class DataExportController extends UFAbstractEventManager
   
   public void shutDown()
   {
-    
+    onClearAllExports();
   }
   
   public IUFView getExportView()
@@ -140,7 +142,9 @@ public class DataExportController extends UFAbstractEventManager
   public void onClearAllExports()
   {
     metricExportsByMSID.clear();
-    exportMetaDataFile = null;
+    exportMetaDataFile   = null;
+    exportMetricDataFile = null;
+    
     exportView.resetView();
   }
   
@@ -149,20 +153,22 @@ public class DataExportController extends UFAbstractEventManager
   {
     if ( !metricExportsByMSID.isEmpty() )
     {
-      exportView.displayMessage( "Creating metric file", "Please wait... this make take a measurable period of time" );
       exportView.setDownloadEnabled( false );
       
       if ( generateMetaFile() )
       {
         exportView.setMetaInfoDownloadResource( exportMetaDataFile );
-        exportView.displayMessage( "Ready to download metric meta-data", "Please click download link" );
+        exportView.setDownloadEnabled( true );
+        
+        if ( generateMetricFile() )
+          exportView.setMetricDataDownloadResource( exportMetricDataFile );
       }
       else exportView.displayWarning( "Could not generate metric file", "Please check ECC configuration" );
     }
     else exportView.displayWarning( "Could not export metric data",
                                     "No metric data has been selected" );
     
-    exportView.setDownloadEnabled( true );
+    exportView.setDownloadEnabled( false );
   }
   
   // Private methods -----------------------------------------------------------
@@ -253,7 +259,7 @@ public class DataExportController extends UFAbstractEventManager
                   info.attributeName + "," +
                   info.unit + "," +
                   info.msID.toString() + "," +
-                  info.totalMetrics );
+                  info.totalMetrics + "\n" );
       }
       
       bw.close();
@@ -267,9 +273,56 @@ public class DataExportController extends UFAbstractEventManager
     return false;
   }
   
-  private void streamMetricFile()
+  private boolean generateMetricFile()
   {
+    exportMetricDataFile = new FileResource( new File( dashFilePath + "/ExportMetricData.csv"),
+                                             dashApplication );
     
+    File expFile   = exportMetricDataFile.getSourceFile();
+    
+    try
+    {
+      FileWriter     fw = new FileWriter( expFile );
+      BufferedWriter bw = new BufferedWriter( fw );
+      
+      Iterator<MetricExportInfo> infoIt = metricExportsByMSID.values().iterator();
+      while ( infoIt.hasNext() )
+      {
+        MetricExportInfo info = infoIt.next();
+        Report report = reportDAO.getReportForAllMeasurements( info.msID, true );
+        
+        if ( report != null )
+        {
+          MeasurementSet ms = report.getMeasurementSet();
+          if ( ms != null )
+          {
+            Set<Measurement> measurements = ms.getMeasurements();
+            
+            TreeMap<Date, Measurement> sortedM =
+                    MetricHelper.sortMeasurementsByDate( measurements );
+            
+            Iterator<Date> ascDateIt = sortedM.keySet().iterator();
+            while ( ascDateIt.hasNext() )
+            {
+              Measurement m = sortedM.get( ascDateIt.next() );
+              
+              bw.write( info.msID.toString() + "," +
+                        m.getTimeStamp().toString() + "," +
+                        m.getValue() + "\n" );
+            }
+          }
+        }
+      }
+      
+      bw.close();
+      fw.close();
+      
+      return true;
+    }
+    catch ( Exception e )
+    { exportView.displayWarning( "Could not generate metric file", e.getMessage() ); }
+    
+    return false;
   }
   
   // Private classes -----------------------------------------------------------

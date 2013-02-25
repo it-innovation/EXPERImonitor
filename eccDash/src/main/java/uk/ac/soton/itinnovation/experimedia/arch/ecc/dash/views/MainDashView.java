@@ -116,10 +116,15 @@ public class MainDashView extends SimpleView
   
   public void setExperimentPhase( EMPhase phase )
   {
-    if ( phase != EMPhase.eEMUnknownPhase )
+    switch ( phase )
     {
-      controlView.setPhase( phase );
-      connectionsView.updateClientsInPhase( phase );
+      case eEMUnknownPhase : logView.addLogMessage( "Tried an displaying an unknown phase!" ); break;
+              
+      default:
+      {
+        controlView.setPhase( phase );
+        connectionsView.updateClientsInPhase( phase );
+      }
     }
   }
   

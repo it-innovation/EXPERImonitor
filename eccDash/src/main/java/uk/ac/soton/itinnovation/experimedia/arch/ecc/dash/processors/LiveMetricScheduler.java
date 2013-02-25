@@ -60,15 +60,20 @@ public class LiveMetricScheduler extends UFAbstractEventManager
   
   public void start( IExperimentMonitor monitor )
   {
-    expMonitor   = monitor;
+    expMonitor = monitor;
     isScheduling = true;
   }
   
   public void stop()
   {
-    scheduler.cancel();
+    scheduler.cancel();    
+    isScheduling = false;
+  }
+  
+  public void reset()
+  {
+    liveClients.clear();
     scheduler.purge();
-    
     isScheduling = false;
   }
   

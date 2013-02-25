@@ -47,7 +47,10 @@ public class DataExportView extends SimpleView
 {
   private Table  exportTable;
   private Button downloadMetricsButton;
+  private Label  metaStatusLabel;
   private Link   metainfoLink;
+  private Label  mainStatusLabel;
+  private Link   mainDataLink;
   
   // Table column ids
   private final String tClientName    = "Client";
@@ -68,14 +71,25 @@ public class DataExportView extends SimpleView
   public void resetView()
   {
     clearExportItems();
+    
+    metaStatusLabel.setValue( "Data not ready" );
+    mainStatusLabel.setValue( "Data not ready" );
+    metainfoLink.setEnabled( false );
+    mainDataLink.setEnabled( false );
+    downloadMetricsButton.setEnabled( false );
   }
   
   public void clearExportItems()
   {
    exportTable.removeAllItems();
+   
    downloadMetricsButton.setEnabled( false );
+   
    metainfoLink.setResource( null );
    metainfoLink.setEnabled( false );
+   
+   mainDataLink.setResource( null );
+   mainDataLink.setEnabled( false );
   }
   
   public void setDownloadEnabled( boolean enable )
@@ -101,8 +115,23 @@ public class DataExportView extends SimpleView
   {
     if ( resource != null )
     {
+      metaStatusLabel.removeStyleName( "loading" );
+      metaStatusLabel.setValue( "Data ready" );
+      
       metainfoLink.setResource( resource );
       metainfoLink.setEnabled( true );
+    }
+  }
+  
+  public void setMetricDataDownloadResource( FileResource resource )
+  {
+    if ( resource != null )
+    {
+      mainStatusLabel.removeStyleName( "loading" );
+      mainStatusLabel.setValue( "Data ready" );
+      
+      mainDataLink.setResource( resource );
+      mainDataLink.setEnabled( true );
     }
   }
   
@@ -174,7 +203,7 @@ public class DataExportView extends SimpleView
     panel.addComponent( hl );
     
     downloadMetricsButton = new Button( "Download metrics" );
-    downloadMetricsButton.addStyleName( "wide tall big" );
+    downloadMetricsButton.addStyleName( "big" );
     downloadMetricsButton.setEnabled( false );
     downloadMetricsButton.addListener( new ExportDataClicked() );
     hl.addComponent( downloadMetricsButton );
@@ -182,11 +211,40 @@ public class DataExportView extends SimpleView
     // Space
     hl.addComponent( UILayoutUtil.createSpace( "10px", null, true ) );
     
-    metainfoLink = new Link( "Download metric meta-info", null );
-    metainfoLink.addStyleName( "large" );
+    // Links
+    VerticalLayout innerVL = new VerticalLayout();
+    innerVL.setStyleName( "eccInfoSubPanel" );
+    hl.addComponent( innerVL );
+    
+    // Meta info
+    HorizontalLayout innerHL = new HorizontalLayout();
+    innerVL.addComponent( innerHL );
+    
+    metaStatusLabel = new Label( "Data not ready" );
+    innerHL.addComponent( metaStatusLabel );
+    
+    // Space
+    innerHL.addComponent( UILayoutUtil.createSpace( "5px", null, true ) );
+    
+    metainfoLink = new Link( "Download metric meta-data", null );
     metainfoLink.setImmediate( true );
     metainfoLink.setEnabled( false );
-    hl.addComponent( metainfoLink ); 
+    innerHL.addComponent( metainfoLink );
+    
+    // Main data
+    innerHL = new HorizontalLayout();
+    innerVL.addComponent( innerHL );
+    
+    mainStatusLabel = new Label( "Data not ready" );
+    innerHL.addComponent( mainStatusLabel );
+    
+    // Space
+    innerHL.addComponent( UILayoutUtil.createSpace( "5px", null, true ) );
+    
+    mainDataLink = new Link( "Download metric data", null );
+    mainDataLink.setImmediate( true );
+    mainDataLink.setEnabled( false );
+    innerHL.addComponent( mainDataLink );
   }
   
   // Event handlers ------------------------------------------------------------
@@ -206,6 +264,12 @@ public class DataExportView extends SimpleView
   
   private void onExportData()
   {
+    metaStatusLabel.addStyleName( "loading" );
+    metaStatusLabel.setValue( "Generating data" );
+    
+    mainStatusLabel.addStyleName( "loading" );
+    mainStatusLabel.setValue( "Generating data" );
+    
     Collection<DataExportViewListener> listeners = getListenersByType();
     for ( DataExportViewListener listener : listeners )
       listener.onExportData();

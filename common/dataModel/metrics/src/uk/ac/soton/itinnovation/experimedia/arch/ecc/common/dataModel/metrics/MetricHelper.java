@@ -183,4 +183,21 @@ public class MetricHelper
         
         return targetSet;        
     }
+    
+    public static TreeMap<Date, Measurement> sortMeasurementsByDate( Set<Measurement> measurements )
+    {
+      TreeMap<Date, Measurement> sortedM = new TreeMap<Date, Measurement>();
+      
+      if ( measurements != null )
+      {
+        Iterator<Measurement> mIt = measurements.iterator();
+        while ( mIt.hasNext() )
+        {
+          Measurement m = mIt.next();
+          sortedM.put( m.getTimeStamp(), m );
+        }
+      }
+      
+      return sortedM;
+    }
 }

@@ -97,20 +97,19 @@ public class DashMainController extends UFAbstractEventManager
   private MonitorControlView    monitorControlView;
   private ClientConnectionsView connectionsView;
   private ClientInfoView        clientInfoView;
-  
-  private transient LiveMonitorController liveMonitorController;
-  
+ 
   private transient IMonitoringEDM      expDataManager;
   private transient IMetricGeneratorDAO expMGAccessor;
   private transient IReportDAO          expReportAccessor;
   private transient Experiment          currentExperiment;
   
-  private transient IExperimentMonitor  expMonitor;
-  private transient LiveMetricScheduler liveMetricScheduler;
+  private transient IExperimentMonitor    expMonitor;
+  private transient LiveMetricScheduler   liveMetricScheduler;
+  private transient LiveMonitorController liveMonitorController;
   
-  private boolean isShuttingDown          = false;
-  private boolean waitingToStartNextPhase = false;
-  private EMPhase currentPhase            = EMPhase.eEMUnknownPhase;
+  private boolean isShuttingDown       = false;
+  private boolean waitingForPhaseToEnd = false;
+  private EMPhase currentPhase         = EMPhase.eEMUnknownPhase;
   
 
   public DashMainController()
@@ -136,10 +135,11 @@ public class DashMainController extends UFAbstractEventManager
     {
       isShuttingDown = true;
       
-      if ( dashMainLog != null )         dashMainLog.info( "Shutting down the ECC dashboard" );
-      if ( liveMetricScheduler != null ) liveMetricScheduler.shutDown();
-      if ( expMonitor != null )          expMonitor.shutDown();
-      if ( mainDashView != null )        mainDashView.shutDownUI();
+      if ( dashMainLog != null )           dashMainLog.info( "Shutting down the ECC dashboard" );
+      if ( liveMetricScheduler != null )   liveMetricScheduler.shutDown();
+      if ( liveMonitorController != null ) liveMonitorController.shutDown();
+      if ( expMonitor != null )            expMonitor.shutDown();
+      if ( mainDashView != null )          mainDashView.shutDownUI();
       
       mainDashView        = null;
       expMonitor          = null;
@@ -176,6 +176,13 @@ public class DashMainController extends UFAbstractEventManager
   }
   
   @Override
+  public void onClientStartedPhase( EMClient client, EMPhase phase )
+  {
+    if ( client != null && phase != null)
+      connectionsView.updateClientPhase( client.getID(), phase);
+  }
+  
+  @Override
   public void onLifecyclePhaseStarted( EMPhase phase )
   {
     currentPhase = phase;
@@ -183,6 +190,7 @@ public class DashMainController extends UFAbstractEventManager
     mainDashView.setExperimentPhase( phase );
     connectionsView.updateClientsInPhase( phase );
     
+    // Perform starting actions, as required
     switch ( currentPhase )
     {
       case eEMLiveMonitoring :
@@ -195,29 +203,43 @@ public class DashMainController extends UFAbstractEventManager
   @Override
   public void onLifecyclePhaseCompleted( EMPhase phase )
   {
-    if ( waitingToStartNextPhase )
+    // Perform stopping actions, as required
+    switch ( currentPhase )
     {
-      waitingToStartNextPhase = false;
-      
-      try 
-      { expMonitor.goToNextPhase(); }
-      catch ( Exception e )
-      { dashMainLog.error("Could not go to next phase: " + e.getMessage()); }
+      case eEMLiveMonitoring: liveMetricScheduler.stop();
     }
+    
+    // If we have been waiting for a phase to end (so we can move to the next)
+    // then advance the phase
+    if ( waitingForPhaseToEnd )
+      try
+      {
+        waitingForPhaseToEnd = false;
+        expMonitor.goToNextPhase();
+      }
+      catch ( Exception e )
+      {
+        String problem = "Could not advance to next phase: " + e.getMessage();
+        mainDashView.addLogMessage( problem );
+        dashMainLog.error( problem );
+      }
   }
   
   @Override
   public void onNoFurtherLifecyclePhases()
   {
+    waitingForPhaseToEnd = false;
     
+    mainDashView.setExperimentPhase( EMPhase.eEMProtocolComplete );
   }
   
   @Override
   public void onLifecycleReset()
   {
     // Reset to start and wait for new connections
-    waitingToStartNextPhase = false;
+    waitingForPhaseToEnd = false;
     
+    liveMetricScheduler.reset();
     mainDashView.resetViews();
     
     // Create a new experiment
@@ -346,13 +368,32 @@ public class DashMainController extends UFAbstractEventManager
   @Override
   public void onGotDataBatch( EMClient client, EMDataBatch batch )
   {
-    
+    if ( client != null && batch != null )
+    {
+      // Push batched data into the EDM (if we can)
+      if ( expReportAccessor != null )
+        try
+        { 
+          expReportAccessor.saveReport( batch.getBatchReport(), true ); 
+        }
+        catch ( Exception e )
+        {
+          String problem = "Could not save batch data report: " + e.getMessage();
+          mainDashView.addLogMessage( problem );
+          dashMainLog.error( problem );
+        }
+    }
   }
   
   @Override
   public void onDataBatchMeasurementSetCompleted( EMClient client, UUID measurementSetID )
   {
-    
+    if ( client != null && measurementSetID != null )
+    {
+      mainDashView.addLogMessage( "Client " + client.getName()  + 
+                                  " has finished batching MS: " +
+                                  measurementSetID.toString() ); 
+    }
   }
   
   @Override
@@ -437,24 +478,22 @@ public class DashMainController extends UFAbstractEventManager
   @Override
   public void onNextPhaseClicked()
   {
-    if ( expMonitor != null && !waitingToStartNextPhase )
-    {
-      // Perform immediate actions before going on to winding down phase
-      switch ( currentPhase )
-      {
-        case eEMLiveMonitoring: liveMetricScheduler.stop();
-      }
-      
-      if ( expMonitor.isCurrentPhaseActive() )
+    if ( expMonitor != null )
+    {      
+      if ( expMonitor.isCurrentPhaseActive() && !waitingForPhaseToEnd )
       {
         try
         {
-          waitingToStartNextPhase = true;
+          waitingForPhaseToEnd = true;
           expMonitor.stopCurrentPhase();
         }
         catch ( Exception e )
-        { dashMainLog.error( "Could not stop phase: " + expMonitor.getCurrentPhase().name() +
-                             " because " + e.getMessage()); }
+        { 
+          dashMainLog.error( "Could not stop phase: " + expMonitor.getCurrentPhase().name() +
+                             " because " + e.getMessage());
+          
+          waitingForPhaseToEnd = false;
+        }
       }
       else
         try { expMonitor.goToNextPhase(); }
@@ -635,7 +674,7 @@ public class DashMainController extends UFAbstractEventManager
     currentExperiment.setExperimentID( expDate.toString() );
     
     try
-    {
+    { 
       IExperimentDAO expDAO = expDataManager.getExperimentDAO();
       expDAO.saveExperiment( currentExperiment );
     }

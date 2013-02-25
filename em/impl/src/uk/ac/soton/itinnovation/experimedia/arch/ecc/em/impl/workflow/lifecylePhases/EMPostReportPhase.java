@@ -262,9 +262,11 @@ public class EMPostReportPhase extends AbstractEMLCPhase
       // Get the basic information from this batch and check it's OK
       UUID popBatchID  = populatedBatch.getID();
       Report popReport = populatedBatch.getBatchReport();
+      
+      boolean handleReport = ( popBatchID != null && popReport != null );
 
       // If this is the batch we expected, see if we need any more data
-      if ( popBatchID.equals(currExpectedClientBatch.getID()) )
+      if ( handleReport && popBatchID.equals(currExpectedClientBatch.getID()) )
       {
         if ( popReport != null ) // Check we have some data
         {    
@@ -311,13 +313,13 @@ public class EMPostReportPhase extends AbstractEMLCPhase
       }
       else // If this isn't the data we expected, save it (if data exists), but complain as well
       {
-        if ( popReport != null )
+        if ( handleReport )
         {
           phaseListener.onGotDataBatch( client, populatedBatch );
           phaseLogger.warn( "Got an unexpected batch report: " + populatedBatch.getID().toString() );
         }
         else
-          phaseLogger.warn( "Got an unexpected batch report (with no data): " + populatedBatch.getID().toString() );
+          phaseLogger.warn( "Got an unexpected batch report (with null data): " + senderID.toString() );
       }
     }
 

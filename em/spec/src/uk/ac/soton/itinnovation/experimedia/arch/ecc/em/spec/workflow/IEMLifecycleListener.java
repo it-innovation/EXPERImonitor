@@ -39,6 +39,8 @@ public interface IEMLifecycleListener
   
   void onClientDisconnected( EMClient client );
   
+  void onClientStartedPhase( EMClient client, EMPhase phase );
+  
   void onLifecyclePhaseStarted( EMPhase phase );
   
   void onLifecyclePhaseCompleted( EMPhase phase );

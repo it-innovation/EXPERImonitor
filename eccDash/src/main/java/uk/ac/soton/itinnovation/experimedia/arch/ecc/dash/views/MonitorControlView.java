@@ -25,6 +25,8 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views;
 
+import com.vaadin.terminal.Resource;
+import com.vaadin.terminal.ThemeResource;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.SimpleView;
 
 import com.vaadin.ui.*;
@@ -78,15 +80,25 @@ public class MonitorControlView extends SimpleView
   {
     currentPhase = phase;
     
-    currentPhaseLabel.setValue( "Current phase: " + phase.toString() );
-    
-    if ( phase.nextPhase() != EMPhase.eEMProtocolComplete )
+    if ( currentPhase != EMPhase.eEMProtocolComplete )
     {
-      phaseControlButton.setCaption( "Go to " + phase.nextPhase().toString() );
-      experimentStopButton.setEnabled( true );
+      currentPhaseLabel.setValue( "Current phase: " + phase.toString() );
+      
+      // Update next phase button
+      if ( phase.nextPhase() != EMPhase.eEMProtocolComplete )
+      {
+        phaseControlButton.setCaption( "Go to " + phase.nextPhase().toString() );
+        experimentStopButton.setEnabled( true );
+      }
+      else
+        phaseControlButton.setCaption( "Finalize experiment" );
     }
     else
+    {
+      phaseControlButton.setCaption( "No further phases" );
       phaseControlButton.setEnabled( false );
+      currentPhaseLabel.setValue( "Experiment process completed");
+    }
   }
   
   public void resetView()
@@ -94,6 +106,7 @@ public class MonitorControlView extends SimpleView
     currentPhase = EMPhase.eEMUnknownPhase;
     currentPhaseLabel.setValue( "Waiting for clients" );
     phaseControlButton.setCaption( "Start discovery phase" );
+    phaseControlButton.setEnabled( true );
     experimentStopButton.setEnabled( false );
   }
   
@@ -106,11 +119,15 @@ public class MonitorControlView extends SimpleView
     // Title
     HorizontalLayout hl = new HorizontalLayout();
     vl.addComponent( hl );
-    hl.addComponent( UILayoutUtil.createSpace( "10px", null, true ) );
     
-    Label label = new Label( "EXPERIMEDIA Experiment monitor (v1.1)" );
-    label.setStyleName( "h1 color" );
+    Resource res  = new ThemeResource( "img/expLogo.jpg" );
+    Embedded img  = new Embedded( null, res );
+    hl.addComponent( img );
+    
+    Label label = new Label( "Dashboard V1.1" );
+    label.setStyleName( "tiny" );
     hl.addComponent( label );
+    hl.setComponentAlignment( label, Alignment.TOP_LEFT );
     
     VerticalLayout innerVL = new VerticalLayout();
     innerVL.setStyleName( "eccControlInfoPanel" );
@@ -157,7 +174,7 @@ public class MonitorControlView extends SimpleView
   private Component createControlComponents()
   {
     VerticalLayout vl = new VerticalLayout();
-    vl.setWidth( "350px" );
+    vl.setWidth( "300px" );
     
     // Phase control
     phaseControlButton = new Button( "Start discovery phase" );

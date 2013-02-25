@@ -733,9 +733,16 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
     {
       // If the next phase for this client is the current one, de-accelerate
       if ( nextPhase == currentPhase )
+      {
+        lifecycleListener.onClientStartedPhase( client, currentPhase );
         deaccelerateClient( client );
+      }
       else
-        accelerateClient( client, nextPhase ); // Otherwise, push them on
+      {
+        // Otherwise, push them on
+        lifecycleListener.onClientStartedPhase( client, nextPhase );
+        accelerateClient( client, nextPhase ); 
+      }
     }
   }
   

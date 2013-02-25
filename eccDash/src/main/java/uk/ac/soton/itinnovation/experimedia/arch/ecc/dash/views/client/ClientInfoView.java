@@ -87,7 +87,7 @@ public class ClientInfoView extends SimpleView
     {
       if ( connected )
       {
-        clientStatusLabel.addStyleName( "eccInfoPanelHeader" );
+        clientStatusLabel.setStyleName( "h3" );
         clientStatusLabel.setValue( "(connected)" );
       }
       else
@@ -139,7 +139,7 @@ public class ClientInfoView extends SimpleView
     
     // Status
     clientStatusLabel = new Label();
-    clientStatusLabel.addStyleName( "h3" );
+    clientStatusLabel.setStyleName( "h3" );
     clientStatusLabel.setImmediate( true );
     innerHL.addComponent( clientStatusLabel );
     innerHL.setComponentAlignment( clientStatusLabel, Alignment.TOP_RIGHT );

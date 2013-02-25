@@ -113,6 +113,17 @@ public class ClientConnectionsView extends SimpleView
       if ( !view.isClientAccelerating() ) view.setCurrentPhase( phase ); 
     }
   }
+  
+  public void updateClientPhase( UUID clientID, EMPhase phase )
+  {
+    if ( clientID != null && phase != null )
+    {
+      ClientView cv = connectedClients.get( clientID );
+      
+      if ( cv != null )
+        cv.setCurrentPhase( phase );
+    }
+  }
 
   // Private methods -----------------------------------------------------------
   private void createComponents()

@@ -110,6 +110,14 @@ public class EMController implements IEMLifecycleListener
   }
   
   @Override
+  public void onClientStartedPhase( EMClient client, EMPhase phase )
+  {
+    if ( mainView != null )
+      mainView.addLogText( "Client " + client.getName() + " started phase " +
+                           phase.toString() );
+  }
+  
+  @Override
   public void onLifecyclePhaseStarted( EMPhase phase )
   {    
     // Manage modal behaviour of the view

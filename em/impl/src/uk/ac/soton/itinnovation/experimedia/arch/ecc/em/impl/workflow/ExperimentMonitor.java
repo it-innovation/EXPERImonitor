@@ -317,6 +317,15 @@ public class ExperimentMonitor implements IExperimentMonitor,
   }
   
   @Override
+  public void onClientStartedPhase( EMClient client, EMPhase phase )
+  {
+    Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
+    
+    while ( listIt.hasNext() )
+    { listIt.next().onClientStartedPhase(client, phase); }
+  }
+  
+  @Override
   public void onLifecyclePhaseStarted( EMPhase phase )
   {
     Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
