@@ -133,12 +133,14 @@ public class ClientConnectionsView extends SimpleView
     Panel panel = new Panel();
     panel.addStyleName( "borderless light" );
     panel.setCaption( "Connected clients" );
-    panel.setSizeFull();
+    panel.setWidth( "250px" );
+    VerticalLayout vpl = (VerticalLayout) panel.getContent(); // Reduce internal padding here
+    vpl.setMargin( false );
     vl.addComponent( panel );
     
     clientList = new VerticalLayout();
-    clientList.setWidth( "450px" );
     clientList.setImmediate( true );
+    clientList.setSizeUndefined();
     panel.addComponent( clientList );
   }
   

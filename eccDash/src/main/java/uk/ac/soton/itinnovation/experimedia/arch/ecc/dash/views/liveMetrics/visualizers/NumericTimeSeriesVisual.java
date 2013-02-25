@@ -162,8 +162,8 @@ public class NumericTimeSeriesVisual extends BaseMetricVisual
     chartConfig.setYAxes( yAxesSet );
     
     chart = new InvientCharts( chartConfig );
-    chart.setStyleName( "v-chart-min-width" );
-    chart.setSizeFull();
+    chart.setWidth( "425px" );
+    chart.setHeight( "280px" );
     
     // Series & marker configuration
     SymbolMarker marker = new SymbolMarker();

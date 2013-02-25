@@ -136,35 +136,26 @@ public class LiveMonitorView extends SimpleView
   private void createComponents()
   {
     VerticalLayout vl = getViewContents();
-    vl.setImmediate( true );
     
-    Panel panel = new Panel();
-    panel.addStyleName( "borderless light" );
-    panel.setSizeFull();
-    vl.addComponent( panel );
-
+    Panel vizBody = new Panel();
+    vl.addComponent( vizBody );
+    vizBody.setStyleName( "borderless light" );
+    vl = (VerticalLayout) vizBody.getContent();
+  
     HorizontalLayout hl = new HorizontalLayout();
-    hl.setSpacing( true );
-    panel.addComponent( hl );
-    
-    // Navigation list
-    Panel innerPanel = new Panel();
-    innerPanel.addStyleName( "borderless light" );
-    innerPanel.setCaption( "Current live metrics" );
-    hl.addComponent( innerPanel );
-    hl.setExpandRatio( innerPanel, 1.0f );
+    hl.setStyleName( "eccDashDefault" );
+    vl.addComponent( hl );
     
     metricsNavList = new VerticalLayout();
-    innerPanel.addComponent( metricsNavList );
+    metricsNavList.setWidth( "250px" );
+    hl.addComponent( metricsNavList );
     
-    innerPanel = new Panel();
-    innerPanel.addStyleName( "borderless light" );
-    innerPanel.setCaption( "Metric visuals" );
-    hl.addComponent( innerPanel );
-    hl.setExpandRatio( innerPanel, 3.0f );
-    
-    metricsVisualList = new VerticalLayout();
-    innerPanel.addComponent( metricsVisualList );
+    Panel visualPanel = new Panel();
+    //visualPanel.setWidth( "100%" );
+    visualPanel.setStyleName( "borderless light" );
+    hl.addComponent( visualPanel );
+    metricsVisualList = (VerticalLayout) visualPanel.getContent();
+    metricsVisualList.setMargin( false );
   }
   
   private void onNavViewSelected( UUID targetID )
@@ -254,7 +245,7 @@ public class LiveMonitorView extends SimpleView
       
       // Remove button
       Button button = new Button( "Remove" );
-      button.setStyleName( "tiny" );
+      button.setStyleName( "small" );
       button.setData( measurementSetID );
       button.addListener( new RemoveButtonClickedListener() );
       vl.addComponent( button );

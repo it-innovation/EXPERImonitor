@@ -44,6 +44,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.Live
 public class MainDashView extends SimpleView
 {
   private VerticalLayout dashHeaderView;
+  private Panel          dashViewBody;
   private Panel          dashContentContainer;
   private VerticalLayout dashContentView;
   private VerticalLayout dashSideView;
@@ -53,6 +54,7 @@ public class MainDashView extends SimpleView
   private ClientInfoView        clientInfoView;
   private NAGIOSView            nagiosView;
   private DashLogView           logView;
+  private boolean               subViewsReady;
   
   private ProgressIndicator livePI;
   private TabSheet          subViewsSheet;
@@ -81,6 +83,31 @@ public class MainDashView extends SimpleView
     
     liveMonitorController.reset();
     dataExportController.reset();
+  }
+  
+  public void updateViewport()
+  {
+    if ( subViewsReady )
+    {
+      VerticalLayout vl = getViewContents();
+      Window mainWindow = vl.getApplication().getMainWindow();
+      
+      if ( mainWindow != null )
+      {
+        final float vMargin = 220;
+        final float hMargin = 200;
+        
+        VerticalLayout cVL = (VerticalLayout) controlView.getImplContainer();
+        float bodyHeight   = mainWindow.getHeight() - cVL.getHeight();
+        bodyHeight -= vMargin;
+        
+        float bodyWidth = mainWindow.getWidth() - cVL.getWidth();
+        bodyWidth -= hMargin;
+        
+        subViewsSheet.setWidth( bodyWidth, TabSheet.UNITS_PIXELS );
+        dashViewBody.setHeight( bodyHeight, VerticalLayout.UNITS_PIXELS );
+      }
+    }
   }
   
   public void shutDownUI()
@@ -148,15 +175,22 @@ public class MainDashView extends SimpleView
     dashHeaderView = new VerticalLayout();
     vl.addComponent( dashHeaderView );
     
+    // Body of the view (will adjust to window size and scroll contents)
+    dashViewBody = new Panel();
+    dashViewBody.setImmediate( true );
+    dashViewBody.setStyleName( "borderless light" );
+    vl.addComponent( dashViewBody );
+    // Make sure content scrolls
+    VerticalLayout bodyVL = (VerticalLayout) dashViewBody.getContent();
+    bodyVL.setMargin( false );
+    bodyVL.setSizeUndefined();
+    
     // Horizontal: side and main content container
     HorizontalLayout hl = new HorizontalLayout();
-    hl.setWidth( "100%" );
-    hl.setSpacing( true );
-    vl.addComponent( hl );
+    bodyVL.addComponent( hl );
     
     dashSideView = new VerticalLayout();
     hl.addComponent( dashSideView );
-    hl.setExpandRatio( dashSideView, 1.0f );
     
     // Main content view
     dashContentContainer = new Panel();
@@ -164,31 +198,30 @@ public class MainDashView extends SimpleView
     VerticalLayout vpl = (VerticalLayout) dashContentContainer.getContent(); // Reduce internal padding here
     vpl.setMargin( false );
     hl.addComponent( dashContentContainer );
-    hl.setExpandRatio( dashContentContainer, 4.0f );
     
     dashContentView = new VerticalLayout();
     dashContentContainer.addComponent( dashContentView );
     
     // Space
-    vl.addComponent( UILayoutUtil.createSpace( "20px", null ) );
+    bodyVL.addComponent( UILayoutUtil.createSpace( "20px", null ) );
     
     // Footer
     hl = new HorizontalLayout();
-    vl.addComponent( hl );
-    vl.setComponentAlignment( hl, Alignment.BOTTOM_LEFT );
+    bodyVL.addComponent( hl );
+    bodyVL.setComponentAlignment( hl, Alignment.BOTTOM_LEFT );
     
     // Shutdown button
     Button button = new Button( "Shut down ECC" );
     button.addStyleName( "small" );
     button.addListener( new ShutdownButtonListener() );
-    hl.addComponent( button );
+    bodyVL.addComponent( button );
     
     // Space
-    hl.addComponent( UILayoutUtil.createSpace( "30px", null, true ) );
+    bodyVL.addComponent( UILayoutUtil.createSpace( "30px", null, true ) );
     
     Label label = new Label( "© University of Southampton IT Innovation Centre 2013" );
     label.setStyleName( "small" );
-    hl.addComponent( label );
+    bodyVL.addComponent( label );
   }
   
   private void createMainDashControls()
@@ -204,11 +237,10 @@ public class MainDashView extends SimpleView
   
   private void createSubViews()
   {
-    dashContentContainer.setCaption( "ECC views" );
     dashContentView.removeAllComponents();
     
     // Space
-    dashContentView.addComponent( UILayoutUtil.createSpace( "2px", null ) );
+    dashContentView.addComponent( UILayoutUtil.createSpace( "4px", null ) );
     
     subViewsSheet = new TabSheet();
     subViewsSheet.addStyleName( "borderless" );
@@ -232,6 +264,10 @@ public class MainDashView extends SimpleView
     
     logView = new DashLogView();
     subViewsSheet.addTab( (Component) logView.getImplContainer(), "ECC log", null );
+    
+    subViewsReady = true;
+    
+    updateViewport();
   }
   
   // Event handlers ------------------------------------------------------------

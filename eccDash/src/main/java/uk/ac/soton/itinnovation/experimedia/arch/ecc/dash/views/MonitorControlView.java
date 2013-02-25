@@ -153,7 +153,7 @@ public class MonitorControlView extends SimpleView
   private VerticalLayout createStatusComponents()
   {
     VerticalLayout vl = new VerticalLayout();
-    vl.setWidth( "400px" );
+    vl.setWidth( "350px" );
     
     // Experiment entry point
     entryPointLabel = new Label( "Entry point ID: " );
@@ -174,7 +174,7 @@ public class MonitorControlView extends SimpleView
   private Component createControlComponents()
   {
     VerticalLayout vl = new VerticalLayout();
-    vl.setWidth( "300px" );
+    vl.setWidth( "255px" );
     
     // Phase control
     phaseControlButton = new Button( "Start discovery phase" );
@@ -202,7 +202,7 @@ public class MonitorControlView extends SimpleView
   private VerticalLayout createExperimentInfoComponents()
   {
     VerticalLayout vl = new VerticalLayout();
-    vl.setWidth( "100%" );
+    vl.setWidth( "350px" );
     
     experimentNameLabel = new Label( "Awaiting experiment info" );
     vl.addComponent( experimentNameLabel );

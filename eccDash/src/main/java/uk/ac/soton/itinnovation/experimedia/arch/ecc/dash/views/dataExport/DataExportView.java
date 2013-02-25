@@ -140,7 +140,7 @@ public class DataExportView extends SimpleView
   {
     VerticalLayout vl = getViewContents();
     
-    Panel panel = new Panel( "ECC data export" );
+    Panel panel = new Panel();
     panel.addStyleName( "borderless light" );
     panel.setSizeFull();
     vl.addComponent( panel );

@@ -75,11 +75,9 @@ public abstract class BaseMetricVisual extends SimpleView
   private void createComponents()
   {
     VerticalLayout vl = super.getViewContents();
-    vl.setWidth( "100%" );
     
     // Header
     HorizontalLayout hl = new HorizontalLayout();
-    hl.setWidth( "100%" );
     hl.setStyleName( "eccInfoPanelHeader" );
     vl.addComponent( hl );
     
@@ -112,7 +110,6 @@ public abstract class BaseMetricVisual extends SimpleView
     // Internal graphing area
     VerticalLayout innerVL = new VerticalLayout();
     innerVL.setStyleName( "eccGraphPanel" );
-    innerVL.setSizeFull();
     vl.addComponent( innerVL );
   
     // Graph area

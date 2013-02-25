@@ -117,15 +117,19 @@ public class DashMainController extends UFAbstractEventManager
   
   public void initialise( Window rootWin )
   {
-    rootWindow = rootWin;
-    rootWindow.setStyleName( "eccDashDefault" );
-    
-    createWelcomeView();
-    
-    if ( intitialiseECCResources() )
+    if ( rootWin != null )
     {
-      liveMetricScheduler = new LiveMetricScheduler();
-      welcomeView.setReadyToStart( true );
+      rootWindow = rootWin;
+      rootWindow.setStyleName( "eccDashDefault" );
+      rootWindow.addListener( new DashWindowResizeListener() );
+
+      createWelcomeView();
+
+      if ( intitialiseECCResources() )
+      {
+        liveMetricScheduler = new LiveMetricScheduler();
+        welcomeView.setReadyToStart( true );
+      }
     }
   }
   
@@ -674,7 +678,7 @@ public class DashMainController extends UFAbstractEventManager
     currentExperiment.setExperimentID( expDate.toString() );
     
     try
-    { 
+    {      
       IExperimentDAO expDAO = expDataManager.getExperimentDAO();
       expDAO.saveExperiment( currentExperiment );
     }
@@ -837,5 +841,17 @@ public class DashMainController extends UFAbstractEventManager
     }
     
     return props; 
+  }
+  
+  // Event handlers
+  private void onDashWindowResized()
+  {
+    if ( mainDashView != null ) mainDashView.updateViewport();
+  }
+  
+  private class DashWindowResizeListener implements Window.ResizeListener
+  {
+    @Override
+    public void windowResized( Window.ResizeEvent re ) { onDashWindowResized(); }
   }
 }
