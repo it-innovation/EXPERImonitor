@@ -33,6 +33,7 @@ import com.invient.vaadin.charts.InvientCharts.SeriesType;
 import com.invient.vaadin.charts.InvientChartsConfig;
 import com.invient.vaadin.charts.InvientChartsConfig.AxisBase.AxisTitle;
 import com.invient.vaadin.charts.InvientChartsConfig.DateTimeAxis;
+import com.invient.vaadin.charts.InvientChartsConfig.Legend;
 import com.invient.vaadin.charts.InvientChartsConfig.LineConfig;
 import com.invient.vaadin.charts.InvientChartsConfig.MarkerState;
 import com.invient.vaadin.charts.InvientChartsConfig.NumberYAxis;
@@ -41,7 +42,6 @@ import com.invient.vaadin.charts.InvientChartsConfig.SymbolMarker.Symbol;
 import com.invient.vaadin.charts.InvientChartsConfig.Title;
 import com.invient.vaadin.charts.InvientChartsConfig.XAxis;
 import com.invient.vaadin.charts.InvientChartsConfig.YAxis;
-import com.invient.vaadin.charts.InvientChartsConfig.YAxisDataLabel;
 import com.vaadin.ui.VerticalLayout;
 import java.util.Date;
 import java.util.Iterator;
@@ -139,31 +139,37 @@ public class NumericTimeSeriesVisual extends BaseMetricVisual
     chartConfig = new InvientChartsConfig();
     chartConfig.getGeneralChartConfig().setType( SeriesType.LINE );
     chartConfig.getGeneralChartConfig().setReflow( false );
+    chartConfig.getGeneralChartConfig().setBackgroundColor( new RGB(242,242,242) );
     chartConfig.getCredit().setEnabled( false );
-    Title title = new Title(); // Base class handles this
+    
+    // Remove unwanted visual components
+    Title title = new Title();
     title.setText( "" );
     chartConfig.setTitle( title );
+    
+    Legend legend = new Legend();
+    legend.setEnabled( false );
+    chartConfig.setLegend( legend );
     
     // Time axis
     timeAxis = new DateTimeAxis();
     timeAxis.setTitle( new AxisTitle( "Time" ) ); 
     timeAxis.setMin( new Date() );
-    LinkedHashSet<XAxis> xAxisData = new LinkedHashSet<InvientChartsConfig.XAxis>();
-    xAxisData.add( timeAxis );
+    LinkedHashSet<XAxis> xAxisSet = new LinkedHashSet<InvientChartsConfig.XAxis>();
+    xAxisSet.add( timeAxis );
     
     // Numeric axis
     NumberYAxis yAxis = new NumberYAxis();
-    yAxis.setTitle( new AxisTitle( visualUnit.getCaption()) );
+    yAxis.setTitle( new AxisTitle( (String) visualUnit.getValue() ) );
     
     LinkedHashSet<YAxis> yAxesSet = new LinkedHashSet<InvientChartsConfig.YAxis>();
     yAxesSet.add( yAxis );
     
-    chartConfig.setXAxes( xAxisData );
+    chartConfig.setXAxes( xAxisSet );
     chartConfig.setYAxes( yAxesSet );
     
     chart = new InvientCharts( chartConfig );
-    chart.setWidth( "425px" );
-    chart.setHeight( "280px" );
+    chart.setSizeFull();
     
     // Series & marker configuration
     SymbolMarker marker = new SymbolMarker();

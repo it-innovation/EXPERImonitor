@@ -78,16 +78,17 @@ public abstract class BaseMetricVisual extends SimpleView
   private void createComponents()
   {
     VerticalLayout vl = super.getViewContents();
-    vl.setWidth( "100%" );
     
     // Header
     HorizontalLayout hl = new HorizontalLayout();
+    hl.setSpacing( true );
     hl.setStyleName( "eccInfoPanelHeader" );
     vl.addComponent( hl );
     
     // Info part
     HorizontalLayout innerHL = new HorizontalLayout();
     hl.addComponent( innerHL );
+    hl.setExpandRatio( innerHL, 1.0f );
     
     // Space
     innerHL.addComponent( UILayoutUtil.createSpace( "5px", null, true ) );
@@ -115,15 +116,14 @@ public abstract class BaseMetricVisual extends SimpleView
     // Control part
     innerHL = new HorizontalLayout();
     hl.addComponent( innerHL );
+    hl.setExpandRatio( innerHL, 3.0f );
     
-    // Space 
-    innerHL.addComponent( UILayoutUtil.createSpace( "20px", null, true ) );
     // Expand/hide button
     Button button = new Button( "hide" );
     button.addStyleName( "small" );
     button.addListener( new HideButtonListener() );
     innerHL.addComponent( button );
-    innerHL.setComponentAlignment( button, Alignment.TOP_RIGHT );
+    innerHL.setComponentAlignment( button, Alignment.MIDDLE_RIGHT );
     
     // Space
     innerHL.addComponent( UILayoutUtil.createSpace( "5px", null, true ) );
@@ -133,20 +133,15 @@ public abstract class BaseMetricVisual extends SimpleView
     button.addStyleName( "small" );
     button.setData( true );
     innerHL.addComponent( button );
-    innerHL.setComponentAlignment( button, Alignment.TOP_RIGHT );
+    innerHL.setComponentAlignment( button, Alignment.MIDDLE_RIGHT );
     
     // Space
     vl.addComponent( UILayoutUtil.createSpace( "5px", null, true ) );
-    
-    // Internal graphing area
-    VerticalLayout innerVL = new VerticalLayout();
-    innerVL.setStyleName( "eccGraphPanel" );
-    vl.addComponent( innerVL );
   
     // Graph area
     vizContainer  = new VerticalLayout();
     visualVisible = true;
-    innerVL.addComponent( vizContainer );
+    vl.addComponent( vizContainer );
   }
   
   // Event handling ------------------------------------------------------------

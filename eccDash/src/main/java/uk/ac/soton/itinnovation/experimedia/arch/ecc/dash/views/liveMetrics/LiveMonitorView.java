@@ -151,7 +151,6 @@ public class LiveMonitorView extends SimpleView
     hl.addComponent( metricsNavList );
     
     Panel visualPanel = new Panel();
-    //visualPanel.setWidth( "100%" );
     visualPanel.setStyleName( "borderless light" );
     hl.addComponent( visualPanel );
     metricsVisualList = (VerticalLayout) visualPanel.getContent();
