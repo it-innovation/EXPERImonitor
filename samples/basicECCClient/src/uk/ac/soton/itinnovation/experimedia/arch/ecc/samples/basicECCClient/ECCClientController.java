@@ -204,7 +204,7 @@ public class ECCClientController implements EMIAdapterListener,
         // Define the metric for this MeasurementSet
         Metric memMetric = new Metric();
         memMetric.setMetricType( MetricType.RATIO );
-        memMetric.setUnit( new Unit("Bytes") );
+        memMetric.setUnit( new Unit("bytes") );
         ms.setMetric( memMetric );
 
         clientView.addLogMessage( "Discovered generator: " + metricGen.getName() );
