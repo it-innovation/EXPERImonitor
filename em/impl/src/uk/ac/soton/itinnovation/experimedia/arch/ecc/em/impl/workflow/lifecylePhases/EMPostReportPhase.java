@@ -319,7 +319,12 @@ public class EMPostReportPhase extends AbstractEMLCPhase
           phaseLogger.warn( "Got an unexpected batch report: " + populatedBatch.getID().toString() );
         }
         else
-          phaseLogger.warn( "Got an unexpected batch report (with null data): " + senderID.toString() );
+        {
+          notifyOfClientMSDone = true; // Have to assume we won't get any more data from this measurement set
+          phaseLogger.warn( "Got an unexpected batch report (with null data): " + 
+                            senderID.toString() + " MS ID: " + 
+                            populatedBatch.getExpectedMeasurementSetID().toString() );
+        }
       }
     }
 
