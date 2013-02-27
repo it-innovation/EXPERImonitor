@@ -44,6 +44,10 @@ public class EMListener implements IEMLifecycleListener {
     public void onClientDisconnected(EMClient client) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+    
+    public void onClientStartedPhase( EMClient client, EMPhase phase ) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 
     public void onLifecyclePhaseStarted(EMPhase phase) {
         throw new UnsupportedOperationException("Not supported yet.");

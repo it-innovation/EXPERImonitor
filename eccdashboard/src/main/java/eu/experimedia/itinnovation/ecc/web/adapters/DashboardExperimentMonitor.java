@@ -397,6 +397,12 @@ public class DashboardExperimentMonitor implements IEMLifecycleListener {
         logger.debug("Client disconnected: " + client.getName() + " [" + client.getID().toString() + "]");
 
     }
+    
+    @Override
+    public void onClientStartedPhase( EMClient client, EMPhase phase )
+    {
+      logger.debug( "Client " + client.getName() + " started phase: " + phase.toString() );
+    }
 
     @Override
     public void onLifecyclePhaseStarted(EMPhase phase) {
