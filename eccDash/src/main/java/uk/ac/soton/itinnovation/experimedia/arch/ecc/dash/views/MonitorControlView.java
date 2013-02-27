@@ -174,13 +174,13 @@ public class MonitorControlView extends SimpleView
   private Component createControlComponents()
   {
     VerticalLayout vl = new VerticalLayout();
-    vl.setWidth( "255px" );
+    vl.setWidth( "240px" );
     
     // Phase control
     phaseControlButton = new Button( "Start discovery phase" );
     phaseControlButton.addStyleName( "wide tall big" );
     phaseControlButton.addListener( new PhaseControlClicked() );
-    phaseControlButton.setWidth( "250px" );
+    phaseControlButton.setWidth( "230px" );
     vl.addComponent( phaseControlButton );
     vl.setComponentAlignment( phaseControlButton, Alignment.BOTTOM_LEFT );
     
@@ -190,7 +190,7 @@ public class MonitorControlView extends SimpleView
     // Experiment stop
     experimentStopButton = new Button( "Stop experiment" );
     experimentStopButton.setStyleName( "small" );
-    experimentStopButton.setWidth( "250px" );
+    experimentStopButton.setWidth( "230px" );
     experimentStopButton.setEnabled( false );
     experimentStopButton.addListener( new StopExpClicked() );
     vl.addComponent( experimentStopButton );

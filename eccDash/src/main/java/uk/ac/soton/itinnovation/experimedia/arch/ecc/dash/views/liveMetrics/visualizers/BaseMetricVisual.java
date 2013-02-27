@@ -25,6 +25,8 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.visualizers;
 
+import com.vaadin.ui.Alignment;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
@@ -40,9 +42,10 @@ public abstract class BaseMetricVisual extends SimpleView
   protected Label visualTitle;
   protected Label visualUnit;
   protected Label visualType;
-  
-  
   private VerticalLayout vizContainer;
+  
+  private transient boolean visualVisible;
+  
   
   public BaseMetricVisual()
   {
@@ -75,34 +78,62 @@ public abstract class BaseMetricVisual extends SimpleView
   private void createComponents()
   {
     VerticalLayout vl = super.getViewContents();
+    vl.setWidth( "100%" );
     
     // Header
     HorizontalLayout hl = new HorizontalLayout();
     hl.setStyleName( "eccInfoPanelHeader" );
     vl.addComponent( hl );
     
+    // Info part
+    HorizontalLayout innerHL = new HorizontalLayout();
+    hl.addComponent( innerHL );
+    
     // Space
-    hl.addComponent( UILayoutUtil.createSpace( "5px", null, true ) );
+    innerHL.addComponent( UILayoutUtil.createSpace( "5px", null, true ) );
     
     // Title
     visualTitle = new Label();
     visualTitle.addStyleName( "h3" );
-    hl.addComponent( visualTitle );
+    innerHL.addComponent( visualTitle );
     
     // Space
-    hl.addComponent( UILayoutUtil.createSpace( "20px", null, true ) );
+    innerHL.addComponent( UILayoutUtil.createSpace( "20px", null, true ) );
     
     // Other info
     visualUnit = new Label();
     visualUnit.addStyleName( "h4" );
-    hl.addComponent( visualUnit );
+    innerHL.addComponent( visualUnit );
     
     // Space
-    hl.addComponent( UILayoutUtil.createSpace( "5px", null, true ) );
+    innerHL.addComponent( UILayoutUtil.createSpace( "5px", null, true ) );
     
     visualType = new Label();
     visualType.addStyleName( "h4" );
-    hl.addComponent( visualType );
+    innerHL.addComponent( visualType );
+    
+    // Control part
+    innerHL = new HorizontalLayout();
+    hl.addComponent( innerHL );
+    
+    // Space 
+    innerHL.addComponent( UILayoutUtil.createSpace( "20px", null, true ) );
+    // Expand/hide button
+    Button button = new Button( "hide" );
+    button.addStyleName( "small" );
+    button.addListener( new HideButtonListener() );
+    innerHL.addComponent( button );
+    innerHL.setComponentAlignment( button, Alignment.TOP_RIGHT );
+    
+    // Space
+    innerHL.addComponent( UILayoutUtil.createSpace( "5px", null, true ) );
+    
+    // Close button
+    button = new Button( "close" );
+    button.addStyleName( "small" );
+    button.setData( true );
+    innerHL.addComponent( button );
+    innerHL.setComponentAlignment( button, Alignment.TOP_RIGHT );
     
     // Space
     vl.addComponent( UILayoutUtil.createSpace( "5px", null, true ) );
@@ -113,7 +144,42 @@ public abstract class BaseMetricVisual extends SimpleView
     vl.addComponent( innerVL );
   
     // Graph area
-    vizContainer = new VerticalLayout();
+    vizContainer  = new VerticalLayout();
+    visualVisible = true;
     innerVL.addComponent( vizContainer );
+  }
+  
+  // Event handling ------------------------------------------------------------
+  private void onHideButtonClicked( Button button )
+  {
+    if ( button != null )
+    {
+      if ( visualVisible )
+      {
+        visualVisible = false;
+        
+        vizContainer.setVisible( visualVisible );
+        button.setCaption( "show" );
+      }
+      else
+      {
+        visualVisible = true;
+        
+        vizContainer.setVisible( visualVisible );
+        button.setCaption( "hide" );
+      } 
+    }
+  }
+  
+  private void onCloseButtonClicked()
+  {
+    
+  }
+  
+  private class HideButtonListener implements Button.ClickListener
+  {
+    @Override
+    public void buttonClick(Button.ClickEvent ce) 
+    { onHideButtonClicked( ce.getButton() ); }
   }
 }
