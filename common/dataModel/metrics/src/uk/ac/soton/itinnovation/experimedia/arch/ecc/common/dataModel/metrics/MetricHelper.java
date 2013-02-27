@@ -70,20 +70,47 @@ public class MetricHelper
       
       if ( attr != null && mgenSet != null )
       {
-        UUID targetAttID = attr.getUUID();
-        Set<MeasurementSet> allSets = getAllMeasurementSets( mgenSet );
+        UUID targetAttID              = attr.getUUID();
+        Set<MeasurementSet> allSets   = getAllMeasurementSets( mgenSet );
         Iterator<MeasurementSet> msIt = allSets.iterator();
         
         while ( msIt.hasNext() )
         {
           MeasurementSet ms = msIt.next();
+          UUID linkedAttrID = ms.getAttributeUUID();
           
-          if ( ms.getAttributeUUID().equals(targetAttID) )
+          if ( linkedAttrID != null && linkedAttrID.equals(targetAttID) )
             mSets.put( ms.getUUID(), ms );
         }
       }
       
       return mSets;
+    }
+    
+    public static MeasurementSet getMeasurementSetForAttribute( Attribute attr,
+                                                                MetricGenerator mgen )
+    {
+      MeasurementSet msTarget = null;
+      
+      if ( attr != null && mgen != null )
+      {
+        Map<UUID, MeasurementSet> allSets = getAllMeasurementSets( mgen );
+        Iterator<MeasurementSet> msIt = allSets.values().iterator();
+        
+        while ( msIt.hasNext() )
+        {
+          MeasurementSet ms = msIt.next();
+          UUID linkedAttrID = ms.getAttributeUUID();
+          
+          if ( linkedAttrID != null && linkedAttrID.equals( attr.getUUID()) )
+          {
+            msTarget = ms;
+            break;
+          }
+        }
+      }
+      
+      return msTarget;
     }
     
     public static Map<UUID, Attribute> getAllAttributes( Collection<MetricGenerator> mgenSet )
@@ -116,15 +143,29 @@ public class MetricHelper
         while ( mgenIt.hasNext() )
         {
           MetricGenerator mg = mgenIt.next();
-          Set<Entity> mgEnts = mg.getEntities();
-          if ( mgEnts != null )
+          
+          Map<UUID, Entity> mgEnts = getAllEntities( mg );
+          entities.putAll( mgEnts );
+        }
+      }
+      
+      return entities;
+    }
+    
+    public static Map<UUID, Entity> getAllEntities( MetricGenerator mgen )
+    {
+      HashMap<UUID, Entity> entities = new HashMap<UUID, Entity>();
+      
+      if ( mgen != null )
+      {
+        Set<Entity> mgEnts = mgen.getEntities();
+        if ( mgEnts != null )
+        {
+          Iterator<Entity> mgEntIt = mgEnts.iterator();
+          while ( mgEntIt.hasNext() )
           {
-            Iterator<Entity> mgEntIt = mgEnts.iterator();
-            while ( mgEntIt.hasNext() )
-            {
-              Entity entity = mgEntIt.next();
-              entities.put( entity.getUUID(), entity );
-            }
+            Entity entity = mgEntIt.next();
+            entities.put( entity.getUUID(), entity );
           }
         }
       }
@@ -154,6 +195,29 @@ public class MetricHelper
         return mSets;        
     }
     
+    public static Map<UUID, MeasurementSet> getAllMeasurementSets( MetricGenerator mgen )
+    {
+      HashMap<UUID, MeasurementSet> mSets = new HashMap<UUID, MeasurementSet>();
+      
+      if ( mgen != null )
+      {
+        Iterator<MetricGroup> groupIt = mgen.getMetricGroups().iterator();
+        while ( groupIt.hasNext() )
+        {
+          Iterator<MeasurementSet> msIt = groupIt.next().getMeasurementSets().iterator();
+          while ( msIt.hasNext() )
+          {
+            MeasurementSet ms = msIt.next();
+            UUID msID = ms.getUUID();
+            
+            if ( msID != null ) mSets.put( ms.getUUID(), ms );
+          }
+        }
+      }
+      
+      return mSets;
+    }
+    
     public static MeasurementSet getMeasurementSet( Collection<MetricGenerator> mgenSet,
                                                     UUID measurementSetID )
     {
@@ -171,7 +235,9 @@ public class MetricHelper
                     while ( msIt.hasNext() )
                     { 
                         MeasurementSet ms = msIt.next();
-                        if ( ms.getUUID().equals( measurementSetID) )
+                        UUID msID = ms.getUUID();
+                        
+                        if ( msID != null &&  msID.equals( measurementSetID) )
                         {
                             targetSet = ms;
                             break;
@@ -194,10 +260,196 @@ public class MetricHelper
         while ( mIt.hasNext() )
         {
           Measurement m = mIt.next();
-          sortedM.put( m.getTimeStamp(), m );
+          Date stamp = m.getTimeStamp();
+          
+          if ( stamp != null ) sortedM.put( stamp, m );
         }
       }
       
       return sortedM;
     }
+    
+    public static Attribute createAttribute( String name, String desc, Entity entity )
+    {
+      Attribute attribute = new Attribute();
+      attribute.setName( name );
+      attribute.setDescription( desc );
+      
+      if ( entity != null )
+      {
+        attribute.setEntityUUID( entity.getUUID() );
+        entity.addAttribute( attribute );
+      }
+      
+      return attribute;
+    }
+    
+    public static Attribute getAttributeByName( String name, Entity entity )
+    {
+      Attribute targAttr = null;
+      
+      if ( name != null && entity != null )
+      {
+        Set<Attribute> attrs = entity.getAttributes();
+        if ( attrs != null )
+        {
+          Iterator<Attribute> attIt = attrs.iterator();
+          while ( attIt.hasNext() )
+          {
+            Attribute attr = attIt.next();
+            String attName = attr.getName();
+            
+            if ( attName != null && attName.equals(name) )
+            {
+              targAttr = attr;
+              break;
+            }
+          }
+        }
+      }
+      
+      return targAttr;      
+    }
+    
+    public static MetricGroup createMetricGroup( String name, String desc, MetricGenerator mGen )
+    {
+      MetricGroup mGroup = new MetricGroup();
+      mGroup.setName( name );
+      mGroup.setDescription( desc );
+      
+      if ( mGen != null ) mGen.addMetricGroup( mGroup );
+      
+      return mGroup;
+    }
+    
+    public static MeasurementSet createMeasurementSet( Attribute attr,
+                                                       MetricType type,
+                                                       Unit unit,
+                                                       MetricGroup group )
+    {
+      MeasurementSet mSet = null;
+      
+      if ( attr != null && type != null && unit != null && group != null )
+      {
+        mSet = new MeasurementSet();
+        Metric metric = new Metric();
+        metric.setMetricType( type );
+        metric.setUnit( unit );
+        mSet.setMetric( metric );
+        
+        mSet.setAttributeUUID( attr.getUUID() );
+        mSet.setMetricGroupUUID( attr.getEntityUUID() );
+        
+        group.addMeasurementSets( mSet );
+      }
+      
+      return mSet;
+    }
+    
+    public static MetricGenerator getMetricGeneratorByName( String name, 
+                                                            Set<MetricGenerator> mGens )
+    {
+      MetricGenerator targetGen = null;
+      
+      if ( mGens != null )
+      {
+        Iterator<MetricGenerator> genIt = mGens.iterator();
+        while ( genIt.hasNext() )
+        {
+          MetricGenerator mgen = genIt.next();
+          String genName = mgen.getName();
+          
+          if ( genName != null && genName.equals(name) )
+          {
+            targetGen = mgen;
+            break;
+          }
+        }
+      }
+      
+      return targetGen;
+    }
+    
+    public static MetricGroup getMetricGroupByName( String groupName,
+                                                    Set<MetricGroup> mGroups )
+    {
+      MetricGroup targetGroup = null;
+      
+      if ( groupName != null || mGroups != null )
+      {
+        Iterator<MetricGroup> groupIt = mGroups.iterator();
+        while ( groupIt.hasNext() )
+        {
+          MetricGroup group = groupIt.next();
+          String gName      = group.getName();
+          
+          if ( gName != null && gName.equals(groupName) )
+          {
+            targetGroup = group;
+            break;
+          }
+        }
+      }
+      
+      return targetGroup;
+    } 
+    
+    public static String describeGenerator( MetricGenerator mgen )
+    {
+      String desc = "Could not describe generator (null)";
+
+      if ( mgen != null )
+      {
+        desc = mgen.getName() + "\n";
+        desc += "Description: " + mgen.getDescription() + "\n";
+
+        Collection<Entity> mGenEntities = MetricHelper.getAllEntities(mgen).values();
+        if ( !mGenEntities.isEmpty() )
+        {
+          desc += "Generator has " + mGenEntities.size() + " entities" + "\n";
+
+          Iterator<Entity> entIt = mGenEntities.iterator();
+          while ( entIt.hasNext() )
+          {
+            Entity entity = entIt.next();
+            desc += "  Entity: " + entity.getName() + "\n";
+            desc += "  Description: " + entity.getDescription() + "\n";
+
+            Set<Attribute> attributes = entity.getAttributes();
+            if ( !attributes.isEmpty() )
+            {
+              desc += "  Number of attributes: " + attributes.size() + "\n";
+              Iterator<Attribute> attIt = attributes.iterator();
+              while ( attIt.hasNext() )
+              {
+                Attribute att = attIt.next();
+                desc += "    Attribute: " + att.getName() + "\n";
+                desc += "    Description: " + att.getDescription() + "\n";
+                
+                MeasurementSet ms = getMeasurementSetForAttribute( att, mgen );
+                if ( ms != null )
+                {
+                  desc += "      Measurement set ID: " + ms.getUUID() + "\n";
+                  
+                  Metric metric = ms.getMetric();
+                  if ( metric != null )
+                  {
+                    desc += "      Metric unit: " + metric.getUnit().toString() + "\n";
+                    desc += "      Metric type: " + metric.getMetricType().toString() + "\n";
+                  }
+                  else desc += "      Measurement set has no metric.";
+                }
+                else desc += "    Attribute has no measurement set associated with it.\n";
+              }
+            }
+            else desc += "  Entity has no attributes.\n";
+          }
+        }
+        else desc += "Generator has no entities associated with it.\n";
+        
+        desc += "\n";
+      }
+      
+      return desc;
+    } 
 }

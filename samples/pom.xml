@@ -20,6 +20,7 @@
 	<module>headlessECCClient</module>
     <module>basicECCClient</module>
     <module>basicECCContainer</module>
+    <module>metricGeneratorExamples</module>
   </modules>
     
 </project>
