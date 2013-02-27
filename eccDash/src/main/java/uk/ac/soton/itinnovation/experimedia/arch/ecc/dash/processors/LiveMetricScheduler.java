@@ -74,6 +74,7 @@ public class LiveMetricScheduler extends UFAbstractEventManager
   {
     liveClients.clear();
     scheduler.purge();
+    scheduler    = new Timer();
     isScheduling = false;
   }
   

@@ -178,7 +178,7 @@ public class MonitorControlView extends SimpleView
     
     // Phase control
     phaseControlButton = new Button( "Start discovery phase" );
-    phaseControlButton.addStyleName( "wide tall big" );
+    phaseControlButton.addStyleName( "wide tall" );
     phaseControlButton.addListener( new PhaseControlClicked() );
     phaseControlButton.setWidth( "230px" );
     vl.addComponent( phaseControlButton );

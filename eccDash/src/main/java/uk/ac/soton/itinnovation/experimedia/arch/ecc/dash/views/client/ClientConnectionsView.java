@@ -218,6 +218,7 @@ public class ClientConnectionsView extends SimpleView
     private void createComponents()
     {
       VerticalLayout vl = getViewContents();
+      vl.setWidth( "250px" );
       
       clientName = new Label( client.getName() );
       clientName.addStyleName( "small" );
