@@ -30,9 +30,11 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Set;
+import java.util.UUID;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Measurement;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.SimpleView;
@@ -51,17 +53,22 @@ public abstract class BaseMetricVisual extends SimpleView
   protected transient int                     maxCachedMeasurements = 20;
   
   private VerticalLayout    vizContainer;
+  private transient UUID    visualID;
   private transient boolean visualVisible;
   
  
-  public BaseMetricVisual()
+  public BaseMetricVisual( UUID id )
   {
     super();
     
+    visualID = id;
     cachedMeasurements = new LinkedList<Measurement>();
     
     createComponents();
   }
+  
+  public UUID getID()
+  { return visualID; }
   
   public void setTitle( String title )
   { if ( title != null ) visualTitle.setValue( title ); }
@@ -179,6 +186,7 @@ public abstract class BaseMetricVisual extends SimpleView
     button = new Button( "close" );
     button.addStyleName( "small" );
     button.setData( true );
+    button.addListener( new CloseButtonListener() );
     innerHL.addComponent( button );
     innerHL.setComponentAlignment( button, Alignment.MIDDLE_RIGHT );
     
@@ -215,7 +223,9 @@ public abstract class BaseMetricVisual extends SimpleView
   
   private void onCloseButtonClicked()
   {
-    
+    Collection<BaseMetricVisualListener> listeners = getListenersByType();
+    for( BaseMetricVisualListener listener : listeners )
+      listener.onVisualClosed( visualID );
   }
   
   private class HideButtonListener implements Button.ClickListener
@@ -223,5 +233,12 @@ public abstract class BaseMetricVisual extends SimpleView
     @Override
     public void buttonClick(Button.ClickEvent ce) 
     { onHideButtonClicked( ce.getButton() ); }
+  }
+  
+  private class CloseButtonListener implements Button.ClickListener
+  {
+    @Override
+    public void buttonClick(Button.ClickEvent ce) 
+    { onCloseButtonClicked(); }
   }
 }

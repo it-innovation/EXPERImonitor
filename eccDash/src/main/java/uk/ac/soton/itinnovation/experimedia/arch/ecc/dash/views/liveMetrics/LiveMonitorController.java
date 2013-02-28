@@ -136,14 +136,16 @@ public class LiveMonitorController extends UFAbstractEventManager
             case ORDINAL :
               visual = new RawDataVisual( attribute.getName(),
                                           metric.getUnit().getName(),
-                                          metric.getMetricType().name() ); break;               
+                                          metric.getMetricType().name(),
+                                          msID ); break;               
              
             
             case INTERVAL:
             case RATIO   :
               visual = new NumericTimeSeriesVisual( attribute.getName(),
                                                     metric.getUnit().getName(),
-                                                    metric.getMetricType().name() ); break;
+                                                    metric.getMetricType().name(),
+                                                    msID ); break;
           }
           
           if ( visual != null )

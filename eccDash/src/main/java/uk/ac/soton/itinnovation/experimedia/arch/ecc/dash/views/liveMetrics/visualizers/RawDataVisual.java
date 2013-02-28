@@ -28,6 +28,7 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.vis
 import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
 import java.util.Iterator;
+import java.util.UUID;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Measurement;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.UILayoutUtil;
 
@@ -42,9 +43,9 @@ public class RawDataVisual extends BaseMetricVisual
   private final String tData      = "Data";
   
   
-  public RawDataVisual( String title, String unit, String type )
+  public RawDataVisual( String title, String unit, String type, UUID msID )
   {
-    super();
+    super( msID );
     
     setTitle( title );
     setMetricInfo( unit, type );

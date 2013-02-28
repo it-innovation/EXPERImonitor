@@ -41,12 +41,14 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.Highlight
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.SimpleView;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.UILayoutUtil;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.visualizers.BaseMetricVisual;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.visualizers.BaseMetricVisualListener;
 import uk.ac.soton.itinnovation.robust.cat.core.components.viewEngine.spec.uif.types.UFAbstractEventManager;
 
 
 
 
 public class LiveMonitorView extends SimpleView
+                             implements BaseMetricVisualListener
 {
   private VerticalLayout metricsNavList;
   private VerticalLayout metricsVisualList;
@@ -98,6 +100,8 @@ public class LiveMonitorView extends SimpleView
         
         // High-light if first selected
         if ( currSelectedNavView == null ) onNavViewSelected( msID );
+        
+        visual.addListener( this );
       }
   }
   
@@ -117,6 +121,9 @@ public class LiveMonitorView extends SimpleView
       {
         metricsVisualList.removeComponent( (Component) visual.getImplContainer() );
         visualsByMSID.remove( msID );
+        
+        // Do not listen to this visual any more
+        unhookNotifier( visual );
       }
     }
   }
@@ -130,6 +137,14 @@ public class LiveMonitorView extends SimpleView
       if ( visual != null ) 
         visual.addMeasurementData( ms );
     }
+  }
+  
+  // BaseMetricVisualListener --------------------------------------------------
+  @Override
+  public void onVisualClosed( UUID visualID )
+  {
+    if ( visualID != null )
+      onNavViewRemovedClicked( visualID );
   }
   
   // Private methods -----------------------------------------------------------

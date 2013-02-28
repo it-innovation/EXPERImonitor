@@ -46,6 +46,7 @@ import com.vaadin.ui.VerticalLayout;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.UUID;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Measurement;
 
 
@@ -60,9 +61,9 @@ public class NumericTimeSeriesVisual extends BaseMetricVisual
   private LinkedHashSet<DateTimePoint> plotPoints;
   
 
-  public NumericTimeSeriesVisual( String title, String unit, String type )
+  public NumericTimeSeriesVisual( String title, String unit, String type, UUID msID )
   {
-    super();
+    super( msID );
     
     setTitle( title );
     setMetricInfo( unit, type );
