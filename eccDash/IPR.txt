@@ -1,0 +1,58 @@
+This software distribution is licenced under the terms found in the file ITInnov-EXPERIMEDIA-licence-v1.0.txt
+
+The IT Innovation software is the source code and the following war:
+
+experimedia-arch-ecc-eccDash-1.1-SNAPSHOT.war
+
+
+This software requires various third-party libraries to compile and execute.
+These libraries and their associated licences are:
+
+
+The Apache Software License, Version 2.0
+-----------------------------------------------
+gson-2.2.2.jar
+log4j-1.2.17.jar
+vaadin-6.8.2.jar
+gwt-user-2.3.0.jar
+gwt-dev-2.3.0.jar
+validation-api-1.0.0.GA.jar
+validation-api-1.0.0.GA-sources.jar
+joda-time-2.1.jar
+invient-charts-0.8.6.jar
+
+
+CPL 1.0
+-----------------------------------------------
+junit-4.10.jar
+
+
+GPL v2 / MPL v1.1
+-----------------------------------------------
+amqp-client-2.8.6.jar
+
+
+CDDL / GPLv2 with classpath exception
+-----------------------------------------------
+servlet-api-2.3.jar
+
+
+BSD
+-----------------------------------------------
+postgresql-9.1-901.jdbc4.jar
+
+
+Creative Commons Attribution-NonCommercial 3.0
+-----------------------------------------------
+Highcharts javascript library 
+
+
+Oracle Binary Code License Agreement
+-----------------------------------------------
+Java 1.6
+
+
+Public domain
+-----------------------------------------------
+base64-2.3.8.jar
+
