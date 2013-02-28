@@ -41,6 +41,7 @@ import java.util.TreeMap;
 import java.util.UUID;
 import javax.servlet.ServletContext;
 import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Attribute;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Entity;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Measurement;
@@ -306,8 +307,11 @@ public class DataExportController extends UFAbstractEventManager
             {
               Measurement m = sortedM.get( ascDateIt.next() );
               
+              // ISO-8601 stamping
+              DateTime isoTime = new DateTime( m.getTimeStamp().getTime() );
+              
               bw.write( info.msID.toString() + "," +
-                        m.getTimeStamp().toString() + "," +
+                        isoTime.toString() + "," +
                         m.getValue() + "\n" );
             }
           }
