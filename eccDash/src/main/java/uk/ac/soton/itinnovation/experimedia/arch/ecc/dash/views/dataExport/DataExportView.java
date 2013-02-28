@@ -202,7 +202,7 @@ public class DataExportView extends SimpleView
     hl = new HorizontalLayout();
     panel.addComponent( hl );
     
-    downloadMetricsButton = new Button( "Download metrics" );
+    downloadMetricsButton = new Button( "Generate export data" );
     downloadMetricsButton.addStyleName( "big" );
     downloadMetricsButton.setEnabled( false );
     downloadMetricsButton.addListener( new ExportDataClicked() );
