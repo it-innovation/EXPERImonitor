@@ -41,7 +41,9 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Me
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricHelper;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMClient;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.visualizers.BaseMetricVisual;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.visualizers.NumericTimeSeriesVisual;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.visualizers.RawDataVisual;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IReportDAO;
 import uk.ac.soton.itinnovation.robust.cat.core.components.viewEngine.spec.uif.mvc.IUFView;
 import uk.ac.soton.itinnovation.robust.cat.core.components.viewEngine.spec.uif.types.UFAbstractEventManager;
@@ -121,30 +123,36 @@ public class LiveMonitorController extends UFAbstractEventManager
       Iterator<MeasurementSet> msIt = mSets.iterator();
       while ( msIt.hasNext() )
       {
-        MeasurementSet ms = msIt.next();
+        MeasurementSet ms       = msIt.next();
+        UUID msID               = ms.getUUID();
+        Metric metric           = ms.getMetric();
+        BaseMetricVisual visual = null;
         
-        UUID msID = ms.getUUID();
         if ( !activeMSVisuals.contains(msID) )
         {
           switch ( ms.getMetric().getMetricType() )
           {
+            case NOMINAL :
+            case ORDINAL :
+              visual = new RawDataVisual( attribute.getName(),
+                                          metric.getUnit().getName(),
+                                          metric.getMetricType().name() ); break;               
+             
+            
             case INTERVAL:
             case RATIO   :
-            {
-              Metric metric = ms.getMetric();
-              
-              NumericTimeSeriesVisual ntsv = 
-                      new NumericTimeSeriesVisual( attribute.getName(),
-                                                   metric.getUnit().getName(),
-                                                   metric.getMetricType().name() );
-              
-              liveMonitorView.addMetricVisual( client.getName(),
-                                               entity.getName(),
-                                               attribute.getName(),
-                                               msID, ntsv );
-              activeMSVisuals.add( msID );
-
-            } break;
+              visual = new NumericTimeSeriesVisual( attribute.getName(),
+                                                    metric.getUnit().getName(),
+                                                    metric.getMetricType().name() ); break;
+          }
+          
+          if ( visual != null )
+          {
+            liveMonitorView.addMetricVisual( client.getName(),
+                                             entity.getName(),
+                                             attribute.getName(),
+                                             msID, visual );
+            activeMSVisuals.add( msID );
           }
         }
       }

@@ -30,6 +30,10 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Set;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Measurement;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.SimpleView;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.UILayoutUtil;
@@ -42,14 +46,19 @@ public abstract class BaseMetricVisual extends SimpleView
   protected Label visualTitle;
   protected Label visualUnit;
   protected Label visualType;
-  private VerticalLayout vizContainer;
   
+  protected transient LinkedList<Measurement> cachedMeasurements;
+  protected transient int                     maxCachedMeasurements = 20;
+  
+  private VerticalLayout    vizContainer;
   private transient boolean visualVisible;
   
-  
+ 
   public BaseMetricVisual()
   {
     super();
+    
+    cachedMeasurements = new LinkedList<Measurement>();
     
     createComponents();
   }
@@ -66,8 +75,46 @@ public abstract class BaseMetricVisual extends SimpleView
     }
   }
   
-  // Sub-classes to implement --------------------------------------------------
-  public abstract void addMeasurementData( MeasurementSet ms );
+  public void clearMeasurements()
+  {
+    cachedMeasurements.clear();
+    updateView();
+  }
+  
+  public void addMeasurementData( MeasurementSet ms )
+  {
+    if ( ms != null )
+    {
+      // Gather limited measurements internally
+      Set<Measurement> measurements = ms.getMeasurements();
+      if ( measurements != null && !measurements.isEmpty() )
+      {
+        Iterator<Measurement> mIt = ms.getMeasurements().iterator();
+        while ( mIt.hasNext() )
+        {
+          Measurement m = mIt.next();
+          cachedMeasurements.add( m );
+          
+          if ( cachedMeasurements.size() > maxCachedMeasurements )
+            cachedMeasurements.removeFirst();
+        }
+      }
+      
+      updateView();
+    }
+  }
+  
+  public void setMaxMeasurements( int max )
+  {
+    if ( max > 0 )
+    {
+      while ( cachedMeasurements.size() > max )
+      { cachedMeasurements.removeFirst(); } 
+      
+      maxCachedMeasurements = max;
+      updateView();
+    }
+  }
   
   // Protected methods ---------------------------------------------------------
   @Override

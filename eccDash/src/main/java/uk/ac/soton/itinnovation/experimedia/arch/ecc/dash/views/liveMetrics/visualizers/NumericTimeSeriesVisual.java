@@ -46,10 +46,7 @@ import com.vaadin.ui.VerticalLayout;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.Set;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Measurement;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
 
 
 
@@ -62,9 +59,6 @@ public class NumericTimeSeriesVisual extends BaseMetricVisual
   private DateTimeSeries               dataSeries;
   private LinkedHashSet<DateTimePoint> plotPoints;
   
-  private transient LinkedList<Measurement> measurementSeries;
-  private transient int maxPoints = 20;
-  
 
   public NumericTimeSeriesVisual( String title, String unit, String type )
   {
@@ -73,63 +67,42 @@ public class NumericTimeSeriesVisual extends BaseMetricVisual
     setTitle( title );
     setMetricInfo( unit, type );
     
-    measurementSeries = new LinkedList<Measurement>();
-    
     createChartConfig();
     createComponents();
   }
   
-  // BaseMetricVisual ----------------------------------------------------------
   @Override
-  public void addMeasurementData( MeasurementSet ms )
+  public void updateView()
   {
-    if ( ms != null )
+    // Update graph series view
+    if ( !cachedMeasurements.isEmpty() )
     {
-      // Gather limited measurements internally
-      Set<Measurement> measurements = ms.getMeasurements();
-      if ( measurements != null && !measurements.isEmpty() )
+      chart.removeSeries( dataSeries );
+      dataSeries.removeAllPoints();
+      plotPoints.clear();
+
+      // Ranges for axes
+      Measurement first = null;
+
+      Iterator<Measurement> mIt = cachedMeasurements.iterator();
+      while ( mIt.hasNext() )
       {
-        Iterator<Measurement> mIt = ms.getMeasurements().iterator();
-        while ( mIt.hasNext() )
-        {
-          Measurement m = mIt.next();
-          measurementSeries.add( m );
-          
-          if ( measurementSeries.size() > maxPoints )
-            measurementSeries.removeFirst();
-        }
+        Measurement m = mIt.next();
+
+        // Update range data
+        if ( first == null ) first = m;
+
+        plotPoints.add( new DateTimePoint( dataSeries,
+                                           m.getTimeStamp(),
+                                           Double.parseDouble(m.getValue())) );
       }
-      
-      // Update graph series view
-      if ( !measurementSeries.isEmpty() )
-      {
-        chart.removeSeries( dataSeries );
-        dataSeries.removeAllPoints();
-        plotPoints.clear();
-        
-        // Ranges for axes
-        Measurement first = null, min = null, max = null;
-        
-        Iterator<Measurement> mIt = measurementSeries.iterator();
-        while ( mIt.hasNext() )
-        {
-          Measurement m = mIt.next();
-          
-          // Update range data
-          if ( first == null ) first = m;
-          
-          plotPoints.add( new DateTimePoint( dataSeries,
-                                             m.getTimeStamp(),
-                                             Double.parseDouble(m.getValue())) );
-        }
-        
-        // Update axes
-        timeAxis.setMin( first.getTimeStamp() );
-        
-        // Update series
-        dataSeries.setSeriesPoints( plotPoints );
-        chart.addSeries( dataSeries );
-      }
+
+      // Update axes
+      timeAxis.setMin( first.getTimeStamp() );
+
+      // Update series
+      dataSeries.setSeriesPoints( plotPoints );
+      chart.addSeries( dataSeries );
     }
   }
   
