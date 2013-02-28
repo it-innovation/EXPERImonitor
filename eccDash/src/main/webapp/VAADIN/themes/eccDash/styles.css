@@ -1,0 +1,127 @@
+/* 
+/////////////////////////////////////////////////////////////////////////
+//
+// © University of Southampton IT Innovation Centre, 2012
+//
+// Copyright in this software belongs to University of Southampton
+// IT Innovation Centre of Gamma House, Enterprise Road, 
+// Chilworth Science Park, Southampton, SO16 7NS, UK.
+//
+// This software may not be used, sold, licensed, transferred, copied
+// or reproduced in whole or in part in any manner or form or in or
+// on any media by any person other than in accordance with the terms
+// of the Licence Agreement supplied with the software, or otherwise
+// without the prior written consent of the copyright owners.
+//
+// This software is distributed WITHOUT ANY WARRANTY, without even the
+// implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+// PURPOSE, except where stated in the Licence Agreement supplied with
+// the software.
+//
+//      Created By :            Simon Crowle
+//      Created Date :          01-Feb-2013
+//      Created for Project :   EXPERIMEDIA
+//
+/////////////////////////////////////////////////////////////////////////
+*/
+
+@import "../chameleon/styles.css";
+
+
+.eccDashDefault
+{
+  background-color: #E9E9E9;
+  
+  font-family: Arial;
+  font-size: small;
+  font-weight: 100;
+}
+
+.eccButton
+{
+  background-color: #728ac2;
+  background-image: none;
+  color: #e1eaff;
+  border: none;
+  border-radius: 0px;
+  
+  text-shadow: none;
+}
+
+.eccControlPanel
+{
+  background-color: #EAEAEA;
+  color: #404040;
+  
+  font-weight: 100;
+  font-size: medium;
+  border: none;
+}
+
+.eccControlInfoPanel
+{
+  background-color: #ECECEC;
+  color: #303030;
+  
+  font-weight: 100;
+  font-size: small;
+  border: none;
+}
+
+.eccInfoPanelHeader
+{
+  background-color: #EDEDED;
+  
+  border-bottom-width: 2px;
+  border-bottom-style: solid;
+  border-bottom-color: #DDDDDD;
+}
+
+.eccInfoPanelAlert
+{
+  background-color: #d10f2b;
+  color: #ececec;
+  
+  border-bottom: 2px;
+  border-bottom-style: solid;
+  border-bottom-color: #840618;
+}
+
+.eccInfoSubPanel
+{
+  background-color: #E6E6E6;
+  
+  font-weight: 100;
+  font-size: small;
+  
+  padding: 5px;
+  
+  border-color: #F2F2F2;
+  border-style: solid;
+  border-width: 1px;
+}
+
+.eccInfoPanelHighlight
+{
+  color: #FFFFFF; 
+  background-color: #9292DE;
+  
+  font-weight: 200;
+  font-size: small;
+  
+  border: #8282CE;
+}
+
+.eccGraphPanel
+{
+  background-color: #FFFFFF;
+  
+  font-weight: 100;
+  font-size: small;
+  
+  padding: 5px;
+  
+  border-color: #F2F2F2;
+  border-style: solid;
+  border-width: 1px;
+}

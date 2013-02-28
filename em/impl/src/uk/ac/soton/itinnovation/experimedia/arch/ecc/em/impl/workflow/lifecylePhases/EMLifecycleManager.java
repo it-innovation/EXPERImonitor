@@ -40,6 +40,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 
 import java.util.*;
 import org.apache.log4j.Logger;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.IEMDiscovery;
 
 
 
@@ -61,6 +62,7 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   
   private Experiment                          currentExperiment;
   private EnumMap<EMPhase, AbstractEMLCPhase> lifecyclePhases;
+  private HashMap<UUID, EMClientEx>           phaseDeferredClients; // Clients waiting to engage in a future phase
   
   private EMPhase currentPhase         = EMPhase.eEMUnknownPhase;
   private boolean windingCurrPhaseDown = false;
@@ -70,7 +72,8 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   
   public EMLifecycleManager() 
   {
-    lifecyclePhases = new EnumMap<EMPhase, AbstractEMLCPhase>( EMPhase.class );
+    lifecyclePhases      = new EnumMap<EMPhase, AbstractEMLCPhase>( EMPhase.class );
+    phaseDeferredClients = new HashMap<UUID, EMClientEx>();
   }
   
   public void initialise( AMQPBasicChannel     channel, 
@@ -80,6 +83,9 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
     emChannel         = channel;
     emProviderID      = providerID;
     lifecycleListener = listener;
+    
+    lifecyclePhases.clear();
+    phaseDeferredClients.clear();
 
     // Create life-cycle phases
     EMGeneratorDiscoveryPhase gdp = new EMGeneratorDiscoveryPhase( emChannel,
@@ -101,6 +107,15 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
     lifecyclePhases.put( EMPhase.eEMTearDown, tdp );
   }
   
+  public void shutdown()
+  {
+    Iterator<AbstractEMLCPhase> phaseIt = lifecyclePhases.values().iterator();
+    while ( phaseIt.hasNext() )
+    { phaseIt.next().hardStop(); }
+    
+    lifecyclePhases.clear();
+  }
+  
   public void resetLifecycle()
   {
     // Clear all phases of all clients
@@ -113,6 +128,8 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
         phase.reset();
       }
     }
+    
+    phaseDeferredClients.clear();
     
     currentExperiment    = null;
     windingCurrPhaseDown = false;
@@ -190,13 +207,7 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   public EMPhase iterateLifecycle()
   {
     if ( currentPhase != EMPhase.eEMProtocolComplete && !lifecyclePhases.isEmpty() )
-    {
-      // try to stop current phase
-      AbstractEMLCPhase killPhase = lifecyclePhases.get( currentPhase );
-      
-      if ( killPhase != null && killPhase.isActive() ) 
-        killPhase.hardStop();
-      
+    {      
       // Find out what the next phase is
       currentPhase = currentPhase.nextPhase();
       
@@ -207,24 +218,43 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
       }
       else // Otherwise, try the next phase
       {
+        // Before starting the next phase, see if there are any deferred clients
+        // waiting to be added in
+        tryDeferredClientsForRemaingPhases();
+        
+        // Now start the phase
         AbstractEMLCPhase lcPhase = lifecyclePhases.get( currentPhase );
         if ( lcPhase != null )
-          try
-          { 
-            lcPhase.start();
-
-            // Notify listener
-            lifecycleListener.onLifecyclePhaseStarted( lcPhase.getPhaseType() );
-          }
-          catch( Exception e ) 
+        {
+          // If there are clients in the next phase, start it
+          if ( !lcPhase.getCopySetOfCurrentClients().isEmpty() )
           {
-            String msg = "Could not start lifecycle phase: " + lcPhase.getPhaseType() + "\n"
-                       + "Life-cycle exception: " + e.getMessage();
+            try
+            { 
+              lcPhase.start();
 
-            lmLogger.warn( msg );
-            lmLogger.info( "Trying next phase: " + currentPhase.nextPhase() );
+              // Notify listener
+              lifecycleListener.onLifecyclePhaseStarted( lcPhase.getPhaseType() );
+            }
+            catch( Exception e ) 
+            {
+              String msg = "Could not start lifecycle phase: " + lcPhase.getPhaseType() + "\n"
+                         + "Life-cycle exception: " + e.getMessage();
+
+              lmLogger.warn( msg );
+              lmLogger.info( "Trying next phase: " + currentPhase.nextPhase() );
+              currentPhase = iterateLifecycle();
+            }
+          }
+          else // No clients, so move onto the next phase
+          {
+            // Notify listener phase has started and stopped
+            lifecycleListener.onLifecyclePhaseCompleted( currentPhase );
+            lifecycleListener.onLifecyclePhaseCompleted( currentPhase );
+            
             currentPhase = iterateLifecycle();
           }
+        }
       }
     }
     
@@ -247,10 +277,6 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
           windingCurrPhaseDown = false;
           String msg = "Did not wind-down this phase: " + windDownPhase.toString() + e.getMessage();
           lmLogger.info( msg );
-
-          try { windDownPhase.hardStop(); }
-          catch ( Exception hs )
-          { lmLogger.error( "Could not stop phase " + windDownPhase.toString() ); }
         }
     }
     else
@@ -270,10 +296,18 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
         
         // ...before trying a controlled stop
         try
-        { phase.controlledStop(); } 
-        catch ( Exception e ) { phase.hardStop(); }
+        { phase.controlledStop(); }
+        // If a controlled stop is not possible, just notify end of phase
+        catch ( Exception e )
+        { 
+          phase.hardStop();
+          lifecycleListener.onLifecyclePhaseCompleted( currentPhase );
+        }
       }
     }
+    
+    // Clean up deferred clients
+    phaseDeferredClients.clear();
   }
   
   public void tryPullMetric( EMClient client, UUID measurementSetID ) throws Exception
@@ -436,37 +470,69 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   
   // EMConnectionManagerListener -----------------------------------------------
   @Override
-  public void onClientRegistered( EMClientEx client )
+  public void onClientRegistered( EMClientEx client, boolean reconnected )
   {
-    // Attach client to GeneratorDiscoveryPhase
-    if ( client          != null && 
-         lifecyclePhases != null &&
-         currentPhase    == EMPhase.eEMUnknownPhase ) // Only register client if we've not started a life-cycle
+    // Check client and phases are ok
+    if ( client != null ) 
     {
-      AbstractEMLCPhase discovery = 
+      client.setIsConnected( true );
+      lifecycleListener.onClientConnected( client, reconnected );
+          
+      // If the experiment (proper has not started, just add the client)
+      if ( currentPhase == EMPhase.eEMUnknownPhase )
+      {
+        AbstractEMLCPhase discovery = 
           lifecyclePhases.get( EMPhase.eEMDiscoverMetricGenerators );
-      
-      if ( discovery != null )
-        if ( discovery.addClient( client ) )
+
+        if ( !discovery.addClient( client ) )
+          lmLogger.error( "Could not add client to discovery phase (at connection time)" );
+      }
+      // If the experiment process has already started, flag to accelerate the client
+      // through phases already completed so it can catch up
+      else if ( currentPhase != EMPhase.eEMProtocolComplete )
+      {
+        // We'll need to do the preliminary acknowledgements before accelerating
+        // if this client is already known to us
+        if ( reconnected )
         {
-          client.setIsConnected( true );
-          lifecycleListener.onClientConnected( client );
+          AbstractEMLCPhase discovery = 
+                  lifecyclePhases.get( EMPhase.eEMDiscoverMetricGenerators );
+          
+          discovery.setupClientInterface( client );
+          
+          IEMDiscovery monFace = client.getDiscoveryInterface();
+          monFace.registrationConfirmed( true,
+                                         currentExperiment.getUUID(),
+                                         currentExperiment.getExperimentID(),
+                                         currentExperiment.getName(),
+                                         currentExperiment.getDescription(),
+                                         currentExperiment.getStartTime() );
         }
+        
+        client.setIsPhaseAccelerating( true );
+        advanceClientPhase( client );
+      }
     }
+    else lmLogger.error( "Could not register client; client is null" );
   }
   
   // GeneratorDiscoveryPhaseListener -------------------------------------------
   @Override
   public void onClientPhaseSupportReceived( EMClientEx client )
   {
-    EnumSet<EMPhase> clientPhases = client.getCopyOfSupportedPhases();
-    Iterator<EMPhase> phaseIt = clientPhases.iterator();
-    
-    while ( phaseIt.hasNext() )
+    // Do not try to add accelerating clients into 'future' phases - the experiment
+    // may already be in one of these but the client will not be ready for it.
+    if ( !client.isPhaseAccelerating() )
     {
-      AbstractEMLCPhase phase = lifecyclePhases.get( phaseIt.next() );
-      if ( phase != null )
-        phase.addClient( client );
+      EnumSet<EMPhase> clientPhases = client.getCopyOfSupportedPhases();
+      Iterator<EMPhase> phaseIt = clientPhases.iterator();
+
+      while ( phaseIt.hasNext() )
+      {
+        AbstractEMLCPhase phase = lifecyclePhases.get( phaseIt.next() );
+        if ( phase != null )
+          phase.addClient( client );
+      }
     }
   }
   
@@ -514,8 +580,18 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
     AbstractEMLCPhase thisPhase = lifecyclePhases.get( currentPhase );
     if ( thisPhase != null ) thisPhase.onClientHasBeenDeregistered( client );
     
+    // And from the deferred client list (may or may not be in there)
+    phaseDeferredClients.remove( client.getID() );
+    
     // Finally, notify listener of this disconnection
     lifecycleListener.onClientDisconnected( client );
+  }
+  
+  @Override
+  public void onDiscoveryPhaseCompleted( EMClientEx client )
+  {
+    if ( client.isPhaseAccelerating() )
+      advanceClientPhase( client );
   }
   
   @Override
@@ -527,9 +603,16 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   
   // EMNMetricGenSetupPhaseListener --------------------------------------------
   @Override
-  public void onMetricGenSetupResult( EMClient client, boolean success )
+  public void onMetricGenSetupResult( EMClientEx client, boolean success )
   {
     lifecycleListener.onClientSetupResult( client, success );
+  }
+  
+  @Override
+  public void onSetupPhaseCompleted( EMClientEx client )
+  {
+    if ( client.isPhaseAccelerating() )
+      advanceClientPhase( client );
   }
   
   @Override
@@ -556,6 +639,13 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   public void onGotMetricData( EMClientEx client, Report report )
   {
     lifecycleListener.onGotMetricData( client, report );
+  }
+  
+  @Override
+  public void onLiveMonitorPhaseCompleted( EMClientEx client )
+  {
+    if ( client.isPhaseAccelerating() )
+      advanceClientPhase( client );
   }
   
   @Override
@@ -592,6 +682,13 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   }
   
   @Override
+  public void onPostReportPhaseCompleted( EMClientEx client )
+  {
+    if ( client.isPhaseAccelerating() )
+      advanceClientPhase( client );
+  }
+  
+  @Override
   public void onPostReportPhaseCompleted()
   {
     windingCurrPhaseDown = false;
@@ -606,9 +703,138 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   }
 
   @Override
+  public void onTearDownPhaseCompleted( EMClientEx client )
+  {
+    // We don't actually need to accelerate the client any further here
+  }
+  
+  @Override
   public void onTearDownPhaseCompleted()
   {
     windingCurrPhaseDown = false;
     lifecycleListener.onLifecyclePhaseCompleted( EMPhase.eEMTearDown );
+  }
+  
+  // Private methods -----------------------------------------------------------
+  private void advanceClientPhase( EMClientEx client )
+  {
+    EMPhase targetClientPhase = client.getCurrentPhaseActivity();
+    boolean deferClient       = true;
+        
+    // If client is behind the current phase, then try accelerating to the next
+    // phase they support (before the current, active phase)
+    if ( targetClientPhase.compareTo(currentPhase) < 0 )
+    {
+      targetClientPhase = targetClientPhase.nextPhase();
+      
+      while ( targetClientPhase != EMPhase.eEMProtocolComplete )
+      {
+        // Found a phase the client supports, so stop searching
+        if ( client.supportsPhase(targetClientPhase) ) { deferClient = false; break; }
+        
+        // We've got the current phase (client doesn't support it, so defer)
+        if ( targetClientPhase == currentPhase ) break;
+        
+        // Advance to next phase to test
+        targetClientPhase = targetClientPhase.nextPhase();
+      }
+    }
+    else deferClient = false; // Client is already aligned with current phase
+                              // So do not defer
+    
+    // Defer the client for later phases if we can't accelerate it yet
+    if ( deferClient )
+    {
+      UUID id = client.getID();
+      
+      if ( !phaseDeferredClients.containsKey(id) )
+        phaseDeferredClients.put( id, client );
+    }
+    else // Otherwise either accelerate or de-accelerate the client
+    {
+      // If the next phase for this client is the current one, de-accelerate
+      if ( targetClientPhase == currentPhase )
+      {
+        lifecycleListener.onClientStartedPhase( client, currentPhase );
+        deaccelerateClient( client );
+      }
+      else
+      {
+        // Otherwise, push them on
+        lifecycleListener.onClientStartedPhase( client, targetClientPhase );
+        accelerateClient( client, targetClientPhase ); 
+      }
+    }
+  }
+  
+  private void accelerateClient( EMClientEx client, EMPhase nextPhase )
+  {
+    AbstractEMLCPhase accPhase = lifecyclePhases.get( nextPhase );
+    String accelProblem = null;
+    
+    if ( accPhase != null )
+      try
+      { accPhase.accelerateClient( client ); }
+      catch ( Exception e ) { accelProblem = "Phase could not accelerate client" + e.getMessage(); }
+    else
+      accelProblem = "Could not find phase to accelerate to!";
+
+    // Report acceleration problems
+    if ( accelProblem != null )
+      lmLogger.error( "Could not acclerate client " + client.getName() +
+                      "into phase " + nextPhase.name() );
+  }
+  
+  private void deaccelerateClient( EMClientEx client )
+  {
+    // Add the client to the remaining phases which it supports (need to accelerate
+    // into current one as it may have already started)
+    addClientToRemainingPhases( client, false );
+    
+    // Formally de-accelerate the client...
+    client.setIsPhaseAccelerating( false );
+    
+    // ... and accelerate them (for the last time) into the current phase
+    accelerateClient( client, currentPhase );    
+  }
+  
+  private void addClientToRemainingPhases( EMClientEx client, boolean addToCurrent )
+  {
+    // Add client into the remaining phases for the experiment (possibly including the current one)
+    EMPhase trailPhase = addToCurrent ? currentPhase : currentPhase.nextPhase();
+    
+    while ( trailPhase != EMPhase.eEMProtocolComplete )
+    {
+      // Add client to phase if it supports it
+      if ( client.supportsPhase(trailPhase) )
+      {
+        AbstractEMLCPhase phase = lifecyclePhases.get( trailPhase );
+    
+        if ( phase != null )
+          phase.addClient( client );
+      }
+      
+      trailPhase = trailPhase.nextPhase();
+    }
+  }
+  
+  private void tryDeferredClientsForRemaingPhases()
+  {
+    // Try engaging deferred clients into the current phase
+    Iterator<EMClientEx> clientIt = phaseDeferredClients.values().iterator();
+    while ( clientIt.hasNext() )
+    {
+      EMClientEx client = clientIt.next();
+      
+      if ( client.supportsPhase(currentPhase) )
+      {
+        // Pull them out of a deferred, accelerated state
+        phaseDeferredClients.remove( client.getID() );
+        client.setIsPhaseAccelerating( false );
+        
+        // Reinsert client into remaining phases (including the current one; unstarted)
+        addClientToRemainingPhases( client, true );
+      }
+    }
   }
 }

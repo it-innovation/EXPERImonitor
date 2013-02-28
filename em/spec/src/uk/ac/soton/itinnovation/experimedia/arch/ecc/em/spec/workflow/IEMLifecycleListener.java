@@ -35,9 +35,11 @@ import java.util.UUID;
 
 public interface IEMLifecycleListener
 {
-  void onClientConnected( EMClient client );
+  void onClientConnected( EMClient client, boolean reconnected );
   
   void onClientDisconnected( EMClient client );
+  
+  void onClientStartedPhase( EMClient client, EMPhase phase );
   
   void onLifecyclePhaseStarted( EMPhase phase );
   

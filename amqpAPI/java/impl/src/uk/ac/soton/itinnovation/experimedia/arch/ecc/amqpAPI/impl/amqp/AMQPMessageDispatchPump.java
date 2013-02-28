@@ -39,6 +39,7 @@ public class AMQPMessageDispatchPump implements Runnable,
                                                 
 {
   private final Logger pumpLogger  = Logger.getLogger( AMQPMessageDispatchPump.class );
+  private final Object pumpingLock = new Object();
   private final Object listLock    = new Object();
   private final Object waitingLock = new Object();
   
@@ -74,8 +75,11 @@ public class AMQPMessageDispatchPump implements Runnable,
   }
   
   @Override
-  public synchronized void stopPump()
-  { isPumping = false; }
+  public void stopPump()
+  {
+    synchronized ( pumpingLock )
+    { isPumping = false; }
+  }
   
   @Override
   public void emptyPump()
@@ -85,8 +89,15 @@ public class AMQPMessageDispatchPump implements Runnable,
   }
   
   @Override
-  public synchronized boolean isPumping()
-  { return isPumping; }
+  public boolean isPumping()
+  {
+    boolean result = false;
+    
+    synchronized ( pumpingLock )
+    { result = isPumping; }
+    
+    return result;
+  }
   
   @Override
   public void addDispatch( IAMQPMessageDispatch dispatch )
@@ -118,7 +129,12 @@ public class AMQPMessageDispatchPump implements Runnable,
     {
       // If we don't have any dispatches waiting, cool it for a bit
       while ( !dispatchesWaiting )
+      {
+        // Make sure we stop waiting altogether if we are no longer pumping
+        if ( !isPumping ) break;
+        
         try { Thread.sleep(50); } catch (InterruptedException ie) { break; }
+      }
       
       // Make a safe copy of the current list for processing (this may change at run-time)
       LinkedList<AMQPMessageDispatch> currentDispatches = new LinkedList<AMQPMessageDispatch>();
@@ -146,6 +162,8 @@ public class AMQPMessageDispatchPump implements Runnable,
         }
       }
     }
+    
+    pumpLogger.info( "Pump: " + pumpName + " has stopped" );
   }
   
   // Protected methods ---------------------------------------------------------
@@ -158,19 +176,25 @@ public class AMQPMessageDispatchPump implements Runnable,
   // Private methods -----------------------------------------------------------
   private void startPumpThread()
   {
-    pumpThread = new Thread( this, "DispatchPump (" + pumpName + ")" );
-    
-    switch ( pumpPriority )
+    synchronized ( pumpingLock )
     {
-      case HIGH    : pumpThread.setPriority( Thread.MAX_PRIORITY ); break;
-      
-      case NORMAL  : pumpThread.setPriority( Thread.NORM_PRIORITY ); break;
-      
-      case MINIMUM:
-           default : pumpThread.setPriority( Thread.MIN_PRIORITY ); break;
+      pumpThread = new Thread( this, "DispatchPump (" + pumpName + ")" );
+    
+      switch ( pumpPriority )
+      {
+        case HIGH    : pumpThread.setPriority( Thread.MAX_PRIORITY ); break;
+
+        case NORMAL  : pumpThread.setPriority( Thread.NORM_PRIORITY ); break;
+
+        case MINIMUM:
+             default : pumpThread.setPriority( Thread.MIN_PRIORITY ); break;
+      }
+
+      isPumping = true;
     }
     
-    isPumping = true;
     pumpThread.start();
+    
+    pumpLogger.info( "Pump: " + pumpName + " has started" );
   }
 }

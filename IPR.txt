@@ -1,81 +1,81 @@
 This software distribution is licenced under the terms found in the file ITInnov-EXPERIMEDIA-licence-v1.0.txt
 
-The IT Innovation software is the source code and the following associated jars:
+The IT Innovation software is the source code and the following associated jars/war:
 
-experimedia-arch-ecc-common-dataModel-experiment-1.0-SNAPSHOT.jar
-experimedia-arch-ecc-common-dataModel-metrics-1.0-SNAPSHOT.jar
-experimedia-arch-ecc-common-dataModel-monitor-1.0-SNAPSHOT.jar
-experimedia-arch-ecc-edm-factory-1.0-SNAPSHOT.jar
-experimedia-arch-ecc-edm-impl-1.0-SNAPSHOT.jar
-experimedia-arch-ecc-edm-spec-1.0-SNAPSHOT.jar
-experimedia-arch-ecc-em-factory-1.0-SNAPSHOT.jar
-experimedia-arch-ecc-em-impl-1.0-SNAPSHOT.jar
-experimedia-arch-ecc-em-spec-1.0-SNAPSHOT.jar
-experimedia-arch-ecc-samples-shared-1.0-SNAPSHOT.jar
-experimedia-arch-ecc-amqpAPI-impl-1.0-SNAPSHOT.jar
-experimedia-arch-ecc-amqpAPI-spec-1.0-SNAPSHOT.jar
+build-tools-1.0.jar
+experimedia-arch-ecc-amqpAPI-impl-1.1-SNAPSHOT.jar
+experimedia-arch-ecc-amqpAPI-spec-1.1-SNAPSHOT.jar
+experimedia-arch-ecc-common-dataModel-experiment-1.1-SNAPSHOT.jar
+experimedia-arch-ecc-common-dataModel-metrics-1.1-SNAPSHOT.jar
+experimedia-arch-ecc-common-dataModel-monitor-1.1-SNAPSHOT.jar
+experimedia-arch-ecc-common-dataModel-provenance-1.1-SNAPSHOT.jar
+experimedia-arch-ecc-edm-factory-1.1-SNAPSHOT.jar
+experimedia-arch-ecc-edm-impl-1.1-SNAPSHOT.jar
+experimedia-arch-ecc-edm-spec-1.1-SNAPSHOT.jar
+experimedia-arch-ecc-edm-test-1.1-SNAPSHOT.jar
+experimedia-arch-ecc-em-factory-1.1-SNAPSHOT.jar
+experimedia-arch-ecc-em-impl-1.1-SNAPSHOT.jar
+experimedia-arch-ecc-em-spec-1.1-SNAPSHOT.jar
+experimedia-arch-ecc-em-test-1.1-SNAPSHOT.jar
+experimedia-arch-ecc-samples-basicECCClient-1.1-SNAPSHOT.jar
+experimedia-arch-ecc-samples-basicECCContainer-1.1-SNAPSHOT.jar
+experimedia-arch-ecc-samples-headlessECCClient-1.1-SNAPSHOT.jar
+experimedia-arch-ecc-samples-metricGeneratorExamples-1.1-SNAPSHOT.jar
+experimedia-arch-ecc-samples-shared-1.1-SNAPSHOT.jar
 
-This software requires various third-party libraries to compile and execute.  These libraries and their associated licences are:
+robust-cat-core-components-viewEngine-spec-uif-1.3-SNAPSHOT.jar
+
+experimedia-arch-ecc-eccDash-1.1-SNAPSHOT.war
+
+
+This software requires various third-party libraries to compile and execute.
+These libraries and their associated licences are:
 
 
 The Apache Software License, Version 2.0
-
-ezmorph-1.0.6.jar
+-----------------------------------------------
 gson-2.2.2.jar
-jackson-core-asl-1.9.4.jar
-jackson-mapper-asl-1.9.4.jar
-json-lib-2.4-jdk15.jar
 log4j-1.2.17.jar
-org.osgi.core-4.0.0.jar
-spring-aop-3.0.5.RELEASE.jar
-spring-asm-3.0.5.RELEASE.jar
-spring-beans-3.0.5.RELEASE.jar
-spring-context-3.0.5.RELEASE.jar
-spring-context-support-3.0.5.RELEASE.jar
-spring-core-3.0.5.RELEASE.jar
-spring-expression-3.0.5.RELEASE.jar
-spring-jdbc-3.0.5.RELEASE.jar
-spring-orm-3.0.5.RELEASE.jar
-spring-security-acl-3.0.5.RELEASE.jar
-spring-security-config-3.0.5.RELEASE.jar
-spring-security-core-3.0.5.RELEASE.jar
-spring-security-taglibs-3.0.5.RELEASE.jar
-spring-security-web-3.0.5.RELEASE.jar
-spring-tx-3.0.5.RELEASE.jar
-spring-web-3.0.5.RELEASE.jar
-spring-webmvc-3.0.5.RELEASE.jar
-cglib-nodep-2.2.jar
-commons-beanutils-1.8.0.jar
-commons-collections-3.2.1.jar
-commons-lang-2.5.jar
-commons-logging-1.1.1.jar
+vaadin-6.8.2.jar
+gwt-user-2.3.0.jar
+gwt-dev-2.3.0.jar
+validation-api-1.0.0.GA.jar
+validation-api-1.0.0.GA-sources.jar
+joda-time-2.1.jar
+invient-charts-0.8.6.jar
+
+
+CPL 1.0
+-----------------------------------------------
+junit-4.10.jar
+
 
 GPL v2 / MPL v1.1
-
+-----------------------------------------------
 amqp-client-2.8.6.jar
 
+
 CDDL / GPLv2 with classpath exception
+-----------------------------------------------
+servlet-api-2.3.jar
 
-javax.servlet-api-3.0.1.jar
-
-LGPLv3.0 / LGPLv2.1 / CDDL license 1.0 / EPL license 1.0 
-
-org.restlet.ext.json-2.0.5.jar
-org.restlet.ext.servlet-2.0.1.jar
-org.restlet.ext.spring-2.0.1.jar
-org.restlet.lib.org.json-2.0.jar
-org.restlet-2.0.1.jar
 
 BSD
-
+-----------------------------------------------
 postgresql-9.1-901.jdbc4.jar
 
-Public domain
 
-aopalliance-1.0.jar
+Creative Commons Attribution-NonCommercial 3.0
+-----------------------------------------------
+Highcharts javascript library 
+
+
+Oracle Binary Code License Agreement
+-----------------------------------------------
+Java 1.6
+
+
+Public domain
+-----------------------------------------------
 base64-2.3.8.jar
 
-Eclipse Public License - v 1.0
-
-aspectjrt-1.6.8.jar
-aspectjweaver-1.6.8.jar

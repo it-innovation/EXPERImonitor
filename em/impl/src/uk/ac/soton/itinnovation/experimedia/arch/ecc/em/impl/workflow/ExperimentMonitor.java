@@ -48,20 +48,22 @@ public class ExperimentMonitor implements IExperimentMonitor,
 {
   private final Logger emLogger = Logger.getLogger( ExperimentMonitor.class );
   
-  private IExperimentMonitor.eStatus monitorStatus = IExperimentMonitor.eStatus.NOT_YET_INITIALISED;
-  private AMQPBasicChannel           amqpChannel;
-  private UUID                       entryPointID;
+  private AMQPConnectionFactory amqpConnectionFactory;
+  private AMQPBasicChannel      amqpChannel;
+  private UUID                  entryPointID;
   
   private EMConnectionManager           connectionManager;
   private EMLifecycleManager            lifecycleManager;
   private HashSet<IEMLifecycleListener> lifecycleListeners;
   
+  private IExperimentMonitor.eStatus monitorStatus = IExperimentMonitor.eStatus.NOT_YET_INITIALISED;
   private boolean isResettingMonitor;
   
   
   public ExperimentMonitor()
   {
-    lifecycleListeners = new HashSet<IEMLifecycleListener>();
+    lifecycleListeners    = new HashSet<IEMLifecycleListener>();
+    amqpConnectionFactory = new AMQPConnectionFactory();
   }
  
   // IExperimentMonitor --------------------------------------------------------
@@ -108,6 +110,32 @@ public class ExperimentMonitor implements IExperimentMonitor,
       initialiseManagers();
     }
     catch ( Exception e ) { throw e; }
+  }
+  
+  @Override
+  public void shutDown()
+  {
+    try
+    {
+      if ( connectionManager != null ) connectionManager.shutdown();
+      if ( lifecycleManager != null )  lifecycleManager.shutdown();
+      
+      amqpChannel.close();
+      amqpChannel = null;
+      
+      amqpConnectionFactory.closeDownConnection();
+    }
+    catch ( Exception e )
+    {
+      emLogger.error( "Trying to shut down Experiment monitor & lifecycle, but: " +
+                      e.getMessage() ); 
+    }
+  }
+  
+  @Override
+  public EMClient getClientByID( UUID id )
+  {
+    return connectionManager.getClient( id );
   }
   
   @Override
@@ -269,12 +297,12 @@ public class ExperimentMonitor implements IExperimentMonitor,
   
   // IEMLifecycleListener ------------------------------------------------------
   @Override
-  public void onClientConnected( EMClient client )
+  public void onClientConnected( EMClient client, boolean reconnected )
   {
     Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
     
     while ( listIt.hasNext() )
-    { listIt.next().onClientConnected( client ); }
+    { listIt.next().onClientConnected( client, reconnected ); }
   }
   
   @Override
@@ -286,6 +314,15 @@ public class ExperimentMonitor implements IExperimentMonitor,
     
     while ( listIt.hasNext() )
     { listIt.next().onClientDisconnected( client ); }
+  }
+  
+  @Override
+  public void onClientStartedPhase( EMClient client, EMPhase phase )
+  {
+    Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
+    
+    while ( listIt.hasNext() )
+    { listIt.next().onClientStartedPhase(client, phase); }
   }
   
   @Override
@@ -438,27 +475,30 @@ public class ExperimentMonitor implements IExperimentMonitor,
   // Private methods -----------------------------------------------------------
   private void basicInitialise( String rabbitServerIP ) throws Exception
   {
-    AMQPConnectionFactory amqpCF = new AMQPConnectionFactory();
+   if ( amqpConnectionFactory.isConnectionValid() )
+     throw new Exception( "Already connected to AMQP Bus" );
     
-    if ( !amqpCF.setAMQPHostIPAddress(rabbitServerIP) )
+    if ( !amqpConnectionFactory.setAMQPHostIPAddress(rabbitServerIP) )
       throw new Exception( "Could not set the server IP correctly" );
     
-    amqpCF.connectToAMQPHost();
-    if ( !amqpCF.isConnectionValid() ) throw new Exception( "Could not connect to Rabbit server" );
+    amqpConnectionFactory.connectToAMQPHost();
+    if ( !amqpConnectionFactory.isConnectionValid() ) throw new Exception( "Could not connect to Rabbit server" );
     
-    amqpChannel = amqpCF.createNewChannel();
+    amqpChannel = amqpConnectionFactory.createNewChannel();
     if ( amqpChannel == null ) throw new Exception( "Could not create AMQP channel" );
   }
   
   private void configInitialise( Properties emProps ) throws Exception
   {
-    AMQPConnectionFactory amqpCF = new AMQPConnectionFactory();
+    if ( amqpConnectionFactory.isConnectionValid() )
+     throw new Exception( "Already connected to AMQP Bus" );
+    
     try
     {
-      amqpCF.connectToAMQPHost( emProps );
-      if ( !amqpCF.isConnectionValid() ) throw new Exception( "Could not connect to Rabbit server" );
+      amqpConnectionFactory.connectToAMQPHost( emProps );
+      if ( !amqpConnectionFactory.isConnectionValid() ) throw new Exception( "Could not connect to Rabbit server" );
       
-      amqpChannel = amqpCF.createNewChannel();
+      amqpChannel = amqpConnectionFactory.createNewChannel();
       if ( amqpChannel == null ) throw new Exception( "Could not create AMQP channel" );
     }
     catch ( Exception e ) { throw e; }

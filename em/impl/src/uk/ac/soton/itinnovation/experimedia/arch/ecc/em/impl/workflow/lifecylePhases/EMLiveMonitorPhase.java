@@ -44,13 +44,15 @@ import java.util.*;
 public class EMLiveMonitorPhase extends AbstractEMLCPhase
                                 implements IEMLiveMonitor_ProviderListener
 {
-  private EMLiveMonitorPhaseListener phaseListener;
+  private final Object controlledStopLock = new Object();
+  private final Object acceleratorLock    = new Object();
   
+  private EMLiveMonitorPhaseListener phaseListener;
+
   private HashSet<UUID> clientPushGroup;
   private HashSet<UUID> clientPullGroup;
   
-  private boolean       monitorStopping = false;
-  private final Object  controlledStopLock = new Object();
+  private volatile boolean monitorStopping; // Atomic
   
   
   public EMLiveMonitorPhase( AMQPBasicChannel channel,
@@ -59,10 +61,10 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
   {
     super( EMPhase.eEMLiveMonitoring, channel, providerID );
     
-    phaseListener = listener;
-    
+    phaseListener   = listener;
     clientPushGroup = new HashSet<UUID>();
     clientPullGroup = new HashSet<UUID>();
+    phaseMsgPump.startPump();
     
     phaseState = "Ready to start live monitor";
   }
@@ -71,10 +73,15 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
   @Override
   public void reset()
   {
+    synchronized ( controlledStopLock )
+    {
+      clientPushGroup.clear();
+      clientPullGroup.clear();
+    }
+    
     clearAllClients();
     
-    clientPushGroup.clear();
-    clientPullGroup.clear();
+    phaseActive     = false;
     monitorStopping = false;
   }
   
@@ -84,27 +91,30 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
     if ( phaseActive ) throw new Exception( "Phase already active" );
     if ( !hasClients() ) throw new Exception( "No clients available for this phase" );
     
-    // Create the live monitor interface
-    for ( EMClientEx client : getCopySetOfCurrentClients() )
+    phaseActive     = true;
+    monitorStopping = false;
+    
+    // Set up live monitoring clients
+    synchronized ( acceleratorLock )
     {
-      AMQPMessageDispatch dispatch = new AMQPMessageDispatch();
-      phaseMsgPump.addDispatch( dispatch );
+      Set<EMClientEx> currClients   = getCopySetOfCurrentClients();
+      Iterator<EMClientEx> clientIt = currClients.iterator();
       
-      EMLiveMonitor face = new EMLiveMonitor( emChannel, dispatch,
-                                              emProviderID, client.getID(), true );
+      // Create the live monitoring interface
+      while ( clientIt.hasNext() )
+      {
+        EMClientEx client = clientIt.next();
+        client.setCurrentPhaseActivity( EMPhase.eEMLiveMonitoring );
+        setupClientInterface( client );
+      }
       
-      face.setProviderListener( this );
-      client.setLiveMonitorInterface( face );
-    }
-    
-    phaseMsgPump.startPump();
-    phaseActive = true;
-    
-    // Request clients do the same
-    for ( EMClientEx client: getCopySetOfCurrentClients() )
-      client.getDiscoveryInterface().createInterface( EMInterfaceType.eEMLiveMonitor );
+      // Request clients do the same
+      for ( EMClientEx client: getCopySetOfCurrentClients() )
+        client.getDiscoveryInterface().createInterface( EMInterfaceType.eEMLiveMonitor );
+    } 
     
     phaseState = "Waiting for clients to signal ready to start monitoring";
+    //... remainder of protocol implemented through events
   }
   
   @Override
@@ -112,17 +122,19 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
   {
     if ( phaseActive && !monitorStopping )
     {
+      phaseActive     = false;
       monitorStopping = true;
-    
+      
       // Get a copy of pushers and pullers
       HashSet<UUID> copyOfPushers = new HashSet<UUID>();
       HashSet<UUID> copyOfPullers = new HashSet<UUID>();
+      
       synchronized ( controlledStopLock )
       {
         copyOfPushers.addAll( clientPushGroup );
         copyOfPullers.addAll( clientPullGroup );
       }
-
+      
       // Stop pushing clients
       if ( !copyOfPushers.isEmpty() )
       {
@@ -147,13 +159,13 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
         }
 
         // We can clear the pulling list immediately
-        synchronized( controlledStopLock )
+        synchronized ( controlledStopLock )
         { clientPullGroup.clear(); }
       }
       
-      // Now call a hard-stop
-      hardStop();
+      // Consider live monitoring phase completed
       monitorStopping = false;
+      phaseListener.onLiveMonitorPhaseCompleted();
     }
     else throw new Exception( "Phase already stopped or inactive" );
   }
@@ -161,10 +173,52 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
   @Override
   public void hardStop()
   {
+    monitorStopping = false;
+    phaseActive     = false;
     phaseMsgPump.stopPump();
-    phaseActive = false;
-    
-    if ( phaseListener != null ) phaseListener.onLiveMonitorPhaseCompleted();
+  }
+  
+  @Override
+  public void setupClientInterface( EMClientEx client )
+  {
+    if ( client.getLiveMonitorInterface() == null )
+    {
+      AMQPMessageDispatch dispatch = new AMQPMessageDispatch();
+      phaseMsgPump.addDispatch( dispatch );
+      
+      EMLiveMonitor face = new EMLiveMonitor( emChannel, dispatch,
+                                              emProviderID, client.getID(), true );
+      
+      face.setProviderListener( this );
+      client.setLiveMonitorInterface( face );
+    }
+  }
+  
+  @Override
+  public void accelerateClient( EMClientEx client ) throws Exception
+  {
+    if ( client == null ) throw new Exception( "Cannot accelerate client (live monitoring) - client is null" );
+   
+    synchronized ( acceleratorLock )
+    {
+      // Always update the client's current phase
+      client.setCurrentPhaseActivity( EMPhase.eEMLiveMonitoring );
+      
+      // Only engage client if we're actually active and not trying to stop
+      if ( phaseActive && !monitorStopping ) 
+      {
+        // Need to manually add/setup accelerated clients
+        addClient( client );
+        setupClientInterface( client );
+      
+        client.getDiscoveryInterface().createInterface( EMInterfaceType.eEMLiveMonitor );
+      }
+      else // Client is too late.. refer them out of this phase immediately
+      {
+        phaseListener.onLiveMonitorPhaseCompleted( client );
+        phaseLogger.info( "Tried accelerating client (live monitoring) but we're not active or we are already stopping" );
+      }
+    }
   }
   
   @Override
@@ -172,7 +226,8 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
   {
     // Safety first
     if ( client == null ) throw new Exception( "Could not time-out: client is null" );
-    if ( !phaseActive )   throw new Exception( "Could not time-out: phase not active" );     
+    
+    if ( monitorStopping ) throw new Exception( "Could not time-out: monitoring phase is already stopping" );
     
     // Check this client is registered with this phase first
     if ( isClientRegisteredInPhase(client) )
@@ -206,10 +261,13 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
     if ( client != null )
     {
       UUID clientID = client.getID();
-      
-      clientPushGroup.remove( clientID );
-      clientPullGroup.remove( clientID );
-      removeClient( clientID );
+     
+      synchronized ( controlledStopLock )
+      {
+        clientPushGroup.remove( clientID );
+        clientPullGroup.remove( clientID );
+        removeClient( clientID );
+      }
     }
   }
   
@@ -217,14 +275,16 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
   @Override
   public void onNotifyReadyToPush( UUID senderID )
   {
-    if ( phaseActive && !monitorStopping )
+    if ( !monitorStopping )
     {
       EMClientEx client = getClient( senderID );
       
       if ( client != null )
       {
         client.setIsPushCapable( true );
-        clientPushGroup.add( client.getID() );
+        
+        synchronized ( controlledStopLock )
+        { clientPushGroup.add( client.getID() ); }
         
         // Notify of client behaviour
         phaseListener.onClientDeclaredCanPush( client );
@@ -238,49 +298,47 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
   @Override
   public void onPushMetric( UUID senderID, Report report )
   {
-    if ( phaseActive )
+    EMClientEx client = getClient( senderID );
+
+    // Only allow clients who have declared they are going to push
+    boolean clientInPushGroup = false;
+    synchronized ( controlledStopLock )
+    { clientInPushGroup = clientPushGroup.contains( client.getID() ); }
+    
+    if ( client != null && clientInPushGroup )
     {
-      EMClientEx client = getClient( senderID );
-      
-      // Only allow clients who have declared they are going to push
-      if ( client != null && clientPushGroup.contains( client.getID() ) )
-      {
-        // Make sure we don't have any empty report...
-        MeasurementSet mSet = report.getMeasurementSet();
-        
-        //... before sending
-        if ( phaseListener != null && mSet != null )
-          phaseListener.onGotMetricData( client, report );
-        
-        // Let client know we've received the data
-        client.getLiveMonitorInterface().notifyPushReceived( report.getUUID() );
-      }
+      // Make sure we don't have any empty report before sending
+      if ( report.getMeasurementSet() != null )
+        phaseListener.onGotMetricData( client, report );
+
+      // Let client know we've received the data
+      client.getLiveMonitorInterface().notifyPushReceived( report.getUUID() );
     }
   }
   
   @Override
   public void onNotifyPushingCompleted( UUID senderID )
   {
-    if ( phaseActive )
-    {
-      EMClientEx client = getClient( senderID );
-      
-      if ( client != null )
-        clientPushGroup.remove( client.getID() );
-    }
+    EMClientEx client = getClient( senderID );
+
+    if ( client != null )
+      synchronized ( controlledStopLock )
+      { clientPushGroup.remove( client.getID() ); }
   }
   
   @Override
   public void onNotifyReadyForPull( UUID senderID )
   {
-    if ( phaseActive && !monitorStopping )
+    if ( !monitorStopping )
     {
       EMClientEx client = getClient( senderID );
       
       if ( client != null )
       {
         client.setIsPullCapable( true );
-        clientPullGroup.add( client.getID() );
+        
+        synchronized ( controlledStopLock )
+        { clientPullGroup.add( client.getID() ); }
         
         // Notify of client behaviour
         phaseListener.onClientDeclaredCanBePulled( client );
@@ -291,46 +349,43 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
   @Override
   public void onSendPulledMetric( UUID senderID, Report report )
   {
-    if ( phaseActive )
-    {
-      EMClientEx client = getClient( senderID );
-      
-      // Only allow clients who have declared they are going to be pulled
-      if ( client != null && report != null )
-      {
-        MeasurementSet mSet = report.getMeasurementSet();
-        
-        // Check we don't have an empty report...
-        if ( mSet != null )
-        {
-          // Remove ID from current pulling set
-          client.removePullingMeasurementSetID( mSet.getUUID() );
+    EMClientEx client = getClient( senderID );
 
-          // Notify listeners
-          if ( phaseListener != null ) 
-            phaseListener.onGotMetricData( client, report );
-        }
-        else // We didn't get any actual data, so we'll have to assume that
-             // this was the report we asked for
-        {
-          phaseLogger.error( "Pulled report contained NULL MeasurementSet" );
-          client.removePullingMeasurementSetID( client.getCurrentRequestedMeasurementSetID() );
-        }
-        
-        // Tell the client we got the report
-        IEMLiveMonitor monitor = client.getLiveMonitorInterface();
-        monitor.notifyPullReceived( report.getUUID() );
-        
-        // If there are outstanding metrics to pull, make another request (if we're not stopping)
-        if ( !monitorStopping )
-        {
-          UUID nextMSID = client.iterateNextMSForPulling();
-        
-          if ( nextMSID != null ) monitor.pullMetric( nextMSID );
-        }
-        
+    // Only allow clients who have declared they are going to be pulled
+    if ( client != null && report != null )
+    {
+      MeasurementSet mSet = report.getMeasurementSet();
+
+      // Check we don't have an empty report...
+      if ( mSet != null )
+      {
+        // Remove ID from current pulling set
+        client.removePullingMeasurementSetID( mSet.getUUID() );
+
+        // Notify listeners
+        if ( phaseListener != null ) 
+          phaseListener.onGotMetricData( client, report );
       }
-      else phaseLogger.error( "Could not process pulled metric: NULL client or report" );
+      else // We didn't get any actual data, so we'll have to assume that
+           // this was the report we asked for
+      {
+        phaseLogger.error( "Pulled report contained NULL MeasurementSet" );
+        client.removePullingMeasurementSetID( client.getCurrentRequestedMeasurementSetID() );
+      }
+
+      // Tell the client we got the report
+      IEMLiveMonitor monitor = client.getLiveMonitorInterface();
+      monitor.notifyPullReceived( report.getUUID() );
+
+      // If there are outstanding metrics to pull, make another request (if we're not stopping)
+      if ( !monitorStopping )
+      {
+        UUID nextMSID = client.iterateNextMSForPulling();
+
+        if ( nextMSID != null ) monitor.pullMetric( nextMSID );
+      }
+
     }
+    else phaseLogger.error( "Could not process pulled metric: NULL client or report" ); 
   }
 }

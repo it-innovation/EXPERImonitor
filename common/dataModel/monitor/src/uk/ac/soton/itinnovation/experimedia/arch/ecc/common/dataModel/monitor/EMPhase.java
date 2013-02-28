@@ -30,15 +30,15 @@ import java.util.Comparator;
 
 public enum EMPhase implements Comparator
 {
-  eEMUnknownPhase             ( "Undefined EM phase"                 , 0 ),
-  eEMDiscoverMetricGenerators ( "EM Metric generator discovery phase", 1 ),
-  eEMSetUpMetricGenerators    ( "EM Metric generator set-up phase",    2 ),
-  eEMLiveMonitoring           ( "EM Metric live monitoring phase",     3 ),
-  eEMPostMonitoringReport     ( "EM Post-monitoring reporting phase",  4 ),
-  eEMTearDown                 ( "EM Monitoring tear-down phase",       5 ),
+  eEMUnknownPhase             ( "Undefined EM phase",    0 ),
+  eEMDiscoverMetricGenerators ( "Discovery phase",       1 ),
+  eEMSetUpMetricGenerators    ( "Set-up phase",          2 ),
+  eEMLiveMonitoring           ( "Live monitoring phase", 3 ),
+  eEMPostMonitoringReport     ( "Post-reporting phase",  4 ),
+  eEMTearDown                 ( "Tear-down phase",       5 ),
   
   // Always at the end of the protocol
-  eEMProtocolComplete         ( "EM Monitoring protocol is complete",  6 );
+  eEMProtocolComplete         ( "Monitoring is complete", 6 );
   
   private final int    phaseIndex;
   private final String phaseDescription;

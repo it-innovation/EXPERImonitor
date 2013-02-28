@@ -39,5 +39,7 @@ public interface EMLiveMonitorPhaseListener
   
   void onGotMetricData( EMClientEx client, Report report );
   
+  void onLiveMonitorPhaseCompleted( EMClientEx client );
+  
   void onLiveMonitorPhaseCompleted();
 }

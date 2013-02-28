@@ -80,6 +80,21 @@ public interface IExperimentMonitor
   void openEntryPoint( Properties emProps ) throws Exception;
   
   /**
+   * Explicitly shuts down the monitoring process. Disconnects all clients
+   * and tidies up all threads.
+   * 
+   */
+  void shutDown();
+  
+  /**
+   * Use this method to get a (connected) client by UUID - if it exists.
+   * 
+   * @param id - UUID of the client
+   * @return   - EMClient instance (or NULL if it does not exist)
+   */
+  EMClient getClientByID( UUID id );
+  
+  /**
    * Use this method to get the set of all known connected clients.
    * 
    * @return - Set of EMClient instances.

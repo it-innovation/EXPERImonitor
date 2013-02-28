@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
     <artifactId>experimedia-arch-ecc</artifactId>
-    <version>1.0</version> 
+    <version>1.1-SNAPSHOT</version> 
     <name>Experiment Content Component</name> 
     <packaging>pom</packaging>
     
@@ -186,7 +186,7 @@
         <module>edm</module>
         <module>samples</module>
         <module>build-tools</module>
-        <module>eccdashboard</module>
+        <module>eccDash</module>
     </modules>
     
 </project>

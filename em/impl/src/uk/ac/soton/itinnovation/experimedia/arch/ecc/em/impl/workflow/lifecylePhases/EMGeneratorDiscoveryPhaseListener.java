@@ -40,5 +40,7 @@ public interface EMGeneratorDiscoveryPhaseListener
   
   void onClientIsDisconnected( EMClientEx client );
   
+  void onDiscoveryPhaseCompleted( EMClientEx client );
+  
   void onDiscoveryPhaseCompleted();
 }

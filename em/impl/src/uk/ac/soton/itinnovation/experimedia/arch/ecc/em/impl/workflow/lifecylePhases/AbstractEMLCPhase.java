@@ -48,12 +48,13 @@ public abstract class AbstractEMLCPhase
   protected final Logger phaseLogger = Logger.getLogger( AbstractEMLCPhase.class );
   protected EMPhase      phaseType;
   protected String       phaseState;
-  protected boolean      phaseActive           = false;
   protected boolean      phaseSupportsTimeOuts = true;
  
   protected AMQPBasicChannel        emChannel;
   protected UUID                    emProviderID;
   protected AMQPMessageDispatchPump phaseMsgPump;
+  
+  protected volatile boolean phaseActive = false; // Atomic
   
   
   public EMPhase getPhaseType()
@@ -100,6 +101,10 @@ public abstract class AbstractEMLCPhase
   
   public abstract void hardStop();
   
+  public abstract void setupClientInterface( EMClientEx client );
+  
+  public abstract void accelerateClient( EMClientEx client ) throws Exception;
+  
   public abstract void timeOutClient( EMClientEx client ) throws Exception;
   
   public abstract void onClientHasBeenDeregistered( EMClientEx client );
@@ -123,7 +128,6 @@ public abstract class AbstractEMLCPhase
   {
     // Safety first
     if ( client == null ) return false;
-    if ( phaseActive )    return false;
     
     boolean result = false;
     
@@ -166,5 +170,11 @@ public abstract class AbstractEMLCPhase
     if ( getClient(client.getID()) == null ) return false;
     
     return true;
+  }
+  
+  @Override
+  protected void finalize() throws Throwable
+  {
+    phaseMsgPump.stopPump();
   }
 }

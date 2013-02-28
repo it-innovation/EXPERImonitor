@@ -96,7 +96,7 @@ public class EMController implements IEMLifecycleListener
  
   // IEMLifecycleListener ------------------------------------------------------
   @Override
-  public void onClientConnected( EMClient client )
+  public void onClientConnected( EMClient client, boolean reconnected )
   {
     if ( mainView != null )
       mainView.addConnectedClient( client );
@@ -107,6 +107,14 @@ public class EMController implements IEMLifecycleListener
   {
     if ( mainView != null )
       mainView.removeClient( client );
+  }
+  
+  @Override
+  public void onClientStartedPhase( EMClient client, EMPhase phase )
+  {
+    if ( mainView != null )
+      mainView.addLogText( "Client " + client.getName() + " started phase " +
+                           phase.toString() );
   }
   
   @Override
@@ -506,7 +514,10 @@ public class EMController implements IEMLifecycleListener
           mainView.addLogText( "Requesting missing data from client: " + client.getName() );
         }
         catch ( Exception e )
-        { emCtrlLogger.error( "Could not request data batches from client: " + e.getMessage()); }
+        {
+          mainView.addLogText( "Could not get any further data from client: " + client.getName() + " because: " + e.getMessage() );
+          emCtrlLogger.error( "Could not request data batches from client: " + e.getMessage());
+        }
       }
     }
   }

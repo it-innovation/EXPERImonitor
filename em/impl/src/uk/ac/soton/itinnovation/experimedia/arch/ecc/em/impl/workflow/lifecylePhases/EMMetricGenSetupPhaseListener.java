@@ -25,14 +25,16 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecylePhases;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMClient;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
 
 
 
 
 public interface EMMetricGenSetupPhaseListener
 {
-  void onMetricGenSetupResult( EMClient client, boolean success );
+  void onMetricGenSetupResult( EMClientEx client, boolean success );
+  
+  void onSetupPhaseCompleted( EMClientEx client );
   
   void onSetupPhaseCompleted();
 }

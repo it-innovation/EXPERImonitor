@@ -551,7 +551,7 @@ public class ECCHeadlessClient implements EMIAdapterListener
         setupMeasurementForAttribute( attr,
                                       resourceGroup, 
                                       MetricType.RATIO,
-                                      new Unit("Kilobytes"),
+                                      new Unit("Bytes"),
                                       new MemoryUsageTool(),
                                       1000 ); // Measure every second
         

@@ -41,9 +41,13 @@ import java.util.*;
 public class EMTearDownPhase extends AbstractEMLCPhase
                                      implements IEMTearDown_ProviderListener
 {
-  private EMTearDownPhaseListener phaseListener;
+  private final Object controlledStopLock = new Object();
+  private final Object acceleratorLock    = new Object();
   
-  private HashSet<UUID> clientsStillToTearDown;
+  private EMTearDownPhaseListener phaseListener;
+  private HashSet<UUID>           clientsStillToTearDown;
+  
+  private volatile boolean tearingStopping; // Atomic
   
   
   public EMTearDownPhase( AMQPBasicChannel channel,
@@ -52,9 +56,9 @@ public class EMTearDownPhase extends AbstractEMLCPhase
   {
     super( EMPhase.eEMTearDown, channel, providerID );
     
-    phaseListener = listener;
-    
+    phaseListener          = listener;
     clientsStillToTearDown = new HashSet<UUID>();
+    phaseMsgPump.startPump();
     
     phaseState = "Ready to start tear-down process";
   }
@@ -63,6 +67,9 @@ public class EMTearDownPhase extends AbstractEMLCPhase
   @Override
   public void reset()
   {
+    phaseActive     = false;
+    tearingStopping = false;
+    
     clearAllClients();
     
     clientsStillToTearDown.clear();
@@ -74,50 +81,111 @@ public class EMTearDownPhase extends AbstractEMLCPhase
     if ( phaseActive ) throw new Exception( "Phase already active" );
     if ( !hasClients() ) throw new Exception( "No clients available for this phase" );
     
-    // Create the tear-down interface
-    for ( EMClientEx client : getCopySetOfCurrentClients() )
+    phaseActive     = true;
+    tearingStopping = false;
+    
+    // Create tear-down interfaces
+    synchronized ( acceleratorLock )
     {
-      AMQPMessageDispatch dispatch = new AMQPMessageDispatch();
-      phaseMsgPump.addDispatch( dispatch );
+      Set<EMClientEx> currClients   = getCopySetOfCurrentClients();
+      Iterator<EMClientEx> clientIt = currClients.iterator();
+    
+      // Create the set-up interface and prepare to tear-down clients
+      while ( clientIt.hasNext() )
+      {
+        EMClientEx client = clientIt.next();
+        client.setCurrentPhaseActivity( EMPhase.eEMTearDown );
+        setupClientInterface( client );
+        
+        clientsStillToTearDown.add( client.getID() );
+      }
       
-      EMTearDown face = new EMTearDown( emChannel, dispatch,
-                                        emProviderID, client.getID(), true );
-      
-      // Add client to the tear-down list
-      clientsStillToTearDown.add( client.getID() );
-      
-      face.setProviderListener( this );
-      client.setTearDownInterface( face );
+      // Request clients do the same
+      clientIt = currClients.iterator();
+      while ( clientIt.hasNext() )
+      {
+        EMClientEx client = clientIt.next();
+        client.getDiscoveryInterface().createInterface( EMInterfaceType.eEMTearDown );
+      }
     }
-    
-    phaseMsgPump.startPump();
-    phaseActive = true;
-    
-    // Request clients do the same
-    for ( EMClientEx client : getCopySetOfCurrentClients() )
-      client.getDiscoveryInterface().createInterface( EMInterfaceType.eEMTearDown );
-    
+          
     phaseState = "Waiting for client to signal ready to tear down";
+    //... remainder of protocol implemented through events
   }
   
   @Override
   public void controlledStop() throws Exception
-  { throw new Exception( "Not yet supported for this phase"); }
+  {
+    if ( phaseActive && !tearingStopping )
+    {
+      synchronized ( controlledStopLock )
+      {
+        phaseActive     = false;
+        tearingStopping = false;
+        
+        // Nothing else to do here actually - tearing down is a 'single interaction' phase
+        // if we're already finished, notify
+        if ( clientsStillToTearDown.isEmpty() )
+          phaseListener.onTearDownPhaseCompleted();
+      }
+    }
+  }
   
   @Override
   public void hardStop()
   {
+    phaseActive     = false;
+    tearingStopping = false;
     phaseMsgPump.stopPump();
-    phaseActive = false;
-    if ( phaseListener != null ) phaseListener.onTearDownPhaseCompleted();
+  }
+  
+  @Override
+  public void setupClientInterface( EMClientEx client )
+  {
+    if ( client.getTearDownInterface() == null )
+    {
+      AMQPMessageDispatch dispatch = new AMQPMessageDispatch();
+      phaseMsgPump.addDispatch( dispatch );
+
+      EMTearDown face = new EMTearDown( emChannel, dispatch,
+                                        emProviderID, client.getID(), true );
+
+      // Add client to the tear-down list
+      clientsStillToTearDown.add( client.getID() );
+
+      face.setProviderListener( this );
+      client.setTearDownInterface( face );
+    }
+  }
+  
+  @Override
+  public void accelerateClient( EMClientEx client ) throws Exception
+  {
+    if ( client == null ) throw new Exception( "Cannot accelerate client (setup) - client is null" );
+    
+    synchronized ( acceleratorLock )
+    {
+      if ( !tearingStopping )
+      {
+        client.setCurrentPhaseActivity( EMPhase.eEMSetUpMetricGenerators );
+      
+        // Need to manually add/setup accelerated clients
+        addClient( client );
+        setupClientInterface( client );
+        
+        clientsStillToTearDown.add( client.getID() );
+
+        // Tell client to initialise their tear-down phase
+        client.getDiscoveryInterface().createInterface( EMInterfaceType.eEMTearDown );
+      }
+    }
   }
   
   @Override
   public void timeOutClient( EMClientEx client ) throws Exception
   {
     // Safety first
-    if ( client == null ) throw new Exception( "Could not time-out: client is null" );
-    if ( !phaseActive )   throw new Exception( "Could not time-out: phase not active" );      
+    if ( client == null ) throw new Exception( "Could not time-out: client is null" );    
     
     // Check this client is registered with this phase first
     if ( isClientRegisteredInPhase(client) )
@@ -137,10 +205,14 @@ public class EMTearDownPhase extends AbstractEMLCPhase
   {
     if ( client != null )
     {
-      UUID clientID = client.getID();
+      synchronized ( controlledStopLock )
+      {
+        UUID clientID = client.getID();
       
-      clientsStillToTearDown.remove( clientID );
-      removeClient( clientID );
+        clientsStillToTearDown.remove( clientID );
+
+        removeClient( clientID );
+      }
     }
   }
   
@@ -148,33 +220,40 @@ public class EMTearDownPhase extends AbstractEMLCPhase
   @Override
   public void onNotifyReadyToTearDown( UUID senderID )
   {
-    if ( phaseActive )
-    {
-      EMClientEx client = getClient( senderID );
-      
-      if ( client != null )
-        client.getTearDownInterface().tearDownMetricGenerators();
-    }
+    EMClientEx client = getClient( senderID );
+
+    if ( client != null )
+      client.getTearDownInterface().tearDownMetricGenerators();
   }
   
   @Override
   public void onNotifyTearDownResult( UUID senderID, Boolean success )
   {
-    if ( phaseActive )
+    EMClientEx client = getClient( senderID );
+
+    if ( client != null )
     {
-      EMClientEx client = getClient( senderID );
+      client.setTearDownResult( success );
       
-      if ( client != null )
+      boolean noFurtherClientsTearingDown;
+      
+      synchronized ( controlledStopLock )
       {
-        client.setTearDownResult( success );
         clientsStillToTearDown.remove( client.getID() );
-        
-        if ( phaseListener != null )
-          phaseListener.onClientTearDownResult( client, success );
+        noFurtherClientsTearingDown = clientsStillToTearDown.isEmpty();
       }
+     
+      // Notify of tear-down result
+      phaseListener.onClientTearDownResult( client, success );
       
-      // Notify phase completion if all results are in
-      if ( clientsStillToTearDown.isEmpty() ) hardStop();
+      // Check to see if we're done actively tearing down
+      if ( phaseActive )
+      {
+        if ( noFurtherClientsTearingDown ) phaseListener.onTearDownPhaseCompleted();
+      }
+      else
+        if ( client.isPhaseAccelerating() )
+          phaseListener.onTearDownPhaseCompleted( client );
     }
   }
 }
