@@ -6,7 +6,7 @@
   <artifactId>eccDash</artifactId>
   <packaging>war</packaging>
   <version>1.1-SNAPSHOT</version>
-  <name>ECC Dash</name>
+  <name>ECC Dashboard</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -18,7 +18,7 @@
 
   <build>
     <plugins>
-      
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -28,25 +28,65 @@
         </configuration>
       </plugin>
 
-      <!-- A simple Jetty test server at http://localhost:8080/eccDash can be launched with the Maven goal jetty:run and stopped with jetty:stop -->
       <plugin>
-        <groupId>org.mortbay.jetty</groupId>
-        <artifactId>maven-jetty-plugin</artifactId>
-        <version>6.1.24</version>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>gwt-maven-plugin</artifactId>
+        <version>${gwt.plugin.version}</version>
+
         <configuration>
-          <stopPort>9966</stopPort>
-          <stopKey>eccDash</stopKey>
-          <scanIntervalSeconds>0</scanIntervalSeconds>
-          <webAppConfig>
-            <contextPath>/eccDash</contextPath>
-            <baseResource implementation="org.mortbay.resource.ResourceCollection">
-              <!-- Workaround for Maven/Jetty issue http://jira.codehaus.org/browse/JETTY-680 -->
-              <!-- <resources>src/main/webapp,${project.build.directory}/${project.build.finalName}</resources> -->
-              <resourcesAsCSV>src/main/webapp,${project.build.directory}/${project.build.finalName}</resourcesAsCSV>
-            </baseResource>
-          </webAppConfig>
+          <webappDirectory>${project.build.directory}/${project.build.finalName}/VAADIN/widgetsets</webappDirectory>
+          <extraJvmArgs>-Xmx512M -Xss1024k</extraJvmArgs>
+          <runTarget>eccdashboardOO</runTarget>
+          <hostedWebapp>${project.build.directory}/${project.build.finalName}</hostedWebapp>
+          <noServer>true</noServer>
+          <port>8080</port>
+          <compileReport>false</compileReport>
         </configuration>
+
+        <executions>
+          <execution>
+            <goals>
+              <goal>resources</goal>
+              <goal>compile</goal>
+            </goals>
+          </execution>
+        </executions>
+
+        <dependencies>
+          <dependency>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-dev</artifactId>
+            <version>${gwt.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-user</artifactId>
+            <version>${gwt.version}</version>
+          </dependency>
+        </dependencies>
       </plugin>
+
+      <plugin>
+        <groupId>com.vaadin</groupId>
+        <artifactId>vaadin-maven-plugin</artifactId>
+        <version>1.0.2</version>
+        <executions>
+          <execution>
+
+            <!-- Widgetsets for compilation declared here ______________ -->
+            <configuration>
+              <modules>
+                <module>com.invient.vaadin.InvientChartsDemoAppWidgetset</module>
+              </modules>
+            </configuration>
+
+            <goals>
+              <goal>update-widgetset</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
     </plugins>
   </build>
 
@@ -66,14 +106,38 @@
       <url>http://maven.vaadin.com/vaadin-addons</url>
     </repository>
   </repositories>
+                  
+  <pluginRepositories>
+    <pluginRepository>
+      <id>codehaus-snapshots</id>
+      <url>http://nexus.codehaus.org/snapshots</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+    </pluginRepository>
 
-  <profiles>
+    <pluginRepository>
+      <id>vaadin-snapshots</id>
+      <url>http://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+    </pluginRepository>
+  </pluginRepositories>
+  
+  <profiles>    
     <profile>
-      <id>buildWidgetSet</id>
+      <id>light</id>
       
       <build>
         <plugins>
-          
+
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-compiler-plugin</artifactId>
@@ -82,126 +146,29 @@
               <target>1.6</target>
             </configuration>
           </plugin>
-          
+
+          <!-- A simple Jetty test server at http://localhost:8080/eccDash can be launched with the Maven goal jetty:run and stopped with jetty:stop -->
           <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>gwt-maven-plugin</artifactId>
-            <version>${gwt.plugin.version}</version>
-            
+            <groupId>org.mortbay.jetty</groupId>
+            <artifactId>maven-jetty-plugin</artifactId>
+            <version>6.1.24</version>
             <configuration>
-              <webappDirectory>${project.build.directory}/${project.build.finalName}/VAADIN/widgetsets</webappDirectory>
-              <extraJvmArgs>-Xmx512M -Xss1024k</extraJvmArgs>
-              <runTarget>eccdashboardOO</runTarget>
-              <hostedWebapp>${project.build.directory}/${project.build.finalName}</hostedWebapp>
-              <noServer>true</noServer>
-              <port>8080</port>
-              <compileReport>false</compileReport>
+              <stopPort>9966</stopPort>
+              <stopKey>eccDash</stopKey>
+              <scanIntervalSeconds>0</scanIntervalSeconds>
+              <webAppConfig>
+                <contextPath>/eccDash</contextPath>
+                <baseResource implementation="org.mortbay.resource.ResourceCollection">
+                  <!-- Workaround for Maven/Jetty issue http://jira.codehaus.org/browse/JETTY-680 -->
+                  <!-- <resources>src/main/webapp,${project.build.directory}/${project.build.finalName}</resources> -->
+                  <resourcesAsCSV>src/main/webapp,${project.build.directory}/${project.build.finalName}</resourcesAsCSV>
+                </baseResource>
+              </webAppConfig>
             </configuration>
-            
-            <executions>
-              <execution>
-                <goals>
-                  <goal>resources</goal>
-                  <goal>compile</goal>
-                </goals>
-              </execution>
-            </executions>
-            
-            <dependencies>
-              <dependency>
-                <groupId>com.google.gwt</groupId>
-                <artifactId>gwt-dev</artifactId>
-                <version>${gwt.version}</version>
-              </dependency>
-              <dependency>
-                <groupId>com.google.gwt</groupId>
-                <artifactId>gwt-user</artifactId>
-                <version>${gwt.version}</version>
-              </dependency>
-            </dependencies>
           </plugin>
-          
-          <plugin>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-maven-plugin</artifactId>
-            <version>1.0.2</version>
-            <executions>
-              <execution>
-                
-                <!-- Widgetsets for compilation declared here ______________ -->
-                <configuration>
-                  <modules>
-                    <module>com.invient.vaadin.InvientChartsDemoAppWidgetset</module>
-                  </modules>
-                </configuration>
-                
-                <goals>
-                  <goal>update-widgetset</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-          
         </plugins>
       </build>
-      
-      <pluginRepositories>
-        <pluginRepository>
-          <id>codehaus-snapshots</id>
-          <url>http://nexus.codehaus.org/snapshots</url>
-          <snapshots>
-            <enabled>true</enabled>
-          </snapshots>
-          <releases>
-            <enabled>false</enabled>
-          </releases>
-        </pluginRepository>
-        
-        <pluginRepository>
-          <id>vaadin-snapshots</id>
-          <url>http://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
-          <snapshots>
-            <enabled>true</enabled>
-          </snapshots>
-          <releases>
-            <enabled>false</enabled>
-          </releases>
-        </pluginRepository>
-      </pluginRepositories>
-      
-      <dependencies>
-        
-        <dependency>
-          <groupId>com.google.gwt</groupId>
-          <artifactId>gwt-user</artifactId>
-          <version>${gwt.version}</version>
-          <scope>provided</scope>
-        </dependency>
-    
-        <dependency>
-          <groupId>javax.validation</groupId>
-          <artifactId>validation-api</artifactId>
-          <version>1.0.0.GA</version>
-          <scope>provided</scope>
-        </dependency>
-    
-        <dependency>
-          <groupId>javax.validation</groupId>
-          <artifactId>validation-api</artifactId>
-          <version>1.0.0.GA</version>
-          <classifier>sources</classifier>
-          <scope>provided</scope>
-        </dependency>
-        
-        <!-- Plugins _______________________________________________________ -->
-        <dependency>
-          <groupId>org.vaadin.addons</groupId>
-          <artifactId>invient-charts</artifactId>
-          <version>0.8.6</version>
-        </dependency>
-        
-      </dependencies>
-      
+  
     </profile>
   </profiles>
 
@@ -239,6 +206,28 @@
     
     <!-- 3rd party dependencies ____________________________________________ -->
     <dependency>
+      <groupId>com.google.gwt</groupId>
+      <artifactId>gwt-user</artifactId>
+      <version>${gwt.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.validation</groupId>
+      <artifactId>validation-api</artifactId>
+      <version>1.0.0.GA</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.validation</groupId>
+      <artifactId>validation-api</artifactId>
+      <version>1.0.0.GA</version>
+      <classifier>sources</classifier>
+      <scope>provided</scope>
+    </dependency>
+    
+    <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
       <version>2.3</version>
@@ -258,16 +247,17 @@
     </dependency>
     
     <dependency>
+      <groupId>joda-time</groupId>
+      <artifactId>joda-time</artifactId>
+      <version>2.1</version>
+    </dependency>  
+    
+    <!-- Vaadin plugins ____________________________________________________ -->
+    <dependency>
       <groupId>org.vaadin.addons</groupId>
       <artifactId>invient-charts</artifactId>
       <version>0.8.6</version>
     </dependency>
-    
-    <dependency>
-      <groupId>joda-time</groupId>
-      <artifactId>joda-time</artifactId>
-      <version>2.1</version>
-    </dependency>        
     
   </dependencies>
 
