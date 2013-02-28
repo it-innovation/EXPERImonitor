@@ -88,28 +88,44 @@ these steps:
 	- Rabbit MQ server (for EM)
 	- Apache Tomcat 7.x (if deploying on Tomcat)
 
-2. Set up PostgreSQL database to work with settings in edm.properties file (./src/dashboard/edm.properties)
+2. Prepare the PostgreSQL database to work with settings in edm.properties file (see step 7.2)
 	* See the README in ./src/edm/resources/README.txt for more information
 
-3. Set up the RabbitMQ server to work with settings in em.properties file (./src/dashboard/em.properties)
+3. Prepare RabbitMQ server to work with settings in em.properties file (see step 7.2)
 	* See the 'T05 ECC samples notes V1.0' technical note for more information
 
-4. (Optional) Install your Tomcat server
+4. (Optional) Prepare your NAGIOS server, noting the full URL for use in the dashboard.properties file (see step 7.2)
 
-5. (Optional) If you have NAGIOS deployed:
-	5.1 Rename ./src/dashboard/_eccdashboard.properties to 'eccdashboard.properties'
-	5.2 Configure nagios credentials.
+5. Install your Tomcat server
 
-6. Build everything in src. (mvn install) or use the pre-built WAR in the bin directory
+6. Build the dashboard.
+	Type: mvn clean install
 
 7. Deploy and run, using:
 
-	7.1 Tomcat 
-	  Step 1: Replace the contents of the ROOT directory with the contents of the WAR
-	  Step 2: Copy em.properties and edm.properties files to Tomcat 'bin' directory
-	  Step 3: Start up Tomcat
+	7.1 Tomcat (default deployment)
+	---------------------------------------------------------------------------------------------------
+	  Step 1: Start up Tomcat
 
-	you should see the ECC dashboard running on: http://localhost:8080.
+	  Step 2: Copy WAR file generated in step 6 to Tomcat's 'webapps' directory
+	          (Tomcat should automatically unpack and deploy for you)
+	  
+	  Result: You should see the ECC dashboard running on: http://localhost:8080/eccDash-1.1-SNAPSHOT/
+
+	7.2 Tomcat (your particular configuration)
+	---------------------------------------------------------------------------------------------------
+	  Step 1: Follow 7.1
+
+	  Step 2: Using Tomcat's management UI, STOP the current ECC dashboard
+
+	  Step 3: Modify the any of the ECC property files you require:
+		  <Tomcat root>\webapps\eccDash-1.1-SNAPSHOT\WEB-INF\dashboard.properites
+		  <Tomcat root>\webapps\eccDash-1.1-SNAPSHOT\WEB-INF\edm.properites
+		  <Tomcat root>\webapps\eccDash-1.1-SNAPSHOT\WEB-INF\em.properites
+
+	  Step 4: Using Tomcat's management UI:
+		> Expire any existing ECC dashboard sessions
+		> RELOAD the ECC dashboard
 
 
 Using JuJu to deploy the ECC
