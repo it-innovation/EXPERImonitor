@@ -179,6 +179,22 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
   }
   
   @Override
+  public void setupClientInterface( EMClientEx client )
+  {
+    if ( client.getLiveMonitorInterface() == null )
+    {
+      AMQPMessageDispatch dispatch = new AMQPMessageDispatch();
+      phaseMsgPump.addDispatch( dispatch );
+      
+      EMLiveMonitor face = new EMLiveMonitor( emChannel, dispatch,
+                                              emProviderID, client.getID(), true );
+      
+      face.setProviderListener( this );
+      client.setLiveMonitorInterface( face );
+    }
+  }
+  
+  @Override
   public void accelerateClient( EMClientEx client ) throws Exception
   {
     if ( client == null ) throw new Exception( "Cannot accelerate client (live monitoring) - client is null" );
@@ -371,21 +387,5 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
 
     }
     else phaseLogger.error( "Could not process pulled metric: NULL client or report" ); 
-  }
-  
-  // Private methods -----------------------------------------------------------
-  private void setupClientInterface( EMClientEx client )
-  {
-    if ( client.getLiveMonitorInterface() == null )
-    {
-      AMQPMessageDispatch dispatch = new AMQPMessageDispatch();
-      phaseMsgPump.addDispatch( dispatch );
-      
-      EMLiveMonitor face = new EMLiveMonitor( emChannel, dispatch,
-                                              emProviderID, client.getID(), true );
-      
-      face.setProviderListener( this );
-      client.setLiveMonitorInterface( face );
-    }
   }
 }

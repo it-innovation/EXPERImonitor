@@ -162,6 +162,19 @@ public class EMPostReportPhase extends AbstractEMLCPhase
   }
   
   @Override
+  public void setupClientInterface( EMClientEx client )
+  {
+    AMQPMessageDispatch dispatch = new AMQPMessageDispatch();
+    phaseMsgPump.addDispatch( dispatch );
+
+    EMPostReport face = new EMPostReport( emChannel, dispatch,
+                                          emProviderID, client.getID(), true );
+
+    face.setProviderListener( this );
+    client.setPostReportInterface( face );
+  }
+  
+  @Override
   public void accelerateClient( EMClientEx client ) throws Exception
   {
     if ( client == null ) throw new Exception( "Cannot accelerate client (live monitoring) - client is null" );
@@ -373,18 +386,6 @@ public class EMPostReportPhase extends AbstractEMLCPhase
   }
   
   // Private methods -----------------------------------------------------------
-  private void setupClientInterface( EMClientEx client )
-  {
-    AMQPMessageDispatch dispatch = new AMQPMessageDispatch();
-    phaseMsgPump.addDispatch( dispatch );
-
-    EMPostReport face = new EMPostReport( emChannel, dispatch,
-                                          emProviderID, client.getID(), true );
-
-    face.setProviderListener( this );
-    client.setPostReportInterface( face );
-  }
-  
   private void amendReportMinusOne( Report popRepOUT )
   {
     // We're going to clip the very last measurement away by first ordering

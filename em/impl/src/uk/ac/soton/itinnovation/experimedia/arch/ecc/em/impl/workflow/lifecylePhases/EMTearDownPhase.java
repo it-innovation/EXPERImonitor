@@ -140,6 +140,25 @@ public class EMTearDownPhase extends AbstractEMLCPhase
   }
   
   @Override
+  public void setupClientInterface( EMClientEx client )
+  {
+    if ( client.getTearDownInterface() == null )
+    {
+      AMQPMessageDispatch dispatch = new AMQPMessageDispatch();
+      phaseMsgPump.addDispatch( dispatch );
+
+      EMTearDown face = new EMTearDown( emChannel, dispatch,
+                                        emProviderID, client.getID(), true );
+
+      // Add client to the tear-down list
+      clientsStillToTearDown.add( client.getID() );
+
+      face.setProviderListener( this );
+      client.setTearDownInterface( face );
+    }
+  }
+  
+  @Override
   public void accelerateClient( EMClientEx client ) throws Exception
   {
     if ( client == null ) throw new Exception( "Cannot accelerate client (setup) - client is null" );
@@ -235,25 +254,6 @@ public class EMTearDownPhase extends AbstractEMLCPhase
       else
         if ( client.isPhaseAccelerating() )
           phaseListener.onTearDownPhaseCompleted( client );
-    }
-  }
-  
-  // Private methods -----------------------------------------------------------
-  private void setupClientInterface( EMClientEx client )
-  {
-    if ( client.getTearDownInterface() == null )
-    {
-      AMQPMessageDispatch dispatch = new AMQPMessageDispatch();
-      phaseMsgPump.addDispatch( dispatch );
-
-      EMTearDown face = new EMTearDown( emChannel, dispatch,
-                                        emProviderID, client.getID(), true );
-
-      // Add client to the tear-down list
-      clientsStillToTearDown.add( client.getID() );
-
-      face.setProviderListener( this );
-      client.setTearDownInterface( face );
     }
   }
 }

@@ -40,6 +40,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 
 import java.util.*;
 import org.apache.log4j.Logger;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.IEMDiscovery;
 
 
 
@@ -490,6 +491,24 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
       // through phases already completed so it can catch up
       else if ( currentPhase != EMPhase.eEMProtocolComplete )
       {
+        // We'll need to do the preliminary acknowledgements before accelerating
+        // if this client is already known to us
+        if ( reconnected )
+        {
+          AbstractEMLCPhase discovery = 
+                  lifecyclePhases.get( EMPhase.eEMDiscoverMetricGenerators );
+          
+          discovery.setupClientInterface( client );
+          
+          IEMDiscovery monFace = client.getDiscoveryInterface();
+          monFace.registrationConfirmed( true,
+                                         currentExperiment.getUUID(),
+                                         currentExperiment.getExperimentID(),
+                                         currentExperiment.getName(),
+                                         currentExperiment.getDescription(),
+                                         currentExperiment.getStartTime() );
+        }
+        
         client.setIsPhaseAccelerating( true );
         advanceClientPhase( client );
       }
@@ -699,27 +718,29 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   // Private methods -----------------------------------------------------------
   private void advanceClientPhase( EMClientEx client )
   {
-    EMPhase nextPhase   = client.getCurrentPhaseActivity();
-    boolean deferClient = true;
+    EMPhase targetClientPhase = client.getCurrentPhaseActivity();
+    boolean deferClient       = true;
         
     // If client is behind the current phase, then try accelerating to the next
     // phase they support (before the current, active phase)
-    if ( nextPhase.compareTo(currentPhase) < 0 )
+    if ( targetClientPhase.compareTo(currentPhase) < 0 )
     {
-      nextPhase = nextPhase.nextPhase();
+      targetClientPhase = targetClientPhase.nextPhase();
       
-      while ( nextPhase != EMPhase.eEMProtocolComplete )
+      while ( targetClientPhase != EMPhase.eEMProtocolComplete )
       {
         // Found a phase the client supports, so stop searching
-        if ( client.supportsPhase(nextPhase) ) { deferClient = false; break; }
+        if ( client.supportsPhase(targetClientPhase) ) { deferClient = false; break; }
         
         // We've got the current phase (client doesn't support it, so defer)
-        if ( nextPhase == currentPhase ) break;
+        if ( targetClientPhase == currentPhase ) break;
         
         // Advance to next phase to test
-        nextPhase = nextPhase.nextPhase();
+        targetClientPhase = targetClientPhase.nextPhase();
       }
-    }   
+    }
+    else deferClient = false; // Client is already aligned with current phase
+                              // So do not defer
     
     // Defer the client for later phases if we can't accelerate it yet
     if ( deferClient )
@@ -732,7 +753,7 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
     else // Otherwise either accelerate or de-accelerate the client
     {
       // If the next phase for this client is the current one, de-accelerate
-      if ( nextPhase == currentPhase )
+      if ( targetClientPhase == currentPhase )
       {
         lifecycleListener.onClientStartedPhase( client, currentPhase );
         deaccelerateClient( client );
@@ -740,8 +761,8 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
       else
       {
         // Otherwise, push them on
-        lifecycleListener.onClientStartedPhase( client, nextPhase );
-        accelerateClient( client, nextPhase ); 
+        lifecycleListener.onClientStartedPhase( client, targetClientPhase );
+        accelerateClient( client, targetClientPhase ); 
       }
     }
   }

@@ -141,6 +141,25 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
   }
   
   @Override
+  public void setupClientInterface( EMClientEx client )
+  {
+    if ( client.getDiscoveryInterface() == null )
+    {
+      // Create a new IEMMonitor interface for the client
+      AMQPMessageDispatch dispatch = new AMQPMessageDispatch();
+      phaseMsgPump.addDispatch( dispatch );
+
+      EMDiscovery discoverFace = new EMDiscovery( emChannel,
+                                                  dispatch,
+                                                  emProviderID,
+                                                  client.getID(),
+                                                  true );
+      discoverFace.setProviderListener( this );
+      client.setDiscoveryInterface( discoverFace );
+    }
+  }
+  
+  @Override
   public void accelerateClient( EMClientEx client ) throws Exception
   {
     if ( client == null ) throw new Exception( "Cannot accelerate client (discovery) - client is null" );
@@ -314,24 +333,5 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
     }
     
     return result;
-  }
-  
-  // Private methods -----------------------------------------------------------
-  private void setupClientInterface( EMClientEx client )
-  {
-    if ( client.getDiscoveryInterface() == null )
-    {
-      // Create a new IEMMonitor interface for the client
-      AMQPMessageDispatch dispatch = new AMQPMessageDispatch();
-      phaseMsgPump.addDispatch( dispatch );
-
-      EMDiscovery discoverFace = new EMDiscovery( emChannel,
-                                                  dispatch,
-                                                  emProviderID,
-                                                  client.getID(),
-                                                  true );
-      discoverFace.setProviderListener( this );
-      client.setDiscoveryInterface( discoverFace );
-    }
   }
 }

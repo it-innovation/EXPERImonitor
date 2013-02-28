@@ -62,6 +62,8 @@ public abstract class AbstractAMQPInterface
         {
           Channel channel = (Channel) amqpChannel.getChannelImpl();
           channel.queueDelete( subListenQueue );
+          subProcessor = null;
+          msgDispatch  = null;
         }
         catch (IOException ioe)
         { amqpIntLogger.error( "Could not delete AMQP queue: " + ioe.getMessage() ); }

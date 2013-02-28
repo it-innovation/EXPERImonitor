@@ -174,7 +174,17 @@ public class DashMainController extends UFAbstractEventManager
     if ( client != null )
     {
       if ( connectionsView != null ) connectionsView.removeClient( client );
-      if ( clientInfoView != null )  clientInfoView.updateClientConnectivityStatus( client, false );
+      if ( clientInfoView != null  ) clientInfoView.updateClientConnectivityStatus( client, false );
+      
+      if ( liveMetricScheduler != null )
+        try { liveMetricScheduler.removeClient( client ); }
+        catch ( Exception e )
+        {
+          String problem = "Could not unschedule client from live monitoring: " + e.getMessage();
+          dashMainLog.error( problem );
+          mainDashView.addLogMessage( problem );
+        }
+      
       if ( liveMonitorController != null ) liveMonitorController.removeClientLiveView( client );
     }
   }
@@ -678,7 +688,7 @@ public class DashMainController extends UFAbstractEventManager
     currentExperiment.setExperimentID( expDate.toString() );
     
     try
-    {      
+    {        
       IExperimentDAO expDAO = expDataManager.getExperimentDAO();
       expDAO.saveExperiment( currentExperiment );
     }

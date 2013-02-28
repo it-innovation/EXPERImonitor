@@ -142,6 +142,25 @@ public class EMMetricGenSetupPhase extends AbstractEMLCPhase
   }
   
   @Override
+  public void setupClientInterface( EMClientEx client )
+  {
+    if ( client.getSetupInterface() == null )
+    {
+      AMQPMessageDispatch dispatch = new AMQPMessageDispatch();
+      phaseMsgPump.addDispatch( dispatch );
+
+      UUID clientID = client.getID();
+      EMMetricGenSetup face = new EMMetricGenSetup( emChannel,
+                                                    dispatch,
+                                                    emProviderID,
+                                                    clientID,
+                                                    true );
+      face.setProviderListener( this );
+      client.setSetupInterface( face );
+    }  
+  }
+  
+  @Override
   public void accelerateClient( EMClientEx client ) throws Exception
   {
     if ( client == null ) throw new Exception( "Cannot accelerate client (setup) - client is null" );
@@ -256,24 +275,5 @@ public class EMMetricGenSetupPhase extends AbstractEMLCPhase
     else // Otherwise, accelerate client
       if ( client.isPhaseAccelerating() )
         phaseListener.onSetupPhaseCompleted( client );
-  }
-  
-  // Private methods -----------------------------------------------------------
-  private void setupClientInterface( EMClientEx client )
-  {
-    if ( client.getSetupInterface() == null )
-    {
-      AMQPMessageDispatch dispatch = new AMQPMessageDispatch();
-      phaseMsgPump.addDispatch( dispatch );
-
-      UUID clientID = client.getID();
-      EMMetricGenSetup face = new EMMetricGenSetup( emChannel,
-                                                    dispatch,
-                                                    emProviderID,
-                                                    clientID,
-                                                    true );
-      face.setProviderListener( this );
-      client.setSetupInterface( face );
-    }  
   }
 }

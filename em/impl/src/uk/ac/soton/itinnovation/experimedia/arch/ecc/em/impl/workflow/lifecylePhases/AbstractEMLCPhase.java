@@ -101,6 +101,8 @@ public abstract class AbstractEMLCPhase
   
   public abstract void hardStop();
   
+  public abstract void setupClientInterface( EMClientEx client );
+  
   public abstract void accelerateClient( EMClientEx client ) throws Exception;
   
   public abstract void timeOutClient( EMClientEx client ) throws Exception;

@@ -86,14 +86,11 @@ public class ClientInfoView extends SimpleView
     if ( client != null && client.getID().equals(currClientID) )
     {
       if ( connected )
-      {
-        clientStatusLabel.setStyleName( "h3" );
         clientStatusLabel.setValue( "(connected)" );
-      }
       else
       {
-        clientStatusLabel.addStyleName( "eccInfoPanelAlert" );
         clientStatusLabel.setValue( "(disconnected)" );
+        clientInfoHolder.removeAllComponents();
       }
     }
   }
