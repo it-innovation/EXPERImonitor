@@ -175,9 +175,10 @@
   <dependencies>
     
     <dependency>
+      <!-- Foundation UI classes from ROBUST project _______________________ -->
       <groupId>uk.ac.soton.itinnovation.robust.cat</groupId>
       <artifactId>robust-cat-core-components-viewEngine-spec-uif</artifactId>
-      <version>1.3-SNAPSHOT</version>
+      <version>1.0-SNAPSHOT</version> <!-- Should not change -->
     </dependency>
     
     <dependency>
