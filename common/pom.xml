@@ -16,7 +16,8 @@
   </parent>
   
     <modules>
-        <module>dataModel</module>
+      <module>dataModel</module>
+      <module>uif</module>
     </modules>
     
 </project>
