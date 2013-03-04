@@ -1,8 +1,0 @@
-This software distribution is licenced under the terms found in the file ITInnov-EXPERIMEDIA-licence-v1.0.txt
-
-This software requires various third-party libraries to compile and execute.  These libraries, where they can be found and their associated licences are:
-
-Java
-	JDK v6
-	http://java.sun.com
-	Sun Microsystems, Inc. Binary Code License Agreement (http://java.sun.com/javase/6/jdk-6u3-license.txt)

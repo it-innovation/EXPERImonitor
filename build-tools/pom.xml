@@ -7,29 +7,27 @@
   <artifactId>build-tools</artifactId>
   <version>1.1-SNAPSHOT</version>
   <name>Build Tools</name>
+  
+  <parent>
+      <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
+      <artifactId>experimedia-arch-ecc</artifactId>
+      <version>1.1-SNAPSHOT</version>
+    </parent>
 
   <build>
-    <extensions>
-      <!-- Allow deployment with SCP -->
-      <extension>
-	<groupId>org.apache.maven.wagon</groupId>
-	<artifactId>wagon-ssh-external</artifactId>
-	<version>1.0-beta-6</version>
-      </extension>
-    </extensions>
+    
+    <plugins>
+      <!-- Plug-in to build the project with UTF-8 encoding ________________ -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>${ecc.resourceplugin.version}</version>
+        <configuration>
+          <encoding>${project.build.sourceEncoding}</encoding>
+        </configuration>
+      </plugin>
+    </plugins>
+    
   </build>
-
-  <distributionManagement>
-    <repository>
-      <id>barooga</id>
-      <name>IT Innovation hosted public repository</name>
-      <url>scpexe://barooga.it-innovation.soton.ac.uk/srv/software/experimedia/maven</url>
-    </repository>
-    <snapshotRepository>
-      <id>barooga</id>
-      <name>IT Innovation hosted public repository</name>
-      <url>scpexe://barooga.it-innovation.soton.ac.uk/srv/software/experimedia/maven-snapshots</url>
-    </snapshotRepository>
-  </distributionManagement>
 
 </project>

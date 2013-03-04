@@ -3,7 +3,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
-  <artifactId>eccDash</artifactId>
+  <artifactId>experimedia-arch-ecc-eccDash</artifactId>
   <packaging>war</packaging>
   <version>1.1-SNAPSHOT</version>
   <name>ECC Dashboard</name>

@@ -11,41 +11,65 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <ecc.java.version>1.6</ecc.java.version>
+        <ecc.javadocplugin.version>2.9</ecc.javadocplugin.version>
+        <ecc.reportplugin.version>2.6</ecc.reportplugin.version>
+        <ecc.licenseplugin.version>1.4</ecc.licenseplugin.version>
+        <ecc.resourceplugin.version>2.5</ecc.resourceplugin.version>
         <ecc.junit.version>4.10</ecc.junit.version>
         <ecc.log4j.version>1.2.17</ecc.log4j.version>
         <ecc.gson.version>2.2.2</ecc.gson.version>
         <ecc.surefire.version>2.12.4</ecc.surefire.version>
     </properties>
+    
+    <!-- EXPERIMEDIA license agreement _____________________________________ -->
+    <licenses>
+      <license>
+        <name>Experimedia consortium license</name>
+        <url>file:///ITInnov-EXPERIMEDIA-licence-v1.0.txt</url>
+        <distribution>JRS SVN</distribution>
+      </license>
+    </licenses>
   
     <build>
         <pluginManagement>
-            <!-- does this help config version for child poms?  -->
-            <plugins>
-                <plugin>
-                    <groupId>junit</groupId>
-                    <artifactId>junit</artifactId>
-                    <version>4.10</version>
-                </plugin>
-                <plugin><!-- where do you put this to stop maven complaining about the version not being defined? -->
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-project-info-reports-plugin</artifactId>
-                    <version>2.5.1</version>
-                </plugin>
-            </plugins>
+          <plugins>
+            
+            <plugin>
+              <groupId>org.codehaus.mojo</groupId>
+              <artifactId>license-maven-plugin</artifactId>
+              <version>${ecc.licenseplugin.version}</version>
+                <executions>
+                  <execution>
+                    <id>third-party-report</id>
+                    <phase>package</phase>
+                    <goals>
+                      <goal>third-party-report</goal>
+                    </goals>
+                    
+                    <!-- Use mvn license:add-third-party -Dlicense.useMissingFile 
+                         to update all licenses for the ECC component        -->
+                    <configuration>
+                      <useMissingFile>true</useMissingFile>
+                    </configuration>
+                  </execution>
+                </executions>
+            </plugin>
+            
+          </plugins>
         </pluginManagement>
                
         <plugins>
-              
-            <!-- Plug-in to build the project with UTF-8 encoding -->
+            <!-- Plug-in to build the project with UTF-8 encoding __________ -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>2.5</version>
+                <version>${ecc.resourceplugin.version}</version>
                 <configuration>
-                    <encoding>${project.build.sourceEncoding}</encoding>
+                  <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
             </plugin>
             
+            <!-- Compilation _______________________________________________ -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -56,6 +80,7 @@
                 </configuration>
             </plugin>
             
+            <!-- Check style _______________________________________________ -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
@@ -64,27 +89,44 @@
                     <dependency>
                         <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
                         <artifactId>build-tools</artifactId>
-                        <version>1.0</version>
+                        <version>1.1-SNAPSHOT</version>
                     </dependency>
                 </dependencies>
             </plugin>
             
+            <!-- SITE report generation ____________________________________ -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-site-plugin</artifactId>
                 <version>3.1</version>
                 <configuration>
+                  
                     <reportPlugins>
-                        <plugin><!-- where do you put this to stop maven complaining about the version not being defined? -->
+                        <plugin>
                             <groupId>org.apache.maven.plugins</groupId>
                             <artifactId>maven-project-info-reports-plugin</artifactId>
-                            <version>2.5.1</version>
+                            <version>${ecc.reportplugin.version}</version>
                         </plugin>
+                        
+                        <!-- Check code conformance ________________________ -->
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-checkstyle-plugin</artifactId>
+                            <version>2.9.1</version>
+                            <configuration>
+                                <configLocation>checkstyle/checkstyle.xml</configLocation>
+                                <headerLocation>checkstyle/regexp.header</headerLocation>
+                            </configuration>
+                        </plugin>
+                        
+                        <!-- JavaDoc generation ____________________________ -->
                         <plugin>
                             <groupId>org.apache.maven.plugins</groupId>
                             <artifactId>maven-javadoc-plugin</artifactId>
-                            <version>2.8.1</version>
+                            <version>${ecc.javadocplugin.version}</version>
                         </plugin>
+                        
+                        <!-- Source cross-referencing documentation ________ -->
                         <plugin>
                             <groupId>org.apache.maven.plugins</groupId>
                             <artifactId>maven-jxr-plugin</artifactId>
@@ -93,11 +135,15 @@
                                 <aggregate>true</aggregate>
                             </configuration>
                         </plugin>
+                        
+                        <!-- Test results documentation ____________________ -->
                         <plugin>
                             <groupId>org.apache.maven.plugins</groupId>
                             <artifactId>maven-surefire-report-plugin</artifactId>
                             <version>2.12.3</version>
                         </plugin>
+                        
+                        <!-- Test coverage documentation ___________________ -->
                         <plugin>
                             <groupId>org.codehaus.mojo</groupId>
                             <artifactId>cobertura-maven-plugin</artifactId>
@@ -109,84 +155,62 @@
                                 </formats>
                             </configuration>
                         </plugin>
-                        <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-checkstyle-plugin</artifactId>
-                            <version>2.9.1</version>
-                            <configuration>
-                                <configLocation>checkstyle/checkstyle.xml</configLocation>
-                                <headerLocation>checkstyle/regexp.header</headerLocation>
-                            </configuration>
-                        </plugin>
-                        <!--
-                        <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-pmd-plugin</artifactId>
-                            <version>2.7.1</version>
-                            <configuration>
-                                <linkXref>true</linkXref>
-                                <sourceEncoding>utf-8</sourceEncoding>
-                                <minimumTokens>100</minimumTokens>
-                                <targetJdk>${ecc.java.version}</targetJdk>
-                                <includes>
-                                    <include>uk/ac/soton/**/*.java</include>                      
-                                </includes>
-                                <excludeRoots>
-                                    <excludeRoot>target/generated-sources/*</excludeRoot>
-                                </excludeRoots>
-                            </configuration>
-                        </plugin>
-                        <plugin>
-                            <groupId>org.codehaus.mojo</groupId>
-                            <artifactId>findbugs-maven-plugin</artifactId>
-                            <version>2.5.2</version>
-                            <configuration>
-                                <onlyAnalyze>uk.ac.soton.-</onlyAnalyze>
-                            </configuration>
-                        </plugin>
-                        -->
+   
                     </reportPlugins>
+                    
                 </configuration>
             </plugin>
         </plugins>
-
-	<extensions>
-	  <!-- Allow deployment with SCP -->
-	  <extension>
-	    <groupId>org.apache.maven.wagon</groupId>
-	    <artifactId>wagon-ssh-external</artifactId>
-	    <version>1.0-beta-6</version>
-	  </extension>
-	</extensions>
+          
     </build>
-  
-    <!-- 3rd party repositories -->
-    <repositories>
+    
+    <profiles>
+      <profile>
+        <!-- Rapid build for development purposes __________________________ -->
+        <id>QuickBuild</id>
+        <build>
+          
+          <plugins>
+            <!-- Plug-in to build the project with UTF-8 encoding __________ -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>${ecc.resourceplugin.version}</version>
+                <configuration>
+                  <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
+            </plugin>
+            <!-- Compilation _______________________________________________ -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <source>${ecc.java.version}</source>
+                    <target>${ecc.java.version}</target>
+                </configuration>
+            </plugin>
+          
+          </plugins>
+          
+        </build>
+      </profile>
+    </profiles>
 
-    </repositories>
+  <!-- 3rd party repositories _____________________________________________  -->
+  <repositories>
 
-    <distributionManagement>
-      <repository>
-        <id>barooga</id>
-        <name>IT Innovation hosted public repository</name>
-        <url>scpexe://barooga.it-innovation.soton.ac.uk/srv/software/experimedia/maven</url>
-      </repository>
-      
-      <snapshotRepository>
-        <id>barooga</id>
-        <name>IT Innovation hosted public repository</name>
-        <url>scpexe://barooga.it-innovation.soton.ac.uk/srv/software/experimedia/maven-snapshots</url>
-      </snapshotRepository>
-    </distributionManagement>
-  
-    <modules>
-        <module>common</module>
-        <module>amqpAPI</module>
-        <module>em</module>
-        <module>edm</module>
-        <module>samples</module>
-        <module>build-tools</module>
-        <module>eccDash</module>
-    </modules>
+  </repositories>
+
+  <!-- Modules _____________________________________________________________ -->
+  <modules>
+      <module>common</module>
+      <module>amqpAPI</module>
+      <module>em</module>
+      <module>edm</module>
+      <module>samples</module>
+      <module>build-tools</module>
+      <module>eccDash</module>
+  </modules>
     
 </project>
