@@ -1,0 +1,32 @@
+Packaging the ECC component (using Maven 3.x+)
+----------------------------------------------
+
+1) mvn clean
+  
+  Then you should (but this is optional) manually delete the contents from:
+    * ./doc/javaDoc
+    
+2) mvn install
+
+3) mvn license:aggregate-add-third-party -Dlicense.useMissingFile
+
+  * This should generate a summary of licenses required for ECC compilation in:
+      ./target/generated-sources/license/THIRD-PARTY.txt
+      
+  * Ensure that all the appropriate license files can be found in:
+      ./licenses
+      
+  * Update the IPR file:
+      ./IPR.txt
+      
+4) mvn package -PpackageECC
+
+  * This will build and package up the ECC component in a ZIP file:
+    ./target/experimedia-arch-ecc-<VERSION>-src.zip
+   
+   and should include:
+   
+     * Everything you find in this directory
+     * Generated JavaDoc in ./doc/javaDoc/
+  
+

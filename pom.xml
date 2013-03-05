@@ -12,9 +12,12 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <ecc.java.version>1.6</ecc.java.version>
         <ecc.javadocplugin.version>2.9</ecc.javadocplugin.version>
+        <ecc.javadocpath>doc/javaDoc</ecc.javadocpath>
         <ecc.reportplugin.version>2.6</ecc.reportplugin.version>
         <ecc.licenseplugin.version>1.4</ecc.licenseplugin.version>
         <ecc.resourceplugin.version>2.5</ecc.resourceplugin.version>
+        <ecc.assemblyplugin.version>2.4</ecc.assemblyplugin.version>
+        <ecc.assemblypath>assembly</ecc.assemblypath>
         <ecc.junit.version>4.10</ecc.junit.version>
         <ecc.log4j.version>1.2.17</ecc.log4j.version>
         <ecc.gson.version>2.2.2</ecc.gson.version>
@@ -25,7 +28,7 @@
     <licenses>
       <license>
         <name>Experimedia consortium license</name>
-        <url>file:///ITInnov-EXPERIMEDIA-licence-v1.0.txt</url>
+        <url>file://ITInnov-EXPERIMEDIA-licence-v1.0.txt</url>
         <distribution>JRS SVN</distribution>
       </license>
     </licenses>
@@ -34,6 +37,19 @@
         <pluginManagement>
           <plugins>
             
+            <!-- Source code packaging configuration _______________________ -->
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-assembly-plugin</artifactId>
+              <version>${ecc.assemblyplugin.version}</version>
+              <configuration>
+                <descriptors>
+                  <descriptor>${ecc.assemblypath}/eccSourceAssembly.xml</descriptor>
+                </descriptors>
+              </configuration>
+            </plugin>
+            
+            <!-- Licensing _________________________________________________ -->
             <plugin>
               <groupId>org.codehaus.mojo</groupId>
               <artifactId>license-maven-plugin</artifactId>
@@ -43,10 +59,10 @@
                     <id>third-party-report</id>
                     <phase>package</phase>
                     <goals>
-                      <goal>third-party-report</goal>
+                      <goal>aggregate-add-third-party</goal>
                     </goals>
                     
-                    <!-- Use mvn license:add-third-party -Dlicense.useMissingFile 
+                    <!-- Use mvn license:aggregate-add-third-party -Dlicense.useMissingFile
                          to update all licenses for the ECC component        -->
                     <configuration>
                       <useMissingFile>true</useMissingFile>
@@ -80,20 +96,6 @@
                 </configuration>
             </plugin>
             
-            <!-- Check style _______________________________________________ -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>2.9.1</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
-                        <artifactId>build-tools</artifactId>
-                        <version>1.1-SNAPSHOT</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
-            
             <!-- SITE report generation ____________________________________ -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -124,6 +126,8 @@
                             <groupId>org.apache.maven.plugins</groupId>
                             <artifactId>maven-javadoc-plugin</artifactId>
                             <version>${ecc.javadocplugin.version}</version>
+                            <reportOutputDirectory>${ecc.javadocpath}</reportOutputDirectory>
+                            <destDir>.</destDir>
                         </plugin>
                         
                         <!-- Source cross-referencing documentation ________ -->
@@ -165,9 +169,9 @@
     </build>
     
     <profiles>
+      
       <profile>
-        <!-- Rapid build for development purposes __________________________ -->
-        <id>QuickBuild</id>
+        <id>packageECC</id>
         <build>
           
           <plugins>
@@ -180,6 +184,21 @@
                   <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
             </plugin>
+            
+            <!-- Check style _______________________________________________ -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>2.9.1</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
+                        <artifactId>build-tools</artifactId>
+                        <version>1.1-SNAPSHOT</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+            
             <!-- Compilation _______________________________________________ -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -190,11 +209,55 @@
                     <target>${ecc.java.version}</target>
                 </configuration>
             </plugin>
+           
+            <!-- Package JavaDoc ___________________________________________ -->
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-javadoc-plugin</artifactId>
+              <version>${ecc.javadocplugin.version}</version>
+              <executions>
+                <execution>
+                  <id>attach-javadocs</id>
+                  <phase>package</phase>
+                  <goals>
+                    <goal>aggregate</goal>
+                  </goals>
+                  
+                  <configuration>
+                    <reportOutputDirectory>${ecc.javadocpath}</reportOutputDirectory>
+                    <destDir>.</destDir>
+                  </configuration>
+                  
+                </execution>
+              </executions>
+            </plugin>
+            
+            <!-- Package content ___________________________________________ -->
+            <plugin>
+              <artifactId>maven-assembly-plugin</artifactId>
+              <version>${ecc.assemblyplugin.version}</version>
+              <configuration>
+                <descriptors>
+                  <descriptor>${ecc.assemblypath}/eccSourceAssembly.xml</descriptor>
+                </descriptors>
+              </configuration>
+              
+              <executions>
+                <execution>
+                  <id>make-assembly</id>
+                  <phase>package</phase>
+                  <goals>
+                    <goal>single</goal>
+                  </goals>
+                </execution>
+              </executions>
+            </plugin>
           
           </plugins>
           
         </build>
       </profile>
+      
     </profiles>
 
   <!-- 3rd party repositories _____________________________________________  -->

@@ -1,0 +1,25 @@
+<assembly>
+  <id>src</id>
+  
+  <formats>
+    <format>zip</format>
+  </formats>
+
+  <fileSets>
+      <fileSet>
+          <directory>.</directory>
+          <excludes>
+            <exclude>**/target/**</exclude>
+            <exclude>assembly/**</exclude>
+          </excludes>    
+      </fileSet>
+      
+      <fileSet>
+        <directory>./assembly</directory>
+        <includes>
+          <include>eccSourceAssembly.xml</include>
+        </includes>
+      </fileSet>
+  </fileSets>
+  
+</assembly>
