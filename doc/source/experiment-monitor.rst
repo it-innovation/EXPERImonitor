@@ -1,4 +1,0 @@
-Experiment Monitor
-==================
-
-TODO: SGC

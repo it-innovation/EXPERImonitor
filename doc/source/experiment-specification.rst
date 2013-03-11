@@ -1,4 +1,0 @@
-Experiment Specification
-========================
-
-TODO: ?
