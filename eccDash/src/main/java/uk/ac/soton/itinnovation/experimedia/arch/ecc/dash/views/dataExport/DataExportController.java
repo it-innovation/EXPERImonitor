@@ -208,7 +208,7 @@ public class DataExportController extends UFAbstractEventManager
             while ( msIt.hasNext() )
             {
               MeasurementSet ms = msIt.next();
-              UUID msID = ms.getUUID();
+              UUID msID = ms.getID();
               
               if ( !metricExportsByMSID.containsKey(msID) )
               {

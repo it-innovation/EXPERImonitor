@@ -305,11 +305,11 @@ public class APopulateDBTest extends TestCase
             for (MeasurementSet mSet : measurementSets)
             {
                 assertNotNull("Measurement set is NULL", mSet);
-                assertNotNull("Measurement set's UUID is NULL", mSet.getUUID());
+                assertNotNull("Measurement set's UUID is NULL", mSet.getID());
                 assertNotNull("Measurement set's metric is NULL", mSet.getMetric());
                 assertNotNull("Measurement set's metric type is NULL", mSet.getMetric().getMetricType());
                 assertNotNull("Measurement set's metric unit is NULL", mSet.getMetric().getUnit());
-                assertNotNull("Measurement set's Attribute UUID is NULL", mSet.getAttributeUUID());
+                assertNotNull("Measurement set's Attribute UUID is NULL", mSet.getAttributeID());
             }
         }
     }

@@ -17,7 +17,7 @@
 // PURPOSE, except where stated in the Licence Agreement supplied with
 // the software.
 //
-//      Created By :            Vegard Engen
+//      Created By :            Vegard Engen/Simon Crowle
 //      Created Date :          2012-08-09
 //      Created for Project :   BonFIRE
 //
@@ -25,9 +25,10 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics;
 
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+
+
+
 
 /**
  * This class represents a set of measurements for a specific attribute (of an entity),
@@ -37,19 +38,25 @@ import java.util.UUID;
  */
 public class MeasurementSet implements Serializable
 {
-    private UUID uuid;
-    private UUID attributeUUID;
-    private UUID metricGroupUUID;
-    private Metric metric;
+    private UUID             msetID;
+    private UUID             attributeID;
+    private UUID             metricGroupID;
+    private Metric           metric;
     private Set<Measurement> measurements;
+    
+    private MEASUREMENT_RULE measurementRule = MEASUREMENT_RULE.eINDEFINITE;
+    private int              measurementCountMax;
+    private int              samplingInterval = 1000; // Default rate of 1 sample/second
+    
+    public enum MEASUREMENT_RULE { eFIXED_COUNT, eINDEFINITE };
     
     /**
      * Default constructor which sets a random UUID for the object instance.
      */
     public MeasurementSet()
     {
-        this.uuid = UUID.randomUUID();
-        this.measurements = new HashSet<Measurement>();
+        msetID = UUID.randomUUID();
+        measurements = new HashSet<Measurement>();
     }
     
     /**
@@ -57,189 +64,283 @@ public class MeasurementSet implements Serializable
      * @param ms The metric set object from which a copy is made.
      * @param copyMeasurements Flag indicating whether or not to copy measurements
      */
-    public MeasurementSet(MeasurementSet ms, boolean copyMeasurements )
+    public MeasurementSet( MeasurementSet ms, boolean copyMeasurements )
     {
-        if (ms == null)
-            return;
+        this();
         
-        if (ms.getUUID() != null)
-            this.uuid = UUID.fromString(ms.getUUID().toString());
-        if (ms.getAttributeUUID() != null)
-            this.attributeUUID = UUID.fromString(ms.getAttributeUUID().toString());
-        if (ms.getMetricGroupUUID() != null)
-            this.metricGroupUUID = UUID.fromString(ms.getMetricGroupUUID().toString());
-        if (ms.getMetric() != null)
-            this.metric = new Metric(ms.getMetric());
+        if ( ms == null ) return;
         
-        this.measurements = new HashSet<Measurement>();
-        if (copyMeasurements && ms.getMeasurements() != null)
+        msetID              = ms.getID();
+        attributeID         = ms.getAttributeID();
+        metricGroupID       = ms.getMetricGroupID();
+        measurementRule     = ms.getMeasurementRule();
+        measurementCountMax = ms.getMeasurementCountMax();
+        samplingInterval    = ms.getSamplingInterval();
+        
+        if ( ms.getMetric() != null ) metric = new Metric( ms.getMetric() );
+        
+        if ( copyMeasurements && ms.getMeasurements() != null )
         {
-            for (Measurement m : ms.getMeasurements())
-            {
-                if (m != null)
-                    this.measurements.add(new Measurement(m));
-            }
+            for ( Measurement m : ms.getMeasurements() )
+              appendMeasurement( m );
         }
     }
     
     /**
      * Constructor to set the UUID of the MeasurementSet.
      */
-    public MeasurementSet(UUID uuid)
+    public MeasurementSet( UUID msID )
     {
         this();
-        this.uuid = uuid;
+        
+        msetID = msID;
     }
     
     /**
      * Constructor to set the attributes of the Measurement Set except for measurements.
-     * @param uuid The UUID used to uniquely identify a measurement set in this framework.
-     * @param attributeUUID The UUID of the attribute this measurement set defines measurements of.
-     * @param metricGroupUUID The UUID of the metric group this measurement set is a part of.
-     * @param metric The metric of the measurements.
+     * @param msID The UUID used to uniquely identify a measurement set in this framework.
+     * @param attrID The UUID of the attribute this measurement set defines measurements of.
+     * @param metGroupID The UUID of the metric group this measurement set is a part of.
+     * @param met The metric of the measurements.
      */
-    public MeasurementSet(UUID uuid, UUID attributeUUID, UUID metricGroupUUID, Metric metric)
+    public MeasurementSet( UUID msID, UUID attrID, UUID metGroupID, Metric met )
     {
-        this(uuid);
-        this.attributeUUID = attributeUUID;
-        this.metricGroupUUID = metricGroupUUID;
-        this.metric = metric;
+        this( msID );
+                
+        attributeID   = attrID;
+        metricGroupID = metGroupID;
+        metric        = met;
     }
     
     /**
      * Constructor to set all the attributes of the Measurement Set.
-     * @param uuid The UUID used to uniquely identify a measurement set in this framework.
-     * @param attributeUUID The UUID of the attribute this measurement set defines measurements of.
-     * @param metricGroupUUID The UUID of the metric group this measurement set is a part of.
+     * @param msID The UUID used to uniquely identify a measurement set in this framework.
+     * @param attrID The UUID of the attribute this measurement set defines measurements of.
+     * @param metGroupID The UUID of the metric group this measurement set is a part of.
      * @param metric The metric of the measurements.
      * @param measurements The set of measurements.
      */
-    public MeasurementSet(UUID uuid, UUID attributeUUID, UUID metricGroupUUID, Metric metric, Set<Measurement> measurements)
+    public MeasurementSet( UUID msID, UUID attrID, UUID metGroupID, 
+                           Metric metric, Set<Measurement> measures )
     {
-        this(uuid, attributeUUID, metricGroupUUID, metric);
-        this.measurements = measurements;
+        this( msID, attrID, metGroupID, metric );
+        
+        if ( measures != null )
+            for ( Measurement m : measures )
+                appendMeasurement( m );
     }
     
     /**
-     * @return the uuid
+     * @return the MeasurementSet ID
      */
-    public UUID getUUID()
-    {
-        return uuid;
-    }
+    public UUID getID()
+    {   return msetID;    }
 
     /**
-     * @param uuid the uuid to set
+     * @param msID Set the MeasurementSet ID
      */
-    public void setUUID(UUID uuid)
-    {
-        this.uuid = uuid;
-    }
+    public void setID( UUID msID )
+    {    msetID = msID;    }
 
     /**
-     * @return the attributeUUID
+     * @return the associated attribute ID
      */
-    public UUID getAttributeUUID()
-    {
-        return attributeUUID;
-    }
+    public UUID getAttributeID()
+    {   return attributeID;   }
 
     /**
-     * @param attributeUUID the attributeUUID to set
+     * @param id the associated attribute ID
      */
-    public void setAttributeUUID(UUID attributeUUID)
-    {
-        this.attributeUUID = attributeUUID;
-    }
+    public void setAttributeUUID( UUID id )
+    {   attributeID = id;   }
     
     /**
-     * @return the metricGroupUUID
+     * @return the associated metric group ID
      */
-    public UUID getMetricGroupUUID()
-    {
-        return metricGroupUUID;
-    }
+    public UUID getMetricGroupID()
+    {   return metricGroupID;   }
 
     /**
-     * @param metricGroupUUID the metricGroupUUID to set
+     * @param metricGroupUUID the associated metric group ID to set
      */
-    public void setMetricGroupUUID(UUID metricGroupUUID)
-    {
-        this.metricGroupUUID = metricGroupUUID;
-    }
+    public void setMetricGroupUUID( UUID id )
+    {   metricGroupID = id;   }
     
     /**
      * @return the metric
      */
     public Metric getMetric()
-    {
-        return metric;
-    }
+    {   return metric;    }
 
     /**
-     * @param metric the metric to set
+     * @param met the metric to set
      */
-    public void setMetric(Metric metric)
-    {
-        this.metric = metric;
-    }
+    public void setMetric( Metric met )
+    {   metric = met;   }
 
     /**
      * @return the measurements
      */
     public Set<Measurement> getMeasurements()
-    {
-        return measurements;
-    }
-
+    {   return measurements;    }
+    
     /**
-     * @param measurements the measurements to set
+     * Returns the measurement rule for this set:
+     *   - eFIXED_COUNT : a finite number of measurements may be added to this set.
+     *   - eINDEFINITE  : an indefinite/unlimited number of measurements may be added to this set (default)
+     * 
+     * @return  - rule for this set.
      */
-    public void setMeasurements(Set<Measurement> measurements)
+    public MEASUREMENT_RULE getMeasurementRule()
+    {   return measurementRule;   }
+    
+    /**
+     * Sets the measurement rule of this set:
+     *   * eFIXED_COUNT : a finite number of measurements may be added to this set.
+     *   * eINDEFINITE  : an indefinite/unlimited number of measurements may be added to this set (default)
+     * 
+     * @param per - rule for this set.
+     */
+    public void setMeasurementRule( MEASUREMENT_RULE per )
+    {   measurementRule = per;    }
+    
+    /**
+     * Returns a positive integer, depending on the Measurement Rule for this set:
+     *   * eFIXED_COUNT : returns the number of remaining measurements that can be added
+     *   * eINDEFINITE  : returns the number of measurements already added
+     * 
+     * @return - the number of measurements, depending on Measurement Rule
+     */
+    public int getMeasurementCountMax()
     {
-        this.measurements = measurements;
-        
-        for (Measurement measurement : measurements) {
-            measurement.setMeasurementSetUUID(this.uuid);
-        }
+        if ( measurementRule == MEASUREMENT_RULE.eINDEFINITE )
+            return measurements.size();
+          
+        return measurementCountMax;
     }
     
     /**
-     * Add a measurement to the set.
-     * @param measurement the measurement to add.
+     * Set the measurement count maximum only if:
+     *   * The measurement rule is of type eFIXED_COUNT
+     *   * The current number of measurements is less than 'max'
+     *   * 'max' is a number greater than zero
+     * 
+     * @param max - the maximum number of measurements allowed for this set
+     * 
+     * @return returns true if maximum was set 
      */
-    public void addMeasurement(Measurement measurement)
+    public boolean setMeasurementCountMax( int max )
     {
-        if (measurement == null) {
-            return;
+        if ( max < 1 || 
+            measurementRule == MEASUREMENT_RULE.eINDEFINITE ||
+            measurements.size() > max ) return false;
+        
+        measurementCountMax = max;
+        
+        return true;
+    }
+
+    /**
+     * Sets the measurements for this set. If the measurement rule for this set is 
+     * eFIXED_COUNT then the size of the set must be less than the measurement max count
+     * 
+     * @param measurements the measurements to set (null values are ignored)
+     * 
+     * @return returns true if measurements were set
+     */
+    public boolean setMeasurements( Set<Measurement> measures )
+    {
+        boolean setMeasures = false;
+        
+        if ( measures != null )
+        {
+            if ( measurementRule == MEASUREMENT_RULE.eINDEFINITE )
+                setMeasures = true;
+            else
+                if ( measures != null && measures.size() < measurementCountMax )
+                    setMeasures = true;
         }
         
-        if (this.measurements == null) {
-            this.measurements = new HashSet<Measurement>();
-        }
+        if ( setMeasures ) measurements = measures;
         
-        measurement.setMeasurementSetUUID(this.uuid);
-        this.measurements.add(measurement);
+        return setMeasures;
+    }
+    
+    /**
+     * Return this minimum time (in milliseconds) that must elapse before the ECC 
+     * should query this measurement set for new data.
+     * 
+     * @return - interval time, in milliseconds
+     */
+    public int getSamplingInterval()
+    {   return samplingInterval;    }
+    
+    /**
+     * Sets the minimum time (in milliseconds) that must elapse before the ECC 
+     * should query this measurement set for new data
+     * 
+     * @param sampInt - minimum time elapsed (in milliseconds)
+     */
+    public void setSamplingInternval( int sampInt )
+    {
+      if ( sampInt >= 0 ) samplingInterval = sampInt;
+    }
+    
+    /**
+     * Add a measurement to the set. If the measurement rule for this set is eFIXED_COUNT
+     * the measurement will only be added if the maximum is not already reached.
+     * 
+     * @param measurement the measurement to add.
+     * 
+     * @return returns true if measurement was added
+     */
+    public boolean addMeasurement( Measurement measurement )
+    {
+        if ( measurement == null ) return false;
+        
+        if ( measurements == null ) measurements = new HashSet<Measurement>();
+        
+        return appendMeasurement( measurement );
     }
     
     /**
      * Add measurements to the set.
+     * 
      * @param measurements the set of measurements to add.
+     * 
+     * @return returns true if all measurements were added
      */
-    public void addMeasurements(Set<Measurement> measurements)
+    public boolean addMeasurements( Set<Measurement> measurements )
     {
-        if ((measurements == null) || measurements.isEmpty()) {
-            return;
-        }
+        if ( (measurements == null) || measurements.isEmpty() ) return false;
         
-        if (this.measurements == null) {
-            this.measurements = new HashSet<Measurement>();
-        }
+        if ( measurements == null ) measurements = new HashSet<Measurement>();
         
-        for (Measurement measurement : measurements)
+        Iterator<Measurement> measureIt = measurements.iterator();
+        while ( measureIt.hasNext() )
+        { appendMeasurement( measureIt.next() ); }
+        
+        if ( measureIt.hasNext() ) return false; // Did not add all measurements
+        
+        return false;
+    }
+    
+    // Private methods ---------------------------------------------------------
+    private boolean appendMeasurement( Measurement m )
+    {
+        boolean addMeasure = false;
+        
+        if ( measurementRule == MEASUREMENT_RULE.eINDEFINITE )
+          addMeasure = true;
+        else
+            if ( measurements.size() < measurementCountMax ) addMeasure = true;
+        
+        if ( addMeasure )
         {
-            measurement.setMeasurementSetUUID(this.uuid);
-            this.measurements.add(measurement);
+            m.setMeasurementSetUUID( msetID );
+            measurements.add( m );
         }
+        
+        return addMeasure;
     }
 }

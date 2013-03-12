@@ -596,7 +596,7 @@ public class ECCHeadlessClient implements EMIAdapterListener
         ms.setMetric( new Metric(UUID.randomUUID(), type, unit) );
         
         // Map this measurement set for later
-        measurementSetMap.put( ms.getUUID(), ms );
+        measurementSetMap.put( ms.getID(), ms );
         
         // If available, create an automatic measurement task to periodically take measurements
         if ( edmAgentOK && schedulerOK )
@@ -615,7 +615,7 @@ public class ECCHeadlessClient implements EMIAdapterListener
             { clientLogger.error( "Could not define measurement task for attribute " + attr.getName() ); }
         else
             // If we can't schedule & store measurements, just have the samplers handy
-            instantMeasurers.put( ms.getUUID(), listener );
+            instantMeasurers.put( ms.getID(), listener );
     }
     
     private void startMeasuring()

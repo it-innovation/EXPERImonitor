@@ -349,7 +349,7 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
         
         Iterator<MeasurementSet> msIt = targetMSets.iterator();       
         while ( msIt.hasNext() )
-        { clientEx.addPullingMeasurementSetID( msIt.next().getUUID() ); }
+        { clientEx.addPullingMeasurementSetID( msIt.next().getID() ); }
         
         clientEx.getLiveMonitorInterface().pullMetric( clientEx.iterateNextMSForPulling() );
       }
@@ -416,7 +416,7 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
       Report report = summary.getReport( msIDIt.next() );
       if ( report != null && report.getNumberOfMeasurements() > 0 )
       {
-        EMDataBatchEx newBatch = new EMDataBatchEx( report.getMeasurementSet().getUUID(),
+        EMDataBatchEx newBatch = new EMDataBatchEx( report.getMeasurementSet().getID(),
                                                     report.getFromDate(),
                                                     batchRequestSize );
         

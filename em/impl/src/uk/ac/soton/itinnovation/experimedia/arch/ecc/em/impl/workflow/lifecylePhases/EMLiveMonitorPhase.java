@@ -360,7 +360,7 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
       if ( mSet != null )
       {
         // Remove ID from current pulling set
-        client.removePullingMeasurementSetID( mSet.getUUID() );
+        client.removePullingMeasurementSetID( mSet.getID() );
 
         // Notify listeners
         if ( phaseListener != null ) 

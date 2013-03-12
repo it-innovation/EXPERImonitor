@@ -77,10 +77,10 @@ public class MetricHelper
         while ( msIt.hasNext() )
         {
           MeasurementSet ms = msIt.next();
-          UUID linkedAttrID = ms.getAttributeUUID();
+          UUID linkedAttrID = ms.getAttributeID();
           
           if ( linkedAttrID != null && linkedAttrID.equals(targetAttID) )
-            mSets.put( ms.getUUID(), ms );
+            mSets.put( ms.getID(), ms );
         }
       }
       
@@ -100,7 +100,7 @@ public class MetricHelper
         while ( msIt.hasNext() )
         {
           MeasurementSet ms = msIt.next();
-          UUID linkedAttrID = ms.getAttributeUUID();
+          UUID linkedAttrID = ms.getAttributeID();
           
           if ( linkedAttrID != null && linkedAttrID.equals( attr.getUUID()) )
           {
@@ -208,9 +208,9 @@ public class MetricHelper
           while ( msIt.hasNext() )
           {
             MeasurementSet ms = msIt.next();
-            UUID msID = ms.getUUID();
+            UUID msID = ms.getID();
             
-            if ( msID != null ) mSets.put( ms.getUUID(), ms );
+            if ( msID != null ) mSets.put( ms.getID(), ms );
           }
         }
       }
@@ -235,7 +235,7 @@ public class MetricHelper
                     while ( msIt.hasNext() )
                     { 
                         MeasurementSet ms = msIt.next();
-                        UUID msID = ms.getUUID();
+                        UUID msID = ms.getID();
                         
                         if ( msID != null &&  msID.equals( measurementSetID) )
                         {
@@ -429,7 +429,7 @@ public class MetricHelper
                 MeasurementSet ms = getMeasurementSetForAttribute( att, mgen );
                 if ( ms != null )
                 {
-                  desc += "      Measurement set ID: " + ms.getUUID() + "\n";
+                  desc += "      Measurement set ID: " + ms.getID() + "\n";
                   
                   Metric metric = ms.getMetric();
                   if ( metric != null )

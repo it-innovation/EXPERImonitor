@@ -137,7 +137,7 @@ public class ReportDAOHelper
             
             PreparedStatement pstmt = connection.prepareStatement(query);
             pstmt.setObject(1, report.getUUID(), java.sql.Types.OTHER);
-            pstmt.setObject(2, report.getMeasurementSet().getUUID(), java.sql.Types.OTHER);
+            pstmt.setObject(2, report.getMeasurementSet().getID(), java.sql.Types.OTHER);
             pstmt.setLong(3, report.getReportDate().getTime());
             pstmt.setLong(4, report.getFromDate().getTime());
             pstmt.setLong(5, report.getToDate().getTime());
@@ -156,7 +156,7 @@ public class ReportDAOHelper
                 if ((report.getMeasurementSet().getMeasurements() != null) && !report.getMeasurementSet().getMeasurements().isEmpty())
                 {
                     log.debug("Saving " + report.getMeasurementSet().getMeasurements().size() + " measurements for the report");
-                    MeasurementDAOHelper.saveMeasurementsForSet(report.getMeasurementSet().getMeasurements(), report.getMeasurementSet().getUUID(), connection);
+                    MeasurementDAOHelper.saveMeasurementsForSet(report.getMeasurementSet().getMeasurements(), report.getMeasurementSet().getID(), connection);
                 }
             } catch (Exception ex) {
                 throw ex;
@@ -258,7 +258,7 @@ public class ReportDAOHelper
             
             PreparedStatement pstmt = connection.prepareStatement(query);
             pstmt.setObject(1, report.getUUID(), java.sql.Types.OTHER);
-            pstmt.setObject(2, report.getMeasurementSet().getUUID(), java.sql.Types.OTHER);
+            pstmt.setObject(2, report.getMeasurementSet().getID(), java.sql.Types.OTHER);
             pstmt.setLong(3, report.getReportDate().getTime());
             pstmt.setLong(4, report.getFromDate().getTime());
             pstmt.setLong(5, report.getToDate().getTime());
@@ -297,7 +297,7 @@ public class ReportDAOHelper
         
         try {
             log.debug("Saving " + report.getMeasurementSet().getMeasurements().size() + " measurements for the report");
-            MeasurementDAOHelper.saveMeasurementsForSet(report.getMeasurementSet().getMeasurements(), report.getMeasurementSet().getUUID(), connection);
+            MeasurementDAOHelper.saveMeasurementsForSet(report.getMeasurementSet().getMeasurements(), report.getMeasurementSet().getID(), connection);
         } catch (Exception ex) {
             log.error("Error while saving the measurements for the report: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while saving the measurements for the report: " + ex.getMessage(), ex);

@@ -69,7 +69,7 @@ public class EMPostReportSummary
       MeasurementSet ms = report.getMeasurementSet();
       
       if ( ms != null )
-        reportsByMeasurementSetID.put( ms.getUUID(), report );
+        reportsByMeasurementSetID.put( ms.getID(), report );
     }
   }
   

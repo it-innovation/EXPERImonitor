@@ -99,7 +99,7 @@ public class MeasurementTask
      * @return - UUID of the MeasurementSet
      */
     public UUID getMeasurementSetID()
-    { return measurementSet.getUUID(); }
+    { return measurementSet.getID(); }
     
     /**
      * Returns the recurrance type for this task

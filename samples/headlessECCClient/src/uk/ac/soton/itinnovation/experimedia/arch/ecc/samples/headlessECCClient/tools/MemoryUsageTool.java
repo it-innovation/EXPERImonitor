@@ -54,7 +54,7 @@ public class MemoryUsageTool implements ITakeMeasurement
         
         // Create measurement instance
         Measurement measure = new Measurement( memVal );
-        measure.setMeasurementSetUUID( reportOUT.getMeasurementSet().getUUID() );
+        measure.setMeasurementSetUUID( reportOUT.getMeasurementSet().getID() );
         Date stamp = measure.getTimeStamp();
         
         // Create report

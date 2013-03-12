@@ -77,7 +77,7 @@ public class PsuedoRandomWalkTool implements ITakeMeasurement
 
         // Create measurement instance
         Measurement measure = new Measurement( Integer.toString(directionDegrees) );
-        measure.setMeasurementSetUUID( reportOUT.getMeasurementSet().getUUID() );
+        measure.setMeasurementSetUUID( reportOUT.getMeasurementSet().getID() );
         Date stamp = measure.getTimeStamp();
         
         // Create report

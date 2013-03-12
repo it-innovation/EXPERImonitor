@@ -436,7 +436,7 @@ public class ECCClientController implements EMIAdapterListener,
 
         // Update the latest measurement
         currentMeasurement = new Measurement();
-        currentMeasurement.setMeasurementSetUUID( snapshotMS.getUUID() );
+        currentMeasurement.setMeasurementSetUUID( snapshotMS.getID() );
         currentMeasurement.setTimeStamp( new Date() );
         currentMeasurement.setValue( memVal );
 

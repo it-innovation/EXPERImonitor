@@ -55,17 +55,17 @@ public class MeasurementSetDAOHelper
         
         // check if all the required information is given; uuid, metric group UUID, attribute UUID, metric, measurements (if any)
         
-        if (mSet.getUUID() == null)
+        if (mSet.getID() == null)
         {
             return new ValidationReturnObject(false, new IllegalArgumentException("The MeasurementSet UUID is NULL"));
         }
         
-        if (mSet.getMetricGroupUUID() == null)
+        if (mSet.getMetricGroupID() == null)
         {
             return new ValidationReturnObject(false, new IllegalArgumentException("The MeasurementSet's measurement group UUID is NULL"));
         }
         
-        if (mSet.getAttributeUUID() == null)
+        if (mSet.getAttributeID() == null)
         {
             return new ValidationReturnObject(false, new IllegalArgumentException("The MeasurementSet's attribute UUID is NULL"));
         }
@@ -100,9 +100,9 @@ public class MeasurementSetDAOHelper
         // check that the metric group exists, if flagged to check
         if (checkForMetricGroup)
         {
-            if (!MetricGroupDAOHelper.objectExists(mSet.getMetricGroupUUID(), connection))
+            if (!MetricGroupDAOHelper.objectExists(mSet.getMetricGroupID(), connection))
             {
-                return new ValidationReturnObject(false, new RuntimeException("The MetricGroup for the MeasurementSet doesn't exit (UUID: " + mSet.getMetricGroupUUID().toString() + ")"));
+                return new ValidationReturnObject(false, new RuntimeException("The MetricGroup for the MeasurementSet doesn't exit (UUID: " + mSet.getMetricGroupID().toString() + ")"));
             }
         }
         
@@ -122,7 +122,7 @@ public class MeasurementSetDAOHelper
                 {
                     return validationReturn;
                 }
-                else if (!measurement.getMeasurementSetUUID().equals(mSet.getUUID()))
+                else if (!measurement.getMeasurementSetUUID().equals(mSet.getID()))
                 {
                     return new ValidationReturnObject(false, new RuntimeException("The MeasurementSet UUID of a Measurement is not equal to the MeasurementSet that it's supposed to be saved with (measurement UUID " + measurement.getUUID().toString() + ")"));
                 }
@@ -184,9 +184,9 @@ public class MeasurementSetDAOHelper
             String query = "INSERT INTO MeasurementSet (mSetUUID, mGrpUUID, attribUUID, metricUUID) VALUES "
                     + "(?, ?, ?, ?)";
             PreparedStatement pstmt = connection.prepareStatement(query);
-            pstmt.setObject(1, measurementSet.getUUID(), java.sql.Types.OTHER);
-            pstmt.setObject(2, measurementSet.getMetricGroupUUID(), java.sql.Types.OTHER);
-            pstmt.setObject(3, measurementSet.getAttributeUUID(), java.sql.Types.OTHER);
+            pstmt.setObject(1, measurementSet.getID(), java.sql.Types.OTHER);
+            pstmt.setObject(2, measurementSet.getMetricGroupID(), java.sql.Types.OTHER);
+            pstmt.setObject(3, measurementSet.getAttributeID(), java.sql.Types.OTHER);
             pstmt.setObject(4, measurementSet.getMetric().getUUID(), java.sql.Types.OTHER);
             
             pstmt.executeUpdate();
@@ -242,7 +242,7 @@ public class MeasurementSetDAOHelper
                 metricUUIDstr = rs.getString("metricUUID");
                 
                 measurementSet = new MeasurementSet();
-                measurementSet.setUUID(measurementSetUUID);
+                measurementSet.setID(measurementSetUUID);
                 measurementSet.setMetricGroupUUID(UUID.fromString(mGenUUIDstr));
                 measurementSet.setAttributeUUID(UUID.fromString(attribUUIDstr));
             }

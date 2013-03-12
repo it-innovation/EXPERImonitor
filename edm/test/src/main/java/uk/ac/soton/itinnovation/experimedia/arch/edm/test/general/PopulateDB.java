@@ -586,13 +586,13 @@ public class PopulateDB
                                 // get attribute
                                 Attribute attrib = null;
                                 try {
-                                    attrib = entityDAO.getAttribute(mSet.getAttributeUUID());
+                                    attrib = entityDAO.getAttribute(mSet.getAttributeID());
                                 } catch (Exception ex) {
-                                    log.error("Unable to get attribute instance according to the UUID: " + mSet.getAttributeUUID().toString());
+                                    log.error("Unable to get attribute instance according to the UUID: " + mSet.getAttributeID().toString());
                                 }
                                 
                                 log.info("            - MeasurementSet details:");
-                                log.info("              - UUID: " + mSet.getUUID());
+                                log.info("              - UUID: " + mSet.getID());
                                 log.info("              - Attribute:");
                                 if (attrib != null) {
                                     if (attrib.getUUID() != null) log.info("                  - UUID:  " + attrib.getUUID());

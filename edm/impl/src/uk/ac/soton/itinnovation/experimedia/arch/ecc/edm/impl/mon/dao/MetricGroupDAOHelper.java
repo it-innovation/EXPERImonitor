@@ -99,9 +99,9 @@ public class MetricGroupDAOHelper
                 {
                     return validationReturn;
                 }
-                else if (!mSet.getMetricGroupUUID().equals(mGroup.getUUID()))
+                else if (!mSet.getMetricGroupID().equals(mGroup.getUUID()))
                 {
-                    return new ValidationReturnObject(false, new RuntimeException("The MetricGroup UUID of a MeasurementSet is not equal to the MetricGroup that it's supposed to be saved with (measurement set UUID " + mSet.getUUID().toString() + ")"));
+                    return new ValidationReturnObject(false, new RuntimeException("The MetricGroup UUID of a MeasurementSet is not equal to the MetricGroup that it's supposed to be saved with (measurement set UUID " + mSet.getID().toString() + ")"));
                 }
             }
         }

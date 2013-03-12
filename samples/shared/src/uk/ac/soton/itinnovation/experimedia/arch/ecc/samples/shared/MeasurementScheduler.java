@@ -107,11 +107,11 @@ public class MeasurementScheduler
         if ( intervalMS < MINIMUM_MEASUREMENT_INTERVAL_PERIOD )
             throw new Exception( "Measurement interval period is too small" );
         
-        if ( scheduledMeasurementsByID.contains(measurementSet.getUUID()) )
+        if ( scheduledMeasurementsByID.contains(measurementSet.getID()) )
           throw new Exception( "MeasurementSet ID already has a task" );
         
         synchronized ( taskLock )
-        { scheduledMeasurementsByID.add( measurementSet.getUUID() ); }
+        { scheduledMeasurementsByID.add( measurementSet.getID() ); }
         
         return new MeasurementTask( this, listener, 
                                     measurementSet, repetitions,

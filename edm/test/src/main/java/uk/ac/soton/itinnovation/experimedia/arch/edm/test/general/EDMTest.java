@@ -1293,7 +1293,7 @@ public class EDMTest
         {
             log.info(" * Report details");
             log.info("    - Report UUID:  " + report.getUUID().toString());
-            log.info("    - MSet   UUID:  " + report.getMeasurementSet().getUUID().toString());
+            log.info("    - MSet   UUID:  " + report.getMeasurementSet().getID().toString());
             log.info("    - Report date:  " + report.getReportDate() + " (" + report.getReportDate().getTime() + ")");
             log.info("    - From date:    " + report.getFromDate() + " (" + report.getFromDate().getTime() + ")");
             log.info("    - To date:      " + report.getToDate() + " (" + report.getToDate().getTime() + ")");
@@ -1382,8 +1382,8 @@ public class EDMTest
                             {
 
                                 log.info("            - MeasurementSet details:");
-                                log.info("              - UUID: " + mSet.getUUID());
-                                log.info("              - Attribute UUID: " + mSet.getAttributeUUID());
+                                log.info("              - UUID: " + mSet.getID());
+                                log.info("              - Attribute UUID: " + mSet.getAttributeID());
                                 
                                 if (mSet.getMetric() != null)
                                 {
@@ -1457,8 +1457,8 @@ public class EDMTest
                     for (MeasurementSet mSet : mGrp.getMeasurementSets())
                     {
                         log.info("            - MeasurementSet details:");
-                        log.info("              - UUID: " + mSet.getUUID());
-                        log.info("              - Attribute UUID:" + mSet.getAttributeUUID());
+                        log.info("              - UUID: " + mSet.getID());
+                        log.info("              - Attribute UUID:" + mSet.getAttributeID());
                         
                         if (mSet.getMetric() != null)
                         {
@@ -1489,8 +1489,8 @@ public class EDMTest
             for (MeasurementSet mSet : mGrp.getMeasurementSets())
             {
                 log.info("            - MeasurementSet details:");
-                log.info("              - UUID: " + mSet.getUUID());
-                log.info("              - Attribute UUID:" + mSet.getAttributeUUID());
+                log.info("              - UUID: " + mSet.getID());
+                log.info("              - Attribute UUID:" + mSet.getAttributeID());
 
                 if (mSet.getMetric() != null)
                 {
@@ -1506,8 +1506,8 @@ public class EDMTest
     public static void printMeasurementSetDetails(MeasurementSet mSet) throws Exception
     {
         log.info("            - MeasurementSet details:");
-        log.info("              - UUID: " + mSet.getUUID());
-        log.info("              - Attribute UUID:" + mSet.getAttributeUUID());
+        log.info("              - UUID: " + mSet.getID());
+        log.info("              - Attribute UUID:" + mSet.getAttributeID());
 
         if (mSet.getMetric() != null)
         {

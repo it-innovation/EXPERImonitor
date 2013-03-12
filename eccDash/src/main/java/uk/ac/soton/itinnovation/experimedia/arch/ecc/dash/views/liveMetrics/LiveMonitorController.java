@@ -93,7 +93,7 @@ public class LiveMonitorController extends UFAbstractEventManager
     }
     
     // Display (if we have an active display)
-    UUID msID = report.getMeasurementSet().getUUID();
+    UUID msID = report.getMeasurementSet().getID();
     if ( activeMSVisuals.contains(msID) )
     {
       MeasurementSet ms = report.getMeasurementSet();
@@ -124,7 +124,7 @@ public class LiveMonitorController extends UFAbstractEventManager
       while ( msIt.hasNext() )
       {
         MeasurementSet ms       = msIt.next();
-        UUID msID               = ms.getUUID();
+        UUID msID               = ms.getID();
         Metric metric           = ms.getMetric();
         BaseMetricVisual visual = null;
         
@@ -172,7 +172,7 @@ public class LiveMonitorController extends UFAbstractEventManager
         Iterator<MeasurementSet> msIt = MetricHelper.getAllMeasurementSets(msGens).iterator();
         while ( msIt.hasNext() )
         {
-          UUID msID = msIt.next().getUUID();
+          UUID msID = msIt.next().getID();
           
           activeMSVisuals.remove( msID );
           liveMonitorView.removeMetricVisual( msID ); 
@@ -212,7 +212,7 @@ public class LiveMonitorController extends UFAbstractEventManager
         {
           // Measurements we're going to ditch (because we've got them) to be recored here
           HashSet<Measurement> oldMeasurements = new HashSet<Measurement>();
-          UUID msID = ms.getUUID();
+          UUID msID = ms.getID();
 
           // Get latest measurement (if one does not exist, create an old start date)
           Date lastRecent = measurementDateStamps.get( msID );
