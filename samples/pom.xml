@@ -14,10 +14,23 @@
     <artifactId>experimedia-arch-ecc</artifactId>
     <version>1.1-SNAPSHOT</version>
   </parent>
+  
+  <!-- Parent module, no licence to apply here _____________________________ -->
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>license-maven-plugin</artifactId>
+        <configuration>
+          <skipUpdateProjectLicense>true</skipUpdateProjectLicense>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 
   <modules>
     <module>shared</module>
-	<module>headlessECCClient</module>
+    <module>headlessECCClient</module>
     <module>basicECCClient</module>
     <module>basicECCContainer</module>
     <module>metricGeneratorExamples</module>

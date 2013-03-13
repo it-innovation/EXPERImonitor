@@ -10,11 +10,12 @@
     
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <ecc.licenseplugin.version>1.4</ecc.licenseplugin.version>
+        <ecc.projectInfo.version>2.6</ecc.projectInfo.version>
         <ecc.java.version>1.6</ecc.java.version>
         <ecc.javadocplugin.version>2.9</ecc.javadocplugin.version>
         <ecc.javadocpath>doc/javaDoc</ecc.javadocpath>
         <ecc.reportplugin.version>2.6</ecc.reportplugin.version>
-        <ecc.licenseplugin.version>1.4</ecc.licenseplugin.version>
         <ecc.resourceplugin.version>2.5</ecc.resourceplugin.version>
         <ecc.assemblyplugin.version>2.4</ecc.assemblyplugin.version>
         <ecc.assemblypath>assembly</ecc.assemblypath>
@@ -37,7 +38,52 @@
         <pluginManagement>
           <plugins>
             
-            <!-- Source code packaging configuration _______________________ -->
+            <!-- Licensing (for packaging) _________________________________ -->
+            <plugin>
+              <groupId>org.codehaus.mojo</groupId>
+              <artifactId>license-maven-plugin</artifactId>
+              <version>${ecc.licenseplugin.version}</version>
+              <executions>
+                <execution>
+                    <id>third-party-report</id>
+                    <phase>package</phase>
+                    <goals>
+                      <goal>aggregate-add-third-party</goal>
+                    </goals>
+                    <configuration>
+                      <useMissingFile>true</useMissingFile>
+                    </configuration>
+                </execution>
+                
+                <execution>
+                  <id>update-project-license</id>
+                  <phase>package</phase>
+                  <goals>
+                    <goal>update-project-license</goal>
+                  </goals>
+                  
+                  <configuration>
+                    <licenseName>experimedia_licence</licenseName>
+                    <licenseResolver>${project.baseUri}/lic</licenseResolver>
+                  </configuration>
+                  
+                </execution>
+              </executions>
+            </plugin>
+            
+            <!-- Compiler configuration ____________________________________ -->
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-compiler-plugin</artifactId>
+              <version>3.0</version>
+              <configuration>
+                <source>${ecc.java.version}</source>
+                <target>${ecc.java.version}</target>
+                <encoding>${project.build.sourceEncoding}</encoding>
+              </configuration>
+            </plugin>
+              
+            <!-- Packaging configuration ___________________________________ -->
             <plugin>
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-assembly-plugin</artifactId>
@@ -47,28 +93,6 @@
                   <descriptor>${ecc.assemblypath}/eccSourceAssembly.xml</descriptor>
                 </descriptors>
               </configuration>
-            </plugin>
-            
-            <!-- Licensing _________________________________________________ -->
-            <plugin>
-              <groupId>org.codehaus.mojo</groupId>
-              <artifactId>license-maven-plugin</artifactId>
-              <version>${ecc.licenseplugin.version}</version>
-                <executions>
-                  <execution>
-                    <id>third-party-report</id>
-                    <phase>package</phase>
-                    <goals>
-                      <goal>aggregate-add-third-party</goal>
-                    </goals>
-                    
-                    <!-- Use mvn license:aggregate-add-third-party -Dlicense.useMissingFile
-                         to update all licenses for the ECC component        -->
-                    <configuration>
-                      <useMissingFile>true</useMissingFile>
-                    </configuration>
-                  </execution>
-                </executions>
             </plugin>
             
           </plugins>
@@ -82,17 +106,6 @@
                 <version>${ecc.resourceplugin.version}</version>
                 <configuration>
                   <encoding>${project.build.sourceEncoding}</encoding>
-                </configuration>
-            </plugin>
-            
-            <!-- Compilation _______________________________________________ -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
-                <configuration>
-                    <source>${ecc.java.version}</source>
-                    <target>${ecc.java.version}</target>
                 </configuration>
             </plugin>
             
@@ -199,15 +212,10 @@
                 </dependencies>
             </plugin>
             
-            <!-- Compilation _______________________________________________ -->
+            <!-- Licensing _________________________________________________ -->
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
-                <configuration>
-                    <source>${ecc.java.version}</source>
-                    <target>${ecc.java.version}</target>
-                </configuration>
+              <groupId>org.codehaus.mojo</groupId>
+              <artifactId>license-maven-plugin</artifactId>
             </plugin>
            
             <!-- Package JavaDoc ___________________________________________ -->
@@ -255,7 +263,7 @@
           
           </plugins>
           
-        </build>
+        </build>        
       </profile>
       
     </profiles>

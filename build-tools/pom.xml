@@ -26,7 +26,19 @@
           <encoding>${project.build.sourceEncoding}</encoding>
         </configuration>
       </plugin>
+      
+      <!-- No IT Innovation source to license here _________________________ -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>license-maven-plugin</artifactId>
+        <configuration>
+          <skipUpdateProjectLicense>true</skipUpdateProjectLicense>
+        </configuration>
+      </plugin>
+      
     </plugins>
+    
+    
     
   </build>
 
