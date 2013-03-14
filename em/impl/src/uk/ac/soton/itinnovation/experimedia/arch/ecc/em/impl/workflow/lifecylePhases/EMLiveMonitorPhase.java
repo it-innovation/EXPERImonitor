@@ -366,12 +366,8 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
         if ( phaseListener != null ) 
           phaseListener.onGotMetricData( client, report );
       }
-      else // We didn't get any actual data, so we'll have to assume that
-           // this was the report we asked for
-      {
+      else // Didn't get any actual measurement data
         phaseLogger.error( "Pulled report contained NULL MeasurementSet" );
-        client.removePullingMeasurementSetID( client.getCurrentRequestedMeasurementSetID() );
-      }
 
       // Tell the client we got the report
       IEMLiveMonitor monitor = client.getLiveMonitorInterface();
@@ -380,11 +376,10 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
       // If there are outstanding metrics to pull, make another request (if we're not stopping)
       if ( !monitorStopping )
       {
-        UUID nextMSID = client.iterateNextMSForPulling();
-
+        UUID nextMSID = client.iterateNextMSToBePulled();
+        
         if ( nextMSID != null ) monitor.pullMetric( nextMSID );
       }
-
     }
     else phaseLogger.error( "Could not process pulled metric: NULL client or report" ); 
   }

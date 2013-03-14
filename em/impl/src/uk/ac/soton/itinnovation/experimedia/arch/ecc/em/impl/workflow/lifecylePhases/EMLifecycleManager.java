@@ -313,17 +313,16 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   public void tryPullMetric( EMClient client, UUID measurementSetID ) throws Exception
   {
     // Safety first
-    if ( client == null || measurementSetID == null ) throw new Exception( "Pull parameters are invalid" );
-    if ( currentPhase != EMPhase.eEMLiveMonitoring )  throw new Exception( "Not in metric pulling compatible phase" );
-    if ( client.isPullingMetricData() )               throw new Exception( "Client is already being pulled for data" );
+    EMClientEx clientEx = (EMClientEx) client;
+    
+    if ( clientEx == null || measurementSetID == null )             throw new Exception( "Pull parameters are invalid" );
+    if ( currentPhase != EMPhase.eEMLiveMonitoring )                throw new Exception( "Not in metric pulling compatible phase" );
+    if ( clientEx.isMeasurementSetQueuedForPull(measurementSetID) ) throw new Exception( "Measurement set already queued for this client" );
     
     synchronized ( clientLock )
     {
-      EMClientEx clientEx = (EMClientEx) client;
-      if ( clientEx == null ) throw new Exception( "Client is invalid" );
-
       clientEx.addPullingMeasurementSetID( measurementSetID );
-      clientEx.getLiveMonitorInterface().pullMetric( clientEx.iterateNextMSForPulling() );
+      clientEx.getLiveMonitorInterface().pullMetric( clientEx.iterateNextMSToBePulled() );
     }
   }
   
@@ -331,7 +330,10 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   {
     // Safety first
     if ( currentPhase != EMPhase.eEMLiveMonitoring )  throw new Exception( "Not in metric pulling compatible phase" );
-    if ( client.isPullingMetricData() )               throw new Exception( "Client is already being pulled for data" );
+    
+    EMClientEx clientEx = (EMClientEx) client;
+    if ( clientEx == null )               throw new Exception( "Client is invalid" );
+    if ( clientEx.isPullingMetricData() ) throw new Exception( "Client is already being pulled for data" );
     
     // Get all MeasurementSets available
     Set<MeasurementSet> targetMSets = 
@@ -342,19 +344,12 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
       throw new Exception( "Client (apparently) has no measurement sets to pull!" );
     else
     {
-      synchronized ( clientLock ) // Otherwise, collect, stack and post request for the first one
-      {
-        EMClientEx clientEx = (EMClientEx) client;
-        if ( clientEx == null ) throw new Exception( "Client is invalid" );
-        
-        Iterator<MeasurementSet> msIt = targetMSets.iterator();       
-        while ( msIt.hasNext() )
-        { clientEx.addPullingMeasurementSetID( msIt.next().getID() ); }
-        
-        clientEx.getLiveMonitorInterface().pullMetric( clientEx.iterateNextMSForPulling() );
-      }
+      Iterator<MeasurementSet> msIt = targetMSets.iterator();
+      while ( msIt.hasNext() )
+      { clientEx.addPullingMeasurementSetID( msIt.next().getID() ); }
+      
+      clientEx.getLiveMonitorInterface().pullMetric( clientEx.iterateNextMSToBePulled() ); 
     }
-    
   }
   
   public void tryRequestDataBatch( EMClient client, UUID measurementSetID ) throws Exception

@@ -38,7 +38,7 @@ import java.util.UUID;
  */
 public class Report
 {
-    private UUID uuid;
+    private UUID reportID;
     private MeasurementSet measurementSet;
     private Date reportDate;
     private Date fromDate;
@@ -50,8 +50,20 @@ public class Report
      */
     public Report()
     {
-        this.uuid = UUID.randomUUID();
-        this.reportDate = new Date();
+        reportID = UUID.randomUUID();
+        reportDate = new Date();
+    }
+    
+    /**
+     * Constructor for the Report class that also creates a MeasurementSet with
+     * 'msID' as the identifier.
+     * 
+     * @param msID - MeasurementSet ID to be used for this report
+     */
+    public Report( UUID msID )
+    {
+        this();
+        measurementSet = new MeasurementSet( msID );
     }
     
     /**
@@ -64,7 +76,7 @@ public class Report
             return;
         
         if (report.getUUID() != null)
-            this.uuid = UUID.fromString(report.getUUID().toString());
+            this.reportID = UUID.fromString(report.getUUID().toString());
         if (report.getMeasurementSet() != null)
             this.measurementSet = new MeasurementSet(report.getMeasurementSet(), true);
         if (report.getReportDate() != null)
@@ -87,7 +99,7 @@ public class Report
      */
     public Report(UUID uuid, MeasurementSet measurementSet, Date reportDate, Date fromDate, Date toDate)
     {
-        this.uuid = uuid;
+        this.reportID = uuid;
         this.measurementSet = measurementSet;
         this.reportDate = reportDate;
         this.fromDate = fromDate;
@@ -114,7 +126,7 @@ public class Report
      */
     public UUID getUUID()
     {
-        return uuid;
+        return reportID;
     }
 
     /**
@@ -122,7 +134,7 @@ public class Report
      */
     public void setUUID(UUID uuid)
     {
-        this.uuid = uuid;
+        this.reportID = uuid;
     }
 
     /**
@@ -209,7 +221,7 @@ public class Report
     {
         if ( repIn != null )
         {
-            uuid = repIn.getUUID();
+            reportID = repIn.getUUID();
             measurementSet = new MeasurementSet(repIn.getMeasurementSet(),copyMeasurements);
             reportDate = (Date) repIn.getReportDate().clone();
             fromDate = (Date) repIn.getFromDate().clone();

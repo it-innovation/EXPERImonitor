@@ -489,7 +489,9 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
     {
         if ( senderID.equals(expMonitorID) && liveMonitorFace != null )
         {
-            Report reportOUT = new Report();
+            // Make sure we indicate which measurement set this report is carrying
+            // (up to the client to actually populate it)
+            Report reportOUT = new Report( measurementSetID );
 
             if ( emiListener != null )
                 emiListener.onPullMetric( measurementSetID, reportOUT );

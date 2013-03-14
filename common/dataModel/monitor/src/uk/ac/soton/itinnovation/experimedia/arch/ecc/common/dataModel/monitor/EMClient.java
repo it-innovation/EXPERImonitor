@@ -34,8 +34,6 @@ import java.util.*;
 
 public class EMClient
 {
-  protected final Object  pullLock = new Object();
-  
   // Experiment states
   protected UUID             clientID;
   protected String           clientName;
@@ -56,7 +54,7 @@ public class EMClient
   protected HashSet<UUID> generatorsSetupOK;
   
   // Live monitoring phase states
-  protected HashSet<UUID> currentMeasurementSetPulls;
+  protected volatile boolean isQueueingMSPulls;
   
   // Post-report phase states
   protected EMPostReportSummary        postReportSummary;
@@ -231,33 +229,12 @@ public class EMClient
   
   /**
    * Specifies whether the client is currently generating metric data requested
-   * by the EM.
+   * by the ECC.
    * 
    * @return - true if currently generating data
    */
   public boolean isPullingMetricData()
-  {
-    boolean isPulling;
-    
-    synchronized ( pullLock )
-    { isPulling = !currentMeasurementSetPulls.isEmpty(); }
-    
-    return isPulling;
-  }
-  
-  /**
-   * Returns the IDs of all MeasurementSet IDs that have been requested by the EM
-   * but not yet returned by the client
-   * 
-   * @return  - Set of IDs of MeasurementSets currently being pulled
-   */
-  public Set<UUID> getCopyOfCurrentMeasurementSetPullIDs()
-  {
-    HashSet<UUID> pullCopy = new HashSet<UUID>();
-    pullCopy.addAll( currentMeasurementSetPulls );
-    
-    return pullCopy;
-  }
+  { return isQueueingMSPulls; }
   
   /**
    * Returns the post report summary the client reported (if supported) during the
@@ -322,7 +299,6 @@ public class EMClient
     
     metricGenerators             = new HashSet<MetricGenerator>();
     generatorsSetupOK            = new HashSet<UUID>();
-    currentMeasurementSetPulls   = new HashSet<UUID>();
     postReportOutstandingBatches = new HashMap<UUID, EMDataBatch>();
   }
 }

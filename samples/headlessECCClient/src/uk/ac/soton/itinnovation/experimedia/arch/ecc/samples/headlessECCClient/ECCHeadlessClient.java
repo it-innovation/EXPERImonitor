@@ -328,12 +328,12 @@ public class ECCHeadlessClient implements EMIAdapterListener
      * Note that 'reportOut' is an OUT parameter provided by the adapter
      */
     public void onPullMetric( UUID measurementSetID, Report reportOUT )
-    {      
+    {
         // If we have an EDMAgent running, then get the latest measurement from there
         if ( edmAgentOK )
         {
             try
-            { 
+            {
                 Report edmReport = edmReportDAO.getReportForLatestMeasurement( measurementSetID, true );
                 
                 // Save this report internally (without data - we already have it stored in the EDMAgent)

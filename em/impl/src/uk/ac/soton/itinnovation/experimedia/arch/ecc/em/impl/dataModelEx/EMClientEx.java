@@ -39,7 +39,9 @@ import java.util.*;
 
 
 public class EMClientEx extends EMClient
-{ 
+{
+  private final Object pullLock = new Object();
+ 
   private IEMDiscovery      discoveryFace;
   private IEMMetricGenSetup setupFace;
   private IEMLiveMonitor    liveFace;
@@ -49,15 +51,22 @@ public class EMClientEx extends EMClient
   // Internal Set-up stage support
   private ArrayList<UUID> generatorsToSetup;
   
-  // Internal Shared state support
-  private UUID currentRequestedMSID;
+  // Internal Monitoring state support
+  private HashSet<UUID>    currentMeasurementSetPulls;
+  private LinkedList<UUID> orderedCurrentMeasurementSetPulls;
+  private UUID             expectedPullMSID;
+  
+  // Internal Post Report state support
+  private UUID currentRequestedBatchMSID;
  
   
   public EMClientEx( UUID id, String name )
   {
     super( id, name );
     
-    generatorsToSetup = new ArrayList<UUID>();
+    generatorsToSetup                 = new ArrayList<UUID>();
+    currentMeasurementSetPulls        = new HashSet<UUID>();
+    orderedCurrentMeasurementSetPulls = new LinkedList<UUID>();
   }
   
   public void destroyAllInterfaces()
@@ -178,39 +187,98 @@ public class EMClientEx extends EMClient
   public void setIsPullCapable( boolean pull )
   { isPullCapable = pull; }
   
-  public void addPullingMeasurementSetID( UUID msID )
+  public boolean isMeasurementSetQueuedForPull( UUID msID )
   {
-    synchronized ( pullLock )
-    { currentMeasurementSetPulls.add( msID ); }
+    boolean isPulling;
+    
+    synchronized( pullLock )
+    { isPulling = currentMeasurementSetPulls.contains(msID); }
+    
+    return isPulling;
   }
   
-  public boolean isCurrentlyPullingMeasurementSetID( UUID msID )
+  public Set<UUID> getCopyOfCurrentMeasurementSetPullIDs()
   {
-    boolean isPullingMS;
+    HashSet<UUID> pullCopy = new HashSet<UUID>();
     
     synchronized ( pullLock )
-    { isPullingMS = currentMeasurementSetPulls.contains( msID ); }
+    { pullCopy.addAll( currentMeasurementSetPulls ); }
     
-    return isPullingMS;  
+    return pullCopy;
+  }
+  
+  public void addPullingMeasurementSetID( UUID msID )
+  {
+    if ( msID != null )
+    {
+      synchronized ( pullLock )
+      {
+        if ( !currentMeasurementSetPulls.contains(msID) )
+        {
+          currentMeasurementSetPulls.add( msID );
+          orderedCurrentMeasurementSetPulls.add( msID );
+          
+          isQueueingMSPulls = !currentMeasurementSetPulls.isEmpty();
+        }
+      }
+    }
   }
   
   public void removePullingMeasurementSetID( UUID msID )
-  {
-    synchronized ( pullLock )
-    { if ( msID != null ) currentMeasurementSetPulls.remove(msID); }
+  { 
+    if ( msID != null )
+    {
+      synchronized ( pullLock )
+      {
+        currentMeasurementSetPulls.remove( msID );
+        orderedCurrentMeasurementSetPulls.remove( msID ); // Should be first in list
+        
+        // We are now free to iterate to the next MS...
+        if ( expectedPullMSID.equals(msID) ) expectedPullMSID = null;
+        
+        // ... and ensure our state of currently pulling remains accurate
+        isQueueingMSPulls = ( !currentMeasurementSetPulls.isEmpty() || 
+                              expectedPullMSID != null );
+      }
+    }
   }
   
-  public UUID iterateNextMSForPulling()
+  public UUID iterateNextMSToBePulled()
   {
+    UUID nextID = null;
+    
     synchronized ( pullLock )
     {
-      if ( currentMeasurementSetPulls.isEmpty() )
-        currentRequestedMSID = null;
-      else
-        currentRequestedMSID = currentMeasurementSetPulls.iterator().next();
+      // Need to take care here - MUST keep track of what we are expecting back
+      // and not try to iterate further forward until we know we have the result
+      if ( expectedPullMSID == null && !orderedCurrentMeasurementSetPulls.isEmpty() )
+      {
+        expectedPullMSID = orderedCurrentMeasurementSetPulls.getFirst();
+        nextID           = expectedPullMSID;
+      }
     }
     
-    return currentRequestedMSID;
+    // Note that this will be NULL if we've not got our expected result back yet
+    return nextID;
+  }
+  
+  public void requeueMSForPulling( UUID msID )
+  {
+    if ( msID != null )
+    {
+      synchronized ( pullLock )
+      {
+        if ( currentMeasurementSetPulls.contains(msID) && 
+             !msID.equals(expectedPullMSID) )
+        {
+          // Remove from current position in queue
+          orderedCurrentMeasurementSetPulls.remove( msID );
+          
+          // Push to back of queue
+          orderedCurrentMeasurementSetPulls.add( msID );
+        }
+      }
+    }
   }
   
   public void clearAllLiveMeasurementSetPulls()
@@ -218,7 +286,9 @@ public class EMClientEx extends EMClient
     synchronized ( pullLock )
     {
       currentMeasurementSetPulls.clear(); 
-      currentRequestedMSID = null;
+      orderedCurrentMeasurementSetPulls.clear();
+      
+      isQueueingMSPulls = false;
     }
   }
   
@@ -230,11 +300,18 @@ public class EMClientEx extends EMClient
   {
     EMDataBatch targetBatch = null;
     
-    if ( currentRequestedMSID != null )
-      targetBatch = postReportOutstandingBatches.get( currentRequestedMSID );
+    if ( currentRequestedBatchMSID != null )
+      targetBatch = postReportOutstandingBatches.get( currentRequestedBatchMSID );
     
     return targetBatch;
   }
+  
+  // Shared phase state --------------------------------------------------------
+  public UUID getCurrentRequestBatchMSID()
+  { return currentRequestedBatchMSID; }
+  
+  public void setCurrentRequestBatchMSID( UUID id )
+  { currentRequestedBatchMSID = id; }
   
   public void addDataForBatching( EMDataBatchEx batch ) throws Exception
   {
@@ -252,35 +329,28 @@ public class EMClientEx extends EMClient
   
   public UUID iterateNextMSForBatching()
   {
-    if ( currentRequestedMSID != null )
-      postReportOutstandingBatches.remove( currentRequestedMSID );
+    if ( currentRequestedBatchMSID != null )
+      postReportOutstandingBatches.remove( currentRequestedBatchMSID );
     
-    currentRequestedMSID = null;
+    currentRequestedBatchMSID = null;
     
     if ( !postReportOutstandingBatches.isEmpty() )
     {
       Iterator<UUID> msIDIt = postReportOutstandingBatches.keySet().iterator();
-      currentRequestedMSID = msIDIt.next();
+      currentRequestedBatchMSID = msIDIt.next();
     }
     
-    return currentRequestedMSID;
+    return currentRequestedBatchMSID;
   }
   
   public void clearAllBatching()
   {
     postReportOutstandingBatches.clear();
-    currentRequestedMSID = null;
+    currentRequestedBatchMSID = null;
   }
   
   // Tear-down phase state -----------------------------------------------------
   public void setTearDownResult( boolean success )
   { tearDownSuccessful = success; }
-  
-  // Shared phase state --------------------------------------------------------
-  public UUID getCurrentRequestedMeasurementSetID()
-  { return currentRequestedMSID; }
-  
-  public void setCurrentRequestedMeasurementSetID( UUID id )
-  { currentRequestedMSID = id; }
 }
  

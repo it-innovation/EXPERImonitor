@@ -259,9 +259,12 @@ public class EMController implements IEMLifecycleListener
               { emCtrlLogger.error( "Failed to store report data" ); }
           
           // Notify UI
-          mainView.addLogText( client.getName() + 
-                               " got metric data: " + 
-                                measures.iterator().next().getValue() );
+          Measurement m = measures.iterator().next();
+          if ( m != null )
+            mainView.addLogText( "Data MS[" +
+                                 ms.getID().toString() +
+                                 "] Time[" + m.getTimeStamp().toString() + "] = " + 
+                                 m.getValue() );
         }
       }
     }
@@ -491,8 +494,12 @@ public class EMController implements IEMLifecycleListener
                                 e.getMessage() ); 
           }
         }
-        else if ( noteBusyClients ) 
-          mainView.addLogText( "Client " + client.getName() + " is busy generating metrics" );
+        else if ( noteBusyClients )
+        {
+          String msg = "Client " + client.getName() + " is busy generating metrics";
+          emCtrlLogger.info( msg );
+          mainView.addLogText( msg );
+        }
       }
     }
   }
@@ -588,7 +595,7 @@ public class EMController implements IEMLifecycleListener
       if ( pullMetricsTask == null )
       {
         pullMetricsTask = new PullMetricsTask();
-        pullMetricTimer.scheduleAtFixedRate(pullMetricsTask, 0, 100);
+        pullMetricTimer.scheduleAtFixedRate(pullMetricsTask, 0, 1000);
       }
     }
     else
