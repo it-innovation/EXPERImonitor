@@ -266,6 +266,34 @@
         </build>        
       </profile>
       
+      <!-- ECC component visualisation _____________________________________ -->
+      <!-- Requires Graphviz to be installed (not distributed with ECC)      -->
+      <!-- Usage: mvn -Pvisualise graph:reactor                              -->
+      <profile>
+        <id>visualise</id>
+        
+          <pluginRepositories>
+            <pluginRepository>
+              <id>mvnplugins.fusesource.org</id>
+              <url>http://mvnplugins.fusesource.org/repo/release</url>
+              <releases>
+                <enabled>true</enabled>
+              </releases>
+            </pluginRepository>
+          </pluginRepositories>
+          
+          <build>
+            <plugins>
+              <plugin>
+                <groupId>org.fusesource.mvnplugins</groupId>
+                <artifactId>maven-graph-plugin</artifactId>
+                <version>1.4</version>
+              </plugin>
+            </plugins>
+          </build>
+      
+    </profile>
+      
     </profiles>
 
   <!-- 3rd party repositories _____________________________________________  -->
