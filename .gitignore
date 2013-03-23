@@ -33,3 +33,10 @@
 /em/target/
 /samples/target/
 /amqpAPI/java/target/
+/samples/basicAndroidClient/gen/
+/samples/basicAndroidClient/bin/
+/common/logging/lib/
+/common/dataModel/target/
+/common/logging/impls/lib/
+/common/logging/spec/lib/
+/common/logging/target/

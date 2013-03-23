@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:weightSum="10">
+  
+  <LinearLayout
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+    
+    <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="ECC Server IP:"/>
+      
+    <EditText
+      android:id="@+id/serverIP"
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content"
+      android:hint="IP of ECC server"
+      android:inputType="phone" />
+        
+  </LinearLayout>
+  
+  <Button
+    android:id="@+id/conButton"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:text="Connect" />  
+  
+  <ScrollView
+    android:id="@+id/logScrollView"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:scrollbars="vertical"
+    android:fillViewport="true"
+    android:layout_weight="6" >
+    
+    <TextView
+      android:id="@+id/logView"
+      android:layout_width="fill_parent"
+      android:layout_height="fill_parent"
+      android:background="#10101000"
+      android:lines="16"
+      android:text="Basic ECC Client"/>
+ 
+  </ScrollView>
+  
+  <LinearLayout
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_weight="4">
+    
+      <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+          <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Send value:"/>
+
+          <SeekBar 
+            android:id="@+id/seekBar"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:max="100"
+            android:progress="50" />
+
+        </LinearLayout>
+
+  </LinearLayout>
+ 
+</LinearLayout>
+

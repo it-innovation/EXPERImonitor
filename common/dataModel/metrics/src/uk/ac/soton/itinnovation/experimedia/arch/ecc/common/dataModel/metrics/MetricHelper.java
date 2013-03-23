@@ -31,7 +31,6 @@ import java.util.*;
 
 /**
  * A Helper class for assisting with getting information from the metric data model.
- * @author Simon Crowle
  */
 public class MetricHelper
 {
@@ -218,6 +217,43 @@ public class MetricHelper
       return mSets;
     }
     
+    public static MeasurementSet getMeasurementSet( MetricGenerator mgen,
+                                                    UUID measurementSetID )
+    {
+      MeasurementSet targetSet = null;
+      
+      if ( mgen != null && measurementSetID != null )
+      {
+        Set<MetricGroup> mGroup = mgen.getMetricGroups();
+        
+        if ( mGroup != null )
+        {
+           Iterator<MetricGroup> mgIt = mGroup.iterator();
+            while ( mgIt.hasNext() )
+            {
+              Set<MeasurementSet> msets = mgIt.next().getMeasurementSets();
+              if ( msets != null )
+              {
+                Iterator<MeasurementSet> msIt = msets.iterator();
+                while ( msIt.hasNext() )
+                { 
+                    MeasurementSet ms = msIt.next();
+                    UUID msID = ms.getID();
+
+                    if ( msID != null &&  msID.equals( measurementSetID) )
+                    {
+                        targetSet = ms;
+                        break;
+                    }
+                }
+              }
+            }
+        }
+      }
+      
+      return targetSet;
+    }
+    
     public static MeasurementSet getMeasurementSet( Collection<MetricGenerator> mgenSet,
                                                     UUID measurementSetID )
     {
@@ -228,22 +264,8 @@ public class MetricHelper
             Iterator<MetricGenerator> mgenIt = mgenSet.iterator();
             while ( mgenIt.hasNext() )
             {
-                Iterator<MetricGroup> mgIt = mgenIt.next().getMetricGroups().iterator();
-                while ( mgIt.hasNext() )
-                {
-                    Iterator<MeasurementSet> msIt = mgIt.next().getMeasurementSets().iterator();
-                    while ( msIt.hasNext() )
-                    { 
-                        MeasurementSet ms = msIt.next();
-                        UUID msID = ms.getID();
-                        
-                        if ( msID != null &&  msID.equals( measurementSetID) )
-                        {
-                            targetSet = ms;
-                            break;
-                        }
-                    }
-                }
+                targetSet = getMeasurementSet( mgenIt.next(), measurementSetID );
+                if ( targetSet != null ) break;
             }
         }
         
@@ -317,7 +339,11 @@ public class MetricHelper
       mGroup.setName( name );
       mGroup.setDescription( desc );
       
-      if ( mGen != null ) mGen.addMetricGroup( mGroup );
+      if ( mGen != null )
+      {
+        mGen.addMetricGroup( mGroup );
+        mGroup.setMetricGeneratorUUID( mGen.getUUID() );
+      }
       
       return mGroup;
     }
@@ -341,6 +367,7 @@ public class MetricHelper
         mSet.setMetricGroupUUID( attr.getEntityUUID() );
         
         group.addMeasurementSets( mSet );
+        mSet.setMetricGroupUUID( group.getUUID() );
       }
       
       return mSet;
@@ -392,7 +419,22 @@ public class MetricHelper
       }
       
       return targetGroup;
-    } 
+    }
+    
+    public static Report createEmptyMeasurementReport( MeasurementSet sourceMS )
+    {
+      Report targetReport = null;
+     
+      if ( sourceMS != null )
+      {
+        MeasurementSet emptyMS = new MeasurementSet( sourceMS, false );
+        Date now = new Date();
+        
+        targetReport = new Report( UUID.randomUUID(), emptyMS, now, now, now );
+      }
+      
+      return targetReport;      
+    }
     
     public static String describeGenerator( MetricGenerator mgen )
     {
