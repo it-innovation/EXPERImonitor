@@ -31,9 +31,10 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
-import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMClient;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.IECCLogger;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.IExperimentMonitor;
 import uk.ac.soton.itinnovation.robust.cat.core.components.viewEngine.spec.uif.types.UFAbstractEventManager;
 
@@ -42,7 +43,7 @@ import uk.ac.soton.itinnovation.robust.cat.core.components.viewEngine.spec.uif.t
 
 public class LiveMetricScheduler extends UFAbstractEventManager
 {
-  private final Logger metLogger  = Logger.getLogger( LiveMetricScheduler.class );
+  private final IECCLogger metLogger  = Logger.getLogger( LiveMetricScheduler.class );
   private final int pullSpeed     = 2000;
   private final Object clientLock = new Object();
   

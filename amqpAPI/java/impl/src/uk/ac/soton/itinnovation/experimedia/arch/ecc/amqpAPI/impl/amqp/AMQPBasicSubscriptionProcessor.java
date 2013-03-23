@@ -25,16 +25,17 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
+
 import com.rabbitmq.client.*;
 import java.io.IOException;
-import org.apache.log4j.Logger;
 
 
 
 
 public class AMQPBasicSubscriptionProcessor extends DefaultConsumer
 {
-  private final Logger subProcLogger = Logger.getLogger( AMQPBasicSubscriptionProcessor.class );
+  private final IECCLogger subProcLogger = Logger.getLogger( AMQPBasicSubscriptionProcessor.class );
   
   private String              queueName;
   private AMQPMessageDispatch messageDispatch;

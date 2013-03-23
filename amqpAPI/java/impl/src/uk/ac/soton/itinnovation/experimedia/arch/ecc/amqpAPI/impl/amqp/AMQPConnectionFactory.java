@@ -25,6 +25,8 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
+
 import java.io.*;
 import java.net.*;
 import java.security.*;
@@ -32,14 +34,14 @@ import java.util.Properties;
 import javax.net.ssl.*;
 
 import com.rabbitmq.client.*;
-import org.apache.log4j.Logger;
+
 
 
 
 
 public class AMQPConnectionFactory
 {
-    private Logger factoryLog = Logger.getLogger( AMQPConnectionFactory.class );
+    private IECCLogger factoryLog = Logger.getLogger( AMQPConnectionFactory.class );
 
     private InetAddress amqpHostIP;
     private int         amqpPortNumber = 5672;

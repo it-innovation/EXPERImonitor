@@ -30,14 +30,16 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 import com.rabbitmq.client.*;
 
 import java.io.*;
-import org.apache.log4j.Logger;
+
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.IECCLogger;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.Logger;
 
 
 
 
 public abstract class AbstractAMQPInterface
 {
-  private final Logger amqpIntLogger = Logger.getLogger( AbstractAMQPInterface.class );
+  private final IECCLogger amqpIntLogger = Logger.getLogger( AbstractAMQPInterface.class );
   
   private AMQPBasicSubscriptionProcessor subProcessor;
   

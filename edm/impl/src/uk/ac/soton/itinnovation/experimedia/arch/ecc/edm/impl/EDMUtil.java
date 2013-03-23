@@ -25,7 +25,8 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl;
 
 import java.util.Properties;
-import org.apache.log4j.Logger;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.IECCLogger;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.Logger;
 
 /**
  * A utility class for the Experiment Data Manager.
@@ -34,7 +35,7 @@ import org.apache.log4j.Logger;
  */
 public class EDMUtil
 {
-    static Logger log = Logger.getLogger(EDMUtil.class);
+    static IECCLogger log = Logger.getLogger(EDMUtil.class);
     private static String configFileName = "edm.properties";
     
     public static Properties getConfigs() throws Exception

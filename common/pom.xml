@@ -14,23 +14,11 @@
       <artifactId>experimedia-arch-ecc</artifactId>
       <version>1.1-SNAPSHOT</version>
     </parent>
-    
-    <!-- Parent module, no licence to apply here ___________________________ -->
-    <build>
-      <plugins>
-        <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>license-maven-plugin</artifactId>
-          <configuration>
-            <skipUpdateProjectLicense>true</skipUpdateProjectLicense>
-          </configuration>
-        </plugin>
-      </plugins>
-    </build>
   
     <modules>
       <module>dataModel</module>
       <module>uif</module>
+      <module>logging</module>
     </modules>
     
 </project>

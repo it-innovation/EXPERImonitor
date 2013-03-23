@@ -52,7 +52,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
-import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Attribute;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Entity;
@@ -64,6 +63,8 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EM
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMDataBatch;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMPhase;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMPostReportSummary;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.IECCLogger;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.processors.LiveMetricSchedulerListener;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.dataExport.DataExportController;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.LiveMonitorController;
@@ -85,7 +86,7 @@ public class DashMainController extends UFAbstractEventManager
                                            ClientInfoViewListener,
                                            LiveMetricSchedulerListener
 {
-  private final transient Logger dashMainLog = Logger.getLogger( DashMainController.class );
+  private final transient IECCLogger dashMainLog = Logger.getLogger( DashMainController.class );
   
   private Properties dashboardProps;
   private Properties edmProps;
@@ -688,7 +689,7 @@ public class DashMainController extends UFAbstractEventManager
     currentExperiment.setExperimentID( expDate.toString() );
     
     try
-    {        
+    {      
       IExperimentDAO expDAO = expDataManager.getExperimentDAO();
       expDAO.saveExperiment( currentExperiment );
     }

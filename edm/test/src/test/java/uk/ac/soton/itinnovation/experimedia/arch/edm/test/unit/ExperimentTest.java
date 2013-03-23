@@ -28,13 +28,15 @@ import java.util.Date;
 import java.util.Properties;
 import java.util.Set;
 import junit.framework.*;
-import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.loggin.impl.Log4JImpl;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.IECCLogger;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMInterfaceFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDM;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IExperimentDAO;
@@ -44,11 +46,15 @@ public class ExperimentTest extends TestCase
 {
     IMonitoringEDM edm = null;
     IExperimentDAO expDAO = null;
-    static Logger log = Logger.getLogger(ExperimentTest.class);
+    static IECCLogger log;
     
     @BeforeClass
     public static void beforeClass()
     {
+        // Configure logging system
+        Logger.setLoggerImpl( new Log4JImpl() );
+        log = Logger.getLogger(ExperimentTest.class);
+      
         log.info("Experiment tests executing...");
     }
     

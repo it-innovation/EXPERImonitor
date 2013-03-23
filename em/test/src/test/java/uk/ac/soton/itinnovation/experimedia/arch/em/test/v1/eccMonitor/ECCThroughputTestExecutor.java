@@ -33,7 +33,6 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.IEM
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasicChannel;
 
 import uk.ac.soton.itinnovation.experimedia.arch.em.test.common.*;
-import uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccEntryPoint.ECCMonitorEntryPointTest;
 import uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccMonitor.thruPut.*;
 
 import java.util.*;

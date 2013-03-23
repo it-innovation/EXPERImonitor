@@ -25,12 +25,13 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.em.test.common;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
+
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.spec.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasicChannel;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.factory.EMInterfaceFactory;
 
-import org.apache.log4j.Logger;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.factory.EMInterfaceFactory;
 
 
 
@@ -39,7 +40,7 @@ public abstract class ECCBaseTestExecutor
 {
   private TestEventListener testListener;
   
-  protected Logger exeLogger = Logger.getLogger( ECCBaseTestExecutor.class );
+  protected IECCLogger exeLogger = Logger.getLogger( ECCBaseTestExecutor.class );
   
   protected EMInterfaceFactory providerFactory;
   protected EMInterfaceFactory userFactory;

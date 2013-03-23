@@ -28,7 +28,6 @@ import java.util.Date;
 import java.util.Properties;
 import java.util.Random;
 import java.util.UUID;
-import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Attribute;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Entity;
@@ -40,6 +39,9 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Me
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricType;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Unit;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.loggin.impl.Log4JImpl;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.IECCLogger;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMInterfaceFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDM;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IEntityDAO;
@@ -89,7 +91,7 @@ public class PopulateDB
     
     
     
-    static Logger log = Logger.getLogger(PopulateDB.class);
+    static IECCLogger log;
     
     /**
      * Main method that makes a call to the populateWithTestData() method.
@@ -98,6 +100,10 @@ public class PopulateDB
      */
     public static void main(String[] args) throws Exception
     {
+        // Configure logging system
+        Logger.setLoggerImpl( new Log4JImpl() );
+        log = Logger.getLogger(PopulateDB.class);
+      
         log.info("Populating the EDM metrics database with test data");
         Properties prop = new Properties();;
         if ((args != null) && (args.length == 5) && isArgsValid(args))

@@ -25,6 +25,9 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.em.test.v1.eccMonitor.thruPut;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.loggin.impl.Log4JImpl;
+
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.spec.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.AMQPBasicChannel;
 
@@ -34,13 +37,14 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.factory.EMInterfaceFacto
 import uk.ac.soton.itinnovation.experimedia.arch.em.test.common.ECCBaseTest;
 
 import java.util.UUID;
-import org.apache.log4j.Logger;
+
+
 
 
 
 public abstract class BaseThruExeNode
 {
-  protected Logger nodeLogger = Logger.getLogger( BaseThruExeNode.class );
+  protected IECCLogger nodeLogger;
   
   protected UUID                     senderID;
   protected IAMQPMessageDispatchPump sendPump;
@@ -58,6 +62,10 @@ public abstract class BaseThruExeNode
                              AMQPBasicChannel   senderChannel,
                              EMInterfaceFactory userFactory )
   {
+    // Configure logging system
+    Logger.setLoggerImpl( new Log4JImpl() );
+    nodeLogger = Logger.getLogger( BaseThruExeNode.class );
+    
     senderID  = id;
     byteStore = store;
     sendPump  = userFactory.createDispatchPump( id.toString() + " thruput pump", 

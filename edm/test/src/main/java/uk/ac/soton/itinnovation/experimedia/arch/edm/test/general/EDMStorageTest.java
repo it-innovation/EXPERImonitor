@@ -33,7 +33,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
-import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Attribute;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Entity;
@@ -44,6 +43,9 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Me
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGroup;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricType;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Unit;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.loggin.impl.Log4JImpl;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.IECCLogger;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMInterfaceFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.EDMUtil;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDM;
@@ -56,11 +58,15 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IMeasureme
  */
 public class EDMStorageTest
 {
-    static Logger log = Logger.getLogger(EDMStorageTest.class);
+    static IECCLogger log;
     static final String fixedString32 = "10101010101010101010101010101010";
     
     public static void main(String[] args) throws Exception
     {
+        // Configure logging system
+        Logger.setLoggerImpl( new Log4JImpl() );
+        log = Logger.getLogger(EDMStorageTest.class);
+      
         Properties edmConfig = EDMUtil.getConfigs();
         log.info("isConfigValid() = " + EDMUtil.isConfigValid(edmConfig));
         IMonitoringEDM edm = EDMInterfaceFactory.getMonitoringEDM(edmConfig);

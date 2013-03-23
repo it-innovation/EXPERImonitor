@@ -26,13 +26,15 @@ package uk.ac.soton.itinnovation.experimedia.arch.edm.test.unit;
 
 import java.io.FileOutputStream;
 import java.util.Properties;
-import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.runner.Result;
 import org.junit.runner.RunWith;
 import org.junit.runner.notification.Failure;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.loggin.impl.Log4JImpl;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.IECCLogger;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.Logger;
 
 /**
  * Runs all unit tests.
@@ -49,12 +51,16 @@ import org.junit.runners.Suite.SuiteClasses;
 })
 public class EDMTestSuite
 {
-    static Logger log = Logger.getLogger(EDMTestSuite.class);
+    static IECCLogger log;
     static String propertiesFile = "edm-test.properties";
     
     @BeforeClass
     public static void beforeClass()
     {
+        // Configure logging system
+        Logger.setLoggerImpl( new Log4JImpl() );
+        log = Logger.getLogger(EDMTestSuite.class);
+        
         log.info("Starting EDM Test Suite");
         
         String[] args = {System.getProperty("dbURL"), System.getProperty("dbName"), System.getProperty("dbUsername"), System.getProperty("dbPassword"), System.getProperty("dbType")};

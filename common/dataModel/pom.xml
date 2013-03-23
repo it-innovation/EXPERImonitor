@@ -10,16 +10,16 @@
     <packaging>pom</packaging>
   
     <parent>
-    <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
-    <artifactId>experimedia-arch-ecc-common</artifactId>
-    <version>1.1-SNAPSHOT</version>
-  </parent>
+      <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
+      <artifactId>experimedia-arch-ecc-common</artifactId>
+      <version>1.1-SNAPSHOT</version>
+    </parent>
   
     <modules>
-        <module>metrics</module>
-        <module>experiment</module>
-        <module>provenance</module>
-        <module>monitor</module>
+      <module>metrics</module>
+      <module>experiment</module>
+      <module>provenance</module>
+      <module>monitor</module>
     </modules>
     
 </project>

@@ -26,11 +26,13 @@ package uk.ac.soton.itinnovation.experimedia.arch.edm.test.unit;
 
 import java.util.Properties;
 import junit.framework.*;
-import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.loggin.impl.Log4JImpl;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.IECCLogger;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMInterfaceFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDM;
 import uk.ac.soton.itinnovation.experimedia.arch.edm.test.general.PopulateDB;
@@ -38,11 +40,15 @@ import uk.ac.soton.itinnovation.experimedia.arch.edm.test.general.PopulateDB;
 @RunWith(JUnit4.class)
 public class AGeneralTest extends TestCase
 {
-    static Logger log = Logger.getLogger(AGeneralTest.class);
+    static IECCLogger log;
     
     @BeforeClass
     public static void beforeClass()
     {
+        // Configure logging system
+        Logger.setLoggerImpl( new Log4JImpl() );
+        log = Logger.getLogger(AGeneralTest.class);
+        
         log.info("General tests executing...");
     }
     

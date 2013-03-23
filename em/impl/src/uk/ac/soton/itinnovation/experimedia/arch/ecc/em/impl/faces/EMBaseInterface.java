@@ -25,12 +25,13 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.spec.IAMQPMessageDispatchListener;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.spec.IAMQPMessageDispatchListener;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.faces.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 
-import org.apache.log4j.Logger;
+
 import com.google.gson.*;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
@@ -38,9 +39,11 @@ import java.util.*;
 
 
 
+
+
 public abstract class EMBaseInterface implements IAMQPMessageDispatchListener
 {
-  protected final static Logger faceLogger = Logger.getLogger( EMBaseInterface.class );
+  protected final static IECCLogger faceLogger = Logger.getLogger( EMBaseInterface.class );
   
   protected String     interfaceName;
   protected String     interfaceVersion;

@@ -25,13 +25,14 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
+
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDMAgent;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IReportDAO;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 
 import java.util.*;
-import org.apache.log4j.Logger;
 
 
 
@@ -46,9 +47,9 @@ import org.apache.log4j.Logger;
  */
 public class MeasurementScheduler
 {
-    private final Logger schedulerLogger = Logger.getLogger( MeasurementScheduler.class );
-    private final Object taskLock        = new Object();
-    private final Object edmLock         = new Object();
+    private final IECCLogger schedulerLogger = Logger.getLogger( MeasurementScheduler.class );
+    private final Object taskLock            = new Object();
+    private final Object edmLock             = new Object();
   
     private IReportDAO edmReportDAO;
     private boolean    initialisedOK = false;

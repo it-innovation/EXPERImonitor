@@ -27,7 +27,6 @@ package uk.ac.soton.itinnovation.experimedia.arch.edm.test.unit;
 import java.util.Properties;
 import java.util.UUID;
 import junit.framework.TestCase;
-import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -35,6 +34,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Entity;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.loggin.impl.Log4JImpl;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.IECCLogger;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMInterfaceFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDM;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IMetricGeneratorDAO;
@@ -49,11 +51,15 @@ public class MetricGeneratorTest extends TestCase
 {
     IMonitoringEDM edm = null;
     IMetricGeneratorDAO mGenDAO = null;
-    static Logger log = Logger.getLogger(MetricGeneratorTest.class);
+    static IECCLogger log;
     
     @BeforeClass
     public static void beforeClass()
     {
+        // Configure logging system
+        Logger.setLoggerImpl( new Log4JImpl() );
+        log = Logger.getLogger(MetricGeneratorTest.class);
+        
         log.info("MetricGenerator tests executing...");
     }
     

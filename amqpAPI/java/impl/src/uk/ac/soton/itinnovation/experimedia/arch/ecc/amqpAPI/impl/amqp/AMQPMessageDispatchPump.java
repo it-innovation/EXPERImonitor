@@ -26,10 +26,9 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.spec.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
 
 import java.util.*;
-import org.apache.log4j.Logger;
-
 
 
 
@@ -38,7 +37,7 @@ public class AMQPMessageDispatchPump implements Runnable,
                                                 IAMQPMessageDispatchPump
                                                 
 {
-  private final Logger pumpLogger  = Logger.getLogger( AMQPMessageDispatchPump.class );
+  private final IECCLogger pumpLogger  = Logger.getLogger( AMQPMessageDispatchPump.class );
   private final Object pumpingLock = new Object();
   private final Object listLock    = new Object();
   private final Object waitingLock = new Object();

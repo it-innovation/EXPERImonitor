@@ -30,7 +30,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 import junit.framework.*;
-import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -43,6 +42,9 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Me
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGroup;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.loggin.impl.Log4JImpl;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.IECCLogger;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMInterfaceFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDM;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IEntityDAO;
@@ -66,12 +68,17 @@ import uk.ac.soton.itinnovation.experimedia.arch.edm.test.general.PopulateDB;
 public class APopulateDBTest extends TestCase
 {
     IMonitoringEDM edm = null;
-    static Logger log = Logger.getLogger(APopulateDBTest.class);
+    static IECCLogger log;
     
     @BeforeClass
     public static void populateDB()
     {
+        // Configure logging system
+        Logger.setLoggerImpl( new Log4JImpl() );
+        log = Logger.getLogger(APopulateDBTest.class);
+      
         log.info("PopulateDB tests executing...");
+        
         try {
             Properties prop = getProperties();
             IMonitoringEDM edm = EDMInterfaceFactory.getMonitoringEDM(prop);

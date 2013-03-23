@@ -27,11 +27,13 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.basicECCClient;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
+
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.loggin.impl.Log4JImpl;
+
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
-
-import org.apache.log4j.Logger;
 
 import java.util.*;
 import javax.swing.JOptionPane;
@@ -42,7 +44,7 @@ import javax.swing.JOptionPane;
 public class ECCClientController implements EMIAdapterListener,
                                             ECCClientViewListener
 {
-    private final Logger clientLogger = Logger.getLogger( ECCClientController.class );
+    private final IECCLogger clientLogger;
 
     private AMQPBasicChannel   amqpChannel;
     private EMInterfaceAdapter emiAdapter;
@@ -63,6 +65,10 @@ public class ECCClientController implements EMIAdapterListener,
 
     public ECCClientController()
     {
+        // Configure logging system
+        Logger.setLoggerImpl( new Log4JImpl() );
+        clientLogger = Logger.getLogger( ECCClientController.class );
+      
         metricGenerators   = new HashMap<UUID,MetricGenerator>();
         pendingPushReports = new HashMap<UUID, Report>();
         pendingPullReports = new HashMap<UUID, Report>();

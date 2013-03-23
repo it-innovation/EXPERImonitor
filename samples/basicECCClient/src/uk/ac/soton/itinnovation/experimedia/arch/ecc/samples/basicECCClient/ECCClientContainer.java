@@ -25,18 +25,23 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.basicECCClient;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.loggin.impl.Log4JImpl;
+
 import java.util.UUID;
-import org.apache.log4j.Logger;
 
 
 
 
 public class ECCClientContainer
 {
-    public static Logger clientLogger;
+    public static IECCLogger clientLogger;
 
     public static void main( String args[] )
     {
+        // Configure logging system
+        Logger.setLoggerImpl( new Log4JImpl() );
+      
         ECCClientController ctrl = new ECCClientController();
 
         try

@@ -30,7 +30,8 @@ import java.sql.SQLException;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Properties;
-import org.apache.log4j.Logger;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.IECCLogger;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.Logger;
 
 /**
  * A helper class to connect to a database and execute queries on it.
@@ -39,7 +40,7 @@ import org.apache.log4j.Logger;
  */
 public class DatabaseConnector
 {
-    static Logger log = Logger.getLogger(DatabaseConnector.class);
+    static IECCLogger log = Logger.getLogger(DatabaseConnector.class);
     
     // database connection details
     private String dbURL = null;

@@ -26,22 +26,19 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecylePhases;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.IEMLifecycleListener;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.IEMDiscovery;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
-
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.EMConnectionManagerListener;
-
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.*;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 
 import java.util.*;
-import org.apache.log4j.Logger;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.IEMDiscovery;
-
 
 
 
@@ -53,7 +50,7 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
                                            EMPostReportPhaseListener,
                                            EMTearDownPhaseListener
 {
-  private final Logger lmLogger         = Logger.getLogger( EMLifecycleManager.class );
+  private final IECCLogger lmLogger     = Logger.getLogger( EMLifecycleManager.class );
   private final Object clientLock       = new Object();
   private final int    batchRequestSize = 50;
   

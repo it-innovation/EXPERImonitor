@@ -30,10 +30,11 @@ import java.sql.ResultSet;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Measurement;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Metric;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.IECCLogger;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DBUtil;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.NoDataException;
 
@@ -44,7 +45,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.NoDataException;
  */
 public class MeasurementSetDAOHelper
 {
-    static Logger log = Logger.getLogger(MeasurementSetDAOHelper.class);
+    static IECCLogger log = Logger.getLogger(MeasurementSetDAOHelper.class);
     
     public static ValidationReturnObject isObjectValidForSave(MeasurementSet mSet, boolean checkForMetricGroup, Connection connection) throws Exception
     {

@@ -34,6 +34,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMInterfaceFactory;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
@@ -41,14 +42,15 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared.*;
 
 import java.util.*;
-import org.apache.log4j.Logger;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.loggin.impl.Log4JImpl;
+
 
 
 
 
 public class ECCHeadlessClient implements EMIAdapterListener
 {
-    private final Logger clientLogger = Logger.getLogger( ECCHeadlessClient.class );
+    private final IECCLogger clientLogger;
     private final String clientName;
     
     // Connection to the ECC
@@ -74,6 +76,10 @@ public class ECCHeadlessClient implements EMIAdapterListener
     
     public ECCHeadlessClient( String name )
     {
+        // Configure logging system
+        Logger.setLoggerImpl( new Log4JImpl() );
+        clientLogger = Logger.getLogger( ECCHeadlessClient.class );
+      
         clientName = name;
         
         // Easy-to-find measurement sets based on their IDs
