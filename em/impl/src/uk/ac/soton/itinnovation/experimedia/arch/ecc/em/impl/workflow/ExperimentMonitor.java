@@ -145,6 +145,12 @@ public class ExperimentMonitor implements IExperimentMonitor,
   }
   
   @Override
+  public Set<EMClient> getAllKnownClients()
+  {
+    return getSimpleClientSet( connectionManager.getCopyOfAllKnownClients() );
+  }
+  
+  @Override
   public Set<EMClient> getCurrentPhaseClients()
   {
     HashSet<EMClient> clients = new HashSet<EMClient>();
@@ -541,6 +547,8 @@ public class ExperimentMonitor implements IExperimentMonitor,
   private void resetExperimentMonitor()
   {
     connectionManager.disconnectAllClients();
+    connectionManager.clearAllAssociatedClients();
+    
     lifecycleManager.resetLifecycle();
     
     isResettingMonitor = false;

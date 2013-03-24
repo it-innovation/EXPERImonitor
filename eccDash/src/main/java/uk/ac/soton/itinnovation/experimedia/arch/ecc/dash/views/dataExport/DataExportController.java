@@ -182,7 +182,7 @@ public class DataExportController extends UFAbstractEventManager
   
   private int addAllClientMetricsInfo()
   {
-    Set<EMClient> clients = expMonitor.getAllConnectedClients();
+    Set<EMClient> clients = expMonitor.getAllKnownClients();
     int metricCount = 0;
     
     if ( !clients.isEmpty() )

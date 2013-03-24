@@ -95,11 +95,19 @@ public interface IExperimentMonitor
   EMClient getClientByID( UUID id );
   
   /**
-   * Use this method to get the set of all known connected clients.
+   * Use this method to get the set of all currently connected clients.
    * 
    * @return - Set of EMClient instances.
    */
   Set<EMClient> getAllConnectedClients();
+  
+  /**
+   * Use this method to get the set of all known clients that have at least once
+   * connected to the ECC for the current experiment.
+   * 
+   * @return 
+   */
+  Set<EMClient> getAllKnownClients();
   
   /**
    * Use this method to find out which clients support the current experimental

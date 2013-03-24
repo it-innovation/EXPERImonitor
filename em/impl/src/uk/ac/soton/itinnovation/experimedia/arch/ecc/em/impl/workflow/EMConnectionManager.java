@@ -170,6 +170,16 @@ public class EMConnectionManager implements IEMMonitorEntryPoint_ProviderListene
     return currClients;
   }
   
+  public Set<EMClientEx> getCopyOfAllKnownClients()
+  {
+    HashSet<EMClientEx> knownClients = new HashSet<EMClientEx>();
+    
+    synchronized( clientListLock )
+    { knownClients.addAll( associatedClients.values() ); }
+    
+    return knownClients;
+  }
+  
   // IEMMonitorEntryPoint_ProviderListener -------------------------------------
   @Override
   public void onRegisterAsEMClient( UUID userID, String userName )
