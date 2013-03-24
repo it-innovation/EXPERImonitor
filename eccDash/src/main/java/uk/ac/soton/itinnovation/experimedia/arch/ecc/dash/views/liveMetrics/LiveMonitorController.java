@@ -30,6 +30,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Attribute;
@@ -169,7 +170,8 @@ public class LiveMonitorController extends UFAbstractEventManager
       Set<MetricGenerator> msGens = client.getCopyOfMetricGenerators();
       if ( !msGens.isEmpty() )
       {
-        Iterator<MeasurementSet> msIt = MetricHelper.getAllMeasurementSets(msGens).iterator();
+        Map<UUID, MeasurementSet> mSets = MetricHelper.getAllMeasurementSets( msGens );
+        Iterator<MeasurementSet> msIt = mSets.values().iterator();
         while ( msIt.hasNext() )
         {
           UUID msID = msIt.next().getID();

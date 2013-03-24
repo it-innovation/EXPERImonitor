@@ -69,9 +69,9 @@ public class MetricHelper
       
       if ( attr != null && mgenSet != null )
       {
-        UUID targetAttID              = attr.getUUID();
-        Set<MeasurementSet> allSets   = getAllMeasurementSets( mgenSet );
-        Iterator<MeasurementSet> msIt = allSets.iterator();
+        UUID targetAttID                  = attr.getUUID();
+        Map<UUID, MeasurementSet> allSets = getAllMeasurementSets( mgenSet );
+        Iterator<MeasurementSet> msIt     = allSets.values().iterator();
         
         while ( msIt.hasNext() )
         {
@@ -172,9 +172,9 @@ public class MetricHelper
       return entities;
     }
   
-    public static Set<MeasurementSet> getAllMeasurementSets( Collection<MetricGenerator> mgenSet )
+    public static Map<UUID, MeasurementSet> getAllMeasurementSets( Collection<MetricGenerator> mgenSet )
     {
-        HashSet<MeasurementSet> mSets = new HashSet<MeasurementSet>();
+        HashMap<UUID, MeasurementSet> mSets = new HashMap<UUID, MeasurementSet>();
         
         if ( mgenSet != null )
         {
@@ -186,7 +186,10 @@ public class MetricHelper
                 {
                     Iterator<MeasurementSet> msIt = mgIt.next().getMeasurementSets().iterator();
                     while ( msIt.hasNext() )
-                    { mSets.add( msIt.next() ); }
+                    {
+                      MeasurementSet ms = msIt.next();
+                      mSets.put( ms.getID(), ms ); 
+                    }
                 }
             }
         }

@@ -359,8 +359,11 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
       // Check we don't have an empty report...
       if ( mSet != null )
       {
-        // Remove ID from current pulling set
-        client.removePullingMeasurementSetID( mSet.getID() );
+        // Update state for this client's measurement set
+        UUID msID = mSet.getID();
+        
+        client.updatePullReceivedForMS( msID );
+        client.removePullingMeasurementSetID( msID );
 
         // Notify listeners
         if ( phaseListener != null ) 
@@ -376,8 +379,7 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
       // If there are outstanding metrics to pull, make another request (if we're not stopping)
       if ( !monitorStopping )
       {
-        UUID nextMSID = client.iterateNextMSToBePulled();
-        
+        UUID nextMSID = client.iterateNextValidMSToBePulled();
         if ( nextMSID != null ) monitor.pullMetric( nextMSID );
       }
     }

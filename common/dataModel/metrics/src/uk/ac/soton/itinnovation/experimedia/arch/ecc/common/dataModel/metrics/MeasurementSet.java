@@ -46,9 +46,11 @@ public class MeasurementSet implements Serializable
     
     private MEASUREMENT_RULE measurementRule = MEASUREMENT_RULE.eINDEFINITE;
     private int              measurementCountMax;
-    private int              samplingInterval = 1000; // Default rate of 1 sample/second
+    private long             samplingInterval = MINIMUM_SAMPLE_RATE_MS; // Default rate of 1 sample/second
     
-    public enum MEASUREMENT_RULE { eFIXED_COUNT, eINDEFINITE };
+    public enum       MEASUREMENT_RULE { eNO_LIVE_MONITOR, eFIXED_COUNT, eINDEFINITE };
+    public static int MINIMUM_SAMPLE_RATE_MS = 1000; // milliseconds
+    
     
     /**
      * Default constructor which sets a random UUID for the object instance.
@@ -186,8 +188,9 @@ public class MeasurementSet implements Serializable
     
     /**
      * Returns the measurement rule for this set:
-     *   - eFIXED_COUNT : a finite number of measurements may be added to this set.
-     *   - eINDEFINITE  : an indefinite/unlimited number of measurements may be added to this set (default)
+     *   - eNO_LIVE_MONITOR : measurements for this set will not be gathered during Live Monitoring phase
+     *   - eFIXED_COUNT     : a finite number of measurements may be added to this set.
+     *   - eINDEFINITE      : an indefinite/unlimited number of measurements may be added to this set (default)
      * 
      * @return  - rule for this set.
      */
@@ -196,8 +199,9 @@ public class MeasurementSet implements Serializable
     
     /**
      * Sets the measurement rule of this set:
-     *   * eFIXED_COUNT : a finite number of measurements may be added to this set.
-     *   * eINDEFINITE  : an indefinite/unlimited number of measurements may be added to this set (default)
+     *   - eNO_LIVE_MONITOR : measurements for this set will not be gathered during Live Monitoring phase
+     *   - eFIXED_COUNT     : a finite number of measurements may be added to this set.
+     *   - eINDEFINITE      : an indefinite/unlimited number of measurements may be added to this set (default)
      * 
      * @param per - rule for this set.
      */
@@ -206,17 +210,19 @@ public class MeasurementSet implements Serializable
     
     /**
      * Returns a positive integer, depending on the Measurement Rule for this set:
-     *   * eFIXED_COUNT : returns the number of remaining measurements that can be added
-     *   * eINDEFINITE  : returns the number of measurements already added
+     *   - eNO_LIVE_MONITOR : 
+     *   - eFIXED_COUNT     : the number of measurements in this set
+     *   or
+     *   - eFIXED_COUNT     : the maximum number of measurements allowed for this set
      * 
      * @return - the number of measurements, depending on Measurement Rule
      */
     public int getMeasurementCountMax()
     {
-        if ( measurementRule == MEASUREMENT_RULE.eINDEFINITE )
-            return measurements.size();
+        if ( measurementRule == MEASUREMENT_RULE.eFIXED_COUNT )
+            return measurementCountMax;
           
-        return measurementCountMax;
+        return measurements.size();
     }
     
     /**
@@ -231,9 +237,9 @@ public class MeasurementSet implements Serializable
      */
     public boolean setMeasurementCountMax( int max )
     {
-        if ( max < 1 || 
-            measurementRule == MEASUREMENT_RULE.eINDEFINITE ||
-            measurements.size() > max ) return false;
+        // Safety first
+        if ( measurementRule != MEASUREMENT_RULE.eFIXED_COUNT ) return false;
+        if ( max < 1 || measurements.size() > max )             return false;
         
         measurementCountMax = max;
         
@@ -254,7 +260,7 @@ public class MeasurementSet implements Serializable
         
         if ( measures != null )
         {
-            if ( measurementRule == MEASUREMENT_RULE.eINDEFINITE )
+            if ( measurementRule != MEASUREMENT_RULE.eFIXED_COUNT )
                 setMeasures = true;
             else
                 if ( measures != null && measures.size() < measurementCountMax )
@@ -272,18 +278,18 @@ public class MeasurementSet implements Serializable
      * 
      * @return - interval time, in milliseconds
      */
-    public int getSamplingInterval()
+    public long getSamplingInterval()
     {   return samplingInterval;    }
     
     /**
      * Sets the minimum time (in milliseconds) that must elapse before the ECC 
      * should query this measurement set for new data
      * 
-     * @param sampInt - minimum time elapsed (in milliseconds)
+     * @param sampInt - minimum time elapsed (in milliseconds), cannot drop below MINIMUM_SAMPLE_RATE_MS
      */
-    public void setSamplingInternval( int sampInt )
+    public void setSamplingInternval( long sampInt )
     {
-      if ( sampInt >= 0 ) samplingInterval = sampInt;
+      if ( sampInt >= MINIMUM_SAMPLE_RATE_MS ) samplingInterval = sampInt;
     }
     
     /**
@@ -330,7 +336,7 @@ public class MeasurementSet implements Serializable
     {
         boolean addMeasure = false;
         
-        if ( measurementRule == MEASUREMENT_RULE.eINDEFINITE )
+        if ( measurementRule != MEASUREMENT_RULE.eFIXED_COUNT )
           addMeasure = true;
         else
             if ( measurements.size() < measurementCountMax ) addMeasure = true;

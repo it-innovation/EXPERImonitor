@@ -29,8 +29,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces.EMBaseInterface;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
-
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 
 import java.util.*;
 
@@ -52,9 +51,10 @@ public class EMClientEx extends EMClient
   private ArrayList<UUID> generatorsToSetup;
   
   // Internal Monitoring state support
-  private HashSet<UUID>    currentMeasurementSetPulls;
-  private LinkedList<UUID> orderedCurrentMeasurementSetPulls;
-  private UUID             expectedPullMSID;
+  private Map<UUID, EMMeasurementSetInfo> msSetInfoCache;
+  private HashSet<UUID>                   currentMeasurementSetPulls;
+  private LinkedList<UUID>                orderedCurrentMeasurementSetPulls;
+  private UUID                            expectedPullMSID;
   
   // Internal Post Report state support
   private UUID currentRequestedBatchMSID;
@@ -64,6 +64,7 @@ public class EMClientEx extends EMClient
   {
     super( id, name );
     
+    msSetInfoCache                    = new HashMap<UUID, EMMeasurementSetInfo>();
     generatorsToSetup                 = new ArrayList<UUID>();
     currentMeasurementSetPulls        = new HashSet<UUID>();
     orderedCurrentMeasurementSetPulls = new LinkedList<UUID>();
@@ -148,16 +149,28 @@ public class EMClientEx extends EMClient
   
   public void setMetricGenerators( Set<MetricGenerator> generators )
   {    
-    if ( generators != null ) metricGenerators = 
-            (HashSet<MetricGenerator>) generators;
-    
-    generatorsToSetup.clear();
-    generatorsSetupOK.clear();
-    
-    // Copy UUIDs of generators into set-up set
-    Iterator<MetricGenerator> genIt = metricGenerators.iterator();
-    while ( genIt.hasNext() )
-      generatorsToSetup.add( genIt.next().getUUID() );
+    if ( generators != null )
+    {
+      metricGenerators = (HashSet<MetricGenerator>) generators;
+      
+      msSetInfoCache.clear();
+      generatorsToSetup.clear();
+      generatorsSetupOK.clear();
+      
+      // Cache measurement set info for Live Monitoring state later
+      Map<UUID,MeasurementSet> mSets = MetricHelper.getAllMeasurementSets( metricGenerators );
+      Iterator<MeasurementSet> msIt = mSets.values().iterator();
+      while ( msIt.hasNext() )
+      {
+        MeasurementSet ms = msIt.next();
+        msSetInfoCache.put( ms.getID(), new EMMeasurementSetInfo(ms) );
+      }
+     
+      // Copy UUIDs of generators into set-up set
+      Iterator<MetricGenerator> genIt = metricGenerators.iterator();
+      while ( genIt.hasNext() )
+        generatorsToSetup.add( genIt.next().getUUID() );
+    }
   }
   
   // Setup phase state ---------------------------------------------------------  
@@ -234,7 +247,7 @@ public class EMClientEx extends EMClient
         orderedCurrentMeasurementSetPulls.remove( msID ); // Should be first in list
         
         // We are now free to iterate to the next MS...
-        if ( expectedPullMSID.equals(msID) ) expectedPullMSID = null;
+        if ( msID.equals(expectedPullMSID) ) expectedPullMSID = null;
         
         // ... and ensure our state of currently pulling remains accurate
         isQueueingMSPulls = ( !currentMeasurementSetPulls.isEmpty() || 
@@ -243,7 +256,7 @@ public class EMClientEx extends EMClient
     }
   }
   
-  public UUID iterateNextMSToBePulled()
+  public UUID iterateNextValidMSToBePulled()
   {
     UUID nextID = null;
     
@@ -253,8 +266,25 @@ public class EMClientEx extends EMClient
       // and not try to iterate further forward until we know we have the result
       if ( expectedPullMSID == null && !orderedCurrentMeasurementSetPulls.isEmpty() )
       {
-        expectedPullMSID = orderedCurrentMeasurementSetPulls.getFirst();
-        nextID           = expectedPullMSID;
+        nextID = orderedCurrentMeasurementSetPulls.getFirst();
+        while ( nextID != null )
+        {
+          // Must validate the MS if we are to pull it
+          if ( validateMSReadyForPull(nextID) )
+          {
+            expectedPullMSID = nextID;
+            break;
+          }
+          else // If this is not valid, remove it (do not requeue here!)
+          {
+            removePullingMeasurementSetID( nextID );
+            
+            if ( !orderedCurrentMeasurementSetPulls.isEmpty() )
+              nextID = orderedCurrentMeasurementSetPulls.getFirst();
+            else
+              nextID = null;
+          }
+        }
       }
     }
     
@@ -290,6 +320,60 @@ public class EMClientEx extends EMClient
       
       isQueueingMSPulls = false;
     }
+  }
+  
+  public EMMeasurementSetInfo getMSInfo( UUID msID )
+  { return msSetInfoCache.get( msID ); }
+  
+  public void updatePullReceivedForMS( UUID msID )
+  {
+    if ( msID != null )
+    {
+      EMMeasurementSetInfo info = msSetInfoCache.get( msID );
+      if ( info != null ) info.updatePullDate( new Date() );
+    }
+  }
+  
+  public boolean validateMSReadyForPull( UUID msID )
+  {
+    // Safety first
+    if ( msID == null )   return false;
+    if ( !isPullCapable ) return false;
+    
+    EMMeasurementSetInfo info = msSetInfoCache.get( msID );
+    if ( info == null ) return false;
+    
+    MeasurementSet ms = info.getMeasurementSet();
+    if ( ms == null ) return false;
+    
+    // Check measurement rule first
+    boolean ruleOK = false;
+    switch ( ms.getMeasurementRule() )
+    {        
+      case eFIXED_COUNT : 
+      {
+        if ( info.getPullCount() < ms.getMeasurementCountMax() )
+          ruleOK = true;
+        
+      } break;
+        
+      case eINDEFINITE : ruleOK = true;
+    }
+    
+    if ( !ruleOK ) return false;
+    
+    // Now check time interval
+    Date lastDate = info.getLastPullDate();
+    if ( lastDate != null )
+    {
+      long ellapsedTime = new Date().getTime() - lastDate.getTime();
+    
+      if ( ellapsedTime < ms.getSamplingInterval() ) 
+        return false;
+    }
+    
+    // Looks like we can pull the measurement set
+    return true;
   }
   
   // Post-report phase state ---------------------------------------------------

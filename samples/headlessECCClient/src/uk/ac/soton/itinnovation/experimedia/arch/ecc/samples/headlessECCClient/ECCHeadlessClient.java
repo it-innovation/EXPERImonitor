@@ -600,6 +600,7 @@ public class ECCHeadlessClient implements EMIAdapterListener
         ms.setMetricGroupUUID( parentGroup.getUUID() );
         ms.setAttributeUUID( attr.getUUID() );
         ms.setMetric( new Metric(UUID.randomUUID(), type, unit) );
+        ms.setSamplingInternval( intervalMS ); // Specifies pulling rate for ECC
         
         // Map this measurement set for later
         measurementSetMap.put( ms.getID(), ms );

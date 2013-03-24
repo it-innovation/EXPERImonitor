@@ -316,11 +316,13 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
     if ( currentPhase != EMPhase.eEMLiveMonitoring )                throw new Exception( "Not in metric pulling compatible phase" );
     if ( clientEx.isMeasurementSetQueuedForPull(measurementSetID) ) throw new Exception( "Measurement set already queued for this client" );
     
-    synchronized ( clientLock )
+    if ( clientEx.validateMSReadyForPull(measurementSetID) )
     {
       clientEx.addPullingMeasurementSetID( measurementSetID );
-      clientEx.getLiveMonitorInterface().pullMetric( clientEx.iterateNextMSToBePulled() );
+      clientEx.getLiveMonitorInterface().pullMetric( clientEx.iterateNextValidMSToBePulled() );
     }
+    else throw new Exception( "MeasurementSet "  + measurementSetID.toString() +
+                              "was not ready for pulling" );
   }
   
   public void tryPullAllMetrics( EMClient client ) throws Exception
@@ -333,7 +335,7 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
     if ( clientEx.isPullingMetricData() ) throw new Exception( "Client is already being pulled for data" );
     
     // Get all MeasurementSets available
-    Set<MeasurementSet> targetMSets = 
+    Map<UUID, MeasurementSet> targetMSets = 
             MetricHelper.getAllMeasurementSets( client.getCopyOfMetricGenerators() );
     
     // If we don't have any MeasurementSets, then back out
@@ -341,11 +343,17 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
       throw new Exception( "Client (apparently) has no measurement sets to pull!" );
     else
     {
-      Iterator<MeasurementSet> msIt = targetMSets.iterator();
+      Iterator<MeasurementSet> msIt = targetMSets.values().iterator();
       while ( msIt.hasNext() )
       { clientEx.addPullingMeasurementSetID( msIt.next().getID() ); }
       
-      clientEx.getLiveMonitorInterface().pullMetric( clientEx.iterateNextMSToBePulled() ); 
+      // Try to find a valid first measurement set to pull
+      UUID nextMS = clientEx.iterateNextValidMSToBePulled();
+      
+      if ( nextMS != null )
+        clientEx.getLiveMonitorInterface().pullMetric( nextMS );
+      else
+        throw new Exception( "Could not find any measurements ready for pulling" ); 
     }
   }
   
