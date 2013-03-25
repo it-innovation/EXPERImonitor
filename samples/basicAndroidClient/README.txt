@@ -17,7 +17,6 @@ Limitations of this client include:
 
 Installing Android SDK (and support)
 ------------------------------------
-
 This client is currently only available as a NetBeans 7.x project and is most easily built and run by first installing:
 
  * Android SDK tools (latest is recommended; should support OS 4.1.2), see: http://developer.android.com/sdk/index.html
@@ -30,11 +29,12 @@ Once you have installed both the Android SDK and NBAndroid plugin, you need to s
 
 Building the Android sample
 ---------------------------
-  
 Having installed the above software, you now need compile the ECC (Maven) project so that you can copy the appropriate ECC JAR files into the 'libs' directory of the sample folder. Do to this:
 
   1. Naviate to the root of the ECC API
+  
   2. Type 'mvn clean install'
+  
   3. Search for and copy the following ECC JAR files into '<root>\samples\basicAndroidClient\libs':
       * experimedia-arch-ecc-amqpAPI-impl-1.1-SNAPSHOT.jar
       * experimedia-arch-ecc-amqpAPI-spec-1.1-SNAPSHOT.jar
@@ -46,10 +46,17 @@ Having installed the above software, you now need compile the ECC (Maven) projec
       * experimedia-arch-ecc-em-impl-1.1-SNAPSHOT.jar
       * experimedia-arch-ecc-em-spec-1.1-SNAPSHOT.jar
       * experimedia-arch-ecc-samples-shared-1.1-SNAPSHOT.jar
+      
+  4. Add the following third party libraries:
+      * amqp-client-2.8.6.jar
+      * base64.2.3.8.jar
+      * commons-cli-1.1.jar
+      * commons-io-1.2.jar
+      * gson-2.2.2.jar
   
-  4. Open the basicAndroidClient in NetBeans
+  5. Open the basicAndroidClient in NetBeans
   
-  5. Clean and Build the basicAndroidClient (the result should be a debug APK)
+  6. Clean and Build the basicAndroidClient (the result should be a debug APK)
 
   
 Running the Android sample (on your desktop)
@@ -65,28 +72,5 @@ Having built your APK (and if you have installed the NBAndroid plugin, you shoul
   7. Click 'Connect' on the Android UI
   8. Move through the experiment process (using the dashboard) until you get to Live Monitoring
   9. Move the slider bar on the Android UI - you should see the data appear in the Live monitoring view
-  
-Summary of JARs required for this client
-----------------------------------------
-You will find the following 3rd party libraries in the libs folder:
-
-  * amqp-client-2.8.6.jar
-  * base64-2.3.8.jar
-  * commons-cli-1.1.jar
-  * commons-io-1.2.jar
-  * gson-2.2.2.jar
-  
-These are part of the ECC distribution. You will also need to build the following ECC specific JARS:
-
-  * experimedia-arch-ecc-amqpAPI-impl-1.1-SNAPSHOT.jar
-  * experimedia-arch-ecc-amqpAPI-spec-1.1-SNAPSHOT.jar
-  * experimedia-arch-ecc-common-dataModel-experiment-1.1-SNAPSHOT.jar
-  * experimedia-arch-ecc-common-dataModel-metrics-1.1-SNAPSHOT.jar
-  * experimedia-arch-ecc-common-dataModel-monitor-1.1-SNAPSHOT.jar
-  * experimedia-arch-ecc-common-logging-1.1-SNAPSHOT.jar
-  * experimedia-arch-ecc-em-factory-1.1-SNAPSHOT.jar
-  * experimedia-arch-ecc-em-impl-1.1-SNAPSHOT.jar
-  * experimedia-arch-ecc-em-spec-1.1-SNAPSHOT.jar
-  * experimedia-arch-ecc-samples-shared-1.1-SNAPSHOT.jar
   
  
