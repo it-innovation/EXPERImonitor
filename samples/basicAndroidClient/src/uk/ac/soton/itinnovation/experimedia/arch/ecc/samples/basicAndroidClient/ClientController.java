@@ -349,10 +349,11 @@ public class ClientController implements EMIAdapterListener,
 
                     // Push the report
                     emiAdapter.pushMetric( newReport );
-                    queueLogMessage( "Pushed report: " + sentReportID.toString() );
-
+                    
                     // Remember the ID of the report so we can confirm the ECC got the data
                     sentReportID = newReport.getUUID();
+                    
+                    queueLogMessage( "Pushed report: " + sentReportID.toString() );
               }
             }  
         }
