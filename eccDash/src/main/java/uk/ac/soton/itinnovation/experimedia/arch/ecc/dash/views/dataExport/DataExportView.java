@@ -58,7 +58,7 @@ public class DataExportView extends SimpleView
   private final String tAttributeName = "Attribute";
   private final String tMSID          = "Measurement set ID";
   private final String tMSUnit        = "Unit";
-  private final String tMeasureCount  = "Total metrics";
+  private final String tMeasureCount  = "Total measurements";
   
   
   public DataExportView()
