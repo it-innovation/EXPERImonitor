@@ -1,0 +1,23 @@
+Libraries required for client
+-----------------------------
+ECC libraries:
+
+      * experimedia-arch-ecc-amqpAPI-impl-1.1-SNAPSHOT.jar
+      * experimedia-arch-ecc-amqpAPI-spec-1.1-SNAPSHOT.jar
+      * experimedia-arch-ecc-common-dataModel-experiment-1.1-SNAPSHOT.jar
+      * experimedia-arch-ecc-common-dataModel-metrics-1.1-SNAPSHOT.jar
+      * experimedia-arch-ecc-common-dataModel-monitor-1.1-SNAPSHOT.jar
+      * experimedia-arch-ecc-common-logging-spec-1.1-SNAPSHOT.jar
+      * experimedia-arch-ecc-em-factory-1.1-SNAPSHOT.jar
+      * experimedia-arch-ecc-em-impl-1.1-SNAPSHOT.jar
+      * experimedia-arch-ecc-em-spec-1.1-SNAPSHOT.jar
+      * experimedia-arch-ecc-samples-shared-1.1-SNAPSHOT.jar
+      
+3rd party libraries:
+
+      * amqp-client-2.8.6.jar
+      * base64.2.3.8.jar
+      * commons-cli-1.1.jar
+      * commons-io-1.2.jar
+      * gson-2.2.2.jar
+  
