@@ -8,7 +8,14 @@ Packaging the ECC component (using Maven 3.x+)
     
 2) mvn install
 
-3) mvn license:aggregate-add-third-party -Dlicense.useMissingFile
+3) mvn site -PreportECC
+
+  This should generate a set of reports in:
+    ./target/site/
+    
+  - Check the reports for consistency before then...
+
+4) mvn license:aggregate-add-third-party -Dlicense.useMissingFile
 
   * This should generate a summary of licenses required for ECC compilation in:
       ./target/generated-sources/license/THIRD-PARTY.txt
@@ -18,8 +25,10 @@ Packaging the ECC component (using Maven 3.x+)
       
   * Update the IPR file:
       ./IPR.txt
+
+5) mvn clean
       
-4) mvn package -PpackageECC
+6) mvn package -PpackageECC
 
   * This will build and package up the ECC component in a ZIP file:
     ./target/experimedia-arch-ecc-<VERSION>-src.zip

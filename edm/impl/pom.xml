@@ -38,6 +38,13 @@
         <artifactId>experimedia-arch-ecc-edm</artifactId>
         <version>1.1</version>
     </parent>
+    
+    <licenses>
+      <license>
+      <name>IT Innovation Experimedia License, Version 1.0</name>
+      <url>${session.executionRootDirectory}/ITInnov-EXPERIMEDIA-licence-v1.0.txt</url>
+      </license>
+    </licenses>
   
     <build>
         <plugins>

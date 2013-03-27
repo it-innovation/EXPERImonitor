@@ -19,6 +19,13 @@
     <gwt.version>2.3.0</gwt.version>
     <gwt.plugin.version>2.2.0</gwt.plugin.version>
   </properties>
+  
+  <licenses>
+    <license>
+    <name>IT Innovation Experimedia License, Version 1.0</name>
+    <url>${session.executionRootDirectory}/ITInnov-EXPERIMEDIA-licence-v1.0.txt</url>
+    </license>
+  </licenses>
 
   <build>
     <plugins>
