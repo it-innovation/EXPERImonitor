@@ -621,7 +621,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
         } catch (Exception ex) {
             throw ex;
         } finally {
-            try { connection.close(); } catch (Exception ex) {}
+            try { connection.close(); } catch (Exception ex) { log.error("Failed to save measurement: ", ex); }
         }
     }
     
@@ -653,7 +653,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
                 log.debug("Committing the transaction and closing the connection");
                 connection.commit();
             }*/
-            try { connection.close(); } catch (Exception ex) {}
+            try { connection.close(); } catch (Exception ex) { log.error("Failed to save measurement set: ", ex);}
         }
     }
     
@@ -672,7 +672,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
         } catch (Exception ex) {
             throw ex;
         } finally {
-            try { connection.close(); } catch (Exception ex) {}
+            try { connection.close(); } catch (Exception ex) { log.error("Failed to get measurement: ", ex); }
         }
     }
     
@@ -692,7 +692,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
         } catch (Exception ex) {
             throw ex;
         } finally {
-            try { connection.close(); } catch (Exception ex) {}
+            try { connection.close(); } catch (Exception ex) { log.error("Failed to sync measurement: ", ex); }
         }
     }
 
@@ -724,7 +724,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
                 log.debug("Committing the transaction and closing the connection");
                 connection.commit();
             }*/
-            try { connection.close(); } catch (Exception ex) {}
+            try { connection.close(); } catch (Exception ex) { log.error("Failed to close db connection: ", ex); }
         }
     }
     
@@ -756,7 +756,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
                 log.debug("Committing the transaction and closing the connection");
                 connection.commit();
             }*/
-            try { connection.close(); } catch (Exception ex) {}
+            try { connection.close(); } catch (Exception ex) { log.error("Failed to close db connection: ", ex); }
         }
     }
 
@@ -788,7 +788,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
                 log.debug("Committing the transaction and closing the connection");
                 connection.commit();
             }*/
-            try { connection.close(); } catch (Exception ex) {}
+            try { connection.close(); } catch (Exception ex) { log.error("Failed to close db connection: ", ex); }
         }
     }
     
@@ -822,7 +822,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
                 log.debug("Committing the transaction and closing the connection");
                 connection.commit();
             }*/
-            try { connection.close(); } catch (Exception ex) {}
+            try { connection.close(); } catch (Exception ex) { log.error("Failed to close db connection: ", ex); }
         }
     }
     
@@ -853,7 +853,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
                 log.debug("Committing the transaction and closing the connection");
                 connection.commit();
             }*/
-            try { connection.close(); } catch (Exception ex) {}
+            try { connection.close(); } catch (Exception ex) { log.error("Failed to close db connection: ", ex); }
         }
     }
 
@@ -872,7 +872,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
         } catch (Exception ex) {
             throw ex;
         } finally {
-            try { connection.close(); } catch (Exception ex) {}
+            try { connection.close(); } catch (Exception ex) { log.error("Failed to close db connection: ", ex); }
         }
     }
 
@@ -891,7 +891,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
         } catch (Exception ex) {
             throw ex;
         } finally {
-            try { connection.close(); } catch (Exception ex) {}
+            try { connection.close(); } catch (Exception ex) { log.error("Failed to close db connection: ", ex); }
         }
     }
 
@@ -910,7 +910,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
         } catch (Exception ex) {
             throw ex;
         } finally {
-            try { connection.close(); } catch (Exception ex) {}
+            try { connection.close(); } catch (Exception ex) { log.error("Failed to close db connection: ", ex);  }
         }
     }
 
@@ -929,7 +929,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
         } catch (Exception ex) {
             throw ex;
         } finally {
-            try { connection.close(); } catch (Exception ex) {}
+            try { connection.close(); } catch (Exception ex) { log.error("Failed to close db connection: ", ex);  }
         }
     }
     
@@ -948,7 +948,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
         } catch (Exception ex) {
             throw ex;
         } finally {
-            try { connection.close(); } catch (Exception ex) {}
+            try { connection.close(); } catch (Exception ex) { log.error("Failed to close db connection: ", ex);  }
         }
     }
 
@@ -967,7 +967,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
         } catch (Exception ex) {
             throw ex;
         } finally {
-            try { connection.close(); } catch (Exception ex) {}
+            try { connection.close(); } catch (Exception ex) { log.error("Failed to close db connection: ", ex); }
         }
     }
     
@@ -998,7 +998,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
                 log.debug("Committing the transaction and closing the connection");
                 connection.commit();
             }
-            try { connection.close(); } catch (Exception ex) {}
+            try { connection.close(); } catch (Exception ex) { log.error("Failed to close db connection: ", ex); }
         }
     }
 
@@ -1029,7 +1029,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
                 log.debug("Committing the transaction and closing the connection");
                 connection.commit();
             }
-            try { connection.close(); } catch (Exception ex) {}
+            try { connection.close(); } catch (Exception ex) { log.error("Failed to close db connection: ", ex); }
         }
     }
     
@@ -1098,7 +1098,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
             log.debug("Error when executing database query to get table schema: " + ex.toString(), ex);
             return false;
         } finally {
-            try { connection.close(); } catch (SQLException ex){ }
+            try { connection.close(); } catch (SQLException ex){ log.error("Failed to close db connection: ", ex); }
         }
     }
     
@@ -1168,7 +1168,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
         } catch (Exception ex) {
             throw ex;
         } finally {
-            try { connection.close(); } catch (Exception ex) {}
+            try { connection.close(); } catch (Exception ex) { log.error("Failed to close db connection: ", ex);  }
         }
     }
     
@@ -1187,7 +1187,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
         } catch (Exception ex) {
             throw ex;
         } finally {
-            try { connection.close(); } catch (Exception ex) {}
+            try { connection.close(); } catch (Exception ex) { log.error("Failed to close db connection: ", ex); }
         }
     }
     
@@ -1206,7 +1206,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
         } catch (Exception ex) {
             throw ex;
         } finally {
-            try { connection.close(); } catch (Exception ex) {}
+            try { connection.close(); } catch (Exception ex) { log.error("Failed to close db connection: ", ex); }
         }
     }
     
@@ -1225,7 +1225,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
         } catch (Exception ex) {
             throw ex;
         } finally {
-            try { connection.close(); } catch (Exception ex) {}
+            try { connection.close(); } catch (Exception ex) { log.error("Failed to close db connection: ", ex); }
         }
     }
     
@@ -1244,7 +1244,7 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
         } catch (Exception ex) {
             throw ex;
         } finally {
-            try { connection.close(); } catch (Exception ex) {}
+            try { connection.close(); } catch (Exception ex) { log.error("Failed to close db connection: ", ex); }
         }
     }
     

@@ -19,7 +19,7 @@
 //
 //      Created By :            Simon Crowle
 //      Created Date :          07-Feb-2013
-//      Created for Project :   ECC Dash
+//      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 

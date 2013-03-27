@@ -25,15 +25,19 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.metGenExamples;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.IECCLogger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 
 import java.util.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.Logger;
+
 
 
 
 
 public class ExampleMetrics
 {
+  private IECCLogger               logger;
   private Entity                   applicationEntity;
   private Entity                   userEntity;
   private HashSet<MetricGenerator> metricGenerators;
@@ -41,6 +45,7 @@ public class ExampleMetrics
   
   public ExampleMetrics()
   {
+    logger = Logger.getLogger( ExampleMetrics.class );
   }
   
   public void runDemo()
@@ -57,12 +62,12 @@ public class ExampleMetrics
     
     MetricGenerator mg = MetricHelper.getMetricGeneratorByName( "Application metric generator",
                                                                 metricGenerators );
-    System.out.println( MetricHelper.describeGenerator(mg) );
+    logger.info( MetricHelper.describeGenerator(mg) );
     
     mg = MetricHelper.getMetricGeneratorByName( "User metric generator",
                                                  metricGenerators );
     
-    System.out.println( MetricHelper.describeGenerator(mg) );
+    logger.info( MetricHelper.describeGenerator(mg) );
     
     demoPopulateQoSData();
     
@@ -173,8 +178,8 @@ public class ExampleMetrics
     MeasurementSet newMS = new MeasurementSet( ms, false );
     Measurement        m = new Measurement( "100" );
     newMS.addMeasurement( m );
-    System.out.println( "Execution time measurement: " + m.getValue() + " (" +
-                        newMS.getMetric().getUnit().toString() +")" );
+    logger.info( "Execution time measurement: " + m.getValue() + " (" +
+                 newMS.getMetric().getUnit().toString() +")" );
     
     // Device temperature
     attr  = MetricHelper.getAttributeByName( "Application device temperature", applicationEntity );
@@ -182,8 +187,8 @@ public class ExampleMetrics
     newMS = new MeasurementSet( ms, false );
     m     = new Measurement( "28" );
     newMS.addMeasurement( m );
-    System.out.println( "Application device temperature measurement: " + m.getValue() + " (" +
-                        newMS.getMetric().getUnit().toString() +")" );
+    logger.info( "Application device temperature measurement: " + m.getValue() + " (" +
+                 newMS.getMetric().getUnit().toString() +")" );
   }
   
   private void demoPopulateQoEData()
@@ -197,8 +202,8 @@ public class ExampleMetrics
     MeasurementSet newMS = new MeasurementSet( ms, false );
     Measurement        m = new Measurement( "undo, select, cut, paste, save" );
     newMS.addMeasurement( m );
-    System.out.println( "Top five actions: " + m.getValue() + " (" +
-                        newMS.getMetric().getUnit().toString() +")" );
+    logger.info( "Top five actions: " + m.getValue() + " (" +
+                 newMS.getMetric().getUnit().toString() +")" );
     
     // Device temperature
     attr  = MetricHelper.getAttributeByName( "User perceived application speed", userEntity );
@@ -206,7 +211,7 @@ public class ExampleMetrics
     newMS = new MeasurementSet( ms, false );
     m     = new Measurement( "5" );
     newMS.addMeasurement( m );
-    System.out.println( "User scaled rating: " + m.getValue() + " (" +
-                        newMS.getMetric().getUnit().toString() +")" );
+    logger.info( "User scaled rating: " + m.getValue() + " (" +
+                 newMS.getMetric().getUnit().toString() +")" );
   } 
 }

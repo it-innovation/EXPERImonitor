@@ -19,7 +19,7 @@
 //
 //      Created By :            Simon Crowle
 //      Created Date :          20-Mar-2013
-//      Created for Project :   Logging foundation
+//      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
