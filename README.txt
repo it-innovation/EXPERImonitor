@@ -10,6 +10,7 @@ Licences
 --------
 
 The licence for this software can be found in the file ITInnov-EXPERIMEDIA-licence-v1.0.txt
+
 A complete list of licences for this software and associated third party software can be found in the file IPR.txt and in sub-folders within the source directories.
 
 Building
@@ -29,12 +30,13 @@ To compile the software packages:
 Documentation
 -------------
 
-Javadoc for the source code may be found in the 'apidocs' folder.
-Further information may be found in the 'T05 ECC samples notes V1.0.docx' file.
+Javadoc for the source code may be found in /doc/javaDoc' folder.
+Further information may be found in the 'Experiment Metric Data Monitoring.pdf' file.
+
 Brief notes are below.
 
-Experiment Manager (EM) Usage
------------------------------
+Quick start up with ECC Container (for use during ECC client development)
+-------------------------------------------------------------------------
 
 MICROSOFT WINDOWS
 
@@ -60,26 +62,23 @@ The biaries and batch files are included in this release in the bin folder.
 8. Shutdown your RabbitMQ server by typing in your RabbitMQ 'sbin' Command window:
 	rabbitmq-service stop
 
-Batch files for running the client and container applications so that they connect to a remote RabbitMQ server
-are also provided.  They need to be adjusted to set the IP address of the RabbitMQ server.
-
+Batch files for running the client and container applications so that they connect to a remote RabbitMQ server are also provided.  They need to be adjusted to set the IP address of the RabbitMQ server. An Android ECC client has also been provided: this must be uploaded to an Android 4.2.x device - it uses the default EM UUID (00000000-0000-0000-0000-000000000000); the user can specify the IP address of the RabbitMQ server in the UI.
 	
 Experiment Data Manager (EDM)
 -----------------------------
 
-The Experiment Data Manager manages the data, such as monitoring information,
-which is stored via the ECC Monitor (EM) and displayed via the UI.
+The Experiment Data Manager manages the data, such as monitoring information, which is stored via the ECC Monitor (EM) and displayed via the UI.
 
-The EDM depends on a PostgreSQL database in the back-end, which needs to be set up
-before the EDM can be used. Installation instructions can be found in a separate
-README: ./src/edm/resources/README.txt
+The EDM depends on a PostgreSQL database in the back-end, which needs to be set up before the EDM can be used. Installation instructions can be found in a separate README: ./src/edm/resources/README.txt. The following software from our samples use the EDM:
 
+  * Basic ECC Container
+  * Headless ECC Client
+  
 
-ECC dashboard
--------------
+ECC dashboard (for use in experimentation or development)
+---------------------------------------------------------
 
-The ECC dashboard can be quickly built to run on your local development machine by following
-these steps:
+The ECC dashboard can be quickly built to run on your local development machine by following these steps:
 
 1. Install the following:
 	- Java 1.6 or better
@@ -92,7 +91,7 @@ these steps:
 	* See the README in ./src/edm/resources/README.txt for more information
 
 3. Prepare RabbitMQ server to work with settings in em.properties file (see step 7.2)
-	* See the 'T05 ECC samples notes V1.0' technical note for more information
+	* See the 'Experiment Metric Data Monitoring.pdf' technical note for more information
 
 4. (Optional) Prepare your NAGIOS server, noting the full URL for use in the dashboard.properties file (see step 7.2)
 
@@ -110,7 +109,7 @@ these steps:
 	  Step 2: Copy WAR file generated in step 6 to Tomcat's 'webapps' directory
 	          (Tomcat should automatically unpack and deploy for you)
 	  
-	  Result: You should see the ECC dashboard running on: http://localhost:8080/eccDash-1.1-SNAPSHOT/
+	  Result: You should see the ECC dashboard running on: http://localhost:8080/experimedia-arch-ecc-eccDash-1.1/
 
 	7.2 Tomcat (your particular configuration)
 	---------------------------------------------------------------------------------------------------
@@ -119,9 +118,9 @@ these steps:
 	  Step 2: Using Tomcat's management UI, STOP the current ECC dashboard
 
 	  Step 3: Modify the any of the ECC property files you require:
-		  <Tomcat root>\webapps\eccDash-1.1-SNAPSHOT\WEB-INF\dashboard.properites
-		  <Tomcat root>\webapps\eccDash-1.1-SNAPSHOT\WEB-INF\edm.properites
-		  <Tomcat root>\webapps\eccDash-1.1-SNAPSHOT\WEB-INF\em.properites
+		  <Tomcat root>\webapps\experimedia-arch-ecc-eccDash-1.1\WEB-INF\dashboard.properites
+		  <Tomcat root>\webapps\experimedia-arch-ecc-eccDash-1.1\WEB-INF\edm.properites
+		  <Tomcat root>\webapps\experimedia-arch-ecc-eccDash-1.1\WEB-INF\em.properites
 
 	  Step 4: Using Tomcat's management UI:
 		> Expire any existing ECC dashboard sessions
@@ -134,8 +133,8 @@ Using JuJu to deploy the ECC
 Juju can be used to deploy the ECC in a cloud environment - for instance EC2, OpenStack or in local virtual machines. For more information about Juju please refer to the Ubuntu documentation.
 
 
-Installing the ECC
-------------------
+Installing the ECC using Juju/OpenStack
+---------------------------------------
 
 1. Make sure juju is bootstrapped and "juju status" returns something like:
 

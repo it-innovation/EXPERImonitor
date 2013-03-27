@@ -3,7 +3,6 @@ This software distribution is licenced under the terms found in the file ITInnov
 The IT Innovation software is the source code and the following associated jars/war:
 ------------------------------------------------------------------------------------------------------------
 
-build-tools-1.0.jar
 experimedia-arch-ecc-amqpAPI-impl-1.1-SNAPSHOT.jar
 experimedia-arch-ecc-amqpAPI-spec-1.1-SNAPSHOT.jar
 experimedia-arch-ecc-common-dataModel-experiment-1.1-SNAPSHOT.jar
@@ -40,6 +39,8 @@ log4j-1.2.17.jar
 vaadin-6.8.2.jar
 gwt-user-2.3.0.jar
 gwt-dev-2.3.0.jar
+commons-cli-1.1.jar
+commons-io-1.2.jar
 javax.validation-api-1.0.0.GA.jar
 javax.validation-api-1.0.0.GA-sources.jar
 org.apache.maven.surefire:common-junit3:2.12.4.jar

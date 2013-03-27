@@ -229,12 +229,6 @@
                   <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
             </plugin>
-            
-            <!-- Licensing _________________________________________________ -->
-            <plugin>
-              <groupId>org.codehaus.mojo</groupId>
-              <artifactId>license-maven-plugin</artifactId>
-            </plugin>
            
             <!-- Package JavaDoc ___________________________________________ -->
             <plugin>
