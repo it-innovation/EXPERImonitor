@@ -34,6 +34,13 @@ import java.util.*;
  */
 public class MetricHelper
 {
+    /**
+     * Retrieves the attribute identified by the ID if it exists in the metric generator collection.
+     * 
+     * @param attributeID - ID of the attribute required, must not be null.
+     * @param mgenSet     - Collection of metric generators, must not be null
+     * @return            - Returned attribute instance, if it exists, otherwise null.
+     */
     public static Attribute getAttributeFromID( UUID attributeID,
                                                 Collection<MetricGenerator> mgenSet )
     {
@@ -48,6 +55,13 @@ public class MetricHelper
       return attr;
     }
     
+    /**
+     * Returns an entity identified by the ID, if it exists, from the metric generator collection.
+     * 
+     * @param entityID  - ID of the entity required, must not be null.
+     * @param mgenSet   - Collection of metric generators, must not be null.
+     * @return          - Returned entity instance, if it exists, otherwise null.
+     */
     public static Entity getEntityFromID( UUID entityID,
                                           Collection<MetricGenerator> mgenSet )
     {
@@ -62,6 +76,14 @@ public class MetricHelper
       return entity;
     }
   
+    /**
+     * Returns a collection of measurement sets (if any exist) associated with a specific attribute
+     * from the metric generator collection.
+     * 
+     * @param attr    - Attribute of interest, must not be null.
+     * @param mgenSet - Collection of metric generators to look for measurement sets, must not be null.
+     * @return        - Return collection of measurement sets (will be empty if no measurement sets exist)
+     */
     public static Map<UUID, MeasurementSet> getMeasurementSetsForAttribute( Attribute attr,
                                                                             Collection<MetricGenerator> mgenSet )
     {
@@ -86,6 +108,14 @@ public class MetricHelper
       return mSets;
     }
     
+    /**
+     * Returns a collection of measurement sets (if they exist) associated with a specific attribute
+     * from a single metric generator.
+     * 
+     * @param attr - Attribute of interest, must not be null.
+     * @param mgen - Metric generators in which to look for measurement sets, must not be null.
+     * @return     - Return collection of measurement sets (will be empty if no measurement sets exist)
+     */
     public static MeasurementSet getMeasurementSetForAttribute( Attribute attr,
                                                                 MetricGenerator mgen )
     {
@@ -112,6 +142,12 @@ public class MetricHelper
       return msTarget;
     }
     
+    /**
+     * Returns all the attributes associated with a collection of metric generators.
+     * 
+     * @param mgenSet - Metric generator collection in which to search, must not be null.
+     * @return        - Return collection of attributes (will be empty if no attributes exist)
+     */
     public static Map<UUID, Attribute> getAllAttributes( Collection<MetricGenerator> mgenSet )
     {
       HashMap<UUID, Attribute> attributes = new HashMap<UUID, Attribute>();
@@ -132,6 +168,12 @@ public class MetricHelper
       return attributes;
     }
   
+    /**
+     * Returns all entities associated with a collection of metric generators.
+     * 
+     * @param mgenSet - Metric generator collection in which to search, must not be null.
+     * @return        - Return collection of entities (will be empty if no entities exist)
+     */
     public static Map<UUID, Entity> getAllEntities( Collection<MetricGenerator> mgenSet )
     {
       HashMap<UUID, Entity> entities = new HashMap<UUID, Entity>();
@@ -151,6 +193,12 @@ public class MetricHelper
       return entities;
     }
     
+    /**
+     * Returns all entities associated with a metric generator.
+     * 
+     * @param mgent - Metric generator in which to search, must not be null.
+     * @return      - Return collection of entities (will be empty if no entities exist)
+     */
     public static Map<UUID, Entity> getAllEntities( MetricGenerator mgen )
     {
       HashMap<UUID, Entity> entities = new HashMap<UUID, Entity>();
@@ -172,6 +220,12 @@ public class MetricHelper
       return entities;
     }
   
+    /**
+     * Returns a collection of all measurement sets associated with a collection of metric generators
+     * 
+     * @param mgenSet - Collection of metric generators in which to search, must not be null
+     * @return        - Returned collection of measurement sets (will be empty if non exist in metric generator collection)
+     */
     public static Map<UUID, MeasurementSet> getAllMeasurementSets( Collection<MetricGenerator> mgenSet )
     {
         HashMap<UUID, MeasurementSet> mSets = new HashMap<UUID, MeasurementSet>();
@@ -197,6 +251,12 @@ public class MetricHelper
         return mSets;        
     }
     
+    /**
+     * Returns a collection of all measurement sets associated with a metric generator
+     * 
+     * @param mgen - Metric generator in which to search, must not be null
+     * @return     - Returned collection of measurement sets (will be empty if non exist in metric generator)
+     */
     public static Map<UUID, MeasurementSet> getAllMeasurementSets( MetricGenerator mgen )
     {
       HashMap<UUID, MeasurementSet> mSets = new HashMap<UUID, MeasurementSet>();
@@ -220,6 +280,13 @@ public class MetricHelper
       return mSets;
     }
     
+    /**
+     * Returns the measurement set identified by the ID from a metric generator.
+     * 
+     * @param mgen              - Metric generator in which to search, must not be null.
+     * @param measurementSetID  - MeasurementSet ID of measurement set to find
+     * @return                  - Returned measurement set instance (null if it does not exist)
+     */
     public static MeasurementSet getMeasurementSet( MetricGenerator mgen,
                                                     UUID measurementSetID )
     {
@@ -257,6 +324,13 @@ public class MetricHelper
       return targetSet;
     }
     
+    /**
+     * Returns the measurement set identified by the ID from a metric generator collection.
+     * 
+     * @param mgenSet           - Metric generator collection in which to search, must not be null.
+     * @param measurementSetID  - MeasurementSet ID of measurement set to find
+     * @return                  - Returned measurement set instance (null if it does not exist)
+     */
     public static MeasurementSet getMeasurementSet( Collection<MetricGenerator> mgenSet,
                                                     UUID measurementSetID )
     {
@@ -275,6 +349,12 @@ public class MetricHelper
         return targetSet;        
     }
     
+    /**
+     * Sorts an unordered set of measurements by date.
+     * 
+     * @param measurements - Measurement set to sort - must not be null.
+     * @return             - Returned sorted measurements (will be empty if input set empty)
+     */
     public static TreeMap<Date, Measurement> sortMeasurementsByDate( Set<Measurement> measurements )
     {
       TreeMap<Date, Measurement> sortedM = new TreeMap<Date, Measurement>();
@@ -294,6 +374,15 @@ public class MetricHelper
       return sortedM;
     }
     
+    /**
+     * Creates an attribute with the parameters provided. If a valid entity is provided
+     * the attribute and entity will be automatically associated.
+     * 
+     * @param name    - Name of the attribute to create.
+     * @param desc    - Description of the attribute.
+     * @param entity  - Entity that the attribute belongs to (can be null)
+     * @return        - Attribute instance
+     */
     public static Attribute createAttribute( String name, String desc, Entity entity )
     {
       Attribute attribute = new Attribute();
@@ -309,6 +398,13 @@ public class MetricHelper
       return attribute;
     }
     
+    /**
+     * Searches for an attribute by its name.
+     * 
+     * @param name   - Name of the attribute to search, must not be null.
+     * @param entity - Instance of the entity to query, must not be null.
+     * @return       - Returned attribute (will be null if the attribute cannot be found)
+     */
     public static Attribute getAttributeByName( String name, Entity entity )
     {
       Attribute targAttr = null;
@@ -336,6 +432,15 @@ public class MetricHelper
       return targAttr;      
     }
     
+    /**
+     * Creates a metric group with the given name and description. Will automatically
+     * associate the group with the metric generator, if one is provided.
+     * 
+     * @param name - Name of the entity to create.
+     * @param desc - Description of the entity.
+     * @param mGen - Metric generator to associate the entity with (may be null)
+     * @return     - Returns an instance of a MetricGroup.
+     */
     public static MetricGroup createMetricGroup( String name, String desc, MetricGenerator mGen )
     {
       MetricGroup mGroup = new MetricGroup();
@@ -351,6 +456,15 @@ public class MetricHelper
       return mGroup;
     }
     
+    /**
+     * Creates a measurement set automatically linked to an attribute and metric group.
+     * 
+     * @param attr  - Attribute associated with the measurement set, must not be null.
+     * @param type  - Metric type associated with the measurement set, must not be null.
+     * @param unit  - Unit associated with the measurement set, must not be null.
+     * @param group - Metric group that will contain the measurement set, must not be null.
+     * @return      - Returns a new measurement set (null if parameters are invalid)
+     */
     public static MeasurementSet createMeasurementSet( Attribute attr,
                                                        MetricType type,
                                                        Unit unit,
@@ -376,6 +490,13 @@ public class MetricHelper
       return mSet;
     }
     
+    /**
+     * Searches for a metric generator by name.
+     * 
+     * @param name  - Name of the metric generator to find, must not be null.
+     * @param mGens - Collection of metric generators in which to search, must not be null.
+     * @return      - Returns the metric generator (null if it does not exist)
+     */
     public static MetricGenerator getMetricGeneratorByName( String name, 
                                                             Set<MetricGenerator> mGens )
     {
@@ -400,6 +521,13 @@ public class MetricHelper
       return targetGen;
     }
     
+    /**
+     * Searches for a metric group by name.
+     * 
+     * @param groupName - Name of the metric group to find.
+     * @param mGroups   - Collection of metric groups in which to search.
+     * @return          - Returned metric group, if it exists.
+     */
     public static MetricGroup getMetricGroupByName( String groupName,
                                                     Set<MetricGroup> mGroups )
     {
@@ -424,6 +552,14 @@ public class MetricHelper
       return targetGroup;
     }
     
+    /**
+     * Creates a pre-initialised Report containing a measurement set based on the
+     * instance provided. Use this convenience method for quickly creating a report
+     * to send to the ECC.
+     * 
+     * @param sourceMS  - The measurement set 'template' upon which the report will be based, must not be null.
+     * @return          - A new report instance (with new measurement set instance) that can be populated with measurements for the ECC.
+     */
     public static Report createEmptyMeasurementReport( MeasurementSet sourceMS )
     {
       Report targetReport = null;
@@ -439,6 +575,12 @@ public class MetricHelper
       return targetReport;      
     }
     
+    /**
+     * Use this method to iterate through the contents of a metric generator.
+     * 
+     * @param mgen - Metric generator to describe - must not be null.
+     * @return     - String describing the metric generator.
+     */
     public static String describeGenerator( MetricGenerator mgen )
     {
       String desc = "Could not describe generator (null)";
