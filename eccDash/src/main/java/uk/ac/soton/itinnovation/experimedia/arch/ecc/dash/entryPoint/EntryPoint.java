@@ -41,12 +41,11 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.DashMainController;
 public class EntryPoint extends Application
                         implements HttpServletRequestListener
 {
-  private DashMainController dmc;
-
-
   @Override
   public void init()
   {
+    DashMainController dmc = ECCDashContextListener.getDMC();
+    
     if ( dmc == null )
     {
       // Configure logging system
@@ -62,11 +61,18 @@ public class EntryPoint extends Application
 
       dmc.initialise( window );
     }
+    else
+    {
+      setTheme( "eccDash" );
+      setMainWindow( dmc.getMainWindow() );
+    }
   }
   
   @Override
   public void close()
   {
+    DashMainController dmc = ECCDashContextListener.getDMC();
+    
     if ( dmc != null )
     {
       dmc.shutdown();

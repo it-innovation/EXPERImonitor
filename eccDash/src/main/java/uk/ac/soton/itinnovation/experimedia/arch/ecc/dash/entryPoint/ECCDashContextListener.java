@@ -33,14 +33,18 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.DashMainController;
 
 public class ECCDashContextListener implements ServletContextListener
 {
-  private static DashMainController     mainController;
-  public  static ECCDashContextListener context;
+  private static DashMainController mainController;
+  
   
   public ECCDashContextListener()
-  { ECCDashContextListener.context = this; }
+  {
+  }
   
   public static void setDMC( DashMainController dmc )
   { mainController = dmc; }
+  
+  public static DashMainController getDMC()
+  { return mainController; }
   
   @Override
   public void contextInitialized( ServletContextEvent sce )

@@ -116,6 +116,9 @@ public class DashMainController extends UFAbstractEventManager
   public DashMainController()
   {}
   
+  public Window getMainWindow()
+  { return rootWindow; }
+  
   public void initialise( Window rootWin )
   {
     if ( rootWin != null )
