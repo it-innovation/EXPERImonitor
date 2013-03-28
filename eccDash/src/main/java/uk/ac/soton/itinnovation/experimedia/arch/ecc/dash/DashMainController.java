@@ -43,6 +43,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.*;
 import com.vaadin.ui.*;
 import com.vaadin.Application;
 import com.vaadin.terminal.FileResource;
+import com.vaadin.ui.Window.CloseEvent;
 
 import java.io.*;
 import java.net.URL;
@@ -152,6 +153,8 @@ public class DashMainController extends UFAbstractEventManager
       mainDashView        = null;
       expMonitor          = null;
       liveMetricScheduler = null;
+      
+      rootWindow.getApplication().close();
     }
   }
   
@@ -479,7 +482,18 @@ public class DashMainController extends UFAbstractEventManager
   // MainDashViewListener ------------------------------------------------------
   @Override
   public void onShutdownECCClicked()
-  { shutdown(); }
+  {
+    String[] options = { "no", "yes" };
+    
+    AlertView av = new AlertView( "Shut down confirmation",
+                                  "Shutting down the ECC will cause the experiment to finish and all clients will be " +
+                                  "sent a disconnection message. It is strongly recommended you export your data before " +
+                                  "shutting down. Are you sure you want to shut down?",
+                                  options,
+                                  new UserShutdownListener() );
+    
+    rootWindow.addWindow( av.getWindow() );
+  }
   
   // MonitorControlListener ----------------------------------------------------
   @Override
@@ -857,7 +871,7 @@ public class DashMainController extends UFAbstractEventManager
     return props; 
   }
   
-  // Event handlers
+  // Event handlers ------------------------------------------------------------
   private void onDashWindowResized()
   {
     if ( mainDashView != null ) mainDashView.updateViewport();
@@ -867,5 +881,14 @@ public class DashMainController extends UFAbstractEventManager
   {
     @Override
     public void windowResized( Window.ResizeEvent re ) { onDashWindowResized(); }
+  }
+  
+  private class UserShutdownListener implements AlertViewListener
+  {
+    @Override
+    public void onAlertResponse( String option )
+    {
+      if ( option.equals("yes") ) shutdown();
+    }
   }
 }
