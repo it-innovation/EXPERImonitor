@@ -8,6 +8,10 @@
         <param-value>false</param-value>
     </context-param>
     
+    <session-config>
+      <session-timeout>-1</session-timeout>
+    </session-config>
+    
     <!-- ECC servlet context listener -->
     <listener>
         <listener-class>uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.entryPoint.ECCDashContextListener</listener-class>
