@@ -1,0 +1,104 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{9E8B7C7C-5A5F-4D40-A995-651121E40717}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SimpleHeadlessECCClient</RootNamespace>
+    <AssemblyName>SimpleHeadlessECCClient</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ECCClientController.cs" />
+    <Compile Include="EMIAdapterListener.cs" />
+    <Compile Include="EMInterfaceAdapter.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\extensions\dotNetClientAPI\amqpAPI\impl\ampqAPI-Impl.csproj">
+      <Project>{A8CD2A25-E7C4-4FC0-955A-61150FA20DA1}</Project>
+      <Name>ampqAPI-Impl</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\extensions\dotNetClientAPI\amqpAPI\spec\amqpAPI-Spec.csproj">
+      <Project>{C3E16087-EE9E-4EF0-9FEC-22345C286352}</Project>
+      <Name>amqpAPI-Spec</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\extensions\dotNetClientAPI\eccCommonDataModel-Experiment\eccCommonDataModel-Experiment.csproj">
+      <Project>{38689D8C-6D80-4F86-9ECE-6B601127B7EE}</Project>
+      <Name>eccCommonDataModel-Experiment</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\extensions\dotNetClientAPI\eccCommonDataModel-Metrics\eccCommonDataModel-Metrics.csproj">
+      <Project>{FB862C24-F211-47CF-B788-E89EE28AF4E1}</Project>
+      <Name>eccCommonDataModel-Metrics</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\extensions\dotNetClientAPI\eccCommonDataModel-Monitor\eccCommonDataModel-Monitor.csproj">
+      <Project>{E3B354EF-1C08-4368-87D3-AD8EE3ABC19F}</Project>
+      <Name>eccCommonDataModel-Monitor</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\extensions\dotNetClientAPI\eccCommonLogging-Impl\eccCommonLogging-Impl.csproj">
+      <Project>{AF80371C-B96F-4139-805F-3FD6D53BB133}</Project>
+      <Name>eccCommonLogging-Impl</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\extensions\dotNetClientAPI\eccCommonLogging-Spec\eccCommonLogging-Spec.csproj">
+      <Project>{39EAA610-E91A-46F8-9D22-D4CFA478F258}</Project>
+      <Name>eccCommonLogging-Spec</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\extensions\dotNetClientAPI\eccEMClient-Spec\eccEMClient-Spec.csproj">
+      <Project>{E6FC477F-9B12-4046-88D4-F3B6C0B5F4FD}</Project>
+      <Name>eccEMClient-Spec</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\extensions\dotNetClientAPI\eccEMClientFactory\eccEMClientFactory.csproj">
+      <Project>{F0F6EDD0-B743-4650-B547-30664BE56D39}</Project>
+      <Name>eccEMClientFactory</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="log4net.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
