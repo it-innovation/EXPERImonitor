@@ -53,6 +53,8 @@ org.apache.maven.surefire:common-junit48:2.12.4.jar
 org.apache.maven.surefire:surefire-grouper:2.12.4.jar
 joda-time-2.1.jar
 invient-charts-0.8.6.jar
+RabbitMQ.Client.dll
+log4net.dll
 
 CPL 1.0
 -----------------------------------------------
@@ -76,6 +78,10 @@ invient-charts-0.8.6.jar
 Creative Commons Attribution-NonCommercial 3.0
 -----------------------------------------------
 invient-charts-0.8.6.jar
+
+MIT License
+-----------------------------------------------
+Newtonsoft.Json.dll
 
 Public domain
 -----------------------------------------------
