@@ -5,14 +5,14 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
     <artifactId>experimedia-arch-ecc-common-dataModel</artifactId>
-    <version>1.1</version> 
+    <version>1.2-SNAPSHOT</version> 
     <name>ECC Common Data Model</name> 
     <packaging>pom</packaging>
   
     <parent>
       <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
       <artifactId>experimedia-arch-ecc-common</artifactId>
-      <version>1.1</version>
+      <version>1.2-SNAPSHOT</version>
     </parent>
   
     <modules>

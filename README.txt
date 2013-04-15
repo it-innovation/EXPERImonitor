@@ -62,8 +62,34 @@ The biaries and batch files are included in this release in the bin folder.
 8. Shutdown your RabbitMQ server by typing in your RabbitMQ 'sbin' Command window:
 	rabbitmq-service stop
 
-Batch files for running the client and container applications so that they connect to a remote RabbitMQ server are also provided.  They need to be adjusted to set the IP address of the RabbitMQ server. An Android ECC client has also been provided: this must be uploaded to an Android 4.2.x device - it uses the default EM UUID (00000000-0000-0000-0000-000000000000); the user can specify the IP address of the RabbitMQ server in the UI.
+Batch files for running the client and container applications so that they connect to a remote RabbitMQ server are also provided.  They need to be adjusted to set the IP address of the RabbitMQ server. 
+
+Android client
+--------------
+An Android ECC client has also been provided: this must be uploaded to an Android 4.2.x device - it uses the default EM UUID (00000000-0000-0000-0000-000000000000); the user can specify the IP address of the RabbitMQ server in the UI.
+
+C# Client
+---------
+To build and run the C# ECC API, you will need to install Visual Studio 2010 (updating to include all service packs is recommended). This ECC platform is under development and does not support EDMAgent functionality. Steps for building and running the ECC C# client follows:
+
+1. Set up your RabbitMQ/PostgreSQL services locally (see documentation)
+
+2. Install Visual Studio 2010
+
+3. Open the solution file:
+
+  extensions/dotNetClientAPI/DotNet ECC Api.sln
+  
+4. Build the solution
+
+5. Start the Basic ECC Container (see above) or ECC Dashboard (see below)
+
+6. Run the 'SimpleHeadlessECCClient' EXE project (linked to solution; found in 'samples/basicDotNetClient')
+
+    * This should connect the C# client to the ECC via your local RabbitMQ service using the EM UUID 00000000-0000-0000-0000-000000000000
+    * Step through to the Live Monitoring phase to start gathering two simple metrics
 	
+  
 Experiment Data Manager (EDM)
 -----------------------------
 
@@ -118,9 +144,9 @@ The ECC dashboard can be quickly built to run on your local development machine 
 	  Step 2: Using Tomcat's management UI, STOP the current ECC dashboard
 
 	  Step 3: Modify the any of the ECC property files you require:
-		  <Tomcat root>\webapps\experimedia-arch-ecc-eccDash-1.1\WEB-INF\dashboard.properites
-		  <Tomcat root>\webapps\experimedia-arch-ecc-eccDash-1.1\WEB-INF\edm.properites
-		  <Tomcat root>\webapps\experimedia-arch-ecc-eccDash-1.1\WEB-INF\em.properites
+		  <Tomcat root>\webapps\experimedia-arch-ecc-eccDash-1.2-SNAPSHOT\WEB-INF\dashboard.properites
+		  <Tomcat root>\webapps\experimedia-arch-ecc-eccDash-1.2-SNAPSHOT\WEB-INF\edm.properites
+		  <Tomcat root>\webapps\experimedia-arch-ecc-eccDash-1.2-SNAPSHOT\WEB-INF\em.properites
 
 	  Step 4: Using Tomcat's management UI:
 		> Expire any existing ECC dashboard sessions
