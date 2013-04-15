@@ -481,10 +481,9 @@ public class MetricHelper
         mSet.setMetric( metric );
         
         mSet.setAttributeUUID( attr.getUUID() );
-        mSet.setMetricGroupUUID( attr.getEntityUUID() );
+        mSet.setMetricGroupUUID( group.getUUID() );
         
         group.addMeasurementSets( mSet );
-        mSet.setMetricGroupUUID( group.getUUID() );
       }
       
       return mSet;
