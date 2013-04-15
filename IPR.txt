@@ -28,6 +28,18 @@ robust-cat-core-components-viewEngine-spec-uif-1.3-SNAPSHOT.jar
 BasicAndroidClient-debug.apk
 BasicAndroidClient-debug-unaligned.apk
 
+SimpleHeadlessClient.exe
+amqpAPI-Spec.dll
+eccCommonDataModel-Experiment.dll
+eccCommonDataModel-Metrics.dll
+eccCommonDataModel-Monitor.dll
+eccCommonLogging-Impl.dll
+eccCommonLogging-Spec.dll
+ECCCommsAPI-Impl.dll
+eccEMClient-Impl.dll
+eccEMFactory.dll
+eccEM-Spec.dll
+
 experimedia-arch-ecc-eccDash-1.1-SNAPSHOT.war
 
 ------------------------------------------------------------------------------------------------------------
