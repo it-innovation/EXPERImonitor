@@ -42,14 +42,14 @@ using System.Collections.Generic;
 namespace uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared
 {
 
-/**
- * Client writers can use this class as a high-level wrapper for communications with
- * the ECC. The class using an instance of EMInterfaceAdapter should implement the EMIAdapterListener 
- * interface so that it can respond to requests from the ECC. Writers wishing only to respond to V0.9 
- * behaviours should instead provide a EMILegacyAdapterListener implementation.
- * 
- * @author Simon Crowle
- */
+/// <summary>
+///Client writers can use this class as a high-level wrapper for communications with
+///the ECC. The class using an instance of EMInterfaceAdapter should implement the EMIAdapterListener 
+///interface so that it can respond to requests from the ECC. Writers wishing only to respond to V0.9 
+///behaviours should instead provide a EMILegacyAdapterListener implementation.
+///
+///@author Simon Crowle
+/// </summary>
 public class EMInterfaceAdapter : IEMDiscovery_UserListener,
                                   IEMSetup_UserListener,
                                   IEMLiveMonitor_UserListener,
@@ -84,11 +84,11 @@ public class EMInterfaceAdapter : IEMDiscovery_UserListener,
     protected HashSet<MetricGenerator> clientGenerators;
 
 
-    /**
-     * Constructor for the EMInterfaceAdapter using the most recent listener to ECC events.
-     * 
-     * @param listener - ECC event listener (V1.0)
-     */
+    /// <summary>
+    ///Constructor for the EMInterfaceAdapter using the most recent listener to ECC events.
+    ///
+    ///@param listener - ECC event listener (V1.0)
+    /// </summary>
     public EMInterfaceAdapter( EMIAdapterListener listener )
     {
         emiListener      = listener; 
@@ -96,15 +96,15 @@ public class EMInterfaceAdapter : IEMDiscovery_UserListener,
         supportedPhases  = new HashSet<EMPhase>();
     }
 
-    /**
-     * Use this method to try registering with the ECC.
-     * 
-     * @param name       - Name of the client attempting to register.
-     * @param channel    - AMQP channel used to connect to the ECC.
-     * @param emID       - The UUID of the ECC's monitoring system with which to connect
-     * @param ourID      - The UUID of this client (as a unique instance)
-     * @throws Exception - Registration will throw if any of the parameters are NULL.
-     */
+    /// <summary>
+    ///Use this method to try registering with the ECC.
+    ///
+    ///@param name       - Name of the client attempting to register.
+    ///@param channel    - AMQP channel used to connect to the ECC.
+    ///@param emID       - The UUID of the ECC's monitoring system with which to connect
+    ///@param ourID      - The UUID of this client (as a unique instance)
+    ///@throws Exception - Registration will throw if any of the parameters are NULL.
+    /// </summary>
     public void registerWithEM( String name,
                                 AMQPBasicChannel channel, 
                                 Guid emID,
@@ -150,11 +150,11 @@ public class EMInterfaceAdapter : IEMDiscovery_UserListener,
         entryPointFace.registerAsEMClient( clientID, clientName );
     }
     
-    /**
-     * Use this method to disconnect from the ECC's monitoring system.
-     * 
-     * @throws Exception - Disconnection will throw if the client is unable to send a disconnection message.
-     */
+    /// <summary>
+    ///Use this method to disconnect from the ECC's monitoring system.
+    ///
+    ///@throws Exception - Disconnection will throw if the client is unable to send a disconnection message.
+    /// </summary>
     public void disconnectFromEM()
     {
         bool sentDisconnectMessage = false;
@@ -182,33 +182,33 @@ public class EMInterfaceAdapter : IEMDiscovery_UserListener,
           throw new Exception( "Could not communicate disconnection with EM/ECC" );
     }
 
-    /**
-     * Use this method to get information about the current Experiment being run by
-     * the ECC. 
-     * 
-     * @return - Will return populated Experiment information after registration with the ECC
-     *           has been confirmed.
-     */
+    /// <summary>
+    ///Use this method to get information about the current Experiment being run by
+    ///the ECC. 
+    ///
+    ///@return - Will return populated Experiment information after registration with the ECC
+    ///          has been confirmed.
+    /// </summary>
     public Experiment getExperimentInfo()
     { return currentExperiment; }
     
-    /**
-     * Use this method to set all MetricGenerators known to the client. The EMInterfaceAdapter 
-     * will then send these on the ECC.
-     * 
-     * @param generators 
-     */
+    /// <summary>
+    ///Use this method to set all MetricGenerators known to the client. The EMInterfaceAdapter 
+    ///will then send these on the ECC.
+    ///
+    ///@param generators 
+    /// </summary>
     public void setMetricGenerators( HashSet<MetricGenerator> generators )
     {
         if ( generators != null ) clientGenerators = generators;
     }
 
-    /**
-     * Actively push a metric report to the ECC. This method should only be called during 
-     * the LiveMonitoring process.
-     * 
-     * @param report - A fully populated instance of a metric report.
-     */
+    /// <summary>
+    ///Actively push a metric report to the ECC. This method should only be called during 
+    ///the LiveMonitoring process.
+    ///
+    ///@param report - A fully populated instance of a metric report.
+    /// </summary>
     public void pushMetric( Report report )
     {
         if ( report != null && liveMonitorFace != null )
@@ -252,11 +252,11 @@ public class EMInterfaceAdapter : IEMDiscovery_UserListener,
                         liveMonitorFace.setUserListener( this );
 
                         // Find out whether we can push or pull, or both
-                        Boolean[] pushPull = new Boolean[2];
+                        bool[] pushPull = new bool[2];
                         
                         if ( emiListener != null )
                         {
-                            emiListener.onDescribePushPullBehaviours( pushPull );
+                            emiListener.onDescribePushPullBehaviours( ref pushPull );
 
                             // Notify EM of behaviours
                             if ( pushPull[0] ) liveMonitorFace.notifyReadyToPush();
@@ -387,11 +387,11 @@ public class EMInterfaceAdapter : IEMDiscovery_UserListener,
     {
         if ( senderID.Equals(expMonitorID) && genID != null && setupFace != null )
         {
-            Boolean[] result = new Boolean[1];
+            bool[] result = new bool[1];
             result[0] = false;
 
             if ( emiListener != null )
-                emiListener.onSetupMetricGenerator( genID, result );
+                emiListener.onSetupMetricGenerator( genID, ref result );
             
             setupFace.notifyMetricGeneratorSetupResult( genID, result[0] );
         }
@@ -511,10 +511,10 @@ public class EMInterfaceAdapter : IEMDiscovery_UserListener,
     {
         if ( senderID.Equals(expMonitorID) )
         {
-            Boolean[] result = new Boolean[1];
+            bool[] result = new bool[1];
             
             if ( emiListener != null )
-                emiListener.onGetTearDownResult( result );
+                emiListener.onGetTearDownResult( ref result );
 
             tearDownFace.sendTearDownResult( result[0] );
         }

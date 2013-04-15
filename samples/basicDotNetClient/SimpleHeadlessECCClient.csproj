@@ -44,8 +44,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ECCClientController.cs" />
-    <Compile Include="EMIAdapterListener.cs" />
-    <Compile Include="EMInterfaceAdapter.cs" />
+    <Compile Include="eccAdapter\EMIAdapterListener.cs" />
+    <Compile Include="eccAdapter\EMInterfaceAdapter.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

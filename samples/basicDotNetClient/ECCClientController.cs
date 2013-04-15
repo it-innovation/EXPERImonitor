@@ -100,6 +100,11 @@ public class ECCClientController : EMIAdapterListener
         }
     }
 
+    public void stop()
+    {
+        if (emiAdapter != null) emiAdapter.disconnectFromEM();
+    }
+
     // EMIAdapterListener --------------------------------------------------------
     public void onEMConnectionResult( bool connected, Experiment expInfo )
     {
@@ -127,22 +132,22 @@ public class ECCClientController : EMIAdapterListener
         System.Environment.Exit(0);
     }
     
-    public void onDescribeSupportedPhases( HashSet<EMPhase> phasesOUT )
+    public void onDescribeSupportedPhases( HashSet<EMPhase> phasesREF )
     {
         // We are going to just support live monitoring
         // ... we MUST support the discovery phase by default, but don't need to include
 
         clientLogger.info("Specifying phase compatibility (Live monitoring only)");
-        phasesOUT.Add( EMPhase.eEMLiveMonitoring );
+        phasesREF.Add( EMPhase.eEMLiveMonitoring );
     }
     
-    public void onDescribePushPullBehaviours( bool[] pushPullOUT )
+    public void onDescribePushPullBehaviours( ref bool[] pushPullREF )
     {
         // We're going to support both push and pull
         clientLogger.info("Specifying only pull behaviour");
 
-        pushPullOUT[0] = true;
-        pushPullOUT[1] = true;
+        pushPullREF[0] = false;  // In this demo we are just going to be pull
+        pushPullREF[1] = true;   // ECC will pull metrics from this client
     }
     
     public void onPopulateMetricGeneratorInfo()
@@ -205,7 +210,7 @@ public class ECCClientController : EMIAdapterListener
     public void onDiscoveryTimeOut()
     { clientLogger.info( "Got discovery time-out message" ); }
     
-    public void onSetupMetricGenerator( System.Guid genID, bool[] resultOUT )
+    public void onSetupMetricGenerator( System.Guid genID, ref bool[] resultREF )
     { /*Not implemented in this demo */ }
     
     public void onSetupTimeOut( System.Guid metricGeneratorID )
@@ -238,9 +243,9 @@ public class ECCClientController : EMIAdapterListener
     }
 
     /*
-    * Note that 'reportOut' is an OUT parameter provided by the adapter
+    * Note that 'reportREF' is an out-style parameter provided by the adapter
     */
-    public void onPullMetric( System.Guid measurementSetID, Report reportOut )
+    public void onPullMetric( System.Guid measurementSetID, Report reportREF )
     {
         if (measurementSetID != null)
         {
@@ -249,8 +254,8 @@ public class ECCClientController : EMIAdapterListener
             if (sampler != null)
             {
                 Measurement m = sampler();
-                reportOut.measurementSet.addMeasurement(m);
-                reportOut.numberOfMeasurements = 1;
+                reportREF.measurementSet.addMeasurement(m);
+                reportREF.numberOfMeasurements = 1;
 
                 clientLogger.info("Send pull measurement for " + measurementSetID.ToString());
             }
@@ -268,16 +273,16 @@ public class ECCClientController : EMIAdapterListener
     * Note that the summaryOUT parameter is an OUT parameter supplied by the
     * adapter
     */
-    public void onPopulateSummaryReport( EMPostReportSummary summaryOUT )
+    public void onPopulateSummaryReport( EMPostReportSummary summaryREF )
     { /* Not implemented in this demo */ }
 
-    public void onPopulateDataBatch( EMDataBatch batchOUT )
+    public void onPopulateDataBatch( EMDataBatch batchREF )
     { /* Not implemented in this demo */ }
     
     public void onReportBatchTimeOut( System.Guid batchID )
     { /* Not implemented in this demo */ }
 
-    public void onGetTearDownResult( bool[] resultOUT )
+    public void onGetTearDownResult( ref bool[] resultREF )
     { /* Not implemented in this demo */ }
 
     public void onTearDownTimeOut()
