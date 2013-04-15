@@ -1,0 +1,55 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
+  <artifactId>experimedia-arch-ecc-amqpAPI-spec</artifactId>
+  <version>1.1</version>
+  <packaging>jar</packaging>
+  
+  <parent>
+    <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
+    <artifactId>experimedia-arch-ecc-amqpAPI</artifactId>
+    <version>1.1</version>
+  </parent>
+  
+  <licenses>
+    <license>
+    <name>IT Innovation Experimedia License, Version 1.0</name>
+    <url>${session.executionRootDirectory}/ITInnov-EXPERIMEDIA-licence-v1.0.txt</url>
+    </license>
+  </licenses>
+  
+  <build>
+    <plugins>
+      
+      <!-- Maven compiler -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>${ecc.java.version}</source>
+          <target>${ecc.java.version}</target>
+          <encoding>${project.build.sourceEncoding}</encoding>
+        </configuration>
+      </plugin>
+        <plugin>
+		  <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>2.4.3</version>
+          <configuration>
+            <encoding>${project.build.sourceEncoding}</encoding>
+          </configuration>
+        </plugin>
+    </plugins>
+  
+    <directory>lib</directory>
+    <sourceDirectory>src</sourceDirectory>
+  </build>
+  
+  <dependencies>
+		
+  </dependencies>
+    
+</project>
