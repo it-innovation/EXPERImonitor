@@ -165,6 +165,9 @@ public class LiveMonitorView extends SimpleView
     metricsNavList.setWidth( "250px" );
     hl.addComponent( metricsNavList );
     
+    // Space
+    hl.addComponent( UILayoutUtil.createSpace( "4px", null, true ) );
+    
     Panel visualPanel = new Panel();
     visualPanel.setStyleName( "borderless light" );
     hl.addComponent( visualPanel );

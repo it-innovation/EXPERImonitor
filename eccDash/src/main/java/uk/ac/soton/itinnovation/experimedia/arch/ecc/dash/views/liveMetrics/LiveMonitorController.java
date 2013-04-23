@@ -43,6 +43,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Me
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMClient;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.visualizers.BaseMetricVisual;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.visualizers.NominalValuesSnapshotVisual;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.visualizers.NumericTimeSeriesVisual;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.visualizers.RawDataVisual;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IReportDAO;
@@ -134,6 +135,11 @@ public class LiveMonitorController extends UFAbstractEventManager
           switch ( ms.getMetric().getMetricType() )
           {
             case NOMINAL :
+              visual = new NominalValuesSnapshotVisual( attribute.getName(),
+                                                        metric.getUnit().getName(),
+                                                        metric.getMetricType().name(),
+                                                        msID ); break;
+              
             case ORDINAL :
               visual = new RawDataVisual( attribute.getName(),
                                           metric.getUnit().getName(),
