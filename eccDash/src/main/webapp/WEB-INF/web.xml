@@ -25,12 +25,13 @@
             <param-name>application</param-name>
             <param-value>uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.entryPoint.EntryPoint</param-value>
         </init-param>
-        
-        <!-- Widgetsets ____________________________________________________ -->
+                
+        <!-- Widgetset _____________________________________________________ -->
         <init-param>
           <param-name>widgetset</param-name>
-          <param-value>com.invient.vaadin.InvientChartsDemoAppWidgetset</param-value>
+          <param-value>uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.widgetset</param-value>
         </init-param>
+
     </servlet>
     
     <servlet-mapping>

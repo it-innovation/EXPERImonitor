@@ -65,16 +65,19 @@
         </executions>
 
         <dependencies>
-          <dependency>
-            <groupId>com.google.gwt</groupId>
-            <artifactId>gwt-dev</artifactId>
-            <version>${gwt.version}</version>
-          </dependency>
+          
           <dependency>
             <groupId>com.google.gwt</groupId>
             <artifactId>gwt-user</artifactId>
             <version>${gwt.version}</version>
           </dependency>
+          
+          <dependency>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-dev</artifactId>
+            <version>${gwt.version}</version>
+          </dependency>
+          
         </dependencies>
       </plugin>
 
@@ -82,13 +85,13 @@
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-maven-plugin</artifactId>
         <version>1.0.2</version>
+        
         <executions>
           <execution>
 
-            <!-- Widgetsets for compilation declared here ______________ -->
             <configuration>
               <modules>
-                <module>com.invient.vaadin.InvientChartsDemoAppWidgetset</module>
+                <module>uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.widgetset</module>
               </modules>
             </configuration>
 
@@ -96,6 +99,7 @@
               <goal>update-widgetset</goal>
             </goals>
           </execution>
+          
         </executions>
       </plugin>
 
@@ -163,7 +167,7 @@
           <plugin>
             <groupId>org.mortbay.jetty</groupId>
             <artifactId>maven-jetty-plugin</artifactId>
-            <version>6.1.24</version>
+            <version>6.1.26</version>
             <configuration>
               <stopPort>9966</stopPort>
               <stopKey>eccDash</stopKey>
@@ -229,7 +233,7 @@
       <version>1.2-SNAPSHOT</version>
     </dependency>
     
-    <!-- 3rd party dependencies ____________________________________________ -->
+    <!-- 3rd party dependencies ____________________________________________ -->    
     <dependency>
       <groupId>com.google.gwt</groupId>
       <artifactId>gwt-user</artifactId>
