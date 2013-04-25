@@ -25,7 +25,7 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views;
 
-
+import com.github.wolfie.refresher.Refresher;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.client.ClientInfoView;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.client.ClientConnectionsView;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.SimpleView;
@@ -56,8 +56,8 @@ public class MainDashView extends SimpleView
   private DashLogView           logView;
   private boolean               subViewsReady;
   
-  private ProgressIndicator livePI;
-  private TabSheet          subViewsSheet;
+  
+  private TabSheet subViewsSheet;
   
   private transient LiveMonitorController liveMonitorController;
   private transient DataExportController  dataExportController;
@@ -112,13 +112,6 @@ public class MainDashView extends SimpleView
   
   public void shutDownUI()
   {
-    if ( livePI != null )
-    {
-      livePI.setIndeterminate( false );
-      VerticalLayout vl = getViewContents();
-      vl.removeComponent( livePI );
-    }
-    
     if ( liveMonitorController != null ) liveMonitorController.shutDown();
     if ( dataExportController != null  ) dataExportController.shutDown();
   }
@@ -165,12 +158,7 @@ public class MainDashView extends SimpleView
   private void createFrameworkComponents()
   {
     VerticalLayout vl = getViewContents();
-    
-    livePI = new ProgressIndicator();
-    livePI.setWidth( "0px" );
-    livePI.setHeight( "0px" );
-    livePI.setIndeterminate( true );
-    vl.addComponent( livePI );
+    vl.addComponent( new Refresher() );
     
     dashHeaderView = new VerticalLayout();
     vl.addComponent( dashHeaderView );

@@ -43,7 +43,6 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.*;
 import com.vaadin.ui.*;
 import com.vaadin.Application;
 import com.vaadin.terminal.FileResource;
-import com.vaadin.ui.Window.CloseEvent;
 
 import java.io.*;
 import java.net.URL;
