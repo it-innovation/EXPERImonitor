@@ -203,7 +203,7 @@ public class LiveMonitorView extends SimpleView
       // Notify listeners if required
       Collection<LiveMonitorViewListener> listeners = getListenersByType();
       for ( LiveMonitorViewListener listener : listeners )
-        listener.onRemoveVisualClicked( targetID );
+          listener.onRemoveVisualClicked( targetID );
     }
   }
   

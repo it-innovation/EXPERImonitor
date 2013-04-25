@@ -25,30 +25,18 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Attribute;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Entity;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Measurement;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Metric;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricHelper;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMClient;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.visualizers.BaseMetricVisual;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.visualizers.NominalValuesSnapshotVisual;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.visualizers.NumericTimeSeriesVisual;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.visualizers.RawDataVisual;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IReportDAO;
 import uk.ac.soton.itinnovation.robust.cat.core.components.viewEngine.spec.uif.mvc.IUFView;
 import uk.ac.soton.itinnovation.robust.cat.core.components.viewEngine.spec.uif.types.UFAbstractEventManager;
+
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMClient;
+
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.visualizers.*;
+
+import org.vaadin.artur.icepush.ICEPush;
+
+import java.util.*;
 
 
 
@@ -56,17 +44,21 @@ import uk.ac.soton.itinnovation.robust.cat.core.components.viewEngine.spec.uif.t
 public class LiveMonitorController extends UFAbstractEventManager
                                    implements LiveMonitorViewListener
 {
+  private final Object updateViewLock = new Object();
+  
   private LiveMonitorView liveMonitorView;
   
   private transient HashMap<UUID, Date> measurementDateStamps;
   private transient HashSet<UUID>       activeMSVisuals;
   private transient IReportDAO          expReportAccessor;
+  private transient ICEPush             icePusher;
 
   
-  public LiveMonitorController()
+  public LiveMonitorController( ICEPush pusher )
   {
     super();
     
+    icePusher             = pusher;
     measurementDateStamps = new HashMap<UUID, Date>();
     activeMSVisuals       = new HashSet<UUID>();
     
@@ -95,11 +87,16 @@ public class LiveMonitorController extends UFAbstractEventManager
     }
     
     // Display (if we have an active display)
-    UUID msID = report.getMeasurementSet().getID();
-    if ( activeMSVisuals.contains(msID) )
+    synchronized ( updateViewLock )
     {
-      MeasurementSet ms = report.getMeasurementSet();
-      liveMonitorView.updateMetricVisual( msID, ms );
+      UUID msID = report.getMeasurementSet().getID();
+      if ( activeMSVisuals.contains(msID) )
+      {
+        MeasurementSet ms = report.getMeasurementSet();
+        liveMonitorView.updateMetricVisual( msID, ms );
+
+        if ( icePusher !=null ) icePusher.push();
+      }
     }
   }
   
@@ -114,7 +111,7 @@ public class LiveMonitorController extends UFAbstractEventManager
   
   public void shutDown()
   {
-    
+    icePusher = null;
   }
   
   public void addliveView( EMClient client, Entity entity, Attribute attribute,
@@ -156,13 +153,14 @@ public class LiveMonitorController extends UFAbstractEventManager
           }
           
           if ( visual != null )
-          {
-            liveMonitorView.addMetricVisual( client.getName(),
-                                             entity.getName(),
-                                             attribute.getName(),
-                                             msID, visual );
-            activeMSVisuals.add( msID );
-          }
+            synchronized ( updateViewLock )
+            {
+              liveMonitorView.addMetricVisual( client.getName(),
+                                               entity.getName(),
+                                               attribute.getName(),
+                                               msID, visual );
+              activeMSVisuals.add( msID );
+            }
         }
       }
     }
@@ -176,14 +174,20 @@ public class LiveMonitorController extends UFAbstractEventManager
       Set<MetricGenerator> msGens = client.getCopyOfMetricGenerators();
       if ( !msGens.isEmpty() )
       {
-        Map<UUID, MeasurementSet> mSets = MetricHelper.getAllMeasurementSets( msGens );
+        Map<UUID, MeasurementSet> mSets = MetricHelper.getAllMeasurementSets( msGens );        
         Iterator<MeasurementSet> msIt = mSets.values().iterator();
-        while ( msIt.hasNext() )
+        
+        synchronized ( updateViewLock )
         {
-          UUID msID = msIt.next().getID();
+          while ( msIt.hasNext() )
+          {
+            UUID msID = msIt.next().getID();
+
+            activeMSVisuals.remove( msID );
+            liveMonitorView.removeMetricVisual( msID ); 
+          }
           
-          activeMSVisuals.remove( msID );
-          liveMonitorView.removeMetricVisual( msID ); 
+          if ( icePusher !=null ) icePusher.push();
         }
       }
     }
@@ -195,8 +199,13 @@ public class LiveMonitorController extends UFAbstractEventManager
   {
     if ( msID != null )
     {
-      activeMSVisuals.remove( msID );
-      liveMonitorView.removeMetricVisual( msID ); 
+      synchronized ( updateViewLock )
+      {
+        activeMSVisuals.remove( msID );
+        liveMonitorView.removeMetricVisual( msID );
+        
+        if ( icePusher !=null ) icePusher.push();
+      }
     }
   }
   

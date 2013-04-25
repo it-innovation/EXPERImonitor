@@ -25,7 +25,6 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views;
 
-import com.github.wolfie.refresher.Refresher;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.client.ClientInfoView;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.client.ClientConnectionsView;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.SimpleView;
@@ -33,6 +32,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.SimpleVie
 import com.vaadin.ui.*;
 import java.net.URL;
 import java.util.Collection;
+import org.vaadin.artur.icepush.ICEPush;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMPhase;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.UILayoutUtil;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.dataExport.DataExportController;
@@ -56,7 +56,6 @@ public class MainDashView extends SimpleView
   private DashLogView           logView;
   private boolean               subViewsReady;
   
-  
   private TabSheet subViewsSheet;
   
   private transient LiveMonitorController liveMonitorController;
@@ -70,9 +69,9 @@ public class MainDashView extends SimpleView
     createFrameworkComponents();
   }
   
-  public void initialise()
+  public void initialise( ICEPush pusher )
   {
-    createMainDashControls();
+    createMainDashControls( pusher );
   }
   
   public void resetViews()
@@ -158,7 +157,6 @@ public class MainDashView extends SimpleView
   private void createFrameworkComponents()
   {
     VerticalLayout vl = getViewContents();
-    vl.addComponent( new Refresher() );
     
     dashHeaderView = new VerticalLayout();
     vl.addComponent( dashHeaderView );
@@ -212,7 +210,7 @@ public class MainDashView extends SimpleView
     bodyVL.addComponent( label );
   }
   
-  private void createMainDashControls()
+  private void createMainDashControls( ICEPush pusher )
   {
     controlView = new MonitorControlView();
     dashHeaderView.addComponent( (Component) controlView.getImplContainer() );
@@ -220,10 +218,10 @@ public class MainDashView extends SimpleView
     connectionsView = new ClientConnectionsView();
     dashSideView.addComponent( (Component) connectionsView.getImplContainer() );
     
-    createSubViews();
+    createSubViews( pusher );
   }
   
-  private void createSubViews()
+  private void createSubViews( ICEPush pusher )
   {
     dashContentView.removeAllComponents();
     
@@ -239,7 +237,7 @@ public class MainDashView extends SimpleView
     clientInfoView = new ClientInfoView();
     subViewsSheet.addTab( (Component) clientInfoView.getImplContainer(), "Client info", null );
     
-    liveMonitorController = new LiveMonitorController();
+    liveMonitorController = new LiveMonitorController( pusher );
     subViewsSheet.addTab( (Component) liveMonitorController.getLiveView().getImplContainer(), 
                           "Metric monitor", null );
     

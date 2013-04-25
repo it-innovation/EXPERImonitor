@@ -25,53 +25,33 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.client.ClientInfoViewListener;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.client.ClientInfoView;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.client.ClientConnectionsViewListener;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.client.ClientConnectionsView;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.processors.LiveMetricScheduler;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDM;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.*;
 import uk.ac.soton.itinnovation.robust.cat.core.components.viewEngine.spec.uif.types.UFAbstractEventManager;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMInterfaceFactory;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDM;
-
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.factory.EMInterfaceFactory;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.*;
+
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.client.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.dataExport.DataExportController;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.LiveMonitorController;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.processors.*;
 
 import com.vaadin.ui.*;
 import com.vaadin.Application;
 import com.vaadin.terminal.FileResource;
+import org.vaadin.artur.icepush.ICEPush;
 
 import java.io.*;
 import java.net.URL;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.UUID;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Attribute;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Entity;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricHelper;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMClient;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMDataBatch;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMPhase;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMPostReportSummary;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.IECCLogger;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.Logger;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.processors.LiveMetricSchedulerListener;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.dataExport.DataExportController;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.LiveMonitorController;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IExperimentDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IMetricGeneratorDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IReportDAO;
-
+import java.util.*;
 
 
 
@@ -112,6 +92,8 @@ public class DashMainController extends UFAbstractEventManager
   private boolean waitingForPhaseToEnd = false;
   private EMPhase currentPhase         = EMPhase.eEMUnknownPhase;
   
+  private ICEPush icePusher;
+  
 
   public DashMainController()
   {}
@@ -143,6 +125,12 @@ public class DashMainController extends UFAbstractEventManager
     {
       isShuttingDown = true;
       
+      if ( icePusher != null )
+      {
+        rootWindow.removeComponent( icePusher );
+        icePusher = null;
+      }
+      
       if ( dashMainLog != null )           dashMainLog.info( "Shutting down the ECC dashboard" );
       if ( liveMetricScheduler != null )   liveMetricScheduler.shutDown();
       if ( liveMonitorController != null ) liveMonitorController.shutDown();
@@ -171,6 +159,8 @@ public class DashMainController extends UFAbstractEventManager
         if ( mainDashView != null ) mainDashView.addLogMessage( problem );
         dashMainLog.error( problem );
       }
+      
+      icePusher.push();
     }
   }
   
@@ -192,6 +182,7 @@ public class DashMainController extends UFAbstractEventManager
         }
       
       if ( liveMonitorController != null ) liveMonitorController.removeClientLiveView( client );
+      if ( icePusher != null ) icePusher.push();
     }
   }
   
@@ -199,7 +190,10 @@ public class DashMainController extends UFAbstractEventManager
   public void onClientStartedPhase( EMClient client, EMPhase phase )
   {
     if ( client != null && phase != null)
+    {
       connectionsView.updateClientPhase( client.getID(), phase);
+      icePusher.push();
+    }
   }
   
   @Override
@@ -295,6 +289,7 @@ public class DashMainController extends UFAbstractEventManager
       }
       
       mainDashView.addLogMessage( client.getName() + "Got metrics model from " + client.getName() );
+      icePusher.push();
     }
   }
   
@@ -323,6 +318,7 @@ public class DashMainController extends UFAbstractEventManager
           String problem = "Could not add pulling client to live monitoring: " + e.getMessage();
           mainDashView.addLogMessage( problem );
           dashMainLog.error( problem );
+          icePusher.push();
         }
       }
       else
@@ -330,6 +326,7 @@ public class DashMainController extends UFAbstractEventManager
         String problem = "Client trying to start pull process whilst not in Live monitoring";
         mainDashView.addLogMessage( problem );
         dashMainLog.error( problem );
+        icePusher.push();
       }
     }
   }
@@ -439,6 +436,9 @@ public class DashMainController extends UFAbstractEventManager
     {
       rootWindow.removeAllComponents(); // Get rid of the welcome view
       
+      icePusher = new ICEPush();
+      rootWindow.addComponent( icePusher );
+      
       mainDashView = new MainDashView();
       mainDashView.addListener( this );
       rootWindow.addComponent( (Component) mainDashView.getImplContainer() );
@@ -446,7 +446,7 @@ public class DashMainController extends UFAbstractEventManager
       expMonitor.openEntryPoint( emProps );
       createExperiment();
     
-      mainDashView.initialise();
+      mainDashView.initialise( icePusher );
       
       monitorControlView = mainDashView.getMonitorControlView();
       monitorControlView.addListener( this );
