@@ -51,7 +51,7 @@ namespace SimpleHeadlessECCClient
             clientLogger = Logger.getLogger(typeof(Program));
             clientLogger.info("Starting Simple Headless ECC Client");
 
-            // Set up exit handler for this application
+            // Set up exit handler for this application (would rather not do this - not always reliable)
             SetConsoleCtrlHandler(new CtrlHandlerRoutine(CtrlHandler), true);
 
             // Create an ECC client controller and try connecting to a local RabbitMQ
@@ -64,13 +64,19 @@ namespace SimpleHeadlessECCClient
                 eccController.start( rabbitServerIP,
                                      new Guid("00000000-0000-0000-0000-000000000000"), // ECC instance ID
                                      Guid.NewGuid());                                  // ID of this client (random)
+
+                // Wait for a key press and then shut down cleanly
+                clientLogger.info("Press any key to quit");
+                ConsoleKeyInfo cki = Console.ReadKey();
+                shutdown();
+
+                Environment.Exit(0);
             }
             catch (Exception e)
             { clientLogger.error("Had a problem connecting to the EM:\n" + e.Message); }
         }
 
-        // Exit point
-        private static bool CtrlHandler(CtrlTypes ctrlTypes)
+        private static void shutdown()
         {
             // Issue good-bye notification (if possible)
             if (clientLogger != null) clientLogger.info("Closing down client");
@@ -78,7 +84,12 @@ namespace SimpleHeadlessECCClient
 
             clientLogger = null;
             eccController = null;
+        }
 
+        // Exit point
+        private static bool CtrlHandler(CtrlTypes ctrlTypes)
+        {
+            shutdown();
             return true;
         }
 

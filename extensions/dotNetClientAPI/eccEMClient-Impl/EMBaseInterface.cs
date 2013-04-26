@@ -63,12 +63,20 @@ public abstract class EMBaseInterface : IAMQPMessageDispatchListener
     amqpChannel = channel;
     isProvider  = asProvider;
   }
+
+  ~EMBaseInterface()
+  {
+      shutdown();
+  }
   
   public void shutdown()
   {
-    if ( amqpInterface != null ) amqpInterface.shutdown();
-    
-    // Channel is managed elsewhere
+      if (amqpInterface != null)
+      {
+          amqpInterface.shutdown();
+          amqpInterface = null;
+          // Channel is managed elsewhere
+      }
   }
   
   // IAMQPMessageDispatchListener ----------------------------------------------

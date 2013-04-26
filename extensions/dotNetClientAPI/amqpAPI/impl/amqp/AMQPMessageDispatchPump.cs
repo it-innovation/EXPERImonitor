@@ -78,10 +78,10 @@ public class AMQPMessageDispatchPump : IAMQPMessageDispatchPump
   public void stopPump()
   {
     lock ( pumpingLock )
-    { 
-        isDispatchPumping = false;
-        Monitor.Pulse(pumpingLock);
-    }
+    { isDispatchPumping = false; }
+
+    lock (waitingLock)
+    { Monitor.Pulse(waitingLock); }
   }
   
   public void emptyPump()

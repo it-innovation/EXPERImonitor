@@ -174,7 +174,7 @@ public class EMInterfaceAdapter : IEMDiscovery_UserListener,
         liveMonitorFace = null;
         postReportFace  = null;
         tearDownFace    = null;
-        
+
         amqpChannel      = null;
         clientRegistered = false;
         

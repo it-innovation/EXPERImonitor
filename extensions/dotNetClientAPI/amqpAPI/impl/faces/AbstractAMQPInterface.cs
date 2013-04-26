@@ -71,18 +71,18 @@ public abstract class AbstractAMQPInterface
               }
               catch (Exception e)
               { amqpIntLogger.error( "Could not delete AMQP queue: " + e.Message ); }
-    }
+      }
       
-    // Tidy up (channel is managed elsewhere)     
-    interfaceName        = null;
-    providerExchangeName = null;
-    userExchangeName     = null;
-    providerQueueName    = null;
-    userQueueName        = null;
-    providerRoutingKey   = null;
-    userRoutingKey       = null;
-    subListenQueue       = null;
-    interfaceReady       = false;
+      // Tidy up (channel is managed elsewhere)     
+      interfaceName        = null;
+      providerExchangeName = null;
+      userExchangeName     = null;
+      providerQueueName    = null;
+      userQueueName        = null;
+      providerRoutingKey   = null;
+      userRoutingKey       = null;
+      subListenQueue       = null;
+      interfaceReady       = false;
   }
   
   public bool sendBasicMessage( string message )
