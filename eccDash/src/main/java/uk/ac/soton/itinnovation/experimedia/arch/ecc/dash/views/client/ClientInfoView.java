@@ -28,6 +28,7 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.client;
 import com.vaadin.ui.AbstractLayout;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
@@ -109,59 +110,44 @@ public class ClientInfoView extends SimpleView
     VerticalLayout vl = getViewContents();
     
     Panel panel = new Panel();
+    vl.addComponent( panel );
     panel.addStyleName( "borderless light" );
     panel.setSizeFull();
-    vl.addComponent( panel );
     
+    // Header
     HorizontalLayout hl = new HorizontalLayout();
     hl.setWidth( "100%" );
     hl.setStyleName( "eccInfoPanelHeader" );
     panel.addComponent( hl );
     
-    // Space
-    hl.addComponent( UILayoutUtil.createSpace( "5px", null, true ) );
-    
-    // Main info
-    HorizontalLayout innerHL = new HorizontalLayout();
-    hl.addComponent( innerHL );
-    
     clientNameLabel = new Label( "No client information yet" );
     clientNameLabel.addStyleName( "h2" );
     clientNameLabel.setImmediate( true );
-    innerHL.addComponent( clientNameLabel );
-    innerHL.setComponentAlignment( clientNameLabel, Alignment.TOP_LEFT );
+    hl.addComponent( clientNameLabel );
     
-    // Space
-    innerHL.addComponent( UILayoutUtil.createSpace( "50px", null, true ) );
+    // Info vl
+    vl= new VerticalLayout();
+    panel.addComponent( vl );
     
     // Status
     clientStatusLabel = new Label();
-    clientStatusLabel.setStyleName( "h3" );
     clientStatusLabel.setImmediate( true );
-    innerHL.addComponent( clientStatusLabel );
-    innerHL.setComponentAlignment( clientStatusLabel, Alignment.TOP_RIGHT );
-    
-    // Space
-    innerHL.addComponent( UILayoutUtil.createSpace( "100%", null, true ) );
-    
-    // Space
-    panel.addComponent( UILayoutUtil.createSpace( "5px", null ) );
-    
+    vl.addComponent( clientStatusLabel );
+        
     // ID
     clientIDLabel = new Label();
     clientIDLabel.addStyleName( "small" );
     clientIDLabel.setImmediate( true );
-    panel.addComponent( clientIDLabel );
+    vl.addComponent( clientIDLabel );
     
     // Space
-    panel.addComponent( UILayoutUtil.createSpace( "5px", null ) );
+    vl.addComponent( UILayoutUtil.createSpace( "5px", null ) );
     
     // Main info area
     clientInfoHolder = new VerticalLayout();
     clientInfoHolder.setStyleName( "eccDashDefault" );
     clientInfoHolder.setImmediate( true );
-    clientInfoHolder.setSizeFull();
-    panel.addComponent( clientInfoHolder );
+    vl.addComponent( clientInfoHolder );
     
     resetView();
   }
@@ -188,19 +174,22 @@ public class ClientInfoView extends SimpleView
         createEntityInfo( clientInfoHolder, entity );
         
         // Write out attributes
+        HorizontalLayout hl = new HorizontalLayout();
+        hl.setWidth( "100%" );
+        clientInfoHolder.addComponent( hl );
+        
+        VerticalLayout attVL = new VerticalLayout();
+        attVL.setWidth( "90%" );
+        hl.addComponent( attVL );
+        hl.setComponentAlignment( attVL, Alignment.TOP_RIGHT );
+          
         Iterator<Attribute> attIt = entity.getAttributes().iterator();
         while ( attIt.hasNext() )
-        {
-          // Indent a little
-          HorizontalLayout hl = new HorizontalLayout();
-          hl.addComponent( UILayoutUtil.createSpace( "5px", null, true ) );
-          clientInfoHolder.addComponent( hl );
-          
-          VerticalLayout attVL = new VerticalLayout();
-          hl.addComponent( attVL );
-          
+        {  
           Attribute att = attIt.next();
           createAttributeInfo( attVL, att );
+          
+          attVL.addComponent( UILayoutUtil.createSpace( "5px", null ) );
         }
         
         // Space
@@ -228,21 +217,9 @@ public class ClientInfoView extends SimpleView
     hl = new HorizontalLayout();
     vl.addComponent( hl );
     
-    // Info
+    // Info VL
     VerticalLayout innerVL = new VerticalLayout();
-    innerVL.setWidth( "265px" );
     hl.addComponent( innerVL );
-    
-    label = new Label( entity.getDescription() );
-    label.addStyleName( "small" );
-    innerVL.addComponent( label );
-    
-    // Space
-    innerVL.addComponent( UILayoutUtil.createSpace( "2px", null ) );
-    
-    label = new Label( "Number of attributes: " + entity.getAttributes().size() );
-    label.addStyleName( "small" );
-    innerVL.addComponent( label );
     
     // Controls
     innerVL = new VerticalLayout();
@@ -257,9 +234,6 @@ public class ClientInfoView extends SimpleView
     innerVL.addComponent( button );
     innerVL.setComponentAlignment( button, Alignment.MIDDLE_RIGHT );
     
-    // Space
-    innerVL.addComponent( UILayoutUtil.createSpace( "2px", null ) );
-    
     button = new Button( "Add to data export" );
     button.setWidth( "120px" );
     button.addStyleName( "small" );
@@ -268,35 +242,44 @@ public class ClientInfoView extends SimpleView
     innerVL.setComponentAlignment( button, Alignment.MIDDLE_RIGHT );
     
     // Space
-    innerVL.addComponent( UILayoutUtil.createSpace( "20px", null ) );
+    innerVL.addComponent( UILayoutUtil.createSpace( "2px", null ) );
+    
+    // Info
+    innerVL = new VerticalLayout();
+    hl.addComponent( innerVL );
+    label = new Label( entity.getDescription() );
+    label.addStyleName( "small" );
+    innerVL.addComponent( label );
+    
+    // Space
+    innerVL.addComponent( UILayoutUtil.createSpace( "4px", null ) );
+    
+    label = new Label( "Number of attributes: " + entity.getAttributes().size() );
+    label.addStyleName( "small" );
+    innerVL.addComponent( label );
   }
   
   private void createAttributeInfo( AbstractLayout parent, Attribute attribute )
   {
     VerticalLayout vl = new VerticalLayout();
     parent.addComponent( vl );
-    
+      
     // Header
     HorizontalLayout hl = new HorizontalLayout();
+    hl.setWidth( "100%" );
     hl.setStyleName( "eccInfoPanelHeader" );
     vl.addComponent( hl );
-    
+       
     Label label = new Label( "Attribute: " + attribute.getName() );
     label.addStyleName( "h4" );
     hl.addComponent( label );
     
-    // Two columns; info and controls
+    // Attribute content
     hl = new HorizontalLayout();
     vl.addComponent( hl );
     
-    // Info
     VerticalLayout innerVL = new VerticalLayout();
-    innerVL.setWidth( "260px" );
     hl.addComponent( innerVL );
-    
-    label = new Label( attribute.getDescription() );
-    label.addStyleName( "small" );
-    innerVL.addComponent( label );
     
     // Controls
     innerVL = new VerticalLayout();
@@ -312,7 +295,7 @@ public class ClientInfoView extends SimpleView
     innerVL.setComponentAlignment( button, Alignment.MIDDLE_RIGHT );
     
     // Space
-    innerVL.addComponent( UILayoutUtil.createSpace( "2px", null ) );
+    innerVL.addComponent( UILayoutUtil.createSpace( "4px", null ) );
     
     button = new Button( "Add to data export" );
     button.setWidth( "120px" );
@@ -321,8 +304,12 @@ public class ClientInfoView extends SimpleView
     innerVL.addComponent( button );
     innerVL.setComponentAlignment( button, Alignment.MIDDLE_RIGHT );
     
-    // Space
-    innerVL.addComponent( UILayoutUtil.createSpace( "20px", null ) );
+    // Info
+    innerVL = new VerticalLayout();
+    hl.addComponent( innerVL );
+    label = new Label( attribute.getDescription() );
+    label.addStyleName( "small" );
+    innerVL.addComponent( label );
   }
   
   // Event handlers ------------------------------------------------------------

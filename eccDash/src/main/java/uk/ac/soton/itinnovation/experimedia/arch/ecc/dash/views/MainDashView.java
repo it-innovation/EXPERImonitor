@@ -30,6 +30,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.client.ClientCon
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.SimpleView;
 
 import com.vaadin.ui.*;
+import com.vaadin.ui.TabSheet.Tab;
 import java.net.URL;
 import java.util.Collection;
 import org.vaadin.artur.icepush.ICEPush;
@@ -118,6 +119,15 @@ public class MainDashView extends SimpleView
   public void addLogMessage( String message )
   { if ( logView != null ) logView.addLogMessage( message ); }
   
+  public void switchViewFocus( int index )
+  {
+    if ( subViewsSheet != null )
+    {
+      Tab t = subViewsSheet.getTab( index );  
+      if ( t != null ) subViewsSheet.setSelectedTab( t );
+    }
+  }
+  
   public MonitorControlView getMonitorControlView()
   { return controlView; }
   
@@ -173,7 +183,7 @@ public class MainDashView extends SimpleView
     
     // Horizontal: side and main content container
     HorizontalLayout hl = new HorizontalLayout();
-    bodyVL.addComponent( hl );
+    dashViewBody.addComponent( hl );
     
     dashSideView = new VerticalLayout();
     hl.addComponent( dashSideView );
@@ -184,7 +194,7 @@ public class MainDashView extends SimpleView
     VerticalLayout vpl = (VerticalLayout) dashContentContainer.getContent(); // Reduce internal padding here
     vpl.setMargin( false );
     hl.addComponent( dashContentContainer );
-    
+
     dashContentView = new VerticalLayout();
     dashContentContainer.addComponent( dashContentView );
     

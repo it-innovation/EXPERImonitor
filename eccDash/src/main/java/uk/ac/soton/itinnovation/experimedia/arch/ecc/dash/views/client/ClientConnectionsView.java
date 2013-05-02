@@ -120,8 +120,19 @@ public class ClientConnectionsView extends SimpleView
     {
       ClientView cv = connectedClients.get( clientID );
       
-      if ( cv != null )
-        cv.setCurrentPhase( phase );
+      if ( cv != null ) cv.setCurrentPhase( phase );
+    }
+  }
+  
+  public void updateClientSummaryInfo( UUID clientID,
+                                       int entityCount,
+                                       int metricCount )
+  {
+    if ( clientID != null )
+    {
+      ClientView cv = connectedClients.get( clientID );
+      
+      if ( cv != null ) cv.setSummaryInfo( entityCount, metricCount );
     }
   }
 
@@ -192,6 +203,8 @@ public class ClientConnectionsView extends SimpleView
   {
     private Label clientName;
     private Label currentPhase;
+    private Label entityCountLabel;
+    private Label metricCountLabel;
     
     private transient EMClient client;
     
@@ -210,6 +223,12 @@ public class ClientConnectionsView extends SimpleView
     public void setCurrentPhase( EMPhase phase )
     { currentPhase.setValue( "Phase: " + phase.toString() ); }
     
+    public void setSummaryInfo( int entityCount, int metricCount )
+    {
+      entityCountLabel.setValue( "Entities: " + entityCount );
+      metricCountLabel.setValue( "Metrics: " + metricCount );
+    }
+    
     @Override
     public UUID getDataID()
     { return client.getID(); }
@@ -220,17 +239,47 @@ public class ClientConnectionsView extends SimpleView
       VerticalLayout vl = getViewContents();
       vl.setWidth( "250px" );
       
+      // Space
+      vl.addComponent( UILayoutUtil.createSpace( "4px", null ) );
+      
+      // Indent
+      HorizontalLayout hl = new HorizontalLayout();
+      vl.addComponent( hl );
+      hl.addComponent( UILayoutUtil.createSpace( "4px", null, true ) );
+      VerticalLayout innerVL = new VerticalLayout();
+      hl.addComponent( innerVL );
+      
       clientName = new Label( client.getName() );
       clientName.addStyleName( "small" );
-      vl.addComponent( clientName );
+      innerVL.addComponent( clientName );
       
       // Space
-      vl.addComponent( UILayoutUtil.createSpace( "2px", null ) );
+      innerVL.addComponent( UILayoutUtil.createSpace( "2px", null ) );
       
-      currentPhase = new Label( "Connected" );
+      currentPhase = new Label( "Waiting" );
       currentPhase.addStyleName( "tiny" );
       currentPhase.setImmediate( true );
-      vl.addComponent( currentPhase );
+      innerVL.addComponent( currentPhase );
+      
+      // Space
+      innerVL.addComponent( UILayoutUtil.createSpace( "2px", null ) );
+      
+      // Summary
+      entityCountLabel = new Label( "Entities: unknown" );
+      entityCountLabel.addStyleName( "tiny" );
+      entityCountLabel.setImmediate( true );
+      innerVL.addComponent( entityCountLabel );
+      
+      // Space
+      innerVL.addComponent( UILayoutUtil.createSpace( "2px", null ) );
+      
+      metricCountLabel = new Label( "Metrics: unknown" );
+      metricCountLabel.addStyleName( "tiny" );
+      metricCountLabel.setImmediate( true );
+      innerVL.addComponent( metricCountLabel );
+      
+      // Space
+      vl.addComponent( UILayoutUtil.createSpace( "10px", null ) );
       
       addListener( new ClientViewSelected() );
     }

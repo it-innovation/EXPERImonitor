@@ -81,15 +81,16 @@ public class HighlightView extends SimpleView
     VerticalLayout vl = super.getViewContents();
       
     Panel viewPanel = new Panel();
-    viewPanel.setSizeFull();
-    viewPanel.addListener( new ViewSelected() );
     viewPanel.addStyleName( "borderless light" );
+    viewPanel.setSizeFull();
     viewPanel.addStyleName( "small" );
+    viewPanel.addListener( new ViewSelected() );
     vl.addComponent( viewPanel );
 
     // Set up contents
     hlViewContents = (VerticalLayout) viewPanel.getContent();
     hlViewContents.addStyleName( "eccInfoPanel" );
+    hlViewContents.setMargin( false );
     hlViewContents.setImmediate( true );
   }
   

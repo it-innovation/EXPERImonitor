@@ -77,7 +77,8 @@ public class RawDataVisual extends BaseMetricVisual
     VerticalLayout vl = getViewContents();
     
     dataTable = new Table();
-    dataTable.setSizeFull();
+    dataTable.setWidth( defaultChartWidth );
+    dataTable.setHeight( defaultChartHeight );
     dataTable.addStyleName( "small striped borderless" );
     dataTable.addContainerProperty( tTimeStamp, String.class, null );
     dataTable.addContainerProperty( tData     , String.class, null );

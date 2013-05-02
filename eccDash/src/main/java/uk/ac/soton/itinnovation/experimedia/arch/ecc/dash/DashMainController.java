@@ -277,7 +277,13 @@ public class DashMainController extends UFAbstractEventManager
         { 
           expMGAccessor.saveMetricGenerator( mg, expID );
           
-          if ( clientInfoView.getCurrentClientID().equals( client.getID() ) )
+          UUID clientID = client.getID();
+          
+          connectionsView.updateClientSummaryInfo( clientID, 
+                                                   MetricHelper.getAllEntities( generators ).size(),
+                                                   MetricHelper.getAllMeasurementSets( generators ).size() );
+          
+          if ( clientInfoView.getCurrentClientID().equals(clientID) )
             clientInfoView.writeClientInfo( client );
         }
         catch ( Exception e )
@@ -467,8 +473,14 @@ public class DashMainController extends UFAbstractEventManager
       trySetupNAGIOSView();
       
       if ( emProps != null && currentExperiment != null )
-        monitorControlView.setExperimentInfo( emProps.getProperty( "Monitor_ID" ),
+      {
+        String rabbitConInfo = emProps.getProperty( "Rabbit_IP" ) + ":" + 
+                               emProps.getProperty( "Rabbit_Port" );
+        
+        monitorControlView.setExperimentInfo( rabbitConInfo,
+                                              emProps.getProperty( "Monitor_ID" ),
                                               currentExperiment );
+      }
     }
     catch ( Exception e )
     {
@@ -557,6 +569,7 @@ public class DashMainController extends UFAbstractEventManager
       if ( client != null )
       {
         clientInfoView.writeClientInfo( client );
+        mainDashView.switchViewFocus( 0 );
       }
     }
   }
@@ -873,7 +886,11 @@ public class DashMainController extends UFAbstractEventManager
   // Event handlers ------------------------------------------------------------
   private void onDashWindowResized()
   {
-    if ( mainDashView != null ) mainDashView.updateViewport();
+    if ( mainDashView != null && icePusher != null )
+    {
+      mainDashView.updateViewport();
+      icePusher.push();
+    }
   }
   
   private class DashWindowResizeListener implements Window.ResizeListener

@@ -43,7 +43,7 @@ public class MonitorControlView extends SimpleView
   // Control components
   private Label  entryPointLabel;
   private Label  currentPhaseLabel;
-  private Label  monitorStatus;
+  private Label  rabbitIPLabel;
   private Button phaseControlButton;
   private Button experimentStopButton;
   
@@ -63,10 +63,11 @@ public class MonitorControlView extends SimpleView
     createComponents();
   }
   
-  public void setExperimentInfo( String id, Experiment info )
+  public void setExperimentInfo( String ip, String id, Experiment info )
   { 
     if ( id != null && info != null )
     {
+      rabbitIPLabel.setValue( "Rabbit IP: " + ip );
       entryPointLabel.setValue( "Entry point ID: " + id );
       
       experimentNameLabel.setValue( "Experiment: " + info.getName() );
@@ -144,10 +145,7 @@ public class MonitorControlView extends SimpleView
     hl.addComponent( createExperimentInfoComponents() );
     
     // Space
-    innerVL.addComponent( UILayoutUtil.createSpace( "10px", null ) );
-    
-    // Bottom border
-    vl.addComponent( UILayoutUtil.createSpace( "1px", null ) );
+    innerVL.addComponent( UILayoutUtil.createSpace( "20px", null ) );
   }
   
   private VerticalLayout createStatusComponents()
@@ -155,13 +153,13 @@ public class MonitorControlView extends SimpleView
     VerticalLayout vl = new VerticalLayout();
     vl.setWidth( "350px" );
     
+    // Status
+    rabbitIPLabel = new Label( "Rabbit IP: Unknown" );
+    vl.addComponent( rabbitIPLabel );
+    
     // Experiment entry point
     entryPointLabel = new Label( "Entry point ID: " );
     vl.addComponent( entryPointLabel );
-    
-    // Status
-    monitorStatus = new Label( "Status: Monitor UP" );
-    vl.addComponent( monitorStatus );
     
     // Phase items
     currentPhaseLabel = new Label( "Waiting for clients" );

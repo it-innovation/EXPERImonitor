@@ -155,12 +155,11 @@ public class LiveMonitorView extends SimpleView
     Panel vizBody = new Panel();
     vl.addComponent( vizBody );
     vizBody.setStyleName( "borderless light" );
-    vl = (VerticalLayout) vizBody.getContent();
   
     HorizontalLayout hl = new HorizontalLayout();
     hl.setStyleName( "eccDashDefault" );
-    vl.addComponent( hl );
-    
+    vizBody.addComponent( hl );
+   
     metricsNavList = new VerticalLayout();
     metricsNavList.setWidth( "250px" );
     hl.addComponent( metricsNavList );
@@ -172,7 +171,6 @@ public class LiveMonitorView extends SimpleView
     visualPanel.setStyleName( "borderless light" );
     hl.addComponent( visualPanel );
     metricsVisualList = (VerticalLayout) visualPanel.getContent();
-    metricsVisualList.setMargin( false );
   }
   
   private void onNavViewSelected( UUID targetID )
@@ -233,21 +231,22 @@ public class LiveMonitorView extends SimpleView
     {
       VerticalLayout vl = getViewContents();
       
-      Label label = new Label( "Client: " + clientName );
-      label.addStyleName( "small" );
-      vl.addComponent( label );
-      
       // Space
-      vl.addComponent( UILayoutUtil.createSpace( "2px", null ) );
+      vl.addComponent( UILayoutUtil.createSpace( "4px", null ) );
       
-      // Indent a bit
+      // Indent
       HorizontalLayout hl = new HorizontalLayout();
       vl.addComponent( hl );
-      
-      // Space
-      hl.addComponent( UILayoutUtil.createSpace( "2px", null ) );
+      hl.addComponent( UILayoutUtil.createSpace( "4px", null, true ) );
       VerticalLayout innerVL = new VerticalLayout();
       hl.addComponent( innerVL );
+      
+      Label label = new Label( clientName );
+      label.addStyleName( "small" );
+      innerVL.addComponent( label );
+      
+      // Space
+      innerVL.addComponent( UILayoutUtil.createSpace( "2px", null ) );
       
       label = new Label( "Entity: " + entityName );
       label.addStyleName( "tiny" );
@@ -258,9 +257,9 @@ public class LiveMonitorView extends SimpleView
       innerVL.addComponent( label );
       
       // Space
-      vl.addComponent( UILayoutUtil.createSpace( "2px", null ) );
+      vl.addComponent( UILayoutUtil.createSpace( "4px", null ) );
       
-      // Remove button
+      // Remove button      
       Button button = new Button( "Remove" );
       button.setStyleName( "small" );
       button.setData( measurementSetID );

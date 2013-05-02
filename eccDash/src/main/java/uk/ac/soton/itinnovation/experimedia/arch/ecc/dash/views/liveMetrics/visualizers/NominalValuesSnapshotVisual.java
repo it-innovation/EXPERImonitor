@@ -37,7 +37,6 @@ import com.invient.vaadin.charts.InvientChartsConfig.CategoryAxis;
 import com.invient.vaadin.charts.InvientChartsConfig.ColumnConfig;
 import com.invient.vaadin.charts.InvientChartsConfig.NumberYAxis;
 import com.invient.vaadin.charts.InvientChartsConfig.PieConfig;
-import com.invient.vaadin.charts.InvientChartsConfig.PieDataLabel;
 import com.invient.vaadin.charts.InvientChartsConfig.XAxis;
 import com.invient.vaadin.charts.InvientChartsConfig.YAxis;
 import com.vaadin.ui.TabSheet;
@@ -240,8 +239,8 @@ public class NominalValuesSnapshotVisual extends BaseMetricVisual
     if ( barchartConfig != null )
     {
       barchart = new InvientCharts( barchartConfig );
-      barchart.setWidth( "600px" );
-      barchart.setHeight( "400px" );
+      barchart.setWidth( defaultChartWidth );
+      barchart.setHeight( defaultChartHeight );
       
       ts.addTab( barchart, "bar" );
     }
@@ -249,8 +248,8 @@ public class NominalValuesSnapshotVisual extends BaseMetricVisual
     if ( piechartConfig != null )
     {
       piechart = new InvientCharts( piechartConfig );
-      piechart.setWidth( "600px" );
-      piechart.setHeight( "400px" );
+      piechart.setWidth( defaultChartWidth );
+      piechart.setHeight( defaultChartHeight );
       
       ts.addTab( piechart, "pie" );
     }

@@ -45,6 +45,9 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.UILayoutU
 
 public abstract class BaseMetricVisual extends SimpleView
 {
+  protected final String defaultChartWidth  = "600px";
+  protected final String defaultChartHeight = "400px";
+  
   protected Label visualTitle;
   protected Label visualUnit;
   protected Label visualType;
@@ -135,7 +138,7 @@ public abstract class BaseMetricVisual extends SimpleView
     
     // Header
     HorizontalLayout hl = new HorizontalLayout();
-    hl.setSpacing( true );
+    hl.setWidth( defaultChartWidth );
     hl.setStyleName( "eccInfoPanelHeader" );
     vl.addComponent( hl );
     
@@ -157,20 +160,22 @@ public abstract class BaseMetricVisual extends SimpleView
     
     // Other info
     visualUnit = new Label();
-    visualUnit.addStyleName( "h4" );
+    visualUnit.addStyleName( "small" );
     innerHL.addComponent( visualUnit );
+    innerHL.setComponentAlignment( visualUnit, Alignment.BOTTOM_LEFT );
     
     // Space
     innerHL.addComponent( UILayoutUtil.createSpace( "5px", null, true ) );
     
     visualType = new Label();
-    visualType.addStyleName( "h4" );
+    visualType.addStyleName( "small" );
     innerHL.addComponent( visualType );
+    innerHL.setComponentAlignment( visualType, Alignment.BOTTOM_LEFT );
     
     // Control part
     innerHL = new HorizontalLayout();
     hl.addComponent( innerHL );
-    hl.setExpandRatio( innerHL, 3.0f );
+    hl.setComponentAlignment( innerHL, Alignment.TOP_RIGHT );
     
     // Expand/hide button
     Button button = new Button( "hide" );

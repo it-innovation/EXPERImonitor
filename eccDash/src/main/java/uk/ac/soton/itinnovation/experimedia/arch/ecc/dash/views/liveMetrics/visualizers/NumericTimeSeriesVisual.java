@@ -143,7 +143,8 @@ public class NumericTimeSeriesVisual extends BaseMetricVisual
     chartConfig.setYAxes( yAxesSet );
     
     chart = new InvientCharts( chartConfig );
-    chart.setSizeFull();
+    chart.setWidth( defaultChartWidth );
+    chart.setHeight( defaultChartHeight );
     
     // Series & marker configuration
     SymbolMarker marker = new SymbolMarker();
