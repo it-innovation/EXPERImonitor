@@ -42,7 +42,10 @@ import com.invient.vaadin.charts.InvientChartsConfig.SymbolMarker.Symbol;
 import com.invient.vaadin.charts.InvientChartsConfig.Title;
 import com.invient.vaadin.charts.InvientChartsConfig.XAxis;
 import com.invient.vaadin.charts.InvientChartsConfig.YAxis;
+import com.vaadin.ui.CustomLayout;
 import com.vaadin.ui.VerticalLayout;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -54,6 +57,8 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Me
 
 public class NumericTimeSeriesVisual extends BaseMetricVisual
 {
+  private static boolean applyNonUTC = true;
+  
   private InvientCharts                chart;
   private InvientChartsConfig          chartConfig;
   private DateTimeAxis                 timeAxis;
@@ -170,7 +175,24 @@ public class NumericTimeSeriesVisual extends BaseMetricVisual
   
   private void createComponents()
   {
-    VerticalLayout vl = getViewContents();    
+    VerticalLayout vl = getViewContents();
+    
+    // Apply a once-off UTC global setting for Inveint charts
+    if ( applyNonUTC )
+    {
+      try
+      {
+        String script   = "<div><script>$wnd.Highcharts.setOptions({  global: {  useUTC: false }});</script></div>";
+        CustomLayout cl = new CustomLayout( new ByteArrayInputStream(script.getBytes()) );  
+        vl.addComponent(cl);
+        applyNonUTC = false;
+      } 
+      catch (IOException ex)
+      { /*Really nothing we can do here to fix this */ }
+
+    }
+    
+    // Add in chart
     if ( chart != null ) vl.addComponent( chart );
   }
 }
