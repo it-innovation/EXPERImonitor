@@ -116,6 +116,7 @@ public class NumericTimeSeriesVisual extends BaseMetricVisual
   private void createChartConfig()
   {
     chartConfig = new InvientChartsConfig();
+    chartConfig.getGeneralChartConfig().setAnimation( false );
     chartConfig.getGeneralChartConfig().setType( SeriesType.LINE );
     chartConfig.getGeneralChartConfig().setReflow( false );
     chartConfig.getGeneralChartConfig().setBackgroundColor( new RGB(242,242,242) );

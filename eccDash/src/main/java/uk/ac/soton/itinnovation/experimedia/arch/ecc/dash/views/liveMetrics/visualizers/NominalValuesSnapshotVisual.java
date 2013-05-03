@@ -171,6 +171,7 @@ public class NominalValuesSnapshotVisual extends BaseMetricVisual
   private void createBarchartConfig()
   {
     barchartConfig = new InvientChartsConfig();
+    barchartConfig.getGeneralChartConfig().setAnimation( false );
     barchartConfig.getGeneralChartConfig().setType( SeriesType.COLUMN );
     barchartConfig.getGeneralChartConfig().setReflow( false );
     barchartConfig.getGeneralChartConfig().setBackgroundColor( new Color.RGB(242,242,242) );
@@ -208,6 +209,7 @@ public class NominalValuesSnapshotVisual extends BaseMetricVisual
   private void createPiechartConfig()
   {
     piechartConfig = new InvientChartsConfig();
+    piechartConfig.getGeneralChartConfig().setAnimation( false );
     piechartConfig.getGeneralChartConfig().setType( SeriesType.PIE );
     piechartConfig.getGeneralChartConfig().setReflow( false );
     piechartConfig.getGeneralChartConfig().setBackgroundColor( new Color.RGB(242,242,242) );
