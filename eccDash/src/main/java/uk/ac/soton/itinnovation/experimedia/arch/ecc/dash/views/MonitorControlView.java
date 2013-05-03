@@ -34,6 +34,7 @@ import java.util.Collection;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMPhase;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.UILayoutUtil;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.UIResource;
 
 
 
@@ -121,14 +122,12 @@ public class MonitorControlView extends SimpleView
     HorizontalLayout hl = new HorizontalLayout();
     vl.addComponent( hl );
     
-    Resource res  = new ThemeResource( "img/expLogo.jpg" );
-    Embedded img  = new Embedded( null, res );
+    Embedded img  = new Embedded( null, UIResource.getResource( "experimediaLogo" ) );
     hl.addComponent( img );
     
-    Label label = new Label( "Dashboard V1.1" );
-    label.setStyleName( "tiny" );
-    hl.addComponent( label );
-    hl.setComponentAlignment( label, Alignment.TOP_LEFT );
+    img  = new Embedded( null, UIResource.getResource( "versionIcon" ) );
+    hl.addComponent( img );
+    hl.setComponentAlignment( img, Alignment.TOP_LEFT );
     
     VerticalLayout innerVL = new VerticalLayout();
     innerVL.setStyleName( "eccControlInfoPanel" );

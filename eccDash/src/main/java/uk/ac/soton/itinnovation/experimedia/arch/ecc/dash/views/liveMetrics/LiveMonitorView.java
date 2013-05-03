@@ -40,6 +40,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.Highlight
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.HighlightViewListener;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.SimpleView;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.UILayoutUtil;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.UIResource;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.visualizers.BaseMetricVisual;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.visualizers.BaseMetricVisualListener;
 import uk.ac.soton.itinnovation.robust.cat.core.components.viewEngine.spec.uif.types.UFAbstractEventManager;
@@ -161,7 +162,7 @@ public class LiveMonitorView extends SimpleView
     vizBody.addComponent( hl );
    
     metricsNavList = new VerticalLayout();
-    metricsNavList.setWidth( "250px" );
+    metricsNavList.setWidth( "225px" );
     hl.addComponent( metricsNavList );
     
     // Space
@@ -169,6 +170,8 @@ public class LiveMonitorView extends SimpleView
     
     Panel visualPanel = new Panel();
     visualPanel.setStyleName( "borderless light" );
+    VerticalLayout vpVL = (VerticalLayout) visualPanel.getContent();
+    vpVL.setMargin( false );
     hl.addComponent( visualPanel );
     metricsVisualList = (VerticalLayout) visualPanel.getContent();
   }
@@ -230,42 +233,48 @@ public class LiveMonitorView extends SimpleView
                                    String attributeName )
     {
       VerticalLayout vl = getViewContents();
+      vl.setWidth( "225px" );
       
       // Space
-      vl.addComponent( UILayoutUtil.createSpace( "4px", null ) );
+      vl.addComponent( UILayoutUtil.createSpace( "2px", null ) );
       
       // Indent
       HorizontalLayout hl = new HorizontalLayout();
       vl.addComponent( hl );
       hl.addComponent( UILayoutUtil.createSpace( "4px", null, true ) );
-      VerticalLayout innerVL = new VerticalLayout();
-      hl.addComponent( innerVL );
+      vl = new VerticalLayout();
+      hl.addComponent( vl );
+      
+      // Name label and close button
+      hl = new HorizontalLayout();
+      hl.setWidth( "215px" );
+      vl.addComponent( hl );
       
       Label label = new Label( clientName );
       label.addStyleName( "small" );
-      innerVL.addComponent( label );
+      hl.addComponent( label );
+      hl.setComponentAlignment( label, Alignment.MIDDLE_LEFT );
       
-      // Space
-      innerVL.addComponent( UILayoutUtil.createSpace( "2px", null ) );
+      // Remove button      
+      Button button = new Button();
+      button.setIcon( UIResource.getResource("closeIcon") );
+      button.setStyleName( "borderless icon-on-top" );
+      button.setData( measurementSetID );
+      button.addListener( new RemoveButtonClickedListener() );
+      hl.addComponent( button );
+      hl.setComponentAlignment( button, Alignment.TOP_RIGHT );
       
+      // Entity and attribute detail
       label = new Label( "Entity: " + entityName );
       label.addStyleName( "tiny" );
-      innerVL.addComponent( label );
+      vl.addComponent( label );
       
       label = new Label( "Attribute: " + attributeName );
       label.addStyleName( "tiny" );
-      innerVL.addComponent( label );
+      vl.addComponent( label );
       
       // Space
-      vl.addComponent( UILayoutUtil.createSpace( "4px", null ) );
-      
-      // Remove button      
-      Button button = new Button( "Remove" );
-      button.setStyleName( "small" );
-      button.setData( measurementSetID );
-      button.addListener( new RemoveButtonClickedListener() );
-      vl.addComponent( button );
-      vl.setComponentAlignment( button, Alignment.BOTTOM_RIGHT );
+      vl.addComponent( UILayoutUtil.createSpace( "2px", null ) );
       
       addListener( new NavViewSelected() );
     }

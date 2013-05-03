@@ -39,14 +39,15 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Me
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.SimpleView;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.UILayoutUtil;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.UIResource;
 
 
 
 
 public abstract class BaseMetricVisual extends SimpleView
 {
-  protected final String defaultChartWidth  = "600px";
-  protected final String defaultChartHeight = "400px";
+  protected final String defaultChartWidth  = "512px";
+  protected final String defaultChartHeight = "342px";
   
   protected Label visualTitle;
   protected Label visualUnit;
@@ -178,22 +179,22 @@ public abstract class BaseMetricVisual extends SimpleView
     hl.setComponentAlignment( innerHL, Alignment.TOP_RIGHT );
     
     // Expand/hide button
-    Button button = new Button( "hide" );
-    button.addStyleName( "small" );
+    Button button = new Button();
+    button.setIcon( UIResource.getResource("minimiseIcon") );
+    button.addStyleName( "borderless icon-on-top" );
     button.addListener( new HideButtonListener() );
     innerHL.addComponent( button );
-    innerHL.setComponentAlignment( button, Alignment.MIDDLE_RIGHT );
     
     // Space
-    innerHL.addComponent( UILayoutUtil.createSpace( "5px", null, true ) );
+    innerHL.addComponent( UILayoutUtil.createSpace( "4px", null, true ) );
     
     // Close button
-    button = new Button( "close" );
-    button.addStyleName( "small" );
+    button = new Button();
+    button.setIcon( UIResource.getResource("closeIcon") );
+    button.addStyleName( "borderless icon-on-top" );
     button.setData( true );
     button.addListener( new CloseButtonListener() );
     innerHL.addComponent( button );
-    innerHL.setComponentAlignment( button, Alignment.MIDDLE_RIGHT );
     
     // Space
     vl.addComponent( UILayoutUtil.createSpace( "5px", null, true ) );
@@ -214,14 +215,14 @@ public abstract class BaseMetricVisual extends SimpleView
         visualVisible = false;
         
         vizContainer.setVisible( visualVisible );
-        button.setCaption( "show" );
+        button.setIcon( UIResource.getResource("maximiseIcon") );
       }
       else
       {
         visualVisible = true;
         
         vizContainer.setVisible( visualVisible );
-        button.setCaption( "hide" );
+        button.setIcon( UIResource.getResource("minimiseIcon") );
       } 
     }
   }

@@ -52,6 +52,7 @@ import org.vaadin.artur.icepush.ICEPush;
 import java.io.*;
 import java.net.URL;
 import java.util.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.UIResource;
 
 
 
@@ -66,7 +67,8 @@ public class DashMainController extends UFAbstractEventManager
                                            ClientInfoViewListener,
                                            LiveMetricSchedulerListener
 {
-  private final transient IECCLogger dashMainLog = Logger.getLogger( DashMainController.class );
+  private final transient IECCLogger dashMainLog  = Logger.getLogger( DashMainController.class );
+  private final transient UIResource viewResource = new UIResource();
   
   private Properties dashboardProps;
   private Properties edmProps;
@@ -130,6 +132,8 @@ public class DashMainController extends UFAbstractEventManager
         rootWindow.removeComponent( icePusher );
         icePusher = null;
       }
+      
+      viewResource.cleanUp();
       
       if ( dashMainLog != null )           dashMainLog.info( "Shutting down the ECC dashboard" );
       if ( liveMetricScheduler != null )   liveMetricScheduler.shutDown();
@@ -441,6 +445,8 @@ public class DashMainController extends UFAbstractEventManager
     try
     {
       rootWindow.removeAllComponents(); // Get rid of the welcome view
+      
+      createCommonUIResources(); // Create common resources before we create the main view
       
       icePusher = new ICEPush();
       rootWindow.addComponent( icePusher );
@@ -881,6 +887,15 @@ public class DashMainController extends UFAbstractEventManager
     }
     
     return props; 
+  }
+  
+  private void createCommonUIResources()
+  {
+    viewResource.createResource( "experimediaLogo", "img/expLogo.jpg" );
+    viewResource.createResource( "versionIcon",     "img/versionIcon.png" );
+    viewResource.createResource( "closeIcon",       "img/closeIcon.png" );
+    viewResource.createResource( "minimiseIcon",    "img/minimiseIcon.png" );
+    viewResource.createResource( "maximiseIcon",    "img/maximiseIcon.png" );
   }
   
   // Event handlers ------------------------------------------------------------
