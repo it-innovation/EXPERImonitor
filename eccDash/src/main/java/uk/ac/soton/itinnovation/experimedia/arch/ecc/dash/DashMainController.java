@@ -53,6 +53,7 @@ import java.io.*;
 import java.net.URL;
 import java.util.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.UIResource;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.visualizers.BaseMetricVisual;
 
 
 
@@ -278,27 +279,27 @@ public class DashMainController extends UFAbstractEventManager
       {
         MetricGenerator mg = mgIt.next();
         try 
-        { 
-          expMGAccessor.saveMetricGenerator( mg, expID );
-          
-          UUID clientID = client.getID();
-          
-          connectionsView.updateClientSummaryInfo( clientID, 
-                                                   MetricHelper.getAllEntities( generators ).size(),
-                                                   MetricHelper.getAllMeasurementSets( generators ).size() );
-          
-          if ( clientInfoView.getCurrentClientID().equals(clientID) )
-            clientInfoView.writeClientInfo( client );
-        }
+        { expMGAccessor.saveMetricGenerator( mg, expID ); }
         catch ( Exception e )
         {
           String problem = "Failed to store metric generator";
           mainDashView.addLogMessage( problem );
-          dashMainLog.error( problem ); 
+          dashMainLog.error( problem );
         }
       }
       
-      mainDashView.addLogMessage( client.getName() + "Got metrics model from " + client.getName() );
+      // Update UI
+      UUID clientID = client.getID();
+      connectionsView.updateClientSummaryInfo( clientID, 
+                                               MetricHelper.getAllEntities( generators ).size(),
+                                               MetricHelper.getAllMeasurementSets( generators ).size() );
+          
+      if ( clientID.equals(connectionsView.getSelectedClientID()) )
+      {
+        clientInfoView.writeClientInfo( client );
+        mainDashView.addLogMessage( client.getName() + "Got metrics model from " + client.getName() );
+      }
+        
       icePusher.push();
     }
   }
@@ -476,7 +477,7 @@ public class DashMainController extends UFAbstractEventManager
       DataExportController dec = mainDashView.getDataExportController();
       dec.initialise( expMonitor, expReportAccessor );
       
-      trySetupNAGIOSView();
+      trySetupDashboard();
       
       if ( emProps != null && currentExperiment != null )
       {
@@ -567,7 +568,7 @@ public class DashMainController extends UFAbstractEventManager
   
   // ClientConnectionsViewListener ---------------------------------------------
   @Override
-  public void onClientSelected( UUID clientID )
+  public void onViewClientSelected( UUID clientID )
   {
     if ( clientID != null )
     {
@@ -577,6 +578,62 @@ public class DashMainController extends UFAbstractEventManager
         clientInfoView.writeClientInfo( client );
         mainDashView.switchViewFocus( 0 );
       }
+    }
+  }
+  
+  @Override
+  public void onViewClientDisconnect( UUID clientID, boolean force )
+  {
+    if ( clientID != null )
+    {
+        EMClient client = expMonitor.getClientByID( clientID );
+        if ( client != null )
+        {
+          if ( !force ) // Try to disconnect nicely
+          {
+            try
+            { expMonitor.deregisterClient( client , "ECC experimenter disconnected the client" ); }
+            catch ( Exception e )
+            {
+              String error = "Had problems de-registering client: " + client.getName();
+              dashMainLog.error( error + " " + e.getMessage() );
+              mainDashView.addLogMessage( error );
+            }
+          }
+          else // Assume client is dead and clean our ECC side
+          {
+            // Notify out to log
+            String msg = "Forcing client " + client.getName() + " disconnection";
+            dashMainLog.info( msg );
+            mainDashView.addLogMessage( msg );
+            
+            // Manually remove the client
+            try { expMonitor.forceClientDisconnection( client ); }
+            catch ( Exception e )
+            {
+              String error = "Had problems forcibly de-registering: " + client.getName();
+              dashMainLog.error( error + " " + e.getMessage() );
+              mainDashView.addLogMessage( error );
+            }
+            
+            // Remove client scheduling
+            if ( liveMetricScheduler != null )
+              try { liveMetricScheduler.removeClient( client ); }
+              catch ( Exception e )
+              {
+                String error = "Could not unschedule client: " + client.getName();
+                dashMainLog.error( error + " " + e.getMessage() );
+                mainDashView.addLogMessage( error );
+              }
+            
+            // Remove client metrics from live view
+            if ( liveMonitorController != null )
+              liveMonitorController.removeClientLiveView(client);
+            
+            // Force removal of client from connected list
+            connectionsView.removeClient( client );
+          }
+        }
     }
   }
   
@@ -814,12 +871,20 @@ public class DashMainController extends UFAbstractEventManager
     return result;
   }
   
-  private boolean trySetupNAGIOSView()
+  private boolean trySetupDashboard()
   {
     boolean result = false;
     
     if ( dashboardProps != null )
     {
+      String snapshotVal = dashboardProps.getProperty( "livemonitor.defaultSnapshotCountMax" );
+      if ( snapshotVal != null )
+      {
+        Integer max = Integer.parseInt(snapshotVal);
+        if ( max != null ) BaseMetricVisual.setDefaultSnapshotMaxPointCount( max );
+      }
+      
+      
       String fullURL = dashboardProps.getProperty( "nagios.fullurl" );
       if ( fullURL != null )
       {
