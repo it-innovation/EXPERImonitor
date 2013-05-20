@@ -128,6 +128,16 @@ public interface IExperimentMonitor
   void deregisterClient( EMClient client, String reason ) throws Exception;
   
   /**
+   * Assumes the client is no longer connected/playing nicely; use this method to
+   * forcibly remove live references to this client from the ECC's side.
+   * 
+   * @param client     - instance of the client to forcibly remove
+   * @throws Exception - throws if the client is invalid or unknown
+   * 
+   */
+  void forceClientDisconnection( EMClient client ) throws Exception;
+  
+  /**
    * Adds a class the is interested in the life-cycle events specified by the listener.
    * 
    * @param listener - Class instance implementing the listener interface.

@@ -177,6 +177,17 @@ public class ExperimentMonitor implements IExperimentMonitor,
   }
   
   @Override
+  public void forceClientDisconnection( EMClient client ) throws Exception
+  {
+    // Safety first
+    if ( client == null ) throw new Exception( "Cannot de-register client: client is NULL" );
+    if ( !client.isConnected() ) throw new Exception( "Cannot de-register client: is already disconnected" );
+    
+    // Don't go through registration - just remove
+    lifecycleManager.onClientIsDisconnected( (EMClientEx) client );
+  }
+  
+  @Override
   public void addLifecyleListener( IEMLifecycleListener listener )
   { lifecycleListeners.add(listener); }
   
