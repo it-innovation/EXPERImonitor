@@ -36,12 +36,13 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.Highlight
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.HighlightViewListener;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.SimpleView;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.UILayoutUtil;
-import uk.ac.soton.itinnovation.robust.cat.core.components.viewEngine.spec.uif.types.UFAbstractEventManager;
 
 
 
 
 public class ClientConnectionsView extends SimpleView
+                                   implements HighlightViewListener,
+                                              ClientViewListener
 {
   private VerticalLayout clientList;
   
@@ -74,12 +75,13 @@ public class ClientConnectionsView extends SimpleView
       if ( !connectedClients.containsKey(id) )
       {
         ClientView view = new ClientView( client );
+        view.addListener( this );
         clientList.addComponent( (Component) view.getImplContainer() );
         
         connectedClients.put( id, view );
         
-        // High-light first added
-        if ( currSelectedClient == null ) onClientSelected( id );
+        // Select first added
+        if ( currSelectedClient == null ) currSelectedClient = client.getID();
       }
     }
   }
@@ -103,6 +105,9 @@ public class ClientConnectionsView extends SimpleView
       }
     }
   }
+  
+  public UUID getSelectedClientID()
+  { return currSelectedClient; }
   
   public void updateClientsInPhase( EMPhase phase )
   {
@@ -135,7 +140,67 @@ public class ClientConnectionsView extends SimpleView
       if ( cv != null ) cv.setSummaryInfo( entityCount, metricCount );
     }
   }
+  
+  // HighlightViewListener -----------------------------------------------------
+  @Override
+  public void onHighlightViewSelected( HighlightView hv )
+  {
+    ClientView view = (ClientView) hv;
+    
+    if ( view != null )
+    {
+      UUID targetID = view.getDataID();
+      
+      if ( targetID != null )
+      {
+        boolean notify;
 
+        // If no currently selected client, make this one the selected
+        if ( currSelectedClient == null )
+        {
+          currSelectedClient = targetID;
+          notify = true;
+        }
+        else // Otherwise swap
+        {
+          ClientView oldView = connectedClients.get( currSelectedClient );
+          if ( oldView != null ) oldView.setSelected( false );
+
+          currSelectedClient = targetID;
+
+          notify = true;
+        }
+
+        // Notify listeners if required
+        if ( notify )
+        {
+          ClientView selView = connectedClients.get( currSelectedClient );
+          if ( selView != null )
+          {
+            selView.setSelected( true );
+            currSelectedClient = targetID;
+
+            Collection<ClientConnectionsViewListener> listeners = getListenersByType();
+              for( ClientConnectionsViewListener listener : listeners )
+                listener.onViewClientSelected( currSelectedClient );
+          }
+        }
+      }
+    }
+  }
+  
+  // ClientViewListener --------------------------------------------------------
+  @Override
+  public void onClientDisconnect( UUID clientID, boolean force )
+  {
+    if ( clientID != null )
+    {
+      Collection<ClientConnectionsViewListener> listeners = getListenersByType();
+        for( ClientConnectionsViewListener listener : listeners )
+          listener.onViewClientDisconnect( clientID, force );
+    }
+  }
+  
   // Private methods -----------------------------------------------------------
   private void createComponents()
   {
@@ -155,58 +220,17 @@ public class ClientConnectionsView extends SimpleView
     panel.addComponent( clientList );
   }
   
-  private void onClientSelected( UUID targetID )
-  {
-    if ( targetID != null )
-    {
-      boolean notify = false;
-      
-      // If no currently selected client, make this one the selected
-      if ( currSelectedClient == null )
-      {
-        ClientView view = connectedClients.get( targetID );
-        if ( view != null )
-        {
-          currSelectedClient = targetID; 
-          notify = true;
-        }
-      }
-      else // Otherwise swap
-      {
-        ClientView oldView = connectedClients.get( currSelectedClient );
-        if ( oldView != null ) oldView.setSelected( false );
-        
-        currSelectedClient = targetID;
-        
-        notify = true;
-      }
-      
-      // Notify listeners if required
-      if ( notify )
-      {
-        ClientView selView = connectedClients.get( currSelectedClient );
-        if ( selView != null )
-        {
-          selView.setSelected( true );
-          currSelectedClient = targetID;
-          
-          Collection<ClientConnectionsViewListener> listeners = getListenersByType();
-            for( ClientConnectionsViewListener listener : listeners )
-              listener.onClientSelected( currSelectedClient );
-        }
-      }
-    }
-  }
-  
   // Private classes -----------------------------------------------------------
   private class ClientView extends HighlightView
   {
-    private Label clientName;
-    private Label currentPhase;
-    private Label entityCountLabel;
-    private Label metricCountLabel;
+    private Label  clientName;
+    private Label  currentPhase;
+    private Label  entityCountLabel;
+    private Label  metricCountLabel;
+    private Button disconnectButton;
     
     private transient EMClient client;
+    private transient boolean forceDisconnect = false;
     
     
     public ClientView( EMClient emc )
@@ -247,6 +271,7 @@ public class ClientConnectionsView extends SimpleView
       vl.addComponent( hl );
       hl.addComponent( UILayoutUtil.createSpace( "4px", null, true ) );
       VerticalLayout innerVL = new VerticalLayout();
+      innerVL.setWidth( "240px" );
       hl.addComponent( innerVL );
       
       clientName = new Label( client.getName() );
@@ -281,16 +306,36 @@ public class ClientConnectionsView extends SimpleView
       // Space
       vl.addComponent( UILayoutUtil.createSpace( "10px", null ) );
       
-      addListener( new ClientViewSelected() );
+      // Force disconnect button
+      disconnectButton = new Button( "disconnect" );
+      disconnectButton.addStyleName( "small" );
+      disconnectButton.setData( client.getID() );
+      disconnectButton.addListener( new DisconnectListener() );
+      innerVL.addComponent( disconnectButton );
+      innerVL.setComponentAlignment( disconnectButton, Alignment.BOTTOM_RIGHT );
     }
-  }
-  
-  // Private event handling ----------------------------------------------------
-  private class ClientViewSelected extends UFAbstractEventManager
-                                   implements HighlightViewListener
-  {
-    @Override
-    public void onHighlightViewSelected( HighlightView view )
-    { onClientSelected( view.getDataID() ); }
+    
+    // Private event handling --------------------------------------------------
+    private void onDisconnectClient( UUID clientID )
+    {
+      if ( clientID != null && clientID.equals( client.getID()) )
+      {
+        // Try a gentle disconnect action first
+        Collection<ClientViewListener> listeners = getListenersByType();
+          for( ClientViewListener listener : listeners )
+            listener.onClientDisconnect( clientID, forceDisconnect );
+            
+        // Then force for next time
+        disconnectButton.setCaption( "force disconnect");
+        forceDisconnect = true;
+      }
+    }
+    
+    private class DisconnectListener implements Button.ClickListener
+    {
+      @Override
+      public void buttonClick(Button.ClickEvent ce)
+      { onDisconnectClient( (UUID) ce.getButton().getData() ); }
+    }
   }
 }

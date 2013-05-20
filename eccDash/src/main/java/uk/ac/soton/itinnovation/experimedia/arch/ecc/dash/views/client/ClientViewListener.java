@@ -18,7 +18,7 @@
 // the software.
 //
 //      Created By :            Simon Crowle
-//      Created Date :          04-Feb-2013
+//      Created Date :          07-May-2013
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
@@ -30,9 +30,7 @@ import java.util.UUID;
 
 
 
-public interface ClientConnectionsViewListener
+interface ClientViewListener
 {
-  void onViewClientSelected( UUID clientID );
-  
-  void onViewClientDisconnect( UUID clientID, boolean force );
+  void onClientDisconnect( UUID clientID, boolean force );
 }
