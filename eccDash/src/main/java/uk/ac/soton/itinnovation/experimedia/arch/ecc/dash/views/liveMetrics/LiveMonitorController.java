@@ -48,10 +48,10 @@ public class LiveMonitorController extends UFAbstractEventManager
   
   private LiveMonitorView liveMonitorView;
   
-  private transient HashMap<UUID, Date> measurementDateStamps;
-  private transient HashSet<UUID>       activeMSVisuals;
-  private transient IReportDAO          expReportAccessor;
-  private transient ICEPush             icePusher;
+  private transient HashMap<UUID, MSUpdateInfo> measurementUpdates;
+  private transient HashSet<UUID>               activeMSVisuals;
+  private transient IReportDAO                  expReportAccessor;
+  private transient ICEPush                     icePusher;
 
   
   public LiveMonitorController( ICEPush pusher )
@@ -59,7 +59,7 @@ public class LiveMonitorController extends UFAbstractEventManager
     super();
     
     icePusher             = pusher;
-    measurementDateStamps = new HashMap<UUID, Date>();
+    measurementUpdates = new HashMap<UUID, MSUpdateInfo>();
     activeMSVisuals       = new HashSet<UUID>();
     
     createView();
@@ -74,29 +74,29 @@ public class LiveMonitorController extends UFAbstractEventManager
     if ( report == null || client == null ) throw new Exception( "Live monitoring parameters were null" );
     if ( expReportAccessor == null ) throw new Exception( "Live monitoring control has not been initialised" );
     
-    // Remove all measurements that we already have
-    removeOldMeasurements( report );
-    
     // Check to see if we have anything to store, and try store
     if ( report.getNumberOfMeasurements() > 0 )
     {
       try
       { expReportAccessor.saveMeasurements( report ); }
-      catch ( Exception e )
-      { throw e; }
-    }
-    
-    // Display (if we have an active display)
-    synchronized ( updateViewLock )
-    {
-      UUID msID = report.getMeasurementSet().getID();
-      if ( activeMSVisuals.contains(msID) )
-      {
-        MeasurementSet ms = report.getMeasurementSet();
-        liveMonitorView.updateMetricVisual( msID, ms );
+      catch ( Exception e ) { throw e; }
+      
+      // Remove measurements we've already displayed 'live'
+      removeOldMeasurements( report );
+      
+      // Display (if we have an active display and there is still data)
+      if ( report.getNumberOfMeasurements() > 0 )
+        synchronized ( updateViewLock )
+        {
+          UUID msID = report.getMeasurementSet().getID();
+          if ( activeMSVisuals.contains(msID) )
+          {
+            MeasurementSet ms = report.getMeasurementSet();
+            liveMonitorView.updateMetricVisual( msID, ms );
 
-        if ( icePusher !=null ) icePusher.push();
-      }
+            if ( icePusher !=null ) icePusher.push();
+          }
+        }
     }
   }
   
@@ -138,13 +138,12 @@ public class LiveMonitorController extends UFAbstractEventManager
                                                         msID ); break;
               
             case ORDINAL :
+            case INTERVAL:
               visual = new RawDataVisual( attribute.getName(),
                                           metric.getUnit().getName(),
                                           metric.getMetricType().name(),
-                                          msID ); break;               
-             
-            
-            case INTERVAL:
+                                          msID ); break;  
+              
             case RATIO   :
               visual = new NumericTimeSeriesVisual( attribute.getName(),
                                                     metric.getUnit().getName(),
@@ -231,15 +230,17 @@ public class LiveMonitorController extends UFAbstractEventManager
           HashSet<Measurement> oldMeasurements = new HashSet<Measurement>();
           UUID msID = ms.getID();
 
-          // Get latest measurement (if one does not exist, create an old start date)
-          Date lastRecent = measurementDateStamps.get( msID );
+          // Get latest measurement (if one does not exist, create a dummy measurement)
+          MSUpdateInfo lastRecent = measurementUpdates.get( msID );
           if ( lastRecent == null )
           {
-            lastRecent = new Date();
-            lastRecent.setTime( 0 );
+            Date date = new Date();
+            date.setTime( 0 );
+            
+            lastRecent = new MSUpdateInfo( date, UUID.randomUUID() );
           }
           
-          Date mostRecent = lastRecent;
+          MSUpdateInfo mostRecentInfo = lastRecent;
           
           // Find old measurements (if any)
           Iterator<Measurement> mIt = targetMeasurements.iterator();
@@ -248,11 +249,11 @@ public class LiveMonitorController extends UFAbstractEventManager
             Measurement m = mIt.next();
             Date mDate    = m.getTimeStamp();
             
-            if ( mDate.before(mostRecent) ) // It's an old measurement
-              oldMeasurements.add( m );
+            if ( mostRecentInfo.lastUpdate.after(mDate) || 
+                 mostRecentInfo.lastMeasurementID.equals(m.getUUID()) ) // If it is an old or repeated
+              oldMeasurements.add( m );                                 // measurement, we don't want it
             else
-              if ( mDate.after(mostRecent) ) // It's the most recent (of all) measurements
-                mostRecent = mDate;
+              mostRecentInfo = new MSUpdateInfo( mDate, m.getUUID() ); 
           }
           
           // Remove old measurements
@@ -262,12 +263,25 @@ public class LiveMonitorController extends UFAbstractEventManager
           
           // Update measurement count and recency
           report.setNumberOfMeasurements( targetMeasurements.size() );
-          measurementDateStamps.remove( msID );
-          measurementDateStamps.put( msID, mostRecent );
+          measurementUpdates.remove( msID );
+          measurementUpdates.put( msID, mostRecentInfo );
         }
         else report.setNumberOfMeasurements( 0 );
       }
       else report.setNumberOfMeasurements( 0 );
+    }
+  }
+  
+  // Private classes -----------------------------------------------------------
+  private class MSUpdateInfo
+  {
+    final Date lastUpdate;
+    final UUID lastMeasurementID;
+    
+    public MSUpdateInfo( Date update, UUID measurementID )
+    {
+      lastUpdate = update;
+      lastMeasurementID = measurementID;
     }
   }
 }
