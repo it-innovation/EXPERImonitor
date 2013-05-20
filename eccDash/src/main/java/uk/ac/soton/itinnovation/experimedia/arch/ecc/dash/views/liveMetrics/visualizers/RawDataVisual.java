@@ -82,7 +82,7 @@ public class RawDataVisual extends BaseMetricVisual
     dataTable.addStyleName( "small striped borderless" );
     dataTable.addContainerProperty( tTimeStamp, String.class, null );
     dataTable.addContainerProperty( tData     , String.class, null );
-    dataTable.setColumnWidth( tData, 400 );
+    dataTable.setColumnWidth( tData, 300 );
     vl.addComponent( dataTable );
     
     // Space

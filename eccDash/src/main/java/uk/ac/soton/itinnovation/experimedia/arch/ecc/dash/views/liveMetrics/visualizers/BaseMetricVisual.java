@@ -46,6 +46,8 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.UIResourc
 
 public abstract class BaseMetricVisual extends SimpleView
 {
+  private static transient int defaultSnapshotMeasurementMax = 20;
+  
   protected final String defaultChartWidth  = "512px";
   protected final String defaultChartHeight = "342px";
   
@@ -54,7 +56,7 @@ public abstract class BaseMetricVisual extends SimpleView
   protected Label visualType;
   
   protected transient LinkedList<Measurement> cachedMeasurements;
-  protected transient int                     maxCachedMeasurements = 20;
+  protected transient int maxCachedMeasurements;
   
   private VerticalLayout    vizContainer;
   private transient UUID    visualID;
@@ -67,8 +69,17 @@ public abstract class BaseMetricVisual extends SimpleView
     
     visualID = id;
     cachedMeasurements = new LinkedList<Measurement>();
+    maxCachedMeasurements = defaultSnapshotMeasurementMax;
     
     createComponents();
+  }
+  
+  public static int getDefaultSnapshotMaxPointCount()
+  { return defaultSnapshotMeasurementMax; }
+  
+  public static void setDefaultSnapshotMaxPointCount( int count )
+  {
+    if ( count > 0 ) defaultSnapshotMeasurementMax = count;
   }
   
   public UUID getID()
