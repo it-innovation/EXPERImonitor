@@ -39,7 +39,9 @@ import com.invient.vaadin.charts.InvientChartsConfig.NumberYAxis;
 import com.invient.vaadin.charts.InvientChartsConfig.PieConfig;
 import com.invient.vaadin.charts.InvientChartsConfig.XAxis;
 import com.invient.vaadin.charts.InvientChartsConfig.YAxis;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.TabSheet;
+import com.vaadin.ui.TabSheet.Tab;
 import com.vaadin.ui.VerticalLayout;
 import java.util.ArrayList;
 
@@ -56,6 +58,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Me
 public class NominalValuesSnapshotVisual extends BaseMetricVisual
 {
   // Barchart
+  private VerticalLayout       barContainer;
   private InvientCharts        barchart;
   private InvientChartsConfig  barchartConfig;
   private LinkedHashSet<XAxis> barchartAxisSet;
@@ -67,6 +70,7 @@ public class NominalValuesSnapshotVisual extends BaseMetricVisual
   private XYSeries                           nominalSeries;
   private XYSeries                           pieSeries;
   private transient TreeMap<String, Integer> nominalCounts;
+  private transient boolean                  newNominals;
   
   
   public NominalValuesSnapshotVisual( String title, String unit, String type, UUID msID )
@@ -94,6 +98,8 @@ public class NominalValuesSnapshotVisual extends BaseMetricVisual
   @Override
   public void addMeasurementData( MeasurementSet ms )
   {
+    newNominals = false;
+    
     // Not going to visualise this as a time series, but as a current snapshot
     if ( ms != null )
     {
@@ -113,7 +119,10 @@ public class NominalValuesSnapshotVisual extends BaseMetricVisual
             nominalCounts.put( nomValue, count );
           }
           else
+          {
             nominalCounts.put( nomValue, 1 ); // First instance of this kind
+            newNominals = true;
+          }
         }
       }
       
@@ -135,33 +144,38 @@ public class NominalValuesSnapshotVisual extends BaseMetricVisual
       if ( pieSeries != null ) piechart.removeSeries( pieSeries );
       
       // Create new nominal series
-      nominalSeries = new XYSeries( (String) visualTitle.getValue() );
+      nominalSeries = new XYSeries( (String) visualTitle.getValue(), SeriesType.COLUMN );
       for ( String nomVal : nominalCounts.keySet() )
-        nominalSeries.addPoint( new DecimalPoint( nominalSeries, nominalCounts.get(nomVal) ) );
+        nominalSeries.addPoint( new DecimalPoint( nominalSeries, nomVal, nominalCounts.get(nomVal)) );
       
       // Create new pie series
       pieSeries = new XYSeries( (String) visualTitle.getValue() );
       for ( String nomVal : nominalCounts.keySet() )
-        pieSeries.addPoint( new DecimalPoint( nominalSeries, nomVal, nominalCounts.get(nomVal)) );
+        pieSeries.addPoint( new DecimalPoint( pieSeries, nomVal, nominalCounts.get(nomVal)) );
     }
     
-    // Re-create barchart
-    if ( barchart != null )
+    if ( newNominals && barchartConfig != null && barContainer != null )
     {
+      // Destroy last barchart and re-create from scratch
+      barContainer.removeAllComponents();
+
       // Re-create nominal axis
       ArrayList<String> cats = new ArrayList<String>();
       cats.addAll( nominalCounts.keySet() );
-      
+
       CategoryAxis nomAxis = new CategoryAxis();
       nomAxis.setCategories( cats );
-      
+
       // Revise axis set
       barchartAxisSet.clear();
       barchartAxisSet.add( nomAxis );
       barchartConfig.setXAxes( barchartAxisSet );
-     
-      barchart.addSeries( nominalSeries );
+      
+      createBarchart();
     }
+    
+    // Update barchart
+    if ( barchart != null ) barchart.addSeries( nominalSeries );
     
     // Update piechart
     if ( piechart != null ) piechart.addSeries( pieSeries );
@@ -240,11 +254,11 @@ public class NominalValuesSnapshotVisual extends BaseMetricVisual
             
     if ( barchartConfig != null )
     {
-      barchart = new InvientCharts( barchartConfig );
-      barchart.setWidth( defaultChartWidth );
-      barchart.setHeight( defaultChartHeight );
+      barContainer = new VerticalLayout();
       
-      ts.addTab( barchart, "bar" );
+      createBarchart();
+      
+      ts.addTab( barContainer, "bar" );
     }
     
     if ( piechartConfig != null )
@@ -255,6 +269,15 @@ public class NominalValuesSnapshotVisual extends BaseMetricVisual
       
       ts.addTab( piechart, "pie" );
     }
+  }
+  
+  private void createBarchart()
+  {
+    barchart = new InvientCharts( barchartConfig );
+    barchart.setWidth( defaultChartWidth );
+    barchart.setHeight( defaultChartHeight );
+      
+    barContainer.addComponent( barchart );
   }
   
 }
