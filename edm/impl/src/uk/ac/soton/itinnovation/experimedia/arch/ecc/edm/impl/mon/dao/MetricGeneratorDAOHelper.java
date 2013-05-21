@@ -30,6 +30,7 @@ import java.sql.ResultSet;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Attribute;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Entity;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGroup;
@@ -181,10 +182,19 @@ public class MetricGeneratorDAOHelper
             try {
                 for (Entity entity : metricGen.getEntities())
                 {
-                    // check if the entity exists; if not, then save it
+                    // check if the entity exists; if not, then save it 'whole sale'
                     if (!EntityDAOHelper.objectExists(entity.getUUID(), connection, false))
                     {
                         EntityDAOHelper.saveEntity(entity, connection, false);
+                    }
+                    else // If the entity does exist, try saving any new attributes not already declared
+                    {
+                      Set<Attribute> attributes = entity.getAttributes();
+                      for ( Attribute att : attributes )
+                      {
+                        if ( !AttributeDAOHelper.objectExists(att.getUUID(), connection, false) )
+                          AttributeDAOHelper.saveAttribute( att, connection, false );
+                      }
                     }
                 }
             } catch (Exception ex) {

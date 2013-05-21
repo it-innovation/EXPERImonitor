@@ -54,7 +54,6 @@ public class EntityDAOHelper
         }
         
         // check if all the required information is given; uuid, name
-        
         if (entity.getUUID() == null)
         {
             return new ValidationReturnObject(false, new IllegalArgumentException("The Entity UUID is NULL"));
@@ -64,32 +63,12 @@ public class EntityDAOHelper
         {
             return new ValidationReturnObject(false, new IllegalArgumentException("The Entity name is NULL"));
         }
-        /*
-        // check if it exists in the DB already
-        try {
-            if (objectExists(entity.getUUID(), dbCon))
-            {
-                return new ValidationReturnObject(false, new RuntimeException("The Entity already exists; the UUID is not unique"));
-            }
-        } catch (Exception ex) {
-            throw ex;
-        }
-        */
+
         // validate attributes if there are any
         if ((entity.getAttributes() != null) && !entity.getAttributes().isEmpty())
         {
             for (Attribute attrib : entity.getAttributes())
             {
-                /*ValidationReturnObject validationReturn = AttributeHelper.isObjectValidForSave(attrib, dbCon, false); // false = don't check for entity existing as this won't be saved yet!
-                if (!validationReturn.valid)
-                {
-                    return validationReturn;
-                }
-                else if (!attrib.getEntityUUID().equals(entity.getUUID()))
-                {
-                    return new ValidationReturnObject(false, new RuntimeException("The Entity UUID of an Attribute is not equal to the Entity that it's supposed to be saved with (attribute UUID " + attrib.getUUID().toString() + ")"));
-                }*/
-                
                 if (attrib == null)
                 {
                     if (entity.getAttributes().size() > 0)

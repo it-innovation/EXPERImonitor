@@ -64,16 +64,6 @@ public class AttributeDAOHelper
             return new ValidationReturnObject(false, new IllegalArgumentException("The Attribute name is NULL"));
         }
         
-        // check if it exists in the DB already
-        /*try {
-            if (objectExists(attrib.getUUID(), connection))
-            {
-                return new ValidationReturnObject(false, new RuntimeException("The Attribute already exists; the UUID is not unique"));
-            }
-        } catch (Exception ex) {
-            throw ex;
-        }*/
-        
         if (attrib.getEntityUUID() == null)
         {
             return new ValidationReturnObject(false, new RuntimeException("The Attribute's Entity UUID is NULL"));
