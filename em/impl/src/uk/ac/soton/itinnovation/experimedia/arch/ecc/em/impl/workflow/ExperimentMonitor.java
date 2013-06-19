@@ -34,7 +34,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
 
@@ -400,12 +400,23 @@ public class ExperimentMonitor implements IExperimentMonitor,
   }
   
   @Override
-  public void onFoundClientWithMetricGenerators( EMClient client )
+  public void onFoundClientWithMetricGenerators( EMClient client, 
+                                                 Set<MetricGenerator> newGens )
   {
     Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
     
     while ( listIt.hasNext() )
-    { listIt.next().onFoundClientWithMetricGenerators( client ); }
+    { listIt.next().onFoundClientWithMetricGenerators( client, newGens ); }
+  }
+  
+  @Override
+  public void onClientEnabledMetricCollection( EMClient client, 
+                                               UUID entityID, boolean enabled )
+  {
+    Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
+    
+    while ( listIt.hasNext() )
+    { listIt.next().onClientEnabledMetricCollection( client, entityID, enabled ); }
   }
   
   @Override

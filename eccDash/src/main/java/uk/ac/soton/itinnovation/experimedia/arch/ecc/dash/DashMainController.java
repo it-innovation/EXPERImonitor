@@ -266,14 +266,13 @@ public class DashMainController extends UFAbstractEventManager
   }
   
   @Override
-  public void onFoundClientWithMetricGenerators( EMClient client )
+  public void onFoundClientWithMetricGenerators( EMClient client, Set<MetricGenerator> newGens )
   {
     if ( client != null )
     {
-      Set<MetricGenerator> generators = client.getCopyOfMetricGenerators();
-      Iterator<MetricGenerator> mgIt = generators.iterator();
+      Iterator<MetricGenerator> mgIt = newGens.iterator();
       
-      // Pass to EDM
+      // Pass only new metric generators to EDM
       UUID expID = currentExperiment.getUUID();
       while ( mgIt.hasNext() )
       {
@@ -288,16 +287,18 @@ public class DashMainController extends UFAbstractEventManager
         }
       }
       
-      // Update UI
+      // Update UI with all metric generators
       UUID clientID = client.getID();
+      Set<MetricGenerator> allGenerators = client.getCopyOfMetricGenerators();
+      
       connectionsView.updateClientSummaryInfo( clientID, 
-                                               MetricHelper.getAllEntities( generators ).size(),
-                                               MetricHelper.getAllMeasurementSets( generators ).size() );
+                                               MetricHelper.getAllEntities( allGenerators ).size(),
+                                               MetricHelper.getAllMeasurementSets( allGenerators ).size() );
           
       if ( clientID.equals(connectionsView.getSelectedClientID()) )
       {
         clientInfoView.writeClientInfo( client );
-        mainDashView.addLogMessage( client.getName() + "Got metrics model from " + client.getName() );
+        mainDashView.addLogMessage( client.getName() + "Got new metrics model from " + client.getName() );
       }
         
       icePusher.push();
@@ -305,15 +306,31 @@ public class DashMainController extends UFAbstractEventManager
   }
   
   @Override
+  public void onClientEnabledMetricCollection( EMClient client, UUID entityID, boolean enabled )
+  {
+    // DION & SIMON TO DO:
+    //
+    // 1) Create some new elements in UI to show Entity metric availability
+    //
+    // 2) Wire this event through to the view so it can be updated
+  }
+  
+  @Override
   public void onClientSetupResult( EMClient client, boolean success )
   {
-    
+    // DION TO DO:
+    // 
+    // 1) Wire this event through to dashboard log
   }
   
   @Override
   public void onClientDeclaredCanPush( EMClient client )
   {
-    
+    // DION TO DO?:
+    //
+    // 1) Add some 'pull'/'push' icons to client view
+    //
+    // 2) Update the view to display PUSH icon
   }
   
   @Override
@@ -323,7 +340,16 @@ public class DashMainController extends UFAbstractEventManager
     {
       if ( currentPhase.equals( EMPhase.eEMLiveMonitoring) )
       {
-        try { liveMetricScheduler.addClient(client); }
+        try 
+        { 
+          liveMetricScheduler.addClient(client); 
+          
+          // DION TO DO?:
+          //
+          // See 'onClientDeclaredCanPush(..)' work...
+          //
+          // 1) Update the view to display PULL icon for this client
+        }
         catch ( Exception e )
         {
           String problem = "Could not add pulling client to live monitoring: " + e.getMessage();

@@ -123,16 +123,25 @@ public interface IEMDiscovery
     * to a dashboard view.
     */
     void setStatusMonitorEndpoint( String endPoint );
-
-    // User methods --------------------------------------------------------------
+    
     /**
-    * Notify the provider that the user is ready to initialise (i.e., is ready
+     * Confirms with the client that the ECC has enabled/disabled metric data 
+     * collection for a specific entity
+     * 
+     * @param entityID - ID of the Entity that was enabled
+     * @param enabled  - Enabled/disabled status
+     */
+    void notifyEntityMetricCollectionEnabled( UUID entityID, boolean enabled );
+
+    // User methods ------------------------------------------------------------
+    /**
+    * Notify the ECC that the user is ready to initialise (i.e., is ready
     * to specify which activity phases it supports; find metric providers etc)
     */
     void readyToInitialise();
 
     /**
-    * Send the provider with all the supported EM based monitoring phases supported
+    * Send the ECC with all the supported EM based monitoring phases supported
     * by the user (see EMSupportedPhase enumeration).
     * 
     * @param supportedPhases - a list of the monitoring phases supported.
@@ -140,18 +149,27 @@ public interface IEMDiscovery
     void sendActivePhases( EnumSet<EMPhase> supportedPhases );
 
     /**
-    * Send the provider with the result of the user's search for metric generators.
+    * Send the ECC with the result of the user's search for metric generators.
     */
     void sendDiscoveryResult( Boolean discoveredGenerators );
 
     /**
-    * Sends the provider a model of all the metric generators the user currently
+    * Sends the ECC a model of all the metric generators the user currently
     * has available.
     */
     void sendMetricGeneratorInfo( Set<MetricGenerator> generators );
+    
+    /**
+     * Tells the ECC to enable or disable metric collection, from this client,
+     * for the Entity specified.
+     * 
+     * @param entityID  - ID of the entity the client has declared to the ECC
+     * @param enabled   - Enable or disable metric collection
+     */
+    void enableEntityMetricCollection( UUID entityID, boolean enabled );
 
     /**
-    * Notify the EM that the user is disconnecting.
+    * Notify the ECC that the user is disconnecting.
     */
     void clientDisconnecting();
 }

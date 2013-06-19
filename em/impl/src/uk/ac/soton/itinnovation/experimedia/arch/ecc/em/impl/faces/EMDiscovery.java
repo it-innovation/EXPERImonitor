@@ -153,6 +153,18 @@ public class EMDiscovery extends EMBaseInterface
     executeMethod( 7, params );
   }
   
+  
+  // Method ID= 15
+  @Override
+  public void notifyEntityMetricCollectionEnabled( UUID entityID, boolean enabled )
+  {
+    ArrayList<Object> params = new ArrayList<Object>();
+    params.add( entityID );
+    params.add( enabled );
+    
+    executeMethod( 15, params );
+  }
+  
   // User methods --------------------------------------------------------------
   // Method ID = 8
   @Override
@@ -189,6 +201,17 @@ public class EMDiscovery extends EMBaseInterface
     params.add( generators );
     
     executeMethod( 11, params );
+  }
+  
+  // Method ID = 14
+  @Override
+  public void enableEntityMetricCollection( UUID entityID, boolean enabled )
+  {
+    ArrayList<Object> params = new ArrayList<Object>();
+    params.add( entityID );
+    params.add( enabled );
+    
+    executeMethod( 14, params );
   }
   
   // Method ID = 12
@@ -339,6 +362,30 @@ public class EMDiscovery extends EMBaseInterface
         }
         
       } break;
+        
+      case ( 14 ) :
+      {
+        if ( providerListener != null )
+        {
+          UUID entityID   = jsonMapper.fromJson( methodData.get(2), UUID.class );
+          boolean enabled = jsonMapper.fromJson( methodData.get(2), Boolean.class );
+          
+          providerListener.onEnableEntityMetricCollection( interfaceUserID,
+                                                           entityID, enabled );
+        }
+      }
+        
+      case ( 15 ) :
+      {
+        if ( userListener != null )
+        {
+          UUID entityID   = jsonMapper.fromJson( methodData.get(2), UUID.class );
+          boolean enabled = jsonMapper.fromJson( methodData.get(2), Boolean.class );
+          
+          userListener.onEntityMetricCollectionEnabled( interfaceProviderID, 
+                                                        entityID, enabled );
+        }
+      }
     }
   }
 }

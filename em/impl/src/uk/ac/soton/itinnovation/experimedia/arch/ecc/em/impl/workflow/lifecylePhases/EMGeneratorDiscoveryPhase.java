@@ -285,8 +285,11 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
 
     if ( client != null )
     {
+      // DION TO DO: Need now to add these, rather than replace them
       client.setMetricGenerators( generators );
-      phaseListener.onClientMetricGeneratorsFound( client );
+      
+      // Always notify, even if the set is empty
+      phaseListener.onClientMetricGeneratorsFound( client, generators );
 
       // Remove from the list of expected generators
       synchronized ( acceleratorLock )
@@ -303,6 +306,31 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
       if ( client.isPhaseAccelerating() ) 
         phaseListener.onDiscoveryPhaseCompleted( client );
     
+  }
+  
+  @Override
+  public void onEnableEntityMetricCollection( UUID senderID,
+                                              UUID entityID, 
+                                              boolean enabled )
+  {
+    
+    EMClientEx client = getClient( senderID );
+
+    if ( client != null )
+    {
+      // DION TO DO (see above method for example technqiues):
+      //
+      // 1) Check the client has an entity with ID 'entityID'
+      //
+      // 2) Find all the MeasurementSets associated with the Entity (MetricHelper class?)
+      //
+      // 3) Update the EMClientEx & EMMeasurementSetInfo classes to enable/disable measurement sets
+      //
+      // 4) Use this new method to update the correct EMMeasurementSetInfo instances
+      //
+      // 5) Find out (using debugging) where this method goes (in the dashboard)
+      phaseListener.onClientEnabledMetricCollection( client, entityID, enabled );
+    }
   }
   
   @Override
