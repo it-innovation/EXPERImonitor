@@ -47,6 +47,8 @@ public class MetricGenerator implements Serializable
     private Set<MetricGroup> metricGroups; // change if the ordering is important
     private Set<Entity> entities; // a set of entities being observed
     
+    
+  
     // other things needed?
     //   - identifier such as URI?
     //   - need to say anything about what type of generator it is?
@@ -56,6 +58,8 @@ public class MetricGenerator implements Serializable
      */
     public MetricGenerator()
     {
+        name = "undefined";
+        description = "undefined";
         this.uuid = UUID.randomUUID();
         this.metricGroups = new HashSet<MetricGroup>();
         this.entities = new HashSet<Entity>();
@@ -109,6 +113,8 @@ public class MetricGenerator implements Serializable
         this.uuid = uuid;
         this.name = name;
         this.description = description;
+  
+    
     }
     
     /**
