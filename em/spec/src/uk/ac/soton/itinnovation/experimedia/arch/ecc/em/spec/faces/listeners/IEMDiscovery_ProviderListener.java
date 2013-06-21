@@ -76,6 +76,19 @@ public interface IEMDiscovery_ProviderListener
     void onSendMetricGeneratorInfo( UUID senderID,
                                     Set<MetricGenerator> generators );
 
+    
+    /**
+     * Notification from the user that a previously declared entity should be
+     * enabled/disabled in the metric capturing process (live monitoring &
+     * post reporting).
+     * 
+     * @param entityID - ID of the entity to enable/disable
+     * @param enabled  - Enable or disable metric collection
+     */
+    void onEnableEntityMetricCollection( UUID senderID,
+                                         UUID entityID, 
+                                         boolean enabled );
+    
     /**
     * Notification that the user is disconnecting from the EM.
     * 

@@ -553,9 +553,15 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   }
   
   @Override
-  public void onClientMetricGeneratorsFound( EMClientEx client )
+  public void onClientMetricGeneratorsFound( EMClientEx client, Set<MetricGenerator> newGens )
   {
-    lifecycleListener.onFoundClientWithMetricGenerators( client );
+    lifecycleListener.onFoundClientWithMetricGenerators( client, newGens );
+  }
+  
+  @Override
+  public void onClientEnabledMetricCollection( EMClientEx client, UUID entityID, boolean enabled )
+  {
+    lifecycleListener.onClientEnabledMetricCollection( client, entityID, enabled );
   }
   
   @Override

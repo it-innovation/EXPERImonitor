@@ -25,7 +25,12 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecylePhases;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
+
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
+
+import java.util.*;
+
 
 
 
@@ -36,7 +41,9 @@ public interface EMGeneratorDiscoveryPhaseListener
   
   void onClientDiscoveryResult( EMClientEx client );
   
-  void onClientMetricGeneratorsFound( EMClientEx client );
+  void onClientMetricGeneratorsFound( EMClientEx client, Set<MetricGenerator> newGens );
+  
+  void onClientEnabledMetricCollection( EMClientEx client, UUID entityID, boolean enabled );
   
   void onClientIsDisconnected( EMClientEx client );
   

@@ -70,52 +70,63 @@ public interface IEMDiscovery_UserListener
                                 Date    createTime );
   
   /**
-   * Provider (EM) has notified the user that they are being de-registered. Clients
+   * Provider (ECC) has notified the user that they are being de-registered. Clients
    * should reply by using the clientDisconnecting() method on the discovery interface.
    * 
-   * @param senderID  - ID of the EM sending this event
+   * @param senderID  - ID of the ECC sending this event
    * @param reason    - Brief description for the reason for de-registering
    */
   void onDeregisteringThisClient( UUID senderID,
                                   String reason );
   
   /**
-   * EM requests a list of supported activities by the user.
+   * ECC requests a list of supported activities by the user.
    * 
-   * @param senderID - ID of the EM sending this event
+   * @param senderID - ID of the ECC sending this event
    */
   void onRequestActivityPhases( UUID senderID );
   
   /**
-   * EM requests the user discovers any metric generators that are available
-   * to generate metric data to send to the EM.
+   * ECC requests the user discovers any metric generators that are available
+   * to generate metric data to send to the ECC.
    * 
-   * @param senderID - ID of the EM sending this event
+   * @param senderID - ID of the ECC sending this event
    */
   void onDiscoverMetricGenerators( UUID senderID );
   
   /**
-   * EM requests the user sends it a model of the generators that it has available
+   * ECC requests the user sends it a model of the generators that it has available
    * to it
    * 
-   * @param senderID - ID of the EM sending this event
+   * @param senderID - ID of the ECC sending this event
    */
   void onRequestMetricGeneratorInfo( UUID senderID );
   
   /**
-   * EM notifies the user that time has run out to discover any more metric
+   * ECC notifies the user that time has run out to discover any more metric
    * generators - the user should stop this process if it is continuing.
    * 
-   * @param senderID - ID of the EM sending this event
+   * @param senderID - ID of the ECC sending this event
    */
   void onDiscoveryTimeOut( UUID senderID );
   
   /**
-   * The EM has sent a status monitoring end-point for the user to (optionally)
+   * The ECC has sent a status monitoring end-point for the user to (optionally)
    * use to provide active reporting of the systems it is currently using.
    * 
-   * @param senderID - ID of the EM sending this event
+   * @param senderID - ID of the ECC sending this event
    */
   void onSetStatusMonitorEndpoint( UUID senderID,
                                    String endPoint );
+  
+  /**
+   * The ECC has responded to the client's request 
+   * 
+   * @param senderID - ID of the ECC sending this response
+   * @param entityID - ID of the Entity that was enabled/disabled
+   * @param enabled  - Entity enabled/disabled
+   */
+  void onEntityMetricCollectionEnabled( UUID    senderID,
+                                        UUID    entityID,
+                                        boolean enabled );
 }

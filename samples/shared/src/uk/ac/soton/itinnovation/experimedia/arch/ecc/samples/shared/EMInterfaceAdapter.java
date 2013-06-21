@@ -210,6 +210,16 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
      */
     public void setMetricGenerators( Set<MetricGenerator> generators )
     {
+        // DION TO DO:
+        // 
+        // 1) Change this method name to 'sendMetricGenerators(..)'
+        //
+        // 2) If valid, use the discoveryFace member to send these new generators
+        //
+        // 3) Change the code below to add, rather than replace, new metric generators
+        //
+        // 4) Call discoveryFace.sendMetricGeneratorInfo( ... ) method to send the *new* metric generators only
+
         if ( generators != null ) clientGenerators = generators;
     }
 
@@ -386,14 +396,16 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
 
     @Override
     public void onRequestMetricGeneratorInfo( UUID senderID )
-    {
+    {      
         if ( senderID.equals(expMonitorID) )
         {
              if ( emiListener != null )
                 emiListener.onPopulateMetricGeneratorInfo();
              else
                emiLegListener.onPopulateMetricGeneratorInfo();
-             
+            
+            // DION TO DO: 
+            // Remove this line of code once you have finished working with 'setMetricGenerators(..)'
             discoveryFace.sendMetricGeneratorInfo( clientGenerators );
         }
     }
@@ -409,6 +421,20 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
     public void onSetStatusMonitorEndpoint( UUID senderID,
                                             String endPoint )
     { /* Not implemented in this demo */ }
+    
+    @Override
+    public void onEntityMetricCollectionEnabled( UUID    senderID,
+                                                 UUID    entityID,
+                                                 boolean enabled )
+    {
+      // DION TO DO:
+      //
+      // 1) Check UUID validity
+      //
+      // 2) Update the EMIAdapterListener interface to include this event
+      //
+      // 3) Forward this event using EMIAdapterListener
+    }
 
     // IEMMonitorSetup_UserListener --------------------------------------------
     @Override

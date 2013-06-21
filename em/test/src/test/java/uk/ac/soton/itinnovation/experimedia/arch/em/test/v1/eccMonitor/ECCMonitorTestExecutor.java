@@ -169,6 +169,12 @@ public class ECCMonitorTestExecutor extends ECCBaseTestExecutor
   { /*Not implemented in this test*/ }
   
   @Override
+  public void onEnableEntityMetricCollection( UUID senderID,
+                                              UUID entityID, 
+                                              boolean enabled )
+  { /*Not implemented in this test*/ }
+  
+  @Override
   public void onClientDisconnecting( UUID senderID )
   { /*Not implemented in this test*/ }
   
@@ -252,6 +258,11 @@ public class ECCMonitorTestExecutor extends ECCBaseTestExecutor
   @Override
   public void onSetStatusMonitorEndpoint( UUID senderID, String endPoint )
   { /*Not implemented in this test*/ }
+  
+  @Override
+  public void onEntityMetricCollectionEnabled( UUID senderID, UUID entityID,
+                                               boolean enabled )
+  { /*Not implemented in this test */ }
   
   // Runnable ------------------------------------------------------------------
   @Override

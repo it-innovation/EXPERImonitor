@@ -52,7 +52,7 @@ public class EMController implements IEMLifecycleListener
   private final IECCLogger emCtrlLogger;
   
   private IExperimentMonitor expMonitor;
-  private EMLoginView     loginView;
+  private EMLoginView        loginView;
   private EMView             mainView;
   private boolean            waitingToStartNextPhase = false;
   
@@ -194,12 +194,11 @@ public class EMController implements IEMLifecycleListener
   }
   
   @Override
-  public void onFoundClientWithMetricGenerators( EMClient client )
+  public void onFoundClientWithMetricGenerators( EMClient client, Set<MetricGenerator> newGens )
   {
     if ( client != null )
     {
-      Set<MetricGenerator> generators = client.getCopyOfMetricGenerators();
-      Iterator<MetricGenerator> mgIt = generators.iterator();
+      Iterator<MetricGenerator> mgIt = newGens.iterator();
       
       // Pass to EDM
       if ( expMGAccessor != null && expInstance != null )
@@ -216,7 +215,7 @@ public class EMController implements IEMLifecycleListener
       }
       
       // Update UI
-      mgIt = generators.iterator();
+      mgIt = newGens.iterator();
       while ( mgIt.hasNext() )
       {
         MetricGenerator mg = mgIt.next();
@@ -224,6 +223,18 @@ public class EMController implements IEMLifecycleListener
         mainView.addLogText( client.getName() + " has metric generator: " + mg.getName() );
       }
     }
+  }
+  
+  @Override
+  public void onClientEnabledMetricCollection( EMClient client, UUID entityID, boolean enabled )
+  {
+    // DION TO DO:
+    //
+    // 1) Check in-coming parameters are valid
+    //
+    // 2) Output a message to the mainView describing this event
+    //
+    // That's all we're going to do for this development tool
   }
   
   @Override

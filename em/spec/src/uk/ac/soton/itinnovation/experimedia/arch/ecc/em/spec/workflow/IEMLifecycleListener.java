@@ -28,7 +28,7 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
 
-import java.util.UUID;
+import java.util.*;
 
 
 
@@ -49,7 +49,9 @@ public interface IEMLifecycleListener
   
   void onLifecycleReset();
   
-  void onFoundClientWithMetricGenerators( EMClient client );
+  void onFoundClientWithMetricGenerators( EMClient client, Set<MetricGenerator> newGens );
+  
+  void onClientEnabledMetricCollection( EMClient client, UUID entityID, boolean enabled );
   
   void onClientSetupResult( EMClient client, boolean success );
   
