@@ -218,13 +218,20 @@ public class ECCClientController implements EMIAdapterListener,
         // Ready our metric generator for the EM
         HashSet mgSet = new HashSet<MetricGenerator>();
         mgSet.addAll( metricGenerators.values() );
-        emiAdapter.setMetricGenerators( mgSet );
+        emiAdapter.sendMetricGenerators( mgSet );
     }
 
     @Override
     public void onDiscoveryTimeOut()
     { clientView.addLogMessage( "Got discovery time-out message" ); }
     
+    @Override
+    public void onEntityMetricCollectionEnabled( UUID senderID, 
+                                                 UUID entityID, 
+                                                 boolean enabled )
+    {
+        /* Not implemented in this dmeo */
+    }
     @Override
     public void onSetupMetricGenerator( UUID genID, Boolean[] resultOUT )
     {

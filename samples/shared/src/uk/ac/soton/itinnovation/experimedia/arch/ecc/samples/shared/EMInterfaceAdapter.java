@@ -208,19 +208,16 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
      * 
      * @param generators 
      */
-    public void setMetricGenerators( Set<MetricGenerator> generators )
+    public void sendMetricGenerators( Set<MetricGenerator> generators )
     {
-        // DION TO DO:
-        // 
-        // 1) Change this method name to 'sendMetricGenerators(..)'
-        //
-        // 2) If valid, use the discoveryFace member to send these new generators
-        //
-        // 3) Change the code below to add, rather than replace, new metric generators
-        //
-        // 4) Call discoveryFace.sendMetricGeneratorInfo( ... ) method to send the *new* metric generators only
+        
+      
 
-        if ( generators != null ) clientGenerators = generators;
+        if ( generators != null )
+        {
+            clientGenerators.addAll(generators );
+            discoveryFace.sendMetricGeneratorInfo( generators );
+        }
     }
 
     /**
@@ -404,9 +401,7 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
              else
                emiLegListener.onPopulateMetricGeneratorInfo();
             
-            // DION TO DO: 
-            // Remove this line of code once you have finished working with 'setMetricGenerators(..)'
-            discoveryFace.sendMetricGeneratorInfo( clientGenerators );
+          
         }
     }
 
@@ -422,18 +417,16 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
                                             String endPoint )
     { /* Not implemented in this demo */ }
     
-    @Override
+   @Override
     public void onEntityMetricCollectionEnabled( UUID    senderID,
                                                  UUID    entityID,
                                                  boolean enabled )
     {
-      // DION TO DO:
-      //
-      // 1) Check UUID validity
-      //
-      // 2) Update the EMIAdapterListener interface to include this event
-      //
-      // 3) Forward this event using EMIAdapterListener
+        if(senderID !=null)
+        {
+            emiListener.onEntityMetricCollectionEnabled(senderID, entityID, enabled);
+        }
+     
     }
 
     // IEMMonitorSetup_UserListener --------------------------------------------

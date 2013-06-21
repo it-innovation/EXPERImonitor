@@ -170,10 +170,10 @@ public class ECCClientController implements EMIAdapterListener,
     @Override
     public void onPopulateMetricGeneratorInfo()
     {
-       HashSet mgSet = new HashSet<MetricGenerator>();
+       HashSet<MetricGenerator> mgSet = new HashSet<MetricGenerator>();
        mgSet.add( metricGenerator );
        
-       emiAdapter.setMetricGenerators( mgSet );
+       emiAdapter.sendMetricGenerators( mgSet );
    }
 
     @Override
@@ -353,6 +353,12 @@ public class ECCClientController implements EMIAdapterListener,
 //        // ... and store for confirmation of push, then report!
 //        pendingPushReports.put( sampleReport.getUUID(), sampleReport );
 //        emiAdapter.pushMetric( sampleReport );
+    }
+    
+    @Override
+    public void onEntityMetricCollectionEnabled( UUID senderID, UUID entityID, boolean enabled )
+    {
+    
     }
     
     @Override
