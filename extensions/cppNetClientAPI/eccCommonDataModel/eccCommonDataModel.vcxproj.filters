@@ -1,0 +1,141 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="stdafx">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="impl">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="impl\Experiment">
+      <UniqueIdentifier>{118713bb-4fe2-40a6-b25b-47197600a919}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="impl\Metrics">
+      <UniqueIdentifier>{9eb8d096-bc99-490d-a187-1658ecadb96f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="impl\Monitor">
+      <UniqueIdentifier>{c93770bb-ddb2-4677-b4fd-547cf66a5e0e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>stdafx</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>stdafx</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelBase.h">
+      <Filter>impl</Filter>
+    </ClInclude>
+    <ClInclude Include="Experiment\Experiment.h">
+      <Filter>impl\Experiment</Filter>
+    </ClInclude>
+    <ClInclude Include="Metrics\Attribute.h">
+      <Filter>impl\Metrics</Filter>
+    </ClInclude>
+    <ClInclude Include="Metrics\Entity.h">
+      <Filter>impl\Metrics</Filter>
+    </ClInclude>
+    <ClInclude Include="Metrics\Measurement.h">
+      <Filter>impl\Metrics</Filter>
+    </ClInclude>
+    <ClInclude Include="Metrics\MeasurementSet.h">
+      <Filter>impl\Metrics</Filter>
+    </ClInclude>
+    <ClInclude Include="Metrics\Metric.h">
+      <Filter>impl\Metrics</Filter>
+    </ClInclude>
+    <ClInclude Include="Metrics\MetricGenerator.h">
+      <Filter>impl\Metrics</Filter>
+    </ClInclude>
+    <ClInclude Include="Metrics\MetricGroup.h">
+      <Filter>impl\Metrics</Filter>
+    </ClInclude>
+    <ClInclude Include="Metrics\MetricHelper.h">
+      <Filter>impl\Metrics</Filter>
+    </ClInclude>
+    <ClInclude Include="Metrics\MetricType.h">
+      <Filter>impl\Metrics</Filter>
+    </ClInclude>
+    <ClInclude Include="Metrics\Report.h">
+      <Filter>impl\Metrics</Filter>
+    </ClInclude>
+    <ClInclude Include="Metrics\Unit.h">
+      <Filter>impl\Metrics</Filter>
+    </ClInclude>
+    <ClInclude Include="Monitor\EMClient.h">
+      <Filter>impl\Monitor</Filter>
+    </ClInclude>
+    <ClInclude Include="Monitor\EMDataBatch.h">
+      <Filter>impl\Monitor</Filter>
+    </ClInclude>
+    <ClInclude Include="Monitor\EMInterfaceType.h">
+      <Filter>impl\Monitor</Filter>
+    </ClInclude>
+    <ClInclude Include="Monitor\EMPhase.h">
+      <Filter>impl\Monitor</Filter>
+    </ClInclude>
+    <ClInclude Include="Monitor\EMPhaseTimeOut.h">
+      <Filter>impl\Monitor</Filter>
+    </ClInclude>
+    <ClInclude Include="Monitor\EMPostReportSummary.h">
+      <Filter>impl\Monitor</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>stdafx</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelBase.cpp">
+      <Filter>impl</Filter>
+    </ClCompile>
+    <ClCompile Include="Experiment\Experiment.cpp">
+      <Filter>impl\Experiment</Filter>
+    </ClCompile>
+    <ClCompile Include="Metrics\Attribute.cpp">
+      <Filter>impl\Metrics</Filter>
+    </ClCompile>
+    <ClCompile Include="Metrics\Entity.cpp">
+      <Filter>impl\Metrics</Filter>
+    </ClCompile>
+    <ClCompile Include="Metrics\Measurement.cpp">
+      <Filter>impl\Metrics</Filter>
+    </ClCompile>
+    <ClCompile Include="Metrics\MeasurementSet.cpp">
+      <Filter>impl\Metrics</Filter>
+    </ClCompile>
+    <ClCompile Include="Metrics\Metric.cpp">
+      <Filter>impl\Metrics</Filter>
+    </ClCompile>
+    <ClCompile Include="Metrics\MetricGenerator.cpp">
+      <Filter>impl\Metrics</Filter>
+    </ClCompile>
+    <ClCompile Include="Metrics\MetricGroup.cpp">
+      <Filter>impl\Metrics</Filter>
+    </ClCompile>
+    <ClCompile Include="Metrics\MetricHelper.cpp">
+      <Filter>impl\Metrics</Filter>
+    </ClCompile>
+    <ClCompile Include="Metrics\Report.cpp">
+      <Filter>impl\Metrics</Filter>
+    </ClCompile>
+    <ClCompile Include="Metrics\Unit.cpp">
+      <Filter>impl\Metrics</Filter>
+    </ClCompile>
+    <ClCompile Include="Monitor\EMClient.cpp">
+      <Filter>impl\Monitor</Filter>
+    </ClCompile>
+    <ClCompile Include="Monitor\EMDataBatch.cpp">
+      <Filter>impl\Monitor</Filter>
+    </ClCompile>
+    <ClCompile Include="Monitor\EMPostReportSummary.cpp">
+      <Filter>impl\Monitor</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

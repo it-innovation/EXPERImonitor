@@ -1,0 +1,69 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="stdafx">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="impl">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="spec">
+      <UniqueIdentifier>{7891db62-261a-4493-90cc-0e58b3d32b39}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="spec\listeners">
+      <UniqueIdentifier>{eca68d85-f482-4e1a-9d8e-11dd1354e701}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>stdafx</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>stdafx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\eccEMClient-Spec\listeners\IEMDiscovery_UserListener.h">
+      <Filter>spec\listeners</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\eccEMClient-Spec\listeners\IEMLiveMonitor_UserListener.h">
+      <Filter>spec\listeners</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\eccEMClient-Spec\listeners\IEMPostReport_UserListener.h">
+      <Filter>spec\listeners</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\eccEMClient-Spec\listeners\IEMSetup_UserListener.h">
+      <Filter>spec\listeners</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\eccEMClient-Spec\listeners\IEMTearDown_UserListener.h">
+      <Filter>spec\listeners</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\eccEMClient-Spec\IEMDiscovery.h">
+      <Filter>spec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\eccEMClient-Spec\IEMLiveMonitor.h">
+      <Filter>spec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\eccEMClient-Spec\IEMMetricGenSetup.h">
+      <Filter>spec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\eccEMClient-Spec\IEMMonitorEntryPoint.h">
+      <Filter>spec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\eccEMClient-Spec\IEMPostReport.h">
+      <Filter>spec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\eccEMClient-Spec\IEMTearDown.h">
+      <Filter>spec</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>stdafx</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
