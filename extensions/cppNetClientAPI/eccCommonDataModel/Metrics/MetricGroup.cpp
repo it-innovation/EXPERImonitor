@@ -26,6 +26,11 @@
 #include "stdafx.h"
 #include "MetricGroup.h"
 
+using namespace boost::uuids;
+using namespace std;
+
+
+
 
 namespace ecc_commonDataModel
 {
@@ -174,5 +179,21 @@ namespace ecc_commonDataModel
 //        return name;
 //    }
 //};
+
+// ModelBase -----------------------------------------------------------------
+void MetricGroup::toJSON( wstring& jsonStrOUT )
+{
+}
+
+void MetricGroup::fromJSON( const wstring& jsonStr )
+{
+}
+
+wstring MetricGroup::toString()
+{
+  wstring ts;
+
+  return ts;
+}
     
 } // namespace

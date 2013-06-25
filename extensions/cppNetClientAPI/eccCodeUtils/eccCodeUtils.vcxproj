@@ -11,9 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{F1989404-6D1A-4105-B882-30DC481BBF2A}</ProjectGuid>
+    <ProjectGuid>{B11CDE60-E353-49C9-BFD9-A2E1FBABE77A}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>eccEMClientImpl</RootNamespace>
+    <RootNamespace>eccCodeUtils</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -39,11 +39,12 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IntDir>$(ProjectDir)\$(Configuration)\</IntDir>
-    <IncludePath>$(ProjectDir)\..\eccEMClient-Spec\;$(BOOST_DIR);$(ProjectDir);$(IncludePath)</IncludePath>
+    <IncludePath>$(BOOST_DIR);$(ProjectDir);$(IncludePath)</IncludePath>
+    <TargetName>$(ProjectName)_d</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IntDir>$(ProjectDir)\$(Configuration)\</IntDir>
-    <IncludePath>$(ProjectDir)\..\eccEMClient-Spec\;$(BOOST_DIR);$(ProjectDir);$(IncludePath)</IncludePath>
+    <IncludePath>$(BOOST_DIR);$(ProjectDir);$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -51,11 +52,13 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <Lib />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -65,6 +68,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -74,25 +78,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\eccEMClient-Spec\IEMDiscovery.h" />
-    <ClInclude Include="..\..\eccEMClient-Spec\IEMLiveMonitor.h" />
-    <ClInclude Include="..\..\eccEMClient-Spec\IEMMetricGenSetup.h" />
-    <ClInclude Include="..\..\eccEMClient-Spec\IEMMonitorEntryPoint.h" />
-    <ClInclude Include="..\..\eccEMClient-Spec\IEMPostReport.h" />
-    <ClInclude Include="..\..\eccEMClient-Spec\IEMTearDown.h" />
-    <ClInclude Include="..\..\eccEMClient-Spec\listeners\IEMDiscovery_UserListener.h" />
-    <ClInclude Include="..\..\eccEMClient-Spec\listeners\IEMLiveMonitor_UserListener.h" />
-    <ClInclude Include="..\..\eccEMClient-Spec\listeners\IEMPostReport_UserListener.h" />
-    <ClInclude Include="..\..\eccEMClient-Spec\listeners\IEMSetup_UserListener.h" />
-    <ClInclude Include="..\..\eccEMClient-Spec\listeners\IEMTearDown_UserListener.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="Utils\Utils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Utils\Utils.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

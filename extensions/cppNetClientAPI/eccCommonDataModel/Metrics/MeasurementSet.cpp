@@ -26,6 +26,10 @@
 #include "stdafx.h"
 #include "MeasurementSet.h"
 
+using namespace boost::uuids;
+using namespace std;
+
+
 
 
 namespace ecc_commonDataModel
@@ -289,5 +293,21 @@ namespace ecc_commonDataModel
 //        return addMeasure;
 //    }
 //};
+
+// ModelBase -----------------------------------------------------------------
+void MeasurementSet::toJSON( wstring& jsonStrOUT )
+{
+}
+
+void MeasurementSet::fromJSON( const wstring& jsonStr )
+{
+}
+
+wstring MeasurementSet::toString()
+{
+  wstring ts;
+
+  return ts;
+}
 
 } // namespace

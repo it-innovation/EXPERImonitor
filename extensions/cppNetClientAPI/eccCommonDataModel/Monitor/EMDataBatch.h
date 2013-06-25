@@ -41,7 +41,7 @@ namespace ecc_commonDataModel
      * 
      * @author sgc
      */
-    class EMDataBatch
+    class EMDataBatch : ModelBase
     {
     public:
 
@@ -85,6 +85,13 @@ namespace ecc_commonDataModel
       Report::ptr_t getBatchReport();
 
       void setBatchReport( Report::ptr_t report );
+
+      // ModelBase -----------------------------------------------------------------
+      virtual void toJSON( std::wstring& jsonStrOUT );
+
+      virtual void fromJSON( const std::wstring& jsonStr );
+
+      virtual std::wstring toString();
 
     private:
 

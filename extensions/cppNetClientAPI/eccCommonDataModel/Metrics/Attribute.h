@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "Attribute.h"
+#include "ModelBase.h"
 
 #include <boost/uuid/uuid.hpp>
 
@@ -39,7 +39,7 @@ namespace ecc_commonDataModel
  * 
  * @author Vegard Engen
  */
-class Attribute
+class Attribute : ModelBase
 {
 public:
 
@@ -97,6 +97,13 @@ public:
   std::wstring& getDescription();
 
   void setDescription( const std::wstring& description );
+
+  // ModelBase -----------------------------------------------------------------
+  virtual void toJSON( std::wstring& jsonStrOUT );
+
+  virtual void fromJSON( const std::wstring& jsonStr );
+
+  virtual std::wstring toString();
 
 private:
 

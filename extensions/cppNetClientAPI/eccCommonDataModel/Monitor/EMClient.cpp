@@ -26,6 +26,11 @@
 #include "stdafx.h"
 #include "EMClient.h"
 
+using namespace boost::uuids;
+using namespace std;
+
+
+
 
 namespace ecc_commonDataModel
 {

@@ -33,7 +33,7 @@ namespace ecc_commonDataModel
     public:
       virtual ~ModelBase();
 
-      virtual void toJSON( std::wstring& jsonStr ) =0;
+      virtual void toJSON( std::wstring& jsonStrOUT ) =0;
 
       virtual void fromJSON( const std::wstring& jsonStr ) =0;
 

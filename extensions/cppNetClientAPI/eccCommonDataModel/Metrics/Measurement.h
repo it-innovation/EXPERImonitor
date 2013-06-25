@@ -25,6 +25,8 @@
 
 #pragma once
 
+#include "ModelBase.h"
+
 #include <boost/uuid/uuid.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
@@ -39,7 +41,7 @@ namespace ecc_commonDataModel
    * 
    * @author Vegard Engen
    */
-  class Measurement
+  class Measurement : ModelBase
   {
   public:
 
@@ -126,6 +128,13 @@ namespace ecc_commonDataModel
     bool getSynchronised();
 
     void setSynchronised( const bool& synchronised );
+
+    // ModelBase -----------------------------------------------------------------
+    virtual void toJSON( std::wstring& jsonStrOUT );
+
+    virtual void fromJSON( const std::wstring& jsonStr );
+
+    virtual std::wstring toString();
 
   private:
 

@@ -26,6 +26,10 @@
 #include "stdafx.h"
 #include "Unit.h"
 
+using namespace std;
+
+
+
 
 namespace ecc_commonDataModel
 {
@@ -72,5 +76,22 @@ namespace ecc_commonDataModel
 //        return this.name;
 //    }
 //};
+
+
+// ModelBase -----------------------------------------------------------------
+void Unit::toJSON( wstring& jsonStrOUT )
+{
+}
+
+void Unit::fromJSON( const wstring& jsonStr )
+{
+}
+
+wstring Unit::toString()
+{
+  wstring ts;
+
+  return ts;
+  }
     
 } // namespace

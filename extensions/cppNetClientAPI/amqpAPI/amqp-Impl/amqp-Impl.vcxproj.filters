@@ -63,9 +63,6 @@
     <ClInclude Include="amqp\AMQPBasicSubscriptionService.h">
       <Filter>amqp</Filter>
     </ClInclude>
-    <ClInclude Include="Utils.h">
-      <Filter>amqp</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -96,9 +93,6 @@
       <Filter>faces</Filter>
     </ClCompile>
     <ClCompile Include="amqp\AMQPBasicSubscriptionService.cpp">
-      <Filter>amqp</Filter>
-    </ClCompile>
-    <ClCompile Include="Utils.cpp">
       <Filter>amqp</Filter>
     </ClCompile>
   </ItemGroup>

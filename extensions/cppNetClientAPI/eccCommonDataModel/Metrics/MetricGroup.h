@@ -25,6 +25,7 @@
 
 #pragma once
 
+#include "ModelBase.h"
 #include "MeasurementSet.h"
 
 #include <boost/uuid/uuid.hpp>
@@ -37,7 +38,7 @@
 namespace ecc_commonDataModel
 {
 
-    class MetricGroup
+    class MetricGroup : ModelBase
     {
     public:
         typedef boost::shared_ptr<MetricGroup> ptr_t;
@@ -130,6 +131,13 @@ namespace ecc_commonDataModel
          * @param measurementSets the measurement sets to add
          */
         void addMeasurementSets( std::hash_map<boost::uuids::uuid, MeasurementSet::ptr_t> measurementSets );
+
+        // ModelBase -----------------------------------------------------------------
+        virtual void toJSON( std::wstring& jsonStrOUT );
+
+        virtual void fromJSON( const std::wstring& jsonStr );
+
+        virtual std::wstring toString();
     };
     
 } // namespace

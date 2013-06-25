@@ -39,7 +39,7 @@ namespace ecc_commonDataModel
  * 
  * @author Vegard Engen
  */
-class Metric
+class Metric : ModelBase
 {
 public:
     typedef boost::shared_ptr<Metric> ptr_t;
@@ -85,6 +85,13 @@ public:
     Unit::ptr_t getUnit();
 
     void setUnit( Unit::ptr_t unit );
+
+    // ModelBase -----------------------------------------------------------------
+    virtual void toJSON( std::wstring& jsonStrOUT );
+
+    virtual void fromJSON( const std::wstring& jsonStr );
+
+    virtual std::wstring toString();
 };
 
 } // namespace

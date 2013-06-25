@@ -26,6 +26,11 @@
 #include "stdafx.h"
 #include "Entity.h"
 
+using namespace boost::uuids;
+using namespace std;
+
+
+
 
 namespace ecc_commonDataModel
 {
@@ -214,5 +219,21 @@ namespace ecc_commonDataModel
 //        return name;
 //    }
 //};
+
+// ModelBase -----------------------------------------------------------------
+void Entity::toJSON( wstring& jsonStrOUT )
+{
+}
+
+void Entity::fromJSON( const wstring& jsonStr )
+{
+}
+
+wstring Entity::toString()
+{
+  wstring ts;
+
+  return ts;
+}
 
 } // namespace

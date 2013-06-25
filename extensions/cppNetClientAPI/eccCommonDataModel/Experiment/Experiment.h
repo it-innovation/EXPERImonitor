@@ -46,7 +46,7 @@ namespace ecc_commonDataModel
  * 
  * @author Vegard Engen
  */
-class Experiment
+class Experiment : ModelBase
 {
 public:
 
@@ -76,7 +76,7 @@ public:
               const std::wstring&             experimentID, 
               const std::wstring&             name, 
               const std::wstring&             description,
-              const boost::posix_time::ptime& creationTime);
+              const boost::posix_time::ptime& creationTime );
     
   /**
     * Constructor to set all the information about the experiment.
@@ -92,53 +92,53 @@ public:
               const std::wstring&             name, 
               const std::wstring&             description, 
               const boost::posix_time::ptime& creationTime, 
-              const boost::posix_time::ptime& endTime);
+              const boost::posix_time::ptime& endTime );
 
   /**
-   * Getter/Setter for the experiment's unique ID
-   */
+    * Getter/Setter for the experiment's unique ID
+    */
   boost::uuids::uuid getUUID();
 
   void setUUID( const boost::uuids::uuid& ID );
 
   /**
-   * Getter/Setter for the experiment's human readable ID
-   */
+    * Getter/Setter for the experiment's human readable ID
+    */
   std::wstring getExperimentID();
 
   void setExperimentID( const std::wstring& ID );
 
   /**
-   * Getter/Setter for the experiment's name
-   */
+    * Getter/Setter for the experiment's name
+    */
   std::wstring getName();
 
   void setName( const std::wstring& name );
 
   /**
-   * Getter/Setter for the experiment description
-   */
+    * Getter/Setter for the experiment description
+    */
   std::wstring getDescription();
 
   void setDescription( const std::wstring& desc );
 
   /**
-   * Getter/Setter for the experiment's start time
-   */
+    * Getter/Setter for the experiment's start time
+    */
   boost::posix_time::ptime getStartTime();
 
   void setStartTime( const boost::posix_time::ptime& time );
 
   /**
-   * Getter/Setter for the experiment's end time
-   */
+    * Getter/Setter for the experiment's end time
+    */
   boost::posix_time::ptime getEndTime();
 
   void setEndTime( const boost::posix_time::ptime& time );
 
   /**
-   * Getter/Setter for the metric generators associated with this experiment
-   */
+    * Getter/Setter for the metric generators associated with this experiment
+    */
   std::hash_set<MetricGenerator::ptr_t> getMetricGenerators();
 
   void setMetricGenerators( const std::hash_set<MetricGenerator::ptr_t>& generators );
@@ -153,7 +153,15 @@ public:
     */
   void addMetricGenerators( const std::hash_set<MetricGenerator::ptr_t>& generators );
 
-  private:
+  // ModelBase -----------------------------------------------------------------
+  virtual void toJSON( std::wstring& jsonStrOUT );
+
+  virtual void fromJSON( const std::wstring& jsonStr );
+
+  virtual std::wstring toString();
+
+private:
+  boost::uuids::uuid uuid;
 
 };
 

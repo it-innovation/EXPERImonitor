@@ -55,7 +55,7 @@ namespace ecc_commonDataModel
  * 
  * @author Simon Crowle
  */
-class Entity
+class Entity : ModelBase
 {
 public:
 
@@ -173,6 +173,13 @@ public:
     * @param attributes the attributes to add
     */
   void addAttributes( std::hash_map<boost::uuids::uuid, Attribute::ptr_t> attributes );
+
+  // ModelBase -----------------------------------------------------------------
+  virtual void toJSON( std::wstring& jsonStrOUT );
+
+  virtual void fromJSON( const std::wstring& jsonStr );
+
+  virtual std::wstring toString();
 
 private:
 

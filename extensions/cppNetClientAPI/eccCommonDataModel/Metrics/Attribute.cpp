@@ -26,6 +26,11 @@
 #include "stdafx.h"
 #include "Attribute.h"
 
+using namespace boost::uuids;
+using namespace std;
+
+
+
 
 namespace ecc_commonDataModel
 {
@@ -109,5 +114,21 @@ namespace ecc_commonDataModel
 //        return name;
 //    }
 //};
+
+// ModelBase -----------------------------------------------------------------
+void Attribute::toJSON( wstring& jsonStrOUT )
+{
+}
+
+void Attribute::fromJSON( const wstring& jsonStr )
+{
+}
+
+wstring Attribute::toString()
+{
+  wstring ts;
+
+  return ts;
+}
 
 } // namespace

@@ -36,123 +36,129 @@
 namespace ecc_commonDataModel
 {
 
+  /**
+    * A report class that provides a means of transferring measurements, which 
+    * contains meta-information about a measurement set and the measurements for it 
+    * for a given time period
+    * 
+    * Currently only the number of measurements is supported.
+    * 
+    * @author Vegard Engen
+    */
+  class Report : ModelBase
+  {
+  public:
+
+    typedef boost::shared_ptr<Report> ptr_t;
+
+    Report();
+
     /**
-     * A report class that provides a means of transferring measurements, which 
-     * contains meta-information about a measurement set and the measurements for it 
-     * for a given time period
-     * 
-     * Currently only the number of measurements is supported.
-     * 
-     * @author Vegard Engen
-     */
-    class Report
-    {
-    public:
+      * Constructor for the Report class that also creates a MeasurementSet with
+      * 'msID' as the identifier.
+      */
+    Report( const boost::uuids::uuid& msID );
 
-        typedef boost::shared_ptr<Report> ptr_t;
+    /**
+      * Copy constructor for the Report class, which takes a deep copy of any objects.
+      * @param report The report object a copy is made of.
+      */
+    Report( Report::ptr_t report );
 
-        Report();
+    /**
+      * Constructor to set the "administrative" attributes of the class.
+      * @param uuid The UUID of the Report, to uniquely identify it.
+      * @param measurementSet The measurement set that this is a report for.
+      * @param reportDate The time stamp for when the report was made.
+      * @param fromDate The time stamp for the start of the report period.
+      * @param toDate The time stamp for the end of the report period.
+      */
+    Report( const boost::uuids::uuid&      uuid, 
+            MeasurementSet::ptr_t          measurementSet, 
+            const boost::posix_time::ptime reportDate, 
+            const boost::posix_time::ptime fromDate, 
+            const boost::posix_time::ptime toDate );
 
-        /**
-         * Constructor for the Report class that also creates a MeasurementSet with
-         * 'msID' as the identifier.
-         */
-        Report( const boost::uuids::uuid& msID );
-
-        /**
-         * Copy constructor for the Report class, which takes a deep copy of any objects.
-         * @param report The report object a copy is made of.
-         */
-        Report( Report::ptr_t report );
-
-        /**
-         * Constructor to set the "administrative" attributes of the class.
-         * @param uuid The UUID of the Report, to uniquely identify it.
-         * @param measurementSet The measurement set that this is a report for.
-         * @param reportDate The time stamp for when the report was made.
-         * @param fromDate The time stamp for the start of the report period.
-         * @param toDate The time stamp for the end of the report period.
-         */
-        Report( const boost::uuids::uuid&      uuid, 
-                MeasurementSet::ptr_t          measurementSet, 
-                const boost::posix_time::ptime reportDate, 
-                const boost::posix_time::ptime fromDate, 
-                const boost::posix_time::ptime toDate );
-
-        virtual ~Report();
+    virtual ~Report();
     
-        /**
-         * Constructor to set all the attributes of the class.
-         * @param uuid The UUID of the Report, to uniquely identify it.
-         * @param measurementSet The measurement set that this is a report for.
-         * @param reportDate The time stamp for when the report was made.
-         * @param fromDate The time stamp for the start of the report period.
-         * @param toDate The time stamp for the end of the report period.
-         * @param numMeasurements The number of measurements in the reporting period.
-         */
-        Report( const boost::uuids::uuid&       uuid, 
-                MeasurementSet                  measurementSet, 
-                const boost::posix_time::ptime& reportDate, 
-                const boost::posix_time::ptime& fromDate, 
-                const boost::posix_time::ptime& toDate, 
-                const int&                      numMeasurements );
+    /**
+      * Constructor to set all the attributes of the class.
+      * @param uuid The UUID of the Report, to uniquely identify it.
+      * @param measurementSet The measurement set that this is a report for.
+      * @param reportDate The time stamp for when the report was made.
+      * @param fromDate The time stamp for the start of the report period.
+      * @param toDate The time stamp for the end of the report period.
+      * @param numMeasurements The number of measurements in the reporting period.
+      */
+    Report( const boost::uuids::uuid&       uuid, 
+            MeasurementSet                  measurementSet, 
+            const boost::posix_time::ptime& reportDate, 
+            const boost::posix_time::ptime& fromDate, 
+            const boost::posix_time::ptime& toDate, 
+            const int&                      numMeasurements );
 
-        /**
-         * Getter/Setter for the report ID
-         */
-        boost::uuids::uuid getReportID();
+    /**
+      * Getter/Setter for the report ID
+      */
+    boost::uuids::uuid getReportID();
 
-        void setReportID( const boost::uuids::uuid& ID );
+    void setReportID( const boost::uuids::uuid& ID );
 
-        /**
-         * Getter/Setter for the measurement set associated with this report
-         */
-        MeasurementSet::ptr_t getMeasurementSet();
+    /**
+      * Getter/Setter for the measurement set associated with this report
+      */
+    MeasurementSet::ptr_t getMeasurementSet();
    
-        void setMeasurementSet( MeasurementSet::ptr_t ms );
+    void setMeasurementSet( MeasurementSet::ptr_t ms );
 
-        /**
-         * Getter/Setter for the report date
-         */
-        boost::posix_time::ptime getReportDate();
+    /**
+      * Getter/Setter for the report date
+      */
+    boost::posix_time::ptime getReportDate();
         
-        void setReportDate( const boost::posix_time::ptime& date ); 
+    void setReportDate( const boost::posix_time::ptime& date ); 
 
-        /**
-         * Getter/Setter for start date of the measurements contained in this report
-         */
-        boost::posix_time::ptime getReportFromDate();
+    /**
+      * Getter/Setter for start date of the measurements contained in this report
+      */
+    boost::posix_time::ptime getReportFromDate();
         
-        void setReportFromDate( const boost::posix_time::ptime& date ); 
+    void setReportFromDate( const boost::posix_time::ptime& date ); 
 
-        /**
-         * Getter/Setter for the end date of the measurements contained in this report
-         */
-        boost::posix_time::ptime getReportToDate();
+    /**
+      * Getter/Setter for the end date of the measurements contained in this report
+      */
+    boost::posix_time::ptime getReportToDate();
         
-        void setReportToDate( const boost::posix_time::ptime& date ); 
+    void setReportToDate( const boost::posix_time::ptime& date ); 
 
-        /**
-         * Getter/Setter for the number of measurements contained in this report
-         */
-        int getNumberOfMeasurements();
+    /**
+      * Getter/Setter for the number of measurements contained in this report
+      */
+    int getNumberOfMeasurements();
 
-        void setNumberOfMeasurements( const int& mCount );
+    void setNumberOfMeasurements( const int& mCount );
 
-        /**
-         * Copy the report provided by repIn; optional to also copy the measurements
-         */
-        void copyReport( Report repIn, bool copyMeasurements );
+    /**
+      * Copy the report provided by repIn; optional to also copy the measurements
+      */
+    void copyReport( Report::ptr_t repIn, bool copyMeasurements );
 
-      private:
+    // ModelBase -----------------------------------------------------------------
+    virtual void toJSON( std::wstring& jsonStrOUT );
 
-        boost::uuids::uuid       reportID;
-        MeasurementSet::ptr_t    measurementSet;
-        boost::posix_time::ptime reportDate;
-        boost::posix_time::ptime fromDate;
-        boost::posix_time::ptime toDate;
-        int                      numberOfMeasurements;
+    virtual void fromJSON( const std::wstring& jsonStr );
 
-    };
+    virtual std::wstring toString();
+
+  private:
+    boost::uuids::uuid       reportID;
+    MeasurementSet::ptr_t    measurementSet;
+    boost::posix_time::ptime reportDate;
+    boost::posix_time::ptime fromDate;
+    boost::posix_time::ptime toDate;
+    int                      numberOfMeasurements;
+
+  };
     
 } // namespace

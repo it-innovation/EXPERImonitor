@@ -25,7 +25,7 @@
 
 #pragma once
 
-
+#include "ModelBase.h"
 
 
 namespace ecc_commonDataModel
@@ -38,7 +38,7 @@ namespace ecc_commonDataModel
      * 
      * @author Vegard Engen
      */
-    class Unit
+    class Unit : ModelBase
     {
     public:
 
@@ -66,6 +66,13 @@ namespace ecc_commonDataModel
         std::wstring getName();
 
         void setName( const std::wstring& name );
+
+        // ModelBase -----------------------------------------------------------------
+        virtual void toJSON( std::wstring& jsonStrOUT );
+
+        virtual void fromJSON( const std::wstring& jsonStr );
+
+        virtual std::wstring toString();
     };
     
 } // namespace

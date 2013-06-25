@@ -11,9 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{CC4FDC88-4273-4477-B895-A943D974BC27}</ProjectGuid>
+    <ProjectGuid>{F1989404-6D1A-4105-B882-30DC481BBF2A}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>eccCommonDataModel</RootNamespace>
+    <RootNamespace>eccEMClientImpl</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -39,12 +39,14 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IntDir>$(ProjectDir)\$(Configuration)\</IntDir>
-    <IncludePath>$(BOOST_DIR);$(ProjectDir)\Monitor;$(ProjectDir)\Metrics;$(ProjectDir)\Experiment;$(ProjectDir)\Base;$(ProjectDir);$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)\..\eccEMClient-Spec\;$(BOOST_DIR);$(ProjectDir);$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)$(Configuration)\;$(LibraryPath)</LibraryPath>
     <TargetName>$(ProjectName)_d</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IntDir>$(ProjectDir)\$(Configuration)\</IntDir>
-    <IncludePath>$(BOOST_DIR);$(ProjectDir)\Monitor;$(ProjectDir)\Metrics;$(ProjectDir)\Experiment;$(ProjectDir)\Base;$(ProjectDir);$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)\..\eccEMClient-Spec\;$(BOOST_DIR);$(ProjectDir);$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)$(Configuration)\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -52,7 +54,6 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -67,7 +68,6 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -77,44 +77,21 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Base\ModelBase.h" />
-    <ClInclude Include="Experiment\Experiment.h" />
-    <ClInclude Include="Metrics\Attribute.h" />
-    <ClInclude Include="Metrics\Entity.h" />
-    <ClInclude Include="Metrics\Measurement.h" />
-    <ClInclude Include="Metrics\MeasurementSet.h" />
-    <ClInclude Include="Metrics\Metric.h" />
-    <ClInclude Include="Metrics\MetricGenerator.h" />
-    <ClInclude Include="Metrics\MetricGroup.h" />
-    <ClInclude Include="Metrics\MetricHelper.h" />
-    <ClInclude Include="Metrics\MetricType.h" />
-    <ClInclude Include="Metrics\Report.h" />
-    <ClInclude Include="Metrics\Unit.h" />
-    <ClInclude Include="Monitor\EMClient.h" />
-    <ClInclude Include="Monitor\EMDataBatch.h" />
-    <ClInclude Include="Monitor\EMInterfaceType.h" />
-    <ClInclude Include="Monitor\EMPhase.h" />
-    <ClInclude Include="Monitor\EMPhaseTimeOut.h" />
-    <ClInclude Include="Monitor\EMPostReportSummary.h" />
+    <ClInclude Include="..\..\eccEMClient-Spec\IEMDiscovery.h" />
+    <ClInclude Include="..\..\eccEMClient-Spec\IEMLiveMonitor.h" />
+    <ClInclude Include="..\..\eccEMClient-Spec\IEMMetricGenSetup.h" />
+    <ClInclude Include="..\..\eccEMClient-Spec\IEMMonitorEntryPoint.h" />
+    <ClInclude Include="..\..\eccEMClient-Spec\IEMPostReport.h" />
+    <ClInclude Include="..\..\eccEMClient-Spec\IEMTearDown.h" />
+    <ClInclude Include="..\..\eccEMClient-Spec\listeners\IEMDiscovery_UserListener.h" />
+    <ClInclude Include="..\..\eccEMClient-Spec\listeners\IEMLiveMonitor_UserListener.h" />
+    <ClInclude Include="..\..\eccEMClient-Spec\listeners\IEMPostReport_UserListener.h" />
+    <ClInclude Include="..\..\eccEMClient-Spec\listeners\IEMSetup_UserListener.h" />
+    <ClInclude Include="..\..\eccEMClient-Spec\listeners\IEMTearDown_UserListener.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Base\ModelBase.cpp" />
-    <ClCompile Include="Experiment\Experiment.cpp" />
-    <ClCompile Include="Metrics\Attribute.cpp" />
-    <ClCompile Include="Metrics\Entity.cpp" />
-    <ClCompile Include="Metrics\Measurement.cpp" />
-    <ClCompile Include="Metrics\MeasurementSet.cpp" />
-    <ClCompile Include="Metrics\Metric.cpp" />
-    <ClCompile Include="Metrics\MetricGenerator.cpp" />
-    <ClCompile Include="Metrics\MetricGroup.cpp" />
-    <ClCompile Include="Metrics\MetricHelper.cpp" />
-    <ClCompile Include="Metrics\Report.cpp" />
-    <ClCompile Include="Metrics\Unit.cpp" />
-    <ClCompile Include="Monitor\EMClient.cpp" />
-    <ClCompile Include="Monitor\EMDataBatch.cpp" />
-    <ClCompile Include="Monitor\EMPostReportSummary.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>

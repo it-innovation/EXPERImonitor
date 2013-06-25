@@ -46,7 +46,7 @@ namespace ecc_commonDataModel
      * Metrics are organised within metric groups. It is possible to define a hierarchy
      * of metric groups as well, as a metric group can contain a set of metric groups.
      */
-    class MetricGenerator
+    class MetricGenerator : ModelBase
     {
     public:
 
@@ -144,6 +144,13 @@ namespace ecc_commonDataModel
          * @param entities the entities to add
          */
         void addEntities( const std::hash_set<Entity::ptr_t>& entities );
+
+        // ModelBase -----------------------------------------------------------------
+        virtual void toJSON( std::wstring& jsonStrOUT );
+
+        virtual void fromJSON( const std::wstring& jsonStr );
+
+        virtual std::wstring toString();
     
     };
 

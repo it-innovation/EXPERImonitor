@@ -26,6 +26,10 @@
 #include "stdafx.h"
 #include "MetricGenerator.h"
 
+using namespace boost::uuids;
+using namespace std;
+
+
 
 
 namespace ecc_commonDataModel
@@ -211,5 +215,21 @@ namespace ecc_commonDataModel
 //        return name;
 //    }
 //};
+
+// ModelBase -----------------------------------------------------------------
+void MetricGenerator::toJSON( wstring& jsonStrOUT )
+{
+}
+
+void MetricGenerator::fromJSON( const wstring& jsonStr )
+{
+}
+
+wstring MetricGenerator::toString()
+{
+  wstring ts;
+
+  return ts;
+}
 
 } // namespace

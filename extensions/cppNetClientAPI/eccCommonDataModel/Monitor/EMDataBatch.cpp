@@ -26,6 +26,10 @@
 #include "stdafx.h"
 #include "EMDataBatch.h"
 
+using namespace boost::uuids;
+using namespace std;
+
+
 
 namespace ecc_commonDataModel
 {
@@ -92,5 +96,21 @@ namespace ecc_commonDataModel
 //        set;
 //    };
 //}
+
+// ModelBase -----------------------------------------------------------------
+void EMDataBatch::toJSON( wstring& jsonStrOUT )
+{
+}
+
+void EMDataBatch::fromJSON( const wstring& jsonStr )
+{
+}
+
+wstring EMDataBatch::toString()
+{
+  wstring ts;
+
+  return ts;
+}
 
 } // namespace

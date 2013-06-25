@@ -22,6 +22,9 @@
     <Filter Include="impl\Monitor">
       <UniqueIdentifier>{c93770bb-ddb2-4677-b4fd-547cf66a5e0e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="impl\Base">
+      <UniqueIdentifier>{223c12a7-598e-41d3-b40e-e4fcafc25fb2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -29,9 +32,6 @@
     </ClInclude>
     <ClInclude Include="targetver.h">
       <Filter>stdafx</Filter>
-    </ClInclude>
-    <ClInclude Include="ModelBase.h">
-      <Filter>impl</Filter>
     </ClInclude>
     <ClInclude Include="Experiment\Experiment.h">
       <Filter>impl\Experiment</Filter>
@@ -87,13 +87,13 @@
     <ClInclude Include="Monitor\EMPostReportSummary.h">
       <Filter>impl\Monitor</Filter>
     </ClInclude>
+    <ClInclude Include="Base\ModelBase.h">
+      <Filter>impl\Base</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>stdafx</Filter>
-    </ClCompile>
-    <ClCompile Include="ModelBase.cpp">
-      <Filter>impl</Filter>
     </ClCompile>
     <ClCompile Include="Experiment\Experiment.cpp">
       <Filter>impl\Experiment</Filter>
@@ -136,6 +136,9 @@
     </ClCompile>
     <ClCompile Include="Monitor\EMPostReportSummary.cpp">
       <Filter>impl\Monitor</Filter>
+    </ClCompile>
+    <ClCompile Include="Base\ModelBase.cpp">
+      <Filter>impl\Base</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

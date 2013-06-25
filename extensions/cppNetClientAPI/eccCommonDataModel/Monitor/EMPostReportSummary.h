@@ -43,13 +43,15 @@ namespace ecc_commonDataModel
      * 
      * @author sgc
      */
-    class EMPostReportSummary
+    class EMPostReportSummary : ModelBase
     {
     public:
         
         typedef boost::shared_ptr<EMPostReportSummary> ptr_t;
 
         EMPostReportSummary();
+
+        virtual ~EMPostReportSummary();
 
         /**
          * Returns a set of all the MeasurementSet IDs referred to by this summary report.
@@ -71,7 +73,7 @@ namespace ecc_commonDataModel
          * 
          * @param measurementSetID - ID of the MeasurementSet
          */
-        void removeReport(boost::uuids::uuid measurementSetID);
+        void removeReport(const boost::uuids::uuid& measurementSetID);
 
         /**
          * Gets the report associated with the MeasurementSet ID
@@ -79,11 +81,20 @@ namespace ecc_commonDataModel
          * @param measurementID - MeasurementSet ID
          * @return              - Report instance detailing the metric data for the MeasurementSet ID
          */
-        Report::ptr_t getReport(boost::uuids::uuid measurementID);
+        Report::ptr_t getReport(const boost::uuids::uuid& measurementID);
+
+        // ModelBase -----------------------------------------------------------------
+        virtual void toJSON( std::wstring& jsonStrOUT );
+
+        virtual void fromJSON( const std::wstring& jsonStr );
+
+        virtual std::wstring toString();
 
     private:
 
-      std::hash_map<boost::uuids::uuid, Report> reportsByMeasurementSetID;
+      typedef std::hash_map<boost::uuids::uuid, Report::ptr_t> ReportMap;
+
+      ReportMap reportsByMeasurementSetID;
 
     };
 

@@ -45,7 +45,7 @@ namespace ecc_commonDataModel
    * 
    * @author Vegard Engen
    */
-  class MeasurementSet
+  class MeasurementSet : ModelBase
   {
   public:
 
@@ -196,6 +196,13 @@ namespace ecc_commonDataModel
       * @return returns true if all measurements were added
       */
     bool addMeasurements( std::hash_map<boost::uuids::uuid, Measurement::ptr_t> measurements );
+
+    // ModelBase -----------------------------------------------------------------
+    virtual void toJSON( std::wstring& jsonStrOUT );
+
+    virtual void fromJSON( const std::wstring& jsonStr );
+
+    virtual std::wstring toString();
 
   private:
     

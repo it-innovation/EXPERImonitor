@@ -14,10 +14,10 @@
 
 typedef unsigned char byte;
 
-// Warnings disable in VC 2010 project:
+// Warnings disabled in VC 2010 project:
 
 // 4996 Disable warnings for some BOOST libraries
-// boost::uuids::uuid
+// boost::uuids::uuid iterator overrun
 
 #endif
 

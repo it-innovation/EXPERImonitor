@@ -26,6 +26,10 @@
 #include "stdafx.h"
 #include "Report.h"
 
+using namespace boost::uuids;
+using namespace std;
+
+
 
 
 namespace ecc_commonDataModel
@@ -173,5 +177,21 @@ namespace ecc_commonDataModel
 //        }
 //    }
 //};
-    
+
+// ModelBase -----------------------------------------------------------------
+void Report::toJSON( wstring& jsonStrOUT )
+{
+}
+
+void Report::fromJSON( const wstring& jsonStr )
+{
+}
+
+wstring Report::toString()
+{
+  wstring ts;
+
+  return ts;
+}
+
 } // namespace
