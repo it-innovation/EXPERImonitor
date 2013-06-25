@@ -78,15 +78,14 @@
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">.dll</TargetExt>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">true</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">true</GenerateManifest>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)\..\..\rabbitmq-c-v0.3.0\librabbitmq\win32;$(ProjectDir)\..\..\rabbitmq-c-v0.3.0\librabbitmq;$(ProjectDir);$(IncludePath)</IncludePath>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)\..\..\rabbitmq-c-v0.3.0\librabbitmq\win32;$(ProjectDir)\..\..\rabbitmq-c-v0.3.0\librabbitmq;$(ProjectDir);$(IncludePath)</IncludePath>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">$(ProjectDir)\..\..\rabbitmq-c-v0.3.0\librabbitmq\win32;$(ProjectDir)\..\..\rabbitmq-c-v0.3.0\librabbitmq;$(ProjectDir);$(IncludePath)</IncludePath>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">$(ProjectDir)\..\..\rabbitmq-c-v0.3.0\librabbitmq\win32;$(ProjectDir)\..\..\rabbitmq-c-v0.3.0\librabbitmq;$(ProjectDir);$(IncludePath)</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IncludePath)</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IncludePath)</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">$(IncludePath)</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <AdditionalOptions> /Zm1000 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>$(SolutionDir)/amqpAPI/rabbitmq-c-v0.3.0/librabbitmq</AdditionalIncludeDirectories>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <CompileAs>CompileAsC</CompileAs>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -102,6 +101,7 @@
       <AssemblerListingLocation>Debug</AssemblerListingLocation>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <ProgramDataBaseFileName>$(SolutionDir)/Debug/rabbitmq_d.pdb</ProgramDataBaseFileName>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\rabbitmq-c-v0.3.0\librabbitmq\win32;$(ProjectDir)\..\..\rabbitmq-c-v0.3.0\librabbitmq;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;HAVE_CONFIG_H;AMQP_BUILD;CMAKE_INTDIR=\"Debug\";rabbitmq_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -122,7 +122,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ImportLibrary>$(SolutionDir)\Debug\rabbitmq_d.lib</ImportLibrary>
       <LinkIncremental>true</LinkIncremental>
-      <ProgramDataBaseFile>F:/Documents/Views/EXPERIMEDIA-ecc-master-sgc/extensions/cppNetClientAPI/amqpAPI/rabbitmq-c-v0.3.0/vs2010Build/librabbitmq/Debug/rabbitmq.1.pdb</ProgramDataBaseFile>
       <StackReserveSize>10000000</StackReserveSize>
       <SubSystem>Console</SubSystem>
       <Version>
@@ -135,7 +134,6 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <AdditionalOptions> /Zm1000 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>$(SolutionDir)/amqpAPI/rabbitmq-c-v0.3.0/librabbitmq;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <CompileAs>CompileAsC</CompileAs>
       <ExceptionHandling>
       </ExceptionHandling>
@@ -151,6 +149,7 @@
       <AssemblerListingLocation>Release</AssemblerListingLocation>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <ProgramDataBaseFileName>$(SolutionDir)/Release/rabbitmq.pdb</ProgramDataBaseFileName>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\rabbitmq-c-v0.3.0\librabbitmq\win32;$(ProjectDir)\..\..\rabbitmq-c-v0.3.0\librabbitmq;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;HAVE_CONFIG_H;AMQP_BUILD;CMAKE_INTDIR=\"Release\";rabbitmq_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -170,7 +169,6 @@
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <ImportLibrary>$(SolutionDir)\Release\rabbitmq.lib</ImportLibrary>
-      <ProgramDataBaseFile>$(SolutionDir)/Release/rabbitmq.pdb</ProgramDataBaseFile>
       <StackReserveSize>10000000</StackReserveSize>
       <SubSystem>Console</SubSystem>
       <Version>
@@ -183,7 +181,6 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">
     <ClCompile>
       <AdditionalOptions> /Zm1000 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>F:/Documents/Views/EXPERIMEDIA-ecc-master-sgc/extensions/cppNetClientAPI/amqpAPI/rabbitmq-c-v0.3.0/vs2010Build/librabbitmq;F:/Documents/Views/EXPERIMEDIA-ecc-master-sgc/extensions/cppNetClientAPI/amqpAPI/rabbitmq-c-v0.3.0/librabbitmq;F:/Documents/Views/EXPERIMEDIA-ecc-master-sgc/extensions/cppNetClientAPI/amqpAPI/rabbitmq-c-v0.3.0/librabbitmq/win32;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <CompileAs>CompileAsC</CompileAs>
       <ExceptionHandling>
       </ExceptionHandling>
@@ -199,6 +196,7 @@
       <AssemblerListingLocation>MinSizeRel</AssemblerListingLocation>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <ProgramDataBaseFileName>F:/Documents/Views/EXPERIMEDIA-ecc-master-sgc/extensions/cppNetClientAPI/amqpAPI/rabbitmq-c-v0.3.0/vs2010Build/librabbitmq/MinSizeRel/rabbitmq.1.pdb</ProgramDataBaseFileName>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\rabbitmq-c-v0.3.0\librabbitmq\win32;$(ProjectDir)\..\..\rabbitmq-c-v0.3.0\librabbitmq;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;HAVE_CONFIG_H;AMQP_BUILD;CMAKE_INTDIR=\"MinSizeRel\";rabbitmq_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -218,7 +216,6 @@
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <ImportLibrary>F:/Documents/Views/EXPERIMEDIA-ecc-master-sgc/extensions/cppNetClientAPI/amqpAPI/rabbitmq-c-v0.3.0/vs2010Build/librabbitmq/MinSizeRel/rabbitmq.1.lib</ImportLibrary>
-      <ProgramDataBaseFile>F:/Documents/Views/EXPERIMEDIA-ecc-master-sgc/extensions/cppNetClientAPI/amqpAPI/rabbitmq-c-v0.3.0/vs2010Build/librabbitmq/MinSizeRel/rabbitmq.1.pdb</ProgramDataBaseFile>
       <StackReserveSize>10000000</StackReserveSize>
       <SubSystem>Console</SubSystem>
       <Version>
@@ -231,7 +228,6 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">
     <ClCompile>
       <AdditionalOptions> /Zm1000 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>F:/Documents/Views/EXPERIMEDIA-ecc-master-sgc/extensions/cppNetClientAPI/amqpAPI/rabbitmq-c-v0.3.0/vs2010Build/librabbitmq;F:/Documents/Views/EXPERIMEDIA-ecc-master-sgc/extensions/cppNetClientAPI/amqpAPI/rabbitmq-c-v0.3.0/librabbitmq;F:/Documents/Views/EXPERIMEDIA-ecc-master-sgc/extensions/cppNetClientAPI/amqpAPI/rabbitmq-c-v0.3.0/librabbitmq/win32;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <CompileAs>CompileAsC</CompileAs>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ExceptionHandling>
@@ -246,6 +242,7 @@
       <AssemblerListingLocation>RelWithDebInfo</AssemblerListingLocation>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <ProgramDataBaseFileName>F:/Documents/Views/EXPERIMEDIA-ecc-master-sgc/extensions/cppNetClientAPI/amqpAPI/rabbitmq-c-v0.3.0/vs2010Build/librabbitmq/RelWithDebInfo/rabbitmq.1.pdb</ProgramDataBaseFileName>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\rabbitmq-c-v0.3.0\librabbitmq\win32;$(ProjectDir)\..\..\rabbitmq-c-v0.3.0\librabbitmq;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;HAVE_CONFIG_H;AMQP_BUILD;CMAKE_INTDIR=\"RelWithDebInfo\";rabbitmq_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -266,7 +263,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ImportLibrary>F:/Documents/Views/EXPERIMEDIA-ecc-master-sgc/extensions/cppNetClientAPI/amqpAPI/rabbitmq-c-v0.3.0/vs2010Build/librabbitmq/RelWithDebInfo/rabbitmq.1.lib</ImportLibrary>
       <LinkIncremental>true</LinkIncremental>
-      <ProgramDataBaseFile>F:/Documents/Views/EXPERIMEDIA-ecc-master-sgc/extensions/cppNetClientAPI/amqpAPI/rabbitmq-c-v0.3.0/vs2010Build/librabbitmq/RelWithDebInfo/rabbitmq.1.pdb</ProgramDataBaseFile>
       <StackReserveSize>10000000</StackReserveSize>
       <SubSystem>Console</SubSystem>
       <Version>

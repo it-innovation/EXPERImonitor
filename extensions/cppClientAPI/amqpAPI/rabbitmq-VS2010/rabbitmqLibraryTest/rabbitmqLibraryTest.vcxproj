@@ -39,14 +39,14 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>F:\Documents\Views\EXPERIMEDIA-ecc-master-sgc\extensions\cppNetClientAPI\amqpAPI\rabbit-c-wrapper\src;G:\BoostSDK\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\..\amqpAPI\rabbit-c-wrapper\src;G:\BoostSDK\;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)$(Configuration)\;$(LibraryPath)</LibraryPath>
     <IntDir>$(ProjectDir)$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)_d</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>F:\Documents\Views\EXPERIMEDIA-ecc-master-sgc\extensions\cppNetClientAPI\amqpAPI\rabbit-c-wrapper\src;G:\BoostSDK\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\..\amqpAPI\rabbit-c-wrapper\src;G:\BoostSDK\;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)$(Configuration)\;$(LibraryPath)</LibraryPath>
     <IntDir>$(ProjectDir)$(Configuration)\</IntDir>
   </PropertyGroup>
