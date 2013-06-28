@@ -57,6 +57,8 @@ public class ECCClientView extends javax.swing.JFrame
   public synchronized void enablePush( boolean enabled)
   { actionButton.setEnabled(enabled); }
   
+  public synchronized void enableAddEntity (boolean enabled)
+  { actionButton1.setEnabled(enabled);  }       
 
   /**
    * This method is called from within the constructor to initialize the form.
@@ -112,6 +114,7 @@ public class ECCClientView extends javax.swing.JFrame
 
         actionButton1.setText("Add Entity");
         actionButton1.setActionCommand("");
+        actionButton1.setEnabled(false);
         actionButton1.setName("btAddEntity"); // NOI18N
         actionButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -162,22 +165,23 @@ public class ECCClientView extends javax.swing.JFrame
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-  private void onPushDataClicked(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_onPushDataClicked
-    
-    // Wait until we have definitely sent the data before allowing another push
-    actionButton.setEnabled( false );
-    viewListener.onPushDataClicked();
-  }//GEN-LAST:event_onPushDataClicked
-
   private void onWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_onWindowClosing
     viewListener.onClientViewClosed();
   }//GEN-LAST:event_onWindowClosing
 
     private void actionButton1onPushDataClicked(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_actionButton1onPushDataClicked
 
-        ECCNewEntityView newEntity = new ECCNewEntityView( newEntityListener );
-        newEntity.setVisible(true);        // TODO add your handling code here:
+        ECCNewEntityView newEntity;
+        newEntity = new ECCNewEntityView( newEntityListener );
+        newEntity.setVisible(true);    
     }//GEN-LAST:event_actionButton1onPushDataClicked
+
+    private void onPushDataClicked(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_onPushDataClicked
+
+        // Wait until we have definitely sent the data before allowing another push
+        actionButton.setEnabled( false );
+        viewListener.onPushDataClicked();
+    }//GEN-LAST:event_onPushDataClicked
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton actionButton;

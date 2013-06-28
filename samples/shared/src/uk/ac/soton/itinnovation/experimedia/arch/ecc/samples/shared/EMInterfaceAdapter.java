@@ -210,9 +210,6 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
      */
     public void sendMetricGenerators( Set<MetricGenerator> generators )
     {
-        
-      
-
         if ( generators != null )
         {
             clientGenerators.addAll(generators );

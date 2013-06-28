@@ -80,8 +80,12 @@
       <version>1.2-SNAPSHOT</version>
     </dependency>
     
-    <!-- 3rd party dependencies ____________________________________________ -->      
-	
+    <!-- 3rd party dependencies ____________________________________________ -->
+    <dependency>
+      <groupId>org.jdesktop</groupId>
+      <artifactId>beansbinding</artifactId>
+      <version>1.2.1</version>
+    </dependency>
   </dependencies>
     
 </project>

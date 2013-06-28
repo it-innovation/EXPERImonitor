@@ -47,6 +47,7 @@ public class MeasurementSetDAOHelper
 {
     static IECCLogger log = Logger.getLogger(MeasurementSetDAOHelper.class);
     
+    //Checking that the measurement set is suitable for saving
     public static ValidationReturnObject isObjectValidForSave(MeasurementSet mSet, boolean checkForMetricGroup, Connection connection) throws Exception
     {
         if (mSet == null)
@@ -75,28 +76,6 @@ public class MeasurementSetDAOHelper
         {
             return new ValidationReturnObject(false, new IllegalArgumentException("The MeasurementSet's metric is NULL"));
         }
-        /*else
-        {
-            // check if metric exists in the DB already
-            try {
-                if (MetricHelper.objectExists(mSet.getMetric().getUUID(), connection))
-                {
-                    return new ValidationReturnObject(false, new RuntimeException("The MeasurementSet's metric already exists; the UUID of the metric is not unique"));
-                }
-            } catch (Exception ex) {
-                throw ex;
-            }
-        }*/
-        /*
-        // check if it exists in the DB already
-        try {
-            if (objectExists(mSet.getUUID(), connection))
-            {
-                return new ValidationReturnObject(false, new RuntimeException("The MeasurementSet already exists; the UUID is not unique"));
-            }
-        } catch (Exception ex) {
-            throw ex;
-        }*/
         
         // check that the metric group exists, if flagged to check
         if (checkForMetricGroup)
@@ -107,11 +86,6 @@ public class MeasurementSetDAOHelper
             }
         }
         
-        // check that the attribute exists
-        /*if (!AttributeHelper.objectExists(mSet.getAttributeUUID(), connection))
-        {
-            return new ValidationReturnObject(false, new RuntimeException("The Attribute for the MeasurementSet doesn't exit (UUID: " + mSet.getAttributeUUID().toString() + ")"));
-        }*/
         
         // if any measurements, validate them too!
         if ((mSet.getMeasurements() != null) && !mSet.getMeasurements().isEmpty())
@@ -133,6 +107,7 @@ public class MeasurementSetDAOHelper
         return new ValidationReturnObject(true);
     }
     
+    //Throws an exceptin if the measurement set already exists
     public static boolean objectExists(UUID uuid, Connection connection) throws Exception
     {
         return DBUtil.objectExistsByUUID("MeasurementSet", "mSetUUID", uuid, connection, false);

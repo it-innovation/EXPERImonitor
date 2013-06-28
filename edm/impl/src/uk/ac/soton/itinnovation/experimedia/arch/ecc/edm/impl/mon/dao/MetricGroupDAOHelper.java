@@ -70,17 +70,7 @@ public class MetricGroupDAOHelper
             return new ValidationReturnObject(false, new IllegalArgumentException("The MetricGroup name is NULL"));
         }
         
-        /*
-        // check if it exists in the DB already
-        try {
-            if (objectExists(mGroup.getUUID(), connection))
-            {
-                return new ValidationReturnObject(false, new RuntimeException("The MetricGroup already exists; the UUID is not unique"));
-            }
-        } catch (Exception ex) {
-            throw ex;
-        }*/
-        
+                
         // check if the metric generator exists, if it should be checked...
         if (checkForMetricGenerator)
         {
@@ -165,32 +155,32 @@ public class MetricGroupDAOHelper
         
         try {
             // save any measurement sets if not NULL
-            if ((metricGroup.getMeasurementSets() != null) && !metricGroup.getMeasurementSets().isEmpty())
-            {
-                log.debug("Saving " + metricGroup.getMeasurementSets().size() + " measurement set(s) for the metric group");
-                for (MeasurementSet mSet : metricGroup.getMeasurementSets())
+                if ((metricGroup.getMeasurementSets() != null) && !metricGroup.getMeasurementSets().isEmpty())
                 {
-                    if (mSet != null)
-                        MeasurementSetDAOHelper.saveMeasurementSet(mSet, connection, false); // flag not to close the DB connection
+                    log.debug("Saving " + metricGroup.getMeasurementSets().size() + " measurement set(s) for the metric group");
+                    for (MeasurementSet mSet : metricGroup.getMeasurementSets())
+                    {
+                        if (mSet != null)
+                            MeasurementSetDAOHelper.saveMeasurementSet(mSet, connection, false); // flag not to close the DB connection
+                    }
+                }
+            } catch (Exception ex) {
+                exception = true;
+                throw ex;
+            } finally {
+                if (closeDBcon)
+                {
+                    if (exception) {
+                        log.debug("Exception thrown, so rolling back the transaction and closing the connection");
+                        connection.rollback();
+                    }
+                    else {
+                        log.debug("Committing the transaction and closing the connection");
+                        connection.commit();
+                    }
+                    connection.close();
                 }
             }
-        } catch (Exception ex) {
-            exception = true;
-            throw ex;
-        } finally {
-            if (closeDBcon)
-            {
-                if (exception) {
-                    log.debug("Exception thrown, so rolling back the transaction and closing the connection");
-                    connection.rollback();
-                }
-                else {
-                    log.debug("Committing the transaction and closing the connection");
-                    connection.commit();
-                }
-                connection.close();
-            }
-        }
     }
     
     public static MetricGroup getMetricGroup(UUID metricGroupUUID, boolean withSubClasses, Connection connection, boolean closeDBcon) throws Exception
@@ -207,12 +197,7 @@ public class MetricGroupDAOHelper
             throw new RuntimeException("Cannot get the MetricGroup because the connection to the DB is closed");
         }
         
-        /*if (!MetricGroupHelper.objectExists(metricGroupUUID, connection))
-        {
-            log.error("There is no MetricGroup with the given UUID: " + metricGroupUUID.toString());
-            throw new RuntimeException("There is no MetricGroup with the given UUID: " + metricGroupUUID.toString());
-        }*/
-        
+               
         MetricGroup metricGroup = null;
         boolean exception = false;
         try {
