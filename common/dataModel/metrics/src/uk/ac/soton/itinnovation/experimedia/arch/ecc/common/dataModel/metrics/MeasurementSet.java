@@ -322,13 +322,18 @@ public class MeasurementSet implements Serializable
         
         if ( measurements == null ) measurements = new HashSet<Measurement>();
         
+        boolean skippedMeasurement = false;
+        
         Iterator<Measurement> measureIt = measurements.iterator();
         while ( measureIt.hasNext() )
-        { appendMeasurement( measureIt.next() ); }
+        { 
+          if ( !appendMeasurement( measureIt.next() ) )
+            skippedMeasurement = true; 
+        }
         
-        if ( measureIt.hasNext() ) return false; // Did not add all measurements
+        if ( skippedMeasurement ) return false; // Did not add all measurements
         
-        return false;
+        return true;
     }
     
     // Private methods ---------------------------------------------------------
