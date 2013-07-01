@@ -32,6 +32,7 @@ import java.util.Set;
 import java.util.UUID;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Attribute;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Entity;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGroup;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.IECCLogger;
@@ -66,19 +67,7 @@ public class MetricGeneratorDAOHelper
         {
             return new ValidationReturnObject(false, new IllegalArgumentException("The MetricGenerator name is NULL"));
         }
-        
-        // check if it exists in the DB already
-        /*
-        try {
-            if (objectExists(mg.getUUID(), connection))
-            {
-                return new ValidationReturnObject(false, new RuntimeException("The MetricGenerator already exists; the UUID is not unique"));
-            }
-        } catch (Exception ex) {
-            throw ex;
-        }
-        */
-        
+               
         if (expUUID == null)
         {
             return new ValidationReturnObject(false, new IllegalArgumentException("The Experiment UUID is NULL"));
@@ -175,7 +164,37 @@ public class MetricGeneratorDAOHelper
         }
         
         boolean exception = false;
-        // save any entities if not NULL and if not already existing
+        
+        // Save the MetricGenerator if it does not already exist -------------------------------------------
+        if ( !objectExists( metricGen.getUUID(), connection, false ) )
+        {
+            try {
+                    String query = "INSERT INTO MetricGenerator (mGenUUID, expUUID, name, description) VALUES (?, ?, ?, ?)";
+
+                    PreparedStatement pstmt = connection.prepareStatement(query);
+                    pstmt.setObject(1, metricGen.getUUID(), java.sql.Types.OTHER);
+                    pstmt.setObject(2, experimentUUID, java.sql.Types.OTHER);
+                    pstmt.setString(3, metricGen.getName());
+                    pstmt.setString(4, metricGen.getDescription());
+
+                    pstmt.executeUpdate();
+                    
+                   } catch (Exception ex) {
+                        exception = true;
+                        log.error("Error while saving MetricGenerator: " + ex.getMessage(), ex);
+                        throw new RuntimeException("Error while saving MetricGenerator: " + ex.getMessage(), ex);
+                    } finally {
+                        if (exception && closeDBcon)
+                        {
+                            log.debug("Exception thrown, so rolling back the transaction and closing the connection");
+                            connection.rollback();
+                            connection.close();
+                        }
+                    }
+        }
+        // -------------------------------------------------------------------------------------------------
+        
+        // Save any entities if not NULL and if not already existing ---------------------------------------
         if ((metricGen.getEntities() != null) && !metricGen.getEntities().isEmpty())
         {
             log.debug("The metric generator has got " + metricGen.getEntities().size() + " entities, which will now be saved (hopefully...)");
@@ -209,77 +228,76 @@ public class MetricGeneratorDAOHelper
                 }
             }
         }
+        // -------------------------------------------------------------------------------------------------
         
-        try {
-            String query = "INSERT INTO MetricGenerator (mGenUUID, expUUID, name, description) VALUES (?, ?, ?, ?)";
-            
-            PreparedStatement pstmt = connection.prepareStatement(query);
-            pstmt.setObject(1, metricGen.getUUID(), java.sql.Types.OTHER);
-            pstmt.setObject(2, experimentUUID, java.sql.Types.OTHER);
-            pstmt.setString(3, metricGen.getName());
-            pstmt.setString(4, metricGen.getDescription());
-            
-            pstmt.executeUpdate();
-
-        } catch (Exception ex) {
-            exception = true;
-            log.error("Error while saving MetricGenerator: " + ex.getMessage(), ex);
-            throw new RuntimeException("Error while saving MetricGenerator: " + ex.getMessage(), ex);
-        } finally {
-            if (exception && closeDBcon)
-            {
-                log.debug("Exception thrown, so rolling back the transaction and closing the connection");
-                connection.rollback();
-                connection.close();
-            }
-        }
-        
-        // save any metric groups if not NULL
-        try {
+        // Now try saving new Metric Groups (or, if they already exist, any new MeasurementSets
+        // -------------------------------------------------------------------------------------------------
+        try
+        {
+            //Check if metric generator has some metric groups and they are not empty
             if ((metricGen.getMetricGroups() != null) || !metricGen.getMetricGroups().isEmpty())
-            {
+            {   //saving each metric group if it is not null and does not exist already
                 log.debug("Saving " + metricGen.getMetricGroups().size() + " metric group(s) for the metric generator");
                 for (MetricGroup mGrp : metricGen.getMetricGroups())
                 {
-                    if (mGrp != null)
+                    // If this is a new metric group, save it
+                    if (mGrp != null && !MetricGroupDAOHelper.objectExists(mGrp.getUUID(),connection) )
                         MetricGroupDAOHelper.saveMetricGroup(mGrp, connection, false); // flag not to close the DB connection
+                    
+                    // Go through all MeasurementSets, saving new ones
+                    Set<MeasurementSet> msSet = mGrp.getMeasurementSets();
+                    if ( msSet != null )
+                    {
+                        for( MeasurementSet ms : mGrp.getMeasurementSets() )
+                            if ( !MeasurementSetDAOHelper.objectExists( ms.getID(), connection) )
+                                MeasurementSetDAOHelper.saveMeasurementSet(ms, connection, false);
+                    }
                 }
             }
         } catch (Exception ex) {
             exception = true;
             throw ex;
-        } finally {
+         } finally {
             if (exception && closeDBcon)
             {
                 log.debug("Exception thrown, so rolling back the transaction and closing the connection");
                 connection.rollback();
                 connection.close();
             }
-        }
-        
-        try {
+          }
+        // -------------------------------------------------------------------------------------------------
+         
+        // Finally, try linking the metric generator with the Entity
+        // -------------------------------------------------------------------------------------------------
+        try 
+        {
             log.debug("Making links between MG and Entity entries in the MetricGenerator_Entity table");
-            // make link between MG and Entity in MetricGenerator_Entity table
-            for (Entity entity : metricGen.getEntities())
-            {
+
+           // make link between MG and Entity in MetricGenerator_Entity table
+           for (Entity entity : metricGen.getEntities())
+           {
                 linkMetricGeneratorAndEntity(metricGen.getUUID(), entity.getUUID(), connection, false);
-            }
-        } catch (Exception ex) {
-            exception = true;
-            throw ex;
-        } finally {
-            if (closeDBcon)
-            {
-                if (exception) {
-                    log.debug("Exception thrown, so rolling back the transaction and closing the connection");
-                    connection.rollback();
-                } else {
-                    log.debug("Committing the transaction and closing the connection");
-                    connection.commit();
-                }
-                connection.close();
-            }
+           }
+          } catch (Exception ex) {
+              exception = true;
+              throw ex;
+          } finally {
+              if (closeDBcon)
+              {
+                    if (exception) 
+                    {
+                        log.debug("Exception thrown, so rolling back the transaction and closing the connection");
+                        connection.rollback();
+                    } 
+                    else 
+                    {
+                        log.debug("Committing the transaction and closing the connection");
+                        connection.commit();
+                    }
+                  connection.close();
+              }
         }
+        // -------------------------------------------------------------------------------------------------
     }
     
     public static void linkMetricGeneratorAndEntity(UUID mGenUUID, UUID entityUUID, Connection connection, boolean closeDBcon) throws Exception

@@ -204,4 +204,19 @@ public interface EMIAdapterListener
      * 
      */
     void onTearDownTimeOut();
+    /**
+     * 
+     * @param senderID
+     * @param entityID
+     * @param enabled 
+     */
+    
+    /**
+     * An event to enable an entity to be added to a collection
+     * 
+     * @param senderID
+     * @param entityID
+     * @param enabled 
+     */
+    void onEntityMetricCollectionEnabled( UUID senderID, UUID entityID, boolean enabled );
 }

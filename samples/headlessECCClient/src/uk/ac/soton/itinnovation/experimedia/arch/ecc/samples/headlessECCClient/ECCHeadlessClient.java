@@ -287,7 +287,7 @@ public class ECCHeadlessClient implements EMIAdapterListener
             
             // Even if the EDMAgent isn't available, we can still send data, so
             // notify the adapter of our metrics
-            emiAdapter.setMetricGenerators( currentExperiment.getMetricGenerators() );
+            emiAdapter.sendMetricGenerators( currentExperiment.getMetricGenerators() );
         
         }
         else  // Things are bad if we can't describe our metric generators - so disconnect
@@ -300,6 +300,14 @@ public class ECCHeadlessClient implements EMIAdapterListener
     @Override
     public void onDiscoveryTimeOut()
     { /* Not implemented in this demo */ }
+    
+    @Override
+    public void onEntityMetricCollectionEnabled( UUID senderID, 
+                                                 UUID entityID, 
+                                                 boolean enabled )
+    {
+        /* Not implemented in this demo */
+    }
     
     @Override
     public void onSetupMetricGenerator( UUID genID, Boolean[] resultOUT )

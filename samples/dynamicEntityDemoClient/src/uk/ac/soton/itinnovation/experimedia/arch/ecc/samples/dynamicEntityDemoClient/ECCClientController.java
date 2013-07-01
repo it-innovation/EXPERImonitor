@@ -23,7 +23,7 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.basicECCClient;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.dynamicEntityDemoClient;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
@@ -42,7 +42,8 @@ import javax.swing.JOptionPane;
 
 
 public class ECCClientController implements EMIAdapterListener,
-                                            ECCClientViewListener
+                                            ECCClientViewListener,
+                                            ECCNewEntityViewListener
 {
     private final IECCLogger clientLogger;
 
@@ -51,16 +52,10 @@ public class ECCClientController implements EMIAdapterListener,
     private ECCClientView      clientView;
     private String             clientName;
 
-    private Entity                        entityBeingObserved;
-    private Attribute                     entityAttribute;
-    private HashMap<UUID,MetricGenerator> metricGenerators;
-
-    private Measurement firstMeasurement;
-    private Measurement currentMeasurement;
+    private MetricGenerator metricGenerator;
+    private MetricGroup     metricGroup;
     
-    private HashMap<UUID, Report> pendingPushReports;
-    private HashMap<UUID, Report> pendingPullReports;
-
+ 
 
 
     public ECCClientController()
@@ -69,9 +64,13 @@ public class ECCClientController implements EMIAdapterListener,
         Logger.setLoggerImpl( new Log4JImpl() );
         clientLogger = Logger.getLogger( ECCClientController.class );
       
-        metricGenerators   = new HashMap<UUID,MetricGenerator>();
-        pendingPushReports = new HashMap<UUID, Report>();
-        pendingPullReports = new HashMap<UUID, Report>();
+        // Only one metric generator and metric group
+        metricGenerator = new MetricGenerator();
+        metricGenerator.setName( "Demo metric generator" );
+        
+        // Only one metric group
+        metricGroup = MetricHelper.createMetricGroup( "Example group", "Group to add new metrics in", metricGenerator );
+        
     }
 
     public void start( String rabbitServerIP,
@@ -101,7 +100,7 @@ public class ECCClientController implements EMIAdapterListener,
             // Set up a simple view --------------------------------------------------
             Date date = new Date();
             clientName = date.toString();
-            clientView = new ECCClientView( clientName, this );
+            clientView = new ECCClientView( clientName, this, this );
             clientView.setVisible( true );
 
             // Create EM interface adapter, listen to it...
@@ -128,6 +127,7 @@ public class ECCClientController implements EMIAdapterListener,
         {
           clientView.setStatus( "Connected to EM" );
           clientView.addLogMessage( "Linked to experiment: " + expInfo.getName() );
+          clientView.enableAddEntity(true);
         }
         else
           clientView.setStatus( "Refused connection to EM" );
@@ -172,66 +172,16 @@ public class ECCClientController implements EMIAdapterListener,
     @Override
     public void onPopulateMetricGeneratorInfo()
     {
-        clientView.setStatus( "Sending metric gen info to EM" );
-
-        // Create a new entity to be observed (this Java VM)
-        entityBeingObserved = new Entity();
-        entityBeingObserved.setName( "EM Client host" );
-
-        // Create an attribute to observe
-        entityAttribute = new Attribute();
-        entityAttribute.setName( "Client RAM usage" );
-        entityAttribute.setDescription( "Very simple measurement of total bytes used" );
-        entityAttribute.setEntityUUID( entityBeingObserved.getUUID() );
-        entityBeingObserved.addAttribute( entityAttribute );
-
-        // Create a single metric generator that will represent this metric data generation
-        MetricGenerator metricGen = new MetricGenerator();
-        metricGen.setName( "MGEN " + clientName );
-        metricGen.setDescription( "Metric generator demonstration" );
-        metricGen.addEntity( entityBeingObserved );
-
-        // Add our generator to a collection - obviously we only actually have one generator here though
-        metricGenerators.put( metricGen.getUUID(), metricGen );
-
-        // Create a single group which will contain...
-        MetricGroup mg = new MetricGroup();
-        mg.setName( "Demo group" );
-        mg.setDescription( "A single group to contain metrics" );
-        mg.setMetricGeneratorUUID( metricGen.getUUID() );
-        metricGen.addMetricGroup( mg );
-
-        // ... a single MeasurementSet (representing the measures for the attibute)
-        MeasurementSet ms = new MeasurementSet();
-        ms.setMetricGroupUUID( mg.getUUID() );
-        ms.setAttributeUUID( entityAttribute.getUUID() ); // Link the measurement set to the attribute here
-        mg.addMeasurementSets( ms );                              
-
-        // Define the metric for this MeasurementSet
-        Metric memMetric = new Metric();
-        memMetric.setMetricType( MetricType.RATIO );
-        memMetric.setUnit( new Unit("bytes") );
-        ms.setMetric( memMetric );
-
-        clientView.addLogMessage( "Discovered generator: " + metricGen.getName() );
-
-        // Ready our metric generator for the EM
-        HashSet mgSet = new HashSet<MetricGenerator>();
-        mgSet.addAll( metricGenerators.values() );
-        emiAdapter.sendMetricGenerators( mgSet );
-    }
+       HashSet<MetricGenerator> mgSet = new HashSet<MetricGenerator>();
+       mgSet.add( metricGenerator );
+       
+       emiAdapter.sendMetricGenerators( mgSet );
+   }
 
     @Override
     public void onDiscoveryTimeOut()
     { clientView.addLogMessage( "Got discovery time-out message" ); }
     
-    @Override
-    public void onEntityMetricCollectionEnabled( UUID senderID, 
-                                                 UUID entityID, 
-                                                 boolean enabled )
-    {
-        /* Not implemented in this dmeo */
-    }
     @Override
     public void onSetupMetricGenerator( UUID genID, Boolean[] resultOUT )
     {
@@ -251,6 +201,7 @@ public class ECCClientController implements EMIAdapterListener,
     public void onLiveMonitoringStarted()
     {
         clientView.addLogMessage( "ECC has started Live Monitoring process" );
+     
     }
 
     @Override
@@ -263,10 +214,7 @@ public class ECCClientController implements EMIAdapterListener,
 
     @Override
     public void onPushReportReceived( UUID reportID )
-    {
-        // We'll use this report with the 'MiniEDM' later, but for now...
-        pendingPushReports.remove( reportID );
-      
+    {   
         // Got the last push, so allow another manual push
         clientView.enablePush( true );
     }
@@ -274,8 +222,7 @@ public class ECCClientController implements EMIAdapterListener,
     @Override
     public void onPullReportReceived( UUID reportID )
     {
-        // We'll use this report with the 'MiniEDM' later, but for now...
-        pendingPullReports.remove( reportID );
+
     }
     
     @Override
@@ -294,25 +241,27 @@ public class ECCClientController implements EMIAdapterListener,
     /*
     * Note that 'reportOut' is an OUT parameter provided by the adapter
     */
-    public void onPullMetric( UUID measurementSetID, Report reportOut )
+    public void onPullMetric( UUID measurementSetID, Report reportOut)
     {
         // Create an empty instance of our measurement set
-        MeasurementSet sampleSet = createMeasurementSetEmptySample();
+        MeasurementSet targetSet = MetricHelper.getMeasurementSet( metricGenerator, measurementSetID );
 
-        // Add a snapshot measurement to it
-        snapshotMeasurement();
-        sampleSet.addMeasurement( currentMeasurement );
-
-        // Set up report (has only a single measure)
-        Date date = new Date();
-        reportOut.setReportDate( date );
-        reportOut.setFromDate( date );
-        reportOut.setToDate( date );
-        reportOut.setMeasurementSet( sampleSet );
-        reportOut.setNumberOfMeasurements( 1 );
+        // Create a copy of the measurement set, but with no measurements in
+        Report newReport = MetricHelper.createEmptyMeasurementReport( targetSet );
         
-        // Store for confirmation of pull later
-        pendingPullReports.put( reportOut.getUUID(), reportOut );
+        // Generate a simulated measurement using a random number between 1 and 20
+        //These measurements are for demonstration purposes only
+        //In a real situation these numbers will be defined and generated by the entity
+        int ran = 1 +(int)(Math.random()*20);
+        String mes = ""+ ran;
+        Measurement m = new Measurement( mes );
+        
+        // Add measurement
+        newReport.getMeasurementSet().addMeasurement( m );
+        newReport.setNumberOfMeasurements( 1 );
+       
+        // Copy report into OUT parameter
+        reportOut.copyReport( newReport, true );
     }
 
     @Override
@@ -328,46 +277,13 @@ public class ECCClientController implements EMIAdapterListener,
     */
     public void onPopulateSummaryReport( EMPostReportSummary summaryOUT )
     {
-        // We've only got one MeasurementSet so we'll create a demo summary report
-        // and just two measurements.. so we'll use these to create a demo summary
-
-        // If we don't have any measurements, make some up!
-        if ( firstMeasurement   ==  null ) snapshotMeasurement();
-        if ( currentMeasurement ==  null ) snapshotMeasurement();
-
-        // Create a new report for this summary
-        Report report = new Report();
-        report.setReportDate( new Date() );
-        report.setFromDate( firstMeasurement.getTimeStamp() );
-        report.setToDate( currentMeasurement.getTimeStamp() );
-        report.setNumberOfMeasurements( 2 );
-
-        // We've only got one of each...
-        MetricGenerator mGen = metricGenerators.values().iterator().next();
-        MetricGroup mGroup = mGen.getMetricGroups().iterator().next();
-        MeasurementSet mSet = mGroup.getMeasurementSets().iterator().next();
-
-        // Add our one MeasurementSet data to the report and add that to the summary report
-        report.setMeasurementSet( mSet );
-        summaryOUT.addReport( report );
+       
     }
 
     @Override
     public void onPopulateDataBatch( EMDataBatch batchOUT )
     {
-        // We've only stored the first and the last measurements of a single
-        // MeasurementSet, so just send that
-        MeasurementSet ms = createMeasurementSetEmptySample();
-        ms.addMeasurement( firstMeasurement );
-        ms.addMeasurement( currentMeasurement );
-        
-        Report batchRep = new Report();
-        batchRep.setFromDate( firstMeasurement.getTimeStamp() );
-        batchRep.setToDate( currentMeasurement.getTimeStamp() );
-        batchRep.setMeasurementSet( ms );
-        batchRep.setNumberOfMeasurements( 2 );
-        
-        batchOUT.setBatchReport( batchRep );
+  
     }
     
     @Override
@@ -379,6 +295,7 @@ public class ECCClientController implements EMIAdapterListener,
     {
         clientView.setStatus( "Tearing down" );
         clientView.addLogMessage( "Tearing down metric generators" );
+        clientView.enableAddEntity(false);
 
         // Signal we've successfully torn-down
         resultOUT[0] = true;
@@ -388,34 +305,20 @@ public class ECCClientController implements EMIAdapterListener,
     @Override
     public void onPushDataClicked()
     {
-        // Create an empty instance of our measurement set
-        MeasurementSet sampleSet = createMeasurementSetEmptySample();
-
-        // Take a current measurement
-        snapshotMeasurement();
-        sampleSet.addMeasurement( currentMeasurement );
-
-        // Set up report (has only a single measure)
-        Date date           = new Date();
-        Report sampleReport = new Report();
-
-        sampleReport.setMeasurementSet( sampleSet );
-        sampleReport.setReportDate(date );
-        sampleReport.setFromDate( date );
-        sampleReport.setToDate( date );
-        sampleReport.setMeasurementSet( sampleSet );
-        sampleReport.setNumberOfMeasurements( 1 );
-
-        // ... and store for confirmation of push, then report!
-        pendingPushReports.put( sampleReport.getUUID(), sampleReport );
-        emiAdapter.pushMetric( sampleReport );
+        
+    }
+    
+    @Override
+    public void onEntityMetricCollectionEnabled( UUID senderID, UUID entityID, boolean enabled )
+    {
+    
     }
     
     @Override
     public void onClientViewClosed()
     {
         // Need to notify that we're leaving...
-        try { emiAdapter.disconnectFromEM(); }
+        try { emiAdapter.disconnectFromEM();}
         catch ( Exception e )
         { clientLogger.error( "Could not cleanly disconnect from EM:\n" + e.getMessage() ); }
     }
@@ -424,38 +327,49 @@ public class ECCClientController implements EMIAdapterListener,
     public void onTearDownTimeOut()
     { clientView.addLogMessage( "Got tear-down time-out message" ); }
 
-    // Private method ------------------------------------------------------------
-    private MeasurementSet createMeasurementSetEmptySample()
+    
+    // ECCNewEntityViewListener events -----------------------------------------
+    @Override
+    public void onNewEntityInfoEntered(String entityName,ArrayList<String> attList,String entityDesc )
     {
-        // Get our only metric generator
-        MetricGenerator metGen = metricGenerators.values().iterator().next();
-        metGen.getMetricGroups().iterator().next();
 
-        // Get our only metric group
-        MetricGroup mg = metGen.getMetricGroups().iterator().next();
-        MeasurementSet currentMS = mg.getMeasurementSets().iterator().next();
+        // Create a new entity to be observed (this Java VM)
+        Entity entityBeingObserved = new Entity();
+        entityBeingObserved.setName( entityName );
+        entityBeingObserved.setDescription(entityDesc);
+        
+        // Link entity with metric generator
+        metricGenerator.addEntity( entityBeingObserved );
 
-        return new MeasurementSet( currentMS, false );
-    }
-
-    private void snapshotMeasurement()
-    {
-        // Just take a very rough measurement
-        Runtime rt = Runtime.getRuntime();
-        String memVal = Long.toString( rt.totalMemory() - rt.freeMemory() );
-
-        // Get the (single) measurement set for this snapshot (just to get the ID actually)
-        MeasurementSet snapshotMS = createMeasurementSetEmptySample();
-
-        // Update the latest measurement
-        currentMeasurement = new Measurement();
-        currentMeasurement.setMeasurementSetUUID( snapshotMS.getID() );
-        currentMeasurement.setTimeStamp( new Date() );
-        currentMeasurement.setValue( memVal );
-
-        // Store this if it is the first ever measurement
-        if ( firstMeasurement == null ) firstMeasurement = currentMeasurement;
-
-        clientView.addLogMessage( "Memory measurement (bytes): " + memVal );
-    }
+        for(int i =0; i < attList.size(); i++)
+        {   
+            //Extract attribute details
+            String att = (String) attList.get(i);
+            String[] atts = att.split(",");
+            String attName = atts[0];
+            String attDesc = atts[1];
+            String attUnit = atts[2];
+            String attMetricType = atts[3];
+            
+            //Create new attribute and associate it it with the correct entity
+            Attribute entityAttribute = MetricHelper.createAttribute(attName, attDesc, entityBeingObserved);
+            
+            // ... a single MeasurementSet (representing the measures for the attibute)
+            MetricHelper.createMeasurementSet( entityAttribute, 
+                                           MetricType.fromValue(attMetricType), 
+                                           new Unit(attUnit), 
+                                           metricGroup );
+            
+           
+                //Creating a hash set to store metric generators
+                HashSet<MetricGenerator> mgSet = new HashSet<MetricGenerator>();
+                mgSet.add( metricGenerator );
+            
+                //Send metric generators to the EM
+                emiAdapter.sendMetricGenerators( mgSet );       
+            
+        }
+        clientView.addLogMessage( "Created new entity: " + entityBeingObserved.getName() );        
+    }  
 }
+    

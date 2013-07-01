@@ -63,3 +63,5 @@
 /extensions/dotNetClientAPI/sharedLibs/
 samples/basicDotNetClient/bin/
 samples/basicDotNetClient/obj/
+/amqpAPI/spec/lib/
+/amqpAPI/impl/lib/
