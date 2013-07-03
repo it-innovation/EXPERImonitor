@@ -85,6 +85,15 @@ public class AMQPConnectionFactory
         amqpPortNumber = port;
         return true;
     }
+    
+    public void setRabbitUserLogin( String name, String password )
+    {
+      if ( name != null && password != null )
+      {
+        userName = name;
+        userPass = password;
+      }
+    }
 
     public String getLocalIP()
     {
