@@ -51,7 +51,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
-      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\eccCodeUtils\Utils;$(ProjectDir)\..\rabbitmq-c-v0.3.0\librabbitmq;$(ProjectDir)\..\rabbit-c-wrapper\src;$(ProjectDir)\..\amqp-Spec;$(ProjectDir)\faces;$(ProjectDir)\amqp;$(BOOST_DIR);$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\eccCodeUtils\Utils\;$(ProjectDir)\..\rabbitmq-c-v0.3.0\librabbitmq;$(ProjectDir)\..\rabbit-c-wrapper\src;$(ProjectDir)\..\amqp-Spec;$(ProjectDir)\faces;$(ProjectDir)\amqp;$(BOOST_DIR);$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -71,7 +71,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
-      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\eccCodeUtils\Utils;$(ProjectDir)\..\rabbitmq-c-v0.3.0\librabbitmq;$(ProjectDir)\..\rabbit-c-wrapper\src;$(ProjectDir)\..\amqp-Spec;$(ProjectDir)\faces;$(ProjectDir)\amqp;$(BOOST_DIR);$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\eccCodeUtils\Utils\;$(ProjectDir)\..\rabbitmq-c-v0.3.0\librabbitmq;$(ProjectDir)\..\rabbit-c-wrapper\src;$(ProjectDir)\..\amqp-Spec;$(ProjectDir)\faces;$(ProjectDir)\amqp;$(BOOST_DIR);$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

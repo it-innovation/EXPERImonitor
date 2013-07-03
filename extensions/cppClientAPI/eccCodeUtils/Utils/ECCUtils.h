@@ -23,36 +23,36 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#pragma once
 
-#include "Utils.h"
-
+// Common includes
 #include <boost/locale.hpp>
-#include <boost/uuid/uuid_io.hpp>
 
-using namespace boost::locale::conv;
-using namespace std;
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/string_generator.hpp>
+
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+
+#include <boost/unordered_set.hpp>
+#include <boost/unordered_map.hpp>
+
+
+// Common types
+typedef std::wstring                             String;
+typedef boost::uuids::uuid                       UUID;
+typedef boost::unordered_set<boost::uuids::uuid> UUIDSet;
+typedef boost::posix_time::ptime                 TimeStamp;
+
 
 // Inline utility functions
+inline String toWide( const std::string& narrow );
 
-std::wstring toWide( const std::string& narrow )
-{ return to_utf<wchar_t>( narrow, "Latin1" ); }
+inline std::string toNarrow( const String& wide );
 
-std::string toNarrow( const std::wstring& wide )
-{ return from_utf( wide, "Latin1" ); }
+inline std::string uuidToNarrow( const UUID& id );
 
-string uuidToNarrow( const boost::uuids::uuid& id )
-{
-  stringstream ss;
-  ss << id;
+inline String uuidToWide( const UUID& id );
 
-  return ss.str();
-}
+inline UUID createRandomUUID();
 
-std::wstring uuidToWide( const boost::uuids::uuid& id )
-{
-  wstringstream ws;
-  ws << id;
-
-  return ws.str();
-}
+inline TimeStamp getCurrentTime();

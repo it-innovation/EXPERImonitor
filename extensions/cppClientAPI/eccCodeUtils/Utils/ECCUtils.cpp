@@ -23,17 +23,46 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-#pragma once
+#include "stdafx.h"
+
+#include "ECCUtils.h"
 
 #include <boost/locale.hpp>
-#include <boost/uuid/string_generator.hpp>
+#include <boost/uuid/random_generator.hpp>
+#include <boost/uuid/uuid_io.hpp>
+
+using namespace boost::uuids;
+using namespace boost::locale::conv;
+using namespace std;
 
 // Inline utility functions
 
-inline std::wstring toWide( const std::string& narrow );
+String toWide( const std::string& narrow )
+{ return to_utf<wchar_t>( narrow, "Latin1" ); }
 
-inline std::string toNarrow( const std::wstring& wide );
+std::string toNarrow( const std::wstring& wide )
+{ return from_utf( wide, "Latin1" ); }
 
-inline std::string uuidToNarrow( const boost::uuids::uuid& id );
+string uuidToNarrow( const UUID& id )
+{
+  stringstream ss;
+  ss << id;
 
-inline std::wstring uuidToWide( const boost::uuids::uuid& id );
+  return ss.str();
+}
+
+String uuidToWide( const UUID& id )
+{
+  wstringstream ws;
+  ws << id;
+
+  return ws.str();
+}
+
+static boost::uuids::random_generator uuidGenerator;
+
+UUID createRandomUUID()
+{ return uuidGenerator(); }
+
+TimeStamp getCurrentTime()
+{ return boost::posix_time::second_clock::local_time(); }
