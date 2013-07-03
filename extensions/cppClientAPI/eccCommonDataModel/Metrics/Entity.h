@@ -60,6 +60,11 @@ class Entity : ModelBase
 public:
 
   typedef boost::shared_ptr<Entity> ptr_t;
+  
+  typedef boost::unordered_set<Entity::ptr_t> Set;
+  
+  typedef boost::unordered_map<UUID,Entity::ptr_t> Map;
+
 
   /**
     * Default constructor, which creates a random UUID for this object instance
@@ -77,7 +82,7 @@ public:
     * A constructor to set all the fields of the entity class except for the attributes.
     * @param uuid A UUID used to uniquely identify an entity in this framework.
     */
-  Entity( const boost::uuids::uuid& uuid );
+  Entity( const UUID& uuid );
     
   /**
     * A constructor to set all the fields of the entity class except for the attributes.
@@ -85,9 +90,9 @@ public:
     * @param name The name of the Entity.
     * @param description A description of the entity.
     */
-  Entity( const boost::uuids::uuid& uuid, 
-          const std::wstring&       name, 
-          const std::wstring&       description );
+  Entity( const UUID&   uuid, 
+          const String& name, 
+          const String& description );
     
   /**
     * A constructor to set all the fields of the entity class.
@@ -96,10 +101,10 @@ public:
     * @param description A description of the entity.
     * @param attributes A set of attributes of the entity, which could be observed to generate metrics.
     */
-  Entity( const boost::uuids::uuid&              uuid, 
-          const std::wstring&                    name, 
-          const std::wstring&                    description, 
-          const std::hash_set<Attribute::ptr_t>& attributes );
+  Entity( const UUID&           uuid, 
+          const String&         name, 
+          const String&         description, 
+          const Attribute::Set& attributes );
     
   /**
     * A constructor to set all the fields of the entity class except for the attributes.
@@ -108,10 +113,10 @@ public:
     * @param name The name of the Entity.
     * @param description A description of the entity.
     */
-  Entity( const boost::uuids::uuid& uuid, 
-          const std::wstring&       entityID, 
-          const std::wstring&       name, 
-          const std::wstring&       description );
+  Entity( const UUID&   uuid, 
+          const String& entityID, 
+          const String& name, 
+          const String& description );
     
   /**
     * A constructor to set all the fields of the entity class.
@@ -121,48 +126,48 @@ public:
     * @param description A description of the entity.
     * @param attributes A set of attributes of the entity, which could be observed to generate metrics.
     */
-  Entity( const boost::uuids::uuid&             uuid, 
-          const std::wstring&                   entityID, 
-          const std::wstring&                   name, 
-          const std::wstring&                   description, 
-          const std::hash_set<Attribute::ptr_t> attributes );
+  Entity( const UUID&           uuid, 
+          const String&         entityID, 
+          const String&         name, 
+          const String&         description, 
+          const Attribute::Set& attributes );
 
   virtual ~Entity();
 
   /**
    * Getter/Setter for the unique ID for this entity
    */
-  boost::uuids::uuid getUUID();
+  UUID getUUID();
 
-  void setUUID( const boost::uuids::uuid& ID );
+  void setUUID( const UUID& ID );
 
   /**
    * Getter/Setter for the human readable ID for this entity
    */
-  std::wstring getEntityID();
+  String getEntityID();
 
-  void setEntityID( const std::wstring& ID );
+  void setEntityID( const String& ID );
 
   /**
    * Getter/Setter for the name of this entity
    */
-  std::wstring getName();
+  String getName();
 
-  void setName( const std::wstring& name );
+  void setName( const String& name );
 
   /**
    * Getter/Setter for the description of this entity
    */
-  std::wstring getDescription();
+  String getDescription();
 
-  void setDescription( const std::wstring& desc );
+  void setDescription( const String& desc );
 
   /**
    * Getter/Setter for the attributes belonging to this entity.
    */
-  std::hash_set<Attribute::ptr_t> getAttributes();
+  Attribute::Set getAttributes();
   
-  void setAttributes( std::hash_set<Attribute::ptr_t> attributes );
+  void setAttributes( const Attribute::Set& attributes );
     
   /**
     * @param attribute the attribute to add
@@ -172,16 +177,22 @@ public:
   /**
     * @param attributes the attributes to add
     */
-  void addAttributes( std::hash_map<boost::uuids::uuid, Attribute::ptr_t> attributes );
+  void addAttributes( const Attribute::Set& attributes );
 
   // ModelBase -----------------------------------------------------------------
-  virtual void toJSON( std::wstring& jsonStrOUT );
+  virtual void toJSON( String& jsonStrOUT );
 
-  virtual void fromJSON( const std::wstring& jsonStr );
+  virtual void fromJSON( const String& jsonStr );
 
-  virtual std::wstring toString();
+  virtual String toString();
 
 private:
+
+  UUID           entityUniqueID;
+  String         entityID;
+  String         entityName;
+  String         entityDescription;
+  Attribute::Set entityAttributes;
 
 };
 

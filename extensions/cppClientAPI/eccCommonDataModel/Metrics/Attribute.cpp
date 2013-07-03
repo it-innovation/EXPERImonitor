@@ -35,96 +35,88 @@ using namespace std;
 namespace ecc_commonDataModel
 {
 
-/**
- * This class represents an observable attribute of an entity, which metrics can
- * be generated for.
- * 
- * @author Vegard Engen
- */
-//class Attribute
-//{
-//    /**
-//     * Default constructor which sets a random UUID for the object instance.
-//     */
-//    public Attribute()
-//    {
-//        this.uuid = Guid.NewGuid();
-//    }
-//    
-//    /**
-//     * Copy constructor.
-//     * @param a The attribute object from which a copy is made.
-//     */
-//    public Attribute(Attribute a)
-//    {
-//        if (a == null)
-//            return;
-//        
-//        if (a.uuid != null)
-//            this.uuid = new Guid( a.uuid.ToString() );
-//
-//        if (a.entityUUID != null)
-//            this.entityUUID = new Guid( a.entityUUID.ToString() );
-//
-//        this.name = a.name;
-//        this.description = a.description;
-//    }
-//    
-//    /**
-//     * Constructor to set all the fields of the Attribute class.
-//     * @param uuid UUID used to uniquely identify an attribute in this framework.
-//     * @param entityUUID The UUID of the entity that this attribute is a part of.
-//     * @param name The name of the attribute.
-//     * @param description A description of the attribute.
-//     */
-//    public Attribute(Guid uuid, Guid entityUUID, string name, string description)
-//    {
-//        this.uuid = uuid;
-//        this.entityUUID = entityUUID;
-//        this.name = name;
-//        this.description = description;
-//    }
-//
-//    public Guid uuid
-//    {
-//        get;
-//        set;
-//    }
-//
-//    public Guid entityUUID
-//    {
-//        get;
-//        set;
-//    }
-//
-//    public string name
-//    {
-//        get;
-//        set;
-//    }
-//
-//    public string description
-//    {
-//        get;
-//        set;
-//    }
-//
-//    public string toString()
-//    {
-//        return name;
-//    }
-//};
+Attribute::Attribute()
+{
+  attrID = createRandomUUID();
+}
+    
+Attribute::Attribute( Attribute::ptr_t attr )
+{
+  if ( attr )
+  {
+    attrID          = attr->getUUID();
+    entityID        = attr->getEntityUUID();
+    attrName        = attr->getName();
+    attrDescription = attr->getDescription();
+  }
+}
+    
+Attribute::Attribute( const UUID&   uuid, 
+                      const UUID&&  entityUUID, 
+                      const String& name, 
+                      const String& description )
+{
+  attrID          = uuid;
+  entityID        = entityUUID;
+  attrName        = name;
+  attrDescription = description;
+}
+
+Attribute::~Attribute()
+{
+}
+
+UUID Attribute::getUUID()
+{
+  return attrID;
+}
+  
+void Attribute::setUUID( const UUID& ID )
+{
+  attrID = ID;
+}
+
+UUID Attribute::getEntityUUID()
+{
+  return entityID;
+}
+
+void Attribute::setEntityUUID( const UUID& ID )
+{
+  entityID = ID;
+}
+
+String Attribute::getName()
+{
+  return attrName;
+}
+
+void Attribute::setName( const String& name )
+{
+  attrName = name;
+}
+
+String& Attribute::getDescription()
+{
+  return attrDescription;
+}
+
+void Attribute::setDescription( const String& description )
+{
+  attrDescription = description;
+}
+
 
 // ModelBase -----------------------------------------------------------------
-void Attribute::toJSON( wstring& jsonStrOUT )
+void Attribute::toJSON( String& jsonStrOUT )
 {
 }
 
-void Attribute::fromJSON( const wstring& jsonStr )
+void Attribute::fromJSON( const String& jsonStr )
 {
 }
 
-wstring Attribute::toString()
+String Attribute::toString()
 {
   wstring ts;
 

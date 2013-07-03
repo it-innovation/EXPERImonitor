@@ -27,9 +27,6 @@
 
 #include "MetricGenerator.h"
 
-#include <boost/uuid/uuid.hpp>
-#include <boost/date_time/posix_time/posix_time_types.hpp>
-
 
 
 
@@ -72,11 +69,11 @@ public:
     * @param description A description of the experiment.
     * @param creationTime The time stamp when the experiment was started.
     */
-  Experiment( const boost::uuids::uuid        uuid, 
-              const std::wstring&             experimentID, 
-              const std::wstring&             name, 
-              const std::wstring&             description,
-              const boost::posix_time::ptime& creationTime );
+  Experiment( const UUID&         uuid, 
+              const std::wstring& experimentID, 
+              const std::wstring& name, 
+              const std::wstring& description,
+              const TimeStamp&    creationTime );
     
   /**
     * Constructor to set all the information about the experiment.
@@ -87,61 +84,61 @@ public:
     * @param creationTime The time stamp when the experiment was started.
     * @param endTime The time stamp when the experiment ended.
     */
-  Experiment( const boost::uuids::uuid        uuid, 
-              const std::wstring&             experimentID, 
-              const std::wstring&             name, 
-              const std::wstring&             description, 
-              const boost::posix_time::ptime& creationTime, 
-              const boost::posix_time::ptime& endTime );
+  Experiment( const UUID&      uuid, 
+              const String&    experimentID, 
+              const String&    name, 
+              const String&    description, 
+              const TimeStamp& creationTime, 
+              const TimeStamp& endTime );
 
   /**
     * Getter/Setter for the experiment's unique ID
     */
-  boost::uuids::uuid getUUID();
+  UUID getUUID();
 
-  void setUUID( const boost::uuids::uuid& ID );
+  void setUUID( const UUID& ID );
 
   /**
     * Getter/Setter for the experiment's human readable ID
     */
-  std::wstring getExperimentID();
+  String getExperimentID();
 
-  void setExperimentID( const std::wstring& ID );
+  void setExperimentID( const String& ID );
 
   /**
     * Getter/Setter for the experiment's name
     */
-  std::wstring getName();
+  String getName();
 
-  void setName( const std::wstring& name );
+  void setName( const String& name );
 
   /**
     * Getter/Setter for the experiment description
     */
-  std::wstring getDescription();
+  String getDescription();
 
-  void setDescription( const std::wstring& desc );
+  void setDescription( const String& desc );
 
   /**
     * Getter/Setter for the experiment's start time
     */
-  boost::posix_time::ptime getStartTime();
+  TimeStamp getStartTime();
 
-  void setStartTime( const boost::posix_time::ptime& time );
+  void setStartTime( const TimeStamp& time );
 
   /**
     * Getter/Setter for the experiment's end time
     */
-  boost::posix_time::ptime getEndTime();
+  TimeStamp getEndTime();
 
-  void setEndTime( const boost::posix_time::ptime& time );
+  void setEndTime( const TimeStamp& time );
 
   /**
     * Getter/Setter for the metric generators associated with this experiment
     */
-  std::hash_set<MetricGenerator::ptr_t> getMetricGenerators();
+  MetricGenerator::Set getMetricGenerators();
 
-  void setMetricGenerators( const std::hash_set<MetricGenerator::ptr_t>& generators );
+  void setMetricGenerators( const MetricGenerator::Set& generators );
     
   /**
     * @param metricGenerator the metric generator to add
@@ -151,18 +148,24 @@ public:
   /**
     * @param metricGenerators the metric generators to add
     */
-  void addMetricGenerators( const std::hash_set<MetricGenerator::ptr_t>& generators );
+  void addMetricGenerators( const MetricGenerator::Set& generators );
 
   // ModelBase -----------------------------------------------------------------
-  virtual void toJSON( std::wstring& jsonStrOUT );
+  virtual void toJSON( String& jsonStrOUT );
 
-  virtual void fromJSON( const std::wstring& jsonStr );
+  virtual void fromJSON( const String& jsonStr );
 
-  virtual std::wstring toString();
+  virtual String toString();
 
 private:
-  boost::uuids::uuid uuid;
 
+  UUID                 expUniqueID;
+  MetricGenerator::Set metricGenerators;
+  String               experimentID;     // Yes, this is confusing. Human readable ID
+  String               name;
+  String               description;
+  TimeStamp            startTime;
+  TimeStamp            endTime;
 };
 
 } // namespace

@@ -34,79 +34,76 @@ using namespace std;
 namespace ecc_commonDataModel
 {
 
-/**
- * EMDataBatch encapsulates metric data between a start and end date for a particular
- * MeasurementSet.
- * 
- * @author sgc
- */
-//class EMDataBatch
-//{
-//  /**
-//   * Returns the ID of this batch
-//   * 
-//   * @return - ID of the batch.
-//   */
-//    public Guid batchID
-//    {
-//        get;
-//        set;
-//    }
-//    
-//  /**
-//   * Gets the start date of the first measurement in this set
-//   * 
-//   * @return - Start date of the first measurement
-//   */
-//    public DateTime expectedStartStamp
-//    {
-//        get;
-//        set;
-//    }
-//
-//    public int expectedMeasurementCount
-//    {
-//        get;
-//        set;
-//    }
-//  
-//  /**
-//   * Returns the associated MeasurementSet for this batch. This instance
-//   * should contain all the measurements within the range indicated by the start
-//   * and the end date
-//   * 
-//   * @return - Instance of the MeasurementSet
-//   */
-//    public Guid expectedMeasurementSetID
-//    {
-//        get;
-//        set;
-//    }
-//  
-//    /**
-//     * Get the report reflecting the data that was requested for this batch. This
-//     * report may not necessarily contain all the data that was requested by the
-//     * ECC.
-//     * 
-//     * @return - Should return a fully specified Report instance. 
-//     */
-//    public Report batchReport
-//    {
-//        get;
-//        set;
-//    };
-//}
+EMDataBatch::EMDataBatch()
+{
+}
+
+EMDataBatch::~EMDataBatch()
+{
+}
+
+
+UUID EMDataBatch::getID()
+{
+  return batchID;
+}
+
+void EMDataBatch::setID( const UUID& ID )
+{
+  batchID = ID;
+}
+    
+TimeStamp EMDataBatch::getExpectedStartStamp()
+{
+  return expectedStartStamp;
+}
+
+void EMDataBatch::setExpectedStartStamp( const TimeStamp& time )
+{
+  expectedStartStamp = time;
+}
+
+int EMDataBatch::getExpectedMeasurementCount()
+{
+  return expectedMeasurementCount;
+}
+
+void EMDataBatch::setExpectedMeasurementCount( const int& count )
+{
+  expectedMeasurementCount = count;
+}
+  
+UUID EMDataBatch::getExpectedMeasurementSetID()
+{
+  return expectedMeasurementSetID;
+}
+
+void EMDataBatch::setExpectedMeasurementSetID( const UUID& ID )
+{
+  expectedMeasurementSetID = ID;
+}
+  
+
+Report::ptr_t EMDataBatch::getBatchReport()
+{
+  return batchReport;
+}
+
+void EMDataBatch::setBatchReport( Report::ptr_t report )
+{
+  batchReport = report;
+}
 
 // ModelBase -----------------------------------------------------------------
-void EMDataBatch::toJSON( wstring& jsonStrOUT )
+void EMDataBatch::toJSON( String& jsonStrOUT )
 {
 }
 
-void EMDataBatch::fromJSON( const wstring& jsonStr )
+void EMDataBatch::fromJSON( const String& jsonStr )
 {
 }
 
-wstring EMDataBatch::toString()
+String EMDataBatch::toString()
 {
   wstring ts;
 

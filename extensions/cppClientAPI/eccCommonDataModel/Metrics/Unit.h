@@ -50,12 +50,12 @@ namespace ecc_commonDataModel
          * Copy constructor for the Unit.
          * @param u The object to copy from.
          */
-        Unit( Unit::ptr_t u);
+        Unit( Unit::ptr_t u );
     
         /**
          * Unit constructor with name
          */
-        Unit( const std::wstring name );
+        Unit( const String& name );
 
         virtual ~Unit();
     
@@ -63,16 +63,20 @@ namespace ecc_commonDataModel
         /**
          * Getter/Setter for name
          */
-        std::wstring getName();
+        String getName();
 
-        void setName( const std::wstring& name );
+        void setName( const String& name );
 
         // ModelBase -----------------------------------------------------------------
-        virtual void toJSON( std::wstring& jsonStrOUT );
+        virtual void toJSON( String& jsonStrOUT );
 
-        virtual void fromJSON( const std::wstring& jsonStr );
+        virtual void fromJSON( const String& jsonStr );
 
-        virtual std::wstring toString();
+        virtual String toString();
+
+    private:
+      String unitName;
+
     };
     
 } // namespace

@@ -47,6 +47,10 @@ namespace ecc_commonDataModel
 
       typedef boost::shared_ptr<EMDataBatch> ptr_t;
 
+      typedef boost::unordered_set<EMDataBatch::ptr_t> Set;
+
+      typedef boost::unordered_map<UUID,EMDataBatch::ptr_t> Map;
+
       EMDataBatch();
 
       virtual ~EMDataBatch();
@@ -54,16 +58,16 @@ namespace ecc_commonDataModel
       /**
        * Getter/Setter for the ID of this batch
        */
-      boost::uuids::uuid getBatchID();
+      UUID getID();
 
-      void setBatchID( const boost::uuids::uuid& ID );
+      void setID( const UUID& ID );
     
       /**
        * Getter/Setter for the start date of the first measurement in this set
        */
-      boost::posix_time::ptime getExpectedStartStamp();
+      TimeStamp getExpectedStartStamp();
 
-      void setExpectedStartStamp( const boost::posix_time::ptime& time );
+      void setExpectedStartStamp( const TimeStamp& time );
 
       /**
        * Getter/Setter for the expected Measurement count
@@ -75,9 +79,9 @@ namespace ecc_commonDataModel
       /**
        * Getter/Setter of the associated MeasurementSet for this batch.
        */
-      boost::uuids::uuid getExpectedMeasurementSetID();
+      UUID getExpectedMeasurementSetID();
 
-      void setExpectedMeasurementSetID( boost::uuids::uuid ID );
+      void setExpectedMeasurementSetID( const UUID& ID );
   
       /**
         * Getter/Setter reflecting the data that was requested for this batch.
@@ -87,19 +91,18 @@ namespace ecc_commonDataModel
       void setBatchReport( Report::ptr_t report );
 
       // ModelBase -----------------------------------------------------------------
-      virtual void toJSON( std::wstring& jsonStrOUT );
+      virtual void toJSON( String& jsonStrOUT );
 
-      virtual void fromJSON( const std::wstring& jsonStr );
+      virtual void fromJSON( const String& jsonStr );
 
-      virtual std::wstring toString();
+      virtual String toString();
 
     private:
-
-      boost::uuids::uuid       batchID; 
-      boost::posix_time::ptime expectedStartStamp;
-      int                      expectedMeasurementCount;
-      boost::uuids::uuid       expectedMeasurementSetID;
-      Report::ptr_t            batchReport;
+      UUID          batchID; 
+      TimeStamp     expectedStartStamp;
+      int           expectedMeasurementCount;
+      UUID          expectedMeasurementSetID;
+      Report::ptr_t batchReport;
     };
 
 } // namespace

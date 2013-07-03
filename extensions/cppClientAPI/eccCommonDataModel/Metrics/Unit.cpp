@@ -34,64 +34,49 @@ using namespace std;
 namespace ecc_commonDataModel
 {
 
-/**
- * A simple class representing a unit by a name.
- * 
- * This will be extended later.
- * 
- * @author Vegard Engen
- */
-//class Unit
-//{
-//    public Unit() {}
-//    
-//    /**
-//     * Copy constructor for the Unit.
-//     * @param u The object to copy from.
-//     */
-//    public Unit(Unit u)
-//    {
-//        if (u == null)
-//            return;
-//        
-//        this.name = u.name;
-//    }
-//    
-//    public Unit(string name)
-//    {
-//        this.name = name;
-//    }
-//
-//    public string name
-//    {
-//        get;
-//        set;
-//    }
-//    
-//    public string toString()
-//    {
-//        if (this.name == null)
-//            return "null";
-//
-//        return this.name;
-//    }
-//};
+Unit::Unit()
+{
+}
+
+Unit::Unit( Unit::ptr_t u ) 
+{
+  if ( u ) unitName = u->getName();
+}
+    
+Unit::Unit( const String& name ) 
+{
+  unitName = name;
+}
+
+Unit::~Unit()
+{
+}
+    
+String Unit::getName()
+{
+  return unitName;
+}
+
+void Unit::setName( const String& name )
+{
+  unitName = name;
+}
 
 
 // ModelBase -----------------------------------------------------------------
-void Unit::toJSON( wstring& jsonStrOUT )
+void Unit::toJSON( String& jsonStrOUT )
 {
 }
 
-void Unit::fromJSON( const wstring& jsonStr )
+void Unit::fromJSON( const String& jsonStr )
 {
 }
 
-wstring Unit::toString()
+String Unit::toString()
 {
   wstring ts;
 
   return ts;
-  }
+}
     
 } // namespace

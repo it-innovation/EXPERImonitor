@@ -28,12 +28,6 @@
 #include "Entity.h"
 #include "MetricGroup.h"
 
-#include <boost/uuid/uuid.hpp>
-
-#include <hash_set>
-
-
-
 
 namespace ecc_commonDataModel
 {
@@ -49,109 +43,121 @@ namespace ecc_commonDataModel
     class MetricGenerator : ModelBase
     {
     public:
+      
+      typedef boost::shared_ptr<MetricGenerator> ptr_t;
 
-        typedef boost::shared_ptr<MetricGenerator> ptr_t;
+      typedef boost::unordered_set<MetricGenerator::ptr_t> Set;
 
-        /**
-         * Default constructor, which sets a random UUID for the object instance.
-         */
-        MetricGenerator();
+      typedef boost::unordered_map<UUID,MetricGenerator::ptr_t> Map;
+
+      /**
+        * Default constructor, which sets a random UUID for the object instance.
+        */
+      MetricGenerator();
     
-        /**
-         * A copy constructor; takes a deep copy of the UUID, metric groups and entities.
-         * @param mg A metric generator object from which a copy is made.
-         */
-        MetricGenerator( MetricGenerator::ptr_t mg );
+      /**
+        * A copy constructor; takes a deep copy of the UUID, metric groups and entities.
+        * @param mg A metric generator object from which a copy is made.
+        */
+      MetricGenerator( MetricGenerator::ptr_t mg );
     
-        /**
-         * Constructor to set all fields of the Metric Generator class.
-         * @param uuid The UUID used to uniquely identify a metric generator in this framework.
-         * @param name The name of the metric generator.
-         * @param description A description of the metric generator.
-         */
-        MetricGenerator( const boost::uuids::uuid& uuid, 
-                         const std::wstring&       name, 
-                         const std::wstring&       description);
+      /**
+        * Constructor to set all fields of the Metric Generator class.
+        * @param uuid The UUID used to uniquely identify a metric generator in this framework.
+        * @param name The name of the metric generator.
+        * @param description A description of the metric generator.
+        */
+      MetricGenerator( const UUID&   uuid, 
+                       const String& name, 
+                       const String& description);
     
-        /**
-         * Constructor to set all fields of the Metric Generator class.
-         * @param uuid The UUID used to uniquely identify a metric generator in this framework.
-         * @param name The name of the metric generator.
-         * @param description A description of the metric generator.
-         * @param metricGroups A set of metric groups.
-         * @param entities A set entities being observed.
-         */
-        MetricGenerator( boost::uuids::uuid                       uuid, 
-                         const std::wstring&                      name, 
-                         const std::wstring&                      description, 
-                         const std::hash_set<MetricGroup::ptr_t>& metricGroups, 
-                         const std::hash_set<Entity>&             entities );
+      /**
+        * Constructor to set all fields of the Metric Generator class.
+        * @param uuid The UUID used to uniquely identify a metric generator in this framework.
+        * @param name The name of the metric generator.
+        * @param description A description of the metric generator.
+        * @param metricGroups A set of metric groups.
+        * @param entities A set entities being observed.
+        */
+      MetricGenerator( const UUID&             uuid, 
+                       const String&           name, 
+                       const String&           description, 
+                       const MetricGroup::Set& metricGroups, 
+                       const Entity::Set&      entities );
 
-        virtual ~MetricGenerator();
+      virtual ~MetricGenerator();
 
-        /**
-         * Getter/Setter for metric generator ID
-         */
-        boost::uuids::uuid& getUUID();
+      /**
+        * Getter/Setter for metric generator ID
+        */
+      UUID getUUID();
 
-        void setUUID( const boost::uuids::uuid& ID );
+      void setUUID( const UUID& ID );
 
-        /**
-         * Getter/Setter for metric generator name
-         */
-        std::wstring getName();
+      /**
+        * Getter/Setter for metric generator name
+        */
+      std::wstring getName();
 
-        void setName( const std::wstring& name );
+      void setName( const String& name );
 
-        /**
-         * Getter/Setter for metric generator description
-         */
-        std::wstring getDescription();
+      /**
+        * Getter/Setter for metric generator description
+        */
+      String getDescription();
 
-        void setDescription( const std::wstring& desc );
+      void setDescription( const String& desc );
 
-        /**
-         * Getter/Setter for metric groups for this metric generator
-         */
-        std::hash_set<MetricGroup::ptr_t> getMetricGroups();
+      /**
+        * Getter/Setter for metric groups for this metric generator
+        */
+      MetricGroup::Set getMetricGroups();
 
-        void setMetricGroups( const std::hash_set<MetricGroup::ptr_t>& groups );
+      void setMetricGroups( const MetricGroup::Set& groups );
 
-        /**
-         * Getter/Setter for Entites associated with this metric generator
-         */
-        std::hash_set<Entity::ptr_t> getEntities();
+      /**
+        * Getter/Setter for Entites associated with this metric generator
+        */
+      Entity::Set getEntities();
 
-        void setEntities( const std::hash_set<Entity::ptr_t>& entities );
+      void setEntities( const Entity::Set& entities );
     
-        /**
-         * @param metricGroup the metric group to add
-         */
-        void addMetricGroup( MetricGroup::ptr_t metricGroup );
+      /**
+        * @param metricGroup the metric group to add
+        */
+      void addMetricGroup( MetricGroup::ptr_t metricGroup );
     
-        /**
-         * @param metricGroups the metric groups to add
-         */
-        void addMetricGroups( const std::hash_set<MetricGroup::ptr_t>& metricGroups );
+      /**
+        * @param metricGroups the metric groups to add
+        */
+      void addMetricGroups( const MetricGroup::Set& metricGroups );
     
-        /**
-         * @param entity the entity to add
-         */
-        void addEntity( Entity::ptr_t entity );
+      /**
+        * @param entity the entity to add
+        */
+      void addEntity( Entity::ptr_t entity );
 
     
-        /**
-         * @param entities the entities to add
-         */
-        void addEntities( const std::hash_set<Entity::ptr_t>& entities );
+      /**
+        * @param entities the entities to add
+        */
+      void addEntities( const Entity::Set& entities );
 
-        // ModelBase -----------------------------------------------------------------
-        virtual void toJSON( std::wstring& jsonStrOUT );
+      // ModelBase -----------------------------------------------------------------
+      virtual void toJSON( String& jsonStrOUT );
 
-        virtual void fromJSON( const std::wstring& jsonStr );
+      virtual void fromJSON( const String& jsonStr );
 
-        virtual std::wstring toString();
-    
+      virtual String toString();
+
+    private:
+      
+      UUID             mgID;
+      String           mgName;
+      String           mgDescription;
+      MetricGroup::Set mgMetricGroups;
+      Entity::Set      mgEntities;
+
     };
 
 } // namespace

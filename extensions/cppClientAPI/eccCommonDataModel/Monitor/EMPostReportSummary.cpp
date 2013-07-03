@@ -43,12 +43,12 @@ EMPostReportSummary::~EMPostReportSummary()
 {
 }
 
-hash_set<uuid> EMPostReportSummary::getReportedMeasurementSetIDs()
+UUIDSet EMPostReportSummary::getReportedMeasurementSetIDs()
 {
-  hash_set<uuid> reportIDs;
+  UUIDSet reportIDs;
 
   // Copy UUIDs into a collection
-  ReportMap::iterator repIt = reportsByMeasurementSetID.begin();
+  Report::Map::iterator repIt = reportsByMeasurementSetID.begin();
   while ( repIt != reportsByMeasurementSetID.end() )
   {
     reportIDs.insert( repIt->first );
@@ -66,7 +66,7 @@ void EMPostReportSummary::addReport( Report::ptr_t report )
     MeasurementSet::ptr_t ms = report->getMeasurementSet();
 
     if ( ms )
-      reportsByMeasurementSetID.insert( make_pair<uuid,Report::ptr_t>( ms->getMSetID(), report ) );
+      reportsByMeasurementSetID.insert( make_pair<uuid,Report::ptr_t>( ms->getID(), report ) );
   }
 }
 
@@ -79,7 +79,7 @@ Report::ptr_t EMPostReportSummary::getReport( const uuid& measurementID )
 {
   Report::ptr_t report;
 
-  ReportMap::iterator target = reportsByMeasurementSetID.find( measurementID );
+  Report::Map::iterator target = reportsByMeasurementSetID.find( measurementID );
 
   if ( target != reportsByMeasurementSetID.end() )
     report = target->second;
@@ -88,15 +88,15 @@ Report::ptr_t EMPostReportSummary::getReport( const uuid& measurementID )
 }
 
 // ModelBase -----------------------------------------------------------------
-void EMPostReportSummary::toJSON( wstring& jsonStrOUT )
+void EMPostReportSummary::toJSON( String& jsonStrOUT )
 {
 }
 
-void EMPostReportSummary::fromJSON( const wstring& jsonStr )
+void EMPostReportSummary::fromJSON( const String& jsonStr )
 {
 }
 
-wstring EMPostReportSummary::toString()
+String EMPostReportSummary::toString()
 {
   wstring ts;
 

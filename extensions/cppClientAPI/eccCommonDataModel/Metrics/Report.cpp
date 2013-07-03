@@ -35,159 +35,154 @@ using namespace std;
 namespace ecc_commonDataModel
 {
 
-/**
- * A report class that provides a means of transferring measurements, which 
- * contains meta-information about a measurement set and the measurements for it 
- * for a given time period
- * 
- * Currently only the number of measurements is supported.
- * 
- * @author Vegard Engen
- */
-//class Report
-//{    
-//    /**
-//     * Default constructor which generates a random UUID for the Report object.
-//     */
-//    public Report()
-//    {
-//        reportID   = Guid.NewGuid();
-//        reportDate = DateTime.Now;
-//    }
-//    
-//    /**
-//     * Constructor for the Report class that also creates a MeasurementSet with
-//     * 'msID' as the identifier.
-//     * 
-//     * @param msID - MeasurementSet ID to be used for this report
-//     */
-//    public Report(Guid msID) : this()
-//    {
-//        measurementSet = new MeasurementSet( msID );
-//    }
-//    
-//    /**
-//     * Copy constructor for the Report class, which takes a deep copy of any objects.
-//     * @param report The report object a copy is made of.
-//     */
-//    public Report(Report report)
-//    {
-//        if (report == null)
-//            return;
-//        
-//        if (report.reportID != null)
-//            this.reportID = new Guid(report.reportID.ToString());
-//
-//        if (report.measurementSet != null)
-//            this.measurementSet = new MeasurementSet(report.measurementSet, true);
-//
-//        if (report.reportDate != null)
-//            this.reportDate = new DateTime(report.reportDate.Ticks);
-//
-//        if (report.fromDate != null)
-//            this.fromDate = new DateTime(report.fromDate.Ticks);
-//
-//        if (report.toDate != null)
-//            this.toDate = new DateTime(report.toDate.Ticks);
-//        
-//        this.numberOfMeasurements = report.numberOfMeasurements;
-//    }
-//    
-//    /**
-//     * Constructor to set the "administrative" attributes of the class.
-//     * @param uuid The UUID of the Report, to uniquely identify it.
-//     * @param measurementSet The measurement set that this is a report for.
-//     * @param reportDate The time stamp for when the report was made.
-//     * @param fromDate The time stamp for the start of the report period.
-//     * @param toDate The time stamp for the end of the report period.
-//     */
-//    public Report(Guid uuid, MeasurementSet measurementSet, DateTime reportDate, DateTime fromDate, DateTime toDate)
-//    {
-//        this.reportID = uuid;
-//        this.measurementSet = measurementSet;
-//        this.reportDate = reportDate;
-//        this.fromDate = fromDate;
-//        this.toDate = toDate;
-//    }
-//    
-//    /**
-//     * Constructor to set all the attributes of the class.
-//     * @param uuid The UUID of the Report, to uniquely identify it.
-//     * @param measurementSet The measurement set that this is a report for.
-//     * @param reportDate The time stamp for when the report was made.
-//     * @param fromDate The time stamp for the start of the report period.
-//     * @param toDate The time stamp for the end of the report period.
-//     * @param numMeasurements The number of measurements in the reporting period.
-//     */
-//    public Report(Guid uuid, MeasurementSet measurementSet, DateTime reportDate, DateTime fromDate, DateTime toDate, int numMeasurements)
-//        : this(uuid, measurementSet, reportDate, fromDate, toDate)
-//    {
-//        this.numberOfMeasurements = numMeasurements;
-//    }
-//
-//    public Guid reportID
-//    {
-//        get;
-//        set;
-//    }
-//
-//    public MeasurementSet measurementSet
-//    {
-//        get;
-//        set;
-//    }
-//
-//    [JsonConverter(typeof(ECCDateTimeJSONConverter))]
-//    public DateTime reportDate
-//    {
-//        get;
-//        set;
-//    }
-//
-//    [JsonConverter(typeof(ECCDateTimeJSONConverter))]
-//    public DateTime fromDate
-//    {
-//        get;
-//        set;
-//    }
-//
-//    [JsonConverter(typeof(ECCDateTimeJSONConverter))]
-//    public DateTime toDate
-//    {
-//        get;
-//        set;
-//    }
-//
-//    public int numberOfMeasurements
-//    {
-//        get;
-//        set;
-//    }
-//    
-//    public void copyReport(Report repIn, bool copyMeasurements)
-//    {
-//        if ( repIn != null )
-//        {
-//            reportID = repIn.reportID;
-//            measurementSet = new MeasurementSet(repIn.measurementSet,copyMeasurements);
-//            reportDate = new DateTime( repIn.reportDate.Ticks );
-//            fromDate = new DateTime( repIn.fromDate.Ticks );
-//            toDate = new DateTime( repIn.toDate.Ticks );
-//            numberOfMeasurements = repIn.numberOfMeasurements;
-//        }
-//    }
-//};
+Report::Report()
+{
+  reportID   = createRandomUUID();
+  reportDate = getCurrentTime();
+}
+
+Report::Report( const UUID& msID )
+{
+  reportID   = createRandomUUID();
+  reportDate = getCurrentTime();
+  
+  measurementSet = MeasurementSet::ptr_t( new MeasurementSet( msID ) );
+}
+
+Report::Report( Report::ptr_t report )
+{
+  if ( report )
+  {
+    reportID = report->getReportID();
+
+    MeasurementSet::ptr_t ms = report->getMeasurementSet();
+    if ( ms ) measurementSet = MeasurementSet::ptr_t( new MeasurementSet(ms, true) );
+
+    reportDate           = report->getReportDate();
+    fromDate             = report->getReportFromDate();
+    toDate               = report->getReportToDate();
+    numberOfMeasurements = report->getNumberOfMeasurements();
+  }
+}
+
+Report::Report( const UUID&           uuid, 
+                MeasurementSet::ptr_t mSet, 
+                const TimeStamp&      rD, 
+                const TimeStamp&      fD, 
+                const TimeStamp&      tD )
+{
+  reportID       = uuid;
+  measurementSet = mSet;
+  reportDate     = rD;
+  fromDate       = fD;
+  toDate         = tD;
+}
+
+Report::Report( const UUID&                 uuid, 
+                const MeasurementSet::ptr_t mSet, 
+                const TimeStamp&            rD, 
+                const TimeStamp&            fD, 
+                const TimeStamp&            tD, 
+                const int&                  numMeasures )
+{
+  reportID       = uuid;
+  measurementSet = mSet;
+  reportDate     = rD;
+  fromDate       = fD;
+  toDate         = tD;
+  numberOfMeasurements = numMeasures;
+}
+
+Report::~Report()
+{
+}
+
+UUID Report::getReportID()
+{
+  return reportID;
+}
+
+void Report::setReportID( const UUID& ID )
+{
+  reportID = ID;
+}
+
+MeasurementSet::ptr_t Report::getMeasurementSet()
+{
+  return measurementSet;
+}
+   
+void Report::setMeasurementSet( MeasurementSet::ptr_t ms )
+{
+  measurementSet = ms;
+}
+
+TimeStamp Report::getReportDate()
+{
+  return reportDate;
+}
+        
+void Report::setReportDate( const TimeStamp& date )
+{
+  reportDate = date;
+} 
+
+TimeStamp Report::getReportFromDate()
+{
+  return fromDate;
+}
+        
+void Report::setReportFromDate( const TimeStamp& date )
+{
+  fromDate = date;
+} 
+
+TimeStamp Report::getReportToDate()
+{
+  return toDate;
+}
+        
+void Report::setReportToDate( const TimeStamp& date )
+{
+  toDate = date;
+} 
+
+int Report::getNumberOfMeasurements()
+{
+  return numberOfMeasurements;
+}
+
+void Report::setNumberOfMeasurements( const int& mCount )
+{
+  numberOfMeasurements = mCount;
+}
+
+void Report::copyReport( Report::ptr_t repIn, bool copyMeasurements )
+{
+  if ( repIn )
+  {
+    reportID = repIn->getReportID();
+
+    measurementSet = MeasurementSet::ptr_t( new MeasurementSet( repIn->getMeasurementSet(), 
+                                                                copyMeasurements) );
+
+    reportDate           = repIn->getReportDate();
+    fromDate             = repIn->getReportFromDate();
+    toDate               = repIn->getReportToDate();
+    numberOfMeasurements = repIn->getNumberOfMeasurements();
+  }
+}
 
 // ModelBase -----------------------------------------------------------------
-void Report::toJSON( wstring& jsonStrOUT )
+void Report::toJSON( String& jsonStrOUT )
 {
 }
 
-void Report::fromJSON( const wstring& jsonStr )
+void Report::fromJSON( const String& jsonStr )
 {
 }
 
-wstring Report::toString()
+String Report::toString()
 {
   wstring ts;
 

@@ -35,271 +35,171 @@ using namespace std;
 namespace ecc_commonDataModel
 {
 
-//class EMClient
-//{
-//  // Experiment states
-//  protected Guid             clientID;
-//  protected string           clientName;
-//  protected bool             isClientDisconnecting = false;
-//  protected bool             isClientConnected = false;
-//  protected EMPhase          currentPhase;
-//  protected bool             isClientPhaseAccelerating;
-//  protected HashSet<EMPhase> supportedPhases;
-//  
-//  // Discovery phase states
-//  protected HashSet<MetricGenerator> metricGenerators;
-//  protected bool                     discoveredGenerators = false;
-//  protected bool                     isClientPushCapable  = false;
-//  protected bool                     isClientPullCapable  = false;
-//  
-//  // Setup phase states
-//  protected Guid          currentMGSetupID;
-//  protected HashSet<Guid> generatorsSetupOK;
-//  
-//  // Live monitoring phase states
-//  protected volatile bool isQueueingMSPulls;
-//  
-//  // Post-report phase states
-//  protected EMPostReportSummary           postReportSummary;
-//  protected Dictionary<Guid, EMDataBatch> postReportOutstandingBatches; // Indexed by MeasurementSet ID
-//  
-//  // Tear-down phase
-//  protected bool tearDownSuccessful = false;
-//  
-//  // Multi-phase time-out states
-//  protected HashSet<EMPhaseTimeOut> timeOutsCalled;
-//  
-//  
-//  public String toString()
-//  { return clientName; }
-//  
-//  /**
-//   * Gets the ID of the client.
-//   * 
-//   * @return - ID of the client.
-//   */
-//  public Guid getID()
-//  { return clientID; }
-//  
-//  /**
-//   * Gets the name of the client.
-//   * 
-//   * @return - Name of the client.
-//   */
-//  public string getName()
-//  { return clientName; }
-//  
-//  /**
-//   * Specifies whether the client is connected to the EM.
-//   * 
-//   * @return - True if connected.
-//   */
-//  public bool isConnected()
-//  { return isClientConnected; }
-//  
-//  /**
-//   * Return true if the client is currently in the process of being disconnected
-//   * from the EM.
-//   * 
-//   * @return 
-//   */
-//  public bool isDisconnecting()
-//  { return isClientDisconnecting; }
-//  
-//  public bool isPhaseAccelerating()
-//  { return isClientPhaseAccelerating; }
-//  
-//  public EMPhase getCurrentPhaseActivity()
-//  { return currentPhase; }
-//  
-//  /**
-//   * Determines whether the client supports the specified experiment phase. Note:
-//   * the actual phases that the client supports will only be known after the 
-//   * discovery phase has completed. (It is assumed all clients support discovery).
-//   * 
-//   * @param  phase - phase which the client is queried to support
-//   * @return       - returns true if the client supports the phase.
-//   */
-//  public bool supportsPhase( EMPhase phase )
-//  {
-//      // All clients MUST support discovery phase
-//      if ( phase == EMPhase.eEMDiscoverMetricGenerators ) return true;
-//      
-//      // Return bad news if we've got no supported phases
-//      if ( supportedPhases.Count == 0 ) return false;
-//      
-//      bool supported = false;
-//
-//      foreach (EMPhase ep in supportedPhases )
-//      {
-//          if ( ep == phase )
-//          {
-//              supported = true;
-//              break;
-//          }
-//      }
-//        
-//    return supported;
-//  }
-//  
-//  /**
-//   * Returns the client's support for the phases the EM executes.
-//   * 
-//   * @return - A set of supported phases.
-//   */
-//  public HashSet<EMPhase> getCopyOfSupportedPhases()
-//  {
-//      HashSet<EMPhase> supported = new HashSet<EMPhase>();
-//
-//      foreach (EMPhase phase in supportedPhases )
-//          supported.Add( phase );
-//    
-//      return supported;
-//  }
-//  
-//  /**
-//   * Returns the result of the discovery process this client reported to the EM during
-//   * the discovery phase.
-//   * 
-//   * @return 
-//   */
-//  public bool getGeneratorDiscoveryResult()
-//  { return discoveredGenerators; }
-//  
-//  /**
-//   * Returns the MetricGenerators the client reported to the EM during the discovery phase.
-//   * 
-//   * @return 
-//   */
-//  public HashSet<MetricGenerator> getCopyOfMetricGenerators()
-//  {
-//      return new HashSet<MetricGenerator>(metricGenerators);
-//  }
-//  
-//  /**
-//   * Returns whether the client has declared it is capable of pushing. This
-//   * information is only updated after starting the Live Monitoring phase.
-//   * 
-//   * @return 
-//   */
-//  public bool isPushCapable()
-//  { return isClientPushCapable; }
-//  
-//  /**
-//   * Returns whether the client has declared it is capable of being pulled.
-//   * This information is only updated after starting the Live Monitoring phase.
-//   * @return 
-//   */
-//  public bool isPullCapable()
-//  { return isClientPullCapable; }
-//  
-//  /**
-//   * Use this method to determine whether the client is currently setting up
-//   * a metric generator.
-//   * 
-//   * @return - Returns true if a metric generator is being set up.
-//   */
-//  public bool isSettingUpMetricGenerator()
-//  { return (currentMGSetupID != null); }
-//  
-//  /**
-//   * Returns the set-up result the client reported (if supported) during the the
-//   * set-up phase.
-//   * 
-//   * @return 
-//   */
-//  public bool metricGeneratorsSetupOK()
-//  {
-//      if ( metricGenerators.Count == 0 )  return false;
-//      if ( generatorsSetupOK.Count == 0 ) return false;
-//
-//      foreach ( MetricGenerator mGen in metricGenerators )
-//          if ( !generatorsSetupOK.Contains( mGen.uuid ) ) return false;
-//      
-//      return true;
-//  }
-//  
-//  /**
-//   * Specifies whether the client is currently generating metric data requested
-//   * by the ECC.
-//   * 
-//   * @return - true if currently generating data
-//   */
-//  public bool isPullingMetricData()
-//  { return isQueueingMSPulls; }
-//  
-//  /**
-//   * Returns the post report summary the client reported (if supported) during the
-//   * post-reporting phase.
-//   * 
-//   * @return 
-//   */
-//  public EMPostReportSummary getPostReportSummary()
-//  { return postReportSummary; }
-//  
-//  /**
-//   * Use this method to determine if the client is currently generating post-report
-//   * data for the EM.
-//   * 
-//   * @return - Returns true if the client is generating post-report data.
-//   */
-//  public bool isCreatingPostReportBatchData()
-//  { return postReportOutstandingBatches.Count > 0; }
-//  
-//  /**
-//   * Returns the result of the tear-down process the client executed (if it supports it)
-//   * during the tear-down phase.
-//   * 
-//   * @return 
-//   */
-//  public bool getTearDownResult()
-//  { return tearDownSuccessful; }
-//  
-//  /**
-//   * Returns a copy of the time-outs sent to this client by the EM.
-//   * 
-//   * @return - Set of known time-outs sent to the client.
-//   */
-//  public HashSet<EMPhaseTimeOut> getCopyOfSentTimeOuts()
-//  {
-//      HashSet<EMPhaseTimeOut> timeOuts = new HashSet<EMPhaseTimeOut>();
-//
-//      foreach( EMPhaseTimeOut to in timeOutsCalled )
-//          timeOuts.Add( to );
-//
-//      return timeOuts;
-//  }
-//  
-//  /**
-//   * Use this method to determine if the client has had a specific time-out
-//   * sent to them by the EM
-//   * 
-//   * @param timeout - Specific time-out of interest
-//   * @return        - Returns true if the time-out has been sent
-//   */
-//  public bool isNotifiedOfTimeOut( EMPhaseTimeOut timeout )
-//  { return timeOutsCalled.Contains( timeout ); }
-//  
-//  // Protected methods ---------------------------------------------------------
-//  /**
-//   * Constructor of the client representing a user of the EM. ID must be random.
-//   * Clients should only be constructed by the EM.
-//   * 
-//   * @param id    - Random UUID of the client
-//   * @param name  - Human recognisable name of the client
-//   */
-//  protected EMClient( Guid id, string name )
-//  {
-//    clientID = id;
-//    clientName = name;
-//    
-//    supportedPhases = new HashSet<EMPhase>();
-//    timeOutsCalled  = new HashSet<EMPhaseTimeOut>();
-//    
-//    metricGenerators  = new HashSet<MetricGenerator>();
-//    generatorsSetupOK = new HashSet<Guid>();
-//    postReportOutstandingBatches = new Dictionary<Guid, EMDataBatch>();
-//  }
-//};
+EMClient::EMClient( const UUID& id, const String& name )
+  : isClientDisconnecting( false ),
+    isClientConnected( false ),
+    currentPhase( eEMUnknownPhase ),
+    isClientPhaseAccelerating( false ),
+    discoveredGenerators( false ),
+    isClientPushCapable( false ),
+    isClientPullCapable( false ),
+    tearDownSuccessful( false )
+{
+  clientID = id;
+  clientName = name;
+}
+
+EMClient::~EMClient()
+{
+}
+    
+UUID EMClient::getID()
+{
+  return clientID;
+}
+  
+String EMClient::getName()
+{
+  return clientName;
+}
+  
+bool EMClient::isConnected()
+{
+  return isClientConnected;
+}
+  
+bool EMClient::isDisconnecting()
+{
+  return isClientDisconnecting;
+}
+  
+bool EMClient::isPhaseAccelerating()
+{
+  return isClientPhaseAccelerating;
+}
+  
+EMPhase EMClient::getCurrentPhaseActivity()
+{
+  return currentPhase;
+}
+  
+bool EMClient::supportsPhase( const EMPhase& phase )
+{
+  // All clients MUST support discovery phase
+  if ( phase == eEMDiscoverMetricGenerators ) return true;
+
+  if ( supportedPhases.empty() ) return false;
+
+  bool supported = false;
+
+  EMPhaseSet::iterator psIt = supportedPhases.begin();
+  while ( psIt != supportedPhases.end() )
+  {
+    EMPhase nextPhase = *psIt;
+    if ( phase == nextPhase )
+    {
+      supported = true;
+      break;
+    }
+
+    ++psIt;
+  }
+
+  return supported;
+}
+  
+EMPhaseSet EMClient::getCopyOfSupportedPhases()
+{
+  EMPhaseSet phaseCopy;
+  phaseCopy.insert( supportedPhases.begin(), supportedPhases.end() );
+
+  return phaseCopy;
+}
+  
+bool EMClient::getGeneratorDiscoveryResult()
+{
+  return discoveredGenerators;
+}
+  
+MetricGenerator::Set EMClient::getCopyOfMetricGenerators()
+{
+  MetricGenerator::Set mgCopies;
+
+  MetricGenerator::Set::iterator copyIt = metricGenerators.begin();
+  while ( copyIt != metricGenerators.end() )
+  {
+    MetricGenerator::ptr_t clone = MetricGenerator::ptr_t( new MetricGenerator( *copyIt ) );
+    mgCopies.insert( clone );
+
+    ++copyIt;
+  }
+
+  return mgCopies;
+}
+  
+bool EMClient::isPushCapable() 
+{
+  return isClientPushCapable;
+} 
+
+bool EMClient::isPullCapable() 
+{
+  return isClientPullCapable;
+}
+  
+bool EMClient::isSettingUpMetricGenerator()
+{
+  return ( !currentMGSetupID.is_nil() );
+}
+  
+bool EMClient::metricGeneratorsSetupOK() 
+{
+  if ( metricGenerators.empty() )  return false;
+  if ( generatorsSetupOK.empty() ) return false;
+
+  MetricGenerator::Set::iterator genIt = metricGenerators.begin();
+  while ( genIt != metricGenerators.end() )
+  {
+    UUID metGenID = (*genIt)->getUUID();
+    if ( generatorsSetupOK.find( metGenID ) == generatorsSetupOK.end() ) return false;
+
+    ++genIt;
+  }
+
+  return true;
+}
+  
+bool EMClient::isPullingMetricData()
+{
+  return isQueueingMSPulls;
+}  
+
+EMPostReportSummary::ptr_t EMClient::getPostReportSummary()
+{
+  return postReportSummary;
+}
+  
+bool EMClient::isCreatingPostReportBatchData()
+{
+  return !postReportOutstandingBatches.empty();
+}  
+
+bool EMClient::getTearDownResult()
+{
+  return tearDownSuccessful;
+}
+  
+EMPhaseTimeOutSet EMClient::getCopyOfSentTimeOuts()
+{
+  EMPhaseTimeOutSet timeoutSetCopy;
+  timeoutSetCopy.insert( timeOutsCalled.begin(), timeOutsCalled.end() );
+
+  return timeoutSetCopy;
+}
+  
+bool EMClient::isNotifiedOfTimeOut( const EMPhaseTimeOut& timeout )
+{
+  return !( timeOutsCalled.find( timeout ) == timeOutsCalled.end() );
+}
 
 } // namespace

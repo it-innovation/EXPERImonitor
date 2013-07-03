@@ -27,7 +27,7 @@
 
 #include "ModelBase.h"
 
-#include <boost/uuid/uuid.hpp>
+
 
 
 namespace ecc_commonDataModel
@@ -45,6 +45,10 @@ public:
 
   typedef boost::shared_ptr<Attribute> ptr_t;
 
+  typedef boost::unordered_set<Attribute::ptr_t> Set;
+
+  typedef boost::unordered_map<UUID,Attribute::ptr_t> Map;
+
   /**
     * Default constructor which sets a random UUID for the object instance.
     */
@@ -52,9 +56,9 @@ public:
     
   /**
     * Copy constructor.
-    * @param a The attribute object from which a copy is made.
+    * @param attr The attribute object from which a copy is made.
     */
-  Attribute( Attribute::ptr_t a );
+  Attribute( Attribute::ptr_t attr );
     
   /**
     * Constructor to set all the fields of the Attribute class.
@@ -63,49 +67,54 @@ public:
     * @param name The name of the attribute.
     * @param description A description of the attribute.
     */
-  Attribute( const boost::uuids::uuid& uuid, 
-             const boost::uuids::uuid& entityUUID, 
-             const std::wstring&       name, 
-             const std::wstring&       description );
+  Attribute( const UUID&   uuid, 
+             const UUID&&  entityUUID, 
+             const String& name, 
+             const String& description );
 
   virtual ~Attribute();
 
   /**
    * Getter/Setter for the unique ID of this attribute
    */
-  boost::uuids::uuid getUUID();
+  UUID getUUID();
   
-  void setUUID( const boost::uuids::uuid& ID );
+  void setUUID( const UUID& ID );
 
   /**
    * Getter/Setter for the entity ID related to this attribute
    */
-  boost::uuids::uuid getEntityUUID();
+  UUID getEntityUUID();
 
-  void setEntityUUID( const boost::uuids::uuid& ID );
+  void setEntityUUID( const UUID& ID );
 
   /**
    * Getter/Setter for the name of this attribute
    */
-  std::wstring getName();
+  String getName();
 
-  void setName( const std::wstring& name );
+  void setName( const String& name );
 
   /**
    * Getter/Setter for the description of this attribute
    */
-  std::wstring& getDescription();
+  String& getDescription();
 
-  void setDescription( const std::wstring& description );
+  void setDescription( const String& description );
 
   // ModelBase -----------------------------------------------------------------
-  virtual void toJSON( std::wstring& jsonStrOUT );
+  virtual void toJSON( String& jsonStrOUT );
 
-  virtual void fromJSON( const std::wstring& jsonStr );
+  virtual void fromJSON( const String& jsonStr );
 
-  virtual std::wstring toString();
+  virtual String toString();
 
 private:
+
+  UUID   attrID;
+  UUID   entityID;
+  String attrName;
+  String attrDescription;
 
 };
 

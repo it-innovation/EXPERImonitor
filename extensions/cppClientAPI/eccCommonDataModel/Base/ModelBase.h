@@ -25,6 +25,9 @@
 
 #pragma once
 
+#include "ECCUtils.h"
+
+
 namespace ecc_commonDataModel
 {
 
@@ -33,11 +36,11 @@ namespace ecc_commonDataModel
     public:
       virtual ~ModelBase();
 
-      virtual void toJSON( std::wstring& jsonStrOUT ) =0;
+      virtual void toJSON( String& jsonStrOUT ) =0;
 
-      virtual void fromJSON( const std::wstring& jsonStr ) =0;
+      virtual void fromJSON( const String& jsonStr ) =0;
 
-      virtual std::wstring toString() =0;
+      virtual String toString() =0;
 
     protected:
       ModelBase();

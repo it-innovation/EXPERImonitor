@@ -54,8 +54,8 @@ public:
      * @param mgenSet     - Collection of metric generators, must not be null
      * @return            - Returned attribute instance, if it exists, otherwise null.
      */
-    static Attribute::ptr_t getAttributeFromID( const boost::uuids::uuid&                    attributeID,
-                                                const std::hash_set<MetricGenerator::ptr_t>& mgenSet );
+    static Attribute::ptr_t getAttributeFromID( const UUID&                 attributeID,
+                                                const MetricGenerator::Set& mgenSet );
     
     /**
      * Returns an entity identified by the ID, if it exists, from the metric generator collection.
@@ -64,8 +64,8 @@ public:
      * @param mgenSet   - Collection of metric generators, must not be null.
      * @return          - Returned entity instance, if it exists, otherwise null.
      */
-    static Entity::ptr_t getEntityFromID( const boost::uuids::uuid&                    entityID,
-                                          const std::hash_set<MetricGenerator::ptr_t>& mgenSet );
+    static Entity::ptr_t getEntityFromID( const UUID&                 entityID,
+                                          const MetricGenerator::Set& mgenSet );
   
     /**
      * Returns a collection of measurement sets (if any exist) associated with a specific attribute
@@ -75,8 +75,8 @@ public:
      * @param mgenSet - Collection of metric generators to look for measurement sets, must not be null.
      * @return        - Return collection of measurement sets (will be empty if no measurement sets exist)
      */
-    static std::hash_map<boost::uuids::uuid, MeasurementSet::ptr_t> getMeasurementSetsForAttribute( Attribute::ptr_t                             attr,
-                                                                                                    const std::hash_set<MetricGenerator::ptr_t>& mgenSet );
+    static MeasurementSet::Map getMeasurementSetsForAttribute( Attribute::ptr_t            attr, 
+                                                               const MetricGenerator::Set& mgenSet );
     
     /**
      * Returns a collection of measurement sets (if they exist) associated with a specific attribute
@@ -95,7 +95,7 @@ public:
      * @param mgenSet - Metric generator collection in which to search, must not be null.
      * @return        - Return collection of attributes (will be empty if no attributes exist)
      */
-    static std::hash_map<boost::uuids::uuid, Attribute::ptr_t> getAllAttributes( const std::hash_set<MetricGenerator::ptr_t>& mgenSet );
+    static Attribute::Map getAllAttributes( const MetricGenerator::Set& mgenSet );
   
     /**
      * Returns all entities associated with a collection of metric generators.
@@ -103,7 +103,7 @@ public:
      * @param mgenSet - Metric generator collection in which to search, must not be null.
      * @return        - Return collection of entities (will be empty if no entities exist)
      */
-    static std::hash_map<boost::uuids::uuid, Entity::ptr_t> getAllEntities( const std::hash_set<MetricGenerator::ptr_t>& mgenSet );
+    static Entity::Map getAllEntities( const MetricGenerator::Set& mgenSet );
     
     /**
      * Returns all entities associated with a metric generator.
@@ -111,7 +111,7 @@ public:
      * @param mgent - Metric generator in which to search, must not be null.
      * @return      - Return collection of entities (will be empty if no entities exist)
      */
-    static std::hash_map<boost::uuids::uuid, Entity::ptr_t> getAllEntities( MetricGenerator::ptr_t mgen );
+    static Entity::Map getAllEntities( MetricGenerator::ptr_t mgen );
   
     /**
      * Returns a collection of all measurement sets associated with a collection of metric generators
@@ -119,7 +119,7 @@ public:
      * @param mgenSet - Collection of metric generators in which to search, must not be null
      * @return        - Returned collection of measurement sets (will be empty if non exist in metric generator collection)
      */
-    static std::hash_map<boost::uuids::uuid, MeasurementSet::ptr_t> getAllMeasurementSets( const std::hash_set<MetricGenerator::ptr_t>& mgenSet );
+    static MeasurementSet::Map getAllMeasurementSets( const MetricGenerator::Set& mgenSet );
     
     /**
      * Returns a collection of all measurement sets associated with a metric generator
@@ -127,7 +127,7 @@ public:
      * @param mgen - Metric generator in which to search, must not be null
      * @return     - Returned collection of measurement sets (will be empty if non exist in metric generator)
      */
-    static std::hash_map<boost::uuids::uuid, MeasurementSet::ptr_t> getAllMeasurementSets( MetricGenerator::ptr_t mgen );
+    static MeasurementSet::Map getAllMeasurementSets( MetricGenerator::ptr_t mgen );
     
     /**
      * Returns the measurement set identified by the ID from a metric generator.
@@ -136,8 +136,8 @@ public:
      * @param measurementSetID  - MeasurementSet ID of measurement set to find
      * @return                  - Returned measurement set instance (null if it does not exist)
      */
-    static MeasurementSet::ptr_t getMeasurementSet( MetricGenerator::ptr_t    mgen,
-                                                    const boost::uuids::uuid& measurementSetID );
+    static MeasurementSet::ptr_t getMeasurementSet( MetricGenerator::ptr_t mgen,
+                                                    const UUID&            measurementSetID );
     
     /**
      * Returns the measurement set identified by the ID from a metric generator collection.
@@ -146,8 +146,8 @@ public:
      * @param measurementSetID  - MeasurementSet ID of measurement set to find
      * @return                  - Returned measurement set instance (null if it does not exist)
      */
-    static MeasurementSet::ptr_t getMeasurementSet( const std::hash_set<MetricGenerator::ptr_t>& mgenSet,
-                                                    const boost::uuids::uuid&                    measurementSetID );
+    static MeasurementSet::ptr_t getMeasurementSet( const MetricGenerator::Set& mgenSet,
+                                                    const boost::uuids::uuid&   measurementSetID );
     
     /**
      * Sorts an unordered set of measurements by date.
@@ -155,7 +155,7 @@ public:
      * @param measurements - Measurement set to sort - must not be null.
      * @return             - Returned sorted measurements (will be empty if input set empty)
      */
-    static std::hash_set<boost::posix_time::ptime, Measurement> sortMeasurementsByDate( const std::hash_set<Measurement::ptr_t>& measurements );
+    static Measurement::Map_Time sortMeasurementsByDate( const Measurement::Set& measurements );
     
     /**
      * Creates an attribute with the parameters provided. If a valid entity is provided
@@ -166,7 +166,9 @@ public:
      * @param entity  - Entity that the attribute belongs to (can be null)
      * @return        - Attribute instance
      */
-    static Attribute::ptr_t createAttribute( const std::wstring& name, const std::wstring& desc, Entity::ptr_t entity);
+    static Attribute::ptr_t createAttribute( const String& name, 
+                                             const String& desc, 
+                                             Entity::ptr_t entity );
     
     /**
      * Searches for an attribute by its name.
@@ -175,7 +177,8 @@ public:
      * @param entity - Instance of the entity to query, must not be null.
      * @return       - Returned attribute (will be null if the attribute cannot be found)
      */
-    static Attribute::ptr_t getAttributeByName( const std::wstring& name, Entity::ptr_t entity);
+    static Attribute::ptr_t getAttributeByName( const String& name, 
+                                                Entity::ptr_t entity );
     
     /**
      * Creates a metric group with the given name and description. Will automatically
@@ -186,7 +189,9 @@ public:
      * @param mGen - Metric generator to associate the entity with (may be null)
      * @return     - Returns an instance of a MetricGroup.
      */
-    static MetricGroup::ptr_t createMetricGroup( const std::wstring& name, const std::wstring& desc, const MetricGenerator::ptr_t mGen );
+    static MetricGroup::ptr_t createMetricGroup( const String&                name,
+                                                 const String&                desc, 
+                                                 const MetricGenerator::ptr_t mGen );
     
     /**
      * Creates a measurement set automatically linked to an attribute and metric group.
@@ -209,8 +214,8 @@ public:
      * @param mGens - Collection of metric generators in which to search, must not be null.
      * @return      - Returns the metric generator (null if it does not exist)
      */
-    static MetricGenerator::ptr_t getMetricGeneratorByName( const std::wstring& name, 
-                                                            const std::hash_set<MetricGenerator::ptr_t>& mGens );
+    static MetricGenerator::ptr_t getMetricGeneratorByName( const String&               name, 
+                                                            const MetricGenerator::Set& mGens );
     
     /**
      * Searches for a metric group by name.

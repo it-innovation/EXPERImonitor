@@ -30,10 +30,6 @@
 #include "Metric.h"
 
 
-#include <boost/uuid/uuid.hpp>
-
-#include <hash_set>
-#include <hash_map>
 
 
 namespace ecc_commonDataModel
@@ -50,6 +46,10 @@ namespace ecc_commonDataModel
   public:
 
     typedef boost::shared_ptr<MeasurementSet> ptr_t;
+
+    typedef boost::unordered_set<MeasurementSet::ptr_t> Set;
+
+    typedef boost::unordered_map<UUID,MeasurementSet::ptr_t> Map;
 
     enum MEASUREMENT_RULE { eNO_LIVE_MONITOR, eFIXED_COUNT, eINDEFINITE };
 
@@ -71,7 +71,7 @@ namespace ecc_commonDataModel
     /**
       * Constructor to set the UUID of the MeasurementSet.
       */
-    MeasurementSet( const boost::uuids::uuid& msID );
+    MeasurementSet( const UUID& msID );
  
     
     /**
@@ -81,10 +81,10 @@ namespace ecc_commonDataModel
       * @param metGroupID The UUID of the metric group this measurement set is a part of.
       * @param met The metric of the measurements.
       */
-    MeasurementSet( const boost::uuids::uuid& msID, 
-                    const boost::uuids::uuid& attrID, 
-                    const boost::uuids::uuid& metGroupID, 
-                    Metric::ptr_t             met );
+    MeasurementSet( const UUID&   msID, 
+                    const UUID&   attrID, 
+                    const UUID&   metGroupID, 
+                    Metric::ptr_t met );
     
     /**
       * Constructor to set all the attributes of the Measurement Set.
@@ -94,34 +94,34 @@ namespace ecc_commonDataModel
       * @param metric The metric of the measurements.
       * @param measurements The set of measurements.
       */
-    MeasurementSet( const boost::uuids::uuid&         msID, 
-                    const boost::uuids::uuid&         attrID, 
-                    const boost::uuids::uuid&         metGroupID, 
-                    Metric::ptr_t                     metric, 
-                    std::hash_set<Measurement::ptr_t> measures );
+    MeasurementSet( const UUID&             msID, 
+                    const UUID&             attrID, 
+                    const UUID&             metGroupID, 
+                    Metric::ptr_t           metric, 
+                    const Measurement::Set& measures );
 
     virtual ~MeasurementSet();
     
     /**
       * Getter/Setter for the measurement set's ID
       */
-    boost::uuids::uuid getMSetID();
+    UUID getID();
 
-    void setMsetID( const boost::uuids::uuid& ID );
+    void setID( const UUID& ID );
 
     /**
       * Getter/Setter for the attribute ID of this measurement set
       */
-    boost::uuids::uuid getAttributeID();
+    UUID getAttributeID();
 
-    void setAttributeID( const boost::uuids::uuid& ID );
+    void setAttributeID( const UUID& ID );
 
     /**
       * Getter/Setter of the metric group ID for this measurement set
       */
-    boost::uuids::uuid getMetricGroupID();
+    UUID getMetricGroupID();
 
-    void setMetricGroupID( const boost::uuids::uuid& ID );
+    void setMetricGroupID( const UUID& ID );
 
     /**
       * Getter/Setter for the Metric related to this measurement set
@@ -138,9 +138,9 @@ namespace ecc_commonDataModel
     * 
     * @return returns true if measurements were set
     */
-    std::hash_set<Measurement::ptr_t> getMeasurements();
+    Measurement::Set getMeasurements();
 
-    void setMeasurements( std::hash_set<Measurement::ptr_t> measurements );
+    bool setMeasurements( const Measurement::Set& measurements );
     
     /**
       * Getter/Setter the measurement rule for this set:
@@ -164,9 +164,9 @@ namespace ecc_commonDataModel
       * 
       * @return - the number of measurements, depending on Measurement Rule
       */
-    int getMeasurementCountMax();
+    unsigned int getMeasurementCountMax();
 
-    void setMeasurementCountMax( const int& max );
+    bool setMeasurementCountMax( const unsigned int& max );
     
     /**
       * Getter/Setter for the minimum time (in milliseconds) that must elapse before the ECC 
@@ -195,20 +195,28 @@ namespace ecc_commonDataModel
       * 
       * @return returns true if all measurements were added
       */
-    bool addMeasurements( std::hash_map<boost::uuids::uuid, Measurement::ptr_t> measurements );
+    bool addMeasurements( const Measurement::Set& measurements );
 
     // ModelBase -----------------------------------------------------------------
-    virtual void toJSON( std::wstring& jsonStrOUT );
+    virtual void toJSON( String& jsonStrOUT );
 
-    virtual void fromJSON( const std::wstring& jsonStr );
+    virtual void fromJSON( const String& jsonStr );
 
-    virtual std::wstring toString();
+    virtual String toString();
 
   private:
     
       bool appendMeasurement( Measurement::ptr_t m );
 
-      std::hash_set<Measurement::ptr_t> measurementSet;
+      UUID             msetID;
+      UUID             attributeID;
+      UUID             metricGroupID;
+      Metric::ptr_t    metric;
+      Measurement::Set measurements;
+    
+      MEASUREMENT_RULE measurementRule; 
+      unsigned int     measurementCountMax;
+      long             samplingInterval;
   };
 
 } // namespace

@@ -39,4 +39,6 @@ enum EMPhaseTimeOut
   eEMTOTearDownTimeOut
 };
 
+typedef boost::unordered_set<EMPhaseTimeOut> EMPhaseTimeOutSet;
+
 } // namespace

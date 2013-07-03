@@ -51,13 +51,15 @@ namespace ecc_commonDataModel
 
     typedef boost::shared_ptr<Report> ptr_t;
 
+    typedef boost::unordered_map<UUID, Report::ptr_t> Map;
+
     Report();
 
     /**
       * Constructor for the Report class that also creates a MeasurementSet with
       * 'msID' as the identifier.
       */
-    Report( const boost::uuids::uuid& msID );
+    Report( const UUID& msID );
 
     /**
       * Copy constructor for the Report class, which takes a deep copy of any objects.
@@ -73,14 +75,12 @@ namespace ecc_commonDataModel
       * @param fromDate The time stamp for the start of the report period.
       * @param toDate The time stamp for the end of the report period.
       */
-    Report( const boost::uuids::uuid&      uuid, 
-            MeasurementSet::ptr_t          measurementSet, 
-            const boost::posix_time::ptime reportDate, 
-            const boost::posix_time::ptime fromDate, 
-            const boost::posix_time::ptime toDate );
+    Report( const UUID&           uuid, 
+            MeasurementSet::ptr_t measurementSet, 
+            const TimeStamp&      reportDate, 
+            const TimeStamp&      fromDate, 
+            const TimeStamp&      toDate );
 
-    virtual ~Report();
-    
     /**
       * Constructor to set all the attributes of the class.
       * @param uuid The UUID of the Report, to uniquely identify it.
@@ -90,19 +90,21 @@ namespace ecc_commonDataModel
       * @param toDate The time stamp for the end of the report period.
       * @param numMeasurements The number of measurements in the reporting period.
       */
-    Report( const boost::uuids::uuid&       uuid, 
-            MeasurementSet                  measurementSet, 
-            const boost::posix_time::ptime& reportDate, 
-            const boost::posix_time::ptime& fromDate, 
-            const boost::posix_time::ptime& toDate, 
-            const int&                      numMeasurements );
+    Report( const UUID&                 uuid, 
+            const MeasurementSet::ptr_t measurementSet, 
+            const TimeStamp&            reportDate, 
+            const TimeStamp&            fromDate, 
+            const TimeStamp&            toDate, 
+            const int&                  numMeasurements );
+
+    virtual ~Report();
 
     /**
       * Getter/Setter for the report ID
       */
-    boost::uuids::uuid getReportID();
+    UUID getReportID();
 
-    void setReportID( const boost::uuids::uuid& ID );
+    void setReportID( const UUID& ID );
 
     /**
       * Getter/Setter for the measurement set associated with this report
@@ -114,23 +116,23 @@ namespace ecc_commonDataModel
     /**
       * Getter/Setter for the report date
       */
-    boost::posix_time::ptime getReportDate();
+    TimeStamp getReportDate();
         
-    void setReportDate( const boost::posix_time::ptime& date ); 
+    void setReportDate( const TimeStamp& date ); 
 
     /**
       * Getter/Setter for start date of the measurements contained in this report
       */
-    boost::posix_time::ptime getReportFromDate();
+    TimeStamp getReportFromDate();
         
-    void setReportFromDate( const boost::posix_time::ptime& date ); 
+    void setReportFromDate( const TimeStamp& date ); 
 
     /**
       * Getter/Setter for the end date of the measurements contained in this report
       */
-    boost::posix_time::ptime getReportToDate();
+    TimeStamp getReportToDate();
         
-    void setReportToDate( const boost::posix_time::ptime& date ); 
+    void setReportToDate( const TimeStamp& date ); 
 
     /**
       * Getter/Setter for the number of measurements contained in this report
@@ -145,19 +147,19 @@ namespace ecc_commonDataModel
     void copyReport( Report::ptr_t repIn, bool copyMeasurements );
 
     // ModelBase -----------------------------------------------------------------
-    virtual void toJSON( std::wstring& jsonStrOUT );
+    virtual void toJSON( String& jsonStrOUT );
 
-    virtual void fromJSON( const std::wstring& jsonStr );
+    virtual void fromJSON( const String& jsonStr );
 
-    virtual std::wstring toString();
+    virtual String toString();
 
   private:
-    boost::uuids::uuid       reportID;
-    MeasurementSet::ptr_t    measurementSet;
-    boost::posix_time::ptime reportDate;
-    boost::posix_time::ptime fromDate;
-    boost::posix_time::ptime toDate;
-    int                      numberOfMeasurements;
+    UUID                  reportID;
+    MeasurementSet::ptr_t measurementSet;
+    TimeStamp             reportDate;
+    TimeStamp             fromDate;
+    TimeStamp             toDate;
+    int                   numberOfMeasurements;
 
   };
     

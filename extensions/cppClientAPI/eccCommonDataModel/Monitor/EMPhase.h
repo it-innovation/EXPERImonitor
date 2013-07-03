@@ -25,11 +25,11 @@
 
 #pragma once
 
+#include <boost/unordered_set.hpp>
 
 
 namespace ecc_commonDataModel
 {
-
 
 enum EMPhase
 {
@@ -43,5 +43,7 @@ enum EMPhase
     // Always at the end of the protocol
     eEMProtocolComplete         = 6
 };
+
+typedef boost::unordered_set<EMPhase> EMPhaseSet;
 
 } // namespace

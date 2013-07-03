@@ -38,8 +38,7 @@ namespace ecc_commonDataModel
 Experiment::Experiment()
   : ModelBase()
 {
-    //uuid = Guid.NewGuid();
-    //metricGenerators = new HashSet<MetricGenerator>();
+  expUniqueID = createRandomUUID();
 }
     
 /**
@@ -49,71 +48,174 @@ Experiment::Experiment()
 Experiment::Experiment( Experiment::ptr_t ex ) 
   : ModelBase()
 {
-    /*if (ex == null)
-        return;
-        
-    if (ex.uuid != null)
-        this.uuid = new Guid( ex.uuid.ToString() );
-        
-    experimentID = ex.experimentID;
-    name         = ex.name;
-    description  = ex.description;
+  expUniqueID = createRandomUUID();
 
-    if (ex.startTime != null)
-        startTime = new DateTime(ex.startTime.Ticks);
+  if ( !ex ) return;
 
-    if (ex.endTime != null)
-        endTime = new DateTime(ex.endTime.Ticks);
+  // Try copying experiment UUID
+  UUID targetUUID = ex->getUUID();
 
-    metricGenerators = new HashSet<MetricGenerator>();
-        
-    if (ex.metricGenerators != null)
+  if ( !ex->getUUID().is_nil() )
+    expUniqueID = targetUUID;
+
+  // Copy other parameters
+  experimentID = ex->getExperimentID();
+  name         = ex->getName();
+  description  = ex->getDescription();
+  startTime    = ex->getStartTime();
+  endTime      = ex->getEndTime();
+
+  // Copy metric generators
+  MetricGenerator::Set srcGenerators = ex->getMetricGenerators();
+  if ( !srcGenerators.empty() )
+  {
+    MetricGenerator::Set::iterator srcGenIt = srcGenerators.begin();
+    while ( srcGenIt != srcGenerators.end() )
     {
-        foreach (MetricGenerator mg in ex.metricGenerators)
-        {
-            if (mg != null)
-                metricGenerators.Add(new MetricGenerator(mg));
-        }
-    }*/
+      metricGenerators.insert( *srcGenIt );
+      ++srcGenIt;
+    }
+  }
 }
     
-Experiment::Experiment( const boost::uuids::uuid        uuid, 
-                        const std::wstring&             experimentID, 
-                        const std::wstring&             name, 
-                        const std::wstring&             description,
-                        const boost::posix_time::ptime& creationTime )
+Experiment::Experiment( const UUID&      uuid, 
+                        const String&    experimentID, 
+                        const String&    name, 
+                        const String&    description,
+                        const TimeStamp& creationTime )
   : ModelBase()
 {
-  //TODO
-    //this.uuid         = uuid;
-    //this.experimentID = experimentID;
-    //this.name         = name;
-    //this.description  = description;
-    //this.startTime    = creationTime;
+  this->expUniqueID  = uuid;
+  this->experimentID = experimentID;
+  this->name         = name;
+  this->description  = description;
+  this->startTime    = creationTime;
 }
     
-Experiment::Experiment( const boost::uuids::uuid        uuid, 
-                        const std::wstring&             experimentID, 
-                        const std::wstring&             name, 
-                        const std::wstring&             description, 
-                        const boost::posix_time::ptime& creationTime, 
-                        const boost::posix_time::ptime& endTime )
+Experiment::Experiment( const UUID&      uuid, 
+                        const String&    experimentID, 
+                        const String&    name, 
+                        const String&    description, 
+                        const TimeStamp& creationTime, 
+                        const TimeStamp& endTime )
   : ModelBase()
 {
-  //TODO
-    //this.endTime = endTime;
+  this->expUniqueID  = uuid;
+  this->experimentID = experimentID;
+  this->name         = name;
+  this->description  = description;
+  this->startTime    = creationTime;
+  this->endTime      = endTime;
+}
+
+UUID Experiment::getUUID()
+{
+  return expUniqueID;
+}
+
+void Experiment::setUUID( const UUID& ID )
+{
+  expUniqueID = ID;
+}
+
+String Experiment::getExperimentID()
+{
+  return experimentID;
+}
+
+void Experiment::setExperimentID( const String& ID )
+{
+  experimentID = ID;
+}
+
+String Experiment::getName()
+{
+  return name;
+}
+
+void Experiment::setName( const String& name )
+{
+  this->name = name;
+}
+
+/**
+  * Getter/Setter for the experiment description
+  */
+String Experiment::getDescription()
+{
+  return description;
+}
+
+void Experiment::setDescription( const String& desc )
+{
+  description = desc;
+}
+
+/**
+  * Getter/Setter for the experiment's start time
+  */
+TimeStamp Experiment::getStartTime()
+{
+  return startTime;
+}
+
+void Experiment::setStartTime( const TimeStamp& time )
+{
+  startTime = time;
+}
+
+/**
+  * Getter/Setter for the experiment's end time
+  */
+TimeStamp Experiment::getEndTime()
+{
+  return endTime;
+}
+
+void Experiment::setEndTime( const TimeStamp& time )
+{
+  endTime = time;
+}
+
+/**
+  * Getter/Setter for the metric generators associated with this experiment
+  */
+MetricGenerator::Set Experiment::getMetricGenerators()
+{
+  return metricGenerators;
+}
+
+void Experiment::setMetricGenerators( const MetricGenerator::Set& generators )
+{
+  metricGenerators = generators;
+}
+    
+/**
+  * @param metricGenerator the metric generator to add
+  */
+void Experiment::addMetricGenerator( MetricGenerator::ptr_t metricGenerator )
+{
+  if ( metricGenerator ) metricGenerators.insert( metricGenerator );
+}
+    
+/**
+  * @param metricGenerators the metric generators to add
+  */
+void Experiment::addMetricGenerators( const MetricGenerator::Set& generators )
+{
+  metricGenerators.insert( generators.begin(), generators.end() );
 }
 
 // ModelBase -----------------------------------------------------------------
-void Experiment::toJSON( wstring& jsonStrOUT )
+void Experiment::toJSON( String& jsonStrOUT )
 {
 }
 
-void Experiment::fromJSON( const wstring& jsonStr )
+void Experiment::fromJSON( const String& jsonStr )
 {
 }
 
-wstring Experiment::toString()
+String Experiment::toString()
 {
   wstring ts;
 

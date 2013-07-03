@@ -27,10 +27,6 @@
 
 #include "Report.h"
 
-#include <boost/uuid/uuid.hpp>
-
-#include <hash_map>
-#include <hash_set>
 
 
 
@@ -58,7 +54,7 @@ namespace ecc_commonDataModel
          * 
          * @return - Set of IDs for the MeasurementSets in this summary
          */
-        std::hash_set<boost::uuids::uuid> getReportedMeasurementSetIDs();
+        UUIDSet getReportedMeasurementSetIDs();
 
         /**
          * Adds a report to this summary. The report instance should contain correct
@@ -66,14 +62,14 @@ namespace ecc_commonDataModel
          * 
          * @param report - Report instance (fields must not be null)
          */
-        void addReport(Report::ptr_t report);
+        void addReport( Report::ptr_t report );
 
         /**
          * Removes the Report associated with the MeasurementSet ID
          * 
          * @param measurementSetID - ID of the MeasurementSet
          */
-        void removeReport(const boost::uuids::uuid& measurementSetID);
+        void removeReport( const boost::uuids::uuid& measurementSetID );
 
         /**
          * Gets the report associated with the MeasurementSet ID
@@ -81,7 +77,7 @@ namespace ecc_commonDataModel
          * @param measurementID - MeasurementSet ID
          * @return              - Report instance detailing the metric data for the MeasurementSet ID
          */
-        Report::ptr_t getReport(const boost::uuids::uuid& measurementID);
+        Report::ptr_t getReport( const boost::uuids::uuid& measurementID );
 
         // ModelBase -----------------------------------------------------------------
         virtual void toJSON( std::wstring& jsonStrOUT );
@@ -92,9 +88,7 @@ namespace ecc_commonDataModel
 
     private:
 
-      typedef std::hash_map<boost::uuids::uuid, Report::ptr_t> ReportMap;
-
-      ReportMap reportsByMeasurementSetID;
+      Report::Map reportsByMeasurementSetID;
 
     };
 

@@ -43,23 +43,24 @@ namespace ecc_commonDataModel
   class EMClient
   {
   public:
+
+    typedef boost::shared_ptr<EMClient> ptr_t;
+
     virtual ~EMClient();
     
-    typedef boost::shared_ptr<EMClient> ptr_t;
-  
     /**
      * Gets the ID of the client.
      * 
      * @return - ID of the client.
      */
-    boost::uuids::uuid getID();
+    UUID getID();
   
     /**
      * Gets the name of the client.
      * 
      * @return - Name of the client.
      */
-    std::wstring getName();
+    String getName();
   
     /**
      * Specifies whether the client is connected to the EM.
@@ -88,14 +89,14 @@ namespace ecc_commonDataModel
      * @param  phase - phase which the client is queried to support
      * @return       - returns true if the client supports the phase.
      */
-    bool supportsPhase( EMPhase phase );
+    bool supportsPhase( const EMPhase& phase );
   
     /**
      * Returns the client's support for the phases the EM executes.
      * 
      * @return - A set of supported phases.
      */
-    std::hash_set<EMPhase> getCopyOfSupportedPhases();
+    EMPhaseSet getCopyOfSupportedPhases();
   
     /**
      * Returns the result of the discovery process this client reported to the EM during
@@ -110,7 +111,7 @@ namespace ecc_commonDataModel
      * 
      * @return 
      */
-    std::hash_set<MetricGenerator> getCopyOfMetricGenerators();
+    MetricGenerator::Set getCopyOfMetricGenerators();
   
     /**
      * Returns whether the client has declared it is capable of pushing. This
@@ -157,7 +158,7 @@ namespace ecc_commonDataModel
      * 
      * @return 
      */
-    EMPostReportSummary getPostReportSummary();
+    EMPostReportSummary::ptr_t getPostReportSummary();
   
     /**
      * Use this method to determine if the client is currently generating post-report
@@ -180,7 +181,7 @@ namespace ecc_commonDataModel
      * 
      * @return - Set of known time-outs sent to the client.
      */
-    std::hash_set<EMPhaseTimeOut> getCopyOfSentTimeOuts();
+    EMPhaseTimeOutSet getCopyOfSentTimeOuts();
   
     /**
      * Use this method to determine if the client has had a specific time-out
@@ -189,49 +190,43 @@ namespace ecc_commonDataModel
      * @param timeout - Specific time-out of interest
      * @return        - Returns true if the time-out has been sent
      */
-    bool isNotifiedOfTimeOut( EMPhaseTimeOut timeout );
+    bool isNotifiedOfTimeOut( const EMPhaseTimeOut& timeout );
   
   protected:
 
-    EMClient( const boost::uuids::uuid& id, const std::wstring& name );
-
-    // Typedefs
-    typedef std::hash_set<EMPhase>                         PhaseSet;
-    typedef std::hash_set<MetricGenerator>                 MetricSet;
-    typedef std::hash_set<boost::uuids::uuid>              UUIDSet;
-    typedef std::hash_map<boost::uuids::uuid, EMDataBatch> EMDataBatchMap;
+    EMClient( const UUID& id, const String& name );
 
     // Experiment states
-    boost::uuids::uuid clientID;
-    std::wstring       clientName;
-    bool               isClientDisconnecting;  // default false
-    bool               isClientConnected;      // default false
-    EMPhase            currentPhase;
-    bool               isClientPhaseAccelerating;
-    PhaseSet           supportedPhases;
+    UUID       clientID;
+    String     clientName;
+    bool       isClientDisconnecting;     // default false
+    bool       isClientConnected;         // default false
+    EMPhase    currentPhase;
+    bool       isClientPhaseAccelerating; // default false
+    EMPhaseSet supportedPhases;
   
     // Discovery phase states
-    MetricSet metricGenerators;
-    bool      discoveredGenerators; // default false
-    bool      isClientPushCapable;  // default false
-    bool      isClientPullCapable;  // default false
+    MetricGenerator::Set metricGenerators;
+    bool                 discoveredGenerators; // default false
+    bool                 isClientPushCapable;  // default false
+    bool                 isClientPullCapable;  // default false
   
     // Setup phase states
-    boost::uuids::uuid currentMGSetupID;
-    UUIDSet            generatorsSetupOK;
+    UUID    currentMGSetupID;
+    UUIDSet generatorsSetupOK;
   
     // Live monitoring phase states
     volatile bool isQueueingMSPulls;
   
     // Post-report phase states
-    EMPostReportSummary postReportSummary;
-    EMDataBatchMap      postReportOutstandingBatches; // Indexed by MeasurementSet ID
+    EMPostReportSummary::ptr_t postReportSummary;
+    EMDataBatch::Map           postReportOutstandingBatches; // Indexed by MeasurementSet ID
   
     // Tear-down phase
     bool tearDownSuccessful;  // default false
   
     // Multi-phase time-out states
-    std::hash_set<EMPhaseTimeOut> timeOutsCalled;
+    EMPhaseTimeOutSet timeOutsCalled;
   };
 
 } // namespace

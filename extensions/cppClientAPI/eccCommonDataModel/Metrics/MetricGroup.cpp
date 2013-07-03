@@ -35,161 +35,131 @@ using namespace std;
 namespace ecc_commonDataModel
 {
 
-/**
- * This class provides the mechanism to group metrics, given a name and a description.
- * 
- * Example groups:
- *   - User related metrics
- *     - clicks... errors
- *   - Computational / QoS
- *     - response time.. 
- * @author Vegard Engen
- */
-//class MetricGroup
-//{
-//    /**
-//     * Default constructor that sets a random UUID for this object instance.
-//     */
-//    public MetricGroup()
-//    {
-//        this.uuid = Guid.NewGuid();
-//        this.measurementSets = new HashSet<MeasurementSet>();
-//    }
-//    
-//    /**
-//     * A copy constructor, which takes a deep copy of the measurement sets.
-//     * @param mg A metric group object from which a copy is made.
-//     */
-//    public MetricGroup(MetricGroup mg)
-//    {
-//        if (mg == null)
-//            return;
-//        
-//        if (mg.uuid != null)
-//            this.uuid = new Guid( mg.uuid.ToString() );
-//
-//        if (mg.metricGeneratorUUID != null)
-//            this.metricGeneratorUUID = new Guid( mg.metricGeneratorUUID.ToString() );
-//
-//        this.name = mg.name;
-//        this.description = mg.description;
-//
-//        this.measurementSets = new HashSet<MeasurementSet>();
-//        if (mg.measurementSets != null)
-//        {
-//            foreach ( MeasurementSet ms in mg.measurementSets )
-//            {
-//                if (ms != null)
-//                    this.measurementSets.Add(new MeasurementSet(ms, true));
-//            }
-//        }
-//    }
-//    
-//    
-//    /**
-//     * A constructor to set the basic information of a metric group.
-//     * @param uuid The UUID used to uniquely identify a metric group in this framework.
-//     * @param metricGeneratorUUID The UUID of the metric generator that's produced this metric group.
-//     * @param name The name of the metric group.
-//     * @param description A description of the metric group.
-//     */
-//    public MetricGroup(Guid uuid, Guid metricGeneratorUUID, string name, string description)
-//    {
-//        this.uuid = uuid;
-//        this.metricGeneratorUUID = metricGeneratorUUID;
-//        this.name = name;
-//        this.description = description;
-//    }
-//    
-//    /**
-//     * A constructor to set the basic information of a metric group.
-//     * @param uuid The UUID used to uniquely identify a metric group in this framework.
-//     * @param metricGeneratorUUID The UUID of the metric generator that's produced this metric group.
-//     * @param name The name of the metric group.
-//     * @param description A description of the metric group.
-//     * @param measurementSets A set of measurement sets.
-//     */
-//    public MetricGroup(Guid uuid, Guid metricGeneratorUUID, String name, String description, HashSet<MeasurementSet> measurementSets)
-//        : this(uuid, metricGeneratorUUID, name, description)
-//    {
-//        this.measurementSets = measurementSets;
-//    }
-//
-//    public Guid uuid
-//    {
-//        get;
-//        set;
-//    }
-//
-//    public Guid metricGeneratorUUID
-//    {
-//        get;
-//        set;
-//    }
-//
-//    public string name
-//    {
-//        get;
-//        set;
-//    }
-//
-//    public string description
-//    {
-//        get;
-//        set;
-//    }
-//
-//    public HashSet<MeasurementSet> measurementSets
-//    {
-//        get;
-//        set;
-//    }
-//
-//    /**
-//     * @param measurementSet the measurement set to add
-//     */
-//    public void addMeasurementSets(MeasurementSet measurementSet)
-//    {
-//        if (measurementSet == null)
-//            return;
-//        
-//        if (this.measurementSets == null)
-//            this.measurementSets = new HashSet<MeasurementSet>();
-//        
-//        this.measurementSets.Add( measurementSet );
-//    }
-//    
-//    /**
-//     * @param measurementSets the measurement sets to add
-//     */
-//    public void addMeasurementSets(Dictionary<Guid, MeasurementSet> measurementSets)
-//    {
-//        if ((measurementSets == null) || measurementSets.Count == 0 )
-//            return;
-//        
-//        if (this.measurementSets == null)
-//            this.measurementSets = new HashSet<MeasurementSet>();
-//        
-//        foreach ( MeasurementSet ms in measurementSets.Values )
-//            this.measurementSets.Add( ms );
-//    }
-//    
-//    public String toString()
-//    {
-//        return name;
-//    }
-//};
+MetricGroup::MetricGroup()
+{
+  groupID = createRandomUUID();
+}
+
+MetricGroup::MetricGroup( MetricGroup::ptr_t mg )
+{
+  if ( mg )
+  {
+    groupID              = mg->getUUID();
+    metricGeneratorUUID  = mg->getMetricGeneratorUUID();
+    groupName            = mg->getName();
+    groupDescription     = mg->getDescription();
+    groupMeasurementSets = mg->getMeasurementSets();
+  }
+}
+
+MetricGroup::MetricGroup( const UUID&   uuid, 
+                          const UUID&   metGenUUID, 
+                          const String& name, 
+                          const String& description )
+{
+  groupID             = uuid;
+  metricGeneratorUUID = metGenUUID;
+  groupName           = name;
+  groupDescription    = description;
+}
+
+MetricGroup::MetricGroup( const UUID&                uuid, 
+                          const UUID&                metGenUUID, 
+                          const String&              name, 
+                          const String&              description, 
+                          const MeasurementSet::Set& measurementSets )
+{
+  groupID              = uuid;
+  metricGeneratorUUID  = metGenUUID;
+  groupName            = name;
+  groupDescription     = description;
+  groupMeasurementSets = measurementSets;
+}
+
+MetricGroup::~MetricGroup()
+{
+}
+
+
+UUID MetricGroup::getUUID()
+{
+  return groupID;
+}
+
+void MetricGroup::setUUID( const UUID& ID )
+{
+  groupID = ID;
+}
+  
+UUID MetricGroup::getMetricGeneratorUUID()
+{
+  return metricGeneratorUUID;
+}
+
+void MetricGroup::setMetricGeneratorUUID( const UUID& ID )
+{
+  metricGeneratorUUID = ID;
+}
+
+String MetricGroup::getName()
+{
+  return groupName;
+}
+
+void MetricGroup::setName( const String& name )
+{
+  groupName = name;
+}
+
+String MetricGroup::getDescription()
+{
+  return groupDescription;
+}
+
+void MetricGroup::setDescription( const String& name )
+{
+  groupDescription = name;
+}
+
+MeasurementSet::Set MetricGroup::getMeasurementSets()
+{
+  return groupMeasurementSets;
+}
+
+void MetricGroup::setMeasurementSets( MeasurementSet::Set ms )
+{
+  groupMeasurementSets = ms;
+}
+
+void MetricGroup::addMeasurementSet( MeasurementSet::ptr_t measurementSet )
+{
+  if ( measurementSet )
+    groupMeasurementSets.insert( measurementSet );
+}
+    
+void MetricGroup::addMeasurementSets( const MeasurementSet::Set& measurementSets )
+{
+  MeasurementSet::Set::iterator msIt = measurementSets.begin();
+  while ( msIt != measurementSets.end() )
+  {
+    MeasurementSet::ptr_t ms = *msIt;
+
+    if ( ms ) groupMeasurementSets.insert( ms );
+
+    ++msIt;
+  }
+}
 
 // ModelBase -----------------------------------------------------------------
-void MetricGroup::toJSON( wstring& jsonStrOUT )
+void MetricGroup::toJSON( String& jsonStrOUT )
 {
 }
 
-void MetricGroup::fromJSON( const wstring& jsonStr )
+void MetricGroup::fromJSON( const String& jsonStr )
 {
 }
 
-wstring MetricGroup::toString()
+String MetricGroup::toString()
 {
   wstring ts;
 

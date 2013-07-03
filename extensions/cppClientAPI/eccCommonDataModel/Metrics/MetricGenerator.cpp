@@ -35,197 +35,149 @@ using namespace std;
 namespace ecc_commonDataModel
 {
 
-/**
- * This class represents something or someone who generates and provides metrics
- * about the attributes of certain entities. This could be, for example, a 
- * computational process or a human being operating a mobile device.
- * 
- * Metrics are organised within metric groups. It is possible to define a hierarchy
- * of metric groups as well, as a metric group can contain a set of metric groups.
- * 
- * @author Vegard Engen
- */
-//class MetricGenerator
-//{
-//    /**
-//     * Default constructor, which sets a random UUID for the object instance.
-//     */
-//    public MetricGenerator()
-//    {
-//        this.uuid = Guid.NewGuid();
-//        this.metricGroups = new HashSet<MetricGroup>();
-//        this.entities = new HashSet<Entity>();
-//    }
-//    
-//    /**
-//     * A copy constructor; takes a deep copy of the UUID, metric groups and entities.
-//     * @param mg A metric generator object from which a copy is made.
-//     */
-//    public MetricGenerator(MetricGenerator mg)
-//    {
-//        if (mg == null)
-//            return;
-//        
-//        if (mg.uuid != null)
-//            this.uuid = new Guid( mg.uuid.ToString() );
-//        
-//        this.name = mg.name;
-//        this.description = mg.description;
-//        
-//        this.metricGroups = new HashSet<MetricGroup>();
-//        if (mg.metricGroups != null)
-//        {
-//            foreach ( MetricGroup mgroup in mg.metricGroups )
-//            {
-//                if (mgroup != null)
-//                    this.metricGroups.Add(new MetricGroup(mgroup));
-//            }
-//        }
-//        
-//        this.entities = new HashSet<Entity>();
-//        if (mg.entities != null)
-//        {
-//            foreach ( Entity e in mg.entities )
-//            {
-//                if (e != null)
-//                    this.entities.Add(new Entity(e));
-//            }
-//        }
-//    }
-//    
-//    /**
-//     * Constructor to set all fields of the Metric Generator class.
-//     * @param uuid The UUID used to uniquely identify a metric generator in this framework.
-//     * @param name The name of the metric generator.
-//     * @param description A description of the metric generator.
-//     */
-//    public MetricGenerator(Guid uuid, string name, string description) : this()
-//    {
-//
-//        this.uuid = uuid;
-//        this.name = name;
-//        this.description = description;
-//    }
-//    
-//    /**
-//     * Constructor to set all fields of the Metric Generator class.
-//     * @param uuid The UUID used to uniquely identify a metric generator in this framework.
-//     * @param name The name of the metric generator.
-//     * @param description A description of the metric generator.
-//     * @param metricGroups A set of metric groups.
-//     * @param entities A set entities being observed.
-//     */
-//    public MetricGenerator(Guid uuid, string name, string description, HashSet<MetricGroup> metricGroups, HashSet<Entity> entities)
-//        : this(uuid, name, description)
-//    {
-//        this.metricGroups = metricGroups;
-//        this.entities = entities;
-//    }
-//
-//    public Guid uuid
-//    {
-//        get;
-//        set;
-//    }
-//
-//    public string name
-//    {
-//        get;
-//        set;
-//    }
-//
-//    public string description
-//    {
-//        get;
-//        set;
-//    }
-//
-//    public HashSet<MetricGroup> metricGroups
-//    {
-//        get;
-//        set;
-//    }
-//
-//    public HashSet<Entity> entities
-//    {
-//        get;
-//        set;
-//    }
-//    
-//    /**
-//     * @param metricGroup the metric group to add
-//     */
-//    public void addMetricGroup(MetricGroup metricGroup)
-//    {
-//        if (metricGroup == null)
-//            return;
-//        
-//        if (this.metricGroups == null)
-//            this.metricGroups = new HashSet<MetricGroup>();
-//        
-//        this.metricGroups.Add(metricGroup);
-//    }
-//    
-//    /**
-//     * @param metricGroups the metric groups to add
-//     */
-//    public void addMetricGroups(HashSet<MetricGroup> metricGroups)
-//    {
-//        if ( (metricGroups == null) || metricGroups.Count == 0 )
-//            return;
-//        
-//        if (this.metricGroups == null)
-//            this.metricGroups = new HashSet<MetricGroup>();
-//        
-//        foreach ( MetricGroup mg in metricGroups )
-//            this.metricGroups.Add( mg );
-//    }
-//    
-//    /**
-//     * @param entity the entity to add
-//     */
-//    public void addEntity(Entity entity)
-//    {
-//        if (entity == null)
-//            return;
-//        
-//        if (this.entities == null)
-//            this.entities = new HashSet<Entity>();
-//        
-//        this.entities.Add(entity);
-//    }
-//    
-//    /**
-//     * @param entities the entities to add
-//     */
-//    public void addEntities(HashSet<Entity> entities)
-//    {
-//        if ((entities == null) || entities.Count == 0)
-//            return;
-//        
-//        if (this.entities == null)
-//            this.entities = new HashSet<Entity>();
-//        
-//        foreach ( Entity e in entities )
-//            this.entities.Add( e );
-//    }
-//    
-//    public string toString()
-//    {
-//        return name;
-//    }
-//};
+MetricGenerator::MetricGenerator()
+{
+  mgID = createRandomUUID();
+}
+    
+MetricGenerator::MetricGenerator( MetricGenerator::ptr_t mg )
+{
+  if ( mg )
+  {
+    mgID           = mg->getUUID();
+    mgName         = mg->getName();
+    mgDescription  = mg->getDescription();
+    mgMetricGroups = mg->getMetricGroups();
+    mgEntities     = mg->getEntities();
+  }
+}
+    
+MetricGenerator::MetricGenerator( const UUID&   uuid, 
+                                  const String& name, 
+                                  const String& description )
+{
+  mgID          = uuid;
+  mgName        = name;
+  mgDescription = description;
+}
+    
+MetricGenerator::MetricGenerator( const UUID&             uuid, 
+                                  const String&           name, 
+                                  const String&           description, 
+                                  const MetricGroup::Set& metricGroups, 
+                                  const Entity::Set&      entities )
+{
+  mgID           = uuid;
+  mgName         = name;
+  mgDescription  = description;
+  mgMetricGroups = metricGroups;
+  mgEntities     = entities;
+}
+
+MetricGenerator::~MetricGenerator()
+{
+}
+
+UUID MetricGenerator::getUUID()
+{
+  return mgID;
+}
+
+void MetricGenerator::setUUID( const UUID& ID )
+{
+  mgID = ID;
+}
+
+String MetricGenerator::getName()
+{
+  return mgName;
+}
+
+void MetricGenerator::setName( const String& name )
+{
+  mgName = name;
+}
+
+String MetricGenerator::getDescription()
+{
+  return mgDescription;
+}
+
+void MetricGenerator::setDescription( const String& desc )
+{
+  mgDescription = desc;
+}
+
+MetricGroup::Set MetricGenerator::getMetricGroups()
+{
+  return mgMetricGroups;
+}
+
+void MetricGenerator::setMetricGroups( const MetricGroup::Set& groups )
+{
+  mgMetricGroups = groups;
+}
+
+Entity::Set MetricGenerator::getEntities()
+{
+  return mgEntities;
+}
+
+void MetricGenerator::setEntities( const Entity::Set& entities )
+{
+  mgEntities = entities;
+}
+    
+void MetricGenerator::addMetricGroup( MetricGroup::ptr_t metricGroup )
+{
+  if ( metricGroup ) mgMetricGroups.insert( metricGroup );
+}
+    
+void MetricGenerator::addMetricGroups( const MetricGroup::Set& metricGroups )
+{
+  MetricGroup::Set::iterator mgIt = metricGroups.begin();
+  while ( mgIt != metricGroups.end() )
+  {
+    MetricGroup::ptr_t mg = *mgIt;
+
+    if ( mg ) mgMetricGroups.insert( mg );
+
+    ++mgIt;
+  }
+
+  mgMetricGroups.insert( metricGroups.begin(), metricGroups.end() );
+}
+    
+void MetricGenerator::addEntity( Entity::ptr_t entity )
+{
+  if ( entity ) mgEntities.insert( entity );
+}
+
+void MetricGenerator::addEntities( const Entity::Set& entities )
+{
+  Entity::Set::iterator entIt = entities.begin();
+  while ( entIt != entities.end() )
+  {
+    Entity::ptr_t entity = *entIt;
+
+    if ( entity ) mgEntities.insert( entity );
+
+    ++entIt;
+  }
+
+  mgEntities.insert( entities.begin(), entities.end() );
+}
 
 // ModelBase -----------------------------------------------------------------
-void MetricGenerator::toJSON( wstring& jsonStrOUT )
+void MetricGenerator::toJSON( String& jsonStrOUT )
 {
 }
 
-void MetricGenerator::fromJSON( const wstring& jsonStr )
+void MetricGenerator::fromJSON( const String& jsonStr )
 {
 }
 
-wstring MetricGenerator::toString()
+String MetricGenerator::toString()
 {
   wstring ts;
 

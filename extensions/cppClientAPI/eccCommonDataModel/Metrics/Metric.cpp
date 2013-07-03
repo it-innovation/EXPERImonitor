@@ -35,81 +35,74 @@ using namespace std;
 namespace ecc_commonDataModel
 {
 
-/**
- * The metric class details the measurement of an attribute (of an entity).
- * 
- * @author Vegard Engen
- */
-//class Metric
-//{
-//    /**
-//     * Default constructor, which sets a random UUID for the object instance.
-//     */
-//    public Metric()
-//    {
-//        this.uuid = Guid.NewGuid();
-//    }
-//    
-//    /**
-//     * Copy constructor; OBS: does a shallow copy of the unit.
-//     * @param m The metric object a copy is made of.
-//     */
-//    public Metric(Metric m)
-//    {
-//        if (m == null)
-//            return;
-//        
-//        if (m.uuid != null)
-//            this.uuid = new Guid( m.uuid.ToString() );
-//        
-//        this.metricType = m.metricType;
-//
-//        if (m.unit != null)
-//            this.unit = new Unit(m.unit);
-//    }
-//    
-//    /**
-//     * Constructor to set all the fields of the Metric object.
-//     * @param uuid The UUID used to uniquely identify a metric in this framework.
-//     * @param metricType The type of metric (e.g., nominal or interval).
-//     * @param unit The unit of the metric (e.g., meters or miles/second).
-//     */
-//    public Metric(Guid uuid, MetricType metricType, Unit unit)
-//    {
-//        this.uuid = uuid;
-//        this.metricType = metricType;
-//        this.unit = unit;
-//    }
-//
-//    public Guid uuid
-//    {
-//        get;
-//        set;
-//    }
-//
-//    public MetricType metricType
-//    {
-//        get;
-//        set;
-//    }
-//
-//    public Unit unit
-//    {
-//        get;
-//        set;
-//    }
-//};
+Metric::Metric()
+{
+  metricUUID = createRandomUUID();
+}
+
+Metric::Metric( Metric::ptr_t m )
+{
+  if ( m )
+  {
+    metricUUID = m->getUUID();
+    metricType = m->getMetricType();
+    metricUnit = m->getUnit();
+  }
+}
+    
+Metric::Metric( const UUID&       uuid, 
+                const MetricType& mT, 
+                Unit::ptr_t       unit )
+{
+  metricUUID = uuid;
+  metricType = mT;
+  metricUnit = unit;
+}
+
+Metric::~Metric()
+{
+}
+
+UUID Metric::getUUID()
+{
+  return metricUUID;
+}
+
+void Metric::setUUID( const UUID& ID )
+{
+  metricUUID = ID;
+}
+
+MetricType Metric::getMetricType()
+{
+  return metricType;
+}
+
+void Metric::setMetricType( const MetricType& type )
+{
+  metricType = type;
+}
+
+Unit::ptr_t Metric::getUnit()
+{
+  return metricUnit;
+}
+
+void Metric::setUnit( Unit::ptr_t unit )
+{
+  metricUnit = unit;
+}
 
 // ModelBase -----------------------------------------------------------------
-void Metric::toJSON( wstring& jsonStrOUT )
+void Metric::toJSON( String& jsonStrOUT )
 {
 }
 
-void Metric::fromJSON( const wstring& jsonStr )
+void Metric::fromJSON( const String& jsonStr )
 {
 }
 
-wstring Metric::toString()
+String Metric::toString()
 {
   wstring ts;
 

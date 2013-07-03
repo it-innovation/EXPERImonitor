@@ -35,132 +35,121 @@ using namespace std;
 namespace ecc_commonDataModel
 {
 
-/**
- * This class represents a measurement taken at a particular point in time.
- * The measurement is a part of a measurement set for an attribute (of an entity).
- * 
- * @author Vegard Engen
- */
-//class Measurement
-//{    
-//    /**
-//     * Default constructor, which sets a random UUID for the object instance and
-//     * sets the synchronised flag to false.
-//     */
-//    public Measurement()
-//    {
-//        this.uuid         = Guid.NewGuid();
-//        this.timeStamp    = DateTime.Now;
-//        this.synchronised = false;
-//    }
-//    
-//    /**
-//     * Measurement value constructor; creates an instance and automatically time-stamps 
-//     * the construction date.
-//     * 
-//     * @param value - Value of the measurement to be stored
-//     */
-//    public Measurement(string value) : this()
-//    {
-//        this.value = value;
-//    }
-//    
-//    /**
-//     * Copy constructor; takes a deep copy of all objects.
-//     * @param m The measurement object a copy is made from.
-//     */
-//    public Measurement(Measurement m)
-//    {
-//        if (m == null) {
-//            return;
-//        }
-//        
-//        if (m.uuid != null) {
-//            this.uuid = new Guid( m.uuid.ToString() );
-//        }
-//        if (m.measurementSetUUID != null) {
-//            this.measurementSetUUID = new Guid( m.measurementSetUUID.ToString() );
-//        }
-//        if (m.timeStamp != null) {
-//            this.timeStamp = new DateTime( m.timeStamp.Ticks );
-//        }
-//        
-//        this.value = m.value;
-//        this.synchronised = m.synchronised;
-//    }
-//    
-//    /**
-//     * Constructor to set all the fields of the Measurement object.
-//     * @param uuid The UUID used to uniquely identify a measurement in this framework.
-//     * @param measurementSetUUID The UUID of the measurement set that this measurement is a part of.
-//     * @param timeStamp The time stamp when the measurement was taken.
-//     * @param value The measurement value
-//     */
-//    public Measurement(Guid uuid, Guid measurementSetUUID, DateTime timeStamp, string value)
-//    {
-//        this.uuid = uuid;
-//        this.measurementSetUUID = measurementSetUUID;
-//        this.timeStamp = timeStamp;
-//        this.value = value;
-//
-//        this.synchronised = false;
-//    }
-//    
-//    /**
-//     * Constructor to set all the fields of the Measurement object.
-//     * @param uuid The UUID used to uniquely identify a measurement in this framework.
-//     * @param measurementSetUUID The UUID of the measurement set that this measurement is a part of.
-//     * @param timeStamp The time stamp when the measurement was taken.
-//     * @param value The measurement value
-//     */
-//    public Measurement(Guid uuid, Guid measurementSetUUID, DateTime timeStamp, string value, bool synchronised)
-//        : this(uuid, measurementSetUUID, timeStamp, value)
-//    {
-//        this.synchronised = synchronised;
-//    }
-//
-//    public Guid uuid
-//    {
-//        get;
-//        set;
-//    }
-//
-//    public Guid measurementSetUUID
-//    {
-//        get;
-//        set;
-//    }
-//
-//    [JsonConverter(typeof(ECCDateTimeJSONConverter))]
-//    public DateTime timeStamp
-//    {
-//        get;
-//        set;
-//    }
-//
-//    public string value
-//    {
-//        get;
-//        set;
-//    }
-//
-//    public bool synchronised
-//    {
-//        get;
-//        set;
-//    }
-//};
+Measurement::Measurement()
+{
+  measurementUUID         = createRandomUUID();
+  measurementTimeStamp    = getCurrentTime();
+  measurementSynchronised = false;
+}
+
+Measurement::Measurement( const String& value )
+{
+  measurementUUID         = createRandomUUID();
+  measurementTimeStamp    = getCurrentTime();
+  measurementSynchronised = false;
+  measurementValue        = value;
+}
+    
+Measurement::Measurement( Measurement::ptr_t srcMeasurement )
+{
+  if ( srcMeasurement )
+  {
+    measurementUUID         = srcMeasurement->getUUID();
+    measurementTimeStamp    = srcMeasurement->getTimeStamp();
+    measurementSynchronised = srcMeasurement->getSynchronised();
+    measurementValue        = srcMeasurement->getValue();
+  }
+}
+    
+Measurement::Measurement( const UUID&      uuid, 
+                          const UUID&      msetUUID, 
+                          const TimeStamp& timeStamp, 
+                          const String&    value )
+{
+  measurementUUID         = uuid;
+  measurementSetUUID      = msetUUID;
+  measurementTimeStamp    = timeStamp;
+  measurementValue        = value;
+  measurementSynchronised = false;
+}
+    
+Measurement::Measurement( const UUID&      uuid, 
+                          const UUID&      msetUUID, 
+                          const TimeStamp& timeStamp, 
+                          const String&    value, 
+                          const bool       synchronised )
+{
+  measurementUUID         = uuid;
+  measurementSetUUID      = msetUUID;
+  measurementTimeStamp    = timeStamp;
+  measurementValue        = value;
+  measurementSynchronised = synchronised;
+}
+
+Measurement::~Measurement()
+{
+}
+
+UUID Measurement::getUUID()
+{
+  return measurementUUID;
+}
+
+void Measurement::setUUID( const UUID& ID )
+{
+  measurementUUID = ID;
+}
+
+UUID Measurement::getMeasurementSetUUID()
+{
+  return measurementSetUUID;
+}
+
+void Measurement::setMeasurementSetUUID( const UUID& ID )
+{
+  measurementSetUUID = ID;
+}
+
+TimeStamp Measurement::getTimeStamp()
+{
+  return measurementTimeStamp;
+}
+
+void Measurement::setTimeStamp( const TimeStamp& stamp )
+{
+  measurementTimeStamp = stamp;
+}
+
+String Measurement::getValue()
+{
+  return measurementValue;
+}
+
+void Measurement::setValue( const String& value )
+{
+  measurementValue = value;
+}
+
+bool Measurement::getSynchronised()
+{
+  return measurementSynchronised;
+}
+
+void Measurement::setSynchronised( const bool& synchronised )
+{
+  measurementSynchronised = synchronised;
+}
 
 // ModelBase -----------------------------------------------------------------
-void Measurement::toJSON( wstring& jsonStrOUT )
+void Measurement::toJSON( String& jsonStrOUT )
 {
 }
 
-void Measurement::fromJSON( const wstring& jsonStr )
+void Measurement::fromJSON( const String& jsonStr )
 {
 }
 
-wstring Measurement::toString()
+String Measurement::toString()
 {
   wstring ts;
 

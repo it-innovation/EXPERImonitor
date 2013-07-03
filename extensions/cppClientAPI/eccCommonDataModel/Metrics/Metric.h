@@ -28,7 +28,7 @@
 #include "MetricType.h"
 #include "Unit.h"
 
-#include <boost/uuid/uuid.hpp>
+
 
 
 namespace ecc_commonDataModel
@@ -61,16 +61,18 @@ public:
      * @param metricType The type of metric (e.g., nominal or interval).
      * @param unit The unit of the metric (e.g., meters or miles/second).
      */
-    Metric( boost::uuids::uuid uuid, MetricType metricType, Unit unit );
+    Metric( const UUID&        uuid, 
+            const MetricType&  metricType, 
+            Unit::ptr_t        unit );
 
     virtual ~Metric();
 
     /**
      * Getter/Setter for metric ID
      */
-    boost::uuids::uuid getUUID();
+    UUID getUUID();
 
-    void setUUID( const boost::uuids::uuid& ID );
+    void setUUID( const UUID& ID );
 
     /**
      * Getter/Setter for metric type
@@ -87,11 +89,18 @@ public:
     void setUnit( Unit::ptr_t unit );
 
     // ModelBase -----------------------------------------------------------------
-    virtual void toJSON( std::wstring& jsonStrOUT );
+    virtual void toJSON( String& jsonStrOUT );
 
-    virtual void fromJSON( const std::wstring& jsonStr );
+    virtual void fromJSON( const String& jsonStr );
 
-    virtual std::wstring toString();
+    virtual String toString();
+
+private:
+
+  UUID        metricUUID;
+  MetricType  metricType;
+  Unit::ptr_t metricUnit;
+
 };
 
 } // namespace

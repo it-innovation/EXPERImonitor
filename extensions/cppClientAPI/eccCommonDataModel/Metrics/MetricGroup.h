@@ -28,10 +28,6 @@
 #include "ModelBase.h"
 #include "MeasurementSet.h"
 
-#include <boost/uuid/uuid.hpp>
-
-#include <hash_map>
-#include <hash_set>
 
 
 
@@ -42,6 +38,10 @@ namespace ecc_commonDataModel
     {
     public:
         typedef boost::shared_ptr<MetricGroup> ptr_t;
+
+        typedef boost::unordered_set<MetricGroup::ptr_t> Set;
+
+        typedef boost::unordered_map<UUID,MetricGroup::ptr_t> Map;
 
         /**
          * Default constructor that sets a random UUID for this object instance.
@@ -61,10 +61,10 @@ namespace ecc_commonDataModel
          * @param name The name of the metric group.
          * @param description A description of the metric group.
          */
-        MetricGroup( const boost::uuids::uuid& uuid, 
-                     const boost::uuids::uuid& metricGeneratorUUID, 
-                     const std::wstring&       name, 
-                     const std::wstring&       description );
+        MetricGroup( const UUID&   uuid, 
+                     const UUID&   metricGeneratorUUID, 
+                     const String& name, 
+                     const String& description );
 
         
 
@@ -77,67 +77,73 @@ namespace ecc_commonDataModel
          * @param description A description of the metric group.
          * @param measurementSets A set of measurement sets.
          */
-        MetricGroup( const boost::uuids::uuid&                  uuid, 
-                     const boost::uuids::uuid&                  metricGeneratorUUID, 
-                     const std::wstring&                        name, 
-                     const std::wstring&                        description, 
-                     const std::hash_set<MeasurementSet::ptr_t> measurementSets );
+        MetricGroup( const UUID&                uuid, 
+                     const UUID&                metricGeneratorUUID, 
+                     const String&              name, 
+                     const String&              description, 
+                     const MeasurementSet::Set& measurementSets );
 
         virtual ~MetricGroup();
 
         /**
          * Getter/Setter for MetricGroup ID
          */
-        boost::uuids::uuid getUUID();
+        UUID getUUID();
 
-        void setUUID( const boost::uuids::uuid& ID );
+        void setUUID( const UUID& ID );
   
-
         /**
          * Getter/Setter for the parent metric generator ID
          */
-        boost::uuids::uuid getMetricGeneratorUUID();
+        UUID getMetricGeneratorUUID();
 
-        void setMetricGeneratorUUID( const boost::uuids::uuid& ID );
+        void setMetricGeneratorUUID( const UUID& ID );
 
         /**
          * Getter/Setter for metric group name
          */
-        std::wstring getName();
+        String getName();
 
-        void setName( const std::wstring& name );
-
+        void setName( const String& name );
 
         /**
          * Getter/Setter for metric group description
          */
-        std::wstring getDescription();
+        String getDescription();
 
-        void setDescription( const std::wstring& name );
+        void setDescription( const String& name );
 
         /**
          * Getter/Setter for metric group measurement sets
          */
-        std::hash_set<MeasurementSet::ptr_t> getMeasurementSets();
+        MeasurementSet::Set getMeasurementSets();
 
-        void setMeasurementSets( std::hash_set<MeasurementSet::ptr_t> ms );
+        void setMeasurementSets( MeasurementSet::Set ms );
 
         /**
          * @param measurementSet the measurement set to add
          */
-        void addMeasurementSets( MeasurementSet::ptr_t measurementSet );
+        void addMeasurementSet( MeasurementSet::ptr_t measurementSet );
     
         /**
          * @param measurementSets the measurement sets to add
          */
-        void addMeasurementSets( std::hash_map<boost::uuids::uuid, MeasurementSet::ptr_t> measurementSets );
+        void addMeasurementSets( const MeasurementSet::Set& measurementSets );
 
         // ModelBase -----------------------------------------------------------------
-        virtual void toJSON( std::wstring& jsonStrOUT );
+        virtual void toJSON( String& jsonStrOUT );
 
-        virtual void fromJSON( const std::wstring& jsonStr );
+        virtual void fromJSON( const String& jsonStr );
 
-        virtual std::wstring toString();
+        virtual String toString();
+
+      private:
+
+        UUID                groupID;
+        UUID                metricGeneratorUUID;
+        String              groupName;
+        String              groupDescription;
+        MeasurementSet::Set groupMeasurementSets;
     };
     
 } // namespace
