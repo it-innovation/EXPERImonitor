@@ -188,10 +188,13 @@ public class MetricGeneratorTest extends TestCase
         MetricGenerator metricGenerator2 = new MetricGenerator(PopulateDB.mGen1UUID, "Experiment MetricGenerator 2", null);
         metricGenerator2.addEntity(new Entity(UUID.randomUUID(), "Entity", "Description"));
         
+        // EDM now aggregates metric generators (duplicate entities/attributes/measurements are not allowed however)
         try {
             mGenDAO.saveMetricGenerator(metricGenerator2, PopulateDB.expUUID);
-            fail("Saved MetricGenerator with the same UUID as an existing MetricGenerator");
-        } catch (Exception ex) { }
+        } catch (Exception ex)
+        {
+          fail("Saved MetricGenerator with the same UUID as an existing MetricGenerator");
+        }
     }
     
     @Test
