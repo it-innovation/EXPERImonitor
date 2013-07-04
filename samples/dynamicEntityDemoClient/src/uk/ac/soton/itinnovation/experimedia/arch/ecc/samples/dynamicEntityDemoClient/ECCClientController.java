@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////
 //
-// © University of Southampton IT Innovation Centre, 2012
+// © University of Southampton IT Innovation Centre, 2013
 //
 // Copyright in this software belongs to University of Southampton
 // IT Innovation Centre of Gamma House, Enterprise Road, 
@@ -17,8 +17,8 @@
 // PURPOSE, except where stated in the Licence Agreement supplied with
 // the software.
 //
-//      Created By :            Simon Crowle
-//      Created Date :          15-Aug-2012
+//      Created By :            Dion Kitchener
+//      Created Date :          28-June-2013
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
@@ -172,11 +172,9 @@ public class ECCClientController implements EMIAdapterListener,
     @Override
     public void onPopulateMetricGeneratorInfo()
     {
-       HashSet<MetricGenerator> mgSet = new HashSet<MetricGenerator>();
-       mgSet.add( metricGenerator );
-       
-       emiAdapter.sendMetricGenerators( mgSet );
-   }
+      // Not going to pre-create metric generators in this demo. We'll let the
+      // user create them on-the-fly instead, see onNewEntityInfoEntered(..)
+    }
 
     @Override
     public void onDiscoveryTimeOut()
@@ -332,7 +330,6 @@ public class ECCClientController implements EMIAdapterListener,
     @Override
     public void onNewEntityInfoEntered(String entityName,ArrayList<String> attList,String entityDesc )
     {
-
         // Create a new entity to be observed (this Java VM)
         Entity entityBeingObserved = new Entity();
         entityBeingObserved.setName( entityName );
@@ -356,19 +353,20 @@ public class ECCClientController implements EMIAdapterListener,
             
             // ... a single MeasurementSet (representing the measures for the attibute)
             MetricHelper.createMeasurementSet( entityAttribute, 
-                                           MetricType.fromValue(attMetricType), 
-                                           new Unit(attUnit), 
-                                           metricGroup );
+                                               MetricType.fromValue(attMetricType), 
+                                               new Unit(attUnit), 
+                                               metricGroup );
             
            
-                //Creating a hash set to store metric generators
-                HashSet<MetricGenerator> mgSet = new HashSet<MetricGenerator>();
-                mgSet.add( metricGenerator );
-            
-                //Send metric generators to the EM
-                emiAdapter.sendMetricGenerators( mgSet );       
+            //Creating a hash set to store metric generators
+            HashSet<MetricGenerator> mgSet = new HashSet<MetricGenerator>();
+            mgSet.add( metricGenerator );
+
+            //Send metric generators to the EM
+            emiAdapter.sendMetricGenerators( mgSet );       
             
         }
+        
         clientView.addLogMessage( "Created new entity: " + entityBeingObserved.getName() );        
     }  
 }

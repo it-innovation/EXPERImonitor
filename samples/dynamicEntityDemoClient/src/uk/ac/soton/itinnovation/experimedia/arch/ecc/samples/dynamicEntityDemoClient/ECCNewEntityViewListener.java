@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////
 //
-// © University of Southampton IT Innovation Centre, 2012
+// © University of Southampton IT Innovation Centre, 2013
 //
 // Copyright in this software belongs to University of Southampton
 // IT Innovation Centre of Gamma House, Enterprise Road, 
@@ -18,10 +18,11 @@
 // the software.
 //
 //      Created By :            Dion Kitchener
-//      Created Date :          20-June-2013
+//      Created Date :          28-June-2013
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
+
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.dynamicEntityDemoClient;
 
 import java.util.ArrayList;
