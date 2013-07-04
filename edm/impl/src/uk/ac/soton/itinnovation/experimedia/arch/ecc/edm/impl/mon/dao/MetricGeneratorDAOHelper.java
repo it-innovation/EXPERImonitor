@@ -166,8 +166,13 @@ public class MetricGeneratorDAOHelper
         boolean exception = false;
         
         // Save the MetricGenerator if it does not already exist -------------------------------------------
+        // Need to remember whether this generator is new when we link with entities at the end of this method
+        boolean metricGeneratorIsNew = false;
+        
         if ( !objectExists( metricGen.getUUID(), connection, false ) )
         {
+            metricGeneratorIsNew = true;
+            
             try {
                     String query = "INSERT INTO MetricGenerator (mGenUUID, expUUID, name, description) VALUES (?, ?, ?, ?)";
 
@@ -194,7 +199,7 @@ public class MetricGeneratorDAOHelper
         }
         // -------------------------------------------------------------------------------------------------
         
-        // Save any entities if not NULL and if not already existing ---------------------------------------
+        // Save any entities if not NULL and if not already existing ---------------------------------------        
         if ((metricGen.getEntities() != null) && !metricGen.getEntities().isEmpty())
         {
             log.debug("The metric generator has got " + metricGen.getEntities().size() + " entities, which will now be saved (hopefully...)");
@@ -266,36 +271,63 @@ public class MetricGeneratorDAOHelper
             }
           }
         // -------------------------------------------------------------------------------------------------
-         
         // Finally, try linking the metric generator with the Entity
         // -------------------------------------------------------------------------------------------------
         try 
         {
             log.debug("Making links between MG and Entity entries in the MetricGenerator_Entity table");
-
-           // make link between MG and Entity in MetricGenerator_Entity table
-           for (Entity entity : metricGen.getEntities())
-           {
-                linkMetricGeneratorAndEntity(metricGen.getUUID(), entity.getUUID(), connection, false);
-           }
-          } catch (Exception ex) {
-              exception = true;
-              throw ex;
-          } finally {
-              if (closeDBcon)
-              {
-                    if (exception) 
-                    {
-                        log.debug("Exception thrown, so rolling back the transaction and closing the connection");
-                        connection.rollback();
-                    } 
-                    else 
-                    {
-                        log.debug("Committing the transaction and closing the connection");
-                        connection.commit();
-                    }
-                  connection.close();
-              }
+            
+            // If the metric generator is new, save links to all entities (new or not)
+            if ( metricGeneratorIsNew )
+            {
+                // make link between MG and Entity in MetricGenerator_Entity table
+                for (Entity entity : metricGen.getEntities())
+                  linkMetricGeneratorAndEntity(metricGen.getUUID(), entity.getUUID(), connection, false);
+            }
+            else
+            // Otherwise, make sure we only link new MetricGenerator<->Entity relationships
+            {
+                UUID metGenID = metricGen.getUUID();
+                
+                for (Entity entity: metricGen.getEntities())
+                {
+                    UUID entityID = entity.getUUID();
+                  
+                    String query = "SELECT * FROM metricgenerator_entity WHERE mgenuuid = ? AND entityuuid = ?";
+                    
+                    PreparedStatement pstmt = connection.prepareStatement(query);
+                    pstmt.setObject( 1, metGenID, java.sql.Types.OTHER );
+                    pstmt.setObject( 2, entityID, java.sql.Types.OTHER );
+                    
+                    ResultSet rs = pstmt.executeQuery();
+                    
+                    // If nothing is returned, then link the two
+                    if ( !rs.next() )
+                      linkMetricGeneratorAndEntity( metGenID, entityID, connection, false);
+                }
+            }   
+        } 
+        catch (Exception ex) 
+        {
+          exception = true;
+          throw ex;
+        }
+        finally 
+        {
+            if (closeDBcon)
+            {
+                if (exception)
+                {
+                    log.debug("Exception thrown, so rolling back the transaction and closing the connection");
+                    connection.rollback();
+                }
+                else
+                {
+                    log.debug("Committing the transaction and closing the connection");
+                    connection.commit();
+                }
+                connection.close();
+            }
         }
         // -------------------------------------------------------------------------------------------------
     }
