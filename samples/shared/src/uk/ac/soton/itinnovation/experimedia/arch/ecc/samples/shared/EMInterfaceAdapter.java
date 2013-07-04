@@ -79,9 +79,8 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
 
     // Supported phases & metric Generators
     protected EnumSet<EMPhase>     supportedPhases;
-    protected Set<MetricGenerator> clientGenerators;
 
-
+    
     /**
      * Constructor for the EMInterfaceAdapter using the most recent listener to ECC events.
      * 
@@ -89,9 +88,8 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
      */
     public EMInterfaceAdapter( EMIAdapterListener listener )
     {
-        emiListener      = listener; 
-        clientGenerators = new HashSet<MetricGenerator>();
-        supportedPhases  = EnumSet.noneOf( EMPhase.class );
+        emiListener     = listener; 
+        supportedPhases = EnumSet.noneOf( EMPhase.class );
     }
     
     /**
@@ -101,9 +99,8 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
      */
     public EMInterfaceAdapter ( EMILegacyAdapterListener legListener )
     {
-        emiLegListener   = legListener;
-        clientGenerators = new HashSet<MetricGenerator>();
-        supportedPhases  = EnumSet.noneOf( EMPhase.class );
+        emiLegListener  = legListener;
+        supportedPhases = EnumSet.noneOf( EMPhase.class );
     }
 
     /**
@@ -210,11 +207,8 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
      */
     public void sendMetricGenerators( Set<MetricGenerator> generators )
     {
-        if ( generators != null )
-        {
-            clientGenerators.addAll(generators );
+        if ( generators != null && discoveryFace != null )
             discoveryFace.sendMetricGeneratorInfo( generators );
-        }
     }
 
     /**
