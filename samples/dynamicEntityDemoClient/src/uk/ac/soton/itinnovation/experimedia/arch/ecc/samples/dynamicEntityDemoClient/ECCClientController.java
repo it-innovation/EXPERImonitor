@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////
 //
-// © University of Southampton IT Innovation Centre, 2013
+// © University of Southampton IT Innovation Centre, 2012
 //
 // Copyright in this software belongs to University of Southampton
 // IT Innovation Centre of Gamma House, Enterprise Road, 
@@ -17,8 +17,8 @@
 // PURPOSE, except where stated in the Licence Agreement supplied with
 // the software.
 //
-//      Created By :            Dion Kitchener
-//      Created Date :          28-June-2013
+//      Created By :            Dion Kitchener  
+//      Created Date :          04-July-2013
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
@@ -51,15 +51,23 @@ public class ECCClientController implements EMIAdapterListener,
     private EMInterfaceAdapter emiAdapter;
     private ECCClientView      clientView;
     private String             clientName;
-
     private MetricGenerator metricGenerator;
     private MetricGroup     metricGroup;
+    private HashMap<UUID, Boolean> entityMap;
+    private HashMap<UUID,UUID> entityMSmap;
+    
     
  
 
 
     public ECCClientController()
     {
+        // Hash map to store entity UUID and enable status
+        entityMap = new HashMap<UUID, Boolean>();
+        
+        // Hash map to store measurement set UUID and entity UUID
+        entityMSmap = new HashMap<UUID, UUID>();
+        
         // Configure logging system
         Logger.setLoggerImpl( new Log4JImpl() );
         clientLogger = Logger.getLogger( ECCClientController.class );
@@ -69,7 +77,7 @@ public class ECCClientController implements EMIAdapterListener,
         metricGenerator.setName( "Demo metric generator" );
         
         // Only one metric group
-        metricGroup = MetricHelper.createMetricGroup( "Example group", "Group to add new metrics in", metricGenerator );
+        metricGroup = MetricHelper.createMetricGroup( "Example group", "Group to add new metrics in", metricGenerator );      
         
     }
 
@@ -153,8 +161,6 @@ public class ECCClientController implements EMIAdapterListener,
     @Override
     public void onDescribeSupportedPhases( EnumSet<EMPhase> phasesOUT )
     {
-        // We're going to support all phases (although we won't do much in some of them)
-        // ... we MUST support the discovery phase by default, but don't need to include
         phasesOUT.add( EMPhase.eEMSetUpMetricGenerators );
         phasesOUT.add( EMPhase.eEMLiveMonitoring );
         phasesOUT.add( EMPhase.eEMPostMonitoringReport );
@@ -164,7 +170,7 @@ public class ECCClientController implements EMIAdapterListener,
     @Override
     public void onDescribePushPullBehaviours( Boolean[] pushPullOUT )
     {
-        // We're going to support both push and pull
+        // Support for both push and pull
         pushPullOUT[0] = true;
         pushPullOUT[1] = true;
     }
@@ -172,9 +178,11 @@ public class ECCClientController implements EMIAdapterListener,
     @Override
     public void onPopulateMetricGeneratorInfo()
     {
-      // Not going to pre-create metric generators in this demo. We'll let the
-      // user create them on-the-fly instead, see onNewEntityInfoEntered(..)
-    }
+       HashSet<MetricGenerator> mgSet = new HashSet<MetricGenerator>();
+       mgSet.add( metricGenerator );
+       
+       emiAdapter.sendMetricGenerators( mgSet );
+   }
 
     @Override
     public void onDiscoveryTimeOut()
@@ -198,8 +206,7 @@ public class ECCClientController implements EMIAdapterListener,
     @Override
     public void onLiveMonitoringStarted()
     {
-        clientView.addLogMessage( "ECC has started Live Monitoring process" );
-     
+        clientView.addLogMessage( "ECC has started Live Monitoring process" );  
     }
 
     @Override
@@ -207,14 +214,12 @@ public class ECCClientController implements EMIAdapterListener,
     {
         // Allow the human user to manually push some data
         clientView.addLogMessage( "Enabling metric push" );
-        clientView.enablePush( true );
     }
 
     @Override
     public void onPushReportReceived( UUID reportID )
     {   
-        // Got the last push, so allow another manual push
-        clientView.enablePush( true );
+
     }
     
     @Override
@@ -232,34 +237,50 @@ public class ECCClientController implements EMIAdapterListener,
     {
         // Stop manual pushing of data by the human user
         clientView.addLogMessage( "Disabling metric push" );
-        clientView.enablePush( false );
     }
 
     @Override
-    /*
+   /**
     * Note that 'reportOut' is an OUT parameter provided by the adapter
+    * Method to send measurements if the entity is enabled.
+    * Checks hash maps for entity and measurement set details.
     */
     public void onPullMetric( UUID measurementSetID, Report reportOut)
     {
-        // Create an empty instance of our measurement set
-        MeasurementSet targetSet = MetricHelper.getMeasurementSet( metricGenerator, measurementSetID );
+        if ( entityMSmap.containsKey(measurementSetID))
+        {
+            UUID entityID = entityMSmap.get(measurementSetID);
+            
+            if(entityMap.containsKey(entityID))
+            {
+               boolean enable = entityMap.get(entityID);
+               
+               if(enable)
+               {
+                    // Create an empty instance of our measurement set
+                    MeasurementSet targetSet = MetricHelper.getMeasurementSet( metricGenerator, measurementSetID );
 
-        // Create a copy of the measurement set, but with no measurements in
-        Report newReport = MetricHelper.createEmptyMeasurementReport( targetSet );
+                    // Create a copy of the measurement set, but with no measurements in
+                    Report newReport = MetricHelper.createEmptyMeasurementReport( targetSet );
+
+                    // Generate a simulated measurement using a random number between 1 and 20
+                    //These measurements are for demonstration purposes only
+                    //In a real situation these numbers will be defined and generated by the entity
+                    int ran = 1 +(int)(Math.random()*20);
+                    String mes = ""+ ran;
+                    Measurement m = new Measurement( mes );
+
+                    // Add measurement
+                    newReport.getMeasurementSet().addMeasurement( m );
+                    newReport.setNumberOfMeasurements( 1 );
+
+                    // Copy report into OUT parameter
+                    reportOut.copyReport( newReport, true );
+               }
+            }
+        }
         
-        // Generate a simulated measurement using a random number between 1 and 20
-        //These measurements are for demonstration purposes only
-        //In a real situation these numbers will be defined and generated by the entity
-        int ran = 1 +(int)(Math.random()*20);
-        String mes = ""+ ran;
-        Measurement m = new Measurement( mes );
-        
-        // Add measurement
-        newReport.getMeasurementSet().addMeasurement( m );
-        newReport.setNumberOfMeasurements( 1 );
        
-        // Copy report into OUT parameter
-        reportOut.copyReport( newReport, true );
     }
 
     @Override
@@ -327,9 +348,17 @@ public class ECCClientController implements EMIAdapterListener,
 
     
     // ECCNewEntityViewListener events -----------------------------------------
+    
+    /**
+     * Collects new entity and attribute details and creates a new entity object and metric generators
+     * @param entityName
+     * @param attList
+     * @param entityDesc 
+     */
     @Override
     public void onNewEntityInfoEntered(String entityName,ArrayList<String> attList,String entityDesc )
     {
+
         // Create a new entity to be observed (this Java VM)
         Entity entityBeingObserved = new Entity();
         entityBeingObserved.setName( entityName );
@@ -352,22 +381,56 @@ public class ECCClientController implements EMIAdapterListener,
             Attribute entityAttribute = MetricHelper.createAttribute(attName, attDesc, entityBeingObserved);
             
             // ... a single MeasurementSet (representing the measures for the attibute)
-            MetricHelper.createMeasurementSet( entityAttribute, 
-                                               MetricType.fromValue(attMetricType), 
-                                               new Unit(attUnit), 
-                                               metricGroup );
+            MeasurementSet mes =  MetricHelper.createMeasurementSet( entityAttribute, 
+                                           MetricType.fromValue(attMetricType), 
+                                           new Unit(attUnit), 
+                                           metricGroup );
             
-           
-            //Creating a hash set to store metric generators
-            HashSet<MetricGenerator> mgSet = new HashSet<MetricGenerator>();
-            mgSet.add( metricGenerator );
+            //Get the measurement set UUID
+            UUID mesID = mes.getID();
+            
+            //Get the entity UUID
+            UUID entID = entityBeingObserved.getUUID();
+            //Store to measurement set UUID with the entity UUID
+            entityMSmap.put(mesID, entID);
+            
+                //Creating a hash set to store metric generators
+                HashSet<MetricGenerator> mgSet = new HashSet<MetricGenerator>();
+                mgSet.add( metricGenerator );
 
-            //Send metric generators to the EM
-            emiAdapter.sendMetricGenerators( mgSet );       
-            
+                
+                
+                //Send metric generators to the EM
+                emiAdapter.sendMetricGenerators( mgSet );                   
         }
+        clientView.addLogMessage( "Created new entity: " + entityBeingObserved.getName() );
         
-        clientView.addLogMessage( "Created new entity: " + entityBeingObserved.getName() );        
+        //Get the new entity details
+        UUID entityID = entityBeingObserved.getUUID();
+        String eName = entityBeingObserved.getName(); 
+        boolean enable = true;
+        
+        //Update entity map
+        entityMap.put(entityID, enable);
+        
+        //Send entity details to the client view
+        clientView.enableEntity(entityID, eName, enable);        
     }  
+    
+    /**
+     * Updates the entity hash map to change the status of the entity
+     * @param entity
+     * @param status 
+     */
+    @Override
+    public void onEntityStatusChanged(UUID entityID, String eName, boolean status)
+    {
+        //update entity map
+        entityMap.put(entityID, status);
+        
+        //Send entity details to client view
+        clientView.enableEntity(entityID, eName, status);
+    }
+
 }
     

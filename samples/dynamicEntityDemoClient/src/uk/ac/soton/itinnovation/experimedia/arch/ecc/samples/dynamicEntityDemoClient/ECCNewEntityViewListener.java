@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////
 //
-// © University of Southampton IT Innovation Centre, 2013
+// © University of Southampton IT Innovation Centre, 2012
 //
 // Copyright in this software belongs to University of Southampton
 // IT Innovation Centre of Gamma House, Enterprise Road, 
@@ -18,19 +18,15 @@
 // the software.
 //
 //      Created By :            Dion Kitchener
-//      Created Date :          28-June-2013
+//      Created Date :          20-June-2013
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
-
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.dynamicEntityDemoClient;
 
 import java.util.ArrayList;
 
-/**
- *
- * @author dmk
- */
+
 public interface ECCNewEntityViewListener {
     
     /**
@@ -41,6 +37,6 @@ public interface ECCNewEntityViewListener {
     /**
      * Listens for an event to send an entity
      */
-  
+
     
 }

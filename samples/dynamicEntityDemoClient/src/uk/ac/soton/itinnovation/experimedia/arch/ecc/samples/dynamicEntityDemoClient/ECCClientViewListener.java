@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////
 //
-// © University of Southampton IT Innovation Centre, 2013
+// © University of Southampton IT Innovation Centre, 2012
 //
 // Copyright in this software belongs to University of Southampton
 // IT Innovation Centre of Gamma House, Enterprise Road, 
@@ -25,6 +25,8 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.dynamicEntityDemoClient;
 
+import java.util.UUID;
+
 
 
 
@@ -41,4 +43,10 @@ public interface ECCClientViewListener
      * 
      */
     void onClientViewClosed();
+    
+    /**
+     * User has changed the enable status of the entity
+     */
+    void onEntityStatusChanged(UUID entityID, String eName, boolean status);
+ 
 }
