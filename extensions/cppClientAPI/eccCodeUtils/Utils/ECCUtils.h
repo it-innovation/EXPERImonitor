@@ -26,23 +26,25 @@
 #pragma once
 
 // Common includes
-#include <boost/locale.hpp>
+#include <stddef.h>
 
+#include <boost/shared_ptr.hpp>
+#include <boost/locale.hpp>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/string_generator.hpp>
-
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/container/list.hpp>
+#include <boost/container/set.hpp>
+#include <boost/container/map.hpp>
 
-#include <boost/unordered_set.hpp>
-#include <boost/unordered_map.hpp>
-
+#define UTF_CHAR_SET "Latin1"
 
 // Common types
-typedef std::wstring                             String;
-typedef boost::uuids::uuid                       UUID;
-typedef boost::unordered_set<boost::uuids::uuid> UUIDSet;
-typedef boost::posix_time::ptime                 TimeStamp;
-
+typedef char                                      Byte;
+typedef std::wstring                              String;
+typedef boost::uuids::uuid                        UUID;
+typedef boost::container::set<boost::uuids::uuid> UUIDSet;
+typedef boost::posix_time::ptime                  TimeStamp;
 
 // Inline utility functions
 inline String toWide( const std::string& narrow );
@@ -52,6 +54,12 @@ inline std::string toNarrow( const String& wide );
 inline std::string uuidToNarrow( const UUID& id );
 
 inline String uuidToWide( const UUID& id );
+
+inline const Byte* toUnManagedByteArray( const String& wide ); // User must manage memory
+
+inline std::string fromByteArray( const Byte* byteArray );
+
+inline String intToString( const int& i );
 
 inline UUID createRandomUUID();
 

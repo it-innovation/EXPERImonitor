@@ -34,12 +34,7 @@
 namespace ecc_commonDataModel
 {
 
-/**
- * The metric class details the measurement of an attribute (of an entity).
- * 
- * @author Vegard Engen
- */
-class Metric : ModelBase
+class Metric : public ModelBase
 {
 public:
     typedef boost::shared_ptr<Metric> ptr_t;
@@ -79,6 +74,8 @@ public:
      */
     MetricType getMetricType();
 
+    String getMetricTypeLabel();
+
     void setMetricType( const MetricType& type );
 
     /**
@@ -89,9 +86,9 @@ public:
     void setUnit( Unit::ptr_t unit );
 
     // ModelBase -----------------------------------------------------------------
-    virtual void toJSON( String& jsonStrOUT );
+    virtual String toJSON();
 
-    virtual void fromJSON( const String& jsonStr );
+    virtual void fromJSON( const ModelBase::JSONTree& jsonTree );
 
     virtual String toString();
 

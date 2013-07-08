@@ -139,7 +139,7 @@ void MetricGroup::addMeasurementSet( MeasurementSet::ptr_t measurementSet )
     
 void MetricGroup::addMeasurementSets( const MeasurementSet::Set& measurementSets )
 {
-  MeasurementSet::Set::iterator msIt = measurementSets.begin();
+  MeasurementSet::Set::const_iterator msIt = measurementSets.begin();
   while ( msIt != measurementSets.end() )
   {
     MeasurementSet::ptr_t ms = *msIt;
@@ -151,11 +151,14 @@ void MetricGroup::addMeasurementSets( const MeasurementSet::Set& measurementSets
 }
 
 // ModelBase -----------------------------------------------------------------
-void MetricGroup::toJSON( String& jsonStrOUT )
+String MetricGroup::toJSON()
 {
+  String json;
+
+  return json;
 }
 
-void MetricGroup::fromJSON( const String& jsonStr )
+void MetricGroup::fromJSON( const ModelBase::JSONTree& jsonTree )
 {
 }
 

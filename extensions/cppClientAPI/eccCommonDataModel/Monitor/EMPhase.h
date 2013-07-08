@@ -33,12 +33,12 @@ namespace ecc_commonDataModel
 
 enum EMPhase
 {
-    eEMUnknownPhase             = 0,
-    eEMDiscoverMetricGenerators = 1,
-    eEMSetUpMetricGenerators    = 2,
-    eEMLiveMonitoring           = 3,
-    eEMPostMonitoringReport     = 4,
-    eEMTearDown                 = 5,
+    eEMUnknownPhase                  = 0,
+    eEMDiscoverMetricGeneratorsPhase = 1,
+    eEMSetUpMetricGeneratorsPhase    = 2,
+    eEMLiveMonitoringPhase           = 3,
+    eEMPostMonitoringReportPhase     = 4,
+    eEMTearDownPhase                 = 5,
     
     // Always at the end of the protocol
     eEMProtocolComplete         = 6

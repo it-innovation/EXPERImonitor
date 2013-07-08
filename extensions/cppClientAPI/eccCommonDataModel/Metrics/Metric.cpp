@@ -78,6 +78,21 @@ MetricType Metric::getMetricType()
   return metricType;
 }
 
+String Metric::getMetricTypeLabel()
+{
+  String result = L"unknown";
+
+  switch ( metricType )
+  {
+  case NOMINAL  : result = L"NOMINAL";  break;
+  case ORDINAL  : result = L"ORDINAL";  break;
+  case INTERVAL : result = L"INTERVAL"; break;
+  case RATIO    : result = L"RATIO";    break;
+  }
+
+  return result;
+}
+
 void Metric::setMetricType( const MetricType& type )
 {
   metricType = type;
@@ -94,11 +109,14 @@ void Metric::setUnit( Unit::ptr_t unit )
 }
 
 // ModelBase -----------------------------------------------------------------
-void Metric::toJSON( String& jsonStrOUT )
+String Metric::toJSON()
 {
+  String json;
+
+  return json;
 }
 
-void Metric::fromJSON( const String& jsonStr )
+void Metric::fromJSON( const ModelBase::JSONTree& jsonTree )
 {
 }
 

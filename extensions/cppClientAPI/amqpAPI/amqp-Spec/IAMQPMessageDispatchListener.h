@@ -47,7 +47,7 @@ namespace ecc_amqpAPI_spec
         * @param queueName - Name of the queue in which the data travelled
         * @param data      - The data itself
         */
-      virtual void onSimpleMessageDispatched( std::wstring queueName, byte* data ) =0;
+      virtual void onSimpleMessageDispatched( const String& queueName, const Byte* data ) =0;
     };
 
 } // namespace

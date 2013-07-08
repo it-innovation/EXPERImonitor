@@ -25,42 +25,42 @@
 
 #pragma once
 
-#include <boost/shared_ptr.hpp>
-#include <boost/uuid/uuid.hpp>
+#include "ECCUtils.h"
 
 
-namespace ecc_em_spec_faces_listeners
+
+
+namespace ecc_emClient_spec
 {
-    
+/**
+  * IEMSetup_UserListener is a user client listener that listens to instruction
+  * from the EM regarding setting up their metric generators.
+  * 
+  * @author sgc
+  */
+class IEMSetup_UserListener
+{
+public:
+
+    typedef boost::shared_ptr<IEMSetup_UserListener> ptr_t;
 
     /**
-     * IEMSetup_UserListener is a user client listener that listens to instruction
-     * from the EM regarding setting up their metric generators.
-     * 
-     * @author sgc
-     */
-    class IEMSetup_UserListener
-    {
-        typedef boost::shared_ptr<IEMSetup_UserListener> ptr_t;
-
-
-        /**
-         * Notification from the EM that the user client should attempt to set-up
-         * the MetricGenerator identified by the generator ID
-         * 
-         * @param senderID - ID of the EM
-         * @param genID    - ID of the MetricGenerator that requires setting up
-         */
-        virtual void onSetupMetricGenerator( boost::uuids::uuid senderID, boost::uuids::uuid genID ) =0;
+      * Notification from the EM that the user client should attempt to set-up
+      * the MetricGenerator identified by the generator ID
+      * 
+      * @param senderID - ID of the EM
+      * @param genID    - ID of the MetricGenerator that requires setting up
+      */
+    virtual void onSetupMetricGenerator( const UUID& senderID, const UUID& genID ) =0;
   
-        /**
-         * Notifies the user client that time has run out to set-up the MetricGenerator
-         * set up by
-         * 
-         * @param senderID - ID of the EM
-         * @param genID    - ID of the MetricGenerator that required setting up
-         */
-        virtual void onSetupTimeOut( boost::uuids::uuid senderID, boost::uuids::uuid genID ) =0;
-    };
+    /**
+      * Notifies the user client that time has run out to set-up the MetricGenerator
+      * set up by
+      * 
+      * @param senderID - ID of the EM
+      * @param genID    - ID of the MetricGenerator that required setting up
+      */
+    virtual void onSetupTimeOut( const UUID& senderID, const UUID& genID ) =0;
+};
 
 } // namespace

@@ -108,11 +108,14 @@ void Attribute::setDescription( const String& description )
 
 
 // ModelBase -----------------------------------------------------------------
-void Attribute::toJSON( String& jsonStrOUT )
+String Attribute::toJSON()
 {
+  String json;
+
+  return json;
 }
 
-void Attribute::fromJSON( const String& jsonStr )
+void Attribute::fromJSON( const ModelBase::JSONTree& jsonTree )
 {
 }
 

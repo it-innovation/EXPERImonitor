@@ -55,15 +55,15 @@ namespace ecc_commonDataModel
  * 
  * @author Simon Crowle
  */
-class Entity : ModelBase
+class Entity : public ModelBase
 {
 public:
 
   typedef boost::shared_ptr<Entity> ptr_t;
   
-  typedef boost::unordered_set<Entity::ptr_t> Set;
+  typedef boost::container::set<Entity::ptr_t> Set;
   
-  typedef boost::unordered_map<UUID,Entity::ptr_t> Map;
+  typedef boost::container::map<UUID,Entity::ptr_t> Map;
 
 
   /**
@@ -180,9 +180,9 @@ public:
   void addAttributes( const Attribute::Set& attributes );
 
   // ModelBase -----------------------------------------------------------------
-  virtual void toJSON( String& jsonStrOUT );
+  virtual String toJSON();
 
-  virtual void fromJSON( const String& jsonStr );
+  virtual void fromJSON( const ModelBase::JSONTree& jsonTree );
 
   virtual String toString();
 

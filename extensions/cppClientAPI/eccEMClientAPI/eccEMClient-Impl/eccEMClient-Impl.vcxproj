@@ -50,7 +50,8 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)\..\eccEMClient-Spec\;$(BOOST_DIR);$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\eccCommonDataModel\Monitor;$(ProjectDir)\..\..\eccCommonDataModel\Metrics;$(ProjectDir)\..\..\eccCommonDataModel\Experiment;$(ProjectDir)\..\..\eccCommonDataModel\Base;$(ProjectDir)\..\..\amqpAPI\amqp-Impl\faces;$(ProjectDir)\..\..\amqpAPI\amqp-Impl\amqp;$(ProjectDir)\..\..\amqpAPI\rabbit-c-wrapper\src;$(ProjectDir)\..\..\amqpAPI\amqp-Spec;$(ProjectDir)\..\..\eccCodeUtils\Utils;$(ProjectDir)\..\eccEMClient-Spec\listeners;$(ProjectDir)\..\eccEMClient-Spec\;$(ProjectDir)\impl;$(ProjectDir);$(BOOST_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -68,7 +69,8 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)\..\eccEMClient-Spec\;$(BOOST_DIR);$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\eccCommonDataModel\Monitor;$(ProjectDir)\..\..\eccCommonDataModel\Metrics;$(ProjectDir)\..\..\eccCommonDataModel\Experiment;$(ProjectDir)\..\..\eccCommonDataModel\Base;$(ProjectDir)\..\..\amqpAPI\amqp-Impl\faces;$(ProjectDir)\..\..\amqpAPI\amqp-Impl\amqp;$(ProjectDir)\..\..\amqpAPI\rabbit-c-wrapper\src;$(ProjectDir)\..\..\amqpAPI\amqp-Spec;$(ProjectDir)\..\..\eccCodeUtils\Utils;$(ProjectDir)\..\eccEMClient-Spec\listeners;$(ProjectDir)\..\eccEMClient-Spec\;$(ProjectDir)\impl;$(ProjectDir);$(BOOST_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -81,21 +83,37 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\eccEMClient-Spec\IEMDiscovery.h" />
-    <ClInclude Include="..\..\eccEMClient-Spec\IEMLiveMonitor.h" />
-    <ClInclude Include="..\..\eccEMClient-Spec\IEMMetricGenSetup.h" />
-    <ClInclude Include="..\..\eccEMClient-Spec\IEMMonitorEntryPoint.h" />
-    <ClInclude Include="..\..\eccEMClient-Spec\IEMPostReport.h" />
-    <ClInclude Include="..\..\eccEMClient-Spec\IEMTearDown.h" />
-    <ClInclude Include="..\..\eccEMClient-Spec\listeners\IEMDiscovery_UserListener.h" />
-    <ClInclude Include="..\..\eccEMClient-Spec\listeners\IEMLiveMonitor_UserListener.h" />
-    <ClInclude Include="..\..\eccEMClient-Spec\listeners\IEMPostReport_UserListener.h" />
-    <ClInclude Include="..\..\eccEMClient-Spec\listeners\IEMSetup_UserListener.h" />
-    <ClInclude Include="..\..\eccEMClient-Spec\listeners\IEMTearDown_UserListener.h" />
+    <ClInclude Include="..\eccEMClient-Spec\IEMDiscovery.h" />
+    <ClInclude Include="..\eccEMClient-Spec\IEMLiveMonitor.h" />
+    <ClInclude Include="..\eccEMClient-Spec\IEMMetricGenSetup.h" />
+    <ClInclude Include="..\eccEMClient-Spec\IEMMonitorEntryPoint.h" />
+    <ClInclude Include="..\eccEMClient-Spec\IEMPostReport.h" />
+    <ClInclude Include="..\eccEMClient-Spec\IEMTearDown.h" />
+    <ClInclude Include="..\eccEMClient-Spec\listeners\IEMDiscovery_UserListener.h" />
+    <ClInclude Include="..\eccEMClient-Spec\listeners\IEMLiveMonitor_UserListener.h" />
+    <ClInclude Include="..\eccEMClient-Spec\listeners\IEMPostReport_UserListener.h" />
+    <ClInclude Include="..\eccEMClient-Spec\listeners\IEMSetup_UserListener.h" />
+    <ClInclude Include="..\eccEMClient-Spec\listeners\IEMTearDown_UserListener.h" />
+    <ClInclude Include="EMInterfaceFactory.h" />
+    <ClInclude Include="impl\EMBaseInterface.h" />
+    <ClInclude Include="impl\EMDiscovery.h" />
+    <ClInclude Include="impl\EMLiveMonitor.h" />
+    <ClInclude Include="impl\EMMetricGenSetup.h" />
+    <ClInclude Include="impl\EMMonitorEntryPoint.h" />
+    <ClInclude Include="impl\EMPostReport.h" />
+    <ClInclude Include="impl\EMTearDown.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="EMInterfaceFactory.cpp" />
+    <ClCompile Include="impl\EMBaseInterface.cpp" />
+    <ClCompile Include="impl\EMDiscovery.cpp" />
+    <ClCompile Include="impl\EMLiveMonitor.cpp" />
+    <ClCompile Include="impl\EMMetricGenSetup.cpp" />
+    <ClCompile Include="impl\EMMonitorEntryPoint.cpp" />
+    <ClCompile Include="impl\EMPostReport.cpp" />
+    <ClCompile Include="impl\EMTearDown.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>

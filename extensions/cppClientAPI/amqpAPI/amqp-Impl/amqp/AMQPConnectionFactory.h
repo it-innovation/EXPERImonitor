@@ -47,11 +47,11 @@ namespace ecc_amqpAPI_impl
 
     void closeDownConnection();
 
-    bool setAMQPHostIPAddress( std::wstring addr );
+    bool setAMQPHostIPAddress( const String& addr );
 
-    bool setAMQPHostPort( int port );
+    bool setAMQPHostPort( const int port );
 
-    std::wstring getLocalIP();
+    String getLocalIP();
 
     void connectToAMQPHost();
 
@@ -71,11 +71,11 @@ namespace ecc_amqpAPI_impl
 
     AmqpClient::Channel::ptr_t createChannelImpl();
 
-    std::wstring amqpHostIP;
-    int          amqpPortNumber;
-    std::wstring userName;
-    std::wstring userPass;
-    bool         connectionEstablished;
+    String amqpHostIP;
+    int    amqpPortNumber;
+    String userName;
+    String userPass;
+    bool   connectionEstablished;
 
     AMQPBasicSubscriptionService amqpSubscriptionService;
 

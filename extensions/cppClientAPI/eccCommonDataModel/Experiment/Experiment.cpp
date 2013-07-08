@@ -203,15 +203,26 @@ void Experiment::addMetricGenerator( MetricGenerator::ptr_t metricGenerator )
   */
 void Experiment::addMetricGenerators( const MetricGenerator::Set& generators )
 {
-  metricGenerators.insert( generators.begin(), generators.end() );
+  MetricGenerator::Set::const_iterator gIt = generators.begin();
+  while ( gIt != generators.end() )
+  {
+    MetricGenerator::ptr_t gen = *gIt;
+
+    if ( gen ) metricGenerators.insert( gen );
+
+    ++gIt;
+  }
 }
 
 // ModelBase -----------------------------------------------------------------
-void Experiment::toJSON( String& jsonStrOUT )
+String Experiment::toJSON()
 {
+  String json;
+
+  return json;
 }
 
-void Experiment::fromJSON( const String& jsonStr )
+void Experiment::fromJSON( const ModelBase::JSONTree& jsonTree )
 {
 }
 

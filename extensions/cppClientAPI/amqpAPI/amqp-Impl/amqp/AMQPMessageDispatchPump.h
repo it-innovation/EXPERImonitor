@@ -39,14 +39,14 @@
 namespace ecc_amqpAPI_impl
 {
 
-  class AMQPMessageDispatchPump : ecc_amqpAPI_spec::IAMQPMessageDispatchPump
+  class AMQPMessageDispatchPump : public ecc_amqpAPI_spec::IAMQPMessageDispatchPump
   {
   public:
 
     typedef boost::shared_ptr<AMQPMessageDispatchPump> ptr_t;
     
-    AMQPMessageDispatchPump( std::wstring pName, 
-                             ecc_amqpAPI_spec::ePumpPriority priority );
+    AMQPMessageDispatchPump( const String& pName, 
+                             const ecc_amqpAPI_spec::ePumpPriority& priority );
 
     virtual ~AMQPMessageDispatchPump();
     

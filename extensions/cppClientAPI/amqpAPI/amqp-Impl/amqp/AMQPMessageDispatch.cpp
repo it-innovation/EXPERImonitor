@@ -47,7 +47,7 @@ namespace ecc_amqpAPI_impl
     dispatchPump = NULL;
   }
 
-  bool AMQPMessageDispatch::addMessage( wstring queueName, byte* data )
+  bool AMQPMessageDispatch::addMessage( const String& queueName, const Byte* data )
   {
     bool addResult = false;
 

@@ -141,11 +141,14 @@ void Measurement::setSynchronised( const bool& synchronised )
 }
 
 // ModelBase -----------------------------------------------------------------
-void Measurement::toJSON( String& jsonStrOUT )
+String Measurement::toJSON()
 {
+  String json;
+
+  return json;
 }
 
-void Measurement::fromJSON( const String& jsonStr )
+void Measurement::fromJSON( const ModelBase::JSONTree& jsonTree )
 {
 }
 

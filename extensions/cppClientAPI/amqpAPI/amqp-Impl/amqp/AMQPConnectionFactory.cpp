@@ -52,7 +52,7 @@ namespace ecc_amqpAPI_impl
   {
   }
 
-  bool AMQPConnectionFactory::setAMQPHostIPAddress( wstring addr )
+  bool AMQPConnectionFactory::setAMQPHostIPAddress( const String& addr )
   {
     bool ipSuccess = false;
 
@@ -77,7 +77,7 @@ namespace ecc_amqpAPI_impl
     connectionEstablished = false;
   }
 
-  bool AMQPConnectionFactory::setAMQPHostPort( int port )
+  bool AMQPConnectionFactory::setAMQPHostPort( const int port )
   {
     if ( port < 1 ) return false;
 

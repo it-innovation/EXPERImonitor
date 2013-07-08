@@ -38,7 +38,7 @@
 namespace ecc_amqpAPI_impl
 {
 
-  class AMQPMessageDispatch : ecc_amqpAPI_spec::IAMQPMessageDispatch
+  class AMQPMessageDispatch : public ecc_amqpAPI_spec::IAMQPMessageDispatch
   {
   public:
 
@@ -48,7 +48,7 @@ namespace ecc_amqpAPI_impl
 
     virtual ~AMQPMessageDispatch();
 
-    bool addMessage( std::wstring queueName, byte* data );
+    bool addMessage( const String& queueName, const Byte* data );
 
     bool hasOutstandingDispatches();
 
@@ -68,11 +68,11 @@ namespace ecc_amqpAPI_impl
     public:
       QueueMsg() { data = NULL; }
 
-      QueueMsg( std::wstring qName, byte* bData )
+      QueueMsg( const String& qName, const Byte* bData )
       { queueName = qName; data = bData; }
       
-      std::wstring queueName; 
-      byte*        data;
+      String queueName; 
+      const Byte*  data;
     };
 
     //readonly IECCLogger dispatchLogger = Logger.getLogger( typeof(AMQPMessageDispatch) ); 

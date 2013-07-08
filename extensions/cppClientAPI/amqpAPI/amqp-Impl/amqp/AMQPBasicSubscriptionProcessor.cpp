@@ -27,9 +27,9 @@
 
 #include "AMQPBasicSubscriptionProcessor.h"
 
-#include <amqp.h>
+#include "ECCUtils.h"
 
-#include <boost/uuid/uuid_generators.hpp>
+#include <amqp.h>
 
 using namespace AmqpClient;
 
@@ -45,10 +45,10 @@ namespace ecc_amqpAPI_impl
 {
   
   AMQPBasicSubscriptionProcessor::AMQPBasicSubscriptionProcessor( AMQPBasicSubscriptionService::ptr_t service,
-                                                                  Channel::ptr_t channel,
-                                                                  wstring qName,
-                                                                  AMQPMessageDispatch::ptr_t dispatch )
-  : processorID(boost::uuids::random_generator()())
+                                                                  Channel::ptr_t                      channel,
+                                                                  const String&                       qName,
+                                                                  AMQPMessageDispatch::ptr_t          dispatch )
+  : processorID( createRandomUUID() )
   {
     subscriptionService = service;
     amqpChannelImpl     = channel;
@@ -79,7 +79,7 @@ namespace ecc_amqpAPI_impl
         amqp_bytes_t payload = msg->getAmqpBody();
 
         if ( payload.bytes != NULL )
-          messageDispatch->addMessage( queueName, (byte*) payload.bytes );
+          messageDispatch->addMessage( queueName, (const Byte*) payload.bytes );
       }
       
       amqpChannelImpl->BasicAck( envolope );

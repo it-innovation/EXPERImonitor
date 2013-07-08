@@ -39,153 +39,153 @@ using namespace std;
 namespace ecc_amqpAPI_impl
 {
  
-  void AbstractAMQPInterface::shutdown()
+void AbstractAMQPInterface::shutdown()
+{
+  if ( amqpChannel )
   {
-    if ( amqpChannel )
+    // Clear up queue, if it exists
+    if ( !subListenQueue.empty() )
     {
-      // Clear up queue, if it exists
-      if ( !subListenQueue.empty() )
-      {
-        AmqpClient::Channel::ptr_t channelImpl = amqpChannel->getChannelImpl();
-        if ( channelImpl )
-        {
-          channelImpl->DeleteQueue( toNarrow(subListenQueue) );
-          
-          // Deregsiter from subscription service
-          if ( subscriptService && subProcessor ) 
-            subscriptService->unsubscribe( subProcessor );
-            
-          subProcessor     = NULL;
-          subscriptService = NULL;
-          msgDispatch      = NULL;
-        }
-      }
-
-      // Tidy up (channel is managed elsewhere)
-      interfaceName.clear();
-      providerExchangeName.clear();
-      userExchangeName.clear();
-      providerQueueName.clear();
-      userQueueName.clear();
-      providerRoutingKey.clear();
-      userRoutingKey.clear();
-      subListenQueue.clear();
-      interfaceReady = false;
-    }
-  }
-  
-  bool AbstractAMQPInterface::sendBasicMessage( std::wstring message )
-  {
-    // Safety first
-    if ( !interfaceReady   || 
-          message.empty()  ||
-          (providerRoutingKey.empty() && userRoutingKey.empty()) ) 
-      return false;
-
-    bool result = false;
-
-    {
-      lock_guard<mutex> lock( sendMessageMutex );
-
-      // Make sure producer sends to user (or other way around) - targets are reversed
-      wstring& targetExchange = actingAsProvider ? userExchangeName : providerExchangeName;
-      wstring& targetRouteKey = actingAsProvider ? userRoutingKey   : providerRoutingKey;
-          
-
       AmqpClient::Channel::ptr_t channelImpl = amqpChannel->getChannelImpl();
       if ( channelImpl )
       {
-        BasicMessage::ptr_t bMsg = BasicMessage::Create( toNarrow(message) );
-
-        channelImpl->BasicPublish( toNarrow(targetExchange),
-                                   toNarrow(targetRouteKey),
-                                   bMsg,
-                                   false,
-                                   false );
-        result = true;
+        channelImpl->DeleteQueue( toNarrow(subListenQueue) );
+          
+        // Deregsiter from subscription service
+        if ( subscriptService && subProcessor ) 
+          subscriptService->unsubscribe( subProcessor );
+            
+        subProcessor     = NULL;
+        subscriptService = NULL;
+        msgDispatch      = NULL;
       }
+    }
+
+    // Tidy up (channel is managed elsewhere)
+    interfaceName.clear();
+    providerExchangeName.clear();
+    userExchangeName.clear();
+    providerQueueName.clear();
+    userQueueName.clear();
+    providerRoutingKey.clear();
+    userRoutingKey.clear();
+    subListenQueue.clear();
+    interfaceReady = false;
   }
-
-    return result;
-  }
-
-  void AbstractAMQPInterface::setMessageDispatch( AMQPMessageDispatch::ptr_t dispatch )
-  { msgDispatch = dispatch; }
-
-  // Protected methods ---------------------------------------------------------
-  AbstractAMQPInterface::AbstractAMQPInterface( AMQPBasicSubscriptionService::ptr_t sService,
-                                                AMQPBasicChannel::ptr_t             channel )
-  {
-    subscriptService = sService;
-    interfaceReady   = false;
-    amqpChannel      = channel;
-  }
-
-  AbstractAMQPInterface::~AbstractAMQPInterface()
-  {
-  }
- 
-  void AbstractAMQPInterface::createInterfaceExchangeNames( std::wstring iName )
-  {
-    interfaceName        = iName;
-    providerExchangeName = iName + L" [P]";
-    userExchangeName     = iName + L" [U]";
-  }
-
-  void AbstractAMQPInterface::createQueue()
-  {
-    assignBindings();
-
-    wstring targetExchange = actingAsProvider ? providerExchangeName : userExchangeName;
-    wstring targetRouteKey = actingAsProvider ? providerRoutingKey   : userRoutingKey;
-
-    AmqpClient::Channel::ptr_t channelImpl = amqpChannel->getChannelImpl();
-    if ( channelImpl )
-      try
-      {
-        channelImpl->DeclareQueue( toNarrow( subListenQueue ),
-                                   false,  // passive
-                                   false,  // durable
-                                   false,  // exclusive
-                                   true ); // auto-delete
-
-        channelImpl->BindQueue( toNarrow( subListenQueue ),
-                                toNarrow( targetExchange ),
-                                toNarrow( targetRouteKey ) );
-                 
-      }
-      catch ( AmqpException& ae )
-      {
-        // amqpIntLogger.error( "Could not create AMQP queue: " + ae.what );
-      }
-  }
+}
   
-  void AbstractAMQPInterface::createSubscriptionComponent()
+bool AbstractAMQPInterface::sendBasicMessage( const String& message )
+{
+  // Safety first
+  if ( !interfaceReady   || 
+        message.empty()  ||
+        (providerRoutingKey.empty() && userRoutingKey.empty()) ) 
+    return false;
+
+  bool result = false;
+
   {
+    lock_guard<mutex> lock( sendMessageMutex );
+
+    // Make sure producer sends to user (or other way around) - targets are reversed
+    wstring& targetExchange = actingAsProvider ? userExchangeName : providerExchangeName;
+    wstring& targetRouteKey = actingAsProvider ? userRoutingKey   : providerRoutingKey;
+          
+
     AmqpClient::Channel::ptr_t channelImpl = amqpChannel->getChannelImpl();
     if ( channelImpl )
     {
-      subProcessor = AMQPBasicSubscriptionProcessor::ptr_t(
-          new AMQPBasicSubscriptionProcessor( subscriptService,
-                                              channelImpl,
-                                              subListenQueue,
-                                              msgDispatch ) );
-    }
-    //else amqpIntLogger.error( "Could not create subscription component: AMQP channel is NULL" );
-  }
+      BasicMessage::ptr_t bMsg = BasicMessage::Create( toNarrow(message) );
 
-  void AbstractAMQPInterface::assignBindings()
+      channelImpl->BasicPublish( toNarrow(targetExchange),
+                                  toNarrow(targetRouteKey),
+                                  bMsg,
+                                  false,
+                                  false );
+      result = true;
+    }
+}
+
+  return result;
+}
+
+void AbstractAMQPInterface::setMessageDispatch( AMQPMessageDispatch::ptr_t dispatch )
+{ msgDispatch = dispatch; }
+
+// Protected methods ---------------------------------------------------------
+AbstractAMQPInterface::AbstractAMQPInterface( AMQPBasicSubscriptionService::ptr_t sService,
+                                              AMQPBasicChannel::ptr_t             channel )
+{
+  subscriptService = sService;
+  interfaceReady   = false;
+  amqpChannel      = channel;
+}
+
+AbstractAMQPInterface::~AbstractAMQPInterface()
+{
+}
+ 
+void AbstractAMQPInterface::createInterfaceExchangeNames( const String& iName )
+{
+  interfaceName        = iName;
+  providerExchangeName = iName + L" [P]";
+  userExchangeName     = iName + L" [U]";
+}
+
+void AbstractAMQPInterface::createQueue()
+{
+  assignBindings();
+
+  wstring targetExchange = actingAsProvider ? providerExchangeName : userExchangeName;
+  wstring targetRouteKey = actingAsProvider ? providerRoutingKey   : userRoutingKey;
+
+  AmqpClient::Channel::ptr_t channelImpl = amqpChannel->getChannelImpl();
+  if ( channelImpl )
+    try
+    {
+      channelImpl->DeclareQueue( toNarrow( subListenQueue ),
+                                  false,  // passive
+                                  false,  // durable
+                                  false,  // exclusive
+                                  true ); // auto-delete
+
+      channelImpl->BindQueue( toNarrow( subListenQueue ),
+                              toNarrow( targetExchange ),
+                              toNarrow( targetRouteKey ) );
+                 
+    }
+    catch ( AmqpException& ae )
+    {
+      // amqpIntLogger.error( "Could not create AMQP queue: " + ae.what );
+    }
+}
+  
+void AbstractAMQPInterface::createSubscriptionComponent()
+{
+  AmqpClient::Channel::ptr_t channelImpl = amqpChannel->getChannelImpl();
+  if ( channelImpl )
   {
-    wstring puCompositeQueue = providerQueueName + L"/" + userQueueName;
-    
-    if ( actingAsProvider )
-      subListenQueue = puCompositeQueue;
-    else
-      subListenQueue = userQueueName;
-    
-    providerRoutingKey = L"RK_" + puCompositeQueue;
-    userRoutingKey     = L"RK_" + userQueueName;
+    subProcessor = AMQPBasicSubscriptionProcessor::ptr_t(
+        new AMQPBasicSubscriptionProcessor( subscriptService,
+                                            channelImpl,
+                                            subListenQueue,
+                                            msgDispatch ) );
   }
+  //else amqpIntLogger.error( "Could not create subscription component: AMQP channel is NULL" );
+}
+
+void AbstractAMQPInterface::assignBindings()
+{
+  wstring puCompositeQueue = providerQueueName + L"/" + userQueueName;
+    
+  if ( actingAsProvider )
+    subListenQueue = puCompositeQueue;
+  else
+    subListenQueue = userQueueName;
+    
+  providerRoutingKey = L"RK_" + puCompositeQueue;
+  userRoutingKey     = L"RK_" + userQueueName;
+}
 
 
 } // namespace

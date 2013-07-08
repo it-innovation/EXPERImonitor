@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////
 //
-// © University of Southampton IT Innovation Centre, 2012
+// © University of Southampton IT Innovation Centre, 2013
 //
 // Copyright in this software belongs to University of Southampton
 // IT Innovation Centre of Gamma House, Enterprise Road, 
@@ -18,18 +18,25 @@
 // the software.
 //
 //      Created By :            Simon Crowle
-//      Created Date :          20-June-2013
+//      Created Date :          04-Jul-2013
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
 #pragma once
 
-namespace ecc_em_spec_faces
+#include "IEMSetup_UserListener.h"
+
+
+
+
+namespace ecc_emClient_spec
 {
 
     class IEMMetricGenSetup
     {
+    public:
+
         typedef boost::shared_ptr<IEMMetricGenSetup> ptr_t;
 
 
@@ -53,7 +60,7 @@ namespace ecc_em_spec_faces
          * @param genID   - ID of the MetricGenerator
          * @param success - Success or failure of the set-up attempt
          */
-        virtual void notifyMetricGeneratorSetupResult(boost::uuids::uuid genID, bool success) =0;
+        virtual void notifyMetricGeneratorSetupResult( const UUID& genID, const bool success) =0;
     };
 
 } // namespace

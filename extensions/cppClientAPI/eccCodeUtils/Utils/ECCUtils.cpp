@@ -31,6 +31,8 @@
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
+#include <string>
+
 using namespace boost::uuids;
 using namespace boost::locale::conv;
 using namespace std;
@@ -38,10 +40,10 @@ using namespace std;
 // Inline utility functions
 
 String toWide( const std::string& narrow )
-{ return to_utf<wchar_t>( narrow, "Latin1" ); }
+{ return to_utf<wchar_t>( narrow, UTF_CHAR_SET ); }
 
-std::string toNarrow( const std::wstring& wide )
-{ return from_utf( wide, "Latin1" ); }
+std::string toNarrow( const String& wide )
+{ return from_utf( wide, UTF_CHAR_SET ); }
 
 string uuidToNarrow( const UUID& id )
 {
@@ -57,6 +59,35 @@ String uuidToWide( const UUID& id )
   ws << id;
 
   return ws.str();
+}
+
+const Byte* toUnManagedByteArray( const String& wide )
+{
+  const Byte* byteArray = NULL;
+
+  if ( wide.size() > 0 )
+  {
+    const string narrow = toNarrow( wide );
+
+    byteArray = narrow.c_str();
+  }
+
+  return byteArray;
+}
+
+std::string fromByteArray( const Byte* byteArray )
+{
+  return to_utf<char>( byteArray, UTF_CHAR_SET );
+}
+
+String intToString( const int& i )
+{
+  String result;
+
+  wchar_t sValue[64];
+  _itow( i, sValue, 10 );
+
+  return String( sValue );
 }
 
 static boost::uuids::random_generator uuidGenerator;

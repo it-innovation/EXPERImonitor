@@ -135,7 +135,7 @@ void MetricGenerator::addMetricGroup( MetricGroup::ptr_t metricGroup )
     
 void MetricGenerator::addMetricGroups( const MetricGroup::Set& metricGroups )
 {
-  MetricGroup::Set::iterator mgIt = metricGroups.begin();
+  MetricGroup::Set::const_iterator mgIt = metricGroups.begin();
   while ( mgIt != metricGroups.end() )
   {
     MetricGroup::ptr_t mg = *mgIt;
@@ -144,8 +144,6 @@ void MetricGenerator::addMetricGroups( const MetricGroup::Set& metricGroups )
 
     ++mgIt;
   }
-
-  mgMetricGroups.insert( metricGroups.begin(), metricGroups.end() );
 }
     
 void MetricGenerator::addEntity( Entity::ptr_t entity )
@@ -155,7 +153,7 @@ void MetricGenerator::addEntity( Entity::ptr_t entity )
 
 void MetricGenerator::addEntities( const Entity::Set& entities )
 {
-  Entity::Set::iterator entIt = entities.begin();
+  Entity::Set::const_iterator entIt = entities.begin();
   while ( entIt != entities.end() )
   {
     Entity::ptr_t entity = *entIt;
@@ -164,16 +162,17 @@ void MetricGenerator::addEntities( const Entity::Set& entities )
 
     ++entIt;
   }
-
-  mgEntities.insert( entities.begin(), entities.end() );
 }
 
 // ModelBase -----------------------------------------------------------------
-void MetricGenerator::toJSON( String& jsonStrOUT )
+String MetricGenerator::toJSON()
 {
+  String json;
+
+  return json;
 }
 
-void MetricGenerator::fromJSON( const String& jsonStr )
+void MetricGenerator::fromJSON( const ModelBase::JSONTree& jsonTree )
 {
 }
 

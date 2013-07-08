@@ -86,7 +86,7 @@ EMPhase EMClient::getCurrentPhaseActivity()
 bool EMClient::supportsPhase( const EMPhase& phase )
 {
   // All clients MUST support discovery phase
-  if ( phase == eEMDiscoverMetricGenerators ) return true;
+  if ( phase == eEMDiscoverMetricGeneratorsPhase ) return true;
 
   if ( supportedPhases.empty() ) return false;
 

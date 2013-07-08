@@ -27,9 +27,11 @@
 
 #include "AMQPHalfInterfaceBase.h"
 
-
 using namespace boost;
 using namespace std;
+
+
+
 
 namespace ecc_amqpAPI_impl
 {
@@ -44,9 +46,9 @@ namespace ecc_amqpAPI_impl
   {
   }
 
-  bool AMQPHalfInterfaceBase::initialise( std::wstring iName, 
-                                          uuids::uuid targetID, 
-                                          bool asProvider )
+  bool AMQPHalfInterfaceBase::initialise( const String& iName, 
+                                          const UUID&   targetID, 
+                                          bool          asProvider )
   {
     interfaceReady = false;
       
@@ -73,7 +75,7 @@ namespace ecc_amqpAPI_impl
     return interfaceReady;
   }
   
-  void AMQPHalfInterfaceBase::createInterfaceExchangeNames( wstring iName )
+  void AMQPHalfInterfaceBase::createInterfaceExchangeNames( const String& iName )
   {
     interfaceName        = iName;
     providerExchangeName = iName + L" [P]";
@@ -91,7 +93,7 @@ namespace ecc_amqpAPI_impl
     userRoutingKey     = uniRoute;
   }
 
-  bool AMQPHalfInterfaceBase::setInitParams( std::wstring iName, uuids::uuid targetID, bool asProvider )
+  bool AMQPHalfInterfaceBase::setInitParams( const String& iName, const UUID& targetID, const bool asProvider )
   {
     // Safety first
     if ( iName.empty()     ||

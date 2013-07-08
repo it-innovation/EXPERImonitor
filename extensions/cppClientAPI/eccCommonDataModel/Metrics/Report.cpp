@@ -174,11 +174,14 @@ void Report::copyReport( Report::ptr_t repIn, bool copyMeasurements )
 }
 
 // ModelBase -----------------------------------------------------------------
-void Report::toJSON( String& jsonStrOUT )
+String Report::toJSON()
 {
+  String json;
+
+  return json;
 }
 
-void Report::fromJSON( const String& jsonStr )
+void Report::fromJSON( const ModelBase::JSONTree& jsonTree )
 {
 }
 

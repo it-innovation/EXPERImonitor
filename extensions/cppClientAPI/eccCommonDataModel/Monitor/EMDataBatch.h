@@ -47,9 +47,9 @@ namespace ecc_commonDataModel
 
       typedef boost::shared_ptr<EMDataBatch> ptr_t;
 
-      typedef boost::unordered_set<EMDataBatch::ptr_t> Set;
+      typedef boost::container::set<EMDataBatch::ptr_t> Set;
 
-      typedef boost::unordered_map<UUID,EMDataBatch::ptr_t> Map;
+      typedef boost::container::map<UUID,EMDataBatch::ptr_t> Map;
 
       EMDataBatch();
 

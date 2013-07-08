@@ -33,29 +33,31 @@
 namespace ecc_amqpAPI_impl
 {
 
-  class AMQPHalfInterfaceBase : AbstractAMQPInterface
-  {
-  public:
+class AMQPHalfInterfaceBase : public AbstractAMQPInterface
+{
+public:
 
-    typedef boost::shared_ptr<AMQPHalfInterfaceBase> ptr_t;
+  typedef boost::shared_ptr<AMQPHalfInterfaceBase> ptr_t;
   
-    AMQPHalfInterfaceBase( AMQPBasicSubscriptionService::ptr_t sService,
-                           AMQPBasicChannel::ptr_t             channel );
+  AMQPHalfInterfaceBase( AMQPBasicSubscriptionService::ptr_t sService,
+                         AMQPBasicChannel::ptr_t             channel );
 
-    virtual ~AMQPHalfInterfaceBase();
+  virtual ~AMQPHalfInterfaceBase();
 
-    bool initialise( std::wstring iName, boost::uuids::uuid targetID, bool asProvider );
+  bool initialise( const String& iName,
+                   const UUID&   targetID, 
+                   const bool    asProvider );
 
-  protected:
+protected:
   
-    virtual void createInterfaceExchangeNames( std::wstring iName );
+  virtual void createInterfaceExchangeNames( const String& iName );
 
-    virtual void assignBindings();
+  virtual void assignBindings();
 
-  private:
+private:
 
-    bool setInitParams( std::wstring iName, boost::uuids::uuid targetID, bool asProvider );
+  bool setInitParams( const String& iName, const UUID& targetID, const bool asProvider );
 
-  };
+};
 
 } // namespace

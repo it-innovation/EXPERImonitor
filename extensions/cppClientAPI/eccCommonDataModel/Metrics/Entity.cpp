@@ -77,7 +77,15 @@ Entity::Entity( const UUID&           uuid,
   entityName        = name;
   entityDescription = description;
 
-  entityAttributes.insert( atts.begin(), atts.end() );
+  Attribute::Set::const_iterator attIt = atts.begin();
+  while ( attIt != atts.end() )
+  {
+    Attribute::ptr_t attr = *attIt;
+
+    if ( attr ) entityAttributes.insert( attr );
+
+    ++attIt;
+  }
 }
     
 Entity::Entity( const UUID&   uuid, 
@@ -102,7 +110,15 @@ Entity::Entity( const UUID&           uuid,
   entityName        = name;
   entityDescription = description;
 
-  entityAttributes.insert( atts.begin(), atts.end() );
+  Attribute::Set::const_iterator attIt = atts.begin();
+  while ( attIt != atts.end() )
+  {
+    Attribute::ptr_t attr = *attIt;
+
+    if ( attr ) entityAttributes.insert( attr );
+
+    ++attIt;
+  }
 }
 
 Entity::~Entity()
@@ -167,26 +183,27 @@ void Entity::addAttribute( Attribute::ptr_t attribute )
     
 void Entity::addAttributes( const Attribute::Set& attributes )
 {
-  Attribute::Set::iterator attIt = attributes.begin();
+  Attribute::Set::const_iterator attIt = attributes.begin();
 
   while ( attIt != attributes.end() )
   {
-    Attribute::ptr_t att = *attIt;
+    Attribute::ptr_t attr = *attIt;
 
-    if ( att ) entityAttributes.insert( att );
+    if ( attr ) entityAttributes.insert( attr );
 
     ++attIt;
   }
-
-  entityAttributes.insert( attributes.begin(), attributes.end() );
 }
 
 // ModelBase -----------------------------------------------------------------
-void Entity::toJSON( String& jsonStrOUT )
+String Entity::toJSON()
 {
+  String json;
+
+  return json;
 }
 
-void Entity::fromJSON( const String& jsonStr )
+void Entity::fromJSON( const ModelBase::JSONTree& jsonTree )
 {
 }
 

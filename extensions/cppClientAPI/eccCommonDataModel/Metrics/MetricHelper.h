@@ -147,7 +147,7 @@ public:
      * @return                  - Returned measurement set instance (null if it does not exist)
      */
     static MeasurementSet::ptr_t getMeasurementSet( const MetricGenerator::Set& mgenSet,
-                                                    const boost::uuids::uuid&   measurementSetID );
+                                                    const UUID&                 measurementSetID );
     
     /**
      * Sorts an unordered set of measurements by date.
@@ -224,8 +224,8 @@ public:
      * @param mGroups   - Collection of metric groups in which to search.
      * @return          - Returned metric group, if it exists.
      */
-    static MetricGroup::ptr_t getMetricGroupByName( const std::wstring&                      groupName,
-                                                    const std::hash_set<MetricGroup::ptr_t>& mGroups );
+    static MetricGroup::ptr_t getMetricGroupByName( const String&                      groupName,
+                                                    const MetricGroup::Set& mGroups );
     
     /**
      * Creates a pre-initialised Report containing a measurement set based on the
@@ -243,7 +243,7 @@ public:
      * @param mgen - Metric generator to describe - must not be null.
      * @return     - String describing the metric generator.
      */
-    static std::wstring describeGenerator( MetricGenerator::ptr_t mgen );  
+    static String describeGenerator( MetricGenerator::ptr_t mgen );  
   };
     
 } // namespace

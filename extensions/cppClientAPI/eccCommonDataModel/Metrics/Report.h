@@ -42,16 +42,14 @@ namespace ecc_commonDataModel
     * for a given time period
     * 
     * Currently only the number of measurements is supported.
-    * 
-    * @author Vegard Engen
     */
-  class Report : ModelBase
+  class Report : public ModelBase
   {
   public:
 
     typedef boost::shared_ptr<Report> ptr_t;
 
-    typedef boost::unordered_map<UUID, Report::ptr_t> Map;
+    typedef boost::container::map<UUID, Report::ptr_t> Map;
 
     Report();
 
@@ -147,9 +145,9 @@ namespace ecc_commonDataModel
     void copyReport( Report::ptr_t repIn, bool copyMeasurements );
 
     // ModelBase -----------------------------------------------------------------
-    virtual void toJSON( String& jsonStrOUT );
+    virtual String toJSON();
 
-    virtual void fromJSON( const String& jsonStr );
+    virtual void fromJSON( const ModelBase::JSONTree& jsonTree );
 
     virtual String toString();
 

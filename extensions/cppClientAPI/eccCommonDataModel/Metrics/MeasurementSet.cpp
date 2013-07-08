@@ -109,7 +109,7 @@ MeasurementSet::MeasurementSet( const UUID&             msID,
   metric        = metric;
  
   // Copy measurements
-  Measurement::Set::iterator srcMIt = measures.begin();
+  Measurement::Set::const_iterator srcMIt = measures.begin();
   while ( srcMIt != measures.end() )
   {
     appendMeasurement( *srcMIt );
@@ -233,7 +233,7 @@ bool MeasurementSet::addMeasurements( const Measurement::Set& measurements )
 
   bool skippedMeasurement = false;
 
-  Measurement::Set::iterator msIt = measurements.begin();
+  Measurement::Set::const_iterator msIt = measurements.begin();
   while ( msIt != measurements.end() )
   {
     if ( !appendMeasurement( *msIt ) )
@@ -248,11 +248,14 @@ bool MeasurementSet::addMeasurements( const Measurement::Set& measurements )
 }
 
 // ModelBase -----------------------------------------------------------------
-void MeasurementSet::toJSON( String& jsonStrOUT )
+String MeasurementSet::toJSON()
 {
+  String json;
+
+  return json;
 }
 
-void MeasurementSet::fromJSON( const String& jsonStr )
+void MeasurementSet::fromJSON( const ModelBase::JSONTree& jsonTree )
 {
 }
 

@@ -33,25 +33,27 @@
 namespace ecc_amqpAPI_impl
 {
 
-  class AMQPFullInterfaceBase : AbstractAMQPInterface
-  {
-  public:
+class AMQPFullInterfaceBase : public AbstractAMQPInterface
+{
+public:
 
-    AMQPFullInterfaceBase( AMQPBasicSubscriptionService::ptr_t sService,
-                           AMQPBasicChannel::ptr_t             channel );
+  typedef boost::shared_ptr<AMQPFullInterfaceBase> ptr_t;
 
-    virtual ~AMQPFullInterfaceBase();
+  AMQPFullInterfaceBase( AMQPBasicSubscriptionService::ptr_t sService,
+                         AMQPBasicChannel::ptr_t             channel );
 
-    bool initialise( std::wstring       iName,
-                     boost::uuids::uuid providerID,
-                     boost::uuids::uuid userID,
-                     bool               asProvider );
+  virtual ~AMQPFullInterfaceBase();
 
-  private:
-    bool setInitParams( std::wstring       iName,
-                        boost::uuids::uuid providerID,
-                        boost::uuids::uuid userID,
-                        bool               asProvider);
-  };
+  bool initialise( const String& iName,
+                    const UUID&   providerID,
+                    const UUID&   userID,
+                    const bool    asProvider );
+
+private:
+  bool setInitParams( const String& iName,
+                      const UUID&   providerID,
+                      const UUID&   userID,
+                      const bool    asProvider );
+};
   
 } // namespace

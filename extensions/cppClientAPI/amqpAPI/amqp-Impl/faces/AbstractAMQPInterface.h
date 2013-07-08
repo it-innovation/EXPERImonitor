@@ -40,9 +40,11 @@ namespace ecc_amqpAPI_impl
   {
   public:
 
+    typedef boost::shared_ptr<AbstractAMQPInterface> ptr_t;
+
     void shutdown();
   
-    bool sendBasicMessage( std::wstring message );
+    bool sendBasicMessage( const String& message );
 
     void setMessageDispatch( AMQPMessageDispatch::ptr_t dispatch );
   
@@ -53,7 +55,7 @@ namespace ecc_amqpAPI_impl
 
     virtual ~AbstractAMQPInterface();
 
-    virtual void createInterfaceExchangeNames( std::wstring iName );
+    virtual void createInterfaceExchangeNames( const String& iName );
 
     virtual void createQueue();
   
@@ -64,13 +66,13 @@ namespace ecc_amqpAPI_impl
     AMQPBasicChannel::ptr_t    amqpChannel;
     AMQPMessageDispatch::ptr_t msgDispatch;
 
-    std::wstring interfaceName;
-    std::wstring providerExchangeName, userExchangeName;
-    std::wstring providerQueueName,    userQueueName;
-    std::wstring providerRoutingKey,   userRoutingKey;
-    std::wstring subListenQueue;
-    bool         interfaceReady; // = false;
-    bool         actingAsProvider;
+    String interfaceName;
+    String providerExchangeName, userExchangeName;
+    String providerQueueName,    userQueueName;
+    String providerRoutingKey,   userRoutingKey;
+    String subListenQueue;
+    bool   interfaceReady; // = false;
+    bool   actingAsProvider;
 
   private:
       //IECCLogger amqpIntLogger = Logger.getLogger(typeof(AbstractAMQPInterface));

@@ -64,11 +64,14 @@ void Unit::setName( const String& name )
 
 
 // ModelBase -----------------------------------------------------------------
-void Unit::toJSON( String& jsonStrOUT )
+String Unit::toJSON()
 {
+  String json;
+
+  return json;
 }
 
-void Unit::fromJSON( const String& jsonStr )
+void Unit::fromJSON( const ModelBase::JSONTree& jsonTree )
 {
 }
 

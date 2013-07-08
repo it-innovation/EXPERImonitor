@@ -55,7 +55,7 @@ namespace ecc_amqpAPI_impl
     {
       if ( pollInterval >= MIN_POLL_INTERVAL ) pollingInterval = posix_time::milliseconds(pollInterval);
       
-      serviceThread = thread_ptr( new thread( &AMQPBasicSubscriptionService::run, this ) );
+      serviceThread = Thread_ptr( new thread( &AMQPBasicSubscriptionService::run, this ) );
 
       serviceRunning = true;
     }
