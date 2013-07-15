@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////
 //
-// © University of Southampton IT Innovation Centre, 2012
+// © University of Southampton IT Innovation Centre, 2013
 //
 // Copyright in this software belongs to University of Southampton
 // IT Innovation Centre of Gamma House, Enterprise Road, 
@@ -33,7 +33,7 @@ public interface ECCNewEntityViewListener {
      * Event called when the user creates a new entity and attribute at the UI
      * 
      */
-    void onNewEntityInfoEntered(String entityName, ArrayList<String> attList, String entityDesc );
+    void onNewEntityInfoEntered( String entityName, ArrayList<String> attList, String entityDesc );
     /**
      * Listens for an event to send an entity
      */
