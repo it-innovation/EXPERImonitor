@@ -32,15 +32,14 @@
 #include "AbstractAMQPInterface.h"
 #include "ModelBase.h"
 
-#include <boost/property_tree/json_parser.hpp>
-
 
 
 
 namespace ecc_emClient_impl
 {
 
-class EMBaseInterface : public ecc_amqpAPI_spec::IAMQPMessageDispatchListener
+class EMBaseInterface : public boost::enable_shared_from_this<EMBaseInterface>,
+                        public ecc_amqpAPI_spec::IAMQPMessageDispatchListener
 {
 public:
 
@@ -51,22 +50,24 @@ public:
                    const bool                                            asProvider );
 
   virtual ~EMBaseInterface();
+
+  void initialiseAMQPComms();
   
   void shutdown();
   
   // IAMQPMessageDispatchListener ----------------------------------------------
-  virtual void onSimpleMessageDispatched( const String& queueName, const Byte* data );
+  virtual void onSimpleMessageDispatched( const std::string& queueName, const std::string& msg );
   
   // Protected methods ---------------------------------------------------------
 protected:
 
-  typedef boost::property_tree::ptree JSONTree;
-
-  void initialiseAMQP( ecc_amqpAPI_impl::AbstractAMQPInterface::ptr_t eccIFace,
-                       ecc_amqpAPI_impl::AMQPMessageDispatch::ptr_t   msgDispatch );
+  typedef boost::container::vector<ecc_commonDataModel::ModelBase::ptr_t> EXEParamList;
   
-  bool executeMethod( const int methodID, 
-                      const boost::container::list<ecc_commonDataModel::ModelBase::ptr_t>& parameters );
+
+  void setAMQPFaceAndDispatch( ecc_amqpAPI_impl::AbstractAMQPInterface::ptr_t eccIFace,
+                               ecc_amqpAPI_impl::AMQPMessageDispatch::ptr_t   msgDispatch );
+  
+  bool executeMethod( const int methodID, const EXEParamList& parameters );
   
   // Derriving classes must implement ------------------------------------------------------
   virtual void onInterpretMessage( const int& methodID, const JSONTree& jsonTree ) =0;

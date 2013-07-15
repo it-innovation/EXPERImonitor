@@ -48,7 +48,7 @@ namespace ecc_amqpAPI_impl
 
     virtual ~AMQPMessageDispatch();
 
-    bool addMessage( const String& queueName, const Byte* data );
+    bool addMessage( const std::string& queueName, const std::string& msg );
 
     bool hasOutstandingDispatches();
 
@@ -66,13 +66,33 @@ namespace ecc_amqpAPI_impl
     class QueueMsg
     {
     public:
-      QueueMsg() { data = NULL; }
+      QueueMsg()
+      : queueName(""), queueMsg("")
+      {}
 
-      QueueMsg( const String& qName, const Byte* bData )
-      { queueName = qName; data = bData; }
-      
-      String queueName; 
-      const Byte*  data;
+      QueueMsg( const std::string& qName, const std::string& msg )
+        : queueName(qName), queueMsg(msg)
+      { }
+
+      QueueMsg& operator= ( const QueueMsg& rhs )
+      {
+        queueName = rhs.queueName;
+        queueMsg  = rhs.queueMsg;
+
+        return *this;
+      }
+
+      const std::string& getQueueName()
+      { return queueName; }
+
+      const std::string& getQueueMsg()
+      { return queueMsg; }
+
+      virtual ~QueueMsg() {}
+
+    private:
+      std::string queueName;
+      std::string queueMsg;
     };
 
     //readonly IECCLogger dispatchLogger = Logger.getLogger( typeof(AMQPMessageDispatch) ); 

@@ -153,7 +153,37 @@ void MetricGroup::addMeasurementSets( const MeasurementSet::Set& measurementSets
 // ModelBase -----------------------------------------------------------------
 String MetricGroup::toJSON()
 {
-  String json;
+  String json( L"{" );
+
+  json.append( createJSON_Prop( L"uuid", uuidToWide(groupID) ) + L"," );
+
+  json.append( createJSON_Prop( L"metricGeneratorUUID", uuidToWide(metricGeneratorUUID) ) + L"," );
+
+  json.append( createJSON_Prop( L"name", groupName ) + L"," );
+
+  json.append( createJSON_Prop( L"description", groupDescription ) + L"," );
+
+  // Measurement sets
+  json.append( L"\"measurementSets\":[" );
+
+  MeasurementSet::Set::const_iterator msIt = groupMeasurementSets.begin();
+  while ( msIt != groupMeasurementSets.end() )
+  {
+    json.append( (*msIt)->toJSON() + L"," );
+
+    ++msIt;
+  }
+
+  // Snip off trailing delimiter
+  if ( !groupMeasurementSets.empty() )
+  {
+    unsigned int jLen = json.length();
+    json = json.substr( 0, jLen-1 );
+  }
+
+  json.append( L"]" );
+
+  json.append( L"}" );
 
   return json;
 }

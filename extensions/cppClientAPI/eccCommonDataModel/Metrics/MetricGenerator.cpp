@@ -167,7 +167,55 @@ void MetricGenerator::addEntities( const Entity::Set& entities )
 // ModelBase -----------------------------------------------------------------
 String MetricGenerator::toJSON()
 {
-  String json;
+  String json( L"{" );
+
+  json.append( createJSON_Prop( L"uuid", uuidToWide(mgID) ) + L"," );
+
+  json.append( createJSON_Prop( L"name", mgName ) + L"," );
+
+  json.append( createJSON_Prop( L"description", mgDescription ) + L"," );
+
+  // Metric Groups
+  json.append( L"\"metricGroups\":[" );
+
+  MetricGroup::Set::const_iterator mgIt = mgMetricGroups.begin();
+  while ( mgIt != mgMetricGroups.end() )
+  {
+    json.append( (*mgIt)->toJSON() + L"," );
+
+    ++mgIt;
+  }
+
+  // Snip off trailing delimiter
+  if ( !mgMetricGroups.empty() )
+  {
+    unsigned int jLen = json.length();
+    json = json.substr( 0, jLen-1 );
+  }
+
+  json.append( L"]," );
+
+  // Entities
+  json.append( L"\"entities\":[" );
+
+  Entity::Set::const_iterator entIt = mgEntities.begin();
+  while ( entIt != mgEntities.end() )
+  {
+    json.append( (*entIt)->toJSON() + L"," );
+
+    ++entIt;
+  }
+
+  // Snip off trailing delimiter
+  if ( !mgEntities.empty() )
+  {
+    int jLen = json.length();
+    json = json.substr( 0, jLen-1 );
+  }
+
+  json.append( L"]" );
+
+  json.append( L"}" );
 
   return json;
 }

@@ -250,7 +250,60 @@ bool MeasurementSet::addMeasurements( const Measurement::Set& measurements )
 // ModelBase -----------------------------------------------------------------
 String MeasurementSet::toJSON()
 {
-  String json;
+  String json( L"{" );
+
+  json.append( createJSON_Prop( L"msetID", uuidToWide(msetID) ) + L"," );
+
+  json.append( createJSON_Prop( L"attributeID", uuidToWide(attributeID) ) + L"," );
+
+  json.append( createJSON_Prop( L"metricGroupID", uuidToWide(metricGroupID) ) + L"," );
+
+  // Metric
+  if ( metric )
+  {
+    json.append( L"\"metric\":" );
+    json.append( metric->toJSON() + L"," );
+  }
+  
+  // Measurements
+  json.append( L"\"measurements\":[" );
+
+  Measurement::Set::const_iterator mIt = measurements.begin();
+  while ( mIt != measurements.end() )
+  {
+    json.append( (*mIt)->toJSON() + L"," );
+
+    ++mIt;
+  }
+
+  // Snip off trailing delimiter
+  if ( !measurements.empty() )
+  {
+    unsigned int jLen = json.length();
+    json = json.substr( 0, jLen-1 );
+  }
+
+  json.append( L"]," );
+
+  // Measurement rule
+  String mRule;
+  switch ( measurementRule )
+  {
+  case eNO_LIVE_MONITOR : mRule = L"eNO_LIVE_MONITOR"; break;
+  
+  case eFIXED_COUNT : mRule = L"eFIXED_COUNT"; break;
+  
+  case eINDEFINITE : mRule = L"eINDEFINITE"; break;
+  }
+  json.append( createJSON_Prop( L"measurementRule", mRule ) + L"," );
+
+  // MeasurementCountMax
+  json.append( createJSON_Prop( L"measurementCountMax", measurementCountMax ) + L"," );
+
+  // SampleInterval
+  json.append( createJSON_Prop( L"samplingInterval", samplingInterval ) );
+
+  json.append( L"}" );
 
   return json;
 }

@@ -86,11 +86,7 @@ namespace ecc_amqpAPI_impl
                                              const bool     asProvider )
   {
     // Safety first
-    if ( iName.empty()       ||
-         providerID.is_nil() ||
-         userID.is_nil()     ||
-         amqpChannel == NULL )
-        return false;
+    if ( iName.empty() || !amqpChannel ) return false;
       
     createInterfaceExchangeNames( iName );
       

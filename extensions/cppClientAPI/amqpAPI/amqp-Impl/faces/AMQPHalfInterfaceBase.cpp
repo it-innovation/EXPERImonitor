@@ -96,10 +96,7 @@ namespace ecc_amqpAPI_impl
   bool AMQPHalfInterfaceBase::setInitParams( const String& iName, const UUID& targetID, const bool asProvider )
   {
     // Safety first
-    if ( iName.empty()     ||
-         targetID.is_nil() ||
-         amqpChannel == NULL )
-        return false;
+    if ( iName.empty() || !amqpChannel ) return false;
       
     createInterfaceExchangeNames( iName );
       

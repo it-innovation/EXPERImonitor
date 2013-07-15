@@ -58,9 +58,13 @@ EMPostReport::EMPostReport( AMQPBasicSubscriptionService::ptr_t sService,
   AMQPFullInterfaceBase::ptr_t fullFace = 
       AMQPFullInterfaceBase::ptr_t( new AMQPFullInterfaceBase( sService, channel ) );
   
-  initialiseAMQP( dynamic_pointer_cast<AbstractAMQPInterface>(fullFace), dispatch );
+  setAMQPFaceAndDispatch( dynamic_pointer_cast<AbstractAMQPInterface>(fullFace), dispatch );
 }
-  
+
+EMPostReport::~EMPostReport()
+{
+}
+
 // IECCReport ----------------------------------------------------------------
 void EMPostReport::setUserListener( IEMPostReport_UserListener::ptr_t listener )
 { userListener = listener; }
@@ -69,7 +73,7 @@ void EMPostReport::setUserListener( IEMPostReport_UserListener::ptr_t listener )
 // Method ID = 4
 void EMPostReport::notifyReadyToReport()
 {
-  list<ModelBase::ptr_t> emptyParams;
+  EXEParamList emptyParams;
 
   executeMethod( 4, emptyParams );
 }
@@ -77,7 +81,7 @@ void EMPostReport::notifyReadyToReport()
 // Method ID = 5
 void EMPostReport::sendReportSummary( EMPostReportSummary::ptr_t summary )
 {
-  list<ModelBase::ptr_t> paramsList;
+  EXEParamList paramsList;
 
   //paramsList.Add( summary );
     
@@ -87,7 +91,7 @@ void EMPostReport::sendReportSummary( EMPostReportSummary::ptr_t summary )
 // Method ID = 6
 void EMPostReport::sendDataBatch( EMDataBatch::ptr_t populatedBatch )
 {
-  list<ModelBase::ptr_t> paramsList;
+  EXEParamList paramsList;
 
   //paramsList.Add( populatedBatch );
     
@@ -111,6 +115,9 @@ void EMPostReport::onInterpretMessage( const int& methodID,
     {
       if ( userListener )
       {
+        JSONTreeIt tIt = jsonTree.begin(); // Get past method ID first
+        ++tIt;
+
         //EMDataBatch batch = JsonConvert.DeserializeObject<EMDataBatch>( jsonMethodData[1] );      
 
         //userListener.onRequestDataBatch( interfaceProviderID, batch );

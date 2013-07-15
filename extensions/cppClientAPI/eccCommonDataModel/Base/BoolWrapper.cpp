@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////
 //
-// Â© University of Southampton IT Innovation Centre, 2012
+// © University of Southampton IT Innovation Centre, 2012
 //
 // Copyright in this software belongs to University of Southampton
 // IT Innovation Centre of Gamma House, Enterprise Road, 
@@ -18,36 +18,46 @@
 // the software.
 //
 //      Created By :            Simon Crowle
-//      Created Date :          15-May-2013
+//      Created Date :          12-Jul-2013
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
-#pragma once
+#include "StdAfx.h"
+#include "BoolWrapper.h"
+
+using namespace ecc_commonDataModel;
 
 
-namespace ecc_amqpAPI_spec
+BoolWrapper::BoolWrapper( const bool& value )
+  : boolValue(value)
 {
-    /**
-     * The IAMQPMessageDispatchListener interface must be used to receive messages
-     * distributed by the IAMQPMessageDispatch.
-     * 
-     * @author Simon Crowle
-     */
-    class IAMQPMessageDispatchListener 
-    {
-    public:
+}
 
-      typedef boost::shared_ptr<IAMQPMessageDispatchListener> ptr_t;
+BoolWrapper::~BoolWrapper()
+{
+}
 
-      /**
-        * onSimpleMessageDispatched offers an data event from the AMQP bus that
-        * encapsulates a block of data and the queue through which it was sent.
-        * 
-        * @param queueName - Name of the queue in which the data travelled
-        * @param data      - The data itself
-        */
-      virtual void onSimpleMessageDispatched( const std::string& queueName, const std::string& msg ) =0;
-    };
+// ModelBase -----------------------------------------------------------------
+String BoolWrapper::toJSON( )
+{
+  return boolValue ? L"true" : L"false";
+}
 
-} // namespace
+void BoolWrapper::fromJSON( const JSONTree& jsonTree )
+{
+  JSONTreeIt tIt = jsonTree.begin(); // Get past method ID first
+
+  String stringValue = getJSON_String( *tIt );
+
+  if ( stringValue.compare( L"true" ) == 0 )
+    boolValue = true;
+  else
+    boolValue = false;
+}
+
+
+String BoolWrapper::toString()
+{
+  return boolValue ? L"true" : L"false";
+}

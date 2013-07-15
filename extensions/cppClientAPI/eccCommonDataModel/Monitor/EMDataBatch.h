@@ -91,9 +91,9 @@ namespace ecc_commonDataModel
       void setBatchReport( Report::ptr_t report );
 
       // ModelBase -----------------------------------------------------------------
-      virtual void toJSON( String& jsonStrOUT );
+      virtual String toJSON();
 
-      virtual void fromJSON( const String& jsonStr );
+      virtual void fromJSON( const JSONTree& jsonTree );
 
       virtual String toString();
 

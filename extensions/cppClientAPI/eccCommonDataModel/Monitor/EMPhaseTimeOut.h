@@ -25,7 +25,7 @@
 
 #pragma once
 
-
+#include "ECCUtils.h"
 
 namespace ecc_commonDataModel
 {
@@ -39,6 +39,6 @@ enum EMPhaseTimeOut
   eEMTOTearDownTimeOut
 };
 
-typedef boost::unordered_set<EMPhaseTimeOut> EMPhaseTimeOutSet;
+typedef boost::container::set<EMPhaseTimeOut> EMPhaseTimeOutSet;
 
 } // namespace

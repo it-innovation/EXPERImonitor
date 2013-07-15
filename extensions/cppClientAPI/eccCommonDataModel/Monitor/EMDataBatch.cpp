@@ -95,11 +95,14 @@ void EMDataBatch::setBatchReport( Report::ptr_t report )
 }
 
 // ModelBase -----------------------------------------------------------------
-void EMDataBatch::toJSON( String& jsonStrOUT )
+String EMDataBatch::toJSON()
 {
+  String json;
+
+  return json;
 }
 
-void EMDataBatch::fromJSON( const String& jsonStr )
+void EMDataBatch::fromJSON( const JSONTree& jsonTree )
 {
 }
 

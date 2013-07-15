@@ -54,15 +54,18 @@ namespace ecc_amqpAPI_impl
     amqpChannelImpl     = channel;
     queueName           = qName;
     messageDispatch     = dispatch;
-
-    if ( subscriptionService )
-      subscriptionService->subscribe( AMQPBasicSubscriptionProcessor::ptr_t(this) ); 
   }
 
   AMQPBasicSubscriptionProcessor::~AMQPBasicSubscriptionProcessor()
   {
     if ( subscriptionService )
-      subscriptionService->unsubscribe( AMQPBasicSubscriptionProcessor::ptr_t(this) );
+      subscriptionService->unsubscribe( shared_from_this() );
+  }
+
+  void AMQPBasicSubscriptionProcessor::initialiseSubscription()
+  {
+    if ( subscriptionService )
+      subscriptionService->subscribe( shared_from_this() );
   }
 
   uuids::uuid AMQPBasicSubscriptionProcessor::getProcessorID()
@@ -76,10 +79,10 @@ namespace ecc_amqpAPI_impl
 
       if ( msg )
       {
-        amqp_bytes_t payload = msg->getAmqpBody();
-
-        if ( payload.bytes != NULL )
-          messageDispatch->addMessage( queueName, (const Byte*) payload.bytes );
+        const string payload = msg->Body();
+        
+        if ( !payload.empty() )
+          messageDispatch->addMessage( toNarrow(queueName), payload );
       }
       
       amqpChannelImpl->BasicAck( envolope );

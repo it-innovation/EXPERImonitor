@@ -199,7 +199,11 @@ EMPhaseTimeOutSet EMClient::getCopyOfSentTimeOuts()
   
 bool EMClient::isNotifiedOfTimeOut( const EMPhaseTimeOut& timeout )
 {
-  return !( timeOutsCalled.find( timeout ) == timeOutsCalled.end() );
+  EMPhaseTimeOutSet::const_iterator fIt = timeOutsCalled.find( timeout );
+
+  if ( fIt != timeOutsCalled.end() ) return true;
+
+  return false;
 }
 
 } // namespace

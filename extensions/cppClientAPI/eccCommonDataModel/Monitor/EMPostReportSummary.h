@@ -80,9 +80,9 @@ public:
     Report::ptr_t getReport( const boost::uuids::uuid& measurementID );
 
     // ModelBase -----------------------------------------------------------------
-    virtual void toJSON( std::wstring& jsonStrOUT );
+    virtual String toJSON();
 
-    virtual void fromJSON( const std::wstring& jsonStr );
+    virtual void fromJSON( const JSONTree& jsonTree );
 
     virtual std::wstring toString();
 

@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include <boost/unordered_set.hpp>
+#include "ECCUtils.h"
 
 
 namespace ecc_commonDataModel
@@ -44,6 +44,6 @@ enum EMPhase
     eEMProtocolComplete         = 6
 };
 
-typedef boost::unordered_set<EMPhase> EMPhaseSet;
+typedef boost::container::set<EMPhase> EMPhaseSet;
 
 } // namespace

@@ -48,6 +48,8 @@ namespace ecc_amqpAPI_impl
 
     void setMessageDispatch( AMQPMessageDispatch::ptr_t dispatch );
   
+    AMQPMessageDispatch::ptr_t getMessageDispatch();
+
   protected:
 
     AbstractAMQPInterface( AMQPBasicSubscriptionService::ptr_t sService,

@@ -18,46 +18,53 @@
 // the software.
 //
 //      Created By :            Simon Crowle
-//      Created Date :          13-May-2013
+//      Created Date :          08-Jul-2013
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 
-#include <SimpleAmqpClient/SimpleAmqpClient.h>
+#include "ECCClientController.h"
+#include "ECCUtils.h"
 
+#include <tchar.h>
 #include <iostream>
-#include <stdlib.h>
-
-using namespace AmqpClient;
 
 using namespace std;
 
-int _tmain(int argc, _TCHAR* argv[])
+
+int _tmain( int argc, _TCHAR* argv[] )
 {
-  cout << "Starting rabbitmq-c test application" << std::endl;
+  wcout << L"Starting Simple Headless CPP client" << endl;
 
-  Channel::ptr_t channel = Channel::Create();
+  // Create client controller and try to connect to the Rabbit
+  ECCClientController::ptr_t clientController = ECCClientController::ptr_t( new ECCClientController() );
 
-	channel->DeclareQueue("alanqueue");
+  // Default IP or use command line supplied
+  String rabbitServerIP = L"127.0.0.1";
+  if ( argc == 2 ) 
+    rabbitServerIP = String( argv[1] );
 
-	channel->BindQueue("alanqueue", "amq.direct", "alankey");
+  try
+  {
+    clientController->start( rabbitServerIP,
+                             createUUID( L"00000000-0000-0000-0000-000000000000" ), // ECC instance ID
+                             createRandomUUID() );                                  // ID of this client (random)
 
-	BasicMessage::ptr_t msg_in = BasicMessage::Create();
+    wcout << L"Press any key to quit" << endl;
+                            
+  }
+  catch( const String e )
+  {
+    wcout << "Had problems starting client: " << e << endl;
+  }
 
-	msg_in->Body("This is a small message.");
+  clientController = NULL;
 
-	channel->BasicPublish("amq.direct", "alankey", msg_in);
-
-	channel->BasicConsume("alanqueue", "consumertag");
-
-	Envelope::ptr_t msg_env = channel->BasicConsumeMessage( "consumertag" );
-
-	cout << "Message text: " << msg_env->Message()->Body() << std::endl;
-
-  cout << "Press ENTER to exit demo.." << endl;
-  cin.get();
+  wcout << "Hit ENTER to quit demo" << endl;
+  wcin.get();
+  wcout << "Goodbye" << endl;
 
 	return 0;
 }

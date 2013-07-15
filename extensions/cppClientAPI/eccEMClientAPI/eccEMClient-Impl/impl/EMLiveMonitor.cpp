@@ -58,9 +58,13 @@ EMLiveMonitor::EMLiveMonitor( AMQPBasicSubscriptionService::ptr_t sService,
   AMQPFullInterfaceBase::ptr_t fullFace = 
       AMQPFullInterfaceBase::ptr_t( new AMQPFullInterfaceBase( sService, channel ) );
   
-  initialiseAMQP( dynamic_pointer_cast<AbstractAMQPInterface>(fullFace), dispatch );
+  setAMQPFaceAndDispatch( dynamic_pointer_cast<AbstractAMQPInterface>(fullFace), dispatch );
 }
-  
+
+EMLiveMonitor::~EMLiveMonitor()
+{
+}
+
 // IEMLiveMonitor ------------------------------------------------------------
 void EMLiveMonitor::setUserListener( IEMLiveMonitor_UserListener::ptr_t listener )
 { userListener = listener; }
@@ -69,7 +73,7 @@ void EMLiveMonitor::setUserListener( IEMLiveMonitor_UserListener::ptr_t listener
 // Method ID = 7
 void EMLiveMonitor::notifyReadyToPush()
 {
-  list<ModelBase::ptr_t> emptyParams;
+  EXEParamList emptyParams;
 
   executeMethod( 7, emptyParams );
 }
@@ -77,9 +81,9 @@ void EMLiveMonitor::notifyReadyToPush()
 // Method ID = 8
 void EMLiveMonitor::pushMetric( Report::ptr_t report )
 {
-  list<ModelBase::ptr_t> paramsList;
+  EXEParamList paramsList;
 
-  //paramsList.Add( report );
+  paramsList.push_back( report );
     
   executeMethod( 8, paramsList );
 }
@@ -87,7 +91,7 @@ void EMLiveMonitor::pushMetric( Report::ptr_t report )
 // Method ID = 9
 void EMLiveMonitor::notifyPushingCompleted()
 {
-  list<ModelBase::ptr_t> emptyParams;
+  EXEParamList emptyParams;
 
   executeMethod( 9, emptyParams );
 }
@@ -95,7 +99,7 @@ void EMLiveMonitor::notifyPushingCompleted()
 // Method ID = 10
 void EMLiveMonitor::notifyReadyForPull()
 {
-  list<ModelBase::ptr_t> emptyParams;
+  EXEParamList emptyParams;
 
   executeMethod( 10, emptyParams );
 }
@@ -103,9 +107,9 @@ void EMLiveMonitor::notifyReadyForPull()
 // Method ID = 11
 void EMLiveMonitor::sendPulledMetric( Report::ptr_t report )
 {
-  list<ModelBase::ptr_t> paramsList;
+  EXEParamList paramsList;
 
-  //paramsList.Add( report );
+  paramsList.push_back( report );
     
   executeMethod( 11, paramsList );
 }
@@ -126,8 +130,12 @@ void EMLiveMonitor::onInterpretMessage( const int& methodID, const JSONTree& jso
     {
       if ( userListener )
       {
-        //Guid reportID = new Guid(jsonMethodData[1]);
-        //userListener.onReceivedPush( interfaceProviderID, reportID );
+        JSONTreeIt tIt = jsonTree.begin(); // Get past method ID first
+        ++tIt;
+
+        UUID reportID = getJSON_UUID( *tIt );
+
+        userListener->onReceivedPush( interfaceProviderID, reportID );
       }
         
     } break;
@@ -143,8 +151,12 @@ void EMLiveMonitor::onInterpretMessage( const int& methodID, const JSONTree& jso
     {
       if ( userListener )
       {
-        //Guid msID = new Guid(jsonMethodData[1]);
-        //userListener.onPullMetric( interfaceProviderID, msID );
+        JSONTreeIt tIt = jsonTree.begin(); // Get past method ID first
+        ++tIt;
+
+        UUID msID = getJSON_UUID( *tIt );
+
+        userListener->onPullMetric( interfaceProviderID, msID );
       }
         
     } break;
@@ -153,8 +165,12 @@ void EMLiveMonitor::onInterpretMessage( const int& methodID, const JSONTree& jso
     {
       if ( userListener )
       {
-        //Guid msID = new Guid(jsonMethodData[1]);
-        //userListener.onPullMetricTimeOut( interfaceProviderID, msID );
+        JSONTreeIt tIt = jsonTree.begin(); // Get past method ID first
+        ++tIt;
+
+        UUID msID = getJSON_UUID( *tIt );
+
+        userListener->onPullMetricTimeOut( interfaceProviderID, msID );
       }
         
     } break;
@@ -170,8 +186,12 @@ void EMLiveMonitor::onInterpretMessage( const int& methodID, const JSONTree& jso
     {
       if ( userListener )
       {
-        //Guid reportID = new Guid(jsonMethodData[1]);
-        //userListener.onReceivedPull( interfaceProviderID, reportID );
+        JSONTreeIt tIt = jsonTree.begin(); // Get past method ID first
+        ++tIt;
+
+        UUID reportID = getJSON_UUID( *tIt );
+
+        userListener->onReceivedPull( interfaceProviderID, reportID );
       }
     } break;
   }

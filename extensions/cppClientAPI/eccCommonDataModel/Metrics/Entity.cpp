@@ -198,7 +198,37 @@ void Entity::addAttributes( const Attribute::Set& attributes )
 // ModelBase -----------------------------------------------------------------
 String Entity::toJSON()
 {
-  String json;
+  String json( L"{" );
+
+  json.append( createJSON_Prop( L"uuid", uuidToWide(entityUniqueID) ) + L"," );
+
+  json.append( createJSON_Prop( L"entityID", entityID ) + L"," );
+
+  json.append( createJSON_Prop( L"name", entityName ) + L"," );
+
+  json.append( createJSON_Prop( L"description", entityDescription ) + L"," );
+
+  // Attributes
+  json.append( L"\"attributes\":[" );
+
+  Attribute::Set::const_iterator atIt = entityAttributes.begin();
+  while ( atIt != entityAttributes.end() )
+  {
+    json.append( (*atIt)->toJSON() + L"," );
+
+    ++atIt;
+  }
+
+  // Snip off trailing delimiter
+  if ( !entityAttributes.empty() )
+  {
+    unsigned int jLen = json.length();
+    json = json.substr( 0, jLen-1 );
+  }
+
+  json.append( L"]" );
+
+  json.append( L"}" );
 
   return json;
 }

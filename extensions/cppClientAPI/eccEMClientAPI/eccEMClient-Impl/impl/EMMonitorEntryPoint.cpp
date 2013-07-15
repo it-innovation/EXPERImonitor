@@ -27,7 +27,8 @@
 #include "EMMonitorEntryPoint.h"
 
 #include "AMQPHalfInterfaceBase.h"
-#include "ModelBase.h"
+#include "StringWrapper.h"
+#include "UUIDWrapper.h"
 
 using namespace ecc_amqpAPI_impl;
 using namespace ecc_commonDataModel;
@@ -56,19 +57,28 @@ EMMonitorEntryPoint::EMMonitorEntryPoint( AMQPBasicSubscriptionService::ptr_t sS
   AMQPHalfInterfaceBase::ptr_t halfFace = 
       AMQPHalfInterfaceBase::ptr_t( new AMQPHalfInterfaceBase( sService, channel ) );
   
-  initialiseAMQP( dynamic_pointer_cast<AbstractAMQPInterface>(halfFace), dispatch );
+  setAMQPFaceAndDispatch( dynamic_pointer_cast<AbstractAMQPInterface>(halfFace), dispatch );
+}
+
+EMMonitorEntryPoint::~EMMonitorEntryPoint()
+{
 }
   
 // IECCMonitorEntryPoint -----------------------------------------------------
 // Method ID = 1
 void EMMonitorEntryPoint::registerAsEMClient( const UUID& userID, const String& userName )
 {
-  list<ModelBase::ptr_t> paramsList;
+  EXEParamList paramsList;
 
-  //paramsList.Add( userID.ToString() );
-  //paramsList.Add( userName );
+  paramsList.push_back( ModelBase::ptr_t( new UUIDWrapper(userID) ) );
+  paramsList.push_back( ModelBase::ptr_t( new StringWrapper(userName) ) );
     
   executeMethod( 1, paramsList );
+}
+
+void EMMonitorEntryPoint::onInterpretMessage( const int& methodID, const JSONTree& jsonTree )
+{
+  // Not implemented for the client side
 }
 
 } // namespace

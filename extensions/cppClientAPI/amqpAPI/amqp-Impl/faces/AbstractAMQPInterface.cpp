@@ -112,6 +112,11 @@ bool AbstractAMQPInterface::sendBasicMessage( const String& message )
 void AbstractAMQPInterface::setMessageDispatch( AMQPMessageDispatch::ptr_t dispatch )
 { msgDispatch = dispatch; }
 
+AMQPMessageDispatch::ptr_t AbstractAMQPInterface::getMessageDispatch()
+{
+  return msgDispatch;
+}
+
 // Protected methods ---------------------------------------------------------
 AbstractAMQPInterface::AbstractAMQPInterface( AMQPBasicSubscriptionService::ptr_t sService,
                                               AMQPBasicChannel::ptr_t             channel )
@@ -170,6 +175,8 @@ void AbstractAMQPInterface::createSubscriptionComponent()
                                             channelImpl,
                                             subListenQueue,
                                             msgDispatch ) );
+
+    subProcessor->initialiseSubscription();
   }
   //else amqpIntLogger.error( "Could not create subscription component: AMQP channel is NULL" );
 }

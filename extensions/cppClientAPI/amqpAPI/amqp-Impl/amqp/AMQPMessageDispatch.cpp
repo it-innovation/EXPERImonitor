@@ -47,15 +47,16 @@ namespace ecc_amqpAPI_impl
     dispatchPump = NULL;
   }
 
-  bool AMQPMessageDispatch::addMessage( const String& queueName, const Byte* data )
+  bool AMQPMessageDispatch::addMessage( const std::string& queueName, 
+                                        const std::string& msg )
   {
     bool addResult = false;
 
-    if ( !queueName.empty() && data != NULL )
+    if ( !queueName.empty() && !msg.empty() )
     {
       lock_guard<mutex> lock( dispatchMutex );
 
-      QueueMsg msg( queueName, data );
+      QueueMsg msg( queueName, msg );
 
       dispatchQueue.push( msg );
       dispatchPump->notifyDispatchWaiting();
@@ -94,8 +95,8 @@ namespace ecc_amqpAPI_impl
       }
         
       if ( gotMessage && dispatchListener )
-        dispatchListener->onSimpleMessageDispatched( nextMessage.queueName,
-                                                     nextMessage.data );
+        dispatchListener->onSimpleMessageDispatched( nextMessage.getQueueName(),
+                                                     nextMessage.getQueueMsg() );
 
     }
   }

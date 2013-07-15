@@ -28,6 +28,11 @@
 
 #include "AMQPFullInterfaceBase.h"
 #include "ModelBase.h"
+#include "EMInterfaceType.h"
+
+#include "BoolWrapper.h"
+#include "StringWrapper.h"
+#include "ArrayWrapper.h"
 
 using namespace ecc_amqpAPI_impl;
 using namespace ecc_commonDataModel;
@@ -58,7 +63,11 @@ EMDiscovery::EMDiscovery( AMQPBasicSubscriptionService::ptr_t sService,
   AMQPFullInterfaceBase::ptr_t fullFace = 
       AMQPFullInterfaceBase::ptr_t( new AMQPFullInterfaceBase( sService, channel ) );
   
-  initialiseAMQP( dynamic_pointer_cast<AbstractAMQPInterface>(fullFace), dispatch );
+  setAMQPFaceAndDispatch( dynamic_pointer_cast<AbstractAMQPInterface>(fullFace), dispatch );
+}
+
+EMDiscovery::~EMDiscovery()
+{
 }
   
 // IECCMonitor ---------------------------------------------------------------
@@ -69,7 +78,7 @@ void EMDiscovery::setUserListener( IEMDiscovery_UserListener::ptr_t listener)
 // Method ID = 8
 void EMDiscovery::readyToInitialise()
 {
-  list<ModelBase::ptr_t> emptyParams;
+  EXEParamList emptyParams;
 
   executeMethod( 8, emptyParams );
 }
@@ -77,9 +86,52 @@ void EMDiscovery::readyToInitialise()
 // Method ID = 9
 void EMDiscovery::sendActivePhases( const EMPhaseSet& supportedPhases )
 {
-  list<ModelBase::ptr_t> paramsList;
+  EXEParamList paramsList;
 
-  //paramsList.Add( supportedPhases );
+  ArrayWrapper::ptr_t phaseList = ArrayWrapper::ptr_t( new ArrayWrapper() );
+
+  EMPhaseSet::const_iterator spIt = supportedPhases.begin();
+  while ( spIt != supportedPhases.end() )
+  {
+    EMPhase phase = *spIt;
+
+    switch ( phase )
+    {
+    case eEMDiscoverMetricGeneratorsPhase : 
+      {
+        StringWrapper::ptr_t sw = StringWrapper::ptr_t( new StringWrapper(L"eEMDiscoverMetricGenerators") );
+        phaseList->addModel( sw );
+      } break;
+    
+    case eEMSetUpMetricGeneratorsPhase : 
+      {
+        StringWrapper::ptr_t sw = StringWrapper::ptr_t( new StringWrapper(L"eEMSetUpMetricGenerators") );
+        phaseList->addModel( sw );
+      } break;
+    
+    case eEMLiveMonitoringPhase : 
+      {
+        StringWrapper::ptr_t sw = StringWrapper::ptr_t( new StringWrapper(L"eEMLiveMonitoring") );
+        phaseList->addModel( sw );
+      } break;
+    
+    case eEMPostMonitoringReportPhase : 
+      {
+        StringWrapper::ptr_t sw = StringWrapper::ptr_t( new StringWrapper(L"eEMPostMonitoringReport") );
+        phaseList->addModel( sw );
+      } break;
+    
+    case eEMTearDownPhase : 
+      {
+        StringWrapper::ptr_t sw = StringWrapper::ptr_t( new StringWrapper(L"eEMTearDown") );
+        phaseList->addModel( sw );
+      } break;
+    }
+
+    ++spIt;
+  }
+
+  paramsList.push_back( phaseList );
     
   executeMethod( 9, paramsList );
 }
@@ -87,9 +139,10 @@ void EMDiscovery::sendActivePhases( const EMPhaseSet& supportedPhases )
 // Method ID = 10
 void EMDiscovery::sendDiscoveryResult( const bool discoveredGenerators )
 {
-  list<ModelBase::ptr_t> paramsList;
+  EXEParamList paramsList;
 
-  //paramsList.Add( discoveredGenerators );
+  BoolWrapper::ptr_t bw = BoolWrapper::ptr_t( new BoolWrapper(discoveredGenerators) );
+  paramsList.push_back( bw );
     
   executeMethod( 10, paramsList );
 }
@@ -97,9 +150,18 @@ void EMDiscovery::sendDiscoveryResult( const bool discoveredGenerators )
 // Method ID = 11
 void EMDiscovery::sendMetricGeneratorInfo( const MetricGenerator::Set& generators )
 {
-  list<ModelBase::ptr_t> paramsList;
+  EXEParamList paramsList;
 
-  //paramsList.Add( generators );
+  ArrayWrapper::ptr_t mgList = ArrayWrapper::ptr_t( new ArrayWrapper() );
+
+  MetricGenerator::Set::const_iterator mgIt = generators.begin();
+  while ( mgIt != generators.end() )
+  {
+    mgList->addModel( *mgIt );
+    ++mgIt;
+  }
+
+  paramsList.push_back( mgList );
     
   executeMethod( 11, paramsList );
 }
@@ -107,7 +169,7 @@ void EMDiscovery::sendMetricGeneratorInfo( const MetricGenerator::Set& generator
 // Method ID = 12
 void EMDiscovery::clientDisconnecting()
 {
-  list<ModelBase::ptr_t> emptyParams;
+  EXEParamList emptyParams;
 
   executeMethod( 12, emptyParams );
 }
@@ -121,17 +183,21 @@ void EMDiscovery::onInterpretMessage( const int& methodID, const JSONTree& jsonT
     {
       if ( userListener )
       {
-          //// Need to convert from enum string values manually here
-          //String enumVal = jsonMethodData[1];
-          //EMInterfaceType faceType = EMInterfaceType.eEMUnknownInface;
+        JSONTreeIt tIt = jsonTree.begin(); // Get past method ID first
+        ++tIt;
 
-          //if (enumVal.Equals("eEMSetup"))            faceType = EMInterfaceType.eEMSetup;
-          //else if (enumVal.Equals("eEMLiveMonitor")) faceType = EMInterfaceType.eEMLiveMonitor;
-          //else if (enumVal.Equals("eEMPostReport"))  faceType = EMInterfaceType.eEMPostReport;
-          //else if (enumVal.Equals("eEMTearDown"))    faceType = EMInterfaceType.eEMTearDown;
+        // Need to convert from enum string values manually here
+        String enumVal = getJSON_String( *tIt );
 
-          //if (faceType != EMInterfaceType.eEMUnknownInface)
-          //    userListener.onCreateInterface( interfaceProviderID, faceType );
+        EMInterfaceType faceType = eEMUnknownInface;
+
+        if ( enumVal.compare(L"eEMSetup") == 0 )            faceType = eEMSetup;
+        else if ( enumVal.compare(L"eEMLiveMonitor") == 0 ) faceType = eEMLiveMonitor;
+        else if ( enumVal.compare(L"eEMPostReport") == 0 )  faceType = eEMPostReport;
+        else if ( enumVal.compare(L"eEMTearDown") == 0  )   faceType = eEMTearDown;
+
+        if (faceType != eEMUnknownInface)
+          userListener->onCreateInterface( interfaceProviderID, faceType );
       }
         
     } break;
@@ -140,17 +206,20 @@ void EMDiscovery::onInterpretMessage( const int& methodID, const JSONTree& jsonT
     {
       if ( userListener )
       {
-          //bool confirmed      = Boolean.Parse(jsonMethodData[1]);
-          //Guid expUniqueID    = new Guid(jsonMethodData[2]);
-          //string expNamedID   = jsonMethodData[3];
-          //string expName      = jsonMethodData[4];
-          //string expDesc      = jsonMethodData[5];
-          //DateTime createTime = DateTime.Parse(jsonMethodData[6]);
+        JSONTreeIt tIt = jsonTree.begin(); // Get past method ID first
+        ++tIt;
 
-          //userListener.onRegistrationConfirmed( interfaceProviderID, 
-          //                                      confirmed, expUniqueID, 
-          //                                      expNamedID, expName, expDesc,
-          //                                      createTime );
+        bool confirmed       = getJSON_bool( *tIt );      ++tIt;
+        UUID expUniqueID     = getJSON_UUID( *tIt );      ++tIt;
+        String expNameID     = getJSON_String( *tIt);     ++tIt;
+        String expName       = getJSON_String( *tIt);     ++tIt;
+        String expDesc       = getJSON_String( *tIt);     ++tIt;
+        TimeStamp createTime = getJSON_TimeStamp( *tIt ); ++tIt;
+
+        userListener->onRegistrationConfirmed( interfaceProviderID, 
+                                               confirmed, expUniqueID, 
+                                               expNameID, expName, expDesc,
+                                               createTime );
       }
     } break;
         
@@ -186,8 +255,11 @@ void EMDiscovery::onInterpretMessage( const int& methodID, const JSONTree& jsonT
     {
       if ( userListener )
       {
-        //string endPoint = jsonMethodData[1];
-        //userListener.onSetStatusMonitorEndpoint( interfaceProviderID, endPoint );
+        JSONTreeIt tIt = jsonTree.begin(); // Get past method ID first
+        ++tIt;
+
+        String endPoint = getJSON_String( *tIt );
+        userListener->onSetStatusMonitorEndpoint( interfaceProviderID, endPoint );
       } 
         
     } break;
@@ -196,8 +268,11 @@ void EMDiscovery::onInterpretMessage( const int& methodID, const JSONTree& jsonT
     {
       if ( userListener )
       {
-        //string reason = jsonMethodData[1];
-        //userListener.onDeregisteringThisClient( interfaceProviderID, reason );
+        JSONTreeIt tIt = jsonTree.begin(); // Get past method ID first
+        ++tIt;
+
+        String reason = getJSON_String( *tIt );
+        userListener->onDeregisteringThisClient( interfaceProviderID, reason );
       }
         
     } break;

@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////
 //
-// Â© University of Southampton IT Innovation Centre, 2012
+// © University of Southampton IT Innovation Centre, 2012
 //
 // Copyright in this software belongs to University of Southampton
 // IT Innovation Centre of Gamma House, Enterprise Road, 
@@ -18,36 +18,41 @@
 // the software.
 //
 //      Created By :            Simon Crowle
-//      Created Date :          15-May-2013
+//      Created Date :          12-Jul-2013
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
 #pragma once
 
+#include "ModelBase.h"
 
-namespace ecc_amqpAPI_spec
+
+
+namespace ecc_commonDataModel
 {
-    /**
-     * The IAMQPMessageDispatchListener interface must be used to receive messages
-     * distributed by the IAMQPMessageDispatch.
-     * 
-     * @author Simon Crowle
-     */
-    class IAMQPMessageDispatchListener 
-    {
-    public:
 
-      typedef boost::shared_ptr<IAMQPMessageDispatchListener> ptr_t;
+  class StringWrapper : public ModelBase
+  {
+  public:
 
-      /**
-        * onSimpleMessageDispatched offers an data event from the AMQP bus that
-        * encapsulates a block of data and the queue through which it was sent.
-        * 
-        * @param queueName - Name of the queue in which the data travelled
-        * @param data      - The data itself
-        */
-      virtual void onSimpleMessageDispatched( const std::string& queueName, const std::string& msg ) =0;
-    };
+    typedef boost::shared_ptr<StringWrapper> ptr_t;
+    
+    StringWrapper( const String& value );
+    
+    virtual ~StringWrapper();
+
+    // ModelBase
+    virtual String toJSON();
+
+    virtual void fromJSON( const JSONTree& jsonTree );
+
+    virtual String toString();
+
+  private:
+    String stringValue;
+
+  };
 
 } // namespace
+

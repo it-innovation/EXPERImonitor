@@ -58,9 +58,13 @@ EMTearDown::EMTearDown( AMQPBasicSubscriptionService::ptr_t sService,
   AMQPFullInterfaceBase::ptr_t fullFace = 
       AMQPFullInterfaceBase::ptr_t( new AMQPFullInterfaceBase( sService, channel ) );
   
-  initialiseAMQP( fullFace, dispatch );
+  setAMQPFaceAndDispatch( fullFace, dispatch );
 }
-  
+
+EMTearDown::~EMTearDown()
+{
+}
+
 // IECCTearDown --------------------------------------------------------------
 void EMTearDown::setUserListener( IEMTearDown_UserListener::ptr_t listener )
 { userListener = listener; }
@@ -69,13 +73,13 @@ void EMTearDown::setUserListener( IEMTearDown_UserListener::ptr_t listener )
 // Method ID = 3
 void EMTearDown::notifyReadyToTearDown()
 {
-  executeMethod( 3, list<ModelBase::ptr_t>() );
+  executeMethod( 3, EXEParamList() );
 }
   
 // Method ID = 4
 void EMTearDown::sendTearDownResult( const bool success )
 {
-  list<ModelBase::ptr_t> paramsList;
+  EXEParamList paramsList;
 
   //paramsList.Add( success );
     

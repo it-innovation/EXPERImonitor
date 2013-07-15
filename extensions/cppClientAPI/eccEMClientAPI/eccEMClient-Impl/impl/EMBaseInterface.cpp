@@ -29,7 +29,12 @@
 #include "AMQPHalfInterfaceBase.h"
 #include "AMQPFullInterfaceBase.h"
 
+#include "ArrayWrapper.h"
+#include "StringWrapper.h"
+
 #include "ECCUtils.h"
+
+#include <sstream>
 
 using namespace ecc_amqpAPI_impl;
 using namespace ecc_commonDataModel;
@@ -38,7 +43,7 @@ using namespace boost;
 using namespace boost::container;
 using namespace boost::property_tree;
 
-
+using namespace std;
 
 
 namespace ecc_emClient_impl
@@ -57,99 +62,105 @@ EMBaseInterface::~EMBaseInterface()
 {
     shutdown();
 }
+
+void EMBaseInterface::initialiseAMQPComms()
+{
+  if ( amqpInterface )
+  {
+    AMQPMessageDispatch::ptr_t msgDispatch = amqpInterface->getMessageDispatch();
+
+    if ( msgDispatch )
+    {
+      msgDispatch->setListener( IAMQPMessageDispatchListener::ptr_t(shared_from_this()) );
+   
+      String faceName = interfaceName + L" " + interfaceVersion;
+    
+      AMQPHalfInterfaceBase::ptr_t halfFace = dynamic_pointer_cast<AMQPHalfInterfaceBase>(amqpInterface);
+      AMQPFullInterfaceBase::ptr_t fullFace = dynamic_pointer_cast<AMQPFullInterfaceBase>(amqpInterface);
+
+      if ( halfFace )
+        halfFace->initialise( faceName, interfaceProviderID, isProvider );
+      else 
+        if ( fullFace )
+          fullFace->initialise( faceName, interfaceProviderID, interfaceUserID, isProvider );
+    }
+  }
+}
   
 void EMBaseInterface::shutdown()
 {
-    if ( amqpInterface )
-    {
-        amqpInterface->shutdown();
-        amqpInterface.reset();
+  if ( amqpInterface )
+  {
+    amqpInterface->shutdown();
+    amqpInterface.reset();
 
-        // Channel is managed elsewhere
-    }
+    // Channel is managed elsewhere
+  }
 }
   
 // IAMQPMessageDispatchListener ----------------------------------------------
-void EMBaseInterface::onSimpleMessageDispatched( const String& queueName, const Byte* data )
+void EMBaseInterface::onSimpleMessageDispatched( const std::string& queueName, const std::string& msg )
 {
-  if ( !queueName.empty() && data != NULL )
+  if ( !queueName.empty() && !msg.empty() )
   {
-    std::string jsonData = fromByteArray( data );
+    ptree              jsonTree;
+    std::istringstream stream( msg );
+    read_json( stream, jsonTree );
 
-    if ( !jsonData.empty() )
-    {
-      ptree              jsonTree;
-      std::istringstream stream( jsonData );
-      read_json( stream, jsonTree );
+    JSONValue value = ( *jsonTree.begin() );
 
-      int methodID = 0;
+    // Pull out method ID from tree
+    int methodID = getJSON_int( value );
 
-      onInterpretMessage( methodID, jsonTree );
-    }
+    onInterpretMessage( methodID, jsonTree );
   }
 }
   
 // Protected methods ---------------------------------------------------------
-void EMBaseInterface::initialiseAMQP( AbstractAMQPInterface::ptr_t eccIFace,
-                                      AMQPMessageDispatch::ptr_t   msgDispatch )
+void EMBaseInterface::setAMQPFaceAndDispatch( AbstractAMQPInterface::ptr_t eccIFace,
+                                              AMQPMessageDispatch::ptr_t   msgDispatch )
 {
   if ( eccIFace && msgDispatch )
   {
     amqpInterface = eccIFace;
-      
-    msgDispatch->setListener( IAMQPMessageDispatchListener::ptr_t(this) );
-    amqpInterface->setMessageDispatch( msgDispatch );
-   
-    String faceName = interfaceName + L" " + interfaceVersion;
-    
-    AMQPHalfInterfaceBase::ptr_t halfFace = dynamic_pointer_cast<AMQPHalfInterfaceBase>(eccIFace);
-    AMQPFullInterfaceBase::ptr_t fullFace = dynamic_pointer_cast<AMQPFullInterfaceBase>(eccIFace);
 
-    if ( halfFace )
-      halfFace->initialise( faceName, interfaceProviderID, isProvider );
-    else 
-      if ( fullFace )
-        fullFace->initialise( faceName, interfaceProviderID, interfaceUserID, isProvider );
+    amqpInterface->setMessageDispatch( msgDispatch ); 
   }
 }
   
-bool EMBaseInterface::executeMethod( const int methodID, 
-                                     const list<ModelBase::ptr_t>& params )
+bool EMBaseInterface::executeMethod( const int methodID, const EXEParamList& params )
 {
   bool result = false;
     
   if ( amqpInterface )
   {
-    list<ModelBase::ptr_t> parameters;
+    // Wrap up all parameters in a JSON array, leading with method ID
+    String payloadData = L"[";
 
-    // Start JSON Array
-    String payloadData = L"[" + intToString( methodID );
+    // Method ID
+    payloadData.append( intToString( methodID ) + L"," );
 
-    if ( params.size() > 0 )
+    // JSON Array of parameters
+    EXEParamList::const_iterator pIt = params.begin();
+    while ( pIt != params.end() )
     {
-      // Add parameters
-      payloadData += L",";
+      ModelBase::ptr_t model = *pIt;
 
-      list<ModelBase::ptr_t>::const_iterator pIt = params.begin();
-      while ( pIt != params.end() )
-      {
-        ModelBase::ptr_t model = *pIt;
+      payloadData.append( model->toJSON() );
+      payloadData.append( L"," );
 
-        String serial = model->toJSON();
+      ++pIt;
+    }
 
-        if ( !serial.empty() )
-        {
-          payloadData += serial;
-          payloadData += L",";
-        }
-        
-        ++pIt;
-      }
+    // Remove last delimiter & wrap up
+    if ( !params.empty() )
+    {
+      unsigned int plLen = payloadData.length();
+      payloadData = payloadData.substr( 0, plLen-1 );
     }
     
-    // End JSON Array
-    payloadData += L"]";
-      
+    payloadData.append( L"]" );
+
     // Send data
     if ( amqpInterface->sendBasicMessage(payloadData) )
       result = true;

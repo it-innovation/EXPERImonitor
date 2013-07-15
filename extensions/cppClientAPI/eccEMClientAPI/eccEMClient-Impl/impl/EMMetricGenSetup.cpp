@@ -58,7 +58,11 @@ EMMetricGenSetup::EMMetricGenSetup( AMQPBasicSubscriptionService::ptr_t sService
   AMQPFullInterfaceBase::ptr_t fullFace = 
       AMQPFullInterfaceBase::ptr_t( new AMQPFullInterfaceBase( sService, channel ) );
   
-  initialiseAMQP( dynamic_pointer_cast<AbstractAMQPInterface>(fullFace), dispatch );
+  setAMQPFaceAndDispatch( dynamic_pointer_cast<AbstractAMQPInterface>(fullFace), dispatch );
+}
+
+EMMetricGenSetup::~EMMetricGenSetup()
+{
 }
   
 // IEMMonitorSetup -----------------------------------------------------------
@@ -69,7 +73,7 @@ void EMMetricGenSetup::setUserListener( IEMSetup_UserListener::ptr_t listener )
 // Method ID = 3
 void EMMetricGenSetup::notifyReadyToSetup()
 {
-  list<ModelBase::ptr_t> emptyParams;
+  EXEParamList emptyParams;
 
   executeMethod( 3, emptyParams );
 }
@@ -77,7 +81,7 @@ void EMMetricGenSetup::notifyReadyToSetup()
 // Method ID = 4
 void EMMetricGenSetup::notifyMetricGeneratorSetupResult( const UUID& genID, const bool success )
 {
-  list<ModelBase::ptr_t> paramsList;
+  EXEParamList paramsList;
 
   //paramsList.Add( genID );
   //paramsList.Add( success );

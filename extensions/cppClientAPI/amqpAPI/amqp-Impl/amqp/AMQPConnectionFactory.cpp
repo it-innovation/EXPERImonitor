@@ -30,7 +30,8 @@
 
 #include <boost/asio.hpp>
 #include <boost/regex.hpp>
-#include <boost/exception/all.hpp>
+
+#include <exception>
 
 using namespace AmqpClient;
 using namespace std;
@@ -56,15 +57,16 @@ namespace ecc_amqpAPI_impl
   {
     bool ipSuccess = false;
 
-    string charAddr = toNarrow( addr );
+    string source = toNarrow( addr );
+    smatch matcher;
     regex  ipPattern( "\\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)" );
 
-    if ( regex_match( charAddr.begin(), charAddr.end(), ipPattern ) )
+    if ( regex_search( source, matcher, ipPattern ) )
     {
       amqpHostIP = addr;
       ipSuccess  = true;
     }
-    else throw_exception( enable_error_info( std::runtime_error( "Failed to parse IP address" ) ) );
+    else throw L"Failed to parse IP address";
 
     return ipSuccess;
   }
@@ -104,7 +106,7 @@ namespace ecc_amqpAPI_impl
   {
     // Safety first
     if ( amqpHostIP.empty() )
-      throw_exception( enable_error_info( std::runtime_error("AMQP Host IP not correct") ) );
+      throw L"AMQP Host IP not correct";
 
     // Try a throw-away connection
     connectionEstablished = false;
@@ -112,7 +114,7 @@ namespace ecc_amqpAPI_impl
     if ( createChannelImpl() ) connectionEstablished = true;
 
     if ( !connectionEstablished )
-      throw_exception( enable_error_info( std::runtime_error("Could not connect to AMQP host") ) );
+      throw L"Could not connect to AMQP host";
   }
 
   /*

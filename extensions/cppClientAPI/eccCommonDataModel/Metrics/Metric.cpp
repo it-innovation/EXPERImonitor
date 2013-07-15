@@ -111,7 +111,30 @@ void Metric::setUnit( Unit::ptr_t unit )
 // ModelBase -----------------------------------------------------------------
 String Metric::toJSON()
 {
-  String json;
+  String json( L"{" );
+
+  json.append( createJSON_Prop( L"uuid", uuidToWide(metricUUID) ) + L"," );
+
+  // MetricType
+  String mt;
+  switch ( metricType )
+  {
+  case NOMINAL: mt = L"NOMINAL"; break;
+
+  case ORDINAL: mt = L"ORDINAL"; break;
+
+  case INTERVAL: mt = L"INTERVAL"; break;
+
+  case RATIO: mt = L"RATIO"; break;
+  }
+
+  json.append( createJSON_Prop( L"metricType", mt ) + L"," );
+
+  // Unit
+  json.append( L"\"unit\":" );
+  json.append( metricUnit->toJSON() );
+
+  json.append( L"}" );
 
   return json;
 }

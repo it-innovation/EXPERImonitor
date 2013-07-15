@@ -66,7 +66,11 @@ void Unit::setName( const String& name )
 // ModelBase -----------------------------------------------------------------
 String Unit::toJSON()
 {
-  String json;
+  String json( L"{" );
+
+  json.append( createJSON_Prop( L"name", unitName ) );
+
+  json.append( L"}" );
 
   return json;
 }

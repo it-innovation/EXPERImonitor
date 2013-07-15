@@ -60,13 +60,13 @@ namespace ecc_amqpAPI_spec
          * 
          * @return - Returns false if the pump was unable to start.
          */
-        virtual bool startPump() = 0;
+        virtual bool startPump() =0;
 
         /**
          * Stops the pump issuing messages through the  IAMQPMessageDispatch instances
          * added to it.
          */
-        virtual void stopPump();
+        virtual void stopPump() =0;
 
         /**
          * Stops the pump and empties any queued messages not currently being sent

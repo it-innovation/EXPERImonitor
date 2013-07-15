@@ -11,18 +11,18 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{CC4FDC88-4273-4477-B895-A943D974BC27}</ProjectGuid>
+    <ProjectGuid>{81CA79C8-9B24-4E0A-B735-F3C37872D203}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>eccCommonDataModel</RootNamespace>
+    <RootNamespace>BasicCPPClient</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
@@ -38,29 +38,28 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IntDir>$(ProjectDir)\$(Configuration)\</IntDir>
-    <TargetName>$(ProjectName)_d</TargetName>
+    <LinkIncremental>true</LinkIncremental>
+    <IntDir>$(ProjectDir)$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IntDir>$(ProjectDir)\$(Configuration)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+    <IntDir>$(ProjectDir)$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(PROJECT_DIR).\..\..\extensions\cppClientAPI\eccEMClientAPI\eccEMClient-Impl;$(PROJECT_DIR).\..\..\extensions\cppClientAPI\eccEMClientAPI\eccEMClient-Spec\listeners;$(PROJECT_DIR).\..\..\extensions\cppClientAPI\eccEMClientAPI\eccEMClient-Spec;$(PROJECT_DIR).\..\..\extensions\cppClientAPI\eccCommonDataModel\Base;$(PROJECT_DIR).\..\..\extensions\cppClientAPI\eccCommonDataModel\Monitor;$(PROJECT_DIR).\..\..\extensions\cppClientAPI\eccCommonDataModel\Metrics;$(PROJECT_DIR).\..\..\extensions\cppClientAPI\eccCommonDataModel\Experiment;$(PROJECT_DIR).\..\..\extensions\cppClientAPI\eccCodeUtils\Utils;$(PROJECT_DIR).\..\..\extensions\cppClientAPI\amqpAPI\amqp-Impl\amqp;$(PROJECT_DIR).\..\..\extensions\cppClientAPI\amqpAPI\amqp-Spec\;$(PROJECT_DIR).\..\..\extensions\cppClientAPI\amqpAPI\rabbit-c-wrapper\src\;$(PROJECT_DIR);$(BOOST_DIR)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
-      <AdditionalIncludeDirectories>$(ProjectDir)\Experiment;$(ProjectDir)\Metrics;$(ProjectDir)\Monitor;$(ProjectDir)\Base;$(ProjectDir)\..\eccCodeUtils\Utils;$(BOOST_DIR);$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(BOOST_DIR)\stage\lib;$(SolutionDir)$(Configuration)\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>rabbitmq_d.lib;SimpleAmqpClient_d.lib;eccCodeUtils_d.lib;amqp-Impl_d.lib;eccCommonDataModel_d.lib;eccEMClient-Impl_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <Lib>
-      <AdditionalLibraryDirectories>$(SolutionDir)\$(Configuration)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>eccCodeUtils_d.lib</AdditionalDependencies>
-    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -69,67 +68,29 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(PROJECT_DIR).\..\..\extensions\cppClientAPI\eccEMClientAPI\eccEMClient-Impl;$(PROJECT_DIR).\..\..\extensions\cppClientAPI\eccEMClientAPI\eccEMClient-Spec\listeners;$(PROJECT_DIR).\..\..\extensions\cppClientAPI\eccEMClientAPI\eccEMClient-Spec;$(PROJECT_DIR).\..\..\extensions\cppClientAPI\eccCommonDataModel\Base;$(PROJECT_DIR).\..\..\extensions\cppClientAPI\eccCommonDataModel\Monitor;$(PROJECT_DIR).\..\..\extensions\cppClientAPI\eccCommonDataModel\Metrics;$(PROJECT_DIR).\..\..\extensions\cppClientAPI\eccCommonDataModel\Experiment;$(PROJECT_DIR).\..\..\extensions\cppClientAPI\eccCodeUtils\Utils;$(PROJECT_DIR).\..\..\extensions\cppClientAPI\amqpAPI\amqp-Impl\amqp;$(PROJECT_DIR).\..\..\extensions\cppClientAPI\amqpAPI\amqp-Spec\;$(PROJECT_DIR).\..\..\extensions\cppClientAPI\amqpAPI\rabbit-c-wrapper\src\;$(PROJECT_DIR);$(BOOST_DIR)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
-      <AdditionalIncludeDirectories>$(ProjectDir)\Experiment;$(ProjectDir)\Metrics;$(ProjectDir)\Monitor;$(ProjectDir)\Base;$(ProjectDir)\..\eccCodeUtils\Utils;$(BOOST_DIR);$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>$(BOOST_DIR)\stage\lib;$(SolutionDir)$(Configuration)\</AdditionalLibraryDirectories>
     </Link>
-    <Lib>
-      <AdditionalLibraryDirectories>$(SolutionDir)\$(Configuration)</AdditionalLibraryDirectories>
-    </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Base\BoolWrapper.h" />
-    <ClInclude Include="Base\ModelBase.h" />
-    <ClInclude Include="Base\ArrayWrapper.h" />
-    <ClInclude Include="Base\StringWrapper.h" />
-    <ClInclude Include="Base\UUIDWrapper.h" />
-    <ClInclude Include="Experiment\Experiment.h" />
-    <ClInclude Include="Metrics\Attribute.h" />
-    <ClInclude Include="Metrics\Entity.h" />
-    <ClInclude Include="Metrics\Measurement.h" />
-    <ClInclude Include="Metrics\MeasurementSet.h" />
-    <ClInclude Include="Metrics\Metric.h" />
-    <ClInclude Include="Metrics\MetricGenerator.h" />
-    <ClInclude Include="Metrics\MetricGroup.h" />
-    <ClInclude Include="Metrics\MetricHelper.h" />
-    <ClInclude Include="Metrics\MetricType.h" />
-    <ClInclude Include="Metrics\Report.h" />
-    <ClInclude Include="Metrics\Unit.h" />
-    <ClInclude Include="Monitor\EMClient.h" />
-    <ClInclude Include="Monitor\EMDataBatch.h" />
-    <ClInclude Include="Monitor\EMInterfaceType.h" />
-    <ClInclude Include="Monitor\EMPhase.h" />
-    <ClInclude Include="Monitor\EMPhaseTimeOut.h" />
-    <ClInclude Include="Monitor\EMPostReportSummary.h" />
+    <ClInclude Include="ECCClientController.h" />
+    <ClInclude Include="EMInterfaceAdapter.h" />
+    <ClInclude Include="EMInterfaceAdapterListener.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Base\BoolWrapper.cpp" />
-    <ClCompile Include="Base\ModelBase.cpp" />
-    <ClCompile Include="Base\ArrayWrapper.cpp" />
-    <ClCompile Include="Base\StringWrapper.cpp" />
-    <ClCompile Include="Base\UUIDWrapper.cpp" />
-    <ClCompile Include="Experiment\Experiment.cpp" />
-    <ClCompile Include="Metrics\Attribute.cpp" />
-    <ClCompile Include="Metrics\Entity.cpp" />
-    <ClCompile Include="Metrics\Measurement.cpp" />
-    <ClCompile Include="Metrics\MeasurementSet.cpp" />
-    <ClCompile Include="Metrics\Metric.cpp" />
-    <ClCompile Include="Metrics\MetricGenerator.cpp" />
-    <ClCompile Include="Metrics\MetricGroup.cpp" />
-    <ClCompile Include="Metrics\MetricHelper.cpp" />
-    <ClCompile Include="Metrics\Report.cpp" />
-    <ClCompile Include="Metrics\Unit.cpp" />
-    <ClCompile Include="Monitor\EMClient.cpp" />
-    <ClCompile Include="Monitor\EMDataBatch.cpp" />
-    <ClCompile Include="Monitor\EMPostReportSummary.cpp" />
+    <ClCompile Include="EntryPoint.cpp" />
+    <ClCompile Include="ECCClientController.cpp" />
+    <ClCompile Include="EMInterfaceAdapter.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>

@@ -39,7 +39,7 @@ namespace ecc_amqpAPI_impl
   class AMQPBasicSubscriptionService;
   // ----------------------------------
 
-  class AMQPBasicSubscriptionProcessor
+  class AMQPBasicSubscriptionProcessor : public boost::enable_shared_from_this<AMQPBasicSubscriptionProcessor>
   {
   public:
     
@@ -51,6 +51,8 @@ namespace ecc_amqpAPI_impl
                                     AMQPMessageDispatch::ptr_t                      dispatch );
     
     virtual ~AMQPBasicSubscriptionProcessor();
+
+    void initialiseSubscription();
 
     UUID getProcessorID();
 
