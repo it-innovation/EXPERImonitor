@@ -33,7 +33,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces.EMDiscovery;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
 
@@ -285,8 +285,7 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
 
     if ( client != null )
     {
-      // DION TO DO: Need now to add these, rather than replace them
-      client.setMetricGenerators( generators );
+      client.appendMetricGenerators( generators );
       
       // Always notify, even if the set is empty
       phaseListener.onClientMetricGeneratorsFound( client, generators );
@@ -313,23 +312,13 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
                                               UUID entityID, 
                                               boolean enabled )
   {
-    
     EMClientEx client = getClient( senderID );
 
     if ( client != null )
     {
-      // DION TO DO (see above method for example technqiues):
-      //
-      // 1) Check the client has an entity with ID 'entityID'
-      //
-      // 2) Find all the MeasurementSets associated with the Entity (MetricHelper class?)
-      //
-      // 3) Update the EMClientEx & EMMeasurementSetInfo classes to enable/disable measurement sets
-      //
-      // 4) Use this new method to update the correct EMMeasurementSetInfo instances
-      //
-      // 5) Find out (using debugging) where this method goes (in the dashboard)
-      phaseListener.onClientEnabledMetricCollection( client, entityID, enabled );
+      // Try enabling/disabling entity (& notify if successful (ie., entity exists))
+      if ( client.setEntityEnabled( entityID, enabled ) )
+        phaseListener.onClientEnabledMetricCollection( client, entityID, enabled );
     }
   }
   

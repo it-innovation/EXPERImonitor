@@ -270,21 +270,24 @@ public class DashMainController extends UFAbstractEventManager
   {
     if ( client != null )
     {
-      Iterator<MetricGenerator> mgIt = newGens.iterator();
-      
       // Pass only new metric generators to EDM
       UUID expID = currentExperiment.getUUID();
+      
+      Iterator<MetricGenerator> mgIt = newGens.iterator();
       while ( mgIt.hasNext() )
       {
         MetricGenerator mg = mgIt.next();
-        try 
-        { expMGAccessor.saveMetricGenerator( mg, expID ); }
-        catch ( Exception e )
-        {
-          String problem = "Failed to store metric generator";
-          mainDashView.addLogMessage( problem );
-          dashMainLog.error( problem );
-        }
+        
+        // Check metric generator has at least one entity
+        if ( !MetricHelper.getAllEntities( mg ).isEmpty() )
+          try 
+          { expMGAccessor.saveMetricGenerator( mg, expID ); }
+          catch ( Exception e )
+          {
+            String problem = "Failed to store metric generator";
+            mainDashView.addLogMessage( problem );
+            dashMainLog.error( problem );
+          }
       }
       
       // Update UI with all metric generators

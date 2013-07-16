@@ -28,6 +28,8 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
 
 import java.util.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Entity;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricHelper;
 
 
 
@@ -44,10 +46,10 @@ public class EMClient
   protected EnumSet<EMPhase> supportedPhases;
   
   // Discovery phase states
-  protected HashSet<MetricGenerator> metricGenerators;
-  protected boolean                  discoveredGenerators = false;
-  protected boolean                  isPushCapable        = false;
-  protected boolean                  isPullCapable        = false;
+  protected HashMap<UUID, MetricGenerator> metricGenerators;
+  protected boolean                        discoveredGenerators = false;
+  protected boolean                        isPushCapable        = false;
+  protected boolean                        isPullCapable        = false;
   
   // Setup phase states
   protected UUID          currentMGSetupID;
@@ -173,7 +175,7 @@ public class EMClient
   {
     HashSet<MetricGenerator> mgCopies = new HashSet<MetricGenerator>();
     
-    Iterator<MetricGenerator> copyIt = metricGenerators.iterator();
+    Iterator<MetricGenerator> copyIt = metricGenerators.values().iterator();
     while ( copyIt.hasNext() )
     {
       MetricGenerator clone = new MetricGenerator( copyIt.next() );
@@ -182,6 +184,30 @@ public class EMClient
     
     return mgCopies;
   }
+  
+  /**
+   * Returns a copy of the entity identified by the UUID. The return reference
+   * will be NULL if it does not exist.
+   * 
+   * @param entID - UUID of the entity required.
+   * @return      - copy of the Entity (null if it does not exist)
+   */
+  public Entity getCopyOfEntity( UUID entID )
+  {
+    Entity target = null;
+    
+    // Find all entities for this client
+    Map<UUID, Entity> allEntities 
+            = MetricHelper.getAllEntities( metricGenerators.values() );
+    
+    // If found, make a copy
+    Entity found = allEntities.get( entID );
+    
+    if ( found != null ) target = new Entity( found );
+    
+    return target;
+  }
+  
   
   /**
    * Returns whether the client has declared it is capable of pushing. This
@@ -220,9 +246,9 @@ public class EMClient
     if ( metricGenerators.isEmpty() )  return false;
     if ( generatorsSetupOK.isEmpty() ) return false;
     
-    Iterator<MetricGenerator> genIt = metricGenerators.iterator();
-    while ( genIt.hasNext() )
-      if ( !generatorsSetupOK.contains( genIt.next().getUUID() ) ) return false;
+    Iterator<UUID> idIt = metricGenerators.keySet().iterator();
+    while ( idIt.hasNext() )
+      if ( !generatorsSetupOK.contains( idIt.next() ) ) return false;
     
     return true;
   }
@@ -297,7 +323,7 @@ public class EMClient
     supportedPhases = EnumSet.noneOf( EMPhase.class );
     timeOutsCalled  = EnumSet.noneOf( EMPhaseTimeOut.class );
     
-    metricGenerators             = new HashSet<MetricGenerator>();
+    metricGenerators             = new HashMap<UUID,MetricGenerator>();
     generatorsSetupOK            = new HashSet<UUID>();
     postReportOutstandingBatches = new HashMap<UUID, EMDataBatch>();
   }

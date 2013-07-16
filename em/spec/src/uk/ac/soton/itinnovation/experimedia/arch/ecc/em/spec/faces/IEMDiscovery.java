@@ -123,15 +123,6 @@ public interface IEMDiscovery
     * to a dashboard view.
     */
     void setStatusMonitorEndpoint( String endPoint );
-    
-    /**
-     * Confirms with the client that the ECC has enabled/disabled metric data 
-     * collection for a specific entity
-     * 
-     * @param entityID - ID of the Entity that was enabled
-     * @param enabled  - Enabled/disabled status
-     */
-    void notifyEntityMetricCollectionEnabled( UUID entityID, boolean enabled );
 
     // User methods ------------------------------------------------------------
     /**

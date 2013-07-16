@@ -259,11 +259,6 @@ public class ECCMonitorTestExecutor extends ECCBaseTestExecutor
   public void onSetStatusMonitorEndpoint( UUID senderID, String endPoint )
   { /*Not implemented in this test*/ }
   
-  @Override
-  public void onEntityMetricCollectionEnabled( UUID senderID, UUID entityID,
-                                               boolean enabled )
-  { /*Not implemented in this test */ }
-  
   // Runnable ------------------------------------------------------------------
   @Override
   public void run()

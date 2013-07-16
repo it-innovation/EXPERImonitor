@@ -223,6 +223,12 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
             liveMonitorFace.pushMetric( report );
     }
 
+    public void sendEntityEnabled( UUID entityID, boolean enabled )
+    {
+      if ( entityID != null && discoveryFace != null )
+        discoveryFace.enableEntityMetricCollection( entityID, enabled );
+    }
+    
     // IEMDiscovery_UserListener -----------------------------------------------
     @Override
     public void onCreateInterface( UUID senderID, EMInterfaceType type )
@@ -407,18 +413,6 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
     public void onSetStatusMonitorEndpoint( UUID senderID,
                                             String endPoint )
     { /* Not implemented in this demo */ }
-    
-   @Override
-    public void onEntityMetricCollectionEnabled( UUID    senderID,
-                                                 UUID    entityID,
-                                                 boolean enabled )
-    {
-        if(senderID !=null)
-        {
-            emiListener.onEntityMetricCollectionEnabled(senderID, entityID, enabled);
-        }
-     
-    }
 
     // IEMMonitorSetup_UserListener --------------------------------------------
     @Override

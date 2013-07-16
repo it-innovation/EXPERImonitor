@@ -178,11 +178,9 @@ public class ECCClientController implements EMIAdapterListener,
     @Override
     public void onPopulateMetricGeneratorInfo()
     {
-       HashSet<MetricGenerator> mgSet = new HashSet<MetricGenerator>();
-       mgSet.add( metricGenerator );
-       
-       emiAdapter.sendMetricGenerators( mgSet );
-   }
+      // Not going to send any metric generators automatically - will wait
+      // for user to input some from the UI
+    }
 
     @Override
     public void onDiscoveryTimeOut()
@@ -328,12 +326,6 @@ public class ECCClientController implements EMIAdapterListener,
     }
     
     @Override
-    public void onEntityMetricCollectionEnabled( UUID senderID, UUID entityID, boolean enabled )
-    {
-    
-    }
-    
-    @Override
     public void onClientViewClosed()
     {
         // Need to notify that we're leaving...
@@ -426,11 +418,14 @@ public class ECCClientController implements EMIAdapterListener,
     @Override
     public void onEntityStatusChanged( UUID entityID, String eName, boolean status )
     {
-        //update entity map
+        // Update entity map
         entityMap.put( entityID, status );
         
-        //Send entity details to client view
+        // Send entity details to client view
         clientView.enableEntity( entityID, eName, status );
+        
+        // Send enablement to ECC
+        emiAdapter.sendEntityEnabled( entityID, status );
     }
 
 }

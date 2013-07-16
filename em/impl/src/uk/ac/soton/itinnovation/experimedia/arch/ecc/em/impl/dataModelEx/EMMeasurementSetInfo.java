@@ -34,14 +34,20 @@ import java.util.Date;
 
 
 public class EMMeasurementSetInfo
-{
+{  
   private MeasurementSet measurementSet;
   private Date           lastPullDate;
   private int            pullCount;
   
+  private volatile boolean clientEntityEnabled; // Client's control (overriding) on sending data
+  private volatile boolean liveEnabled;         // Experimenter's control on capturing data
   
   public EMMeasurementSetInfo( MeasurementSet ms )
-  { measurementSet = ms; }
+  { 
+    measurementSet      = ms;
+    liveEnabled         = true;
+    clientEntityEnabled = true;
+  }
   
   public MeasurementSet getMeasurementSet()
   { return measurementSet; }
@@ -65,4 +71,16 @@ public class EMMeasurementSetInfo
   
   public int getPullCount()
   { return pullCount; }
+  
+  public boolean isLiveEnabled()
+  { return liveEnabled; }
+  
+  public void setLiveEnabled( boolean enable )
+  { liveEnabled = enable; }
+  
+  public boolean isEntityEnabled()
+  { return clientEntityEnabled; }
+  
+  public void setEntityEnabled( boolean enable )
+  { clientEntityEnabled = enable; }
 }

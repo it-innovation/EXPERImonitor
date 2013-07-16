@@ -302,14 +302,6 @@ public class ECCHeadlessClient implements EMIAdapterListener
     { /* Not implemented in this demo */ }
     
     @Override
-    public void onEntityMetricCollectionEnabled( UUID senderID, 
-                                                 UUID entityID, 
-                                                 boolean enabled )
-    {
-        /* Not implemented in this demo */
-    }
-    
-    @Override
     public void onSetupMetricGenerator( UUID genID, Boolean[] resultOUT )
     { /* This demo has opted out of this phase */ }
     

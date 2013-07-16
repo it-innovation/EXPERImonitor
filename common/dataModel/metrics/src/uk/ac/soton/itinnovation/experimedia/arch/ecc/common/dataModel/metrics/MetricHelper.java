@@ -75,73 +75,7 @@ public class MetricHelper
       
       return entity;
     }
-  
-    /**
-     * Returns a collection of measurement sets (if any exist) associated with a specific attribute
-     * from the metric generator collection.
-     * 
-     * @param attr    - Attribute of interest, must not be null.
-     * @param mgenSet - Collection of metric generators to look for measurement sets, must not be null.
-     * @return        - Return collection of measurement sets (will be empty if no measurement sets exist)
-     */
-    public static Map<UUID, MeasurementSet> getMeasurementSetsForAttribute( Attribute attr,
-                                                                            Collection<MetricGenerator> mgenSet )
-    {
-      HashMap<UUID, MeasurementSet> mSets = new HashMap<UUID, MeasurementSet>();
-      
-      if ( attr != null && mgenSet != null )
-      {
-        UUID targetAttID                  = attr.getUUID();
-        Map<UUID, MeasurementSet> allSets = getAllMeasurementSets( mgenSet );
-        Iterator<MeasurementSet> msIt     = allSets.values().iterator();
-        
-        while ( msIt.hasNext() )
-        {
-          MeasurementSet ms = msIt.next();
-          UUID linkedAttrID = ms.getAttributeID();
-          
-          if ( linkedAttrID != null && linkedAttrID.equals(targetAttID) )
-            mSets.put( ms.getID(), ms );
-        }
-      }
-      
-      return mSets;
-    }
-    
-    /**
-     * Returns a collection of measurement sets (if they exist) associated with a specific attribute
-     * from a single metric generator.
-     * 
-     * @param attr - Attribute of interest, must not be null.
-     * @param mgen - Metric generators in which to look for measurement sets, must not be null.
-     * @return     - Return collection of measurement sets (will be empty if no measurement sets exist)
-     */
-    public static MeasurementSet getMeasurementSetForAttribute( Attribute attr,
-                                                                MetricGenerator mgen )
-    {
-      MeasurementSet msTarget = null;
-      
-      if ( attr != null && mgen != null )
-      {
-        Map<UUID, MeasurementSet> allSets = getAllMeasurementSets( mgen );
-        Iterator<MeasurementSet> msIt = allSets.values().iterator();
-        
-        while ( msIt.hasNext() )
-        {
-          MeasurementSet ms = msIt.next();
-          UUID linkedAttrID = ms.getAttributeID();
-          
-          if ( linkedAttrID != null && linkedAttrID.equals( attr.getUUID()) )
-          {
-            msTarget = ms;
-            break;
-          }
-        }
-      }
-      
-      return msTarget;
-    }
-    
+
     /**
      * Returns all the attributes associated with a collection of metric generators.
      * 
@@ -278,6 +212,112 @@ public class MetricHelper
       }
       
       return mSets;
+    }
+    
+    /**
+     * Returns a map of all measurement sets associated with the entity identified by UUID.
+     * 
+     * @param mGens     - Set of metric generators to look in for entity & measurement sets
+     * @param entityID  - Identity of the entity
+     * @return          - Map of the measurement sets found (will be empty if none found)
+     */
+    public static Map<UUID, MeasurementSet> getMeasurementSetsForEntity( UUID entityID,
+                                                                         Collection<MetricGenerator> mgenSet )
+    {
+      HashMap<UUID, MeasurementSet> targetMSets = new HashMap<UUID, MeasurementSet>();
+      
+      if ( !mgenSet.isEmpty() && entityID != null )
+      {
+        Entity entity = getEntityFromID( entityID, mgenSet );
+        
+        // Create a set of required measurement set IDs
+        HashSet<UUID>       attrMSIDs = new HashSet<UUID>();
+        Iterator<Attribute> attIt     = entity.getAttributes().iterator();
+        while ( attIt.hasNext() )
+        {
+          Attribute attr = attIt.next();
+          attrMSIDs.add( attr.getUUID() );
+        }
+        
+        // Pull out all measurement sets associated with attributes of entity
+        Map<UUID, MeasurementSet> allSets = getAllMeasurementSets( mgenSet );
+        Iterator<MeasurementSet>  msIt    = allSets.values().iterator();
+        while ( msIt.hasNext() )
+        {
+          MeasurementSet ms = msIt.next();
+          
+          if ( attrMSIDs.contains(ms.getAttributeID()) )
+            targetMSets.put( ms.getID(), ms );
+        }
+      }
+      
+      return targetMSets;
+    }
+    
+    /**
+     * Returns a collection of measurement sets (if any exist) associated with a specific attribute
+     * from the metric generator collection.
+     * 
+     * @param attr    - Attribute of interest, must not be null.
+     * @param mgenSet - Collection of metric generators to look for measurement sets, must not be null.
+     * @return        - Return collection of measurement sets (will be empty if no measurement sets exist)
+     */
+    public static Map<UUID, MeasurementSet> getMeasurementSetsForAttribute( Attribute attr,
+                                                                            Collection<MetricGenerator> mgenSet )
+    {
+      HashMap<UUID, MeasurementSet> mSets = new HashMap<UUID, MeasurementSet>();
+      
+      if ( attr != null && mgenSet != null )
+      {
+        UUID targetAttID                  = attr.getUUID();
+        Map<UUID, MeasurementSet> allSets = getAllMeasurementSets( mgenSet );
+        Iterator<MeasurementSet> msIt     = allSets.values().iterator();
+        
+        while ( msIt.hasNext() )
+        {
+          MeasurementSet ms = msIt.next();
+          UUID linkedAttrID = ms.getAttributeID();
+          
+          if ( linkedAttrID != null && linkedAttrID.equals(targetAttID) )
+            mSets.put( ms.getID(), ms );
+        }
+      }
+      
+      return mSets;
+    }
+    
+    /**
+     * Returns a collection of measurement sets (if they exist) associated with a specific attribute
+     * from a single metric generator.
+     * 
+     * @param attr - Attribute of interest, must not be null.
+     * @param mgen - Metric generators in which to look for measurement sets, must not be null.
+     * @return     - Return collection of measurement sets (will be empty if no measurement sets exist)
+     */
+    public static MeasurementSet getMeasurementSetForAttribute( Attribute attr,
+                                                                MetricGenerator mgen )
+    {
+      MeasurementSet msTarget = null;
+      
+      if ( attr != null && mgen != null )
+      {
+        Map<UUID, MeasurementSet> allSets = getAllMeasurementSets( mgen );
+        Iterator<MeasurementSet> msIt = allSets.values().iterator();
+        
+        while ( msIt.hasNext() )
+        {
+          MeasurementSet ms = msIt.next();
+          UUID linkedAttrID = ms.getAttributeID();
+          
+          if ( linkedAttrID != null && linkedAttrID.equals( attr.getUUID()) )
+          {
+            msTarget = ms;
+            break;
+          }
+        }
+      }
+      
+      return msTarget;
     }
     
     /**
