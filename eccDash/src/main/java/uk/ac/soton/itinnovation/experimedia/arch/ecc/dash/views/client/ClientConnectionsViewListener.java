@@ -35,4 +35,6 @@ public interface ClientConnectionsViewListener
   void onViewClientSelected( UUID clientID );
   
   void onViewClientDisconnect( UUID clientID, boolean force );
+  
+
 }

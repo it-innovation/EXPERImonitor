@@ -158,8 +158,8 @@ public class ECCClientView extends javax.swing.JFrame {
   public synchronized void enableAddEntity ( boolean enabled )
   { 
       addEntityButton.setEnabled( enabled );
-      disableEntityButton.setEnabled(enabled);
-      enableEntityButton.setEnabled(enabled);
+      disableEntityButton.setEnabled( enabled );
+      enableEntityButton.setEnabled( enabled );
   }   
 
   /**
