@@ -27,24 +27,34 @@
 
 #include "ECCUtils.h"
 
+#include <boost/property_tree/json_parser.hpp>
+
+
+
 
 namespace ecc_commonDataModel
 {
 
-    class ModelBase
-    {
-    public:
-      virtual ~ModelBase();
+  class ModelBase
+  {
+  public:
 
-      virtual void toJSON( String& jsonStrOUT ) =0;
+    typedef boost::shared_ptr<ModelBase> ptr_t;
 
-      virtual void fromJSON( const String& jsonStr ) =0;
+    typedef boost::property_tree::ptree JSONTree;
 
-      virtual String toString() =0;
+    virtual ~ModelBase();
 
-    protected:
-      ModelBase();
+    virtual String toJSON() =0;
 
-    };
+    virtual void fromJSON( const JSONTree& jsonTree ) =0;
+
+    virtual String toString() =0;
+
+  protected:
+
+    ModelBase();
+
+  };
 
 }

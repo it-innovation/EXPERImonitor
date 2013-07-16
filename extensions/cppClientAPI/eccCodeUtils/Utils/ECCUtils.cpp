@@ -29,7 +29,11 @@
 
 #include <boost/locale.hpp>
 #include <boost/uuid/random_generator.hpp>
+#include <boost/uuid/string_generator.hpp>
 #include <boost/uuid/uuid_io.hpp>
+#include <boost/property_tree/json_parser.hpp>
+
+#include <string>
 
 using namespace boost::uuids;
 using namespace boost::locale::conv;
@@ -38,10 +42,22 @@ using namespace std;
 // Inline utility functions
 
 String toWide( const std::string& narrow )
-{ return to_utf<wchar_t>( narrow, "Latin1" ); }
+{ 
+  String target;
+  
+  target.assign( narrow.begin(), narrow.end() );
 
-std::string toNarrow( const std::wstring& wide )
-{ return from_utf( wide, "Latin1" ); }
+  return target;
+}
+
+std::string toNarrow( const String& wide )
+{ 
+  std::string target;
+
+  target.assign( wide.begin(), wide.end() );
+
+  return target; 
+}
 
 string uuidToNarrow( const UUID& id )
 {
@@ -59,10 +75,141 @@ String uuidToWide( const UUID& id )
   return ws.str();
 }
 
-static boost::uuids::random_generator uuidGenerator;
+const Byte* toUnManagedByteArray( const String& wide )
+{
+  const Byte* byteArray = NULL;
+
+  if ( wide.size() > 0 )
+  {
+    const string narrow = toNarrow( wide );
+
+    byteArray = narrow.c_str();
+  }
+
+  return byteArray;
+}
+
+std::string fromByteArray( const Byte* byteArray )
+{
+  return to_utf<char>( byteArray, UTF_CHAR_SET );
+}
+
+String intToString( const int& i )
+{
+  String result;
+
+  wchar_t sValue[64];
+  _itow( i, sValue, 10 );
+
+  return String( sValue );
+}
+
+String longToString( const long& l )
+{
+  String result;
+
+  wchar_t sValue[64];
+  _ltow( l, sValue, 10 );
+
+  return String( sValue );
+}
+
+int stringToInt( const String& s )
+{ return stoi( s ); }
 
 UUID createRandomUUID()
-{ return uuidGenerator(); }
+{
+  boost::uuids::random_generator uuidRandomGenerator;
+
+  return uuidRandomGenerator(); 
+}
+
+UUID createUUID( const String& idValue )
+{ 
+  boost::uuids::string_generator uuidStringGenerator;
+
+  return uuidStringGenerator( idValue );
+}
 
 TimeStamp getCurrentTime()
-{ return boost::posix_time::second_clock::local_time(); }
+{
+  return boost::posix_time::microsec_clock::local_time(); 
+}
+
+String timeStampToString( const TimeStamp& ts )
+{
+  // Manually fiddle around with this format for correct JSON
+  string timeVal = to_iso_extended_string( ts );
+  boost::replace_all( timeVal, "T", " ");
+
+  std::size_t fracIndex = timeVal.find( '.' );
+  if ( fracIndex == string::npos )
+    timeVal.append( ".000" );
+  else
+    timeVal = timeVal.substr( 0, fracIndex + 4 );
+
+  return toWide( timeVal );
+}
+
+TimeStamp stringToTimeStamp( const String& tString )
+{
+  return boost::posix_time::time_from_string( toNarrow(tString) );
+}
+
+String getJSON_String( const boost::property_tree::ptree::value_type& vt )
+{
+  string jv = vt.second.get_value<std::string>();
+
+  return toWide( jv );
+}
+
+int getJSON_int( const boost::property_tree::ptree::value_type& vt )
+{
+  string jv = vt.second.get_value<std::string>();
+
+  return stoi( jv );
+}
+
+bool getJSON_bool( const boost::property_tree::ptree::value_type& vt )
+{
+  return vt.second.get_value<bool>();
+}
+
+UUID getJSON_UUID( const boost::property_tree::ptree::value_type& vt )
+{
+  return vt.second.get_value<UUID>();
+}
+
+TimeStamp getJSON_TimeStamp( const boost::property_tree::ptree::value_type& vt )
+{
+  String timeVal = getJSON_String( vt );
+
+  return stringToTimeStamp( timeVal );
+}
+
+String createJSON_Prop( const String& prop, const String& val )
+{
+  String json( L"\"" + prop + L"\":" );
+
+  json.append( L"\"" + val + L"\"" );
+
+  return json;
+}
+
+String createJSON_Prop( const String& prop, const long& val )
+{
+  String json( L"\"" + prop + L"\":" );
+
+  json.append( longToString(val) );
+
+  return json;
+}
+
+String createJSON_Prop_bool( const String& prop, const bool& val )
+{
+  String json( L"\"" + prop + L"\":" );
+
+  json.append( val ? L"true" : L"false" );
+
+  return json;
+}

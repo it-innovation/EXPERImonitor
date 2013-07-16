@@ -45,10 +45,10 @@ namespace ecc_amqpAPI_impl
   {
   }
 
-  bool AMQPFullInterfaceBase::initialise( wstring     iName,
-                                          uuids::uuid providerID,
-                                          uuids::uuid userID,
-                                          bool        asProvider )
+  bool AMQPFullInterfaceBase::initialise( const String& iName,
+                                          const UUID&   providerID,
+                                          const UUID&   userID,
+                                          const bool    asProvider )
   {
     interfaceReady = false;
       
@@ -80,17 +80,13 @@ namespace ecc_amqpAPI_impl
   }
 
   // Private methods ---------------------------------------------------------
-  bool AMQPFullInterfaceBase::setInitParams( wstring     iName,
-                                             uuids::uuid providerID,
-                                             uuids::uuid userID,
-                                             bool        asProvider)
+  bool AMQPFullInterfaceBase::setInitParams( const String&  iName,
+                                             const UUID&    providerID,
+                                             const UUID&    userID,
+                                             const bool     asProvider )
   {
     // Safety first
-    if ( iName.empty()       ||
-         providerID.is_nil() ||
-         userID.is_nil()     ||
-         amqpChannel == NULL )
-        return false;
+    if ( iName.empty() || !amqpChannel ) return false;
       
     createInterfaceExchangeNames( iName );
       

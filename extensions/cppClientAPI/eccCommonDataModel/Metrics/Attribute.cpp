@@ -108,11 +108,24 @@ void Attribute::setDescription( const String& description )
 
 
 // ModelBase -----------------------------------------------------------------
-void Attribute::toJSON( String& jsonStrOUT )
+String Attribute::toJSON()
 {
+  String json( L"{" );
+
+  json.append( createJSON_Prop( L"uuid", uuidToWide(attrID) ) + L"," );
+
+  json.append( createJSON_Prop( L"entityUUID", uuidToWide(entityID) ) + L"," );
+
+  json.append( createJSON_Prop( L"name", attrName ) + L"," );
+
+  json.append( createJSON_Prop( L"description", attrDescription ) );
+
+  json.append( L"}" );
+
+  return json;
 }
 
-void Attribute::fromJSON( const String& jsonStr )
+void Attribute::fromJSON( const ModelBase::JSONTree& jsonTree )
 {
 }
 

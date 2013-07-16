@@ -40,15 +40,15 @@ namespace ecc_commonDataModel
      * Metrics are organised within metric groups. It is possible to define a hierarchy
      * of metric groups as well, as a metric group can contain a set of metric groups.
      */
-    class MetricGenerator : ModelBase
+    class MetricGenerator : public ModelBase
     {
     public:
       
       typedef boost::shared_ptr<MetricGenerator> ptr_t;
 
-      typedef boost::unordered_set<MetricGenerator::ptr_t> Set;
+      typedef boost::container::set<MetricGenerator::ptr_t> Set;
 
-      typedef boost::unordered_map<UUID,MetricGenerator::ptr_t> Map;
+      typedef boost::container::map<UUID,MetricGenerator::ptr_t> Map;
 
       /**
         * Default constructor, which sets a random UUID for the object instance.
@@ -144,9 +144,9 @@ namespace ecc_commonDataModel
       void addEntities( const Entity::Set& entities );
 
       // ModelBase -----------------------------------------------------------------
-      virtual void toJSON( String& jsonStrOUT );
+      virtual String toJSON();
 
-      virtual void fromJSON( const String& jsonStr );
+      virtual void fromJSON( const ModelBase::JSONTree& jsonTree );
 
       virtual String toString();
 

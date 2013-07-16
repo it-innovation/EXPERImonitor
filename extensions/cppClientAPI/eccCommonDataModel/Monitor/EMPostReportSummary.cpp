@@ -88,11 +88,14 @@ Report::ptr_t EMPostReportSummary::getReport( const uuid& measurementID )
 }
 
 // ModelBase -----------------------------------------------------------------
-void EMPostReportSummary::toJSON( String& jsonStrOUT )
+String EMPostReportSummary::toJSON()
 {
+  String json;
+
+  return json;
 }
 
-void EMPostReportSummary::fromJSON( const String& jsonStr )
+void EMPostReportSummary::fromJSON( const JSONTree& jsonTree )
 {
 }
 

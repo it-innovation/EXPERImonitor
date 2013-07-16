@@ -41,17 +41,17 @@ namespace ecc_commonDataModel
    * 
    * @author Vegard Engen
    */
-  class Measurement : ModelBase
+  class Measurement : public ModelBase
   {
   public:
 
     typedef boost::shared_ptr<Measurement> ptr_t;
 
-    typedef boost::unordered_set<Measurement::ptr_t> Set;
+    typedef boost::container::set<Measurement::ptr_t> Set;
 
-    typedef boost::unordered_map<UUID,Measurement::ptr_t> Map_ID;
+    typedef boost::container::map<UUID,Measurement::ptr_t> Map_ID;
 
-    typedef boost::unordered_map<TimeStamp,Measurement::ptr_t> Map_Time;
+    typedef boost::container::map<TimeStamp,Measurement::ptr_t> Map_Time;
 
     /**
       * Default constructor, which sets a random UUID for the object instance and
@@ -136,9 +136,9 @@ namespace ecc_commonDataModel
     void setSynchronised( const bool& synchronised );
 
     // ModelBase -----------------------------------------------------------------
-    virtual void toJSON( String& jsonStrOUT );
+    virtual String toJSON();
 
-    virtual void fromJSON( const String& jsonStr );
+    virtual void fromJSON( const ModelBase::JSONTree& jsonTree );
 
     virtual String toString();
 

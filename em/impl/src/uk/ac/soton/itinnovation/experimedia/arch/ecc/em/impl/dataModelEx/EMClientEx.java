@@ -39,7 +39,7 @@ import java.util.*;
 
 public class EMClientEx extends EMClient
 {
-  private final Object pullLock = new Object();
+  private final Object pullLock   = new Object();
  
   private IEMDiscovery      discoveryFace;
   private IEMMetricGenSetup setupFace;
@@ -147,30 +147,97 @@ public class EMClientEx extends EMClient
   public void setGeneratorDiscoveryResult( boolean discovered )
   { discoveredGenerators = discovered; }
   
-  public void setMetricGenerators( Set<MetricGenerator> generators )
+  public void appendMetricGenerators( Set<MetricGenerator> generators )
   {    
     if ( generators != null )
     {
-      metricGenerators = (HashSet<MetricGenerator>) generators;
+      // Find out which of these generators are new for this client
+      HashSet<MetricGenerator> newGenerators = new HashSet<MetricGenerator>();
+      Set<UUID> existingGenIDs               = metricGenerators.keySet();
       
-      msSetInfoCache.clear();
-      generatorsToSetup.clear();
-      generatorsSetupOK.clear();
+      Iterator<MetricGenerator> metIt = generators.iterator();
+      while ( metIt.hasNext() )
+      {
+        MetricGenerator mg = metIt.next();
+        if ( !existingGenIDs.contains(mg.getUUID()) )
+          newGenerators.add( mg );
+      }
       
-      // Cache measurement set info for Live Monitoring state later
-      Map<UUID,MeasurementSet> mSets = MetricHelper.getAllMeasurementSets( metricGenerators );
+      // Make ready the new metric generators for subsequent phases & add to
+      // existing collection
+      metIt = newGenerators.iterator();
+      while ( metIt.hasNext() )
+      {
+        MetricGenerator mGen = metIt.next();
+        UUID genID = mGen.getUUID();
+        
+        generatorsToSetup.add( genID );
+        metricGenerators.put( genID, mGen );
+      }
+      
+      // Cache all new measurement set info for Live Monitoring state later
+      Map<UUID,MeasurementSet> mSets = 
+              MetricHelper.getAllMeasurementSets( metricGenerators.values() );
+      
+      // Add new measurement sets to the info cache
       Iterator<MeasurementSet> msIt = mSets.values().iterator();
       while ( msIt.hasNext() )
       {
         MeasurementSet ms = msIt.next();
-        msSetInfoCache.put( ms.getID(), new EMMeasurementSetInfo(ms) );
-      }
-     
-      // Copy UUIDs of generators into set-up set
-      Iterator<MetricGenerator> genIt = metricGenerators.iterator();
-      while ( genIt.hasNext() )
-        generatorsToSetup.add( genIt.next().getUUID() );
+        UUID msID = ms.getID();
+        
+        if ( !msSetInfoCache.containsKey(msID) )
+          msSetInfoCache.put( ms.getID(), new EMMeasurementSetInfo(ms) );
+      }      
     }
+  }
+  
+  public boolean setEntityEnabled( UUID entID, boolean enabled )
+  {
+    boolean success = false;
+    
+    // Find entity first
+    Map<UUID, MeasurementSet> entityMSets = 
+            MetricHelper.getMeasurementSetsForEntity( entID, metricGenerators.values() );
+    
+    // If we've found measurement sets, update their measurement set infos
+    if ( !entityMSets.isEmpty() )
+    {
+      Iterator<UUID> msIDIt = entityMSets.keySet().iterator();
+      while ( msIDIt.hasNext() )
+      {
+        EMMeasurementSetInfo msInfo = msSetInfoCache.get( msIDIt.next() );
+
+        if ( msInfo != null )
+          msInfo.setEntityEnabled( enabled );
+      }
+    }
+    
+    return success;
+  }
+  
+  public boolean setEntityLiveEnabled( UUID entID, boolean enabled )
+  {
+    boolean success = false;
+    
+    // Find entity first
+    Map<UUID, MeasurementSet> entityMSets = 
+            MetricHelper.getMeasurementSetsForEntity( entID, metricGenerators.values() );
+    
+    // If we've found measurement sets, update their measurement set infos
+    if ( !entityMSets.isEmpty() )
+    {
+      Iterator<UUID> msIDIt = entityMSets.keySet().iterator();
+      while ( msIDIt.hasNext() )
+      {
+        EMMeasurementSetInfo msInfo = msSetInfoCache.get( msIDIt.next() );
+
+        if ( msInfo != null )
+            msInfo.setLiveEnabled( enabled );
+      }
+    }
+    
+    return success;
   }
   
   // Setup phase state ---------------------------------------------------------  
@@ -343,10 +410,16 @@ public class EMClientEx extends EMClient
     EMMeasurementSetInfo info = msSetInfoCache.get( msID );
     if ( info == null ) return false;
     
+    // If client has 'disabled' the entity, then skip this measurement
+    if ( !info.isEntityEnabled() ) return false;
+    
+    // If the ECC dashboard user has stopped live monitoring for this measuement, skip it
+    if ( !info.isLiveEnabled() ) return false;    
+    
+    // Check measurement rule next
     MeasurementSet ms = info.getMeasurementSet();
     if ( ms == null ) return false;
     
-    // Check measurement rule first
     boolean ruleOK = false;
     switch ( ms.getMeasurementRule() )
     {        

@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////
 //
-// © University of Southampton IT Innovation Centre, 2012
+// © University of Southampton IT Innovation Centre, 2013
 //
 // Copyright in this software belongs to University of Southampton
 // IT Innovation Centre of Gamma House, Enterprise Road, 
@@ -18,18 +18,27 @@
 // the software.
 //
 //      Created By :            Simon Crowle
-//      Created Date :          20-June-2013
+//      Created Date :          04-Jul-2013
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
 #pragma once
 
-namespace ecc_em_spec_faces
+#include "IEMLiveMonitor_UserListener.h"
+
+#include "Report.h"
+
+
+
+
+namespace ecc_emClient_spec
 {
 
     class IEMLiveMonitor
     {
+    public:
+
         typedef boost::shared_ptr<IEMLiveMonitor> ptr_t;
 
 
@@ -57,7 +66,7 @@ namespace ecc_em_spec_faces
          * @param report - Instance of a Report containing measurement data (for now,
          * for a single time frame).
          */
-        virtual void pushMetric( Report report ) =0;
+        virtual void pushMetric( ecc_commonDataModel::Report::ptr_t report ) =0;
 
         /**
          * Tells the EM that this user has finished pushing Reports.
@@ -77,7 +86,7 @@ namespace ecc_em_spec_faces
          * @param report  - Instance of a Report containing measurement data (for now,
          * for a single time frame).
          */
-        virtual void sendPulledMetric( Report report ) =0;
+        virtual void sendPulledMetric( ecc_commonDataModel::Report::ptr_t report ) =0;
     };
 
 } // namespace

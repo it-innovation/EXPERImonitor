@@ -38,13 +38,17 @@ using namespace boost;
 
 namespace ecc_amqpAPI_impl
 {
-  AMQPMessageDispatchPump::AMQPMessageDispatchPump( wstring pName, ePumpPriority priority )
+  AMQPMessageDispatchPump::AMQPMessageDispatchPump( const String& pName, const ePumpPriority& priority )
   {
     isDispatchPumping = false;
     dispatchesWaiting = false;
 
     pumpName     = pName;
     pumpPriority = priority;
+  }
+
+  AMQPMessageDispatchPump::~AMQPMessageDispatchPump()
+  {
   }
   
   // IAMQPMessageDispatchPump --------------------------------------------------
@@ -96,7 +100,7 @@ namespace ecc_amqpAPI_impl
     
     if ( amqpDisp )
     {
-      amqpDisp->setPump( AMQPMessageDispatchPump::ptr_t(this) );
+      amqpDisp->setPump( shared_from_this() );
       
       {
         lock_guard<mutex> lock( listMutex );
@@ -133,7 +137,8 @@ namespace ecc_amqpAPI_impl
       // Thread naming and prioritisation is not possible at Boost level; platform
       // specific code needs to be injected here at some point
 
-      pumpThread = thread_ptr( new thread( &AMQPMessageDispatchPump::run, this ) );
+      pumpThread = thread_ptr( new thread( &AMQPMessageDispatchPump::run, 
+                               shared_from_this() ) );
 
       isDispatchPumping = true;
     }

@@ -135,7 +135,7 @@ void MetricGenerator::addMetricGroup( MetricGroup::ptr_t metricGroup )
     
 void MetricGenerator::addMetricGroups( const MetricGroup::Set& metricGroups )
 {
-  MetricGroup::Set::iterator mgIt = metricGroups.begin();
+  MetricGroup::Set::const_iterator mgIt = metricGroups.begin();
   while ( mgIt != metricGroups.end() )
   {
     MetricGroup::ptr_t mg = *mgIt;
@@ -144,8 +144,6 @@ void MetricGenerator::addMetricGroups( const MetricGroup::Set& metricGroups )
 
     ++mgIt;
   }
-
-  mgMetricGroups.insert( metricGroups.begin(), metricGroups.end() );
 }
     
 void MetricGenerator::addEntity( Entity::ptr_t entity )
@@ -155,7 +153,7 @@ void MetricGenerator::addEntity( Entity::ptr_t entity )
 
 void MetricGenerator::addEntities( const Entity::Set& entities )
 {
-  Entity::Set::iterator entIt = entities.begin();
+  Entity::Set::const_iterator entIt = entities.begin();
   while ( entIt != entities.end() )
   {
     Entity::ptr_t entity = *entIt;
@@ -164,16 +162,65 @@ void MetricGenerator::addEntities( const Entity::Set& entities )
 
     ++entIt;
   }
-
-  mgEntities.insert( entities.begin(), entities.end() );
 }
 
 // ModelBase -----------------------------------------------------------------
-void MetricGenerator::toJSON( String& jsonStrOUT )
+String MetricGenerator::toJSON()
 {
+  String json( L"{" );
+
+  json.append( createJSON_Prop( L"uuid", uuidToWide(mgID) ) + L"," );
+
+  json.append( createJSON_Prop( L"name", mgName ) + L"," );
+
+  json.append( createJSON_Prop( L"description", mgDescription ) + L"," );
+
+  // Metric Groups
+  json.append( L"\"metricGroups\":[" );
+
+  MetricGroup::Set::const_iterator mgIt = mgMetricGroups.begin();
+  while ( mgIt != mgMetricGroups.end() )
+  {
+    json.append( (*mgIt)->toJSON() + L"," );
+
+    ++mgIt;
+  }
+
+  // Snip off trailing delimiter
+  if ( !mgMetricGroups.empty() )
+  {
+    unsigned int jLen = json.length();
+    json = json.substr( 0, jLen-1 );
+  }
+
+  json.append( L"]," );
+
+  // Entities
+  json.append( L"\"entities\":[" );
+
+  Entity::Set::const_iterator entIt = mgEntities.begin();
+  while ( entIt != mgEntities.end() )
+  {
+    json.append( (*entIt)->toJSON() + L"," );
+
+    ++entIt;
+  }
+
+  // Snip off trailing delimiter
+  if ( !mgEntities.empty() )
+  {
+    int jLen = json.length();
+    json = json.substr( 0, jLen-1 );
+  }
+
+  json.append( L"]" );
+
+  json.append( L"}" );
+
+  return json;
 }
 
-void MetricGenerator::fromJSON( const String& jsonStr )
+void MetricGenerator::fromJSON( const ModelBase::JSONTree& jsonTree )
 {
 }
 

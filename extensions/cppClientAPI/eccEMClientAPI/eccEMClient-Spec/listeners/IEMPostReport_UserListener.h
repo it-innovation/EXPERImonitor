@@ -25,47 +25,52 @@
 
 #pragma once
 
-#include <boost/shared_ptr.hpp>
-#include <boost/uuid/uuid.hpp>
+#include "EMDataBatch.h"
+
+#include "ECCUtils.h"
 
 
 
-namespace ecc_em_spec_faces_listeners
+
+namespace ecc_emClient_spec
 {
-    /**
-     * IEMPostReport_UserListener is a user client listener that listens to the EM
-     * for post-report data generation requests.
-     * 
-     * @author sgc
-     */
-    class IEMPostReport_UserListener
-    {
-        typedef boost::shared_ptr<IEMPostReport_UserListener> ptr_t;
+/**
+  * IEMPostReport_UserListener is a user client listener that listens to the EM
+  * for post-report data generation requests.
+  * 
+  * @author sgc
+  */
+class IEMPostReport_UserListener
+{
+public:
 
-        /**
-         * Request from the EM to generate a post-report summary
-         * 
-         * @param senderID - ID of the EM
-         */
-        virtual void onRequestPostReportSummary( boost::uuids::uuid senderID ) =0;
+    typedef boost::shared_ptr<IEMPostReport_UserListener> ptr_t;
+
+    /**
+      * Request from the EM to generate a post-report summary
+      * 
+      * @param senderID - ID of the EM
+      */
+    virtual void onRequestPostReportSummary( const UUID& senderID ) =0;
   
-        /**
-         * Request from the EM for the user client to generate metric data based
-         * on the specification of the EMDataBatch instance.
-         * 
-         * @param senderID  - ID of the EM
-         * @param reqBatch  - Instance of the data batch required by the EM
-         */
-        virtual void onRequestDataBatch( boost::uuids::uuid senderID, EMDataBatch reqBatch ) =0;
+    /**
+      * Request from the EM for the user client to generate metric data based
+      * on the specification of the EMDataBatch instance.
+      * 
+      * @param senderID  - ID of the EM
+      * @param reqBatch  - Instance of the data batch required by the EM
+      */
+    virtual void onRequestDataBatch( const UUID& senderID, 
+                                     ecc_commonDataModel::EMDataBatch::ptr_t reqBatch ) =0;
   
-        /**
-         * Notification by the EM that time has run out for the client user to
-         * send the batched data requested (identified by the ID) by the EM.
-         * 
-         * @param senderID  - ID of the EM
-         * @param batchID   - ID of the batch data requested
-         */
-        virtual void notifyReportBatchTimeOut( boost::uuids::uuid senderID, boost::uuids::uuid batchID ) =0;
-    };
+    /**
+      * Notification by the EM that time has run out for the client user to
+      * send the batched data requested (identified by the ID) by the EM.
+      * 
+      * @param senderID  - ID of the EM
+      * @param batchID   - ID of the batch data requested
+      */
+    virtual void notifyReportBatchTimeOut( const UUID& senderID, const UUID& batchID ) =0;
+};
 
 } // namespace

@@ -226,13 +226,6 @@ public class ECCClientController implements EMIAdapterListener,
     { clientView.addLogMessage( "Got discovery time-out message" ); }
     
     @Override
-    public void onEntityMetricCollectionEnabled( UUID senderID, 
-                                                 UUID entityID, 
-                                                 boolean enabled )
-    {
-        /* Not implemented in this dmeo */
-    }
-    @Override
     public void onSetupMetricGenerator( UUID genID, Boolean[] resultOUT )
     {
         clientView.setStatus( "Setting up generators" );

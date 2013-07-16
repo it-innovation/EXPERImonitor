@@ -84,7 +84,11 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Base\BoolWrapper.h" />
     <ClInclude Include="Base\ModelBase.h" />
+    <ClInclude Include="Base\ArrayWrapper.h" />
+    <ClInclude Include="Base\StringWrapper.h" />
+    <ClInclude Include="Base\UUIDWrapper.h" />
     <ClInclude Include="Experiment\Experiment.h" />
     <ClInclude Include="Metrics\Attribute.h" />
     <ClInclude Include="Metrics\Entity.h" />
@@ -107,7 +111,11 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Base\BoolWrapper.cpp" />
     <ClCompile Include="Base\ModelBase.cpp" />
+    <ClCompile Include="Base\ArrayWrapper.cpp" />
+    <ClCompile Include="Base\StringWrapper.cpp" />
+    <ClCompile Include="Base\UUIDWrapper.cpp" />
     <ClCompile Include="Experiment\Experiment.cpp" />
     <ClCompile Include="Metrics\Attribute.cpp" />
     <ClCompile Include="Metrics\Entity.cpp" />

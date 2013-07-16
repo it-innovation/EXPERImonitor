@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////
 //
-// © University of Southampton IT Innovation Centre, 2012
+// © University of Southampton IT Innovation Centre, 2013
 //
 // Copyright in this software belongs to University of Southampton
 // IT Innovation Centre of Gamma House, Enterprise Road, 
@@ -25,7 +25,15 @@
 
 #pragma once
 
-namespace ecc_em_spec_faces
+#include "IEMDiscovery_UserListener.h"
+
+#include "MetricGenerator.h"
+#include "EMPhase.h"
+
+
+
+
+namespace ecc_emClient_spec
 {
 
     /**
@@ -36,6 +44,8 @@ namespace ecc_em_spec_faces
      */
     class IEMDiscovery
     {
+    public:
+
         typedef boost::shared_ptr<IEMDiscovery> ptr_t;
 
 
@@ -45,7 +55,7 @@ namespace ecc_em_spec_faces
          * 
          * @param listener - Implementation of the 'user' side listener
          */
-        virtual void setUserListener(IEMDiscovery_UserListener::ptr_t listener) =0;
+        virtual void setUserListener( IEMDiscovery_UserListener::ptr_t listener ) =0;
 
         // User methods --------------------------------------------------------------
         /**
@@ -60,18 +70,18 @@ namespace ecc_em_spec_faces
         * 
         * @param supportedPhases - a list of the monitoring phases supported.
         */
-        virtual void sendActivePhases(std::hash_set<EMPhase> supportedPhases) =0;
+        virtual void sendActivePhases( const ecc_commonDataModel::EMPhaseSet& supportedPhases ) =0;
 
         /**
         * Send the provider with the result of the user's search for metric generators.
         */
-        virtual void sendDiscoveryResult(bool discoveredGenerators) =0;
+        virtual void sendDiscoveryResult( const bool discoveredGenerators ) =0;
 
         /**
         * Sends the provider a model of all the metric generators the user currently
         * has available.
         */
-        virtual void sendMetricGeneratorInfo(std::hash_set<MetricGenerator> generators) =0;
+        virtual void sendMetricGeneratorInfo( const ecc_commonDataModel::MetricGenerator::Set& generators ) =0;
 
         /**
         * Notify the EM that the user is disconnecting.

@@ -141,11 +141,26 @@ void Measurement::setSynchronised( const bool& synchronised )
 }
 
 // ModelBase -----------------------------------------------------------------
-void Measurement::toJSON( String& jsonStrOUT )
+String Measurement::toJSON()
 {
+  String json( L"{" );
+
+  json.append( createJSON_Prop( L"uuid", uuidToWide(measurementUUID) ) + L"," );
+
+  json.append( createJSON_Prop( L"measurementSetUUID", uuidToWide(measurementSetUUID) ) + L"," );
+
+  json.append( createJSON_Prop( L"timeStamp", timeStampToString(measurementTimeStamp) ) + L"," );
+
+  json.append( createJSON_Prop( L"value", measurementValue ) + L"," );
+
+  json.append( createJSON_Prop_bool( L"synchronised", measurementSynchronised ) );
+
+  json.append( L"}" );
+
+  return json;
 }
 
-void Measurement::fromJSON( const String& jsonStr )
+void Measurement::fromJSON( const ModelBase::JSONTree& jsonTree )
 {
 }
 

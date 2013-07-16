@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////
 //
-// © University of Southampton IT Innovation Centre, 2012
+// © University of Southampton IT Innovation Centre, 2013
 //
 // Copyright in this software belongs to University of Southampton
 // IT Innovation Centre of Gamma House, Enterprise Road, 
@@ -18,14 +18,19 @@
 // the software.
 //
 //      Created By :            Simon Crowle
-//      Created Date :          20-June-2013
+//      Created Date :          04-Jul-2013
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
 #pragma once
 
-namespace ecc_em_spec_faces
+#include "IEMTearDown_UserListener.h"
+
+
+
+
+namespace ecc_emClient_spec
 {
 
     /**
@@ -36,6 +41,8 @@ namespace ecc_em_spec_faces
      */
     class IEMTearDown
     {
+    public:
+
         typedef boost::shared_ptr<IEMTearDown> ptr_t;
 
         // Listeners -----------------------------------------------------------------
@@ -57,7 +64,7 @@ namespace ecc_em_spec_faces
          * 
          * @param success 
          */
-        virtual void sendTearDownResult( bool success ) =0;
+        virtual void sendTearDownResult( const bool success ) =0;
     };
 
 } // namespace

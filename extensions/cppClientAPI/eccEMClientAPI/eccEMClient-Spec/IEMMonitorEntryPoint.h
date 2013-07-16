@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////
 //
-// © University of Southampton IT Innovation Centre, 2012
+// © University of Southampton IT Innovation Centre, 2013
 //
 // Copyright in this software belongs to University of Southampton
 // IT Innovation Centre of Gamma House, Enterprise Road, 
@@ -18,14 +18,14 @@
 // the software.
 //
 //      Created By :            Simon Crowle
-//      Created Date :          20-June-2013
+//      Created Date :          04-Jul-2013
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
 #pragma once
 
-namespace ecc_em_spec_faces
+namespace ecc_emClient_spec
 {
 
     /**
@@ -38,6 +38,8 @@ namespace ecc_em_spec_faces
      */
     class IEMMonitorEntryPoint
     {
+    public:
+
         typedef boost::shared_ptr<IEMMonitorEntryPoint> ptr_t;
 
 
@@ -49,7 +51,7 @@ namespace ecc_em_spec_faces
         * @param userID    -- UUID that uniquely identifies the user connecting
         * @param userName  -- Informal label identifying the connecting user
         */
-        virtual void registerAsEMClient( boost::uuids::uuid userID, std::wstring userName ) =0;
+        virtual void registerAsEMClient( const UUID& userID, const String& userName ) =0;
     };
 
 } // namespace

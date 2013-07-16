@@ -34,14 +34,14 @@
 namespace ecc_commonDataModel
 {
 
-    class MetricGroup : ModelBase
+    class MetricGroup : public ModelBase
     {
     public:
         typedef boost::shared_ptr<MetricGroup> ptr_t;
 
-        typedef boost::unordered_set<MetricGroup::ptr_t> Set;
+        typedef boost::container::set<MetricGroup::ptr_t> Set;
 
-        typedef boost::unordered_map<UUID,MetricGroup::ptr_t> Map;
+        typedef boost::container::map<UUID,MetricGroup::ptr_t> Map;
 
         /**
          * Default constructor that sets a random UUID for this object instance.
@@ -131,9 +131,9 @@ namespace ecc_commonDataModel
         void addMeasurementSets( const MeasurementSet::Set& measurementSets );
 
         // ModelBase -----------------------------------------------------------------
-        virtual void toJSON( String& jsonStrOUT );
+        virtual String toJSON();
 
-        virtual void fromJSON( const String& jsonStr );
+        virtual void fromJSON( const ModelBase::JSONTree& jsonTree );
 
         virtual String toString();
 

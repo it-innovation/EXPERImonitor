@@ -37,6 +37,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 
 import java.util.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMMeasurementSetInfo;
 
 
 
@@ -300,18 +301,35 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
   {
     EMClientEx client = getClient( senderID );
 
-    // Only allow clients who have declared they are going to push
-    boolean clientInPushGroup = false;
-    synchronized ( controlledStopLock )
-    { clientInPushGroup = clientPushGroup.contains( client.getID() ); }
-    
-    if ( client != null && clientInPushGroup )
+    if ( client != null )
     {
-      // Make sure we don't have any empty report before sending
-      if ( report.getMeasurementSet() != null )
-        phaseListener.onGotMetricData( client, report );
+      // Only allow clients who have declared they are going to push
+      boolean clientInPushGroup;
+    
+      synchronized ( controlledStopLock )
+      { clientInPushGroup = clientPushGroup.contains( client.getID() ); }
+    
+      if ( clientInPushGroup )
+      {
+        // Make sure we have measurement set info for this client
+        EMMeasurementSetInfo msInfo = client.getMSInfo( report.getMeasurementSet().getID() );
 
-      // Let client know we've received the data
+        if ( msInfo != null )
+        {
+          // Pass on data if 'LIVE' (ignore 'Enabled' status - the client is pushing this data, so their responsibility)
+          if ( msInfo.isLiveEnabled() )
+          {
+            // Make sure we don't have any empty report before sending
+            if ( report.getMeasurementSet() != null )
+              phaseListener.onGotMetricData( client, report );
+          }
+          // Warn that we have dropped this data
+          else phaseLogger.warn( "Got metric push from client, but dropped the data - Entity is not LIVE" );
+        }
+        else phaseLogger.error( "Got metric push from client, but cannot find measurement set info" );
+      }
+      
+      // Let client know we've received the data (whatever the outcome was this side)
       client.getLiveMonitorInterface().notifyPushReceived( report.getUUID() );
     }
   }
@@ -354,34 +372,47 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
     // Only allow clients who have declared they are going to be pulled
     if ( client != null && report != null )
     {
-      MeasurementSet mSet = report.getMeasurementSet();
+      // Make sure we have measurement set info for this client
+      EMMeasurementSetInfo msInfo = client.getMSInfo( report.getMeasurementSet().getID() );
 
-      // Check we don't have an empty report...
-      if ( mSet != null )
-      {
-        // Update state for this client's measurement set
-        UUID msID = mSet.getID();
-        
-        client.updatePullReceivedForMS( msID );
-        client.removePullingMeasurementSetID( msID );
+      if ( msInfo != null )
+      { 
+        // Pass on data if 'LIVE' (ignore 'Enabled' status - the client is pushing this data, so their responsibility)
+        if ( msInfo.isLiveEnabled() )
+        {
+          MeasurementSet mSet = report.getMeasurementSet();
 
-        // Notify listeners
-        if ( phaseListener != null ) 
-          phaseListener.onGotMetricData( client, report );
+          // Check we don't have an empty report...
+          if ( mSet != null )
+          {
+            // Update state for this client's measurement set
+            UUID msID = mSet.getID();
+
+            client.updatePullReceivedForMS( msID );
+            client.removePullingMeasurementSetID( msID );
+
+            // Notify listeners
+            if ( phaseListener != null ) 
+              phaseListener.onGotMetricData( client, report );
+          }
+          else // Didn't get any actual measurement data
+            phaseLogger.error( "Pulled report contained NULL MeasurementSet" );
+
+          // Tell the client we got the report
+          IEMLiveMonitor monitor = client.getLiveMonitorInterface();
+          monitor.notifyPullReceived( report.getUUID() );
+
+          // If there are outstanding metrics to pull, make another request (if we're not stopping)
+          if ( !monitorStopping )
+          {
+            UUID nextMSID = client.iterateNextValidMSToBePulled();
+            if ( nextMSID != null ) monitor.pullMetric( nextMSID );
+          }
+        }
+        // Warn that we have dropped this data
+        else phaseLogger.warn( "Got metric pull from client, but dropped the data - Entity is no longer LIVE" );
       }
-      else // Didn't get any actual measurement data
-        phaseLogger.error( "Pulled report contained NULL MeasurementSet" );
-
-      // Tell the client we got the report
-      IEMLiveMonitor monitor = client.getLiveMonitorInterface();
-      monitor.notifyPullReceived( report.getUUID() );
-
-      // If there are outstanding metrics to pull, make another request (if we're not stopping)
-      if ( !monitorStopping )
-      {
-        UUID nextMSID = client.iterateNextValidMSToBePulled();
-        if ( nextMSID != null ) monitor.pullMetric( nextMSID );
-      }
+      else phaseLogger.error( "Got metric pull from client, but cannot find measurement set info" ); 
     }
     else phaseLogger.error( "Could not process pulled metric: NULL client or report" ); 
   }

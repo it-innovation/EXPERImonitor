@@ -30,8 +30,6 @@
 
 #include <SimpleAmqpClient/SimpleAmqpClient.h>
 
-#include <hash_map>
-#include <boost/uuid/uuid.hpp>
 
 
 
@@ -41,35 +39,37 @@ namespace ecc_amqpAPI_impl
   class AMQPBasicSubscriptionService;
   // ----------------------------------
 
-  class AMQPBasicSubscriptionProcessor
+  class AMQPBasicSubscriptionProcessor : public boost::enable_shared_from_this<AMQPBasicSubscriptionProcessor>
   {
   public:
     
     typedef boost::shared_ptr<AMQPBasicSubscriptionProcessor> ptr_t;
 
-    AMQPBasicSubscriptionProcessor( boost::shared_ptr<AMQPBasicSubscriptionService> service,
+    AMQPBasicSubscriptionProcessor( boost::shared_ptr<AMQPBasicSubscriptionService> service, // explicit shared_ptr required
                                     AmqpClient::Channel::ptr_t                      channel,
-                                    std::wstring                                    qName,
+                                    const String&                                   qName,
                                     AMQPMessageDispatch::ptr_t                      dispatch );
     
     virtual ~AMQPBasicSubscriptionProcessor();
 
-    boost::uuids::uuid getProcessorID();
+    void initialiseSubscription();
+
+    UUID getProcessorID();
 
     AmqpClient::Channel::ptr_t getAMQPChannel() { return amqpChannelImpl; }
 
-    std::wstring getAMQPQueueName() { return queueName; }
+    String getAMQPQueueName() { return queueName; }
 
     void handleBasicMessage( AmqpClient::Envelope::ptr_t envolope );
 
   private:
     //IECCLogger subProcLogger = Logger.getLogger( typeof(AMQPBasicSubscriptionProcessor) );
 
-    boost::shared_ptr<AMQPBasicSubscriptionService> subscriptionService;
-    boost::uuids::uuid                              processorID;
+    boost::shared_ptr<AMQPBasicSubscriptionService> subscriptionService; // explicit shared_ptr required
+    UUID                                            processorID;
     AmqpClient::Channel::ptr_t                      amqpChannelImpl;
-    std::wstring                                    queueName;
-    boost::shared_ptr<AMQPMessageDispatch>          messageDispatch;
+    String                                          queueName;
+    AMQPMessageDispatch::ptr_t                      messageDispatch;
   };
 
 }

@@ -19,6 +19,9 @@
     <Filter Include="spec\listeners">
       <UniqueIdentifier>{eca68d85-f482-4e1a-9d8e-11dd1354e701}</UniqueIdentifier>
     </Filter>
+    <Filter Include="factory">
+      <UniqueIdentifier>{c0123a58-2084-4ca5-b8d6-5de0551ff700}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -27,43 +30,91 @@
     <ClInclude Include="targetver.h">
       <Filter>stdafx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\eccEMClient-Spec\listeners\IEMDiscovery_UserListener.h">
+    <ClInclude Include="..\eccEMClient-Spec\IEMDiscovery.h">
+      <Filter>spec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\eccEMClient-Spec\IEMLiveMonitor.h">
+      <Filter>spec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\eccEMClient-Spec\IEMMetricGenSetup.h">
+      <Filter>spec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\eccEMClient-Spec\IEMMonitorEntryPoint.h">
+      <Filter>spec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\eccEMClient-Spec\IEMPostReport.h">
+      <Filter>spec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\eccEMClient-Spec\IEMTearDown.h">
+      <Filter>spec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\eccEMClient-Spec\listeners\IEMDiscovery_UserListener.h">
       <Filter>spec\listeners</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\eccEMClient-Spec\listeners\IEMLiveMonitor_UserListener.h">
+    <ClInclude Include="..\eccEMClient-Spec\listeners\IEMLiveMonitor_UserListener.h">
       <Filter>spec\listeners</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\eccEMClient-Spec\listeners\IEMPostReport_UserListener.h">
+    <ClInclude Include="..\eccEMClient-Spec\listeners\IEMPostReport_UserListener.h">
       <Filter>spec\listeners</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\eccEMClient-Spec\listeners\IEMSetup_UserListener.h">
+    <ClInclude Include="..\eccEMClient-Spec\listeners\IEMSetup_UserListener.h">
       <Filter>spec\listeners</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\eccEMClient-Spec\listeners\IEMTearDown_UserListener.h">
+    <ClInclude Include="..\eccEMClient-Spec\listeners\IEMTearDown_UserListener.h">
       <Filter>spec\listeners</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\eccEMClient-Spec\IEMDiscovery.h">
-      <Filter>spec</Filter>
+    <ClInclude Include="impl\EMBaseInterface.h">
+      <Filter>impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\eccEMClient-Spec\IEMLiveMonitor.h">
-      <Filter>spec</Filter>
+    <ClInclude Include="impl\EMDiscovery.h">
+      <Filter>impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\eccEMClient-Spec\IEMMetricGenSetup.h">
-      <Filter>spec</Filter>
+    <ClInclude Include="impl\EMLiveMonitor.h">
+      <Filter>impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\eccEMClient-Spec\IEMMonitorEntryPoint.h">
-      <Filter>spec</Filter>
+    <ClInclude Include="impl\EMMetricGenSetup.h">
+      <Filter>impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\eccEMClient-Spec\IEMPostReport.h">
-      <Filter>spec</Filter>
+    <ClInclude Include="impl\EMMonitorEntryPoint.h">
+      <Filter>impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\eccEMClient-Spec\IEMTearDown.h">
-      <Filter>spec</Filter>
+    <ClInclude Include="impl\EMPostReport.h">
+      <Filter>impl</Filter>
+    </ClInclude>
+    <ClInclude Include="impl\EMTearDown.h">
+      <Filter>impl</Filter>
+    </ClInclude>
+    <ClInclude Include="EMInterfaceFactory.h">
+      <Filter>factory</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>stdafx</Filter>
+    </ClCompile>
+    <ClCompile Include="impl\EMBaseInterface.cpp">
+      <Filter>impl</Filter>
+    </ClCompile>
+    <ClCompile Include="impl\EMDiscovery.cpp">
+      <Filter>impl</Filter>
+    </ClCompile>
+    <ClCompile Include="impl\EMLiveMonitor.cpp">
+      <Filter>impl</Filter>
+    </ClCompile>
+    <ClCompile Include="impl\EMMetricGenSetup.cpp">
+      <Filter>impl</Filter>
+    </ClCompile>
+    <ClCompile Include="impl\EMMonitorEntryPoint.cpp">
+      <Filter>impl</Filter>
+    </ClCompile>
+    <ClCompile Include="impl\EMPostReport.cpp">
+      <Filter>impl</Filter>
+    </ClCompile>
+    <ClCompile Include="impl\EMTearDown.cpp">
+      <Filter>impl</Filter>
+    </ClCompile>
+    <ClCompile Include="EMInterfaceFactory.cpp">
+      <Filter>factory</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

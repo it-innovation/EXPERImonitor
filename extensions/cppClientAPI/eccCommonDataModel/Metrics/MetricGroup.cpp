@@ -139,7 +139,7 @@ void MetricGroup::addMeasurementSet( MeasurementSet::ptr_t measurementSet )
     
 void MetricGroup::addMeasurementSets( const MeasurementSet::Set& measurementSets )
 {
-  MeasurementSet::Set::iterator msIt = measurementSets.begin();
+  MeasurementSet::Set::const_iterator msIt = measurementSets.begin();
   while ( msIt != measurementSets.end() )
   {
     MeasurementSet::ptr_t ms = *msIt;
@@ -151,11 +151,44 @@ void MetricGroup::addMeasurementSets( const MeasurementSet::Set& measurementSets
 }
 
 // ModelBase -----------------------------------------------------------------
-void MetricGroup::toJSON( String& jsonStrOUT )
+String MetricGroup::toJSON()
 {
+  String json( L"{" );
+
+  json.append( createJSON_Prop( L"uuid", uuidToWide(groupID) ) + L"," );
+
+  json.append( createJSON_Prop( L"metricGeneratorUUID", uuidToWide(metricGeneratorUUID) ) + L"," );
+
+  json.append( createJSON_Prop( L"name", groupName ) + L"," );
+
+  json.append( createJSON_Prop( L"description", groupDescription ) + L"," );
+
+  // Measurement sets
+  json.append( L"\"measurementSets\":[" );
+
+  MeasurementSet::Set::const_iterator msIt = groupMeasurementSets.begin();
+  while ( msIt != groupMeasurementSets.end() )
+  {
+    json.append( (*msIt)->toJSON() + L"," );
+
+    ++msIt;
+  }
+
+  // Snip off trailing delimiter
+  if ( !groupMeasurementSets.empty() )
+  {
+    unsigned int jLen = json.length();
+    json = json.substr( 0, jLen-1 );
+  }
+
+  json.append( L"]" );
+
+  json.append( L"}" );
+
+  return json;
 }
 
-void MetricGroup::fromJSON( const String& jsonStr )
+void MetricGroup::fromJSON( const ModelBase::JSONTree& jsonTree )
 {
 }
 

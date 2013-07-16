@@ -26,33 +26,73 @@
 #pragma once
 
 // Common includes
-#include <boost/locale.hpp>
+#include <stddef.h>
 
+#include <boost/shared_ptr.hpp>
+#include <boost/locale.hpp>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/string_generator.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/container/list.hpp>
+#include <boost/container/set.hpp>
+#include <boost/container/map.hpp>
+#include <boost/container/vector.hpp>
+#include <boost/property_tree/ptree.hpp>
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
-
-#include <boost/unordered_set.hpp>
-#include <boost/unordered_map.hpp>
-
+#define UTF_CHAR_SET "Latin1"
 
 // Common types
-typedef std::wstring                             String;
-typedef boost::uuids::uuid                       UUID;
-typedef boost::unordered_set<boost::uuids::uuid> UUIDSet;
-typedef boost::posix_time::ptime                 TimeStamp;
+typedef char                                      Byte;
+typedef std::wstring                              String;
+typedef boost::uuids::uuid                        UUID;
+typedef boost::container::set<boost::uuids::uuid> UUIDSet;
+typedef boost::posix_time::ptime                  TimeStamp;
 
+typedef boost::property_tree::ptree                 JSONTree;
+typedef boost::property_tree::ptree::const_iterator JSONTreeIt;
+typedef boost::property_tree::ptree::value_type     JSONValue;
 
 // Inline utility functions
-inline String toWide( const std::string& narrow );
+extern inline String toWide( const std::string& narrow );
 
-inline std::string toNarrow( const String& wide );
+extern inline std::string toNarrow( const String& wide );
 
-inline std::string uuidToNarrow( const UUID& id );
+extern inline std::string uuidToNarrow( const UUID& id );
 
-inline String uuidToWide( const UUID& id );
+extern inline String uuidToWide( const UUID& id );
 
-inline UUID createRandomUUID();
+extern inline const Byte* toUnManagedByteArray( const String& wide ); // User must manage memory
 
-inline TimeStamp getCurrentTime();
+extern inline std::string fromByteArray( const Byte* byteArray );
+
+extern inline String intToString( const int& i );
+
+extern inline String longToString( const long& l );
+
+extern inline int stringToInt( const String& s );
+
+extern inline UUID createRandomUUID();
+
+extern inline UUID createUUID( const String& idValue );
+
+extern inline TimeStamp getCurrentTime();
+
+extern inline String timeStampToString( const TimeStamp& ts );
+
+extern inline TimeStamp stringToTimeStamp( const String& tString );
+
+extern inline String getJSON_String( const boost::property_tree::ptree::value_type& vt );
+
+extern inline int getJSON_int( const boost::property_tree::ptree::value_type& vt );
+
+extern inline bool getJSON_bool( const boost::property_tree::ptree::value_type& vt );
+
+extern inline UUID getJSON_UUID( const boost::property_tree::ptree::value_type& vt );
+
+extern inline TimeStamp getJSON_TimeStamp( const boost::property_tree::ptree::value_type& vt );
+
+extern inline String createJSON_Prop( const String& prop, const String& val );
+
+extern inline String createJSON_Prop( const String& prop, const long& val );
+
+extern inline String createJSON_Prop_bool( const String& prop, const bool& val );

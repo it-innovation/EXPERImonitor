@@ -25,16 +25,16 @@
 
 #pragma once
 
+
 namespace ecc_amqpAPI_spec
 {
-
     /**
      * The IAMQPMessageDispatchListener interface must be used to receive messages
      * distributed by the IAMQPMessageDispatch.
      * 
      * @author Simon Crowle
      */
-    class IAMQPMessageDispatchListener
+    class IAMQPMessageDispatchListener 
     {
     public:
 
@@ -47,7 +47,7 @@ namespace ecc_amqpAPI_spec
         * @param queueName - Name of the queue in which the data travelled
         * @param data      - The data itself
         */
-      virtual void onSimpleMessageDispatched( std::wstring queueName, byte* data ) =0;
+      virtual void onSimpleMessageDispatched( const std::string& queueName, const std::string& msg ) =0;
     };
 
 } // namespace

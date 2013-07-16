@@ -25,6 +25,11 @@
 
 #pragma once
 
+#include "IAMQPMessageDispatch.h"
+
+
+
+
 namespace ecc_amqpAPI_spec
 {
     // This enum is currently used internally and controls processing resource
@@ -55,13 +60,13 @@ namespace ecc_amqpAPI_spec
          * 
          * @return - Returns false if the pump was unable to start.
          */
-        virtual bool startPump() = 0;
+        virtual bool startPump() =0;
 
         /**
          * Stops the pump issuing messages through the  IAMQPMessageDispatch instances
          * added to it.
          */
-        virtual void stopPump();
+        virtual void stopPump() =0;
 
         /**
          * Stops the pump and empties any queued messages not currently being sent
@@ -80,14 +85,14 @@ namespace ecc_amqpAPI_spec
          * 
          * @param dispatch - instance of a dispatch.
          */
-        virtual void addDispatch( IAMQPMessageDispatch::ptr_t dispatch) =0;
+        virtual void addDispatch( IAMQPMessageDispatch::ptr_t dispatch ) =0;
 
         /**
          * Removes a dispatch instance from the pump.
          * 
          * @param dispatch - instance of the dispatch to be removed.
          */
-        virtual void removeDispatch( boost::shared_ptr<IAMQPMessageDispatch> dispatch) =0;
+        virtual void removeDispatch( IAMQPMessageDispatch::ptr_t dispatch) =0;
     };
 
 } // namespace

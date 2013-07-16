@@ -35,10 +35,8 @@ namespace ecc_commonDataModel
      * A simple class representing a unit by a name.
      * 
      * This will be extended later.
-     * 
-     * @author Vegard Engen
      */
-    class Unit : ModelBase
+    class Unit : public ModelBase
     {
     public:
 
@@ -68,9 +66,9 @@ namespace ecc_commonDataModel
         void setName( const String& name );
 
         // ModelBase -----------------------------------------------------------------
-        virtual void toJSON( String& jsonStrOUT );
+        virtual String toJSON();
 
-        virtual void fromJSON( const String& jsonStr );
+        virtual void fromJSON( const ModelBase::JSONTree& jsonTree );
 
         virtual String toString();
 

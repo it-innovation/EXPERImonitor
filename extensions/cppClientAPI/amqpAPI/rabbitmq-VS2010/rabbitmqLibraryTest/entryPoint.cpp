@@ -32,10 +32,11 @@
 
 using namespace AmqpClient;
 
+using namespace std;
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-  std::cout << "Starting rabbitmq-c test application" << std::endl;
+  cout << "Starting rabbitmq-c test application" << std::endl;
 
   Channel::ptr_t channel = Channel::Create();
 
@@ -53,7 +54,10 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	Envelope::ptr_t msg_env = channel->BasicConsumeMessage( "consumertag" );
 
-	std::cout << "Message text: " << msg_env->Message()->Body() << std::endl;
+	cout << "Message text: " << msg_env->Message()->Body() << std::endl;
+
+  cout << "Press ENTER to exit demo.." << endl;
+  cin.get();
 
 	return 0;
 }

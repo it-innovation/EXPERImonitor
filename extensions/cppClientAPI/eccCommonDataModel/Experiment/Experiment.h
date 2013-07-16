@@ -151,9 +151,9 @@ public:
   void addMetricGenerators( const MetricGenerator::Set& generators );
 
   // ModelBase -----------------------------------------------------------------
-  virtual void toJSON( String& jsonStrOUT );
+  virtual String toJSON();
 
-  virtual void fromJSON( const String& jsonStr );
+  virtual void fromJSON( const ModelBase::JSONTree& jsonTree );
 
   virtual String toString();
 

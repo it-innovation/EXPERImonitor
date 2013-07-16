@@ -90,6 +90,18 @@
     <ClInclude Include="Base\ModelBase.h">
       <Filter>impl\Base</Filter>
     </ClInclude>
+    <ClInclude Include="Base\StringWrapper.h">
+      <Filter>impl\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="Base\UUIDWrapper.h">
+      <Filter>impl\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="Base\ArrayWrapper.h">
+      <Filter>impl\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="Base\BoolWrapper.h">
+      <Filter>impl\Base</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -138,6 +150,18 @@
       <Filter>impl\Monitor</Filter>
     </ClCompile>
     <ClCompile Include="Base\ModelBase.cpp">
+      <Filter>impl\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Base\StringWrapper.cpp">
+      <Filter>impl\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Base\UUIDWrapper.cpp">
+      <Filter>impl\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Base\ArrayWrapper.cpp">
+      <Filter>impl\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Base\BoolWrapper.cpp">
       <Filter>impl\Base</Filter>
     </ClCompile>
   </ItemGroup>

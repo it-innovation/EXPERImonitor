@@ -39,30 +39,33 @@
 namespace ecc_amqpAPI_impl
 {
 
-  class AMQPMessageDispatchPump : ecc_amqpAPI_spec::IAMQPMessageDispatchPump
+  class AMQPMessageDispatchPump : public boost::enable_shared_from_this<AMQPMessageDispatchPump>,
+                                  public ecc_amqpAPI_spec::IAMQPMessageDispatchPump
   {
   public:
 
     typedef boost::shared_ptr<AMQPMessageDispatchPump> ptr_t;
     
-    AMQPMessageDispatchPump( std::wstring pName, 
-                             ecc_amqpAPI_spec::ePumpPriority priority );
+    AMQPMessageDispatchPump( const String& pName, 
+                             const ecc_amqpAPI_spec::ePumpPriority& priority );
 
     virtual ~AMQPMessageDispatchPump();
     
-    bool startPump();
-      
-    void stopPump();
-    
-    void emptyPump();
-    
-    bool isPumping();
-    
-    void addDispatch( ecc_amqpAPI_spec::IAMQPMessageDispatch::ptr_t dispatch );
-    
-    void removeDispatch( ecc_amqpAPI_spec::IAMQPMessageDispatch::ptr_t dispatch );
-      
     void notifyDispatchWaiting();
+
+    // IAMQPMessageDispatchPump --------------------------------------------------
+    virtual bool startPump();
+      
+    virtual void stopPump();
+    
+    virtual void emptyPump();
+    
+    virtual bool isPumping();
+    
+    virtual void addDispatch( ecc_amqpAPI_spec::IAMQPMessageDispatch::ptr_t dispatch );
+    
+    virtual void removeDispatch( ecc_amqpAPI_spec::IAMQPMessageDispatch::ptr_t dispatch );
+    
 
   private:
     

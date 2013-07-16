@@ -37,14 +37,16 @@ namespace ecc_commonDataModel
 
 Report::Report()
 {
-  reportID   = createRandomUUID();
-  reportDate = getCurrentTime();
+  reportID             = createRandomUUID();
+  reportDate           = getCurrentTime();
+  numberOfMeasurements = 0;
 }
 
 Report::Report( const UUID& msID )
 {
-  reportID   = createRandomUUID();
-  reportDate = getCurrentTime();
+  reportID             = createRandomUUID();
+  reportDate           = getCurrentTime();
+  numberOfMeasurements = 0;
   
   measurementSet = MeasurementSet::ptr_t( new MeasurementSet( msID ) );
 }
@@ -76,6 +78,11 @@ Report::Report( const UUID&           uuid,
   reportDate     = rD;
   fromDate       = fD;
   toDate         = tD;
+  
+  if ( mSet )
+    numberOfMeasurements = mSet->getMeasurements().size();
+  else
+    numberOfMeasurements = 0;
 }
 
 Report::Report( const UUID&                 uuid, 
@@ -174,11 +181,34 @@ void Report::copyReport( Report::ptr_t repIn, bool copyMeasurements )
 }
 
 // ModelBase -----------------------------------------------------------------
-void Report::toJSON( String& jsonStrOUT )
+String Report::toJSON()
 {
-}
+  String json( L"{" );
 
-void Report::fromJSON( const String& jsonStr )
+  json.append( createJSON_Prop( L"reportID", uuidToWide(reportID) ) + L"," );
+
+  // Measurement Set
+  if ( measurementSet )
+  {
+    json.append( L"\"measurementSet\":" );
+    json.append( measurementSet->toJSON() );
+
+    json.append( L"," );
+  }
+
+  json.append( createJSON_Prop( L"reportDate", timeStampToString(reportDate) ) + L"," );
+
+  json.append( createJSON_Prop( L"fromDate", timeStampToString(fromDate) ) + L"," );
+
+  json.append( createJSON_Prop( L"toDate", timeStampToString(toDate) ) + L"," );
+
+  json.append( createJSON_Prop( L"numberOfMeasurements", numberOfMeasurements ) );
+
+  json.append( L"}" );
+
+  return json;
+}
+void Report::fromJSON( const ModelBase::JSONTree& jsonTree )
 {
 }
 

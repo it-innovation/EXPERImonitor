@@ -25,38 +25,40 @@
 
 #pragma once
 
-#include <boost/shared_ptr.hpp>
-#include <boost/uuid/uuid.hpp>
+#include "ECCUtils.h"
 
 
 
-namespace ecc_em_spec_faces_listeners
+
+namespace ecc_emClient_spec
 {
+/**
+  * IEMTearDown_UserListener is a listener for user clients to enact tear-down
+  * operations under the coordination of the EM.
+  * 
+  * @author sgc
+  */
+class IEMTearDown_UserListener
+{
+public:
+  
+    typedef boost::shared_ptr<IEMTearDown_UserListener> ptr_t;
+
     /**
-     * IEMTearDown_UserListener is a listener for user clients to enact tear-down
-     * operations under the coordination of the EM.
-     * 
-     * @author sgc
-     */
-    class IEMTearDown_UserListener
-    {
-        typedef boost::shared_ptr<IEMTearDown_UserListener> ptr_t;
+      * Notification from the EM that it is time to tear-down experiment based
+      * resources.
+      * 
+      * @param senderID - ID of the EM
+      */
+    virtual void onTearDownMetricGenerators( const UUID& senderID ) =0;
 
-        /**
-         * Notification from the EM that it is time to tear-down experiment based
-         * resources.
-         * 
-         * @param senderID - ID of the EM
-         */
-        virtual void onTearDownMetricGenerators( boost::uuids::uuid senderID ) =0;
-
-        /**
-         * Notification from the EM that time has run-out for reporting the result
-         * of the tear-down process to the EM.
-         * 
-         * @param senderID 
-         */
-        virtual void onTearDownTimeOut( boost::uuids::uuid senderID ) =0;
-    };
+    /**
+      * Notification from the EM that time has run-out for reporting the result
+      * of the tear-down process to the EM.
+      * 
+      * @param senderID 
+      */
+    virtual void onTearDownTimeOut( const UUID& senderID ) =0;
+};
 
 } // namespace

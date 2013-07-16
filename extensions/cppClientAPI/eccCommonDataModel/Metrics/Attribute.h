@@ -39,15 +39,15 @@ namespace ecc_commonDataModel
  * 
  * @author Vegard Engen
  */
-class Attribute : ModelBase
+class Attribute : public ModelBase
 {
 public:
 
   typedef boost::shared_ptr<Attribute> ptr_t;
 
-  typedef boost::unordered_set<Attribute::ptr_t> Set;
+  typedef boost::container::set<Attribute::ptr_t> Set;
 
-  typedef boost::unordered_map<UUID,Attribute::ptr_t> Map;
+  typedef boost::container::map<UUID,Attribute::ptr_t> Map;
 
   /**
     * Default constructor which sets a random UUID for the object instance.
@@ -103,9 +103,9 @@ public:
   void setDescription( const String& description );
 
   // ModelBase -----------------------------------------------------------------
-  virtual void toJSON( String& jsonStrOUT );
+  virtual String toJSON();
 
-  virtual void fromJSON( const String& jsonStr );
+  virtual void fromJSON( const ModelBase::JSONTree& jsonTree );
 
   virtual String toString();
 

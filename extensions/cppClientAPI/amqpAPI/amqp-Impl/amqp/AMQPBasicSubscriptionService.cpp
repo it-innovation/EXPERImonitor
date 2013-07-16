@@ -27,6 +27,8 @@
 
 #include "AMQPBasicSubscriptionService.h"
 
+#include "SimpleAmqpClient\AmqpException.h"
+
 using namespace AmqpClient;
 
 using namespace std;
@@ -55,7 +57,7 @@ namespace ecc_amqpAPI_impl
     {
       if ( pollInterval >= MIN_POLL_INTERVAL ) pollingInterval = posix_time::milliseconds(pollInterval);
       
-      serviceThread = thread_ptr( new thread( &AMQPBasicSubscriptionService::run, this ) );
+      serviceThread = Thread_ptr( new thread( &AMQPBasicSubscriptionService::run, this ) );
 
       serviceRunning = true;
     }
@@ -124,9 +126,23 @@ namespace ecc_amqpAPI_impl
           Envelope::ptr_t envTarget;
 
           // If a waiting message has been collected, notify onwards (subscriber acknowledges)
-          if ( channel->BasicGet( envTarget, queue ) )
-            if ( envTarget )
-              processor->handleBasicMessage( envTarget );
+          try
+          {
+            if ( channel->BasicGet( envTarget, queue, false ) )
+              if ( envTarget )
+                processor->handleBasicMessage( envTarget );
+          }
+          catch ( AmqpException* ae )
+          {
+            std::string error( "Had problems getting AMQP Message: " );
+            
+            if ( ae )
+              error.append( ae->reply_text() );
+            else
+              error.append( "Could not get futher error data." );
+            
+            cout << error << endl;
+          }
 
           ++subIt;
         }

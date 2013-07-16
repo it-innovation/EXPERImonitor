@@ -77,7 +77,15 @@ Entity::Entity( const UUID&           uuid,
   entityName        = name;
   entityDescription = description;
 
-  entityAttributes.insert( atts.begin(), atts.end() );
+  Attribute::Set::const_iterator attIt = atts.begin();
+  while ( attIt != atts.end() )
+  {
+    Attribute::ptr_t attr = *attIt;
+
+    if ( attr ) entityAttributes.insert( attr );
+
+    ++attIt;
+  }
 }
     
 Entity::Entity( const UUID&   uuid, 
@@ -102,7 +110,15 @@ Entity::Entity( const UUID&           uuid,
   entityName        = name;
   entityDescription = description;
 
-  entityAttributes.insert( atts.begin(), atts.end() );
+  Attribute::Set::const_iterator attIt = atts.begin();
+  while ( attIt != atts.end() )
+  {
+    Attribute::ptr_t attr = *attIt;
+
+    if ( attr ) entityAttributes.insert( attr );
+
+    ++attIt;
+  }
 }
 
 Entity::~Entity()
@@ -167,26 +183,57 @@ void Entity::addAttribute( Attribute::ptr_t attribute )
     
 void Entity::addAttributes( const Attribute::Set& attributes )
 {
-  Attribute::Set::iterator attIt = attributes.begin();
+  Attribute::Set::const_iterator attIt = attributes.begin();
 
   while ( attIt != attributes.end() )
   {
-    Attribute::ptr_t att = *attIt;
+    Attribute::ptr_t attr = *attIt;
 
-    if ( att ) entityAttributes.insert( att );
+    if ( attr ) entityAttributes.insert( attr );
 
     ++attIt;
   }
-
-  entityAttributes.insert( attributes.begin(), attributes.end() );
 }
 
 // ModelBase -----------------------------------------------------------------
-void Entity::toJSON( String& jsonStrOUT )
+String Entity::toJSON()
 {
+  String json( L"{" );
+
+  json.append( createJSON_Prop( L"uuid", uuidToWide(entityUniqueID) ) + L"," );
+
+  json.append( createJSON_Prop( L"entityID", entityID ) + L"," );
+
+  json.append( createJSON_Prop( L"name", entityName ) + L"," );
+
+  json.append( createJSON_Prop( L"description", entityDescription ) + L"," );
+
+  // Attributes
+  json.append( L"\"attributes\":[" );
+
+  Attribute::Set::const_iterator atIt = entityAttributes.begin();
+  while ( atIt != entityAttributes.end() )
+  {
+    json.append( (*atIt)->toJSON() + L"," );
+
+    ++atIt;
+  }
+
+  // Snip off trailing delimiter
+  if ( !entityAttributes.empty() )
+  {
+    unsigned int jLen = json.length();
+    json = json.substr( 0, jLen-1 );
+  }
+
+  json.append( L"]" );
+
+  json.append( L"}" );
+
+  return json;
 }
 
-void Entity::fromJSON( const String& jsonStr )
+void Entity::fromJSON( const ModelBase::JSONTree& jsonTree )
 {
 }
 

@@ -118,15 +118,4 @@ public interface IEMDiscovery_UserListener
    */
   void onSetStatusMonitorEndpoint( UUID senderID,
                                    String endPoint );
-  
-  /**
-   * The ECC has responded to the client's request 
-   * 
-   * @param senderID - ID of the ECC sending this response
-   * @param entityID - ID of the Entity that was enabled/disabled
-   * @param enabled  - Entity enabled/disabled
-   */
-  void onEntityMetricCollectionEnabled( UUID    senderID,
-                                        UUID    entityID,
-                                        boolean enabled );
 }

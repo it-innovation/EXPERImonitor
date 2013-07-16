@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////
 //
-// © University of Southampton IT Innovation Centre, 2012
+// © University of Southampton IT Innovation Centre, 2013
 //
 // Copyright in this software belongs to University of Southampton
 // IT Innovation Centre of Gamma House, Enterprise Road, 
@@ -18,18 +18,26 @@
 // the software.
 //
 //      Created By :            Simon Crowle
-//      Created Date :          20-June-2013
+//      Created Date :          04-Jul-2013
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
 #pragma once
 
-namespace ecc_em_spec_faces
+#include "IEMPostReport_UserListener.h"
+
+#include "EMPostReportSummary.h"
+
+
+
+namespace ecc_emClient_spec
 {
 
     class IEMPostReport
     {
+    public:
+
         typedef boost::shared_ptr<IEMPostReport> ptr_t;
 
         // Listeners -----------------------------------------------------------------    
@@ -51,7 +59,7 @@ namespace ecc_em_spec_faces
          * 
          * @param summary - summary instance of the report. Fields must not be null.
          */
-        virtual void sendReportSummary( EMPostReportSummary summary ) =0;
+        virtual void sendReportSummary( ecc_commonDataModel::EMPostReportSummary::ptr_t summary ) =0;
 
         /**
          * Sends a data batch (based on the specification provided by the EM from the
@@ -59,7 +67,7 @@ namespace ecc_em_spec_faces
          * 
          * @param populatedBatch - data batch with metric data. Fields must not be null.
          */
-        virtual void sendDataBatch( EMDataBatch populatedBatch ) =0;
+        virtual void sendDataBatch( ecc_commonDataModel::EMDataBatch::ptr_t populatedBatch ) =0;
     };
 
 } // namespace
