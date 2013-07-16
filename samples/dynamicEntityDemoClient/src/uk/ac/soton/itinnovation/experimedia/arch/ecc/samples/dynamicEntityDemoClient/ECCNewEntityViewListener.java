@@ -18,29 +18,25 @@
 // the software.
 //
 //      Created By :            Dion Kitchener
-//      Created Date :          28-June-2013
+//      Created Date :          20-June-2013
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
-
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.dynamicEntityDemoClient;
 
 import java.util.ArrayList;
 
-/**
- *
- * @author dmk
- */
+
 public interface ECCNewEntityViewListener {
     
     /**
      * Event called when the user creates a new entity and attribute at the UI
      * 
      */
-    void onNewEntityInfoEntered(String entityName, ArrayList<String> attList, String entityDesc );
+    void onNewEntityInfoEntered( String entityName, ArrayList<String> attList, String entityDesc );
     /**
      * Listens for an event to send an entity
      */
-  
+
     
 }

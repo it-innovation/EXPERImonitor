@@ -47,8 +47,14 @@
     <directory>lib</directory>
     <sourceDirectory>src</sourceDirectory>
   </build>
-  
-  <dependencies>
+    <repositories>
+        <repository>
+            <id>unknown-jars-temp-repo</id>
+            <name>A temporary repository created by NetBeans for libraries and jars it could not identify. Please replace the dependencies in this repository with correct ones and delete this repository.</name>
+            <url>file:${project.basedir}/lib</url>
+        </repository>
+    </repositories>
+    <dependencies>
     
     <dependency>
       <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
@@ -80,12 +86,8 @@
       <version>1.2-SNAPSHOT</version>
     </dependency>
     
-    <!-- 3rd party dependencies ____________________________________________ -->
-    <dependency>
-      <groupId>org.jdesktop</groupId>
-      <artifactId>beansbinding</artifactId>
-      <version>1.2.1</version>
-    </dependency>
-  </dependencies>
+   
+    
+    </dependencies>
     
 </project>
