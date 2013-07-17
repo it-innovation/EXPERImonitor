@@ -210,13 +210,13 @@ String Report::toJSON()
 }
 void Report::fromJSON( const ModelBase::JSONTree& jsonTree )
 {
+  // Client does not require implementation
 }
 
 String Report::toString()
 {
-  wstring ts;
-
-  return ts;
+  return L"ID: {" + uuidToWide(reportID) + L"} number of measurements: " + 
+         intToString( numberOfMeasurements );
 }
 
 } // namespace

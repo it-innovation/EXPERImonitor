@@ -68,6 +68,9 @@ public:
   
   // Method ID = 11
   virtual void sendMetricGeneratorInfo( const ecc_commonDataModel::MetricGenerator::Set& generators );
+
+  // Method ID = 14
+  virtual void enableEntityMetricCollection( const UUID& entityID, const bool enabled );
   
   // Method ID = 12
   virtual void clientDisconnecting();

@@ -43,7 +43,7 @@ namespace ecc_amqpAPI_impl
 {
 
   AMQPBasicSubscriptionService::AMQPBasicSubscriptionService()
-  : serviceRunning( false ), pollingInterval( 100 )
+  : serviceRunning( false ), pollingInterval( MIN_POLL_INTERVAL )
   {
   }
 

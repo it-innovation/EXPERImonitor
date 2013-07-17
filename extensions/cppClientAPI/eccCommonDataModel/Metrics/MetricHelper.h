@@ -66,28 +66,6 @@ public:
      */
     static Entity::ptr_t getEntityFromID( const UUID&                 entityID,
                                           const MetricGenerator::Set& mgenSet );
-  
-    /**
-     * Returns a collection of measurement sets (if any exist) associated with a specific attribute
-     * from the metric generator collection.
-     * 
-     * @param attr    - Attribute of interest, must not be null.
-     * @param mgenSet - Collection of metric generators to look for measurement sets, must not be null.
-     * @return        - Return collection of measurement sets (will be empty if no measurement sets exist)
-     */
-    static MeasurementSet::Map getMeasurementSetsForAttribute( Attribute::ptr_t            attr, 
-                                                               const MetricGenerator::Set& mgenSet );
-    
-    /**
-     * Returns a collection of measurement sets (if they exist) associated with a specific attribute
-     * from a single metric generator.
-     * 
-     * @param attr - Attribute of interest, must not be null.
-     * @param mgen - Metric generators in which to look for measurement sets, must not be null.
-     * @return     - Return collection of measurement sets (will be empty if no measurement sets exist)
-     */
-    static MeasurementSet::ptr_t getMeasurementSetForAttribute( Attribute::ptr_t       attr,
-                                                                MetricGenerator::ptr_t mgen );
     
     /**
      * Returns all the attributes associated with a collection of metric generators.
@@ -128,6 +106,38 @@ public:
      * @return     - Returned collection of measurement sets (will be empty if non exist in metric generator)
      */
     static MeasurementSet::Map getAllMeasurementSets( MetricGenerator::ptr_t mgen );
+
+    /**
+     * Returns a map of all measurement sets associated with the entity identified by UUID.
+     * 
+     * @param mGens     - Set of metric generators to look in for entity & measurement sets
+     * @param entityID  - Identity of the entity
+     * @return          - Map of the measurement sets found (will be empty if none found)
+     */
+    static MeasurementSet::Map getMeasurementSetsForEntity( UUID entityID,
+                                                            const MetricGenerator::Set& mgenSet );
+
+    /**
+     * Returns a collection of measurement sets (if any exist) associated with a specific attribute
+     * from the metric generator collection.
+     * 
+     * @param attr    - Attribute of interest, must not be null.
+     * @param mgenSet - Collection of metric generators to look for measurement sets, must not be null.
+     * @return        - Return collection of measurement sets (will be empty if no measurement sets exist)
+     */
+    static MeasurementSet::Map getMeasurementSetsForAttribute( Attribute::ptr_t            attr, 
+                                                               const MetricGenerator::Set& mgenSet );
+    
+    /**
+     * Returns a collection of measurement sets (if they exist) associated with a specific attribute
+     * from a single metric generator.
+     * 
+     * @param attr - Attribute of interest, must not be null.
+     * @param mgen - Metric generators in which to look for measurement sets, must not be null.
+     * @return     - Return collection of measurement sets (will be empty if no measurement sets exist)
+     */
+    static MeasurementSet::ptr_t getMeasurementSetForAttribute( Attribute::ptr_t       attr,
+                                                                MetricGenerator::ptr_t mgen );
     
     /**
      * Returns the measurement set identified by the ID from a metric generator.

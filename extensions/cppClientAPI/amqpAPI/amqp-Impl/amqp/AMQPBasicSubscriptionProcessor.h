@@ -63,8 +63,7 @@ namespace ecc_amqpAPI_impl
     void handleBasicMessage( AmqpClient::Envelope::ptr_t envolope );
 
   private:
-    //IECCLogger subProcLogger = Logger.getLogger( typeof(AMQPBasicSubscriptionProcessor) );
-
+   
     boost::shared_ptr<AMQPBasicSubscriptionService> subscriptionService; // explicit shared_ptr required
     UUID                                            processorID;
     AmqpClient::Channel::ptr_t                      amqpChannelImpl;

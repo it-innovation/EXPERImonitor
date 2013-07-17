@@ -61,10 +61,6 @@ extern inline std::string uuidToNarrow( const UUID& id );
 
 extern inline String uuidToWide( const UUID& id );
 
-extern inline const Byte* toUnManagedByteArray( const String& wide ); // User must manage memory
-
-extern inline std::string fromByteArray( const Byte* byteArray );
-
 extern inline String intToString( const int& i );
 
 extern inline String longToString( const long& l );

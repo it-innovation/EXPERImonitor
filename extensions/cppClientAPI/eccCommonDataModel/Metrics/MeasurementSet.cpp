@@ -310,13 +310,13 @@ String MeasurementSet::toJSON()
 
 void MeasurementSet::fromJSON( const ModelBase::JSONTree& jsonTree )
 {
+  // Client does not require implementation
 }
 
 String MeasurementSet::toString()
 {
-  wstring ts;
-
-  return ts;
+  return L"{" + uuidToWide( msetID ) + L"} Attribute ID:{" +
+         uuidToWide( attributeID ) + L"}";
 }
 
 // Private methods -----------------------------------------------------------

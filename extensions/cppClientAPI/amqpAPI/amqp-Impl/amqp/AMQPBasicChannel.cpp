@@ -36,9 +36,9 @@ namespace ecc_amqpAPI_impl
 {
  
   AMQPBasicChannel::AMQPBasicChannel( Channel::ptr_t channel  )
+    : channelOpen( false )
   { 
     amqpChannel = channel;
-    channelOpen = false;
   }
 
   AMQPBasicChannel::~AMQPBasicChannel()

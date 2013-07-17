@@ -29,6 +29,9 @@
 #include "AMQPFullInterfaceBase.h"
 #include "ModelBase.h"
 
+#include "BoolWrapper.h"
+#include "UUIDWrapper.h"
+
 using namespace ecc_emClient_spec;
 using namespace ecc_amqpAPI_impl;
 using namespace ecc_commonDataModel;
@@ -83,8 +86,9 @@ void EMMetricGenSetup::notifyMetricGeneratorSetupResult( const UUID& genID, cons
 {
   EXEParamList paramsList;
 
-  //paramsList.Add( genID );
-  //paramsList.Add( success );
+  paramsList.push_back( UUIDWrapper::ptr_t( new UUIDWrapper(genID) ) );
+
+  paramsList.push_back( BoolWrapper::ptr_t( new BoolWrapper(success) ) );
     
   executeMethod( 4, paramsList );
 }
@@ -98,8 +102,12 @@ void EMMetricGenSetup::onInterpretMessage( const int& methodID, const JSONTree& 
     { 
       if ( userListener )
       {
-        //Guid genID = new Guid(jsonMethodData[1]);
-        //userListener.onSetupMetricGenerator( interfaceProviderID, genID );
+        JSONTreeIt tIt = jsonTree.begin(); // Get past method ID first
+        ++tIt;
+
+        UUID genID = getJSON_UUID( *tIt );
+ 
+        userListener->onSetupMetricGenerator( interfaceProviderID, genID );
       }
         
     } break;
@@ -108,8 +116,12 @@ void EMMetricGenSetup::onInterpretMessage( const int& methodID, const JSONTree& 
     {
       if ( userListener )
       {
-        //Guid genID = new Guid(jsonMethodData[1]); ;
-        //userListener.onSetupTimeOut( interfaceProviderID, genID );
+        JSONTreeIt tIt = jsonTree.begin(); // Get past method ID first
+        ++tIt;
+
+        UUID genID = getJSON_UUID( *tIt );
+
+        userListener->onSetupTimeOut( interfaceProviderID, genID );
       }
         
     } break;

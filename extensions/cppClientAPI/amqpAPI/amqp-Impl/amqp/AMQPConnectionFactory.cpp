@@ -43,10 +43,8 @@ namespace ecc_amqpAPI_impl
 {
 
   AMQPConnectionFactory::AMQPConnectionFactory()
+    : amqpHostIP( L"127.0.0.1" ), amqpPortNumber(5672), connectionEstablished(false)
   {
-    amqpHostIP            = L"127.0.0.1";
-    amqpPortNumber        = 5672;
-    connectionEstablished = false;
   }
 
   AMQPConnectionFactory::~AMQPConnectionFactory()

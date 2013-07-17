@@ -29,6 +29,8 @@
 #include "AMQPFullInterfaceBase.h"
 #include "ModelBase.h"
 
+#include "BoolWrapper.h"
+
 using namespace ecc_emClient_spec;
 using namespace ecc_amqpAPI_impl;
 using namespace ecc_commonDataModel;
@@ -81,7 +83,7 @@ void EMTearDown::sendTearDownResult( const bool success )
 {
   EXEParamList paramsList;
 
-  //paramsList.Add( success );
+  paramsList.push_back( BoolWrapper::ptr_t( new BoolWrapper(success) ) );
     
   executeMethod( 4, paramsList );
 }

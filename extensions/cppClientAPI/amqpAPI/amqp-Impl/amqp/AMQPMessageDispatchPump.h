@@ -72,8 +72,6 @@ namespace ecc_amqpAPI_impl
     void startPumpThread();
 
     void run();
-
-    //IECCLogger pumpLogger  = Logger.getLogger( typeof(AMQPMessageDispatchPump) );
     
     typedef boost::shared_ptr<boost::thread> thread_ptr;
 
@@ -83,8 +81,10 @@ namespace ecc_amqpAPI_impl
     boost::condition_variable waitingMonitor;
 
     thread_ptr                      pumpThread;
-    std::wstring                    pumpName;     // Platform specific code required
-    ecc_amqpAPI_spec::ePumpPriority pumpPriority; // Platform specific code required
+
+    // Platform specific code required to set thread name & priority
+    std::wstring                    pumpName;
+    ecc_amqpAPI_spec::ePumpPriority pumpPriority;
   
     bool isDispatchPumping;
     bool dispatchesWaiting;

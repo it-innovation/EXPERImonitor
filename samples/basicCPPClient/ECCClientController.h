@@ -38,72 +38,94 @@ class ECCClientController : public boost::enable_shared_from_this<ECCClientContr
 
 public:
   
-  typedef boost::shared_ptr<ECCClientController> ptr_t;
+    typedef boost::shared_ptr<ECCClientController> ptr_t;
 
-  ECCClientController();
+    ECCClientController();
   
-  virtual ~ECCClientController();
+    virtual ~ECCClientController();
 
-  void start( const String& rabbitServerIP,
-              const UUID& expMonitorID,
-              const UUID& clientID );
+    void start( const String& rabbitServerIP,
+                const UUID& expMonitorID,
+                const UUID& clientID );
 
-  void stop();
+    void stop();
 
-  // EMIAdapterListener -------------------------------------------------
-  virtual void onEMConnectionResult( const bool connected, 
-                                     ecc_commonDataModel::Experiment::ptr_t expInfo );
+    // EMIAdapterListener -------------------------------------------------
+
+    // Discovery phase events
+    virtual void onEMConnectionResult( const bool connected, 
+                                       ecc_commonDataModel::Experiment::ptr_t expInfo );
     
-  virtual void onEMDeregistration( const String& reason );
+    virtual void onEMDeregistration( const String& reason );
     
-  virtual void onDescribeSupportedPhases( ecc_commonDataModel::EMPhaseSet& phasesOUT );
+    virtual void onDescribeSupportedPhases( ecc_commonDataModel::EMPhaseSet& phasesOUT );
 
-  virtual void onDescribePushPullBehaviours( bool* pushPullOUT );
+    virtual void onDescribePushPullBehaviours( bool* pushPullOUT );
     
-  virtual void onPopulateMetricGeneratorInfo();
+    virtual void onPopulateMetricGeneratorInfo();
     
-  virtual void onDiscoveryTimeOut();
+    virtual void onDiscoveryTimeOut();
 
-  virtual void onSetupMetricGenerator( const UUID& metricGeneratorID, 
-                                       bool*       resultOUT );
+    // Set up phase events (not implemented in this demo) _________________
+    virtual void onSetupMetricGenerator( const UUID& metricGeneratorID, 
+                                         bool*       resultOUT );
   
-  virtual void onSetupTimeOut( const UUID& metricGeneratorID );
+    virtual void onSetupTimeOut( const UUID& metricGeneratorID );
     
-  virtual void onLiveMonitoringStarted();
+    // Live monitoring phase events _______________________________________
+    virtual void onLiveMonitoringStarted();
 
-  virtual void onStartPushingMetricData();
+    virtual void onStartPushingMetricData();
     
-  virtual void onPushReportReceived( const UUID& lastReportID );
+    virtual void onPushReportReceived( const UUID& lastReportID );
     
-  virtual void onStopPushingMetricData();
+    virtual void onStopPushingMetricData();
     
-  virtual void onPullReportReceived( const UUID& reportID );
+    virtual void onPullReportReceived( const UUID& reportID );
     
-  virtual void onPullMetric( const UUID& measurementSetID, 
-                             ecc_commonDataModel::Report::ptr_t reportOUT );
+    virtual void onPullMetric( const UUID& measurementSetID, 
+                               ecc_commonDataModel::Report::ptr_t reportOUT );
     
-  virtual void onPullMetricTimeOut( const UUID& measurementSetID );
+    virtual void onPullMetricTimeOut( const UUID& measurementSetID );
 
-  virtual void onPullingStopped();
+    virtual void onPullingStopped();
 
-  virtual void onPopulateSummaryReport( ecc_commonDataModel::EMPostReportSummary::ptr_t summaryOUT );
+    // Post reporting phase events (not implemented in this demo) _________
+    virtual void onPopulateSummaryReport( ecc_commonDataModel::EMPostReportSummary::ptr_t summaryOUT );
 
-  virtual void onPopulateDataBatch( ecc_commonDataModel::EMDataBatch::ptr_t batchOut );
+    virtual void onPopulateDataBatch( ecc_commonDataModel::EMDataBatch::ptr_t batchOut );
     
-  virtual void onReportBatchTimeOut( const UUID& batchID );
+    virtual void onReportBatchTimeOut( const UUID& batchID );
 
-  virtual void onGetTearDownResult( bool* resultOUT );
+    // Tear down phase events (not implemented in this demo) ______________
+    virtual void onGetTearDownResult( bool* resultOUT );
     
-  virtual void onTearDownTimeOut();
+    virtual void onTearDownTimeOut();
 
 private:
 
-  ecc_amqpAPI_impl::AMQPConnectionFactory   amqpFactory;
-  ecc_amqpAPI_impl::AMQPBasicChannel::ptr_t amqpChannel;
-  EMInterfaceAdapter::ptr_t                 emiAdapter;
+    // AMQP/ECC--------------------------------------------------------------------
+    ecc_amqpAPI_impl::AMQPConnectionFactory   amqpFactory;
+    ecc_amqpAPI_impl::AMQPBasicChannel::ptr_t amqpChannel;
+    EMInterfaceAdapter::ptr_t                 emiAdapter;
   
-  String                                      clientName;
-  ecc_commonDataModel::MetricGenerator::ptr_t metricGenerator;
+    // Client and metric ----------------------------------------------------------
+    String                                      clientName;
+    ecc_commonDataModel::MetricGenerator::ptr_t metricGenerator;
+
+    // Measurement functions ------------------------------------------------------
+    typedef boost::function<ecc_commonDataModel::Report::ptr_t (ECCClientController::ptr_t, UUID msID)> MeasurementDelegate;
+  
+    typedef boost::container::map<UUID, MeasurementDelegate> DelegateMap;
+
+    DelegateMap delegateMap;
+
+    // Example measurement delegate functions
+    ecc_commonDataModel::Report::ptr_t measureAlphaDelegate( UUID msID );
+
+    ecc_commonDataModel::Report::ptr_t measureBetaDelegate( UUID msID );
+
+    ecc_commonDataModel::Report::ptr_t createRandomMeasurement( UUID msID ); // Common function used to create random data
 
 
 };

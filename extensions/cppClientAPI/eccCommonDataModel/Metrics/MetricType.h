@@ -36,7 +36,6 @@ namespace ecc_commonDataModel
  *   ORDINAL: partial ordering implied; e.g., medals gold, silver, bronze
  *   INTERVAL: numeric; counting possible; e.g., the number of users.
  *   RATIO: ability to add, subtract, compare and normalise; e.g., CPU load.
- * @author Vegard Engen
  */
 
 enum MetricType

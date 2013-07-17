@@ -41,7 +41,7 @@ namespace ecc_commonDataModel
      * 
      * @author sgc
      */
-    class EMDataBatch : ModelBase
+    class EMDataBatch : public ModelBase
     {
     public:
 

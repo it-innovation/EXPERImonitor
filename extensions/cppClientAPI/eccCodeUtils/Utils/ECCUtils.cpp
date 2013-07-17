@@ -75,43 +75,24 @@ String uuidToWide( const UUID& id )
   return ws.str();
 }
 
-const Byte* toUnManagedByteArray( const String& wide )
-{
-  const Byte* byteArray = NULL;
-
-  if ( wide.size() > 0 )
-  {
-    const string narrow = toNarrow( wide );
-
-    byteArray = narrow.c_str();
-  }
-
-  return byteArray;
-}
-
-std::string fromByteArray( const Byte* byteArray )
-{
-  return to_utf<char>( byteArray, UTF_CHAR_SET );
-}
-
 String intToString( const int& i )
 {
   String result;
 
-  wchar_t sValue[64];
-  _itow( i, sValue, 10 );
+  wstringstream ws;
+  ws << i ;
 
-  return String( sValue );
+  return ws.str();
 }
 
 String longToString( const long& l )
 {
   String result;
 
-  wchar_t sValue[64];
-  _ltow( l, sValue, 10 );
+  wstringstream ws;
+  ws << l ;
 
-  return String( sValue );
+  return ws.str();
 }
 
 int stringToInt( const String& s )
@@ -138,7 +119,7 @@ TimeStamp getCurrentTime()
 
 String timeStampToString( const TimeStamp& ts )
 {
-  // Manually fiddle around with this format for correct JSON
+  // Must fiddle around with this format for correct ECC JSON
   string timeVal = to_iso_extended_string( ts );
   boost::replace_all( timeVal, "T", " ");
 

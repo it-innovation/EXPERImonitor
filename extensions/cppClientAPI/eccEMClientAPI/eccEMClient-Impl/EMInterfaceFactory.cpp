@@ -46,7 +46,6 @@ namespace ecc_emClient_impl
 EMInterfaceFactory::EMInterfaceFactory( AMQPBasicChannel::ptr_t channel, 
                                         bool                    createProviders )
 {
-  
   amqpChannel       = channel;
   generateProviders = createProviders;
 

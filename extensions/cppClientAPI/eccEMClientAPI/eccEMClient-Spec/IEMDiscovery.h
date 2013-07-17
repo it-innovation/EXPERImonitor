@@ -84,6 +84,15 @@ namespace ecc_emClient_spec
         virtual void sendMetricGeneratorInfo( const ecc_commonDataModel::MetricGenerator::Set& generators ) =0;
 
         /**
+         * Tells the ECC to enable or disable metric collection, from this client,
+         * for the Entity specified.
+         * 
+         * @param entityID  - ID of the entity the client has declared to the ECC
+         * @param enabled   - Enable or disable metric collection
+         */
+        virtual void enableEntityMetricCollection( const UUID& entityID, const bool enabled ) =0;
+
+        /**
         * Notify the EM that the user is disconnecting.
         */
         virtual void clientDisconnecting() =0;

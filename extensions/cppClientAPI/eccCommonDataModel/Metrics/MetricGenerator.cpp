@@ -222,13 +222,13 @@ String MetricGenerator::toJSON()
 
 void MetricGenerator::fromJSON( const ModelBase::JSONTree& jsonTree )
 {
+  // Client does not require implementation
 }
 
 String MetricGenerator::toString()
 {
-  wstring ts;
-
-  return ts;
+  return mgName + L" {" + uuidToWide(mgID) + L"} " +
+         mgDescription;
 }
 
 } // namespace

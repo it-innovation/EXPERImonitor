@@ -40,8 +40,6 @@ namespace ecc_commonDataModel
  * An experiment can consist of many different entities that are monitored, some
  * of which could be system components, virtual resources or human beings. Each of
  * which have attributes that can be monitored, which are specified for each entity.
- * 
- * @author Vegard Engen
  */
 class Experiment : ModelBase
 {

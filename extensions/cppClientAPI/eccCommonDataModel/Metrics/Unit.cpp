@@ -77,13 +77,12 @@ String Unit::toJSON()
 
 void Unit::fromJSON( const ModelBase::JSONTree& jsonTree )
 {
+  // Client does not require implementation
 }
 
 String Unit::toString()
 {
-  wstring ts;
-
-  return ts;
+  return unitName;
 }
     
 } // namespace

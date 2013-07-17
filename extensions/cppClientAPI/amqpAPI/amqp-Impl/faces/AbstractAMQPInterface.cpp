@@ -120,9 +120,9 @@ AMQPMessageDispatch::ptr_t AbstractAMQPInterface::getMessageDispatch()
 // Protected methods ---------------------------------------------------------
 AbstractAMQPInterface::AbstractAMQPInterface( AMQPBasicSubscriptionService::ptr_t sService,
                                               AMQPBasicChannel::ptr_t             channel )
+: interfaceReady(false), actingAsProvider(false)
 {
   subscriptService = sService;
-  interfaceReady   = false;
   amqpChannel      = channel;
 }
 
