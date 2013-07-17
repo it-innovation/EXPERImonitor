@@ -110,7 +110,8 @@ public abstract class AbstractAMQPInterface
       
       result = true;
     }
-    catch(IOException ioe) {}
+    catch (IOException ioe) 
+    { amqpIntLogger.error( "Could not send AMQP message: " + ioe.getMessage() ); }
     
     return result;
   }
