@@ -60,7 +60,6 @@ EMBaseInterface::EMBaseInterface( AMQPBasicSubscriptionService::ptr_t sService,
 
 EMBaseInterface::~EMBaseInterface()
 {
-    shutdown();
 }
 
 void EMBaseInterface::initialiseAMQPComms()
@@ -92,9 +91,10 @@ void EMBaseInterface::shutdown()
   if ( amqpInterface )
   {
     amqpInterface->shutdown();
-    amqpInterface.reset();
 
-    // Channel is managed elsewhere
+    amqpSubscriptService = NULL;
+    amqpChannel          = NULL;
+    amqpInterface        = NULL;
   }
 }
   

@@ -78,6 +78,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(BOOST_DIR)\stage\lib;$(SolutionDir)$(Configuration)\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>rabbitmq.lib;SimpleAmqpClient.lib;eccCodeUtils.lib;amqp-Impl.lib;eccCommonDataModel.lib;eccEMClient-Impl.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

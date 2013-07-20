@@ -43,7 +43,6 @@ using namespace std;
 
 
 EMInterfaceAdapter::EMInterfaceAdapter( EMIAdapterListener::ptr_t listener )
-  : clientRegistered(false)
 {
     emiListener = listener;
 }
@@ -61,11 +60,10 @@ void EMInterfaceAdapter::registerWithEM( const String& name,
     // Safety first
     if ( !channel ) throw L"AMQP Channel is null";
   
-    clientRegistered = false;
-    amqpChannel      = channel;
-    clientName       = name;
-    expMonitorID     = eccID;
-    clientID         = thisAppID;
+    amqpChannel     = channel;
+    clientName      = name;
+    expMonitorID    = eccID;
+    clientID        = thisAppID;
 
     // Create interface factory to support interfaces required by the EM
     interfaceFactory = EMInterfaceFactory::ptr_t( new EMInterfaceFactory( amqpChannel, 
@@ -97,30 +95,52 @@ void EMInterfaceAdapter::registerWithEM( const String& name,
 }
 
 void EMInterfaceAdapter::disconnectFromEM()
-{
-    bool sentDisconnectMessage = false;
-        
+{        
+    // Say goodbye to ECC
     if ( discoveryFace )
-    {
-        discoveryFace->clientDisconnecting();
-        sentDisconnectMessage = true;
-    }
+      discoveryFace->clientDisconnecting();
      
     // Tidy up anyway
     dispatchPump->stopPump();
+    
+    // Dispose of interfaces
+    if ( entryPointFace )
+    {
+      entryPointFace->shutdown();
+      entryPointFace  = NULL;
+    }
+    
+    if ( discoveryFace )
+    {
+      discoveryFace->shutdown();
+      discoveryFace = NULL;
+    }
+    
+    if ( setupFace )
+    {
+      setupFace->shutdown();
+      setupFace = NULL;
+    }
+    
+    if ( liveMonitorFace )
+    {
+      liveMonitorFace->shutdown();
+      liveMonitorFace = NULL;
+    }
+   
+    if ( postReportFace )
+    {
+      postReportFace->shutdown();
+      postReportFace = NULL;
+    }
+
+    if ( tearDownFace )
+    {
+      tearDownFace->shutdown();
+      tearDownFace = NULL;
+    }
         
-    entryPointFace  = NULL;
-    discoveryFace   = NULL;
-    setupFace       = NULL;
-    liveMonitorFace = NULL;
-    postReportFace  = NULL;
-    tearDownFace    = NULL;
-        
-    amqpChannel      = NULL;
-    clientRegistered = false;
-        
-    if ( !sentDisconnectMessage )
-      throw L"Could not communicate disconnection with EM/ECC";
+    amqpChannel = NULL;
 }
 
 Experiment::ptr_t EMInterfaceAdapter::getExperimentInfo()

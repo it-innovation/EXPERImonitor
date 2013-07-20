@@ -152,8 +152,6 @@ private:
     ecc_emClient_spec::IEMLiveMonitor::ptr_t          liveMonitorFace;
     ecc_emClient_spec::IEMPostReport::ptr_t           postReportFace;
     ecc_emClient_spec::IEMTearDown::ptr_t             tearDownFace;
-    
-    bool clientRegistered;
 
     // Supported phases & metric Generators
     ecc_commonDataModel::EMPhaseSet supportedPhases;

@@ -27,6 +27,7 @@
 
 #include "AMQPConnectionFactory.h"
 #include "AMQPBasicChannel.h"
+#include "AMQPBasicSubscriptionService.h"
 
 #include <boost/asio.hpp>
 #include <boost/regex.hpp>
@@ -71,8 +72,8 @@ namespace ecc_amqpAPI_impl
     
   void AMQPConnectionFactory::closeDownConnection()
   {
-    // C++ library does not appear to hang on to channel references?
-    // No action may be needed here
+    // Close down the subscription service...
+    amqpSubscriptionService.stopService();
 
     connectionEstablished = false;
   }

@@ -65,6 +65,13 @@ EMPostReport::~EMPostReport()
 {
 }
 
+void EMPostReport::shutdown()
+{
+  EMBaseInterface::shutdown();
+
+  userListener = NULL;
+}
+
 // IECCReport ----------------------------------------------------------------
 void EMPostReport::setUserListener( IEMPostReport_UserListener::ptr_t listener )
 { userListener = listener; }

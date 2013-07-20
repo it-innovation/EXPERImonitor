@@ -31,6 +31,7 @@
 
 #include <iostream>
 
+using namespace ecc_amqpAPI_impl;
 using namespace ecc_commonDataModel;
 
 using namespace boost;
@@ -39,6 +40,7 @@ using namespace std;
 
 
 ECCClientController::ECCClientController()
+  : connectedToECC(false)
 {
 }
 
@@ -52,16 +54,18 @@ void ECCClientController::start( const String& rabbitServerIP,
                                  const UUID&   expMonitorID,
                                  const UUID&   clientID )
 {
-  if ( !rabbitServerIP.empty() )
+  if ( !rabbitServerIP.empty() && !connectedToECC )
   {
     wcout << L"Attempting to connect to Rabbit" << endl;
+
+    amqpFactory = AMQPConnectionFactory::ptr_t( new AMQPConnectionFactory() );
 
     try
     {
       // Set up AMQP factory to connect to the RabbitMQ server
-      amqpFactory.setAMQPHostIPAddress( rabbitServerIP );
-      amqpFactory.connectToAMQPHost();
-      amqpChannel = amqpFactory.createNewChannel();
+      amqpFactory->setAMQPHostIPAddress( rabbitServerIP );
+      amqpFactory->connectToAMQPHost();
+      amqpChannel = amqpFactory->createNewChannel();
 
       cout << "Connected and channel created." << endl;
 
@@ -86,7 +90,16 @@ void ECCClientController::start( const String& rabbitServerIP,
 
 void ECCClientController::stop()
 {
-    emiAdapter->disconnectFromEM();
+    if ( emiAdapter ) emiAdapter->disconnectFromEM();
+
+    emiAdapter = NULL;
+
+    if ( amqpFactory )
+    {
+        amqpFactory->closeDownConnection();
+        amqpFactory = NULL;
+        amqpChannel = NULL;
+    }    
 }
 
 // EMInterfaceAdapterListener ------------------------------------------------
@@ -100,11 +113,13 @@ void ECCClientController::onEMConnectionResult( const bool              connecte
   {
     wcout << L"CONNECTION OK" << endl << endl;
     wcout << L"Linked to experiment: " + expInfo->getExperimentID() << endl;
+
+    connectedToECC = true;
   }
   else
   {
     wcout << L"CONNECTION REFUSED BY ECC" << endl;
-    stop();
+    connectedToECC = false;
   }
 }
     
@@ -112,10 +127,7 @@ void ECCClientController::onEMDeregistration( const String& reason )
 {
     wcout << L"Got disconnection from the ECC: " << reason << endl;
 
-    // Stop our monitoring functions
-    stop();
-
-    wcout << L"Client has stopped." << endl;
+    connectedToECC = false;
 }
     
 void ECCClientController::onDescribeSupportedPhases( EMPhaseSet& phasesOUT )

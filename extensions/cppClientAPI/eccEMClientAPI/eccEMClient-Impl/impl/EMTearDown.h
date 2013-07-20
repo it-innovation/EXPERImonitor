@@ -50,6 +50,8 @@ public:
 
   virtual ~EMTearDown();
   
+  virtual void shutdown();
+
   // IECCTearDown --------------------------------------------------------------
   virtual void setUserListener( ecc_emClient_spec::IEMTearDown_UserListener::ptr_t listener );
   

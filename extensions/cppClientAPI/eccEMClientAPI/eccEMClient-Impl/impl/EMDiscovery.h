@@ -55,7 +55,9 @@ public:
   
   // IECCMonitor ---------------------------------------------------------------
   virtual void setUserListener( ecc_emClient_spec::IEMDiscovery_UserListener::ptr_t listener);
-    
+  
+  virtual void shutdown();
+
   // User methods --------------------------------------------------------------
   // Method ID = 8
   virtual void readyToInitialise();

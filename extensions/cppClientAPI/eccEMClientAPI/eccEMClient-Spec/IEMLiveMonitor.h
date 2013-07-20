@@ -50,7 +50,12 @@ namespace ecc_emClient_spec
          */
         virtual void setUserListener( IEMLiveMonitor_UserListener::ptr_t listener ) =0;
 
-        // User methods --------------------------------------------------------------
+        /**
+        * Shuts down the interface
+        */
+        virtual void shutdown() =0;
+
+        // User methods --------------------------------------------------------------      
         /**
          * Notifies the EM that this user is ready to start pushing metric data.
          */

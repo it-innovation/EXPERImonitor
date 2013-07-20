@@ -42,6 +42,10 @@ namespace ecc_emClient_spec
 
         typedef boost::shared_ptr<IEMMonitorEntryPoint> ptr_t;
 
+        /**
+        * Shuts down the interface
+        */
+        virtual void shutdown() =0;
 
         // User methods ----------------------------------------------------------
         /**

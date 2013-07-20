@@ -59,7 +59,7 @@ namespace ecc_amqpAPI_impl
   AMQPBasicSubscriptionProcessor::~AMQPBasicSubscriptionProcessor()
   {
     if ( subscriptionService )
-      subscriptionService->unsubscribe( shared_from_this() );
+      subscriptionService->unsubscribe( processorID );
   }
 
   void AMQPBasicSubscriptionProcessor::initialiseSubscription()

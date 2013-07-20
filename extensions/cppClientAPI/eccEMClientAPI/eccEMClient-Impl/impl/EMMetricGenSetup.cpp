@@ -67,6 +67,13 @@ EMMetricGenSetup::EMMetricGenSetup( AMQPBasicSubscriptionService::ptr_t sService
 EMMetricGenSetup::~EMMetricGenSetup()
 {
 }
+
+void EMMetricGenSetup::shutdown()
+{
+  EMBaseInterface::shutdown();
+
+  userListener = NULL;
+}
   
 // IEMMonitorSetup -----------------------------------------------------------
 void EMMetricGenSetup::setUserListener( IEMSetup_UserListener::ptr_t listener )

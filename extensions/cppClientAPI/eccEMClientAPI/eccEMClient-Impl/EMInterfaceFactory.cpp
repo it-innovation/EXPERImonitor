@@ -38,7 +38,7 @@ using namespace ecc_amqpAPI_impl;
 using namespace ecc_emClient_spec;
 
 using namespace boost;
-
+using namespace std;
 
 namespace ecc_emClient_impl
 {

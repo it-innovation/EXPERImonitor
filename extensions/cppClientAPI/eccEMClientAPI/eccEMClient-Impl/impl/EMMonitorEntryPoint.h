@@ -49,6 +49,8 @@ public:
 
   virtual ~EMMonitorEntryPoint();
   
+  virtual void shutdown();
+
   // IECCMonitorEntryPoint -----------------------------------------------------
   // Method ID = 1
   virtual void registerAsEMClient( const UUID& userID, const String& userName );

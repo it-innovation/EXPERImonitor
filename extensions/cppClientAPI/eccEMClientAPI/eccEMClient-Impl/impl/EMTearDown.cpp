@@ -67,6 +67,13 @@ EMTearDown::~EMTearDown()
 {
 }
 
+void EMTearDown::shutdown()
+{
+  EMBaseInterface::shutdown();
+
+  userListener = NULL;
+}
+
 // IECCTearDown --------------------------------------------------------------
 void EMTearDown::setUserListener( IEMTearDown_UserListener::ptr_t listener )
 { userListener = listener; }

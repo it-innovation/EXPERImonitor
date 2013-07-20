@@ -27,6 +27,8 @@
 
 #include "AMQPBasicSubscriptionProcessor.h"
 
+#include <boost/atomic.hpp>
+
 
 
 
@@ -44,6 +46,8 @@ namespace ecc_amqpAPI_impl
 
     AMQPBasicSubscriptionService();
 
+    const static int MIN_POLL_INTERVAL = 100; // Milliseconds
+
     virtual ~AMQPBasicSubscriptionService();
 
     void startService( const int pollInterval );
@@ -52,21 +56,19 @@ namespace ecc_amqpAPI_impl
 
     bool subscribe( boost::shared_ptr<AMQPBasicSubscriptionProcessor> processor );   // explicit shared_ptr required
 
-    bool unsubscribe( boost::shared_ptr<AMQPBasicSubscriptionProcessor> processor ); // explicit shared_ptr required
+    void unsubscribe( const UUID& procID ); // explicit shared_ptr required
 
   private:
 
     void run();
-
-    const static int MIN_POLL_INTERVAL = 100; // Milliseconds
 
     typedef boost::container::map<UUID, boost::shared_ptr<AMQPBasicSubscriptionProcessor>> SubscriberMap; // explicit shared_ptr required
     typedef boost::shared_ptr<boost::thread>                                               Thread_ptr;
 
     Thread_ptr                      serviceThread;
     boost::condition_variable       serviceIntervalCondition;
+    bool                            serviceRunning;
     boost::posix_time::milliseconds pollingInterval;
-    volatile bool                   serviceRunning;
     boost::mutex                    subscriberMutex;
     boost::mutex                    pollingMutex;
     SubscriberMap                   subscribers;

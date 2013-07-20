@@ -48,6 +48,11 @@ namespace ecc_emClient_spec
          */
         virtual void setUserListener( IEMSetup_UserListener::ptr_t listener) =0;
 
+        /**
+        * Shuts down the interface
+        */
+        virtual void shutdown() =0;
+
         // User methods --------------------------------------------------------------
         /**
          * Notifies the EM that the user is ready to set up its MetricGenerators

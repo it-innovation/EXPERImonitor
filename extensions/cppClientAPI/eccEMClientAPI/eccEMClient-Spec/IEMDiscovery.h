@@ -57,6 +57,11 @@ namespace ecc_emClient_spec
          */
         virtual void setUserListener( IEMDiscovery_UserListener::ptr_t listener ) =0;
 
+        /**
+        * Shuts down the interface
+        */
+        virtual void shutdown() =0;
+
         // User methods --------------------------------------------------------------
         /**
         * Notify the provider that the user is ready to initialise (i.e., is ready

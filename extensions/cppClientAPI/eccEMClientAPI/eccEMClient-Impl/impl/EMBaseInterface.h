@@ -53,7 +53,7 @@ public:
 
   void initialiseAMQPComms();
   
-  void shutdown();
+  virtual void shutdown();
   
   // IAMQPMessageDispatchListener ----------------------------------------------
   virtual void onSimpleMessageDispatched( const std::string& queueName, const std::string& msg );

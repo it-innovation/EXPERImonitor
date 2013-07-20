@@ -68,13 +68,19 @@ EMDiscovery::EMDiscovery( AMQPBasicSubscriptionService::ptr_t sService,
 }
 
 EMDiscovery::~EMDiscovery()
-{
-}
+{}
   
 // IECCMonitor ---------------------------------------------------------------
 void EMDiscovery::setUserListener( IEMDiscovery_UserListener::ptr_t listener)
 { userListener = listener; }
-    
+
+void EMDiscovery::shutdown()
+{
+  EMBaseInterface::shutdown();
+
+  userListener = NULL;
+}
+
 // User methods --------------------------------------------------------------
 // Method ID = 8
 void EMDiscovery::readyToInitialise()
