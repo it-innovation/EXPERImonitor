@@ -159,8 +159,17 @@ public class EMClientEx extends EMClient
       while ( metIt.hasNext() )
       {
         MetricGenerator mg = metIt.next();
-        if ( !existingGenIDs.contains(mg.getUUID()) )
+        UUID            mgID = mg.getUUID();
+        
+        // If metric generator is entirely new, flag it for possible set-up
+        if ( !existingGenIDs.contains(mgID) )
           newGenerators.add( mg );
+        else
+        {
+          // Otherwise, just update the existing metric generator info for this client
+          metricGenerators.remove( mgID );
+          metricGenerators.put( mgID, mg );
+        }
       }
       
       // Make ready the new metric generators for subsequent phases & add to
