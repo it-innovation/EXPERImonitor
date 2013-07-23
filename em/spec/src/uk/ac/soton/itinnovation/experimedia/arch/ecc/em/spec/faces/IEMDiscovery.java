@@ -152,7 +152,9 @@ public interface IEMDiscovery
     
     /**
      * Tells the ECC to enable or disable metric collection, from this client,
-     * for the Entity specified.
+     * for the Entity specified. IMPORTANT NOTE: disabling an entity means that 
+     * the ECC no longer PULLs metric data for that entity or stores PUSHed metric 
+     * data sent for that entity.
      * 
      * @param entityID  - ID of the entity the client has declared to the ECC
      * @param enabled   - Enable or disable metric collection
