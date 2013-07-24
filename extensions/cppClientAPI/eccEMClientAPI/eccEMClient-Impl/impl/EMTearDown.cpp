@@ -29,6 +29,8 @@
 #include "AMQPFullInterfaceBase.h"
 #include "ModelBase.h"
 
+#include "BoolWrapper.h"
+
 using namespace ecc_emClient_spec;
 using namespace ecc_amqpAPI_impl;
 using namespace ecc_commonDataModel;
@@ -65,6 +67,13 @@ EMTearDown::~EMTearDown()
 {
 }
 
+void EMTearDown::shutdown()
+{
+  EMBaseInterface::shutdown();
+
+  userListener = NULL;
+}
+
 // IECCTearDown --------------------------------------------------------------
 void EMTearDown::setUserListener( IEMTearDown_UserListener::ptr_t listener )
 { userListener = listener; }
@@ -81,7 +90,7 @@ void EMTearDown::sendTearDownResult( const bool success )
 {
   EXEParamList paramsList;
 
-  //paramsList.Add( success );
+  paramsList.push_back( BoolWrapper::ptr_t( new BoolWrapper(success) ) );
     
   executeMethod( 4, paramsList );
 }

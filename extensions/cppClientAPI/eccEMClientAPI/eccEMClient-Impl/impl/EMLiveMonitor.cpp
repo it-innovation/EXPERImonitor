@@ -65,6 +65,13 @@ EMLiveMonitor::~EMLiveMonitor()
 {
 }
 
+void EMLiveMonitor::shutdown()
+{
+  EMBaseInterface::shutdown();
+
+  userListener = NULL;
+}
+
 // IEMLiveMonitor ------------------------------------------------------------
 void EMLiveMonitor::setUserListener( IEMLiveMonitor_UserListener::ptr_t listener )
 { userListener = listener; }

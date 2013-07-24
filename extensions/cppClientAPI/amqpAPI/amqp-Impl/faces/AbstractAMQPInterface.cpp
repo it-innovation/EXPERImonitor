@@ -41,6 +41,10 @@ namespace ecc_amqpAPI_impl
  
 void AbstractAMQPInterface::shutdown()
 {
+  // Deregister from subscription service
+  if ( subscriptService && subProcessor ) 
+    subscriptService->unsubscribe( subProcessor->getProcessorID() );
+
   if ( amqpChannel )
   {
     // Clear up queue, if it exists
@@ -50,11 +54,7 @@ void AbstractAMQPInterface::shutdown()
       if ( channelImpl )
       {
         channelImpl->DeleteQueue( toNarrow(subListenQueue) );
-          
-        // Deregsiter from subscription service
-        if ( subscriptService && subProcessor ) 
-          subscriptService->unsubscribe( subProcessor );
-            
+                  
         subProcessor     = NULL;
         subscriptService = NULL;
         msgDispatch      = NULL;
@@ -120,9 +120,9 @@ AMQPMessageDispatch::ptr_t AbstractAMQPInterface::getMessageDispatch()
 // Protected methods ---------------------------------------------------------
 AbstractAMQPInterface::AbstractAMQPInterface( AMQPBasicSubscriptionService::ptr_t sService,
                                               AMQPBasicChannel::ptr_t             channel )
+: interfaceReady(false), actingAsProvider(false)
 {
   subscriptService = sService;
-  interfaceReady   = false;
   amqpChannel      = channel;
 }
 

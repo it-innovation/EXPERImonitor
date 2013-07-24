@@ -217,20 +217,17 @@ void Experiment::addMetricGenerators( const MetricGenerator::Set& generators )
 // ModelBase -----------------------------------------------------------------
 String Experiment::toJSON()
 {
-  String json;
-
-  return json;
+  return L"Client does not require implementation";
 }
 
 void Experiment::fromJSON( const ModelBase::JSONTree& jsonTree )
 {
+  // Client does not require implementation
 }
 
 String Experiment::toString()
 {
-  wstring ts;
-
-  return ts;
+  return name + L": {" + uuidToWide(expUniqueID) + L"}";
 }
 
 } // namespace

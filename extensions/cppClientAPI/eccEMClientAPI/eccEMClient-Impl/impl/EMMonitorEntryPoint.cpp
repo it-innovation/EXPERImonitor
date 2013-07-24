@@ -63,6 +63,14 @@ EMMonitorEntryPoint::EMMonitorEntryPoint( AMQPBasicSubscriptionService::ptr_t sS
 EMMonitorEntryPoint::~EMMonitorEntryPoint()
 {
 }
+
+void EMMonitorEntryPoint::shutdown()
+{
+  // Do not attempt to remove the entry point (it belongs to the ECC)
+  amqpSubscriptService = NULL;
+  amqpChannel          = NULL;
+  amqpInterface        = NULL;
+}
   
 // IECCMonitorEntryPoint -----------------------------------------------------
 // Method ID = 1

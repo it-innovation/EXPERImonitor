@@ -43,12 +43,13 @@ namespace ecc_amqpAPI_impl
 {
 
   AMQPBasicSubscriptionService::AMQPBasicSubscriptionService()
-  : serviceRunning( false ), pollingInterval( 100 )
+  : serviceRunning(false), pollingInterval( MIN_POLL_INTERVAL )
   {
   }
 
   AMQPBasicSubscriptionService::~AMQPBasicSubscriptionService()
   {
+    serviceThread = NULL;
   }
 
   void AMQPBasicSubscriptionService::startService( int pollInterval )
@@ -56,16 +57,23 @@ namespace ecc_amqpAPI_impl
     if ( !serviceRunning && !serviceThread )
     {
       if ( pollInterval >= MIN_POLL_INTERVAL ) pollingInterval = posix_time::milliseconds(pollInterval);
-      
-      serviceThread = Thread_ptr( new thread( &AMQPBasicSubscriptionService::run, this ) );
 
       serviceRunning = true;
+
+      serviceThread = Thread_ptr( new thread( &AMQPBasicSubscriptionService::run, this ) );
     }
   }
 
   void AMQPBasicSubscriptionService::stopService()
   {
     serviceRunning = false;
+
+    {
+      lock_guard<mutex> lock( subscriberMutex );
+      subscribers.clear();
+    }
+
+    serviceThread = NULL;
   }
 
   bool AMQPBasicSubscriptionService::subscribe( AMQPBasicSubscriptionProcessor::ptr_t processor )
@@ -84,26 +92,21 @@ namespace ecc_amqpAPI_impl
     return false;
   }
 
-  bool AMQPBasicSubscriptionService::unsubscribe( AMQPBasicSubscriptionProcessor::ptr_t processor )
+  void AMQPBasicSubscriptionService::unsubscribe( const UUID& procID )
   {
-    if ( processor )
-    {
-      lock_guard<mutex> lock( subscriberMutex );
+    lock_guard<mutex> lock( subscriberMutex );
 
-      // Only remove if we already have the processor
-      uuid procID = processor->getProcessorID();
-      SubscriberMap::iterator subIt = subscribers.find( procID );
+    // Only remove if we already have the processor
+    SubscriberMap::iterator subIt = subscribers.find( procID );
       
-      if ( subIt != subscribers.end() ) subscribers.erase( subIt );
-    }
-
-    return false;
+    if ( subIt != subscribers.end() )
+      subscribers.erase( subIt );
   }
 
   // Private methods -----------------------------------------------------------
   void AMQPBasicSubscriptionService::run()
   {
-    while( serviceRunning )
+    while ( serviceRunning )
     {
       // Create a copy of the current subscribers for polling
       SubscriberMap currSubscribers;
@@ -155,8 +158,5 @@ namespace ecc_amqpAPI_impl
         serviceIntervalCondition.timed_wait( lock, nextTimeOut );
       }
     }
-
-    serviceThread = NULL;
   }
-
 }

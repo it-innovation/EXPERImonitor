@@ -48,6 +48,11 @@ namespace ecc_emClient_spec
          */
         virtual void setUserListener( IEMPostReport_UserListener::ptr_t listener ) =0;
 
+        /**
+        * Shuts down the interface
+        */
+        virtual void shutdown() =0;
+
         // User methods --------------------------------------------------------------
         /**
          * Notifies the EM that this user is ready to report.

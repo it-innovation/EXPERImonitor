@@ -55,7 +55,9 @@ public:
   
   // IECCMonitor ---------------------------------------------------------------
   virtual void setUserListener( ecc_emClient_spec::IEMDiscovery_UserListener::ptr_t listener);
-    
+  
+  virtual void shutdown();
+
   // User methods --------------------------------------------------------------
   // Method ID = 8
   virtual void readyToInitialise();
@@ -68,6 +70,9 @@ public:
   
   // Method ID = 11
   virtual void sendMetricGeneratorInfo( const ecc_commonDataModel::MetricGenerator::Set& generators );
+
+  // Method ID = 14
+  virtual void enableEntityMetricCollection( const UUID& entityID, const bool enabled );
   
   // Method ID = 12
   virtual void clientDisconnecting();

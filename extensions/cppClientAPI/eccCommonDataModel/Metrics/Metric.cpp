@@ -36,6 +36,7 @@ namespace ecc_commonDataModel
 {
 
 Metric::Metric()
+  : metricType(RATIO)
 {
   metricUUID = createRandomUUID();
 }
@@ -141,11 +142,16 @@ String Metric::toJSON()
 
 void Metric::fromJSON( const ModelBase::JSONTree& jsonTree )
 {
+  // Client does not require implementation
 }
 
 String Metric::toString()
 {
-  wstring ts;
+  String ts;
+
+  if ( metricUnit ) ts.append( metricUnit->toString() );
+
+  ts.append( uuidToWide(metricUUID) );
 
   return ts;
 }

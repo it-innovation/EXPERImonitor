@@ -32,6 +32,7 @@
 
 #include "BoolWrapper.h"
 #include "StringWrapper.h"
+#include "UUIDWrapper.h"
 #include "ArrayWrapper.h"
 
 using namespace ecc_amqpAPI_impl;
@@ -67,13 +68,19 @@ EMDiscovery::EMDiscovery( AMQPBasicSubscriptionService::ptr_t sService,
 }
 
 EMDiscovery::~EMDiscovery()
-{
-}
+{}
   
 // IECCMonitor ---------------------------------------------------------------
 void EMDiscovery::setUserListener( IEMDiscovery_UserListener::ptr_t listener)
 { userListener = listener; }
-    
+
+void EMDiscovery::shutdown()
+{
+  EMBaseInterface::shutdown();
+
+  userListener = NULL;
+}
+
 // User methods --------------------------------------------------------------
 // Method ID = 8
 void EMDiscovery::readyToInitialise()
@@ -164,6 +171,18 @@ void EMDiscovery::sendMetricGeneratorInfo( const MetricGenerator::Set& generator
   paramsList.push_back( mgList );
     
   executeMethod( 11, paramsList );
+}
+
+// Method ID = 14
+void EMDiscovery::enableEntityMetricCollection( const UUID& entityID, const bool enabled )
+{
+  EXEParamList paramsList;
+
+  paramsList.push_back( UUIDWrapper::ptr_t( new UUIDWrapper(entityID) ) );
+
+  paramsList.push_back( BoolWrapper::ptr_t( new BoolWrapper(enabled) ) );
+    
+  executeMethod( 14, paramsList );
 }
   
 // Method ID = 12

@@ -190,13 +190,13 @@ String MetricGroup::toJSON()
 
 void MetricGroup::fromJSON( const ModelBase::JSONTree& jsonTree )
 {
+  // Client does not require implementation
 }
 
 String MetricGroup::toString()
 {
-  wstring ts;
-
-  return ts;
+  return groupName + L" { " + uuidToWide(groupID) + 
+         L"} " + groupDescription;
 }
     
 } // namespace

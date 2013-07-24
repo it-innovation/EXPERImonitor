@@ -56,14 +56,13 @@ int _tmain( int argc, _TCHAR* argv[] )
                             
   }
   catch( const String e )
-  {
-    wcout << "Had problems starting client: " << e << endl;
-  }
-
-  clientController = NULL;
+  { wcout << "Had problems starting client: " << e << endl; }
 
   wcout << "Hit ENTER to quit demo" << endl;
   wcin.get();
+
+  clientController->stop();
+
   wcout << "Goodbye" << endl;
 
 	return 0;

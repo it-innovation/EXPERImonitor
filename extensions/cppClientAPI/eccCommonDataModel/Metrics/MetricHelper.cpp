@@ -56,61 +56,6 @@ Entity::ptr_t MetricHelper::getEntityFromID( const UUID&                 entityI
 
   return target;
 }
-  
-MeasurementSet::Map MetricHelper::getMeasurementSetsForAttribute( Attribute::ptr_t            attr, 
-                                                                  const MetricGenerator::Set& mgenSet )
-{
-  MeasurementSet::Map targetMap;
-
-  if ( attr )
-  {
-    UUID targetAttID                         = attr->getUUID();
-    MeasurementSet::Map allSets              = getAllMeasurementSets( mgenSet );
-    MeasurementSet::Map::const_iterator msIt = allSets.begin();
-
-    while ( msIt != allSets.end() )
-    {
-      MeasurementSet::ptr_t ms = msIt->second;
-      UUID linkedAttrID = ms->getAttributeID();
-
-      if ( linkedAttrID == targetAttID )
-        targetMap.insert( MeasurementSet::Map::value_type(ms->getID(), ms) );
-
-      ++msIt;
-    }
-
-  }
-
-  return targetMap;
-}
-    
-MeasurementSet::ptr_t MetricHelper::getMeasurementSetForAttribute( Attribute::ptr_t       attr,
-                                                                   MetricGenerator::ptr_t mgen )
-{
-  MeasurementSet::ptr_t msTarget;
-
-  if ( attr )
-  {
-    MeasurementSet::Map allSets = MetricHelper::getAllMeasurementSets( mgen );
-    MeasurementSet::Map::const_iterator msIt = allSets.begin();
-
-    while ( msIt != allSets.end() )
-    {
-      MeasurementSet::ptr_t ms = msIt->second;
-      UUID linkedAttrID = ms->getAttributeID();
-
-      if ( linkedAttrID == attr->getUUID() )
-      {
-        msTarget = ms;
-        break;
-      }
-
-      ++msIt;
-    }
-  }
-
-  return msTarget;
-}
     
 Attribute::Map MetricHelper::getAllAttributes( const MetricGenerator::Set& mgenSet )
 {
@@ -235,6 +180,99 @@ MeasurementSet::Map MetricHelper::getAllMeasurementSets( MetricGenerator::ptr_t 
   }
 
   return mSets;
+}
+
+MeasurementSet::Map MetricHelper::getMeasurementSetsForEntity( UUID entityID,
+                                                               const MetricGenerator::Set& mgenSet )
+
+{
+  MeasurementSet::Map targetMSets;
+
+  if ( !mgenSet.empty() )
+  {
+    Entity::ptr_t entity = MetricHelper::getEntityFromID( entityID, mgenSet );
+
+    // Create a set of required measurement set IDs
+    boost::container::set<UUID> attrMSIDs;
+
+    Attribute::Set attributes            = entity->getAttributes();
+    Attribute::Set::const_iterator attIt = attributes.begin();
+    while ( attIt != attributes.end() )
+    {
+      attrMSIDs.insert( (*attIt)->getUUID() );
+      ++attIt;
+    }
+
+    // Pull out all measurement sets associated with attributes of entity
+    MeasurementSet::Map allSets               = MetricHelper::getAllMeasurementSets( mgenSet );
+    MeasurementSet::Map::const_iterator setIt = allSets.begin();
+    while ( setIt != allSets.end() )
+    {
+      boost::container::set<UUID>::const_iterator findIt = attrMSIDs.find( setIt->first );
+
+      if ( findIt != attrMSIDs.end() )
+        targetMSets.insert( MeasurementSet::Map::value_type( setIt->first, setIt->second ) );
+
+      ++setIt;
+    }
+  }
+
+  return targetMSets;
+}
+
+MeasurementSet::Map MetricHelper::getMeasurementSetsForAttribute( Attribute::ptr_t            attr, 
+                                                                  const MetricGenerator::Set& mgenSet )
+{
+  MeasurementSet::Map targetMap;
+
+  if ( attr )
+  {
+    UUID targetAttID                         = attr->getUUID();
+    MeasurementSet::Map allSets              = getAllMeasurementSets( mgenSet );
+    MeasurementSet::Map::const_iterator msIt = allSets.begin();
+
+    while ( msIt != allSets.end() )
+    {
+      MeasurementSet::ptr_t ms = msIt->second;
+      UUID linkedAttrID = ms->getAttributeID();
+
+      if ( linkedAttrID == targetAttID )
+        targetMap.insert( MeasurementSet::Map::value_type(ms->getID(), ms) );
+
+      ++msIt;
+    }
+
+  }
+
+  return targetMap;
+}
+    
+MeasurementSet::ptr_t MetricHelper::getMeasurementSetForAttribute( Attribute::ptr_t       attr,
+                                                                   MetricGenerator::ptr_t mgen )
+{
+  MeasurementSet::ptr_t msTarget;
+
+  if ( attr )
+  {
+    MeasurementSet::Map allSets = MetricHelper::getAllMeasurementSets( mgen );
+    MeasurementSet::Map::const_iterator msIt = allSets.begin();
+
+    while ( msIt != allSets.end() )
+    {
+      MeasurementSet::ptr_t ms = msIt->second;
+      UUID linkedAttrID = ms->getAttributeID();
+
+      if ( linkedAttrID == attr->getUUID() )
+      {
+        msTarget = ms;
+        break;
+      }
+
+      ++msIt;
+    }
+  }
+
+  return msTarget;
 }
     
 MeasurementSet::ptr_t MetricHelper::getMeasurementSet( MetricGenerator::ptr_t mgen,

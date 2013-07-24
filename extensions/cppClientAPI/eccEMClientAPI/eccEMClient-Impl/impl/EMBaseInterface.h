@@ -53,7 +53,7 @@ public:
 
   void initialiseAMQPComms();
   
-  void shutdown();
+  virtual void shutdown();
   
   // IAMQPMessageDispatchListener ----------------------------------------------
   virtual void onSimpleMessageDispatched( const std::string& queueName, const std::string& msg );
@@ -71,8 +71,6 @@ protected:
   
   // Derriving classes must implement ------------------------------------------------------
   virtual void onInterpretMessage( const int& methodID, const JSONTree& jsonTree ) =0;
-
-  //protected static IECCLogger faceLogger = Logger.getLogger( typeof(EMBaseInterface) );
 
   String interfaceName;
   String interfaceVersion;

@@ -215,6 +215,21 @@ public class EMInterfaceAdapter : IEMDiscovery_UserListener,
             liveMonitorFace.pushMetric( report );
     }
 
+    ///
+    /// Sends a request to the ECC for it to enable or disable metric capture
+    /// for a specific entity. IMPORTANT NOTE: disabling an entity will mean that
+    /// the ECC no longer PULLs metrics for that entity or stores PUSHed metrics
+    /// for that entity.
+    /// 
+    /// @param entityID - UUID of the entity to enable or disable.
+    /// @param enabled  - Enabled or disable.
+    ///
+    public void sendEntityEnabled( Guid entityID, bool enabled )
+    {
+        if (entityID != null && discoveryFace != null)
+            discoveryFace.enableEntityMetricCollection(entityID, enabled);
+    }
+
     // IEMDiscovery_UserListener -----------------------------------------------
     public void onCreateInterface( Guid senderID, EMInterfaceType type )
     {

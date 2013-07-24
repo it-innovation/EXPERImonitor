@@ -162,13 +162,12 @@ String Measurement::toJSON()
 
 void Measurement::fromJSON( const ModelBase::JSONTree& jsonTree )
 {
+  // Client does not require implementation
 }
 
 String Measurement::toString()
 {
-  wstring ts;
-
-  return ts;
+  return measurementValue;
 }
     
 } // namespace

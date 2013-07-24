@@ -53,6 +53,11 @@ namespace ecc_emClient_spec
          */
         virtual void setUserListener( IEMTearDown_UserListener::ptr_t listener ) =0;
 
+        /**
+        * Shuts down the interface
+        */
+        virtual void shutdown() =0;
+
         // User methods --------------------------------------------------------------
         /**
          * Notify the EM that this client is ready to start its tear-down process.

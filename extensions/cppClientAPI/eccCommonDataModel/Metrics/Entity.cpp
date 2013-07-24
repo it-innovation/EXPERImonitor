@@ -235,13 +235,12 @@ String Entity::toJSON()
 
 void Entity::fromJSON( const ModelBase::JSONTree& jsonTree )
 {
+  // Client does not require implementation
 }
 
 String Entity::toString()
 {
-  wstring ts;
-
-  return ts;
+  return entityName + L" {" + uuidToWide(entityUniqueID) + L"}";
 }
 
 } // namespace

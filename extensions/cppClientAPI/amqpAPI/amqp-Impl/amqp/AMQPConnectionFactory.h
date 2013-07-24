@@ -78,7 +78,6 @@ namespace ecc_amqpAPI_impl
     bool   connectionEstablished;
 
     AMQPBasicSubscriptionService amqpSubscriptionService;
-
   };
 
 }

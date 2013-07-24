@@ -127,13 +127,12 @@ String Attribute::toJSON()
 
 void Attribute::fromJSON( const ModelBase::JSONTree& jsonTree )
 {
+  // Client does not require implementation
 }
 
 String Attribute::toString()
 {
-  wstring ts;
-
-  return ts;
+  return attrName + L" {" + uuidToWide(attrID) + L"}";
 }
 
 } // namespace

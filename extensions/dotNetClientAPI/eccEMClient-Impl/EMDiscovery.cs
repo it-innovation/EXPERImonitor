@@ -99,6 +99,16 @@ public class EMDiscovery : EMBaseInterface,
     
     executeMethod( 11, paramsList );
   }
+
+  // Method ID = 14
+  public void enableEntityMetricCollection( Guid entityID, bool enabled )
+  {
+    List<Object> paramsList = new List<Object>();
+    paramsList.Add( entityID );
+    paramsList.Add( enabled );
+
+    executeMethod( 14, paramsList );
+  }
   
   // Method ID = 12
   public void clientDisconnecting()

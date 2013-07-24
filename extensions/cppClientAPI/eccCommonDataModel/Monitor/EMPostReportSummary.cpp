@@ -90,7 +90,29 @@ Report::ptr_t EMPostReportSummary::getReport( const uuid& measurementID )
 // ModelBase -----------------------------------------------------------------
 String EMPostReportSummary::toJSON()
 {
-  String json;
+  String json( L"{" );
+
+  json.append( L"\"reportsByMeasurementSetID\":{" );
+
+  // Write out reports (if any exist)
+  Report::Map::const_iterator repIt = reportsByMeasurementSetID.begin();
+  while ( repIt != reportsByMeasurementSetID.end() )
+  {
+    Report::ptr_t report = repIt->second;
+
+    if ( report )
+    {
+      // ID of report
+      json.append( L"\"" + uuidToWide(repIt->first) + L"\":" );
+
+      // The report itself
+      json.append( report->toJSON() );
+    }
+
+    ++repIt;
+  }
+
+  json.append( L"}}" );
 
   return json;
 }

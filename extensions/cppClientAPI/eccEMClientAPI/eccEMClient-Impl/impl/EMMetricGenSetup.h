@@ -54,6 +54,8 @@ public:
   // IEMMonitorSetup -----------------------------------------------------------
   virtual void setUserListener( ecc_emClient_spec::IEMSetup_UserListener::ptr_t listener );
   
+  virtual void shutdown();
+
   // User methods --------------------------------------------------------------
   // Method ID = 3
   virtual void notifyReadyToSetup();

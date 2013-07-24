@@ -61,6 +61,7 @@ public class AMQPBasicSubscriptionProcessor extends DefaultConsumer
     try
     {
       messageDispatch.addMessage( queueName, body );
+      
       getChannel().basicAck( envelope.getDeliveryTag(), false );
     }
     catch (IOException ioe)

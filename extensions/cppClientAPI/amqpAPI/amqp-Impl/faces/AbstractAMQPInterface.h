@@ -77,7 +77,6 @@ namespace ecc_amqpAPI_impl
     bool   actingAsProvider;
 
   private:
-      //IECCLogger amqpIntLogger = Logger.getLogger(typeof(AbstractAMQPInterface));
       boost::mutex sendMessageMutex;
     
       AMQPBasicSubscriptionService::ptr_t   subscriptService;

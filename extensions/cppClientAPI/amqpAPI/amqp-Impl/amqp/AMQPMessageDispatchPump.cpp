@@ -39,10 +39,8 @@ using namespace boost;
 namespace ecc_amqpAPI_impl
 {
   AMQPMessageDispatchPump::AMQPMessageDispatchPump( const String& pName, const ePumpPriority& priority )
+    : isDispatchPumping(false), dispatchesWaiting(false)
   {
-    isDispatchPumping = false;
-    dispatchesWaiting = false;
-
     pumpName     = pName;
     pumpPriority = priority;
   }

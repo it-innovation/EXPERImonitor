@@ -39,7 +39,7 @@ namespace ecc_commonDataModel
   * 
   * @author sgc
   */
-class EMPostReportSummary : ModelBase
+class EMPostReportSummary : public ModelBase
 {
 public:
         

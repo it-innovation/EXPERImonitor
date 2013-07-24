@@ -65,6 +65,13 @@ EMPostReport::~EMPostReport()
 {
 }
 
+void EMPostReport::shutdown()
+{
+  EMBaseInterface::shutdown();
+
+  userListener = NULL;
+}
+
 // IECCReport ----------------------------------------------------------------
 void EMPostReport::setUserListener( IEMPostReport_UserListener::ptr_t listener )
 { userListener = listener; }
@@ -83,7 +90,7 @@ void EMPostReport::sendReportSummary( EMPostReportSummary::ptr_t summary )
 {
   EXEParamList paramsList;
 
-  //paramsList.Add( summary );
+  paramsList.push_back( summary );
     
   executeMethod( 5, paramsList );
 }
@@ -93,7 +100,7 @@ void EMPostReport::sendDataBatch( EMDataBatch::ptr_t populatedBatch )
 {
   EXEParamList paramsList;
 
-  //paramsList.Add( populatedBatch );
+  paramsList.push_back( populatedBatch );
     
   executeMethod( 6, paramsList );
 }
@@ -118,9 +125,10 @@ void EMPostReport::onInterpretMessage( const int& methodID,
         JSONTreeIt tIt = jsonTree.begin(); // Get past method ID first
         ++tIt;
 
-        //EMDataBatch batch = JsonConvert.DeserializeObject<EMDataBatch>( jsonMethodData[1] );      
+        EMDataBatch::ptr_t batch = EMDataBatch::ptr_t( new EMDataBatch() );
+        batch->fromJSON( (*tIt).second );     
 
-        //userListener.onRequestDataBatch( interfaceProviderID, batch );
+        userListener->onRequestDataBatch( interfaceProviderID, batch );
       }
         
     } break;
@@ -129,8 +137,12 @@ void EMPostReport::onInterpretMessage( const int& methodID,
     {
       if ( userListener )
       {
-        //Guid id = new Guid(jsonMethodData[1]);  
-        //userListener.notifyReportBatchTimeOut( interfaceProviderID, id );
+        JSONTreeIt tIt = jsonTree.begin(); // Get past method ID first
+        ++tIt;
+
+        UUID id = getJSON_UUID( *tIt );
+     
+        userListener->notifyReportBatchTimeOut( interfaceProviderID, id );
       }
         
     } break; 

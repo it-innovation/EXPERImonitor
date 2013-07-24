@@ -95,8 +95,6 @@ namespace ecc_amqpAPI_impl
       std::string queueMsg;
     };
 
-    //readonly IECCLogger dispatchLogger = Logger.getLogger( typeof(AMQPMessageDispatch) ); 
-
     AMQPMessageDispatchPump::ptr_t                        dispatchPump;
     boost::mutex                                          dispatchMutex;
     std::queue<QueueMsg>                                  dispatchQueue;

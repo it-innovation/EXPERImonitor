@@ -38,7 +38,7 @@ using namespace ecc_amqpAPI_impl;
 using namespace ecc_emClient_spec;
 
 using namespace boost;
-
+using namespace std;
 
 namespace ecc_emClient_impl
 {
@@ -46,7 +46,6 @@ namespace ecc_emClient_impl
 EMInterfaceFactory::EMInterfaceFactory( AMQPBasicChannel::ptr_t channel, 
                                         bool                    createProviders )
 {
-  
   amqpChannel       = channel;
   generateProviders = createProviders;
 

@@ -55,6 +55,8 @@ public:
   // IEMLiveMonitor ------------------------------------------------------------
   virtual void setUserListener( ecc_emClient_spec::IEMLiveMonitor_UserListener::ptr_t listener );
   
+  virtual void shutdown();
+
   // User methods --------------------------------------------------------------
   // Method ID = 7
   virtual void notifyReadyToPush();

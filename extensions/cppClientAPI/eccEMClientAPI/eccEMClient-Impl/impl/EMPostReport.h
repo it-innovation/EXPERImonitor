@@ -51,6 +51,8 @@ public:
 
   virtual ~EMPostReport();
   
+  virtual void shutdown();
+
   // IECCReport ----------------------------------------------------------------
   virtual void setUserListener( ecc_emClient_spec::IEMPostReport_UserListener::ptr_t listener );
   

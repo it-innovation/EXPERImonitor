@@ -96,9 +96,15 @@ Creative Commons Attribution-NonCommercial 3.0
 -----------------------------------------------
 invient-charts-0.8.6.jar
 
-MIT License
+MIT Licence
 -----------------------------------------------
 Newtonsoft.Json.dll
+rabbitmq-c-v0.3.0 (see https://github.com/alanxz/rabbitmq-c)
+SimpleAmqpClient (see https://github.com/alanxz/SimpleAmqpClient)
+
+BOOST Licence
+-------------
+Boost 1.53.0
 
 Public domain
 -----------------------------------------------
