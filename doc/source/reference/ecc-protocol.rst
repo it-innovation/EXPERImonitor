@@ -1,4 +1,0 @@
-ECC protocol
-============
-
-TODO: SGC
