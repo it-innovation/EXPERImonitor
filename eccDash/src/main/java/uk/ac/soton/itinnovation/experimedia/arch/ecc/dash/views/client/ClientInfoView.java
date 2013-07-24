@@ -28,6 +28,7 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.client;
 import com.vaadin.ui.AbstractLayout;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Embedded;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
@@ -44,6 +45,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Me
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMClient;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.SimpleView;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.UILayoutUtil;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.UIResource;
 
 
 
@@ -54,6 +56,11 @@ public class ClientInfoView extends SimpleView
   private Label          clientStatusLabel;
   private Label          clientIDLabel;
   private VerticalLayout clientInfoHolder;
+  private Embedded       monitoringIcon;
+  private Embedded       databaseIcon;
+  private Embedded       tickIcon;
+  private Button         enableButton;
+
   
   private transient UUID currClientID;
   
@@ -208,9 +215,50 @@ public class ClientInfoView extends SimpleView
     hl.setStyleName( "eccInfoPanelHeader" );
     vl.addComponent( hl );
     
+    // Entity name label
     Label label = new Label( "Entity: " + entity.getName() );
     label.addStyleName( "h3" );
     hl.addComponent( label );
+    
+    // Status bar
+    HorizontalLayout sb = new HorizontalLayout();
+    sb.setStyleName( "eccGraphPanel" );
+    vl.addComponent(sb);
+    
+    // Graph icon used to show entity has been added to live monitoring
+    monitoringIcon = new Embedded(null, UIResource.getResource("monitorIcon"));
+    monitoringIcon.setHeight("20px");
+    monitoringIcon.setWidth("20px");
+    sb.addComponent(monitoringIcon);
+    monitoringIcon.setVisible(false);
+    sb.setComponentAlignment( monitoringIcon, Alignment.MIDDLE_LEFT );
+    
+    // Create a gap between icons
+    sb.addComponent( UILayoutUtil.createSpace("15px", null,true ) );
+    
+    // Database icon used to show entity has data
+    databaseIcon = new Embedded(null, UIResource.getResource("databaseIcon"));
+    databaseIcon.setHeight("20px");
+    databaseIcon.setWidth("20px");
+    sb.addComponent(databaseIcon);
+    databaseIcon.setVisible(false);
+    sb.setComponentAlignment( databaseIcon, Alignment.MIDDLE_LEFT );
+    
+    // Create a gap between icons
+    sb.addComponent( UILayoutUtil.createSpace("15px", null,true ) );
+    
+    // Graph icon used to show entity has been added to live monitoring
+    tickIcon = new Embedded(null, UIResource.getResource("tickIcon"));
+    tickIcon.setHeight("20px");
+    tickIcon.setWidth("20px");
+    sb.addComponent(tickIcon);
+    tickIcon.setVisible(false);
+    sb.setComponentAlignment( tickIcon, Alignment.MIDDLE_LEFT );
+    
+    // Button for enabling an entity
+    enableButton = new Button("Enable Entity");
+    sb.addComponent(enableButton);
+    enableButton.setVisible(false);
     
     // Two columns; info and controls
     hl = new HorizontalLayout();
@@ -256,6 +304,8 @@ public class ClientInfoView extends SimpleView
     label = new Label( "Number of attributes: " + entity.getAttributes().size() );
     label.addStyleName( "small" );
     innerVL.addComponent( label );
+    
+
   }
   
   private void createAttributeInfo( AbstractLayout parent, Attribute attribute )
@@ -317,6 +367,7 @@ public class ClientInfoView extends SimpleView
     if ( entityID != null )
     {
       Collection<ClientInfoViewListener> listeners = getListenersByType();
+      
       for( ClientInfoViewListener listener : listeners )
         listener.onAddEntityToLiveView( entityID );
     }
@@ -336,7 +387,9 @@ public class ClientInfoView extends SimpleView
   {
     @Override
     public void buttonClick(Button.ClickEvent ce) 
-    { onAddEntityToLiveView( (UUID) ce.getButton().getData() ); }
+    { 
+        onAddEntityToLiveView( (UUID) ce.getButton().getData() ); 
+    }
   }
   
   private class AddAttributeToLiveButtonListener implements Button.ClickListener

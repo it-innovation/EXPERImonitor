@@ -686,6 +686,7 @@ public class DashMainController extends UFAbstractEventManager
         }
         else problem = "Could not put entity into live view: client does not hold entity";
       }
+      connectionsView.onEntityAdded(currClientID);
     }
     
     // Report problems, if any
@@ -974,6 +975,12 @@ public class DashMainController extends UFAbstractEventManager
     viewResource.createResource( "closeIcon",       "img/closeIcon.png" );
     viewResource.createResource( "minimiseIcon",    "img/minimiseIcon.png" );
     viewResource.createResource( "maximiseIcon",    "img/maximiseIcon.png" );
+    viewResource.createResource( "alertIcon",       "img/warningIcon.png" );
+    viewResource.createResource( "graphIcon",       "img/graphIcon.png"   );
+    viewResource.createResource( "chartIcon",       "img/chartIcon.png"   );
+    viewResource.createResource( "monitorIcon",       "img/monitorIcon.png"   );
+    viewResource.createResource( "databaseIcon",       "img/databaseIcon.png"   );
+    viewResource.createResource( "tickIcon",       "img/tickIcon.png"   );
   }
   
   // Event handlers ------------------------------------------------------------
@@ -985,7 +992,7 @@ public class DashMainController extends UFAbstractEventManager
       icePusher.push();
     }
   }
-  
+
   private class DashWindowResizeListener implements Window.ResizeListener
   {
     @Override

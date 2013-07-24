@@ -36,6 +36,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.Highlight
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.HighlightViewListener;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.SimpleView;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.UILayoutUtil;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.UIResource;
 
 
 
@@ -137,7 +138,18 @@ public class ClientConnectionsView extends SimpleView
     {
       ClientView cv = connectedClients.get( clientID );
       
-      if ( cv != null ) cv.setSummaryInfo( entityCount, metricCount );
+      if ( cv != null ) 
+      {
+          cv.setSummaryInfo( entityCount, metricCount );
+          if(entityCount>0)
+          {
+              cv.statusIcon.setVisible(true);
+              cv.newEntitiesLabel.setVisible(true);
+              
+          }
+          
+      }
+           
     }
   }
   
@@ -201,6 +213,20 @@ public class ClientConnectionsView extends SimpleView
     }
   }
   
+  @Override
+  public void onEntityAdded(UUID clientID)
+  {
+     if(clientID!=null)
+     {
+         ClientView cv = connectedClients.get(clientID);
+         if ( cv !=null )
+         {
+             cv.newEntitiesLabel.setVisible(false);
+             cv.statusIcon.setVisible(false);
+         }
+     }
+  }
+  
   // Private methods -----------------------------------------------------------
   private void createComponents()
   {
@@ -227,8 +253,14 @@ public class ClientConnectionsView extends SimpleView
     private Label  currentPhase;
     private Label  entityCountLabel;
     private Label  metricCountLabel;
+    private Label newEntitiesLabel;
     private Button disconnectButton;
+    private Embedded statusIcon;
     
+    
+    
+
+            
     private transient EMClient client;
     private transient boolean forceDisconnect = false;
     
@@ -244,18 +276,33 @@ public class ClientConnectionsView extends SimpleView
     public boolean isClientAccelerating()
     { return client.isPhaseAccelerating(); }
     
+    // Set current phase label
     public void setCurrentPhase( EMPhase phase )
     { currentPhase.setValue( "Phase: " + phase.toString() ); }
     
+    // Set entity and metric ount labels
     public void setSummaryInfo( int entityCount, int metricCount )
     {
       entityCountLabel.setValue( "Entities: " + entityCount );
       metricCountLabel.setValue( "Metrics: " + metricCount );
+      
     }
     
+    // HighlightView overrides -------------------------------------------------
     @Override
     public UUID getDataID()
     { return client.getID(); }
+    
+    @Override
+    public void setSelected( boolean selected )
+    {
+      super.setSelected( selected );
+       if(!selected)
+        {
+           //statusIcon.setVisible(false);
+          // newEntitiesLabel.setVisible(false);
+      }
+   }
     
     // Private methods ---------------------------------------------------------
     private void createComponents()
@@ -274,13 +321,25 @@ public class ClientConnectionsView extends SimpleView
       innerVL.setWidth( "240px" );
       hl.addComponent( innerVL );
       
+     
+       // New entity warning icon
+      statusIcon = new Embedded(null, UIResource.getResource( "alertIcon") );
+      statusIcon.setWidth("20px");
+      statusIcon.setHeight("20px");
+      innerVL.addComponent(statusIcon);
+      innerVL.setComponentAlignment(statusIcon, Alignment.TOP_RIGHT);
+      statusIcon.setVisible(false);
+      
+      
+      // Client name label
       clientName = new Label( client.getName() );
       clientName.addStyleName( "small" );
       innerVL.addComponent( clientName );
-      
+           
       // Space
       innerVL.addComponent( UILayoutUtil.createSpace( "2px", null ) );
       
+      // Waiting for entity label
       currentPhase = new Label( "Waiting" );
       currentPhase.addStyleName( "tiny" );
       currentPhase.setImmediate( true );
@@ -298,21 +357,32 @@ public class ClientConnectionsView extends SimpleView
       // Space
       innerVL.addComponent( UILayoutUtil.createSpace( "2px", null ) );
       
+      // Metric count label
       metricCountLabel = new Label( "Metrics: unknown" );
       metricCountLabel.addStyleName( "tiny" );
       metricCountLabel.setImmediate( true );
       innerVL.addComponent( metricCountLabel );
       
+      // Label to inform of new entities
+      newEntitiesLabel = new Label ( "New Entities Available" );
+      newEntitiesLabel.addStyleName( "tiny" );
+      // To do: change font colour to red
+      innerVL.addComponent(newEntitiesLabel);
+      newEntitiesLabel.setVisible(false);
+      
       // Space
       vl.addComponent( UILayoutUtil.createSpace( "10px", null ) );
       
       // Force disconnect button
-      disconnectButton = new Button( "disconnect" );
+      disconnectButton = new Button( "Disconnect" );
       disconnectButton.addStyleName( "small" );
       disconnectButton.setData( client.getID() );
       disconnectButton.addListener( new DisconnectListener() );
       innerVL.addComponent( disconnectButton );
       innerVL.setComponentAlignment( disconnectButton, Alignment.BOTTOM_RIGHT );
+      
+  
+      
     }
     
     // Private event handling --------------------------------------------------
