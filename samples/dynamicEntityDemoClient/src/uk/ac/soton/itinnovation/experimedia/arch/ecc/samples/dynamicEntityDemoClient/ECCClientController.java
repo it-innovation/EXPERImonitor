@@ -174,8 +174,11 @@ public class ECCClientController implements EMIAdapterListener,
     @Override
     public void onPopulateMetricGeneratorInfo()
     {
-      // Not going to send any metric generators automatically - will wait
-      // for user to input some from the UI
+      // Not going to create metric generators in code, but will send them as the
+      // user creates them. So just send back an empty set
+      
+      HashSet<MetricGenerator> mgSet = new HashSet<MetricGenerator>();
+      emiAdapter.sendMetricGenerators( mgSet );
     }
 
     @Override

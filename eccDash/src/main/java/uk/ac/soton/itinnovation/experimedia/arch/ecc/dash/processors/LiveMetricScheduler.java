@@ -92,9 +92,7 @@ public class LiveMetricScheduler extends UFAbstractEventManager
     UUID clientID = client.getID();   
     if ( liveClients.containsKey(clientID) ) throw new Exception( "Already scheduling client" );
     
-    Set<MetricGenerator> mgSet = client.getCopyOfMetricGenerators();
-    if ( mgSet.isEmpty() ) throw new Exception( "Client has no metric generators" );
-    
+    // Scheduling pulling for this client (even if it doesn't initially have any metric generators)
     synchronized( clientLock )
     {
       MetricPullTask mpt = new MetricPullTask(client);

@@ -311,19 +311,11 @@ public class DashMainController extends UFAbstractEventManager
   @Override
   public void onClientEnabledMetricCollection( EMClient client, UUID entityID, boolean enabled )
   {
-    // DION & SIMON TO DO:
-    //
-    // 1) Create some new elements in UI to show Entity metric availability
-    //
-    // 2) Wire this event through to the view so it can be updated
   }
   
   @Override
   public void onClientSetupResult( EMClient client, boolean success )
   {
-    // DION TO DO:
-    // 
-    // 1) Wire this event through to dashboard log
   }
   
   @Override
@@ -344,15 +336,7 @@ public class DashMainController extends UFAbstractEventManager
       if ( currentPhase.equals( EMPhase.eEMLiveMonitoring) )
       {
         try 
-        { 
-          liveMetricScheduler.addClient(client); 
-          
-          // DION TO DO?:
-          //
-          // See 'onClientDeclaredCanPush(..)' work...
-          //
-          // 1) Update the view to display PULL icon for this client
-        }
+        { liveMetricScheduler.addClient( client ); }
         catch ( Exception e )
         {
           String problem = "Could not add pulling client to live monitoring: " + e.getMessage();
