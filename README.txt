@@ -8,14 +8,15 @@ The source code in this distribution is © Copyright University of Southampton IT
 
 Licences
 ========
-The licence for this software can be found in the file ITInnov-EXPERIMEDIA-licence-v1.0.txt
+The licence for this software is LGPL v2.1; the licence agreement for this can be found in folder 'licences'.
 
 A complete list of licences for this software and associated third party software can be found in the file IPR.txt and in sub-folders within the source directories.
   
 Documentation
 =============
-Javadoc for the source code may be found in /doc/javaDoc' folder. Further information may be found in the 'Experiment Metric Data Monitoring.pdf' file. In addition to this, READMEs relating to ECC client development can be found in the 'samples' folder.
+The primary source of ECC documentation can be found in the 'doc' folder. This documentation is encapsulated in RST format; readers have a choice of generating a printable version in a variety of formats including HTML and PDF - please see the README instructions in the doc folder.
 
+Javadoc for the source code may be found in /doc/javaDoc' folder. In addition to this, supplementary READMEs relating to ECC client development can be found in the 'samples' folder. 
 Brief notes 'quick start' notes can be found below.
 
 

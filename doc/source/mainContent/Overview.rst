@@ -420,8 +420,7 @@ Table
 +-----------------------------------------------------------------------------------------------+---------------------+--------------------------------------+------------+----------------+----------------------------+-----------------+
 
 
-In
-, a number of illustrative examples of metrics from QoS, QoE and QoC domains are shown (with notes to offer context). Reading from left to right, we can see how groups of metric sets (each with an associated metric type and unit) are mapped to the entities under observation in the real or virtual world. To save space, metric generator mappings have not been included.
+In the table above a number of illustrative examples of metrics from QoS, QoE and QoC domains are shown (with notes to offer context). Reading from left to right, we can see how groups of metric sets (each with an associated metric type and unit) are mapped to the entities under observation in the real or virtual world. To save space, metric generator mappings have not been included.
 
 
 Moving up the data hierarchy, the

@@ -11,37 +11,37 @@ Welcome to the EXPERIMEDIA ECC documentation
 |    mainContent/Overview                                  |    mainContent/Getting_started_with_the_ECC           |
 |                                                          |                                                       |
 +----------------------------------------------------------+-------------------------------------------------------+
-| **Using the ECC Dashboard**                              | **ECC Components in More Detail**                     |
+| **Using the ECC Dashboard**                              |  **Building Sample ECC Clients**                      |
 +----------------------------------------------------------+-------------------------------------------------------+
 | .. toctree::                                             | .. toctree::                                          |
 |    :maxdepth: 2                                          |    :maxdepth: 2                                       |
 |                                                          |                                                       |
-|    mainContent/Using_the_dashboard                       |    mainContent/ECCinternal_components_in_more_detail  |
+|    mainContent/Using_the_dashboard                       |    mainContent/Building_sample_ECC_clients            |
 |                                                          |                                                       |
 |                                                          |                                                       |
 +----------------------------------------------------------+-------------------------------------------------------+
-| **Building Sample ECC Clients**                          | **Writing an ECC Client**                             |
-+----------------------------------------------------------+-------------------------------------------------------+
-| .. toctree::                                             | .. toctree::                                          |
-|    :maxdepth: 2                                          |    :maxdepth: 2                                       |
-|                                                          |                                                       |
-|    mainContent/Building_sample_ECC_clients               |    mainContent/Writing_an_ECC_client                  |
-|                                                          |                                                       |
-+----------------------------------------------------------+-------------------------------------------------------+
-| **Indicative Monitoring Use Cases**                      | **ECC Monitoring Protocol**                           |
+|  **Writing an ECC Client**                               | **Indicative Monitoring Use Cases**                   |
 +----------------------------------------------------------+-------------------------------------------------------+
 | .. toctree::                                             | .. toctree::                                          |
 |    :maxdepth: 2                                          |    :maxdepth: 2                                       |
 |                                                          |                                                       |
-|    mainContent/Indicativemonitoring_use-cases            |    mainContent/ECC_monitoring_protocol                |              
+|    mainContent/Writing_an_ECC_client                     |    mainContent/Indicativemonitoring_use-cases         |
 |                                                          |                                                       |
 +----------------------------------------------------------+-------------------------------------------------------+
-| **Baseline Metric Services**                             | **ECC API Change Log**                                |                                                       
+| **ECC Monitoring Protocol**                              | **Baseline Metric Services**                          |
 +----------------------------------------------------------+-------------------------------------------------------+
-| .. toctree::                                             |  .. toctree::                                         |                                                       
-|    :maxdepth: 2                                          |     :maxdepth: 2                                      |                                                       
+| .. toctree::                                             | .. toctree::                                          |
+|    :maxdepth: 2                                          |    :maxdepth: 2                                       |
 |                                                          |                                                       |
-|    mainContent/Base_line_metric_services                 |     mainContent/eccAPIChangeLog                       |                          
+|    mainContent/ECC_monitoring_protocol                   |    mainContent/Base_line_metric_services              |              
+|                                                          |                                                       |
++----------------------------------------------------------+-------------------------------------------------------+
+| **ECC API Change Log**                                   |                                                       |                                                       
++----------------------------------------------------------+-------------------------------------------------------+
+| .. toctree::                                             |                                                       |                                                       
+|    :maxdepth: 2                                          |                                                       |                                                       
+|                                                          |                                                       |
+|    mainContent/eccAPIChangeLog                           |                                                       |                          
 |                                                          |                                                       |                                
 |                                                          |                                                       |
 +----------------------------------------------------------+-------------------------------------------------------+

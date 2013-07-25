@@ -89,23 +89,28 @@ following sample client projects:
 |                      | helps you manage your metric data and communication with the ECC.                                                                                                                                                                       |
 |                      |                                                                                                                                                                                                                                         |
 +----------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Dynamic Entity       | An extended version of the Basic ECC Client that allows the user to dynamically created Entities at any point after the experiment process has started. Users can enter details of new entities and their attributes via a desktop      |
+| Demo ECC Client      | UI; new entities and attributes are created and sent to the ECC. Dummy metric data is provided by the client for all new entities/attributes.                                                                                           |
+|                      |                                                                                                                                                                                                                                         |
+|                      |                                                                                                                                                                                                                                         |
++----------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | Basic Android Client | This is a simple client that demonstrates integration with the ECC on                                                                                                                                                                   |
 |                      | the Android 4.2.x platform. This client provides a basic UI with which the user can select the IP of the RabbitMQ server and then later push a simple metric to the ECC.                                                                |
 |                      | For more information on the specific build process for this client (which requires Google’s Android SDK, please see the README).                                                                                                        |
 |                      |                                                                                                                                                                                                                                         |
 +----------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Basic .Net Client    | A simple C# client that works in a similar way to the Java based Headless ECC Client (this client API does not yet provide local EDM metric database support). This client runs from the command line.                                  |
+|                      |                                                                                                                                                                                                                                         |
++----------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Basic C++ Client     | A simple C++ client that works in a similar way to the .Net/Java headless clients (this client API does not yet provide local EDM metric database support). This client runs from the command line.                                     |
+|                      |                                                                                                                                                                                                                                         |
++----------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 
-All sample code can be found at the top level of the ECC API under the folder ‘samples’.
-As a new client writer you may wish to adopt a similar pattern to the clients found here (by using the
-*EMInterfaceAdapter*
-class and listening to its events as described by
-*EMIAdapterListener*
-); more experienced software engineers may wish to directly use the ECC protocol interface classes hidden by the
-*EMInterfaceAdapter*
-themselves.
-For the sake of brevity, the specifics of the Android client are not detailed here since the application very closely follows the pattern adopted
-by the Basic ECC client.
+All sample code can be found at the top level of the ECC API under the folder ‘samples’. As a new client writer you may wish to adopt a similar pattern to the clients found here (by using the *EMInterfaceAdapter* class and listening to its events as described by
+*EMIAdapterListener*); more experienced software engineers may wish to directly use the ECC protocol interface classes hidden by the *EMInterfaceAdapter* themselves.
+
+For the sake of brevity, the specifics of the more recent ECC clients (Android; .Net; C++) are not detailed here since the application very closely follows the pattern adopted by the Java Basic ECC and Headless ECC clients.
 
 Client samples in more detail
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -242,14 +247,34 @@ can be configured to repeat measurement actions indefinitely or for an arbitrary
 Tools: PsuedoRandomWalkTool & MemoryUsageTool (Headless client only)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Two trivial metric producing classes (both implementing the
-*ITakeMeasurement*
-interface) have been supplied for use in the headless client. The
-*PsuedoRandomWalkTool*
-class simulates the change in direction a walker might take on a random path (providing their direction in degrees: 0:-359). The
-*MemoryUsageTool*
-takes a rough estimation of the memory being used by the headless client at run-time.
+Two trivial metric producing classes (both implementing the *ITakeMeasurement* interface) have been supplied for use in the headless client. 
+The *PsuedoRandomWalkTool* class simulates the change in direction a walker might take on a random path (providing their direction in degrees: 0:-359). 
+The *MemoryUsageTool* takes a rough estimation of the memory being used by the headless client at run-time.
 
+More advanced client programming
+--------------------------------
+The ECC provides client writers with a number of more advanced levels of control over the way their client interacts with the ECC - these features are outlined below.
+For more detailed information, please read the inline documentation.
+
+Metric PULL semantics
+~~~~~~~~~~~~~~~~~~~~~
+Metrics that will be pulled from the client by the ECC can be scheduled and limited by the client. When a client constructs its metric model, it creates *MeasurementSets* that are associated with an Entity's attribute.
+Using the MeasurementSet class, the client is able to:
+
+  * Set a limit on the number of times the ECC can ask for metric data for this set [see MeasurementSet.setMeasurementRule(..) & MeasurementSet.setMeasurementCountMax(..)]
+  * Set the frequency at which the ECC will ask for metric data for this set [see MeasurementSet.setSamplingInterval(..)]
+
+Entity enabling and disabling
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Some clients may wish to signal to the ECC that want to enable or disable an Entity during the live monitoring process. The meaning of this is as follows:
+
+  * Enabled entities. Pushed metrics will be captured and stored by the ECC. If the client supports pulling, the ECC will issue pull requests for metrics associated with the entity
+    
+  * Disabled entities. Any pushed metrics associated with the entity will be discarded by the ECC. The ECC will not make pull requests for any metrics associated with the entity
+  
+Client writers can send 'enable' or 'disable' signals to the ECC by using the ECC adapter call EMInterfaceAdapter.sendEntityEnabled(..).
+
+  
 Testing clients against the ECC
 -------------------------------
 
