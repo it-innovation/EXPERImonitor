@@ -27,8 +27,13 @@ Packaging the ECC component (using Maven 3.x+)
       ./IPR.txt
 
 5) mvn clean
+
+6) build the html documentation:
+
+  cd doc
+  make html
       
-6) mvn package -PpackageECC
+7) mvn package -PpackageECC
 
   * This will build and package up the ECC component in a ZIP file:
     ./target/experimedia-arch-ecc-<VERSION>-src.zip
