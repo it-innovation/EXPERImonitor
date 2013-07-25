@@ -184,7 +184,7 @@ public class ClientController implements EMIAdapterListener,
     {
         queueLogMessage( "Creating metric generator..." );
         
-        emiAdapter.setMetricGenerators( createMetricGeneratorSet() );
+        emiAdapter.sendMetricGenerators( createMetricGeneratorSet() );
     }
 
     @Override
