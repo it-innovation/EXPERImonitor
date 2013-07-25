@@ -14,7 +14,10 @@ A complete list of licences for this software and associated third party softwar
   
 Documentation
 =============
-The primary source of ECC documentation can be found in the 'doc' folder. This documentation is encapsulated in RST format; readers have a choice of generating a printable version in a variety of formats including HTML and PDF - please see the README instructions in the doc folder.
+The primary source of ECC documentation can be found in the 'doc' folder. This documentation is encapsulated in RST format; readers have a choice of generating a printable version in a variety of formats including HTML and PDF.
+For convenience, an HTML version of our documentation can be found here:
+
+<ECC API root>/doc/manual/html
 
 Javadoc for the source code may be found in /doc/javaDoc' folder. In addition to this, supplementary READMEs relating to ECC client development can be found in the 'samples' folder. 
 Brief notes 'quick start' notes can be found below.
