@@ -297,6 +297,10 @@ public class DashMainController extends UFAbstractEventManager
       connectionsView.updateClientSummaryInfo( clientID, 
                                                MetricHelper.getAllEntities( allGenerators ).size(),
                                                MetricHelper.getAllMeasurementSets( allGenerators ).size() );
+      
+      // If we are not in discovery phase, alert user that new metric model data has arrived
+      if ( !currentPhase.equals(EMPhase.eEMDiscoverMetricGenerators) )
+        connectionsView.displayAlert( clientID, "New metric data available" );
           
       if ( clientID.equals(connectionsView.getSelectedClientID()) )
       {
@@ -588,7 +592,13 @@ public class DashMainController extends UFAbstractEventManager
       EMClient client = expMonitor.getClientByID( clientID );
       if ( client != null )
       {
+        // Reset alerts on connection view
+        connectionsView.displayAlert( clientID, null );
+        
+        // Update client view
         clientInfoView.writeClientInfo( client );
+        
+        // Switch focus if necessary
         mainDashView.switchViewFocus( 0 );
       }
     }
@@ -686,7 +696,6 @@ public class DashMainController extends UFAbstractEventManager
         }
         else problem = "Could not put entity into live view: client does not hold entity";
       }
-      connectionsView.onEntityAdded(currClientID);
     }
     
     // Report problems, if any

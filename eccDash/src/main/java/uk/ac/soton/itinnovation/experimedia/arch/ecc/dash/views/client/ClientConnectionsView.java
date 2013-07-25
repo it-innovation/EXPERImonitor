@@ -25,18 +25,12 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.client;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.*;
+
 import com.vaadin.ui.*;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.UUID;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMClient;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMPhase;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.HighlightView;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.HighlightViewListener;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.SimpleView;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.UILayoutUtil;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.UIResource;
+
+import java.util.*;
 
 
 
@@ -139,18 +133,19 @@ public class ClientConnectionsView extends SimpleView
       ClientView cv = connectedClients.get( clientID );
       
       if ( cv != null ) 
-      {
-          cv.setSummaryInfo( entityCount, metricCount );
-          if(entityCount>0)
-          {
-              cv.statusIcon.setVisible(true);
-              cv.newEntitiesLabel.setVisible(true);
-              
-          }
-          
-      }
-           
+        cv.setSummaryInfo( entityCount, metricCount );
     }
+  }
+  
+  public void displayAlert( UUID clientID,
+                            String alertMsg )
+  {
+     if ( clientID != null )
+     {
+       ClientView cv = connectedClients.get(clientID);
+       
+       if ( cv !=null ) cv.setAlertMsg( alertMsg );
+     }
   }
   
   // HighlightViewListener -----------------------------------------------------
@@ -213,20 +208,6 @@ public class ClientConnectionsView extends SimpleView
     }
   }
   
-  @Override
-  public void onEntityAdded(UUID clientID)
-  {
-     if(clientID!=null)
-     {
-         ClientView cv = connectedClients.get(clientID);
-         if ( cv !=null )
-         {
-             cv.newEntitiesLabel.setVisible(false);
-             cv.statusIcon.setVisible(false);
-         }
-     }
-  }
-  
   // Private methods -----------------------------------------------------------
   private void createComponents()
   {
@@ -249,18 +230,14 @@ public class ClientConnectionsView extends SimpleView
   // Private classes -----------------------------------------------------------
   private class ClientView extends HighlightView
   {
-    private Label  clientName;
-    private Label  currentPhase;
-    private Label  entityCountLabel;
-    private Label  metricCountLabel;
-    private Label newEntitiesLabel;
-    private Button disconnectButton;
+    private Label    clientName;
+    private Label    currentPhase;
+    private Label    entityCountLabel;
+    private Label    metricCountLabel;
+    private Label    alertLabel;
+    private Button   disconnectButton;
     private Embedded statusIcon;
-    
-    
-    
-
-            
+                
     private transient EMClient client;
     private transient boolean forceDisconnect = false;
     
@@ -285,24 +262,27 @@ public class ClientConnectionsView extends SimpleView
     {
       entityCountLabel.setValue( "Entities: " + entityCount );
       metricCountLabel.setValue( "Metrics: " + metricCount );
-      
+    }
+    
+    public void setAlertMsg( String msg )
+    {
+      if ( msg != null )
+      {
+        alertLabel.setData( msg );
+        alertLabel.setVisible( true );
+        statusIcon.setVisible( true );
+      }
+      else
+      {
+        alertLabel.setVisible( false );
+        statusIcon.setVisible( false );
+      }
     }
     
     // HighlightView overrides -------------------------------------------------
     @Override
     public UUID getDataID()
     { return client.getID(); }
-    
-    @Override
-    public void setSelected( boolean selected )
-    {
-      super.setSelected( selected );
-       if(!selected)
-        {
-           //statusIcon.setVisible(false);
-          // newEntitiesLabel.setVisible(false);
-      }
-   }
     
     // Private methods ---------------------------------------------------------
     private void createComponents()
@@ -321,21 +301,23 @@ public class ClientConnectionsView extends SimpleView
       innerVL.setWidth( "240px" );
       hl.addComponent( innerVL );
       
-     
-       // New entity warning icon
+      // Client name and alert bar
+      HorizontalLayout nabHL = new HorizontalLayout();
+      innerVL.addComponent( nabHL );
+      
+      // New entity warning icon
       statusIcon = new Embedded(null, UIResource.getResource( "alertIcon") );
       statusIcon.setWidth("20px");
       statusIcon.setHeight("20px");
-      innerVL.addComponent(statusIcon);
-      innerVL.setComponentAlignment(statusIcon, Alignment.TOP_RIGHT);
+      nabHL.addComponent(statusIcon);
+      nabHL.setComponentAlignment(statusIcon, Alignment.TOP_RIGHT);
       statusIcon.setVisible(false);
-      
       
       // Client name label
       clientName = new Label( client.getName() );
       clientName.addStyleName( "small" );
-      innerVL.addComponent( clientName );
-           
+      nabHL.addComponent( clientName );
+      
       // Space
       innerVL.addComponent( UILayoutUtil.createSpace( "2px", null ) );
       
@@ -364,11 +346,10 @@ public class ClientConnectionsView extends SimpleView
       innerVL.addComponent( metricCountLabel );
       
       // Label to inform of new entities
-      newEntitiesLabel = new Label ( "New Entities Available" );
-      newEntitiesLabel.addStyleName( "tiny" );
-      // To do: change font colour to red
-      innerVL.addComponent(newEntitiesLabel);
-      newEntitiesLabel.setVisible(false);
+      alertLabel = new Label();
+      alertLabel.addStyleName( "tiny" );
+      innerVL.addComponent(alertLabel);
+      alertLabel.setVisible( false );
       
       // Space
       vl.addComponent( UILayoutUtil.createSpace( "10px", null ) );

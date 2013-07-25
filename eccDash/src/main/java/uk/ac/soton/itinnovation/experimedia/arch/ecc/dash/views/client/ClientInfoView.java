@@ -223,7 +223,7 @@ public class ClientInfoView extends SimpleView
     // Status bar
     HorizontalLayout sb = new HorizontalLayout();
     sb.setStyleName( "eccGraphPanel" );
-    vl.addComponent(sb);
+    //vl.addComponent(sb); INTEGRATE THIS LATER
     
     // Graph icon used to show entity has been added to live monitoring
     monitoringIcon = new Embedded(null, UIResource.getResource("monitorIcon"));

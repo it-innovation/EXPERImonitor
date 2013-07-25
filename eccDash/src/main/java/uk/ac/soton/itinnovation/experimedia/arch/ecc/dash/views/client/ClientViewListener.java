@@ -33,5 +33,4 @@ import java.util.UUID;
 interface ClientViewListener
 {
   void onClientDisconnect( UUID clientID, boolean force );
-  void onEntityAdded(UUID clientID);
 }
