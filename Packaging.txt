@@ -32,6 +32,7 @@ Packaging the ECC component (using Maven 3.x+)
 
   cd doc
   make html
+  cd ..
       
 7) mvn package -PpackageECC
 
