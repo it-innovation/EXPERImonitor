@@ -111,7 +111,7 @@ The ECC dashboard can be quickly built to run on your local development machine 
 	  Step 2: Copy WAR file generated in step 1 to Tomcat's 'webapps' directory
 	          (Tomcat should automatically unpack and deploy for you)
 	  
-	  Result: You should see the ECC dashboard running on: http://localhost:8080/experimedia-arch-ecc-eccDash-1.2-SNAPSHOT/
+	  Result: You should see the ECC dashboard running on: http://localhost:8080/experimedia-arch-ecc-eccDash-1.2/
 
 	2.2 Tomcat (your particular configuration)
 	---------------------------------------------------------------------------------------------------
@@ -120,9 +120,9 @@ The ECC dashboard can be quickly built to run on your local development machine 
 	  Step 2: Using Tomcat's management UI, STOP the current ECC dashboard
 
 	  Step 3: Modify the any of the ECC property files you require:
-		  <Tomcat root>\webapps\experimedia-arch-ecc-eccDash-1.2-SNAPSHOT\WEB-INF\dashboard.properites
-		  <Tomcat root>\webapps\experimedia-arch-ecc-eccDash-1.2-SNAPSHOT\WEB-INF\edm.properites       (PostgreSQL login details here)
-		  <Tomcat root>\webapps\experimedia-arch-ecc-eccDash-1.2-SNAPSHOT\WEB-INF\em.properites        (RabbitMQ server details here)
+		  <Tomcat root>\webapps\experimedia-arch-ecc-eccDash-1.2\WEB-INF\dashboard.properites
+		  <Tomcat root>\webapps\experimedia-arch-ecc-eccDash-1.2\WEB-INF\edm.properites       (PostgreSQL login details here)
+		  <Tomcat root>\webapps\experimedia-arch-ecc-eccDash-1.2\WEB-INF\em.properites        (RabbitMQ server details here)
 
 	  Step 4: Using Tomcat's management UI:
 		> Expire any existing ECC dashboard sessions
