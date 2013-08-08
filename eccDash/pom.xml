@@ -5,13 +5,13 @@
   <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
   <artifactId>experimedia-arch-ecc-eccDash</artifactId>
   <packaging>war</packaging>
-  <version>1.2</version>
+  <version>1.3-SNAPSHOT</version>
   <name>ECC Dashboard</name>
   
   <parent>
     <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
     <artifactId>experimedia-arch-ecc</artifactId>
-    <version>1.2</version>
+    <version>1.3-SNAPSHOT</version>
   </parent>
 
   <properties>
@@ -204,13 +204,13 @@
     <dependency>
       <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
       <artifactId>experimedia-arch-ecc-common-logging-spec</artifactId>
-      <version>1.2</version>
+      <version>1.3-SNAPSHOT</version>
     </dependency>
     
     <dependency>
       <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
       <artifactId>experimedia-arch-ecc-common-logging-impls</artifactId>
-      <version>1.2</version>
+      <version>1.3-SNAPSHOT</version>
     </dependency>
     
     <dependency>
@@ -223,25 +223,25 @@
     <dependency>
       <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
       <artifactId>experimedia-arch-ecc-em-spec</artifactId>
-      <version>1.2</version>
+      <version>1.3-SNAPSHOT</version>
     </dependency>
     
     <dependency>
       <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
       <artifactId>experimedia-arch-ecc-em-factory</artifactId>
-      <version>1.2</version>
+      <version>1.3-SNAPSHOT</version>
     </dependency>
     
     <dependency>
       <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
       <artifactId>experimedia-arch-ecc-edm-spec</artifactId>
-      <version>1.2</version>
+      <version>1.3-SNAPSHOT</version>
     </dependency>
     
     <dependency>
       <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
       <artifactId>experimedia-arch-ecc-edm-factory</artifactId>
-      <version>1.2</version>
+      <version>1.3-SNAPSHOT</version>
     </dependency>
     
     <!-- 3rd party dependencies ____________________________________________ -->    

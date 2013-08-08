@@ -5,13 +5,13 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
   <artifactId>experimedia-arch-ecc-samples-metricGeneratorExamples</artifactId>
-  <version>1.2</version>
+  <version>1.3-SNAPSHOT</version>
   <packaging>jar</packaging>
   
   <parent>
     <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
     <artifactId>experimedia-arch-ecc-samples</artifactId>
-    <version>1.2</version>
+    <version>1.3-SNAPSHOT</version>
   </parent>
   
   <licenses>
@@ -53,19 +53,19 @@
     <dependency>
       <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
       <artifactId>experimedia-arch-ecc-common-dataModel-experiment</artifactId>
-      <version>1.2</version>
+      <version>1.3-SNAPSHOT</version>
     </dependency>
     
     <dependency>
       <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
       <artifactId>experimedia-arch-ecc-common-logging-spec</artifactId>
-      <version>1.2</version>
+      <version>1.3-SNAPSHOT</version>
     </dependency>
     
     <dependency>
       <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
       <artifactId>experimedia-arch-ecc-common-logging-impls</artifactId>
-      <version>1.2</version>
+      <version>1.3-SNAPSHOT</version>
     </dependency>  
     
     <!-- 3rd party dependencies ____________________________________________ -->

@@ -6,13 +6,13 @@
   <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
   <artifactId>experimedia-arch-ecc-common-logging</artifactId>
   <name>Logging foundation</name>
-  <version>1.2</version>
+  <version>1.3-SNAPSHOT</version>
   <packaging>pom</packaging>
   
   <parent>
     <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
     <artifactId>experimedia-arch-ecc-common</artifactId>
-    <version>1.2</version>
+    <version>1.3-SNAPSHOT</version>
   </parent>
   
   <modules>
