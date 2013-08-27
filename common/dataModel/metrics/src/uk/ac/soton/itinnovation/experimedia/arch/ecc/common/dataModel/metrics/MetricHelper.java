@@ -75,6 +75,43 @@ public class MetricHelper
       
       return entity;
     }
+    /**
+     * Returns an entity identified by the name, if it exists, from the metric generator collection.
+     * 
+     * @param name      - Name of the entity required, must not be null.
+     * @param mgenSet   - Collection of metric generators, must not be null.
+     * @return          - Returned entity instance, if it exists, otherwise null.
+     */
+    public static Entity getEntityFromName( String name,
+                                            Collection<MetricGenerator> mgenSet )
+    {
+       Entity entity = null;
+       
+       if(name != null && mgenSet != null)
+       {
+           Iterator<MetricGenerator> mgenIt = mgenSet.iterator();
+           
+           while ( mgenIt.hasNext() && entity == null )
+           {
+               MetricGenerator mg = mgenIt.next();
+               Set<Entity> mgEnts = mg.getEntities();
+               
+               Iterator<Entity> entIt = mgEnts.iterator();
+               
+               while ( entIt.hasNext() && entity == null )
+               {
+                   Entity e = entIt.next();
+                   
+                   if( e.getName().equals(name) )
+                   {
+                       entity = e;
+                   }
+               }
+           }
+       }
+       
+       return entity;
+    }
 
     /**
      * Returns all the attributes associated with a collection of metric generators.
