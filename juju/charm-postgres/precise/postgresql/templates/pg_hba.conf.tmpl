@@ -1,0 +1,12 @@
+#------------------------------------------------------------------------------
+# This file is managed by Juju
+#------------------------------------------------------------------------------
+
+# Database administrative login by UNIX sockets
+local   all        postgres                          ident map=superusers
+
+{% if access_list is defined -%}
+{% for unit in access_list -%}
+host {{unit['database']}} {{unit['user']}} {{unit['private-address']}}/32 trust
+{% endfor -%}
+{% endif -%}

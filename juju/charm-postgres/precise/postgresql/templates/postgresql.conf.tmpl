@@ -1,0 +1,162 @@
+#------------------------------------------------------------------------------
+# This file is managed by Juju
+#------------------------------------------------------------------------------
+
+
+#------------------------------------------------------------------------------
+# FILE LOCATIONS
+#------------------------------------------------------------------------------
+
+data_directory = '/var/lib/postgresql/{{version}}/{{cluster_name}}'
+hba_file = '/etc/postgresql/{{version}}/{{cluster_name}}/pg_hba.conf'
+ident_file = '/etc/postgresql/{{version}}/{{cluster_name}}/pg_ident.conf'
+external_pid_file = '/var/run/postgresql/{{version}}-{{cluster_name}}.pid'
+
+
+#------------------------------------------------------------------------------
+# CONNECTIONS AND AUTHENTICATION
+#------------------------------------------------------------------------------
+
+unix_socket_directory = '/var/run/postgresql'
+
+{% if listen_ip != "" -%}
+listen_addresses = '{{listen_ip}}'
+{% endif -%}
+{% if listen_port != "" -%}
+port = '{{listen_port}}'
+{% endif -%}
+{% if ssl != "" -%}
+ssl = {{ssl}}
+{% endif -%}
+{% if max_connections != "" -%}
+max_connections = {{max_connections}}
+{% endif -%}
+
+
+#------------------------------------------------------------------------------
+# RESOURCE USAGE (except WAL)
+#------------------------------------------------------------------------------
+
+{% if shared_buffers != "" -%}
+shared_buffers = {{shared_buffers}}
+{% endif -%}
+{% if temp_buffers!= "" -%}
+temp_buffers = {{temp_buffers}}
+{% endif -%}
+{% if work_mem != "" -%}
+work_mem = {{work_mem}}
+{% endif -%}
+{% if maintenance_work_mem != "" -%}
+maintenance_work_mem = {{maintenance_work_mem}}
+{% endif -%}
+
+
+#------------------------------------------------------------------------------
+# WRITE AHEAD LOG
+#------------------------------------------------------------------------------
+
+{% if wal_buffers  != "" -%}
+wal_buffers = {{wal_buffers}}
+{% endif -%}
+{% if checkpoint_segments  != "" -%}
+checkpoint_segments = {{checkpoint_segments}}
+{% endif -%}
+
+
+#------------------------------------------------------------------------------
+# QUERY TUNING
+#------------------------------------------------------------------------------
+
+{% if random_page_cost  != "" -%}
+random_page_cost = {{random_page_cost}}
+{% endif -%}
+{% if effective_cache_size  != "" -%}
+effective_cache_size = {{effective_cache_size}}
+{% endif -%}
+
+
+#------------------------------------------------------------------------------
+# ERROR REPORTING AND LOGGING
+#------------------------------------------------------------------------------
+
+{% if log_min_duration_statement  != "" -%}
+log_min_duration_statement = {{log_min_duration_statement}}
+{% endif -%}
+{% if log_checkpoints  != "" -%}
+log_checkpoints = {{log_checkpoints}}
+{% endif -%}
+{% if log_connections  != "" -%}
+log_connections = {{log_connections}}
+{% endif -%}
+{% if log_disconnections  != "" -%}
+log_disconnections = {{log_disconnections}}
+{% endif -%}
+{% if log_line_prefix  != "" -%}
+log_line_prefix = '{{log_line_prefix}}'
+{% endif -%}
+{% if log_lock_waits  != "" -%}
+log_lock_waits = {{log_lock_waits}}
+{% endif -%}
+
+log_timezone = UTC
+
+
+#------------------------------------------------------------------------------
+# AUTOVACUUM PARAMETERS
+#------------------------------------------------------------------------------
+
+{% if autovacuum  != "" -%}
+autovacuum = {{autovacuum}}
+{% endif -%}
+{% if log_autovacuum_min_duration  != "" -%}
+log_autovacuum_min_duration = {{log_autovacuum_min_duration}}
+{% endif -%}
+{% if autovacuum_analyze_threshold  != "" -%}
+autovacuum_analyze_threshold = {{autovacuum_analyze_threshold}}
+{% endif -%}
+{% if autovacuum_vacuum_scale_factor  != "" -%}
+autovacuum_vacuum_scale_factor = {{autovacuum_vacuum_scale_factor}}
+{% endif -%}
+{% if autovacuum_analyze_scale_factor  != "" -%}
+autovacuum_analyze_scale_factor = {{autovacuum_analyze_scale_factor}}
+{% endif -%}
+{% if autovacuum_vacuum_cost_delay  != "" -%}
+autovacuum_vacuum_cost_delay = {{autovacuum_vacuum_cost_delay}}
+{% endif -%}
+
+
+#------------------------------------------------------------------------------
+# CLIENT CONNECTION DEFAULTS
+#------------------------------------------------------------------------------
+
+{% if search_path  != "" -%}
+search_path = '{{search_path}}'
+{% endif -%}
+
+
+#------------------------------------------------------------------------------
+# VERSION/PLATFORM COMPATIBILITY
+#------------------------------------------------------------------------------
+
+{% if standard_conforming_strings  != "" -%}
+standard_conforming_strings = {{standard_conforming_strings}}
+{% endif -%}
+{% if version_float >= "9.1" -%}
+
+{% if hot_standby  != "" -%}
+hot_standby = {{hot_standby}}
+{% endif -%}
+{% if hot_standby_feedback  != "" -%}
+hot_standby_feedback = {{hot_standby_feedback}}
+{% endif -%}
+{% if wal_level  != "" -%}
+wal_level = {{wal_level}}
+{% endif -%}
+{% if max_wal_senders  != "" -%}
+max_wal_senders = {{max_wal_senders}}
+{% endif -%}
+{% if wal_keep_segments  != "" -%}
+wal_keep_segments = {{wal_keep_segments}}
+{% endif -%}
+
+{% endif -%}
