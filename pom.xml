@@ -289,6 +289,7 @@
   <modules>
       <module>common</module>
       <module>amqpAPI</module>
+      <module>edc</module>
       <module>em</module>
       <module>edm</module>
       <module>samples</module>

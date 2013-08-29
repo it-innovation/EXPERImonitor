@@ -1,3 +1,7 @@
+*.project
+*.log
+*.settings
+*.classpath
 /common/dataModel/metrics/lib/
 /common/dataModel/experiment/lib/
 /common/dataModel/provenance/lib/
@@ -17,7 +21,6 @@
 /samples/basicECCClient/lib/
 /samples/basicECCContainer/lib/
 /samples/headlessECCClient/lib/
-*.log
 /charm-rabbitmq-tal/precise/management/.bzr/
 /build-tools/target/
 /em/test/target/
@@ -65,3 +68,4 @@ samples/basicDotNetClient/bin/
 samples/basicDotNetClient/obj/
 /amqpAPI/spec/lib/
 /amqpAPI/impl/lib/
+/samples/dynamicEntityDemoClient/lib/
