@@ -30,8 +30,9 @@
 
 .eccDashDefault
 {
-  background-color: #E9E9E9;
+  background-color: #FFFFFF;
   
+  /* font-family: eccDefaultFont; -- TO BE DEVELOPED LATER */
   font-family: Arial;
   font-size: small;
   font-weight: 100;
@@ -49,10 +50,7 @@
 }
 
 .eccControlPanel
-{
-  background-color: #EAEAEA;
-  color: #404040;
-  
+{  
   font-weight: 100;
   font-size: medium;
   border: none;
@@ -60,18 +58,13 @@
 
 .eccControlInfoPanel
 {
-  background-color: #ECECEC;
-  color: #303030;
-  
   font-weight: 100;
   font-size: small;
   border: none;
 }
 
 .eccInfoPanelHeader
-{
-  background-color: #EDEDED;
-  
+{  
   border-bottom-width: 1px;
   border-bottom-style: solid;
   border-bottom-color: #DDDDDD;
@@ -79,7 +72,6 @@
 
 .eccInfoPanelAlert
 {
-  background-color: #d10f2b;
   color: #ececec;
   
   border-bottom: 2px;

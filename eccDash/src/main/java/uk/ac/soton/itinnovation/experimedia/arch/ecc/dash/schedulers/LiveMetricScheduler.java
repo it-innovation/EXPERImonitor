@@ -23,7 +23,7 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.processors;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.schedulers;
 
 import java.util.Collection;
 import java.util.HashMap;
