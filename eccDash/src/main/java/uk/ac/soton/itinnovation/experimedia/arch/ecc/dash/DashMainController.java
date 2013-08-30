@@ -25,6 +25,10 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.configuration.DashConfigController;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.configuration.ConfigViewListener;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.schedulers.LiveMetricSchedulerListener;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.schedulers.LiveMetricScheduler;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDM;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.*;
@@ -33,6 +37,7 @@ import uk.ac.soton.itinnovation.robust.cat.core.components.viewEngine.spec.uif.t
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMInterfaceFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.factory.EMInterfaceFactory;
 
+
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
@@ -40,9 +45,15 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.client.*;
+
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.visualizers.BaseMetricVisual;
+
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.dataExport.DataExportController;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.LiveMonitorController;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.processors.*;
+
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.*;
+
+
 
 import com.vaadin.ui.*;
 import com.vaadin.Application;
@@ -52,8 +63,7 @@ import org.vaadin.artur.icepush.ICEPush;
 import java.io.*;
 import java.net.URL;
 import java.util.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.UIResource;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.visualizers.BaseMetricVisual;
+
 
 
 
@@ -61,6 +71,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.visu
 public class DashMainController extends UFAbstractEventManager
                                 implements Serializable,
                                            IEMLifecycleListener,
+                                           ConfigViewListener,
                                            WelcomeViewListener,
                                            MainDashViewListener,
                                            MonitorControlViewListener,
@@ -71,16 +82,14 @@ public class DashMainController extends UFAbstractEventManager
   private final transient IECCLogger dashMainLog  = Logger.getLogger( DashMainController.class );
   private final transient UIResource viewResource = new UIResource();
   
-  private Properties dashboardProps;
-  private Properties edmProps;
-  private Properties emProps;
-  
   private Window                rootWindow;
   private MainDashView          mainDashView;
   private WelcomeView           welcomeView;
   private MonitorControlView    monitorControlView;
   private ClientConnectionsView connectionsView;
   private ClientInfoView        clientInfoView;
+  
+  private transient DashConfigController configController;
  
   private transient IMonitoringEDM      expDataManager;
   private transient IMetricGeneratorDAO expMGAccessor;
@@ -112,13 +121,7 @@ public class DashMainController extends UFAbstractEventManager
       rootWindow.setStyleName( "eccDashDefault" );
       rootWindow.addListener( new DashWindowResizeListener() );
 
-      createWelcomeView();
-
-      if ( intitialiseECCResources() )
-      {
-        liveMetricScheduler = new LiveMetricScheduler();
-        welcomeView.setReadyToStart( true );
-      }
+      initialiseConfiguration();
     }
   }
   
@@ -147,6 +150,66 @@ public class DashMainController extends UFAbstractEventManager
       liveMetricScheduler = null;
       
       rootWindow.getApplication().close();
+    }
+  }
+  
+  // ConfigViewListener --------------------------------------------------------
+  @Override
+  public void onConfigurationCompleted()
+  {
+    String problem = null;
+   
+    liveMetricScheduler = new LiveMetricScheduler();
+    
+    createWelcomeView();
+    
+    // ECC configuration
+    Properties props = configController.getDashboardConfig();
+    if ( props == null )
+    {
+      problem = "Could not find dashboard configuration - using defaults";
+      dashMainLog.info( problem );
+      welcomeView.addLogInfo( problem );
+    }
+    else
+    { welcomeView.addLogInfo( "Found dashboard configuration" ); }
+    
+    // EDM configuration
+    props = configController.getEDMConfig();
+    if ( props == null )
+    {
+      problem = "Could not find EDM configuration!";
+      dashMainLog.error( problem );
+      welcomeView.addLogInfo( problem );
+    }
+    welcomeView.addLogInfo( "Found EDM configuration" );
+    
+    // Try set up the EDM (errors encapsulated in method)
+    if ( !trySetupEDM() )
+    {
+      problem = "Could not set up EDM!";
+      dashMainLog.error( problem );
+      welcomeView.addLogInfo( problem );
+    }
+    
+    // EM configuration
+    props = configController.getEMConfig();
+    if ( props == null )
+    {
+      problem = "Could not find EM configuration!";
+      dashMainLog.error( problem );
+      welcomeView.addLogInfo( problem );
+    }
+    
+    // If no problems, allow experiment to start
+    if ( problem == null )
+    {
+      // Ready the EM for connection
+      expMonitor = EMInterfaceFactory.createEM();
+      expMonitor.addLifecyleListener( this );
+
+      welcomeView.addLogInfo( "Waiting to open client enty point." );
+      welcomeView.setReadyToStart( true );
     }
   }
   
@@ -459,10 +522,10 @@ public class DashMainController extends UFAbstractEventManager
   @Override
   public void onStartECCClicked()
   {
-    if ( emProps != null )
+    if ( configController != null )
     try
     {
-      rootWindow.removeAllComponents(); // Get rid of the welcome view
+      rootWindow.removeAllComponents(); // Get rid of all other views
       
       createCommonUIResources(); // Create common resources before we create the main view
       
@@ -473,6 +536,7 @@ public class DashMainController extends UFAbstractEventManager
       mainDashView.addListener( this );
       rootWindow.addComponent( (Component) mainDashView.getImplContainer() );
     
+      Properties emProps = configController.getEMConfig();
       expMonitor.openEntryPoint( emProps );
       createExperiment();
     
@@ -508,7 +572,7 @@ public class DashMainController extends UFAbstractEventManager
     }
     catch ( Exception e )
     {
-      String problem = "Had problems with Rabbit: " + e.getMessage();
+      String problem = "Could not start the ECC: " + e.getMessage();
       dashMainLog.error( problem );
       welcomeView.addLogInfo( problem );
     }
@@ -788,6 +852,8 @@ public class DashMainController extends UFAbstractEventManager
   // Private methods -----------------------------------------------------------
   private void createWelcomeView()
   {
+    rootWindow.removeAllComponents(); // Get rid of other views
+    
     welcomeView = new WelcomeView();
     welcomeView.addListener( this );
     
@@ -817,78 +883,56 @@ public class DashMainController extends UFAbstractEventManager
     return true;
   }
   
-  private boolean intitialiseECCResources()
+  private void initialiseConfiguration()
   {
-    // ECC configuration
-    dashboardProps = tryGetPropertiesFile( "dashboard" );
-    if ( dashboardProps == null )
+    // Create configuration controller if we do not already have one
+    if ( configController == null )
     {
-      String problem = "Could not find dashboard configuration - using defaults";
-      dashMainLog.info( problem );
-      welcomeView.addLogInfo( problem );
+      configController = new DashConfigController();
+      
+      // Display config view to user
+      SimpleView configView = configController.getConfigView();
+      
+      if ( configView != null )
+      {
+        // Listen to high level configuration view events
+        configView.addListener( this );
+      
+        rootWindow.addComponent( (Component) configView.getImplContainer() );
+      }
     }
-    else
-    { welcomeView.addLogInfo( "Found dashboard configuration" ); }
-    
-    // EDM configuration
-    edmProps = tryGetPropertiesFile( "edm" );
-    if ( edmProps == null )
-    {
-      String problem = "Could not find EDM configuration!";
-      dashMainLog.error( problem );
-      welcomeView.addLogInfo( problem );
-      return false;
-    }
-    welcomeView.addLogInfo( "Found EDM configuration" );
-    
-    // Try set up the EDM (errors encapsulated in method)
-    if ( !trySetupEDM() ) return false;
-    
-    // EM configuration
-    emProps = tryGetPropertiesFile( "em" );
-    if ( emProps == null )
-    {
-      String problem = "Could not find EM configuration!";
-      dashMainLog.error( problem );
-      welcomeView.addLogInfo( problem );
-      return false;
-    }
-   
-    // Ready the EM for connection
-    expMonitor = EMInterfaceFactory.createEM();
-    expMonitor.addLifecyleListener( this );
-
-    welcomeView.addLogInfo( "Waiting to open client enty point." );
-    return true;
   }
   
   private boolean trySetupEDM()
   {
     boolean result = false;
     
-    try
+    if ( configController != null )
     {
-      expDataManager = EDMInterfaceFactory.getMonitoringEDM( edmProps );
-      expMGAccessor  = expDataManager.getMetricGeneratorDAO();
-      expReportAccessor  = expDataManager.getReportDAO();
-      
-      if ( expDataManager.isDatabaseSetUpAndAccessible() )
+      try
       {
-        welcomeView.addLogInfo( "Started EDM OK" );
-        result = true;
+        expDataManager    = EDMInterfaceFactory.getMonitoringEDM( configController.getEDMConfig() );
+        expMGAccessor     = expDataManager.getMetricGeneratorDAO();
+        expReportAccessor = expDataManager.getReportDAO();
+
+        if ( expDataManager.isDatabaseSetUpAndAccessible() )
+        {
+          welcomeView.addLogInfo( "Started EDM OK" );
+          result = true;
+        }
+        else
+        {
+          String problem = "EDM database has not been setup correctly ";
+          dashMainLog.error( problem );
+          welcomeView.addLogInfo( problem );
+        }
       }
-      else
+      catch ( Exception e )
       {
-        String problem = "EDM database has not been setup correctly ";
+        String problem = "Could not start EDM: " + e.getMessage();
         dashMainLog.error( problem );
         welcomeView.addLogInfo( problem );
       }
-    }
-    catch ( Exception e )
-    {
-      String problem = "Could not start EDM: " + e.getMessage();
-      dashMainLog.error( problem );
-      welcomeView.addLogInfo( problem );
     }
     
     return result;
@@ -898,9 +942,11 @@ public class DashMainController extends UFAbstractEventManager
   {
     boolean result = false;
     
-    if ( dashboardProps != null )
+    if ( configController != null )
     {
-      String snapshotVal = dashboardProps.getProperty( "livemonitor.defaultSnapshotCountMax" );
+      Properties props = configController.getDashboardConfig();
+      
+      String snapshotVal = props.getProperty( "livemonitor.defaultSnapshotCountMax" );
       if ( snapshotVal != null )
       {
         Integer max = Integer.parseInt(snapshotVal);
@@ -908,7 +954,7 @@ public class DashMainController extends UFAbstractEventManager
       }
       
       
-      String fullURL = dashboardProps.getProperty( "nagios.fullurl" );
+      String fullURL = props.getProperty( "nagios.fullurl" );
       if ( fullURL != null )
       {
         try

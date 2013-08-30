@@ -1,5 +1,10 @@
 @font-face
 {
   font-family: eccDefaultFont;
-  src : url('./fonts/Sertig.otf');
+  /* src : url('./fonts/TO_BE_DECIDED.otf'); */
+}
+
+html
+{
+  -webkit-font-smoothing: antialiased;
 }
