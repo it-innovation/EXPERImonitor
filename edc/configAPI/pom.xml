@@ -44,9 +44,20 @@
   </build>
   
   <dependencies>
-    
+    <dependency>
+                <groupId>com.github.lookfirst</groupId>
+                <artifactId>sardine</artifactId>
+                <version>5.0.1</version>
+            </dependency>
+      
+      <dependency>
+         <groupId>commons-io</groupId>
+         <artifactId>commons-io</artifactId>
+         <version>2.4</version>
+         <type>jar</type>
+      </dependency>
   
-    <!-- 3rd party dependencies ____________________________________________ -->
+  
 
 	
   </dependencies>

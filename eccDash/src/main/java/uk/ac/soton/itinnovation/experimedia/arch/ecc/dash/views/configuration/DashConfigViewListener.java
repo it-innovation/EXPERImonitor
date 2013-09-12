@@ -17,18 +17,33 @@
 // PURPOSE, except where stated in the Licence Agreement supplied with
 // the software.
 //
-//      Created By :            Dion Kitchner & Simon Crowle
-//      Created Date :          29-Aug-2013
+//      Created By :            Dion Kitchener  
+//      Created Date :          04-Sept-2013
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
+
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.configuration;
 
 
-
-
-public interface ConfigViewListener
+public interface DashConfigViewListener 
 {
-  void onConfigurationCompleted();
+
+    void onUpdateConfiguration( String dashboardID, 
+                                String rabbitIP,
+                                String rabbitPort,
+                                String rabbitUsername,
+                                String rabbitPassword,
+                                boolean userRabbitSSL,
+                                String dbUrl,
+                                String dbName,
+                                String dbUsername,
+                                String dbPassword,
+                                String dbType,
+                                String snapshotCount,
+                                String nagiosUrl) throws Exception;
+   
+    void onFindConfigurations( String projectName ) throws Exception;
+
 }
