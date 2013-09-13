@@ -355,15 +355,15 @@ public class ECCConfigAPIImpl implements IECCDirectoryConfig,
     
     
     @Override
-    public void createLocalComponentFeature ( String component, String feature ) throws Exception
+    public void createLocalComponentFeature ( String localDirectoryPath, String component, String feature ) throws Exception
     {
-        if( component.isEmpty() || feature.isEmpty())
+        if( localDirectoryPath.isEmpty() || component.isEmpty() || feature.isEmpty())
         {
             throw new Exception("The component or feature given is not valid");
         }
         else
         {
-            String localConfigFilepath = "" + getLocalConfigPath() + "/" + component + "/" + feature + "/";
+            String localConfigFilepath = "" + localDirectoryPath + "/" + apiProjectName + "/" +component + "/" + feature + "/";
             
             try
             {
@@ -380,11 +380,11 @@ public class ECCConfigAPIImpl implements IECCDirectoryConfig,
     }
     
     @Override
-    public void putLocalComponentFeature(String component, String feature, String data) throws Exception
+    public void putLocalComponentFeature( String localDirectoryPath, String component, String feature, String data) throws Exception
     {
         try
         {
-            String localConfigFile = "" + getLocalConfigPath() + "/" + component + "/" + feature + "/" + "config.json";
+            String localConfigFile = "" + localDirectoryPath + "/" + apiProjectName + "/" + component + "/" + feature + "/" + "config.json";
             FileUtils.writeStringToFile(new File( localConfigFile ), data);
             
         }
@@ -400,7 +400,7 @@ public class ECCConfigAPIImpl implements IECCDirectoryConfig,
     
     
     @Override
-    public String getLocalCompenentFeature ( String component, String feature ) throws Exception
+    public String getLocalComponentFeature ( String localDirectoryPath, String component, String feature ) throws Exception
     {
         if( component.isEmpty() || feature.isEmpty())
         {
@@ -408,7 +408,7 @@ public class ECCConfigAPIImpl implements IECCDirectoryConfig,
         }
         else
         {
-            String localConfigFilepath = "" + getLocalConfigPath() + "/" + component + "/" + feature + "/" + "config.json";
+            String localConfigFilepath = "" + localDirectoryPath + "/" + apiProjectName +"/" + component + "/" + feature + "/" + "config.json";
             
             try
             {

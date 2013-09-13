@@ -481,7 +481,7 @@ public class DashConfigView extends SimpleView
     chl.addComponent( nagiosUrlLabel );
     nagiosUrlText = new TextField();
     nagiosUrlText.setValue( nagiosUrl );
-    dbNameText.setWidth( textWidth );
+    nagiosUrlText.setWidth( textWidth );
     chl.addComponent( nagiosUrlText );
     
     

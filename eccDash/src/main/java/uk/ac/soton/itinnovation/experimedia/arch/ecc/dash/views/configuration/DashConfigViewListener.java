@@ -29,7 +29,24 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.configuration;
 
 public interface DashConfigViewListener 
 {
-
+    /**
+     * Method to collect and update configuration data.
+     * 
+     * @param dashboardID
+     * @param rabbitIP
+     * @param rabbitPort
+     * @param rabbitUsername
+     * @param rabbitPassword
+     * @param userRabbitSSL
+     * @param dbUrl
+     * @param dbName
+     * @param dbUsername
+     * @param dbPassword
+     * @param dbType
+     * @param snapshotCount
+     * @param nagiosUrl
+     * @throws Exception - Throws exception if update is unsuccessful.
+     */
     void onUpdateConfiguration( String dashboardID, 
                                 String rabbitIP,
                                 String rabbitPort,
@@ -43,7 +60,14 @@ public interface DashConfigViewListener
                                 String dbType,
                                 String snapshotCount,
                                 String nagiosUrl) throws Exception;
-   
+   /**
+    * Method to find out if a configuration data is available for a specified project.
+    * If no existing configuration data is available the method will look in the
+    * 'Default' directory for default configuration for each specified component feature.
+    * 
+    * @param projectName
+    * @throws Exception 
+    */
     void onFindConfigurations( String projectName ) throws Exception;
 
 }

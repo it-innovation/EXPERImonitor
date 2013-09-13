@@ -49,13 +49,16 @@ public class DashConfigController implements DashConfigViewListener
   private Properties edmProps;       // edm.properties
   private Properties dashboardProps; // dashboard.properties
   
- 
+ // Online repository credentials here
   private String repositoryUsername = "davuser";
   private String repositoryPassword = "password";
+  
+  // Root folder of the local repository goes here
   private String localConfigLocation = "C://Users/dmk/Documents/Code/experimedia-ecc/eccDash/src/main/webapp/WEB-INF";
-  private Map<String,String> configList = new HashMap<String, String>();
+ 
   
   // Hash maps to store properties
+  private Map<String,String> configList = new HashMap<String, String>();
   private HashMap<String,String> emConfigProperties = new HashMap<String, String>();
   private HashMap<String,String> edmConfigProperties = new HashMap<String, String>();
   private HashMap<String,String> dashConfigProperties = new HashMap<String, String>();
@@ -153,10 +156,9 @@ public class DashConfigController implements DashConfigViewListener
           pcf.createComponentFeature( component, "Database" );
           
           // Set up local directories for RabbitMQ, Database and Dashboard configuration
-          dc.setLocalConfigPath( localConfigLocation );
-          pcf.createLocalComponentFeature( component, "RabbitMQ" );
-          pcf.createLocalComponentFeature( component, "Dashboard" );
-          pcf.createLocalComponentFeature( component, "Database" );
+          pcf.createLocalComponentFeature( localConfigLocation, component, "RabbitMQ" );
+          pcf.createLocalComponentFeature( localConfigLocation, component, "Dashboard" );
+          pcf.createLocalComponentFeature( localConfigLocation,component, "Database" );
           
       }
        catch ( Exception ex )
@@ -169,28 +171,26 @@ public class DashConfigController implements DashConfigViewListener
   /**
    * Method to send retrieved configuration data to the dashboard configuration view.
    * 
-   * @param configList - A list of configurations.
+   * @param configList - A HashMap containing configuration data for all features.
    */
   private void sendDataToView ( Map<String, String> configList )
   {
+     String monitorID =""; 
+     String rabbitIP = "";
+     String rabbitPort =""; 
+     String rabbitKeystore=""; 
+     String rabbitPassword=""; 
+     boolean useRabbitSSL = false;
+     String dbUrl="";
+     String dbName="";
+     String dbUsername="";
+     String dbPassword="";
+     String dbType="";
+     String snapshotCount="";
+     String nagiosUrl="";
       
-      // parse the json data string 
       if( configList !=null )
       {
-          String monitorID =""; 
-          String rabbitIP = "";
-          String rabbitPort =""; 
-          String rabbitKeystore=""; 
-          String rabbitPassword=""; 
-          boolean useRabbitSSL = false;
-          String dbUrl="";
-          String dbName="";
-          String dbUsername="";
-          String dbPassword="";
-          String dbType="";
-          String snapshotCount="";
-          String nagiosUrl="";
-          
           // Tells the view that configs have been found
           configView.foundConfigs( true );
           
@@ -293,7 +293,7 @@ public class DashConfigController implements DashConfigViewListener
   {
       if ( configDataIsOK() )
       {
-           // Save configuration data to the properties object
+           // Save configuration data to the properties objects
           emProps = new Properties();
           emProps.putAll( emConfigProperties );
           
@@ -309,6 +309,14 @@ public class DashConfigController implements DashConfigViewListener
      
   }
   
+  /**
+   * Saves configuration data to online and local repositories.
+   * 
+   * @param component   - The name of the component.
+   * @param feature     - The name of the feature.
+   * @param data        - The configuration as a string.
+   * @throws Exception  - Throws when data cannot not be saved.
+   */
   private void saveConfiguration( String component, String feature, String data ) throws Exception
   {
       if( !data.isEmpty() )
@@ -327,7 +335,7 @@ public class DashConfigController implements DashConfigViewListener
                 }
                   
                 pcf.putComponentFeatureConfig( component, feature, data );
-                pcf.putLocalComponentFeature ( component, feature, data );
+                pcf.putLocalComponentFeature ( localConfigLocation, component, feature, data );
             
             }
             catch (Exception ex) 
@@ -339,6 +347,12 @@ public class DashConfigController implements DashConfigViewListener
       }
   }
   
+  /**
+   * Converts the data from a HashMap into a JSON string.
+   * 
+   * @param configProps - The configuration data as a HashMap.
+   * @return - The configuration data as a string. 
+   */
   private String configJsonString( HashMap<String,String> configProps )
   {
        // parse the received data into a JSON string
@@ -363,6 +377,11 @@ public class DashConfigController implements DashConfigViewListener
       
   }
   
+  /**
+   * Checks that all ECC configurations have data.
+   * 
+   * @return - True or false.
+   */
   private boolean configDataIsOK()
   {
       if ( !emConfigProperties.isEmpty() && !edmConfigProperties.isEmpty() && !dashConfigProperties.isEmpty() )
@@ -419,7 +438,7 @@ public class DashConfigController implements DashConfigViewListener
             dashConfigProperties.put( "nagios.fullurl", nagiosUrl );
             
             String dashConfigString = configJsonString( dashConfigProperties );
-            saveConfiguration( "ECC" , "RabbitMQ", dashConfigString );
+            saveConfiguration( "ECC" , "Dashboard", dashConfigString );
             
             
             configurationComplete();
@@ -437,9 +456,19 @@ public class DashConfigController implements DashConfigViewListener
         
         if ( projectName != null )
         {
+            
+            String localRabbitConfigData;
+            String localDatabaseConfigData;
+            String localDashboardConfigData;
+            boolean localRabbitConfigExists;
+            boolean localDbConfigExists;
+            boolean localDashboardConfigExists;
+            
+            
             String rabbitConfigData;
             String databaseConfigData;
             String dashboardConfigData;
+            
             String component = "ECC";
             String featureRb = "RabbitMQ";
             String featureDB = "Database";
@@ -448,10 +477,40 @@ public class DashConfigController implements DashConfigViewListener
             boolean dbConfigExists;
             boolean dashboardConfigExists;
             
+            
+            // Attempts to find local configuration data-----------------------------------------
+            try
+            {
+                // Retrieve rabbit configuration data--------------------------
+                localRabbitConfigData = pcf.getLocalComponentFeature( localConfigLocation, component, featureRb);
+            }
+            catch (Exception e)
+            {
+                localDashboardConfigExists = false;
+            }
+            try
+            {
+                // Retrieve database configuration data------------------------
+                localDatabaseConfigData = pcf.getLocalComponentFeature( localConfigLocation, component, featureDB);
+            }
+            catch(Exception e)
+            {
+                localDbConfigExists = false;
+            }
+            try
+            {
+                // Retrieve dashboard configuration data-----------------------
+                localDashboardConfigData= pcf.getLocalComponentFeature( localConfigLocation, component, featureDash);
+            }
+            catch(Exception e)
+            {
+                localDashboardConfigExists = false;
+            }
+            //------------------------------------------------------------------------------------------            
+                    
+            
              try
-             {
-                 // TO DO: Include finding local configurations
-                 //-------------------------------------------------------------
+             {   
                  
                  // Retrieve rabbit configuration data--------------------------
                  rabbitConfigExists = pcf.componentFeatureConfigExists( component , featureRb );
@@ -490,6 +549,12 @@ public class DashConfigController implements DashConfigViewListener
                      dashboardConfigData = pcf.getDefaultConfigData( component , featureDash ); 
                  }
                 
+                 
+                 //***********************************************************************
+                 // TO DO: decide what to do with the local configuration data if it exists
+                 //************************************************************************
+                 
+                 // Currently puts online configuration data in list only
                 configList.put( featureRb, rabbitConfigData );
                 configList.put ( featureDB, databaseConfigData  );
                 configList.put( featureDash,  dashboardConfigData );

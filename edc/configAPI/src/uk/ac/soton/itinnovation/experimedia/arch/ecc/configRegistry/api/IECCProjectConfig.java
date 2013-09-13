@@ -76,31 +76,30 @@ public interface IECCProjectConfig {
     boolean componentFeatureConfigExists ( String component, String feature ) throws Exception;
     
     
-    
-    
-    
     /**
      * Method used to create  locally stored directories for a component and feature in the
      * specified local repository.
      * 
+     * @param localDirectoryPath - The drive and directory path of the repository
      * @param component - The named component.
      * @param feature   - The named feature.
      * @throws Exception - Throws if the component or feature is invalid.
      */
-    void createLocalComponentFeature ( String component, String feature ) throws Exception;
+    void createLocalComponentFeature ( String localDirectoryPath, String component, String feature ) throws Exception;
     
     /**
      * Method to put a configuration file into the specified locally store component
      * feature directory.  Will create directories if they do not already exist. 
      * Will replace the file it already exists.
      * 
+     * @param localDirectoryPath - The drive and directory path of the repository
      * @param component - The named component.
      * @param feature   - The named feature.
      * @param data      - The JSON string to be saved in the file.
      * 
      * @throws Exception - Throws if the component feature, or data is invalid. 
      */
-    void putLocalComponentFeature(String component, String feature, String data) throws Exception;
+    void putLocalComponentFeature( String localDirectoryPath, String component, String feature, String data) throws Exception;
     
     /**
      * Use this method to write configuration data for ECC specific feature. 
@@ -148,12 +147,13 @@ public interface IECCProjectConfig {
      * Use this method to retrieve file store in a local repository and convert that file to a string.
      * The method assumes that the local repository, components and features have been created. 
      * 
+     * @param localDirectoryPath - The drive and directory path of the repository
      * @param component     - The component name.
      * @param feature       - The feature name.
      * @return              - The configuration file as a JSON string.
      * @throws Exception    - Throws when file does not exist.
      */
-    String getLocalCompenentFeature ( String component, String feature ) throws Exception;
+    String getLocalComponentFeature ( String localDirectoryPath, String component, String feature ) throws Exception;
     
     
     /**
