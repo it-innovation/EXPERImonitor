@@ -33,7 +33,7 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.configRegistry.api;
  */
 public class ECCConfigAPIFactory {
    
-    private static final String repositoryURL = "http://localhost:1235/webdav/";
+    private static final String repositoryURL = "http://config-experimedia/";
     
     private ECCConfigAPIFactory(){}
     /**

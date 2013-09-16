@@ -533,15 +533,14 @@ public class DashMainController extends UFAbstractEventManager
       rootWindow.addComponent( icePusher );
       
       mainDashView = new MainDashView();
-      mainDashView.addListener( this );
       rootWindow.addComponent( (Component) mainDashView.getImplContainer() );
+      mainDashView.initialise( icePusher );
+      mainDashView.addListener( this );
     
       Properties emProps = configController.getEMConfig();
       expMonitor.openEntryPoint( emProps );
       createExperiment();
     
-      mainDashView.initialise( icePusher );
-      
       monitorControlView = mainDashView.getMonitorControlView();
       monitorControlView.addListener( this );
       
@@ -886,9 +885,12 @@ public class DashMainController extends UFAbstractEventManager
   private void initialiseConfiguration()
   {
     // Create configuration controller if we do not already have one
-    if ( configController == null )
+    if ( configController == null && rootWindow != null )
     {
-      configController = new DashConfigController( this );
+      Application thisApp = rootWindow.getApplication();
+      String basePath = thisApp.getContext().getBaseDirectory().getAbsolutePath();
+    
+      configController = new DashConfigController( basePath, this );
       
       // Display config view to user
       SimpleView configView = configController.getConfigView();

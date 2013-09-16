@@ -27,6 +27,7 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.configuration;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.vaadin.Application;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.SimpleView;
 
 import java.util.Properties;
@@ -50,11 +51,11 @@ public class DashConfigController implements DashConfigViewListener
   private Properties dashboardProps; // dashboard.properties
   
  // Online repository credentials here
-  private String repositoryUsername = "davuser";
-  private String repositoryPassword = "password";
+  private String repositoryUsername = "experimedia";
+  private String repositoryPassword = "ConfiG2013";
   
-  // Root folder of the local repository goes here
-  private String localConfigLocation = "C://Users/dmk/Documents/Code/experimedia-ecc/eccDash/src/main/webapp/WEB-INF";
+  // Root folder of the local configuration repository
+  private String localConfigLocation;
  
   
   // Hash maps to store properties
@@ -68,8 +69,10 @@ public class DashConfigController implements DashConfigViewListener
    * 
    * @param listener 
    */
-  public DashConfigController( ConfigControllerListener listener )
+  public DashConfigController( String localConfigPath,
+                               ConfigControllerListener listener )
   {
+    localConfigLocation = localConfigPath;
     configListener = listener;
  
     initialise();
