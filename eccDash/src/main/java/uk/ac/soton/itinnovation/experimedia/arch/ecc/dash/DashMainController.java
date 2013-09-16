@@ -26,7 +26,7 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.configuration.DashConfigController;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.configuration.ConfigViewListener;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.configuration.ConfigControllerListener;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.schedulers.LiveMetricSchedulerListener;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.schedulers.LiveMetricScheduler;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDM;
@@ -71,7 +71,7 @@ import java.util.*;
 public class DashMainController extends UFAbstractEventManager
                                 implements Serializable,
                                            IEMLifecycleListener,
-                                           ConfigViewListener,
+                                           ConfigControllerListener,
                                            WelcomeViewListener,
                                            MainDashViewListener,
                                            MonitorControlViewListener,
@@ -153,7 +153,7 @@ public class DashMainController extends UFAbstractEventManager
     }
   }
   
-  // ConfigViewListener --------------------------------------------------------
+  // ConfigControllerListener --------------------------------------------------
   @Override
   public void onConfigurationCompleted()
   {
@@ -888,7 +888,7 @@ public class DashMainController extends UFAbstractEventManager
     // Create configuration controller if we do not already have one
     if ( configController == null )
     {
-      configController = new DashConfigController();
+      configController = new DashConfigController( this );
       
       // Display config view to user
       SimpleView configView = configController.getConfigView();

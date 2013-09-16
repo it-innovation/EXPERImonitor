@@ -28,7 +28,11 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.configuration;
 
 
 
-public interface ConfigViewListener
+public interface ConfigControllerListener
 {
+    /**
+     *  Method called when the configuration process is complete.
+     */
   void onConfigurationCompleted();
+  
 }
