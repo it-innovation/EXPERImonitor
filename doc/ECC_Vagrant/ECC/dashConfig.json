@@ -1,0 +1,4 @@
+{
+    "nagios.fullurl":"http://username:password@host/nagios", 
+    "livemonitor.defaultSnapshotCountMax":"50"
+    }

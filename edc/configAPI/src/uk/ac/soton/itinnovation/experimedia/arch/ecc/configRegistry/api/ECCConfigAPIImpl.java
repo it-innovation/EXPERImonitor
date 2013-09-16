@@ -231,6 +231,7 @@ public class ECCConfigAPIImpl implements IECCDirectoryConfig,
             if(!projectExists(configUrl))
                 {
                      Sardine method = SardineFactory.begin(apiUserName, apiPassword);
+                     
                      try
                      {
                          byte[] data = jsonConfig.getBytes();
@@ -268,10 +269,17 @@ public class ECCConfigAPIImpl implements IECCDirectoryConfig,
         else
         {   
             String configUrl = "" + apiDefaultPath + "/" + component + "/" + feature + "/config.json";
+            Sardine method = SardineFactory.begin(apiUserName, apiPassword);
             
             if(!projectExists(configUrl))
                 {
-                     Sardine method = SardineFactory.begin(apiUserName, apiPassword);
+                    
+                    
+                    if(!projectExists( apiDefaultPath ))
+                    {
+                        addDirectory( "Default" );
+                    }
+                     
                      try
                      {
                          byte[] data = jsonConfig.getBytes();

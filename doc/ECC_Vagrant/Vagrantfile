@@ -1,0 +1,115 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# ECC service will be available at http://localhost:8080/ecc-1.2 on host machine.
+# RabbitMQ AMQP bus will be available on port 5672 on host machine.
+# RabbitMQ management interface will be available at http://localhost:55672 on host machine (username: guest / password: guest).
+
+hostname = "ECC"
+ram = "512"
+
+$script = <<SCRIPT
+# install all dependencies
+apt-get update
+apt-get install -y git
+apt-get install -y nano
+apt-get install -y curl
+apt-get install -y maven2
+apt-get install -y tomcat7
+apt-get install -y apache2
+apt-get install -y cadaver
+apt-get install -y openjdk-6-jdk
+apt-get install -y postgresql-9.1
+apt-get install -y rabbitmq-server
+
+# get the latest ECC code
+git clone git://soave.it-innovation.soton.ac.uk/git/experimedia-ecc
+
+# create the database
+sudo -u postgres createdb -T template0 edm-metrics --encoding=UTF8 --locale=en_US.utf8
+sudo -u postgres psql -d edm-metrics -f experimedia-ecc/edm/resources/edm-metrics-postgres.sql
+
+# set postgres user's password to "password"
+sudo -u postgres psql --command="ALTER USER postgres WITH PASSWORD 'password';"
+
+# set postgres user to need password for local connections (and reload)
+echo "host all postgres 127.0.0.1/0 password" > /tmp/pg_hba.conf
+sudo -u postgres cp /tmp/pg_hba.conf /etc/postgresql/9.1/main
+service postgresql reload
+
+# enable rabbitmq management plugin so we can see what's happening
+/usr/lib/rabbitmq/lib/rabbitmq_server-2.7.1/sbin/rabbitmq-plugins enable rabbitmq_management
+service rabbitmq-server restart
+
+# build the ECC (a bit quietly)
+cd experimedia-ecc
+mvn -q install
+
+# deploy the ECC into Tomcat
+cp eccDash/target/experimedia-arch-ecc-eccDash-1.3-SNAPSHOT.war /var/lib/tomcat7/webapps/ecc-1.3.war
+
+#enable WebDAV modules
+sudo a2enmod dav_fs
+sudo service apache2 restart
+
+# make a webDAV directory and a subdirectory for files
+sudo mkdir /var/www/WebDAV
+sudo mkdir /var/www/WebDAV/files
+
+# set the owner of the WebDAV directory
+sudo chown -R www-data:vagrant /var/www/WebDAV
+
+# set the file permissions for the WebDAV directory
+sudo chmod 775 -R /var/www/WebDAV
+
+# enable Digest Authorization to allow password encryption
+sudo a2enmod auth_digest
+
+# copy digest password file
+sudo cp /vagrant/passwords.dav /var/www/WebDAV/digestpasswd.dav
+
+# set up access to the digest password file
+sudo chown www-data:vagrant /var/www/WebDAV/digestpasswd.dav
+sudo chmod 660 /var/www/WebDAV/digestpasswd.dav
+
+# copy and enable the vhost file 
+sudo cp /vagrant/vhost /etc/apache2/sites-available/default
+sudo ln -s /etc/apache2/sites-available/default /etc/apache2/sites-enabled
+sudo service apache2 restart
+
+# copy and replace the WebDAV lock files enable and restart apache
+sudo cp /vagrant/davlock /etc/apache2/conf.d/webdav
+sudo cp /vagrant/davlock /etc/apache2/mods-available/dav_fs.conf
+sudo a2enmod dav_lock
+sudo service apache2 restart
+SCRIPT
+
+Vagrant.configure("2") do |config|
+
+    # build off ubuntu 12.04 LTS (32 bit)
+	config.vm.box = "precise32"
+    config.vm.box_url = "http://files.vagrantup.com/precise32.box"
+    config.vm.hostname = hostname
+	
+	# Forward host port 1235 to guest port 80 for Apache
+	config.vm.network :forwarded_port, host: 1235, guest: 80
+	# Forward host port 8080 to guest port 8080 for Tomcat
+	config.vm.network :forwarded_port, host: 8080, guest: 8080
+	# Forward host port 5672 to guest port 5672 for RabbitMQ messages
+	config.vm.network :forwarded_port, host: 1234, guest: 5672
+	# Forward host port 55672 to guest port 55672 for RabbitMQ management page
+	config.vm.network :forwarded_port, host: 55672, guest: 55672
+	
+    # configure virtualbox
+    config.vm.provider :virtualbox do |vb|
+        vb.customize [
+            'modifyvm', :id,
+            '--name', hostname,
+            '--memory', ram
+        ]
+	end
+
+	# Provision using shell script embedded above
+	config.vm.provision :shell, :inline => $script
+
+end

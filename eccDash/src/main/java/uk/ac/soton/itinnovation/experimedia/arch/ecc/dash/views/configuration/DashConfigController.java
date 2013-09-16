@@ -50,8 +50,8 @@ public class DashConfigController implements DashConfigViewListener
   private Properties dashboardProps; // dashboard.properties
   
  // Online repository credentials here
-  private String repositoryUsername = "davuser";
-  private String repositoryPassword = "password";
+  private String repositoryUsername = "experimedia";
+  private String repositoryPassword = "ConfiG2013";
   
   // Root folder of the local repository goes here
   private String localConfigLocation = "C://Users/dmk/Documents/Code/experimedia-ecc/eccDash/src/main/webapp/WEB-INF";
@@ -147,6 +147,7 @@ public class DashConfigController implements DashConfigViewListener
           
           // specify component
           String component = "ECC";
+ 
           // Sets up project directories if they do not already exist
          
           
@@ -159,6 +160,8 @@ public class DashConfigController implements DashConfigViewListener
           pcf.createLocalComponentFeature( localConfigLocation, component, "RabbitMQ" );
           pcf.createLocalComponentFeature( localConfigLocation, component, "Dashboard" );
           pcf.createLocalComponentFeature( localConfigLocation,component, "Database" );
+          
+          
           
       }
        catch ( Exception ex )
@@ -335,7 +338,7 @@ public class DashConfigController implements DashConfigViewListener
                 }
                   
                 pcf.putComponentFeatureConfig( component, feature, data );
-                pcf.putLocalComponentFeature ( localConfigLocation, component, feature, data );
+          
             
             }
             catch (Exception ex) 
@@ -457,9 +460,9 @@ public class DashConfigController implements DashConfigViewListener
         if ( projectName != null )
         {
             
-            String localRabbitConfigData;
-            String localDatabaseConfigData;
-            String localDashboardConfigData;
+            String localRabbitConfigData="";
+            String localDatabaseConfigData="";
+            String localDashboardConfigData="";
             boolean localRabbitConfigExists;
             boolean localDbConfigExists;
             boolean localDashboardConfigExists;
@@ -555,9 +558,13 @@ public class DashConfigController implements DashConfigViewListener
                  //************************************************************************
                  
                  // Currently puts online configuration data in list only
-                configList.put( featureRb, rabbitConfigData );
-                configList.put ( featureDB, databaseConfigData  );
-                configList.put( featureDash,  dashboardConfigData );
+                //configList.put( featureRb, rabbitConfigData );
+                //configList.put ( featureDB, databaseConfigData  );
+                //configList.put( featureDash,  dashboardConfigData );
+                
+                configList.put( featureRb, localRabbitConfigData );
+                configList.put ( featureDB, localDatabaseConfigData  );
+                configList.put( featureDash,  localDashboardConfigData );
                 sendDataToView( configList );
              }
              catch (Exception ex)
