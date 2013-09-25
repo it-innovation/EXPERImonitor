@@ -44,10 +44,11 @@ public class AMQPConnectionFactory
     private IECCLogger factoryLog = Logger.getLogger( AMQPConnectionFactory.class );
 
     private InetAddress amqpHostIP;
-    private int         amqpPortNumber = 5672;
+    private int         amqpPortNumber  = 5672;
     private Connection  amqpConnection;
-    private String      userName = null;
-    private String      userPass = null;
+    private String      userName        = null;
+    private String      userPass        = null;
+    private Integer     heartbeatRate   = null;
 
 
     public AMQPConnectionFactory()
@@ -94,6 +95,11 @@ public class AMQPConnectionFactory
         userPass = password;
       }
     }
+    
+    public void setRabbitHeartbeatRate( int rate )
+    {
+      if ( rate > 1 ) heartbeatRate = rate;
+    }
 
     public String getLocalIP()
     {
@@ -118,19 +124,27 @@ public class AMQPConnectionFactory
         ConnectionFactory amqpFactory = new ConnectionFactory();
         amqpFactory.setHost( amqpHostIP.getHostAddress() );
         amqpFactory.setPort( amqpPortNumber );
-        if (userPass != null) {
-            
-            if (userName != null) {
-                factoryLog.info("Will try to login as \'" + userName + "\'");
-                amqpFactory.setUsername(userName);
-            } else {
-                factoryLog.info("Will try to login as guest");
-                amqpFactory.setUsername("guest");
-            }
-            
-            amqpFactory.setPassword(userPass);
+        
+        // Select login credentials (if available)
+        String selUserName = "guest";
+        String selPassword = "guest";
+        
+        if ( userName != null && userPass != null )
+        {
+          selUserName = userName;
+          selPassword = userPass;
         }
-
+        
+        // Set login details
+        amqpFactory.setUsername( selUserName );
+        amqpFactory.setPassword( selPassword );
+        factoryLog.info("Logging into RabbitMQ as \'" + userName + "\'");
+        
+        // Set heartbeat rate, if available
+        if ( heartbeatRate != null )
+          amqpFactory.setRequestedHeartbeat( heartbeatRate );
+        
+        // Execute log-in
         try { amqpConnection = amqpFactory.newConnection(); }
         catch ( Exception e )
         { throw new Exception( "Could not create AMQP host connection: " + e.getMessage() ); }
