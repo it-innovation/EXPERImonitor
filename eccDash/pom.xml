@@ -15,7 +15,7 @@
   </parent>
 
   <properties>
-    <vaadin.version>6.8.10</vaadin.version>
+    <vaadin.version>6.8.12</vaadin.version>
     <gwt.version>2.3.0</gwt.version>
     <gwt.plugin.version>2.2.0</gwt.plugin.version>
   </properties>
