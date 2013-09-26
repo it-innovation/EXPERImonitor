@@ -36,12 +36,12 @@ Welcome to the EXPERIMEDIA ECC documentation
 |    mainContent/ECC_monitoring_protocol                   |    mainContent/Base_line_metric_services              |              
 |                                                          |                                                       |
 +----------------------------------------------------------+-------------------------------------------------------+
-| **ECC API Change Log**                                   |                                                       |                                                       
+| **ECC API Change Log**                                   |  **ECC Configuration API**                            |                                                       
 +----------------------------------------------------------+-------------------------------------------------------+
-| .. toctree::                                             |                                                       |                                                       
-|    :maxdepth: 2                                          |                                                       |                                                       
+| .. toctree::                                             |  .. toctree::                                         |                                                       
+|    :maxdepth: 2                                          |     :maxdepth: 2                                      |                                                       
 |                                                          |                                                       |
-|    mainContent/eccAPIChangeLog                           |                                                       |                          
+|    mainContent/eccAPIChangeLog                           |      mainContent/ECC_Configuration_API                |                          
 |                                                          |                                                       |                                
 |                                                          |                                                       |
 +----------------------------------------------------------+-------------------------------------------------------+

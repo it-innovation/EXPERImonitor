@@ -1,0 +1,1 @@
+{"dbURL":"localhost:5432","dbName":"edm-metrics","dbUsername":"postgres","dbPassword":"password","dbType":"postgresql"}
