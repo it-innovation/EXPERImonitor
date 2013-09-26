@@ -890,7 +890,7 @@ public class DashMainController extends UFAbstractEventManager
       Application thisApp = rootWindow.getApplication();
       String basePath = thisApp.getContext().getBaseDirectory().getAbsolutePath();
     
-      configController = new DashConfigController( basePath, this );
+      configController = new DashConfigController( basePath + "/configs/", this );
       
       // Display config view to user
       SimpleView configView = configController.getConfigView();

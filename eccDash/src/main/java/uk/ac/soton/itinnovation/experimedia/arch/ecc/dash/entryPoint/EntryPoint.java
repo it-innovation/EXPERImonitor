@@ -41,6 +41,8 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.DashMainController;
 public class EntryPoint extends Application
                         implements HttpServletRequestListener
 {
+  private static final long serialVersionUID = 13000L;
+  
   @Override
   public void init()
   {

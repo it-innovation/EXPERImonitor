@@ -25,41 +25,49 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.configuration;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import com.vaadin.Application;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.SimpleView;
 
-import java.util.Properties;
-import java.util.Map;
-import java.util.HashMap;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.configRegistry.api.ECCConfigAPIFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.configRegistry.api.IECCDirectoryConfig;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.configRegistry.api.IECCProjectConfig;
+
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import java.io.File;
+import java.io.FileOutputStream;
+
+import java.util.*;
+
+
+
 
 
 
 public class DashConfigController implements DashConfigViewListener
 {
+  private final transient IECCLogger configLogger = Logger.getLogger( DashConfigController.class );
+  
   private DashConfigView configView;
   private ConfigControllerListener configListener;
-  private IECCDirectoryConfig dc;
-  private IECCProjectConfig pcf;
+  private IECCDirectoryConfig dcf;
+  private IECCProjectConfig   pcf;
   
   private Properties emProps;        // em.properties
   private Properties edmProps;       // edm.properties
   private Properties dashboardProps; // dashboard.properties
   
- // Online repository credentials here
+  // Online repository credentials here
   private String repositoryUsername = "experimedia";
   private String repositoryPassword = "ConfiG2013";
   
   // Root folder of the local configuration repository
+  private String projectName;
   private String localConfigLocation;
  
-  
   // Hash maps to store properties
-  private Map<String,String> configList = new HashMap<String, String>();
+  private Map<String,String>     configList = new HashMap<String, String>();
   private HashMap<String,String> emConfigProperties = new HashMap<String, String>();
   private HashMap<String,String> edmConfigProperties = new HashMap<String, String>();
   private HashMap<String,String> dashConfigProperties = new HashMap<String, String>();
@@ -128,33 +136,38 @@ public class DashConfigController implements DashConfigViewListener
   private void initialise()
   {
     configView = new DashConfigView (this);
-    
   }
 
   /**
    * Sets up a new project directories if they do not already exist, and accesses the 
    * configuration API.  Creates component feature directories if they do not exist.
    * 
-   * @param projectName     - The name of the project.
+   * @param projName        - The name of the project.
    * @param repoUsername    - The username of the online repository.
    * @param repoPassword    - The password of the online repository.
    * @throws Exception      - Throws if the API cannot be accessed or component features cannot be created
    */
-  private void  initialiseProject( String projectName, String repoUsername, String repoPassword) throws Exception
+  private void  initialiseProject( String projName, String repoUsername, String repoPassword ) throws Exception
   {
+      // Safety first
+      if ( projName == null || repoUsername == null || repoPassword == null )
+      {
+        String error = "Could not initialise project configuration - parameters invalid";
+        
+        configLogger.fatal( error );
+        throw new Exception( error );
+      }
+      
+      final String component = "ECC";
+      projectName = projName;
+    
       try
       {
            // Starts API and sets up project
-          dc = ECCConfigAPIFactory.getDirectoryConfigAccessor( projectName, repoUsername, repoPassword );
+          dcf = ECCConfigAPIFactory.getDirectoryConfigAccessor( projectName, repoUsername, repoPassword );
           pcf = ECCConfigAPIFactory.getProjectConfigAccessor( projectName, repoUsername, repoPassword );
           
-          // specify component
-          String component = "ECC";
- 
-          // Sets up project directories if they do not already exist
-         
-          
-           // Set up online directories for RabbitMQ, Database and Dashboard configuration
+          // Set up online directories for RabbitMQ, Database and Dashboard configuration
           pcf.createComponentFeature( component, "RabbitMQ" );
           pcf.createComponentFeature( component, "Dashboard" );
           pcf.createComponentFeature( component, "Database" );
@@ -164,14 +177,12 @@ public class DashConfigController implements DashConfigViewListener
           pcf.createLocalComponentFeature( localConfigLocation, component, "Dashboard" );
           pcf.createLocalComponentFeature( localConfigLocation,component, "Database" );
           
-          
-          
       }
-       catch ( Exception ex )
-       {
-            String error = "Could not initialise the project because : " + ex.getMessage();
-            throw new Exception( error, ex );
-        }     
+      catch ( Exception ex )
+      {
+           String error = "Could not initialise the project because : " + ex.getMessage();
+           throw new Exception( error, ex );
+      }     
   }
   
   /**
@@ -310,9 +321,7 @@ public class DashConfigController implements DashConfigViewListener
           dashboardProps.putAll( dashConfigProperties );
           
           configListener.onConfigurationCompleted();
-          
       }
-     
   }
   
   /**
@@ -323,33 +332,64 @@ public class DashConfigController implements DashConfigViewListener
    * @param data        - The configuration as a string.
    * @throws Exception  - Throws when data cannot not be saved.
    */
-  private void saveConfiguration( String component, String feature, String data ) throws Exception
+  private void saveConfiguration( String component, 
+                                  String feature, 
+                                  String data ) throws Exception
   {
-      if( !data.isEmpty() )
+      if ( component == null || feature == null || data == null || data.isEmpty() )
       {
-           // If an exist configuration data file exists delete and replace it
-            boolean configExists;
-            
-            try 
-            {
-                configExists = pcf.componentFeatureConfigExists( component, feature );
-                
-                if( configExists )
-                {
-                   // delete the existing document 
-                    pcf.deleteComponentFeatureConfig( component, feature );
-                }
-                  
-                pcf.putComponentFeatureConfig( component, feature, data );
+          String error = "Could not save configuration: parameters invalid";
+
+          configLogger.error( error );
+          throw new Exception( error );
+      }
+      
+      // Try saving locally
+      FileOutputStream fos = null;
+      try
+      {        
+          String target = localConfigLocation + "/" + projectName + "/" + 
+                          component + "/" + feature + "/config.json";
           
-            
-            }
-            catch (Exception ex) 
-            {
-                
-                    String error = "Could not save configuration because : " + ex.getMessage();
-                    throw new Exception( error, ex );
-            }         
+          // Need to manually write this document locally
+          File file = new File( target );
+          
+          // Delete existing file
+          if ( file.exists() ) file.delete();
+          
+          file.createNewFile();
+          
+          fos = new FileOutputStream( file );
+          fos.write( data.getBytes() );
+      }
+      catch ( Exception e )
+      {
+          String error = "Could not write local configuration data: " + e.getMessage();
+          configLogger.error( error );
+      }
+      finally
+      { 
+        if ( fos != null )
+        {
+          fos.flush();
+          fos.close();
+        }
+      }
+      
+      // Now save remotely
+      try
+      {
+          // Delete old file if it exists
+          if ( pcf.componentFeatureConfigExists( component, feature ) )
+            pcf.deleteComponentFeatureConfig( component, feature );
+          
+          // Write new file
+          pcf.putComponentFeatureConfig( component, feature, data );
+      }
+      catch ( Exception e )
+      {
+          String error = "Could not save remove configuration data because : " + e.getMessage();
+          configLogger.error( error );
       }
   }
   
@@ -419,18 +459,21 @@ public class DashConfigController implements DashConfigViewListener
     {
             String rabbitSsl = String.valueOf( useRabbitSSL );
             
-            
             emConfigProperties.put( "Monitor_ID", monitorID );
             emConfigProperties.put( "Rabbit_IP", rabbitIP );
             emConfigProperties.put( "Rabbit_Port" , rabbitPort );
-            emConfigProperties.put( "Rabbit_Keystore" , rabbitKeystore );
-            emConfigProperties.put( "Rabbit_KeystorePassword" , rabbitPassword );
             emConfigProperties.put( "Rabbit_Use_SSL" , rabbitSsl );
-             
+            
+            // Ensure properties are written correctly for SSL options
+            if ( useRabbitSSL )
+            {
+                emConfigProperties.put( "Rabbit_Keystore" , rabbitKeystore );
+                emConfigProperties.put( "Rabbit_KeystorePassword" , rabbitPassword );
+            }
+            
             String emConfigString = configJsonString( emConfigProperties );
             saveConfiguration( "ECC" , "RabbitMQ", emConfigString );
             
-  
             edmConfigProperties.put( "dbName", dbName );
             edmConfigProperties.put( "dbURL" , dbUrl );
             edmConfigProperties.put( "dbUsername" , dbUsername );
@@ -446,12 +489,7 @@ public class DashConfigController implements DashConfigViewListener
             String dashConfigString = configJsonString( dashConfigProperties );
             saveConfiguration( "ECC" , "Dashboard", dashConfigString );
             
-            
             configurationComplete();
-            
-            
-               
-         
     }
 
     @Override
@@ -459,126 +497,105 @@ public class DashConfigController implements DashConfigViewListener
     {
         initialiseProject( projectName, repositoryUsername , repositoryPassword );
        
-        
         if ( projectName != null )
         {
+            final String component          = "ECC";
+            final String featureRb          = "RabbitMQ";
+            final String featureDB          = "Database";
+            final String featureDash        = "Dashboard";
+            final String localProjectTarget = localConfigLocation + projectName + "/" + component;
             
-            String localRabbitConfigData="";
-            String localDatabaseConfigData="";
-            String localDashboardConfigData="";
-            boolean localRabbitConfigExists;
-            boolean localDbConfigExists;
-            boolean localDashboardConfigExists;
+            String targetRabbitConfigData = null;
+            String targetDatabaseConfigData = null;
+            String targetDashboardConfigData = null;
             
-            
-            String rabbitConfigData;
-            String databaseConfigData;
-            String dashboardConfigData;
-            
-            String component = "ECC";
-            String featureRb = "RabbitMQ";
-            String featureDB = "Database";
-            String featureDash = "Dashboard";
-            boolean rabbitConfigExists;
-            boolean dbConfigExists;
-            boolean dashboardConfigExists;
-            
-            
-            // Attempts to find local configuration data-----------------------------------------
+            // Attempts to find local configuration data------------------------
             try
             {
-                // Retrieve rabbit configuration data--------------------------
-                localRabbitConfigData = pcf.getLocalComponentFeature( localConfigLocation, component, featureRb);
+                File file = new File( localProjectTarget + "/" + featureRb + "/config.json" );
+                
+                if ( file.exists() )
+                    targetRabbitConfigData = pcf.getLocalComponentFeature( localConfigLocation, component, featureRb );
             }
             catch (Exception e)
-            {
-                localDashboardConfigExists = false;
-            }
-            try
-            {
-                // Retrieve database configuration data------------------------
-                localDatabaseConfigData = pcf.getLocalComponentFeature( localConfigLocation, component, featureDB);
-            }
-            catch(Exception e)
-            {
-                localDbConfigExists = false;
-            }
-            try
-            {
-                // Retrieve dashboard configuration data-----------------------
-                localDashboardConfigData= pcf.getLocalComponentFeature( localConfigLocation, component, featureDash);
-            }
-            catch(Exception e)
-            {
-                localDashboardConfigExists = false;
-            }
-            //------------------------------------------------------------------------------------------            
-                    
+            { configLogger.warn( "Could not find local Rabbit config data : " + e.getMessage() ); }
             
-             try
-             {   
-                 
-                 // Retrieve rabbit configuration data--------------------------
-                 rabbitConfigExists = pcf.componentFeatureConfigExists( component , featureRb );
-                 
-                 if( rabbitConfigExists )
-                 {
-                     rabbitConfigData = pcf.getConfigData( component, featureRb );
-                 }
-                 else
-                 {
-                     rabbitConfigData = pcf.getDefaultConfigData( component , featureRb);
-                 }
+            try
+            {
+                File file = new File( localProjectTarget + "/" + featureDB + "/config.json" );
                 
-                 // Retrieve database configuration data------------------------
-                 dbConfigExists = pcf.componentFeatureConfigExists( component, featureDB );
-                 
-                 if ( dbConfigExists )
-                 {
-                     databaseConfigData = pcf.getConfigData( component , featureDB );                   
-                 }
-                 else
-                 {
-                     databaseConfigData = pcf.getDefaultConfigData( component , featureDB ); 
-                 }
+                if ( file.exists() )
+                    targetDatabaseConfigData = pcf.getLocalComponentFeature( localConfigLocation, component, featureDB );
+            }
+            catch(Exception e)
+            { configLogger.warn( "Could not find local Database config data : " + e.getMessage() ); }
+            
+            try
+            {
+                File file = new File( localProjectTarget + "/" + featureDash + "/config.json" );
                 
-                 
-                 // Retrieve dashboard configuration data-----------------------
-                 dashboardConfigExists = pcf.componentFeatureConfigExists( component, featureDash );
-                 
-                 if( dashboardConfigExists )
-                 {
-                     dashboardConfigData = pcf.getConfigData( component , featureDash );     
-                 }
-                 else
-                 {
-                     dashboardConfigData = pcf.getDefaultConfigData( component , featureDash ); 
-                 }
+                if ( file.exists() )
+                      targetDashboardConfigData = pcf.getLocalComponentFeature( localConfigLocation, component, featureDash );
+            }
+            catch(Exception e)
+            { configLogger.warn( "Could not find local dashboard config data : " + e.getMessage() ); }
+            
+            // If no local data, try the remote configuration server------------
+            if ( targetRabbitConfigData    == null ||
+                 targetDatabaseConfigData  == null ||
+                 targetDashboardConfigData == null )
+            {       
+                // Rabbit
+                try
+                {
+                    if ( pcf.componentFeatureConfigExists( component , featureRb ) )
+                        targetRabbitConfigData = pcf.getConfigData( component, featureRb );
+                    else
+                        targetRabbitConfigData = pcf.getDefaultConfigData( component , featureRb );
+                }
+                catch ( Exception e )
+                { configLogger.fatal( "Could not find remote dashboard config data : " + e.getMessage() ); }
                 
-                 
-                 //***********************************************************************
-                 // TO DO: decide what to do with the local configuration data if it exists
-                 //************************************************************************
-                 
-                 // Currently puts online configuration data in list only
-                //configList.put( featureRb, rabbitConfigData );
-                //configList.put ( featureDB, databaseConfigData  );
-                //configList.put( featureDash,  dashboardConfigData );
+                // Database
+                try
+                {
+                    if ( pcf.componentFeatureConfigExists( component , featureDB ) )
+                        targetDatabaseConfigData = pcf.getConfigData( component, featureDB );
+                    else
+                        targetDatabaseConfigData = pcf.getDefaultConfigData( component , featureDB );
+                }
+                catch ( Exception e )
+                { configLogger.fatal( "Could not find remote database config data: " + e.getMessage() ); }
                 
-                configList.put( featureRb, localRabbitConfigData );
-                configList.put ( featureDB, localDatabaseConfigData  );
-                configList.put( featureDash,  localDashboardConfigData );
+                // Dashboard
+                try
+                {
+                    if ( pcf.componentFeatureConfigExists( component , featureDash ) )
+                        targetDashboardConfigData = pcf.getConfigData( component, featureDash );
+                    else
+                        targetDashboardConfigData = pcf.getDefaultConfigData( component , featureDash );
+                }
+                catch ( Exception e )
+                { configLogger.fatal( "Could not find remote database config data: " + e.getMessage() ); }
+            }
+            
+            // If we have config data, present to user, otherwise throw
+            if ( targetRabbitConfigData    != null &&
+                 targetDatabaseConfigData  != null &&
+                 targetDashboardConfigData != null )
+            {
+                configList.put( featureRb,   targetRabbitConfigData    );
+                configList.put( featureDB,   targetDatabaseConfigData  );
+                configList.put( featureDash, targetDashboardConfigData );
+                
                 sendDataToView( configList );
-             }
-             catch (Exception ex)
-             {
-                 String error = "Could not find configuration because : " + ex.getMessage();
-                 throw new Exception( error, ex );  
-            } 
-            
+            }
+            else
+            {
+                String error = "Could not get sufficient configuration data to start ECC";
+                configLogger.fatal( error );
+                throw new Exception( error );
+            }
         }
    }
-
-    
-    
 }

@@ -1,1 +1,0 @@
-{"Rabbit_Port":"5672","Rabbit_Use_SSL":"false","Rabbit_IP":"127.0.0.1","Rabbit_Keystore":"/main/resources/rabbitKeyStore.jks","Monitor_ID":"00000000-0000-0000-0000-000000000000","Rabbit_KeystorePassword":"password"}
