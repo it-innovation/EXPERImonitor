@@ -131,7 +131,9 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
   
   @Override
   public void controlledStop() throws Exception
-  { throw new Exception( "Not yet supported for this phase"); }
+  { 
+    phaseListener.onDiscoveryPhaseCompleted();
+  }
   
   @Override
   public void hardStop()

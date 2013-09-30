@@ -37,6 +37,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 
 import java.util.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.PROVStatement;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMMeasurementSetInfo;
 
 
@@ -301,7 +302,7 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
   {
     EMClientEx client = getClient( senderID );
 
-    if ( client != null )
+    if ( client != null && report != null )
     {
       // Only allow clients who have declared they are going to push
       boolean clientInPushGroup;
@@ -331,6 +332,32 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
       
       // Let client know we've received the data (whatever the outcome was this side)
       client.getLiveMonitorInterface().notifyPushReceived( report.getUUID() );
+    }
+  }
+  
+  @Override
+  public void onPushPROVStatement( UUID senderID, PROVStatement statement )
+  {
+    EMClientEx client = getClient( senderID );
+    
+    if ( client != null && statement != null )
+    {
+      // Only allow clients who have declared they are going to push
+      boolean clientInPushGroup;
+    
+      synchronized ( controlledStopLock )
+      { clientInPushGroup = clientPushGroup.contains( client.getID() ); }
+    
+      if ( clientInPushGroup )
+      {
+        // Check we're not sending rubbish towards the EDM
+        if ( statement != null )
+          phaseListener.onGotPROVData( client, statement );
+      }
+      else phaseLogger.error( "Got PROV push from client, but client has not declared as pushable" );
+      
+      // Let client know we've received the data (whatever the outcome was this side)
+      client.getLiveMonitorInterface().notifyPushReceived( statement.getID() );
     }
   }
   

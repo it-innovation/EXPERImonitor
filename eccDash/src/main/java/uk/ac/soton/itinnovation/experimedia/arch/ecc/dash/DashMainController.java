@@ -37,11 +37,11 @@ import uk.ac.soton.itinnovation.robust.cat.core.components.viewEngine.spec.uif.t
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMInterfaceFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.factory.EMInterfaceFactory;
 
-
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.PROVStatement;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.client.*;
@@ -63,6 +63,7 @@ import org.vaadin.artur.icepush.ICEPush;
 import java.io.*;
 import java.net.URL;
 import java.util.*;
+
 
 
 
@@ -429,11 +430,31 @@ public class DashMainController extends UFAbstractEventManager
     {
       try
       { 
-        liveMonitorController.processLiveData( client, report ); 
+        liveMonitorController.processLiveMetricData( client, report ); 
       }
       catch ( Exception e )
       {
         String problem = "Could not save measurements for client: " + 
+                         client.getName() + " because: " + e.getMessage();
+        
+        mainDashView.addLogMessage( problem );
+        dashMainLog.error( problem );
+      }
+    }
+  }
+  
+  @Override
+  public void onGotPROVData( EMClient client, PROVStatement statement )
+  {
+    if ( client != null && statement != null )
+    {
+      try
+      {
+        liveMonitorController.processLivePROVData( client, statement );
+      }
+      catch ( Exception e )
+      {
+        String problem = "Could not save provenance statement for client " +
                          client.getName() + " because: " + e.getMessage();
         
         mainDashView.addLogMessage( problem );

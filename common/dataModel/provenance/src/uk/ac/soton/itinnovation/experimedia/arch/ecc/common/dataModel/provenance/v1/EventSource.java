@@ -22,7 +22,7 @@
 //      Created for Project :   BonFIRE
 //
 /////////////////////////////////////////////////////////////////////////
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.v1;
 
 import java.io.Serializable;
 import java.util.UUID;

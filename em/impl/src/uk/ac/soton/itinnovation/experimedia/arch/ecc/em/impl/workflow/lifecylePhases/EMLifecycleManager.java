@@ -37,6 +37,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.PROVStatement;
 
 import java.util.*;
 
@@ -50,9 +51,9 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
                                            EMPostReportPhaseListener,
                                            EMTearDownPhaseListener
 {
-  private final IECCLogger lmLogger     = Logger.getLogger( EMLifecycleManager.class );
-  private final Object clientLock       = new Object();
-  private final int    batchRequestSize = 50;
+  private final IECCLogger lmLogger         = Logger.getLogger( EMLifecycleManager.class );
+  private final Object     clientLock       = new Object();
+  private final int        batchRequestSize = 50;
   
   private AMQPBasicChannel emChannel;
   private UUID             emProviderID;
@@ -272,8 +273,9 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
         catch ( Exception e )
         {
           windingCurrPhaseDown = false;
+          
           String msg = "Did not wind-down this phase: " + windDownPhase.toString() + e.getMessage();
-          lmLogger.info( msg );
+          lmLogger.info( msg ); 
         }
     }
     else
@@ -645,6 +647,12 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   public void onGotMetricData( EMClientEx client, Report report )
   {
     lifecycleListener.onGotMetricData( client, report );
+  }
+  
+  @Override
+  public void onGotPROVData( EMClientEx client, PROVStatement statement )
+  {
+    lifecycleListener.onGotPROVData( client, statement );
   }
   
   @Override

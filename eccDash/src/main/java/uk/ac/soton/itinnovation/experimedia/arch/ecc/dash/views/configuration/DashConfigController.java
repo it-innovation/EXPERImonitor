@@ -180,8 +180,10 @@ public class DashConfigController implements DashConfigViewListener
       }
       catch ( Exception ex )
       {
-           String error = "Could not initialise the project because : " + ex.getMessage();
-           throw new Exception( error, ex );
+          // Pretty bad news here
+          String error = "Failed to access ECC configuration service: " + ex.getMessage();
+          
+          throw new Exception( error );
       }     
   }
   
@@ -495,7 +497,19 @@ public class DashConfigController implements DashConfigViewListener
     @Override
     public void onFindConfigurations( String projectName) throws Exception
     {
-        initialiseProject( projectName, repositoryUsername , repositoryPassword );
+        boolean configServiceOK = false;
+        
+        try
+        {
+          initialiseProject( projectName, repositoryUsername , repositoryPassword );
+          configServiceOK = true;
+        }
+        catch ( Exception ex )
+        {
+          configView.displayWarning( "Could not connect to EXPERIMEDIA configuration service",
+                                     "If you have already configured the ECC, it may still be possible to continue." +
+                                     " Otherwise, please contact the EXPERIMEDIA project team" );
+        }
        
         if ( projectName != null )
         {
@@ -540,10 +554,10 @@ public class DashConfigController implements DashConfigViewListener
             catch(Exception e)
             { configLogger.warn( "Could not find local dashboard config data : " + e.getMessage() ); }
             
-            // If no local data, try the remote configuration server------------
-            if ( targetRabbitConfigData    == null ||
-                 targetDatabaseConfigData  == null ||
-                 targetDashboardConfigData == null )
+            // If no local data, try the remote configuration server (if available )
+            if ( configServiceOK && ( targetRabbitConfigData    == null ||
+                                      targetDatabaseConfigData  == null ||
+                                      targetDashboardConfigData == null ) )
             {       
                 // Rabbit
                 try
