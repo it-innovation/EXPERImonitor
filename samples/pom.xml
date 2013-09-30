@@ -21,7 +21,8 @@
     <module>basicECCClient</module>
     <module>basicECCContainer</module>
     <module>metricGeneratorExamples</module>
-	<module>dynamicEntityDemoClient</module>
+	  <module>dynamicEntityDemoClient</module>
+		<module>simplePROVECCClient</module>
   </modules>
     
 </project>
