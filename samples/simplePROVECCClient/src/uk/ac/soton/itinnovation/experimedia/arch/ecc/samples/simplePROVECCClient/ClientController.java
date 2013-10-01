@@ -116,12 +116,9 @@ public class ClientController implements ClientViewListener
   {
     if ( connectedToECC )
     {
-      if ( connectedToECC )
-      {
-        PROVStatement clientStatement = new PROVStatement();
-
-        eccAdapter.pushPROVStatement( clientStatement );
-      }
+      PROVStatement clientStatement = new PROVStatement();
+      
+      eccAdapter.pushPROVStatement( clientStatement );
     }
   }
   

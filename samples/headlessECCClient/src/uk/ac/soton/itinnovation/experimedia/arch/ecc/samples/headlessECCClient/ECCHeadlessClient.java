@@ -350,7 +350,7 @@ public class ECCHeadlessClient implements EMIAdapterListener
                 reportOUT.copyReport( edmReport, true );
             }
             catch ( Exception e )
-            { clientLogger.equals( "Could not pull metric " + measurementSetID.toString() +
+            { clientLogger.error( "Could not pull metric " + measurementSetID.toString() +
                                    "from Agent EDM" ); }
             
         }
