@@ -62,6 +62,7 @@ namespace SimpleHeadlessECCClient
                 if (args.Length == 1) rabbitServerIP = args[0];
 
                 eccController.start( rabbitServerIP,
+                                     "guest", "guest",
                                      new Guid("00000000-0000-0000-0000-000000000000"), // ECC instance ID
                                      Guid.NewGuid());                                  // ID of this client (random)
 

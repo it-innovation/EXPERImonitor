@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////
 //
-// © University of Southampton IT Innovation Centre, 2012
+// © University of Southampton IT Innovation Centre, 2013
 //
 // Copyright in this software belongs to University of Southampton
 // IT Innovation Centre of Gamma House, Enterprise Road, 
@@ -17,31 +17,22 @@
 // PURPOSE, except where stated in the Licence Agreement supplied with
 // the software.
 //
-//      Created By :            Vegard Engen
-//      Created Date :          2012-08-09
-//      Created for Project :   BonFIRE
+//      Created By :            Simon Crowle
+//      Created Date :          29-Sep-2013
+//      Created for Project :   experimedia-arch-ecc-samples-simplePROVECCClient
 //
 /////////////////////////////////////////////////////////////////////////
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance;
 
-import java.io.Serializable;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.simplePROVECCClient;
 
-/**
- * An enum for the source of a provenance event.
- * 
- * @author Vegard Engen
- */
-public enum EventSourceType implements Serializable
+
+
+
+public interface ClientViewListener
 {
-    EXPERIMENT,
-    METRIC_GENERATOR,
-    ENTITY;
-
-    public String value() {
-        return name();
-    }
-
-    public static EventSourceType fromValue(String v) {
-        return valueOf(v.toUpperCase());
-    }
+  void onClientViewClosed();
+  
+  void onSendServerPROVClicked();
+  
+  void onSendClientPROVClicked();
 }

@@ -29,8 +29,10 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IReportDAO
 import uk.ac.soton.itinnovation.robust.cat.core.components.viewEngine.spec.uif.mvc.IUFView;
 import uk.ac.soton.itinnovation.robust.cat.core.components.viewEngine.spec.uif.types.UFAbstractEventManager;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMClient;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.PROVStatement;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.visualizers.*;
 
@@ -44,7 +46,8 @@ import java.util.*;
 public class LiveMonitorController extends UFAbstractEventManager
                                    implements LiveMonitorViewListener
 {
-  private final Object updateViewLock = new Object();
+  private final IECCLogger liveMonLogger  = Logger.getLogger( LiveMonitorController.class );
+  private final Object     updateViewLock = new Object();
   
   private LiveMonitorView liveMonitorView;
   
@@ -68,10 +71,10 @@ public class LiveMonitorController extends UFAbstractEventManager
   public void initialse( IReportDAO dao )
   { expReportAccessor = dao; }
   
-  public void processLiveData( EMClient client, Report report ) throws Exception
+  public void processLiveMetricData( EMClient client, Report report ) throws Exception
   {
     // Safety first
-    if ( report == null || client == null ) throw new Exception( "Live monitoring parameters were null" );
+    if ( report == null || client == null ) throw new Exception( "Live monitoring metric parameters were null" );
     if ( expReportAccessor == null ) throw new Exception( "Live monitoring control has not been initialised" );
     
     // Check to see if we have anything to store, and try store
@@ -98,6 +101,15 @@ public class LiveMonitorController extends UFAbstractEventManager
           }
         }
     }
+  }
+  
+  public void processLivePROVData( EMClient client, PROVStatement statement ) throws Exception
+  {
+    if ( client == null || statement == null ) throw new Exception( "Live monitoring provenance parameters were null" );
+      
+    liveMonLogger.info( "Got PROV statement from: " + statement.getCopyOfDate().toString() );
+    
+    // More to do here later
   }
   
   public IUFView getLiveView()

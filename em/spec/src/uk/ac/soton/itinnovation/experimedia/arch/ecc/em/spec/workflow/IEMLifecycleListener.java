@@ -27,6 +27,7 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.PROVStatement;
 
 import java.util.*;
 
@@ -60,6 +61,8 @@ public interface IEMLifecycleListener
   void onClientDeclaredCanBePulled( EMClient client );
   
   void onGotMetricData( EMClient client, Report report );
+  
+  void onGotPROVData( EMClient client, PROVStatement statement );
   
   void onGotSummaryReport( EMClient client, EMPostReportSummary summary );
   

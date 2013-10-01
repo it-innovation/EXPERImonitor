@@ -37,6 +37,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 
 import java.util.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.PROVStatement;
 
 
 
@@ -213,7 +214,7 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
 
     /**
      * Actively push a metric report to the ECC. This method should only be called during 
-     * the LiveMonitoring process.
+     * the Live Monitoring process.
      * 
      * @param report - A fully populated instance of a metric report.
      */
@@ -221,6 +222,18 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
     {
         if ( report != null && liveMonitorFace != null )
             liveMonitorFace.pushMetric( report );
+    }
+    
+    /**
+     * Push a provenance statement to the ECC. This method should only be called during
+     * the Live Monitoring process.
+     * 
+     * @param statement 
+     */
+    public void pushPROVStatement( PROVStatement statement )
+    {
+      if ( statement != null && liveMonitorFace != null )
+        liveMonitorFace.pushPROVStatement( statement );
     }
 
     /**

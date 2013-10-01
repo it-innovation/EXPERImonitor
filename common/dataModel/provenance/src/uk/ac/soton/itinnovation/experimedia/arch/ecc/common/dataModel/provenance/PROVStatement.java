@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////
 //
-// © University of Southampton IT Innovation Centre, 2012
+// © University of Southampton IT Innovation Centre, 2013
 //
 // Copyright in this software belongs to University of Southampton
 // IT Innovation Centre of Gamma House, Enterprise Road, 
@@ -18,32 +18,32 @@
 // the software.
 //
 //      Created By :            Simon Crowle
-//      Created Date :          27-Aug-2012
+//      Created Date :          27-Sep-2013
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecylePhases;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
-
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
-
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.PROVStatement;
+import java.util.*;
 
 
 
-public interface EMLiveMonitorPhaseListener
+
+public class PROVStatement
 {
-  void onClientDeclaredCanPush( EMClientEx client );
+  private UUID statementID;
+  private Date statementCreationDate;
   
-  void onClientDeclaredCanBePulled( EMClientEx client );
+  public PROVStatement()
+  {
+    statementID           = UUID.randomUUID();
+    statementCreationDate = new Date();
+  }
   
-  void onGotMetricData( EMClientEx client, Report report );
+  public UUID getID()
+  { return statementID; }
   
-  void onGotPROVData( EMClientEx client, PROVStatement statement );
-  
-  void onLiveMonitorPhaseCompleted( EMClientEx client );
-  
-  void onLiveMonitorPhaseCompleted();
+  public Date getCopyOfDate()
+  { return new Date( statementCreationDate.getTime() ); }
 }

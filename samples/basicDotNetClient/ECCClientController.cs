@@ -58,6 +58,8 @@ public class ECCClientController : EMIAdapterListener
     }
     
     public void start( string rabbitServerIP,
+                       string username,
+                       string password,
                        System.Guid expMonitorID,
                        System.Guid clientID )
     {
@@ -72,6 +74,9 @@ public class ECCClientController : EMIAdapterListener
             amqpFactory.setAMQPHostIPAddress( rabbitServerIP );
             try
             {
+                if (username != null && password != null)
+                    amqpFactory.setLoginDetails(username, password);
+
                 amqpFactory.connectToAMQPHost();
                 amqpChannel = amqpFactory.createNewChannel();
             }

@@ -39,6 +39,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
 
 import java.util.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.PROVStatement;
 
 
 
@@ -453,6 +454,15 @@ public class ExperimentMonitor implements IExperimentMonitor,
     
     while ( listIt.hasNext() )
     { listIt.next().onGotMetricData( client, report ); }
+  }
+  
+  @Override
+  public void onGotPROVData( EMClient client, PROVStatement statement )
+  {
+    Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
+    
+    while ( listIt.hasNext() )
+    { listIt.next().onGotPROVData( client, statement ); }
   }
   
   @Override

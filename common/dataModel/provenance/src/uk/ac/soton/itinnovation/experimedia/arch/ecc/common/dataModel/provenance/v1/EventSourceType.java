@@ -17,33 +17,31 @@
 // PURPOSE, except where stated in the Licence Agreement supplied with
 // the software.
 //
-//      Created By :            Simon Crowle
-//      Created Date :          27-Aug-2012
-//      Created for Project :   EXPERIMEDIA
+//      Created By :            Vegard Engen
+//      Created Date :          2012-08-09
+//      Created for Project :   BonFIRE
 //
 /////////////////////////////////////////////////////////////////////////
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.v1;
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecylePhases;
+import java.io.Serializable;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
-
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
-
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.PROVStatement;
-
-
-
-public interface EMLiveMonitorPhaseListener
+/**
+ * An enum for the source of a provenance event.
+ * 
+ * @author Vegard Engen
+ */
+public enum EventSourceType implements Serializable
 {
-  void onClientDeclaredCanPush( EMClientEx client );
-  
-  void onClientDeclaredCanBePulled( EMClientEx client );
-  
-  void onGotMetricData( EMClientEx client, Report report );
-  
-  void onGotPROVData( EMClientEx client, PROVStatement statement );
-  
-  void onLiveMonitorPhaseCompleted( EMClientEx client );
-  
-  void onLiveMonitorPhaseCompleted();
+    EXPERIMENT,
+    METRIC_GENERATOR,
+    ENTITY;
+
+    public String value() {
+        return name();
+    }
+
+    public static EventSourceType fromValue(String v) {
+        return valueOf(v.toUpperCase());
+    }
 }

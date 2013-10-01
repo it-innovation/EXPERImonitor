@@ -30,6 +30,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
 
 import java.util.UUID;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.PROVStatement;
 
 
 
@@ -61,10 +62,10 @@ public interface IEMLiveMonitor
     /**
      * Tell the user that a push report has been received by the EM.
      * 
-     * @param lastReportID - UUID of the last push report received by the EM from
+     * @param lastPushID - UUID of the last pushed report/provenance statement received by the EM from
      * this client.
      */
-    void notifyPushReceived( UUID lastReportID );
+    void notifyPushReceived( UUID lastPushID );
 
     /**
      * Tells the user to stop pushing data to the EM.
@@ -107,16 +108,24 @@ public interface IEMLiveMonitor
     void notifyReadyToPush();
 
     /**
-     * Sends a Report instance to the EM. IMPORTANT NOTE: users MUST pair this
+     * Sends a Report instance to the EM. IMPORTANT NOTE: users should pair this
      * method call with the IEMLiveMonitor_UserListener.onReceivedPush(..) event
-     * issued to the user by the EM. Users MUST NOT attempt to push data to the 
-     * EM on an ad-hoc basis - they must wait for the onReceivedPush(..) response
-     * from the EM before attempting another push.
-     * 
+     * issued to the user by the ECC.
+     *
      * @param report - Instance of a Report containing measurement data (for now,
      * for a single time frame).
      */
     void pushMetric( Report report );
+    
+    /**
+     * Sends a PROVenance based statement to the EM. IMPORTANT NOTE: users should
+     * pair this method call with the IEMLiveMonitor_UserListener.onReceivedPush(..)
+     * event issued to the user by the ECC.
+     * 
+     * @param statement - Instance of the PROVenance statement containing provenance
+     * data objects.
+     */
+    void pushPROVStatement( PROVStatement statement );
 
     /**
      * Tells the EM that this user has finished pushing Reports.

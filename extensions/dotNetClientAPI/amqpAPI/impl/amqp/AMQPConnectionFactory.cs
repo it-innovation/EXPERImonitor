@@ -85,6 +85,15 @@ public class AMQPConnectionFactory
         return true;
     }
 
+    public void setLoginDetails(string uname, string pass)
+    {
+        if (uname != null && pass != null)
+        {
+            userName = uname;
+            userPass = pass;
+        }
+    }
+
     public String getLocalIP()
     {
         String localIPValue = null;
@@ -113,27 +122,28 @@ public class AMQPConnectionFactory
         amqpFactory.HostName = amqpHostIP.ToString();
         amqpFactory.Port = amqpPortNumber;
 
-        if (userPass != null)
+        if (userName != null && userPass != null)
         {
+            factoryLog.info("Will try to login as \'" + userName + "\'");
             
-            if (userName != null)
-            {
-                factoryLog.info("Will try to login as \'" + userName + "\'");
-                amqpFactory.UserName = userName;
-            } 
-            else 
-            {
-                factoryLog.info("Will try to login as guest");
-                amqpFactory.UserName = "guest";
-            }
-            
+            amqpFactory.UserName = userName;
             amqpFactory.Password = userPass;
         }
+        else
+        {
+            factoryLog.info("Will try to login as guest");
+            amqpFactory.UserName = "guest";
+            amqpFactory.Password = "guest";
+        }
 
-        amqpConnection = amqpFactory.CreateConnection();
-
-        if ( amqpConnection == null  )
-            throw new Exception( "Could not create AMQP host connection: " );
+        try
+        {
+            amqpConnection = amqpFactory.CreateConnection();
+        }
+        catch (Exception ex)
+        {
+            throw new Exception( "Could not create AMQP host connection: " + ex.Message );
+        }     
     }
 
     public void connectToAMQPSSLHost()
