@@ -282,7 +282,11 @@
 
   <!-- 3rd party repositories _____________________________________________  -->
   <repositories>
-
+	<repository>
+	    <id>mvn.prov.toolbox</id>
+	    <name>maven repository for PROV toolbox</name>
+	    <url>http://openprovenance.org/java/maven-releases/</url>
+	</repository>
   </repositories>
 
   <!-- Modules _____________________________________________________________ -->
