@@ -77,8 +77,8 @@ public class LiveMonitorController extends UFAbstractEventManager
     if ( report == null || client == null ) throw new Exception( "Live monitoring metric parameters were null" );
     if ( expReportAccessor == null ) throw new Exception( "Live monitoring control has not been initialised" );
     
-    // Check to see if we have anything to store, and try store
-    if ( report.getNumberOfMeasurements() > 0 )
+    // Check to see if we have anything useful store, and try store
+    if ( sanitiseMetricReport(report) )
     {
       try
       { expReportAccessor.saveMeasurements( report ); }
@@ -282,6 +282,57 @@ public class LiveMonitorController extends UFAbstractEventManager
       }
       else report.setNumberOfMeasurements( 0 );
     }
+  }
+  
+  private boolean sanitiseMetricReport( Report reportOUT )
+  {
+    if ( reportOUT.getNumberOfMeasurements() == 0 ) return false;
+    
+    MeasurementSet ms = reportOUT.getMeasurementSet();
+    if ( ms == null ) return false;
+    
+    Metric metric = ms.getMetric();
+    if ( metric == null ) return false;
+    
+    MetricType mt = metric.getMetricType();
+    
+    // Sanitise data
+    MeasurementSet cleanSet = new MeasurementSet( ms, false );
+    
+    for ( Measurement m : ms.getMeasurements() )
+    {
+      String val = m.getValue();
+      
+      switch ( mt )
+      {
+        case NOMINAL:
+        case ORDINAL:
+          if ( val != null && !val.isEmpty() ) cleanSet.addMeasurement( m ); break;
+
+        case INTERVAL:
+        case RATIO:
+        {
+          if ( val != null )
+          {
+            try
+            {
+              // Make sure we have a sensible number
+              Double dVal = Double.parseDouble(val);
+              
+              if ( !dVal.isNaN() && !dVal.isInfinite() )
+                cleanSet.addMeasurement( m );
+            }
+            catch( Exception ex ) { /*Not INTERVAL OR RATIO, so don't include*/ }
+          }
+        } break;
+      }
+    }
+    
+    // Use update report with clean measurement set
+    reportOUT.setMeasurementSet( cleanSet );
+    reportOUT.setNumberOfMeasurements( cleanSet.getMeasurements().size() );
+    
+    return true;
   }
   
   // Private classes -----------------------------------------------------------
