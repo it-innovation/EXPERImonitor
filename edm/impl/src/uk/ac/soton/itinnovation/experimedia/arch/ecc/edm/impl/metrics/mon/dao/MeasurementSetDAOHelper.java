@@ -22,7 +22,7 @@
 //      Created for Project :   BonFIRE
 //
 /////////////////////////////////////////////////////////////////////////
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.mon.dao;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.metrics.mon.dao;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -35,7 +35,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Me
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Metric;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.IECCLogger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.Logger;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db.DBUtil;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.metrics.db.DBUtil;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.NoDataException;
 
 /**

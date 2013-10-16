@@ -22,7 +22,7 @@
 //      Created for Project :   BonFIRE
 //
 /////////////////////////////////////////////////////////////////////////
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.db;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.metrics.db;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
