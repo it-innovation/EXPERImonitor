@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>experimedia-arch-ecc-common-dataModel-provenance</artifactId>
+  <artifactId>experimedia-arch-ecc-common-dataModel-test</artifactId>
   <packaging>jar</packaging>
   
   <parent>
@@ -47,6 +47,41 @@
   </build>
   
   <dependencies>
+    <dependency>
+      <groupId>org.openprovenance.prov</groupId>
+      <artifactId>prov-xml</artifactId>
+      <version>0.3.1-SNAPSHOT</version>
+    </dependency>
+     <dependency>
+      <groupId>org.openprovenance.prov</groupId>
+      <artifactId>prov-interop</artifactId>
+      <version>0.3.1-SNAPSHOT</version>
+    </dependency>
+     <dependency>
+      <groupId>org.openprovenance.prov</groupId>
+      <artifactId>prov-rdf</artifactId>
+      <version>0.3.1-SNAPSHOT</version>
+    </dependency>
+     <dependency>
+      <groupId>org.openprovenance.prov</groupId>
+      <artifactId>prov-dot</artifactId>
+      <version>0.3.1-SNAPSHOT</version>
+    </dependency>
+     <dependency>
+      <groupId>org.openprovenance.prov</groupId>
+      <artifactId>prov-json</artifactId>
+      <version>0.3.1-SNAPSHOT</version>
+    </dependency>
+     <dependency>
+      <groupId>org.openprovenance.prov</groupId>
+      <artifactId>prov-n</artifactId>
+      <version>0.3.1-SNAPSHOT</version>
+    </dependency>
+     <dependency>
+      <groupId>org.openprovenance.prov</groupId>
+      <artifactId>toolbox</artifactId>
+      <version>0.3.1-SNAPSHOT</version>
+    </dependency>
   </dependencies>
     
 </project>

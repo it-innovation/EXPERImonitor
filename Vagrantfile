@@ -71,7 +71,7 @@ mvn install
 
 # deploy the ECC into Tomcat
 echo "**** Deploying ECC into Tomcat"
-cp eccDash/target/experimedia-arch-ecc-eccDash-1.2.war /var/lib/tomcat7/webapps/ECC.war
+cp eccDash/target/experimedia-arch-ecc-eccDash-1.3-SNAPSHOT.war /var/lib/tomcat7/webapps/ECC.war
 
 echo "**** Finished: ECC deployed in Tomcat port running on port 8080.  Mapped to localhost:8080/ECC on host machine."
 SCRIPT

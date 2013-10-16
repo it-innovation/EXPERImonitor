@@ -20,6 +20,7 @@
       <module>experiment</module>
       <module>provenance</module>
       <module>monitor</module>
+      <module>test</module>
     </modules>
     
 </project>
