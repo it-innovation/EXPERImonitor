@@ -64,13 +64,13 @@ public class MonitoringEDM implements IMonitoringEDM
         try {
             try {
                 log.debug("Reading configuration file on the class path");
-                configParams = EDMUtil.getConfigs();
+                configParams = MonitoringEDMUtil.getConfigs();
             } catch (Exception ex){
                 log.error("Caught an exception when reading the config file: " + ex.getMessage());
                 throw ex;
             }
 
-            if (!EDMUtil.isConfigValid(configParams))
+            if (!MonitoringEDMUtil.isConfigValid(configParams))
             {
                 log.error("The configuration parameters are not valid.");
                 throw new IllegalArgumentException("The configuration parameters are not valid.");
@@ -94,7 +94,7 @@ public class MonitoringEDM implements IMonitoringEDM
         log.info("EDM starting up");
         configParams = config;
         try {
-            if (!EDMUtil.isConfigValid(configParams)) {
+            if (!MonitoringEDMUtil.isConfigValid(configParams)) {
                 throw new IllegalArgumentException("The configuration parameters provided are not valid.");
             }
             

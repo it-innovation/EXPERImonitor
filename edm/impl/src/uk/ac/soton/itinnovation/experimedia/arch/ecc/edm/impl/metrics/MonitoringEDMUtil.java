@@ -33,9 +33,9 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.Logger;
  * 
  * @author Vegard Engen
  */
-public class EDMUtil
+public class MonitoringEDMUtil
 {
-    static IECCLogger log = Logger.getLogger(EDMUtil.class);
+    static IECCLogger log = Logger.getLogger(MonitoringEDMUtil.class);
     private static String configFileName = "edm.properties";
     
     public static Properties getConfigs() throws Exception
@@ -43,7 +43,7 @@ public class EDMUtil
         Properties prop = new Properties();
         
         try {
-            prop.load(EDMUtil.class.getClassLoader().getResourceAsStream(configFileName));
+            prop.load(MonitoringEDMUtil.class.getClassLoader().getResourceAsStream(configFileName));
         } catch (Exception ex) {
             log.error("Error with loading configuration file edm.properties: " + ex.getMessage(), ex);
             throw new RuntimeException("Error with loading configuration file " + configFileName + ": " + ex.getMessage(), ex);
