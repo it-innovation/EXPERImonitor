@@ -32,10 +32,13 @@ public class EDMProvReport
   private UUID statementID;
   private Date statementCreationDate;
   
+  private HashMap<String, EDMProvBaseElement> provElements;
+  
   public EDMProvReport()
   {
     statementID           = UUID.randomUUID();
     statementCreationDate = new Date();
+    provElements          = new HashMap<String, EDMProvBaseElement>();
   }
   
   public UUID getID()
@@ -43,4 +46,18 @@ public class EDMProvReport
   
   public Date getCopyOfDate()
   { return new Date( statementCreationDate.getTime() ); }
+  
+  public HashMap<String, EDMProvBaseElement> getProvElements()
+  {
+    return provElements;
+  }
+  
+  // Protected methods ---------------------------------------------------------
+  protected EDMProvReport( HashMap<String, EDMProvBaseElement> pElements )
+  {
+    this();
+    
+    if ( pElements != null && !pElements.isEmpty() )
+      provElements.putAll( pElements );
+  }
 }

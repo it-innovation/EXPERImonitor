@@ -29,13 +29,17 @@ import java.text.SimpleDateFormat;
 import java.util.LinkedList;
 import java.util.TimeZone;
 
-abstract class EDMProvBaseElement {
+public class EDMProvBaseElement {
 
     protected String iri;
     protected LinkedList<EDMProvTriple> triples;
     
     protected static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z^^xsd:dateTime'");
 	
+    public EDMProvBaseElement() {
+        triples = new LinkedList<EDMProvTriple>();
+    }
+    
     protected EDMProvBaseElement(String iri) {
     	this.setIri(iri);
         this.triples = new LinkedList<EDMProvTriple>();

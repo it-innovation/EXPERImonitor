@@ -79,6 +79,7 @@ public class ClientView extends javax.swing.JFrame {
     jPanel1.setPreferredSize(new java.awt.Dimension(300, 50));
 
     serverPROVSendButton.setText("Send PROV statement");
+    serverPROVSendButton.setEnabled(false);
     serverPROVSendButton.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
         onServerPROVSendClicked(evt);

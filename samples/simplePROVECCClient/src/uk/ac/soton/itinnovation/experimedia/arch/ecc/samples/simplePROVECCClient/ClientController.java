@@ -33,7 +33,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvReport;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.*;
 
 import java.util.*;
 
@@ -105,9 +105,7 @@ public class ClientController implements ClientViewListener
   {
     if ( connectedToECC )
     {
-      EDMProvReport serverStatement = new EDMProvReport();
-      
-      eccAdapter.pushPROVStatement( serverStatement );
+      // YET TO DO
     }
   }
   
@@ -116,9 +114,32 @@ public class ClientController implements ClientViewListener
   {
     if ( connectedToECC )
     {
-      EDMProvReport clientStatement = new EDMProvReport();
+      // Describe something very simple in a PROV model
+      EDMProvFactory factory = EDMProvFactory.getInstance();
+
+      try
+      {
+        // This is Bobette
+        EDMAgent bobette = factory.getAgent( "experimedia:BobetteSmith" );
+        bobette.addOwlClass( "foaf:Person" );
+        
+        // This is a video about football
+        EDMEntity video = factory.getEntity( "experimedia:reallyDullVideo" );
+        
+        // Bobette starts to watch a video and pauses it when she gets bored
+        EDMActivity watchVideo = bobette.startActivity( "experimedia:watchVideo" );
+        watchVideo.useEntity(video);
+        
+        EDMActivity pauseVideo = bobette.doDiscreteActivity( "experimedia:pauseVideo" );
+        pauseVideo.useEntity(video);
       
-      eccAdapter.pushPROVStatement( clientStatement );
+        // Get factory to create a report containing the above PROV elements
+        EDMProvReport report = factory.createProvReport();
+      
+        eccAdapter.pushPROVStatement( report );
+      }
+      catch ( Exception ex )
+      { /* TODO: Report bad news to user */ }
     }
   }
   
