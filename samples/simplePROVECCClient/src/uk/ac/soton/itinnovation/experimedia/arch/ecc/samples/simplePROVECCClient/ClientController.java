@@ -33,7 +33,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.PROVStatement;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvReport;
 
 import java.util.*;
 
@@ -105,7 +105,7 @@ public class ClientController implements ClientViewListener
   {
     if ( connectedToECC )
     {
-      PROVStatement serverStatement = new PROVStatement();
+      EDMProvReport serverStatement = new EDMProvReport();
       
       eccAdapter.pushPROVStatement( serverStatement );
     }
@@ -116,7 +116,7 @@ public class ClientController implements ClientViewListener
   {
     if ( connectedToECC )
     {
-      PROVStatement clientStatement = new PROVStatement();
+      EDMProvReport clientStatement = new EDMProvReport();
       
       eccAdapter.pushPROVStatement( clientStatement );
     }

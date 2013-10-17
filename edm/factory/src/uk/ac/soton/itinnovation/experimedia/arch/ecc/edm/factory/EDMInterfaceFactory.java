@@ -24,12 +24,13 @@
 /////////////////////////////////////////////////////////////////////////
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory;
 
-import java.util.Properties;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.MonitoringEDM;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.MonitoringEDMAgent;
+
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.metrics.MonitoringEDM;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.metrics.MonitoringEDMAgent;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDM;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDMAgent;
 
+import java.util.Properties;
 
 /**
  * EDMInterfaceFactory is a simple factory class that generates EDM interfaces.

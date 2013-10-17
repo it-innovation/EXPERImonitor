@@ -41,13 +41,12 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.PROVStatement;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvReport;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.client.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.visualizers.BaseMetricVisual;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.dataExport.DataExportController;
 
@@ -63,6 +62,7 @@ import org.vaadin.artur.icepush.ICEPush;
 import java.io.*;
 import java.net.URL;
 import java.util.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.visualizers.metrics.BaseMetricVisual;
 
 
 
@@ -444,7 +444,7 @@ public class DashMainController extends UFAbstractEventManager
   }
   
   @Override
-  public void onGotPROVData( EMClient client, PROVStatement statement )
+  public void onGotPROVData( EMClient client, EDMProvReport statement )
   {
     if ( client != null && statement != null )
     {

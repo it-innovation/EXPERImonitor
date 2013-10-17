@@ -37,7 +37,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.PROVStatement;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvReport;
 
 import java.util.*;
 
@@ -650,7 +650,7 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   }
   
   @Override
-  public void onGotPROVData( EMClientEx client, PROVStatement statement )
+  public void onGotPROVData( EMClientEx client, EDMProvReport statement )
   {
     lifecycleListener.onGotPROVData( client, statement );
   }

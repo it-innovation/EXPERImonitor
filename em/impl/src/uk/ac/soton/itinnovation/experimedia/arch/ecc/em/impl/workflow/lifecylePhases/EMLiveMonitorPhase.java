@@ -37,7 +37,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 
 import java.util.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.PROVStatement;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvReport;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMMeasurementSetInfo;
 
 
@@ -336,7 +336,7 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
   }
   
   @Override
-  public void onPushPROVStatement( UUID senderID, PROVStatement statement )
+  public void onPushPROVStatement( UUID senderID, EDMProvReport statement )
   {
     EMClientEx client = getClient( senderID );
     
