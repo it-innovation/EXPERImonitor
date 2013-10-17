@@ -33,6 +33,7 @@ public class EDMProvFactory {
 	
 	private static EDMProvFactory factory = null;
 	private HashMap<String, EDMProvBaseElement> allProvElements;
+  private HashMap<String, EDMProvBaseElement> currentProvReportElements;
 	
 	private EDMProvFactory() {
 		init();
@@ -47,6 +48,7 @@ public class EDMProvFactory {
     
 	private void init() {
 		allProvElements = new HashMap<String, EDMProvBaseElement>();
+    currentProvReportElements = new HashMap<String, EDMProvBaseElement>();
 	}
 	
 	public EDMAgent getAgent(String iri) throws DataFormatException {
@@ -91,10 +93,22 @@ public class EDMProvFactory {
 			default:
 				break;
 			}
+      
 			allProvElements.put(iri, element);
+      currentProvReportElements.put(iri, element);
+      
 			return element;
 		}
 	}
+  
+  public EDMProvReport createProvReport()
+  {
+    EDMProvReport report = new EDMProvReport( currentProvReportElements );
+    
+    currentProvReportElements.clear();
+    
+    return report;
+  }
 	
 	public String toString() {
 		String contents = "EDMProvFactory contents:\n########################\n";
