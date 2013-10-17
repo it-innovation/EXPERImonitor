@@ -43,7 +43,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment
 import java.awt.event.*;
 import java.io.*;
 import java.util.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.PROVStatement;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvReport;
 
 
 
@@ -289,7 +289,7 @@ public class EMController implements IEMLifecycleListener
   }
   
   @Override
-  public void onGotPROVData( EMClient client, PROVStatement statement )
+  public void onGotPROVData( EMClient client, EDMProvReport statement )
   {
     if ( client != null && statement != null )
       mainView.addLogText( "Got PROV data from client: " + client.getName() + 

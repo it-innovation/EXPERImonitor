@@ -36,7 +36,7 @@ import uk.ac.soton.itinnovation.robust.cat.core.components.viewEngine.spec.uif.t
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMClient;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.PROVStatement;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvReport;
 
 
 import org.vaadin.artur.icepush.ICEPush;
@@ -106,7 +106,7 @@ public class LiveMonitorController extends UFAbstractEventManager
     }
   }
   
-  public void processLivePROVData( EMClient client, PROVStatement statement ) throws Exception
+  public void processLivePROVData( EMClient client, EDMProvReport statement ) throws Exception
   {
     if ( client == null || statement == null ) throw new Exception( "Live monitoring provenance parameters were null" );
       

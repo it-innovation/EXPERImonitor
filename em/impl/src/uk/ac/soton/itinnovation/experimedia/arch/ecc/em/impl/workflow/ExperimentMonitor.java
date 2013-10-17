@@ -39,7 +39,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
 
 import java.util.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.PROVStatement;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvReport;
 
 
 
@@ -457,7 +457,7 @@ public class ExperimentMonitor implements IExperimentMonitor,
   }
   
   @Override
-  public void onGotPROVData( EMClient client, PROVStatement statement )
+  public void onGotPROVData( EMClient client, EDMProvReport statement )
   {
     Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
     

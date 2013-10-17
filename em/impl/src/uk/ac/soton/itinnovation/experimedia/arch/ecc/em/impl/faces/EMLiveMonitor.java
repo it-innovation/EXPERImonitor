@@ -35,7 +35,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 
 import com.google.gson.JsonArray;
 import java.util.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.PROVStatement;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvReport;
 
 
 
@@ -156,7 +156,7 @@ public class EMLiveMonitor extends EMBaseInterface
   
   // Method ID = 13
   @Override
-  public void pushPROVStatement( PROVStatement statement )
+  public void pushPROVStatement( EDMProvReport statement )
   {
     ArrayList<Object> params = new ArrayList<Object>();
     params.add( statement );
@@ -299,7 +299,7 @@ public class EMLiveMonitor extends EMBaseInterface
       {
         if ( providerListener != null )
         {
-          PROVStatement statement = jsonMapper.fromJson( methodData.get(1), PROVStatement.class );
+          EDMProvReport statement = jsonMapper.fromJson( methodData.get(1), EDMProvReport.class );
           providerListener.onPushPROVStatement( interfaceUserID, statement );
         }
       }

@@ -18,26 +18,57 @@
 // the software.
 //
 //      Created By :            Stefanie Wiegand
-//      Created Date :          07-Oct-2013
+//      Created Date :          16-Oct-2013
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance;
 
-import java.util.zip.DataFormatException;
-
-public class EDMEntity extends EDMProvBaseElement {
-
-	public EDMEntity(String iri) {
-		super(iri);
-		this.addOwlClass("prov:Entity");
+public class EDMProvTriple {
+	
+	private String subject;
+	private String predicate;
+	private String object;
+	
+	public EDMProvTriple(String subject, String predicate, String object) {
+		this.subject = subject;
+		this.predicate = predicate;
+		this.object = object;
 	}
 	
-	public EDMActivity startActivity(String activity) throws DataFormatException {
-		EDMActivity newActivity = EDMProvFactory.getInstance().getActivity(activity);
-		
-		return newActivity;
+	public boolean equals(EDMProvTriple t) {
+		if (this.subject.equals(t.getSubject())
+			&& this.predicate.equals(t.getPredicate())
+			&& this.object.equals(t.getObject())) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	public String getSubject() {
+		return subject;
+	}
+	
+	public void setSubject(String subject) {
+		this.subject = subject;
+	}
+	
+	public String getPredicate() {
+		return predicate;
+	}
+	
+	public void setPredicate(String predicate) {
+		this.predicate = predicate;
+	}
+	
+	public String getObject() {
+		return object;
+	}
+	
+	public void setObject(String object) {
+		this.object = object;
 	}
 
 }

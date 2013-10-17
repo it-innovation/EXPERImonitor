@@ -37,7 +37,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 
 import java.util.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.PROVStatement;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvReport;
 
 
 
@@ -230,7 +230,7 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
      * 
      * @param statement 
      */
-    public void pushPROVStatement( PROVStatement statement )
+    public void pushPROVStatement( EDMProvReport statement )
     {
       if ( statement != null && liveMonitorFace != null )
         liveMonitorFace.pushPROVStatement( statement );

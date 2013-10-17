@@ -25,10 +25,44 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance;
 
+import java.util.zip.DataFormatException;
+
+
 public class EDMActivity extends EDMProvBaseElement {
 
 	public EDMActivity(String iri) {
 		super(iri);
+		this.addOwlClass("prov:Activity");
+	}
+	
+	public EDMEntity generateEntity(String entity) throws DataFormatException {
+		
+		EDMEntity newEntity = EDMProvFactory.getInstance().getEntity(entity);	
+		newEntity.addProperty(entity, "prov:wasGeneratedBy", this.iri);
+		return newEntity;
+	}
+	
+	public EDMEntity deriveEntity(EDMEntity entity) throws DataFormatException {
+		EDMEntity derivation = EDMProvFactory.getInstance().getEntity(entity.iri + "_derivation" +
+			String.valueOf(System.currentTimeMillis() / 1000L));
+		derivation.addProperty(derivation.iri, "prov:wasDerivedFrom", this.iri);
+		return derivation;
+	}
+	
+	public void associateWith(EDMAgent agent) {
+		agent.addProperty(agent.iri, "prov:wasAssociatedWith", this.iri);
+	}
+	
+	public void useEntity(EDMEntity entity) {
+		this.useEntity(entity.iri);
+	}
+	
+	public void useEntity(String entity) {
+		this.addProperty(this.iri, "prov:used", entity);
+	}
+	
+	public void informActivity(EDMActivity activity) {
+		activity.addProperty(activity.iri, "prov:wasInformedBy", this.iri);
 	}
 
 }
