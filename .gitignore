@@ -69,3 +69,7 @@ samples/basicDotNetClient/obj/
 /amqpAPI/spec/lib/
 /amqpAPI/impl/lib/
 /samples/dynamicEntityDemoClient/lib/
+/edc/configAPI/lib/
+/samples/simplePROVECCClient/lib/
+/common/dataModel/test/lib/
+/thirdPartyLibs/owlim-lite-5.4.jar
