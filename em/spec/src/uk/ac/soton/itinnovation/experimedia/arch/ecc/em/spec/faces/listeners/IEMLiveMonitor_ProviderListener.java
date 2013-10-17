@@ -26,7 +26,7 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.PROVStatement;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvReport;
 
 import java.util.UUID;
 
@@ -62,7 +62,7 @@ public interface IEMLiveMonitor_ProviderListener
      * @param senderID  - ID of the user client
      * @param statement - PROVenance statement sent by the client
      */
-    void onPushPROVStatement( UUID senderID, PROVStatement statement );
+    void onPushPROVStatement( UUID senderID, EDMProvReport statement );
     
     /**
      * Notification by the user client that it has stopped pushing metric data to

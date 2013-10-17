@@ -25,35 +25,71 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance;
 
-import java.util.ArrayList;
+import java.text.SimpleDateFormat;
+import java.util.LinkedList;
+import java.util.TimeZone;
 
-public class EDMProvBaseElement {
+abstract class EDMProvBaseElement {
 
-    private String iri;
-    private ArrayList<String> owlClasses;
-
-    public EDMProvBaseElement(String iri) {
-        owlClasses = new ArrayList<String>();
-        this.setIri(iri);
+    protected String iri;
+    protected LinkedList<EDMProvTriple> triples;
+    
+    protected static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z^^xsd:dateTime'");
+	
+    protected EDMProvBaseElement(String iri) {
+    	this.setIri(iri);
+        this.triples = new LinkedList<EDMProvTriple>();
+        
+        EDMProvBaseElement.format.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
     
-    public void print() {
-    	System.out.println(this.iri);
-    	for(String c: this.owlClasses) {
-    		System.out.println("\t" + c);
+    public String toString() {
+    	String contents = this.iri + "\n";
+    	for(EDMProvTriple t: this.triples) {
+    		contents += "\t" + t.getSubject() + " " + t.getPredicate() + " " + t.getObject() + "\n";
+    	}
+    	return contents;
+    }
+    
+    public boolean contains(EDMProvTriple triple) {
+    	boolean contains = false;
+    	for (EDMProvTriple t: this.triples) {
+    		if (t.equals(triple)) {
+    			contains = true;
+    			break;
+    		}
+    	}
+    	return contains;
+    }
+    
+    public void addProperty(String predicate, String object) {
+    	this.addProperty(this.iri, predicate, object);
+    }
+    
+    public void addProperty(String subject, String predicate, String object) {
+    	EDMProvTriple newTriple = new EDMProvTriple(subject, predicate, object);
+    	if (!this.triples.contains(newTriple)) {
+    		this.triples.add(newTriple);
+    	}
+    }
+    
+    public void removeProperty(String predicate, String object) {
+    	this.removeProperty(this.iri, predicate, object);
+    }
+    
+    public void removeProperty(String subject, String predicate, String object) {
+    	EDMProvTriple triple = new EDMProvTriple(subject, predicate, object);
+    	if (this.triples.contains(triple)) {
+    		this.triples.remove(triple);
     	}
     }
     
     public void addOwlClass(String c) {
-    	if (!this.owlClasses.contains(c)) {
-    		this.owlClasses.add(c);
-    	}
+    	this.addProperty(this.iri, "rdf:type", c);
     }
     
     public void removeOwlClass(String c) {
-    	if (this.owlClasses.contains(c)) {
-    		this.owlClasses.remove(c);
-    	}
+    	this.removeProperty(this.iri, "rdf:type", c);
     }
 
 	public String getIri() {

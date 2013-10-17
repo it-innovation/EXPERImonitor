@@ -29,7 +29,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClien
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.PROVStatement;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvReport;
 
 
 
@@ -41,7 +41,7 @@ public interface EMLiveMonitorPhaseListener
   
   void onGotMetricData( EMClientEx client, Report report );
   
-  void onGotPROVData( EMClientEx client, PROVStatement statement );
+  void onGotPROVData( EMClientEx client, EDMProvReport statement );
   
   void onLiveMonitorPhaseCompleted( EMClientEx client );
   

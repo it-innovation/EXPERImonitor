@@ -27,15 +27,12 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenanc
 
 import java.util.*;
 
-
-
-
-public class PROVStatement
+public class EDMProvReport
 {
   private UUID statementID;
   private Date statementCreationDate;
   
-  public PROVStatement()
+  public EDMProvReport()
   {
     statementID           = UUID.randomUUID();
     statementCreationDate = new Date();

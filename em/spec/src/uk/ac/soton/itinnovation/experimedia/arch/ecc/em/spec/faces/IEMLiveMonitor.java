@@ -30,7 +30,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.faces.listeners.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
 
 import java.util.UUID;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.PROVStatement;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvReport;
 
 
 
@@ -125,7 +125,7 @@ public interface IEMLiveMonitor
      * @param statement - Instance of the PROVenance statement containing provenance
      * data objects.
      */
-    void pushPROVStatement( PROVStatement statement );
+    void pushPROVStatement( EDMProvReport statement );
 
     /**
      * Tells the EM that this user has finished pushing Reports.

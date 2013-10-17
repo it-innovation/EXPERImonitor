@@ -25,10 +25,36 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance;
 
+import java.util.Date;
+import java.util.zip.DataFormatException;
+
 public class EDMAgent extends EDMProvBaseElement {
 
 	public EDMAgent(String iri) {
 		super(iri);
+		this.addOwlClass("prov:Agent");
+	}
+	
+	public EDMActivity startActivity(String activity) throws DataFormatException {
+		EDMActivity newActivity = EDMProvFactory.getInstance().getActivity(activity);
+		newActivity.addProperty(activity, "prov:startedAtTime", format.format(new Date()));
+		newActivity.addProperty(activity, "prov:wasStartedBy", this.iri);
+		return newActivity;
+	}
+	
+	public void stopActivity(EDMActivity activity) {
+		activity.addProperty("prov:endedAtTime", format.format(new Date()));
+		activity.addProperty("prov:wasEndedBy", this.iri);
+	}
+	
+	public EDMActivity doDiscreteActivity(String activity) throws DataFormatException {
+		EDMActivity discreteActivity = this.startActivity(activity);
+		this.stopActivity(discreteActivity);
+		return discreteActivity;
+	}
+	
+	public void actOnBehalfOf(EDMAgent agent) {
+		this.addProperty(this.iri, "prov:actedOnBehalfOf", agent.iri);
 	}
 
 }
