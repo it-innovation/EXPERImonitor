@@ -47,7 +47,6 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.client.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.visualizers.BaseMetricVisual;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.dataExport.DataExportController;
 
@@ -63,6 +62,7 @@ import org.vaadin.artur.icepush.ICEPush;
 import java.io.*;
 import java.net.URL;
 import java.util.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.visualizers.metrics.BaseMetricVisual;
 
 
 

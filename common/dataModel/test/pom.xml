@@ -49,6 +49,13 @@
   <dependencies>
     
     <dependency>
+      <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
+      <artifactId>experimedia-arch-ecc-common-dataModel-provenance</artifactId>
+      <version>1.3-SNAPSHOT</version>
+    </dependency>
+    
+    <!-- 3rd party dependencies ____________________________________________ -->
+    <dependency>
       <groupId>org.openprovenance.prov</groupId>
       <artifactId>prov-n</artifactId>
       <version>0.3.0</version>
