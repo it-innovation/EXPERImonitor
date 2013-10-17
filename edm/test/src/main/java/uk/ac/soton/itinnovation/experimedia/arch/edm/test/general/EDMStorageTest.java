@@ -47,7 +47,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.loggin.impl.Log4JImp
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.IECCLogger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMInterfaceFactory;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.metrics.EDMUtil;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.metrics.MonitoringEDMUtil;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDM;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IExperimentDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IMeasurementDAO;
@@ -67,8 +67,8 @@ public class EDMStorageTest
         Logger.setLoggerImpl( new Log4JImpl() );
         log = Logger.getLogger(EDMStorageTest.class);
       
-        Properties edmConfig = EDMUtil.getConfigs();
-        log.info("isConfigValid() = " + EDMUtil.isConfigValid(edmConfig));
+        Properties edmConfig = MonitoringEDMUtil.getConfigs();
+        log.info("isConfigValid() = " + MonitoringEDMUtil.isConfigValid(edmConfig));
         IMonitoringEDM edm = EDMInterfaceFactory.getMonitoringEDM(edmConfig);
         
         UUID expUUID = UUID.fromString("bfe4c710-61ba-46f8-a519-be2f7808192e");
