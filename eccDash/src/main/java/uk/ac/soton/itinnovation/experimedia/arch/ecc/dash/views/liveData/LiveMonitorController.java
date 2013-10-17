@@ -23,12 +23,12 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveData;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.visualizers.metrics.NumericTimeSeriesVisual;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.visualizers.metrics.BaseMetricVisual;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.visualizers.metrics.NominalValuesSnapshotVisual;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.visualizers.metrics.RawDataVisual;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.visualizers.metrics.NumericTimeSeriesVisual;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.visualizers.metrics.BaseMetricVisual;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.visualizers.metrics.NominalValuesSnapshotVisual;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.visualizers.metrics.RawDataVisual;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IReportDAO;
 import uk.ac.soton.itinnovation.robust.cat.core.components.viewEngine.spec.uif.mvc.IUFView;
 import uk.ac.soton.itinnovation.robust.cat.core.components.viewEngine.spec.uif.types.UFAbstractEventManager;

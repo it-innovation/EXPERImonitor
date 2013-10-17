@@ -23,7 +23,7 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.visualizers.metrics;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.visualizers.metrics;
 
 import java.util.UUID;
 
