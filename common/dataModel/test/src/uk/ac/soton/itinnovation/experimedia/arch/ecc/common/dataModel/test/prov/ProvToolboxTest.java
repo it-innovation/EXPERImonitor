@@ -30,8 +30,8 @@ import java.io.StringWriter;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Hashtable;
-
 import javax.xml.bind.JAXBException;
+
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -52,7 +52,7 @@ import org.openprovenance.prov.xml.ProvSerialiser;
 public class ProvToolboxTest {
 	
 	public static final String PC1_NS = "http://our.address.org/experimedia/";
-    public static final String PC1_PREFIX = "exp";
+  public static final String PC1_PREFIX = "exp";
 
 	public static void main(String[] args) {
 
@@ -87,16 +87,18 @@ public class ProvToolboxTest {
 				new Statement[] { waw, wgb }
 			);
 		
+    // Output path
+    final String outPath = System.getProperty("user.dir");
+    
 		//To DOT:
 		ProvToDot toDot=new ProvToDot(true); // with roles
 		if (graph==null) System.out.println("doToDot with null ");
 		try {
-			toDot.convert(graph,"/home/sw/Desktop/pc1-full.dot", "/home/sw/Desktop/pc1-full.pdf", "PC1 Full");
+			toDot.convert(graph, outPath + "/pc1-full.dot", outPath + "pc1-full.pdf", "PC1 Full");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
-		//To XML:
 		try {
 			ProvSerialiser ps = new ProvSerialiser();
 			StringWriter sw = new StringWriter();
@@ -107,9 +109,8 @@ public class ProvToolboxTest {
 		//To JSON:
 		Converter convert=new Converter();
 		try {
-			convert.writeDocument(graph, "/home/sw/Desktop/json.js");
+			convert.writeDocument(graph, outPath + "json.js");
 		} catch (IOException e) {}
-	
 	}
 
 }

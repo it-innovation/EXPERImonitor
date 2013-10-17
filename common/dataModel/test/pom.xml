@@ -47,41 +47,25 @@
   </build>
   
   <dependencies>
+    
     <dependency>
       <groupId>org.openprovenance.prov</groupId>
-      <artifactId>prov-xml</artifactId>
-      <version>0.3.1-SNAPSHOT</version>
+      <artifactId>prov-n</artifactId>
+      <version>0.3.0</version>
     </dependency>
-     <dependency>
-      <groupId>org.openprovenance.prov</groupId>
-      <artifactId>prov-interop</artifactId>
-      <version>0.3.1-SNAPSHOT</version>
-    </dependency>
-     <dependency>
-      <groupId>org.openprovenance.prov</groupId>
-      <artifactId>prov-rdf</artifactId>
-      <version>0.3.1-SNAPSHOT</version>
-    </dependency>
-     <dependency>
+    
+    <dependency>
       <groupId>org.openprovenance.prov</groupId>
       <artifactId>prov-dot</artifactId>
-      <version>0.3.1-SNAPSHOT</version>
+      <version>0.3.0</version>
     </dependency>
-     <dependency>
+    
+    <dependency>
       <groupId>org.openprovenance.prov</groupId>
       <artifactId>prov-json</artifactId>
-      <version>0.3.1-SNAPSHOT</version>
+      <version>0.3.0</version>
     </dependency>
-     <dependency>
-      <groupId>org.openprovenance.prov</groupId>
-      <artifactId>prov-n</artifactId>
-      <version>0.3.1-SNAPSHOT</version>
-    </dependency>
-     <dependency>
-      <groupId>org.openprovenance.prov</groupId>
-      <artifactId>toolbox</artifactId>
-      <version>0.3.1-SNAPSHOT</version>
-    </dependency>
+
   </dependencies>
     
 </project>

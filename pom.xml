@@ -112,7 +112,8 @@
                   <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
             </plugin>
-        </plugins>
+              
+      </plugins>
           
     </build>
     
@@ -282,11 +283,13 @@
 
   <!-- 3rd party repositories _____________________________________________  -->
   <repositories>
-	<repository>
-	    <id>mvn.prov.toolbox</id>
-	    <name>maven repository for PROV toolbox</name>
-	    <url>http://openprovenance.org/java/maven-releases/</url>
-	</repository>
+    
+    <repository>
+      <id>mvn.prov.toolbox</id>
+      <name>maven repository for PROV toolbox</name>
+      <url>http://openprovenance.org/java/maven-releases/</url>
+    </repository>
+    
   </repositories>
 
   <!-- Modules _____________________________________________________________ -->
