@@ -22,7 +22,7 @@
 //      Created for Project :   BonFIRE
 //
 /////////////////////////////////////////////////////////////////////////
-package uk.ac.soton.itinnovation.experimedia.arch.edm.test.unit;
+package uk.ac.soton.itinnovation.experimedia.arch.edm.test.metric.unit;
 
 import java.util.Date;
 import java.util.Properties;
@@ -43,7 +43,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMInterfaceFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDM;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IReportDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.edm.test.general.PopulateDB;
+import uk.ac.soton.itinnovation.experimedia.arch.edm.test.metrics.PopulateDB;
 
 /**
  *

@@ -22,7 +22,7 @@
 //      Created for Project :   BonFIRE
 //
 /////////////////////////////////////////////////////////////////////////
-package uk.ac.soton.itinnovation.experimedia.arch.edm.test.unit;
+package uk.ac.soton.itinnovation.experimedia.arch.edm.test.metric.unit;
 
 import java.util.Properties;
 import junit.framework.*;
@@ -35,7 +35,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.IECCLog
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMInterfaceFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDM;
-import uk.ac.soton.itinnovation.experimedia.arch.edm.test.general.PopulateDB;
+import uk.ac.soton.itinnovation.experimedia.arch.edm.test.metrics.PopulateDB;
 
 @RunWith(JUnit4.class)
 public class AGeneralTest extends TestCase

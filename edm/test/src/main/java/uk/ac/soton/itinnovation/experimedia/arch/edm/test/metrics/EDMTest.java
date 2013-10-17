@@ -22,7 +22,7 @@
 //      Created for Project :   BonFIRE
 //
 /////////////////////////////////////////////////////////////////////////
-package uk.ac.soton.itinnovation.experimedia.arch.edm.test.general;
+package uk.ac.soton.itinnovation.experimedia.arch.edm.test.metrics;
 
 import java.util.ArrayList;
 import java.util.Date;

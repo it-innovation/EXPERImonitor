@@ -22,7 +22,7 @@
 //      Created for Project :   
 //
 /////////////////////////////////////////////////////////////////////////
-package uk.ac.soton.itinnovation.experimedia.arch.edm.test.unit;
+package uk.ac.soton.itinnovation.experimedia.arch.edm.test.metric.unit;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -53,7 +53,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IMeasureme
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IMetricGeneratorDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IMetricGroupDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IReportDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.edm.test.general.PopulateDB;
+import uk.ac.soton.itinnovation.experimedia.arch.edm.test.metrics.PopulateDB;
 
 /**
  * A test class that populates the database according to the PopulateDB script and
