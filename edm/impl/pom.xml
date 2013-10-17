@@ -104,6 +104,19 @@
             <artifactId>experimedia-arch-ecc-common-logging-spec</artifactId>
             <version>1.3-SNAPSHOT</version>
         </dependency>
+        
+        <!-- Third party dependencies ______________________________________ -->
+        <dependency>
+          <groupId>org.openprovenance.prov</groupId>
+          <artifactId>prov-n</artifactId>
+          <version>0.3.0</version>
+        </dependency>
+        
+        <dependency>
+          <groupId>org.openprovenance.prov</groupId>
+          <artifactId>prov-dot</artifactId>
+          <version>0.3.0</version>
+        </dependency>
 
     </dependencies>
     
