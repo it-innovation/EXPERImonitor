@@ -25,13 +25,17 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance;
 
+import java.util.UUID;
+
 public class EDMProvTriple {
 	
+  private UUID   tripleID;
 	private String subject;
 	private String predicate;
 	private String object;
 	
 	public EDMProvTriple(String subject, String predicate, String object) {
+    this.tripleID = UUID.randomUUID();
 		this.subject = subject;
 		this.predicate = predicate;
 		this.object = object;
@@ -46,6 +50,10 @@ public class EDMProvTriple {
 			return false;
 		}
 	}
+  
+  public UUID getID() {
+    return tripleID;
+  }
 	
 	public String getSubject() {
 		return subject;

@@ -36,33 +36,50 @@ public class EDMActivity extends EDMProvBaseElement {
 	}
 	
 	public EDMEntity generateEntity(String entity) throws DataFormatException {
-		
-		EDMEntity newEntity = EDMProvFactory.getInstance().getEntity(entity);	
+    EDMProvFactory factory = EDMProvFactory.getInstance();
+    
+		EDMEntity newEntity = factory.getEntity(entity);	
 		newEntity.addProperty(entity, "prov:wasGeneratedBy", this.iri);
+    
+    factory.elementUpdated(this); // Queue to re-send in next report
+    
 		return newEntity;
 	}
 	
 	public EDMEntity deriveEntity(EDMEntity entity) throws DataFormatException {
-		EDMEntity derivation = EDMProvFactory.getInstance().getEntity(entity.iri + "_derivation" +
+		EDMProvFactory factory = EDMProvFactory.getInstance();
+    
+    EDMEntity derivation = factory.getEntity(entity.iri + "_derivation" +
 			String.valueOf(System.currentTimeMillis() / 1000L));
-		derivation.addProperty(derivation.iri, "prov:wasDerivedFrom", this.iri);
+		
+    derivation.addProperty(derivation.iri, "prov:wasDerivedFrom", this.iri);
+    
+    factory.elementUpdated(this); // Queue to re-send in next report
+    
 		return derivation;
 	}
 	
 	public void associateWith(EDMAgent agent) {
 		agent.addProperty(agent.iri, "prov:wasAssociatedWith", this.iri);
+    
+    EDMProvFactory.getInstance().elementUpdated(this); // Queue to re-send in next report
 	}
 	
 	public void useEntity(EDMEntity entity) {
 		this.useEntity(entity.iri);
+    // Updated below in overloaded method
 	}
 	
 	public void useEntity(String entity) {
 		this.addProperty(this.iri, "prov:used", entity);
+    
+    EDMProvFactory.getInstance().elementUpdated(this); // Queue to re-send in next report
 	}
 	
 	public void informActivity(EDMActivity activity) {
 		activity.addProperty(activity.iri, "prov:wasInformedBy", this.iri);
+    
+    EDMProvFactory.getInstance().elementUpdated(this); // Queue to re-send in next report
 	}
 
 }

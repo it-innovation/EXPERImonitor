@@ -36,25 +36,37 @@ public class EDMAgent extends EDMProvBaseElement {
 	}
 	
 	public EDMActivity startActivity(String activity) throws DataFormatException {
-		EDMActivity newActivity = EDMProvFactory.getInstance().getActivity(activity);
+		EDMProvFactory factory = EDMProvFactory.getInstance();
+    
+    EDMActivity newActivity = factory.getActivity(activity);
 		newActivity.addProperty(activity, "prov:startedAtTime", format.format(new Date()));
 		newActivity.addProperty(activity, "prov:wasStartedBy", this.iri);
+    
+    factory.elementUpdated(this); // Queue to re-send in next report
+    
 		return newActivity;
 	}
 	
 	public void stopActivity(EDMActivity activity) {
 		activity.addProperty("prov:endedAtTime", format.format(new Date()));
 		activity.addProperty("prov:wasEndedBy", this.iri);
+    
+    EDMProvFactory.getInstance().elementUpdated(this); // Queue to re-send in next report
 	}
 	
 	public EDMActivity doDiscreteActivity(String activity) throws DataFormatException {
 		EDMActivity discreteActivity = this.startActivity(activity);
 		this.stopActivity(discreteActivity);
+    
+    EDMProvFactory.getInstance().elementUpdated(this); // Queue to re-send in next report
+    
 		return discreteActivity;
 	}
 	
 	public void actOnBehalfOf(EDMAgent agent) {
 		this.addProperty(this.iri, "prov:actedOnBehalfOf", agent.iri);
+    
+    EDMProvFactory.getInstance().elementUpdated(this); // Queue to re-send in next report
 	}
 
 }

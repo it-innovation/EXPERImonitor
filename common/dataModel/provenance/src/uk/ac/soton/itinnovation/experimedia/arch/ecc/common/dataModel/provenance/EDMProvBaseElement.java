@@ -28,20 +28,24 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenanc
 import java.text.SimpleDateFormat;
 import java.util.LinkedList;
 import java.util.TimeZone;
+import java.util.UUID;
 
 public class EDMProvBaseElement {
 
+    private   UUID instanceID;
     protected String iri;
     protected LinkedList<EDMProvTriple> triples;
     
     protected static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z^^xsd:dateTime'");
 	
     public EDMProvBaseElement() {
+        instanceID = UUID.randomUUID();
         triples = new LinkedList<EDMProvTriple>();
     }
     
     protected EDMProvBaseElement(String iri) {
-    	this.setIri(iri);
+        this.instanceID = UUID.randomUUID();
+        this.setIri(iri);
         this.triples = new LinkedList<EDMProvTriple>();
         
         EDMProvBaseElement.format.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -55,6 +59,10 @@ public class EDMProvBaseElement {
     	return contents;
     }
     
+    public UUID getInstanceID() {
+        return instanceID;
+    }
+    
     public boolean contains(EDMProvTriple triple) {
     	boolean contains = false;
     	for (EDMProvTriple t: this.triples) {
@@ -64,6 +72,10 @@ public class EDMProvBaseElement {
     		}
     	}
     	return contains;
+    }
+    
+    public LinkedList<EDMProvTriple> getTriples() {
+      return triples;
     }
     
     public void addProperty(String predicate, String object) {

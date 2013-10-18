@@ -39,11 +39,12 @@ public class EDMProvFactory {
 		init();
 	}
 
-    public static synchronized EDMProvFactory getInstance() {
-            if (factory==null) {
-            	factory = new EDMProvFactory();
-            }
-            return factory;
+  public static synchronized EDMProvFactory getInstance() {
+    if (factory==null) {
+        factory = new EDMProvFactory();
+        }
+    
+        return factory;
     }
     
 	private void init() {
@@ -74,6 +75,15 @@ public class EDMProvFactory {
 		}
 		return entity;
 	}
+  
+  public void elementUpdated(EDMProvBaseElement element) {
+      if (element != null) {
+          String iri = element.getIri();
+          
+          if ( !currentProvReportElements.containsKey(iri) )
+              currentProvReportElements.put(iri, element);
+      }
+  }
 
 	public EDMProvBaseElement getElement(String iri, Type type) {
 		if (allProvElements.containsKey(iri)) {
