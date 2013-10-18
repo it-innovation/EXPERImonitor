@@ -41,5 +41,21 @@ public class EDMEntity extends EDMProvBaseElement {
 		
 		return newActivity;
 	}
+	
+	public void endActivity(EDMActivity activity) {
+		activity.addProperty(activity.iri, "prov:wasEndedBy", this.iri);
+	}
+
+	public void quoteFrom(EDMEntity entity) {
+		this.addProperty(this.iri, "prov:wasQuotedFrom", entity.iri);
+	}
+	
+	public void hadPrimarySource(EDMEntity entity) {
+		this.addProperty(this.iri, "prov:hadPrimarySource", entity.iri);
+	}
+
+	public void wasRevisionOf(EDMEntity entity) {
+		this.addProperty(this.iri, "prov:wasRevisionOf", entity.iri);
+	}
 
 }

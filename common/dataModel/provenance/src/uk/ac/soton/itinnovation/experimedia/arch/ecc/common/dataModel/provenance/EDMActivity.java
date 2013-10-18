@@ -25,6 +25,7 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance;
 
+import java.util.Date;
 import java.util.zip.DataFormatException;
 
 
@@ -35,15 +36,17 @@ public class EDMActivity extends EDMProvBaseElement {
 		this.addOwlClass("prov:Activity");
 	}
 	
-	public EDMEntity generateEntity(String entity) throws DataFormatException {
-    EDMProvFactory factory = EDMProvFactory.getInstance();
-    
-		EDMEntity newEntity = factory.getEntity(entity);	
+	public EDMEntity generateEntity(String entity, String timestamp) throws DataFormatException {
+		EDMEntity newEntity = EDMProvFactory.getInstance().getEntity(entity);	
 		newEntity.addProperty(entity, "prov:wasGeneratedBy", this.iri);
-    
+		newEntity.addProperty(entity, "prov:generatedAtTime", format.format(new Date(Long.valueOf(timestamp)*1000)));
     factory.elementUpdated(this); // Queue to re-send in next report
     
 		return newEntity;
+	}
+	
+	public EDMEntity generateEntity(String entity) throws DataFormatException {
+		return generateEntity(entity, String.valueOf(System.currentTimeMillis() / 1000L));
 	}
 	
 	public EDMEntity deriveEntity(EDMEntity entity) throws DataFormatException {
@@ -57,6 +60,15 @@ public class EDMActivity extends EDMProvBaseElement {
     factory.elementUpdated(this); // Queue to re-send in next report
     
 		return derivation;
+	}
+	
+	public void invalidateEntity(EDMEntity entity, String timestamp) {
+		entity.addProperty(entity.iri, "prov:wasInvalidatedBy", this.iri);
+		entity.addProperty(entity.iri, "prov:invalidatedAtTime", format.format(new Date(Long.valueOf(timestamp)*1000)));
+	}
+	
+	public void invalidateEntity(EDMEntity entity) {
+		invalidateEntity(entity, String.valueOf(System.currentTimeMillis() / 1000L));
 	}
 	
 	public void associateWith(EDMAgent agent) {
@@ -80,6 +92,12 @@ public class EDMActivity extends EDMProvBaseElement {
 		activity.addProperty(activity.iri, "prov:wasInformedBy", this.iri);
     
     EDMProvFactory.getInstance().elementUpdated(this); // Queue to re-send in next report
+	}
+	
+	
+	public void influenceActivity(EDMActivity activity) {
+		activity.addProperty(activity.iri, "prov:wasInfluencedBy", this.iri);
+		this.addProperty(this.iri, "prov:influenced", activity.iri);
 	}
 
 }
