@@ -23,14 +23,14 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveData;
 
 import java.util.UUID;
 
 
 
 
-public interface LiveMonitorViewListener
+public interface LiveMetricViewListener
 {
   void onRemoveVisualClicked( UUID msID );
 }

@@ -39,6 +39,7 @@ public class WelcomeView extends SimpleView
 {
   private TextArea miniConsole;
   private Button   startButton;
+  
 
   public WelcomeView()
   {
@@ -58,7 +59,9 @@ public class WelcomeView extends SimpleView
   }
   
   public void setReadyToStart( boolean start )
-  { startButton.setEnabled( start ); }
+  { 
+    startButton.setEnabled( start ); 
+  }
   
   // Private methods -----------------------------------------------------------
   private void createComponents()
@@ -99,7 +102,7 @@ public class WelcomeView extends SimpleView
     innerVL.setComponentAlignment( miniConsole, Alignment.MIDDLE_CENTER );
     
     // Space
-    innerVL.addComponent( UILayoutUtil.createSpace( "40px", null ) );
+    innerVL.addComponent( UILayoutUtil.createSpace( "8px", null ) );
     
     // Start button
     startButton = new Button( "Open ECC" );
@@ -111,7 +114,16 @@ public class WelcomeView extends SimpleView
     innerVL.setComponentAlignment( startButton, Alignment.MIDDLE_CENTER );
     
     // Space
-    innerVL.addComponent( UILayoutUtil.createSpace( "40px", null ) );
+    innerVL.addComponent( UILayoutUtil.createSpace( "8px", null ) );
+    
+    Button button = new Button( "Back to configuration" );
+    button.addStyleName( "small" );
+    button.addListener( new ConfigButtonListener() );
+    innerVL.addComponent( button );
+    innerVL.setComponentAlignment( button, Alignment.MIDDLE_CENTER );
+    
+    // Space
+    innerVL.addComponent( UILayoutUtil.createSpace( "32px", null ) );
     
     // Copyright
     lhl = new HorizontalLayout();
@@ -130,9 +142,22 @@ public class WelcomeView extends SimpleView
       listener.onStartECCClicked();
   }
   
+  private void onBackToConfigClicked()
+  {
+    Collection<WelcomeViewListener> listeners = getListenersByType();
+    for( WelcomeViewListener listener : listeners )
+      listener.onBackToConfigClicked();
+  }
+  
   private class StartButtonListener implements Button.ClickListener
   {
     @Override
     public void buttonClick(Button.ClickEvent ce) { onStartClicked(); }
+  }
+  
+  private class ConfigButtonListener implements Button.ClickListener
+  {
+    @Override
+    public void buttonClick(Button.ClickEvent ce) { onBackToConfigClicked(); }
   }
 }

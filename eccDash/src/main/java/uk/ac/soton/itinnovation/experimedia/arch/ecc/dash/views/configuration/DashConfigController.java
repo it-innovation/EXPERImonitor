@@ -209,10 +209,7 @@ public class DashConfigController implements DashConfigViewListener
      String nagiosUrl="";
       
       if( configList !=null )
-      {
-          // Tells the view that configs have been found
-          configView.foundConfigs( true );
-          
+      {          
           // iterate through both configs
           for (Map.Entry<String,String> entry : configList.entrySet())
           {
@@ -495,7 +492,7 @@ public class DashConfigController implements DashConfigViewListener
     }
 
     @Override
-    public void onFindConfigurations( String projectName) throws Exception
+    public void onFindConfigurations( String projectName)
     {
         boolean configServiceOK = false;
         
@@ -608,8 +605,32 @@ public class DashConfigController implements DashConfigViewListener
             {
                 String error = "Could not get sufficient configuration data to start ECC";
                 configLogger.fatal( error );
-                throw new Exception( error );
+                
+                error = "Falling back on to local machine configuration as last resort";
+                configLogger.info( error );
+                
+                fallbackToLocalMachineConfig();
             }
         }
    }
+    
+    // Private methods ---------------------------------------------------------
+    private void fallbackToLocalMachineConfig()
+    {
+      configList.clear();
+      
+      final String featureRb   = "RabbitMQ";
+      final String featureDB   = "Database";
+      final String featureDash = "Dashboard";
+      
+      final String targetRabbitConfigData = "{\"Rabbit_Port\":\"5672\",\"Rabbit_Use_SSL\":\"false\",\"Rabbit_IP\":\"127.0.0.1\",\"Rabbit_Keystore\":\"/main/resources/rabbitKeyStore.jks\",\"Monitor_ID\":\"00000000-0000-0000-0000-000000000000\",\"Rabbit_KeystorePassword\":\"password\"}";
+      final String targetDatabaseConfigData = "{\"dbPassword\":\"password\",\"dbName\":\"edm-metrics\",\"dbType\":\"postgresql\",\"dbURL\":\"localhost:5432\",\"dbUsername\":\"postgres\"}";
+      final String targetDashboardConfigData = "{\"livemonitor.defaultSnapshotCountMax\":\"50\",\"nagios.fullurl\":\"http://username:password@host/nagios\"}";
+      
+      configList.put( featureRb,   targetRabbitConfigData    );
+      configList.put( featureDB,   targetDatabaseConfigData  );
+      configList.put( featureDash, targetDashboardConfigData );
+
+      sendDataToView( configList );
+    }
 }

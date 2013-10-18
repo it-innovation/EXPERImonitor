@@ -37,7 +37,7 @@ import org.vaadin.artur.icepush.ICEPush;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMPhase;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.UILayoutUtil;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.dataExport.DataExportController;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.LiveMonitorController;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveData.LiveMonitorController;
 
 
 
@@ -249,7 +249,7 @@ public class MainDashView extends SimpleView
     
     liveMonitorController = new LiveMonitorController( pusher );
     subViewsSheet.addTab( (Component) liveMonitorController.getLiveView().getImplContainer(), 
-                          "Metric monitor", null );
+                          "Live monitor", null );
     
     dataExportController = new DataExportController();
     subViewsSheet.addTab( (Component) dataExportController.getExportView().getImplContainer(), 

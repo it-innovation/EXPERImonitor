@@ -25,6 +25,8 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.configuration;
 
+import com.vaadin.data.Property;
+import com.vaadin.event.ShortcutAction.KeyCode;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.*;
 
 import com.vaadin.ui.*;
@@ -35,22 +37,17 @@ import java.util.logging.Logger;
 
 public class DashConfigView extends SimpleView
 {
-    
    // View listener
    private DashConfigViewListener viewlistener;
-    
-    
+       
    // View root components  
    private Panel mainPanel;
    private VerticalLayout innerVL;
-   private HorizontalLayout lhl;
-   private HorizontalLayout chl;
     
    // Project name field
    private TextField projectNameText;
+   private Button    projectSearchButton;
 
-   
-    
    // Fields for rabbit configuration data
    private TextField dashboardIdText;
    private TextField rabbitIpText;
@@ -81,8 +78,8 @@ public class DashConfigView extends SimpleView
   {  
     super( true );
     viewlistener = dcl;
-    createComponents(); 
     
+    createComponents();
   }
   
   
@@ -94,89 +91,65 @@ public class DashConfigView extends SimpleView
   {
     // Creates a new layout
     VerticalLayout vl = getViewContents();
-    mainPanel = new Panel();
-    innerVL = new VerticalLayout();
-    lhl = new HorizontalLayout();  
     
-    // Sets a up the main panel
+    mainPanel = new Panel();
     mainPanel.setWidth( "800px" );
-    mainPanel.setHeight( "1050px" );
     vl.addComponent( mainPanel );
     vl.setComponentAlignment( mainPanel, Alignment.MIDDLE_CENTER );
     
-    // Adds the inner vertical layout to the main panel
-     mainPanel.addComponent( innerVL );
+    // Add inner layout items
+    innerVL = (VerticalLayout) mainPanel.getContent();
     
     // Space
-    innerVL.addComponent( UILayoutUtil.createSpace( "15", null ) );
+    innerVL.addComponent( UILayoutUtil.createSpace( "20px", null ) );
     
     // Title
-    innerVL.addComponent( lhl );
-    innerVL.setComponentAlignment( lhl, Alignment.MIDDLE_CENTER );
+    HorizontalLayout hl = new HorizontalLayout();
+    innerVL.addComponent( hl );
+    innerVL.setComponentAlignment( hl, Alignment.MIDDLE_CENTER );
     Label title = new Label( "Welcome to the Experimedia ECC Dashboard" );
-    title.addStyleName( "h1 color" );
-    lhl.addComponent(title);
+    title.addStyleName( "h1" );
+    hl.addComponent( title );
     
      // Space
-    innerVL.addComponent( UILayoutUtil.createSpace( "15", null ) );
+    innerVL.addComponent( UILayoutUtil.createSpace( "12px", null ) );
    
-      // Prompt
-    lhl = new HorizontalLayout();
-    innerVL.addComponent( lhl );
-    innerVL.setComponentAlignment( lhl , Alignment.MIDDLE_CENTER );
+    // Prompt
+    hl = new HorizontalLayout();
+    innerVL.addComponent( hl );
+    innerVL.setComponentAlignment( hl, Alignment.MIDDLE_CENTER );
     Label prompt = new Label ( "Please enter your project name and click 'Find' to start configuration" );
-    lhl.addComponent( prompt );
+    prompt.addStyleName( "small" );
+    hl.addComponent( prompt );
     
-     // Space
-    innerVL.addComponent( UILayoutUtil.createSpace( "15", null ) );
+    // Space
+    innerVL.addComponent( UILayoutUtil.createSpace( "8px", null ) );
     
     // Project configuration search bar 
-    lhl = new HorizontalLayout();
-    Label projectNameLabel = new Label ( "Project Name:" );
-    lhl.addComponent( projectNameLabel );
-    lhl.addComponent( UILayoutUtil.createSpace( "35" , null, true));
-    projectNameText = new TextField();
-    projectNameText.setWidth( "300" );
-    lhl.addComponent( projectNameText );
-    lhl.addComponent( UILayoutUtil.createSpace("25" , null, true));
-    Button findConfigButton = new Button( "Find" );
-    findConfigButton.addListener(new FindButtonListener());
-    findConfigButton.setWidth( "90" );
-    lhl.addComponent(findConfigButton);
-    innerVL.addComponent(lhl);
-    innerVL.setComponentAlignment(lhl, Alignment.MIDDLE_CENTER);
- 
-
+    hl = new HorizontalLayout();
+    innerVL.addComponent( hl );
+    innerVL.setComponentAlignment( hl, Alignment.MIDDLE_CENTER );
     
+    Label projectNameLabel = new Label ( "Project Name:" );
+    hl.addComponent( projectNameLabel );
+    hl.addComponent( UILayoutUtil.createSpace("8px" , null, true) );
+    
+    projectNameText = new TextField();
+    projectNameText.setWidth( "300px" );
+    hl.addComponent( projectNameText );
+    hl.addComponent( UILayoutUtil.createSpace("8px" , null, true));
+    
+    projectSearchButton = new Button( "Find" );
+    projectSearchButton.addStyleName( "small" );
+    projectSearchButton.addListener( new FindButtonListener() );
+    projectSearchButton.setWidth( "90px" );
+    projectSearchButton.setClickShortcut( KeyCode.ENTER );
+    hl.addComponent( projectSearchButton );
+    
+    // Space
+    innerVL.addComponent( UILayoutUtil.createSpace( "16px", null ) );
   }
-  
-  /**
-   * Method that will display a prompt to select a configuration if any exist.
-   * 
-   * @param configsToShow - A boolean value to indicate if configuration data is available for display. 
-   */
-  public void foundConfigs( boolean configsToShow )
-  {
-      if( configsToShow )
-      {
-            // Space
-            innerVL.addComponent(UILayoutUtil.createSpace( "15", null));
-           
-            
-            // Sets up a horizontal layout
-            lhl = new HorizontalLayout();
-            innerVL.addComponent( lhl );
-            innerVL.setComponentAlignment( lhl, Alignment.TOP_LEFT );
-
-            // Select config prompt
-            Label selectConfigLabel = new Label ( "Please select a configuration" );
-            selectConfigLabel.addStyleName( "h2 color" );
-            lhl.addComponent(UILayoutUtil.createSpace( "100", null, true));
-            lhl.addComponent( selectConfigLabel );
-      }
-      
-  }
-  
+    
   /**
    * Method shows the configuration footer if the user interface is showing configuration data panels.
    * 
@@ -184,38 +157,30 @@ public class DashConfigView extends SimpleView
    */
   public void showConfigFooter( boolean showingConfigs)
   {
-      if( showingConfigs )
-      {
-            // Space
-            innerVL.addComponent(UILayoutUtil.createSpace( "10", null));
-            
-            // Set a horizonatal layout
-            lhl = new HorizontalLayout();
-            innerVL.addComponent( lhl );
-            innerVL.setComponentAlignment( lhl, Alignment.TOP_LEFT );
+    if ( showingConfigs )
+    {
+      // Space
+      innerVL.addComponent( UILayoutUtil.createSpace( "8", null) );
 
+      // Footer section directly below the config panels
+      Label message = new Label ( "Values in the fields can be modified.  The online configuration only will be updated" );
+      innerVL.addComponent( message );
 
-            // Footer section directly below the config panels
-            Label message = new Label ( "Values in the fields can be modified.  The online configuration only will be updated" );
-            lhl.addComponent(UILayoutUtil.createSpace( "100", null, true));
-            lhl.addComponent( message );
-            lhl = new HorizontalLayout();
-            innerVL.addComponent(UILayoutUtil.createSpace( "15" , null ));
-            innerVL.addComponent( lhl );
-            innerVL.setComponentAlignment( lhl, Alignment.TOP_LEFT);
+      innerVL.addComponent(UILayoutUtil.createSpace( "8" , null ));
 
-            // Update configuration button
-            Button updateConfigButton = new Button ( "Update Configuration" );
-            updateConfigButton.addListener( new UpdateButtonListener() );
-            lhl.addComponent(UILayoutUtil.createSpace( "100", null, true));
-            lhl.addComponent( updateConfigButton ); 
-      }
+      // Update configuration button
+      Button updateConfigButton = new Button ( "Update Configuration" );
+      updateConfigButton.addListener( new UpdateButtonListener() );
+      innerVL.addComponent( updateConfigButton );
+      innerVL.setComponentAlignment( updateConfigButton, Alignment.BOTTOM_CENTER );
       
+      innerVL.addComponent(UILayoutUtil.createSpace( "8" , null ));
+    }
   }
   
   /**
    * Method to display configuration data in the user interface in forms that can be
-   * modified.  Online and local configuration data will be displayed in seperate panels.
+   * modified.  Online and local configuration data will be displayed in separate panels.
    * 
    * @param monitorID - Dashboard ID field.
    * @param rabbitIP    - Rabbit server IP address.
@@ -224,302 +189,263 @@ public class DashConfigView extends SimpleView
    * @param rabbitPassword - Rabbit server password
    * @param useRabbitSSL    - Option to use SSL on the Rabbit server.
    */
-  public void showConfig ( String monitorID, 
-                           String rabbitIP, 
-                           String rabbitPort,
-                           String rabbitKeystore,
-                           String rabbitPassword,
-                           boolean useRabbitSSL,
-                           String dbUrl,
-                           String dbName,
-                           String dbUsername,
-                           String dbPassword,
-                           String dbType,
-                           String snapshotCount,
-                           String nagiosUrl)
+  public void showConfig( String monitorID, 
+                          String rabbitIP, 
+                          String rabbitPort,
+                          String rabbitKeystore,
+                          String rabbitPassword,
+                          boolean useRabbitSSL,
+                          String dbUrl,
+                          String dbName,
+                          String dbUsername,
+                          String dbPassword,
+                          String dbType,
+                          String snapshotCount,
+                          String nagiosUrl )
   {
-      
+    // Remove short cut once config is shown
+    projectSearchButton.removeClickShortcut();
+    
+    // Layout constants
+    final String fieldVHeight = "4px";
+    final String labelWidth   = "150px";
+    final String hSpace       = "80px";
+    final String textWidth    = "270px";
+    
     // Sets up a config panel  
     Panel configPanel = new Panel();
-    configPanel.setWidth( "600" );
-    configPanel.setHeight( "650" );
+    configPanel.addStyleName( "light" );
+    configPanel.setCaption( "Current " + projectNameText + " configuration" );
+    innerVL.addComponent( configPanel );
+    innerVL.setComponentAlignment( configPanel, Alignment.TOP_CENTER );
     
-    // set background colour
-    configPanel.getStyleName( );
+    VerticalLayout pVL = (VerticalLayout) configPanel.getContent();
+    VerticalLayout configContents = new VerticalLayout();
+    configContents.setWidth( "600px" );
+    pVL.addComponent( configContents );
+    pVL.setComponentAlignment(configContents, Alignment.TOP_CENTER );
     
-    
-     // Sets up vertical layout, adds it to the main panel
-    VerticalLayout innerConfigVL  = new VerticalLayout();
-    configPanel.addComponent( innerConfigVL );
-      
-    // Sets label widths
-    String labelWidth = "130";
-    
-    // Sets horizantol space width
-    String hSpace =  "80";
-    
-    // Set textbox widths
-    String textWidth = "270";
-    
-    
+    // Space
+    configContents.addComponent( UILayoutUtil.createSpace( "4", null) );
+ 
     // Monitor ID label and text box
-    chl = new HorizontalLayout();
-    innerConfigVL.addComponent( chl );
-    innerConfigVL.setComponentAlignment( chl, Alignment.TOP_LEFT );
+    HorizontalLayout hl = new HorizontalLayout();
+    configContents.addComponent( hl );
+    
     Label dashboardIdLabel = new Label ( "Monitor ID:" );
     dashboardIdLabel.setWidth( labelWidth );
-    chl.addComponent(UILayoutUtil.createSpace( hSpace, null, true));
-    chl.addComponent( dashboardIdLabel );
+    hl.addComponent(UILayoutUtil.createSpace( hSpace, null, true));
+    hl.addComponent( dashboardIdLabel );
     dashboardIdText = new TextField();
     dashboardIdText.setValue( monitorID );
     dashboardIdText.setWidth( textWidth );
-    chl.addComponent( dashboardIdText);   
+    hl.addComponent( dashboardIdText );   
    
-    
-    
     // Space
-    innerConfigVL.addComponent(UILayoutUtil.createSpace( "15", null));
+    configContents.addComponent( UILayoutUtil.createSpace( "4", null) );
     
     // Rabbit IP label and text box
-    chl = new HorizontalLayout();
-    innerConfigVL.addComponent( chl );
-    innerConfigVL.setComponentAlignment( chl, Alignment.TOP_LEFT );
+    hl = new HorizontalLayout();
+    configContents.addComponent( hl );
     Label rabbitIpLabel = new Label ( "Rabbit IP:" );
     rabbitIpLabel.setWidth( labelWidth );
-    chl.addComponent(UILayoutUtil.createSpace( hSpace, null, true));
-    chl.addComponent( rabbitIpLabel);
+    hl.addComponent(UILayoutUtil.createSpace( hSpace, null, true));
+    hl.addComponent( rabbitIpLabel);
     rabbitIpText = new TextField();
     rabbitIpText.setValue( rabbitIP );
     rabbitIpText.setWidth( textWidth );
-    chl.addComponent( rabbitIpText );
+    hl.addComponent( rabbitIpText );
 
-    
     // Space
-    innerConfigVL.addComponent(UILayoutUtil.createSpace( "15", null));
+    configContents.addComponent( UILayoutUtil.createSpace( fieldVHeight, null) );
     
     // Rabbit Port label and text box
-    chl = new HorizontalLayout();
-    innerConfigVL.addComponent( chl );
-    innerConfigVL.setComponentAlignment( chl, Alignment.TOP_LEFT );
+    hl = new HorizontalLayout();
+    configContents.addComponent( hl );
     Label rabbitPortLabel = new Label ( "Rabbit Port:" );
     rabbitPortLabel.setWidth( labelWidth );
-    chl.addComponent(UILayoutUtil.createSpace( hSpace, null, true));
-    chl.addComponent( rabbitPortLabel );   
+    hl.addComponent(UILayoutUtil.createSpace( hSpace, null, true));
+    hl.addComponent( rabbitPortLabel );   
     rabbitPortText = new TextField();
     rabbitPortText.setValue( rabbitPort );
     rabbitPortText.setWidth( "75" );
-    chl.addComponent( rabbitPortText );
+    hl.addComponent( rabbitPortText );
 
-  
     // Space
-    innerConfigVL.addComponent(UILayoutUtil.createSpace( "15", null));
+    configContents.addComponent( UILayoutUtil.createSpace( fieldVHeight, null) );
     
     // Rabbit username label and text box
-    chl = new HorizontalLayout();
-    innerConfigVL.addComponent( chl );
-    innerConfigVL.setComponentAlignment( chl, Alignment.TOP_LEFT );
-    Label rabbitUsernameLabel = new Label ( "Rabbit Keystore" );
+    hl = new HorizontalLayout();
+    configContents.addComponent( hl );
+    Label rabbitUsernameLabel = new Label ( "Rabbit Keystore:" );
     rabbitUsernameLabel.setWidth( labelWidth );
-    chl.addComponent(UILayoutUtil.createSpace( hSpace, null, true));
-    chl.addComponent( rabbitUsernameLabel );
+    hl.addComponent(UILayoutUtil.createSpace( hSpace, null, true));
+    hl.addComponent( rabbitUsernameLabel );
     rabbitKeystoreText = new TextField();
     rabbitKeystoreText.setValue( rabbitKeystore );
     rabbitKeystoreText.setWidth( textWidth );
-    chl.addComponent( rabbitKeystoreText );
+    hl.addComponent( rabbitKeystoreText );
         
-    
-    innerConfigVL.addComponent(UILayoutUtil.createSpace( "15", null));
+    // Space
+    configContents.addComponent( UILayoutUtil.createSpace( fieldVHeight, null) );
     
     // Rabbit password label and text box
-    chl = new HorizontalLayout();
-    innerConfigVL.addComponent( chl );
-    innerConfigVL.setComponentAlignment( chl, Alignment.TOP_LEFT );
-    Label rabbitPasswordLabel  = new Label ( "Rabbit Password" );
+    hl = new HorizontalLayout();
+    configContents.addComponent( hl );
+    Label rabbitPasswordLabel  = new Label ( "Rabbit Password:" );
     rabbitPasswordLabel.setWidth( labelWidth );
-    chl.addComponent(UILayoutUtil.createSpace( hSpace, null, true));
-    chl.addComponent( rabbitPasswordLabel );
+    hl.addComponent(UILayoutUtil.createSpace( hSpace, null, true));
+    hl.addComponent( rabbitPasswordLabel );
     rabbitPasswordText = new PasswordField();
     rabbitPasswordText.setValue( rabbitPassword );
     rabbitPasswordText.setWidth( textWidth );
-    chl.addComponent( rabbitPasswordText );
-        
-    
+    hl.addComponent( rabbitPasswordText );
     
     // Space
-    innerConfigVL.addComponent(UILayoutUtil.createSpace( "15", null));
+    configContents.addComponent( UILayoutUtil.createSpace( fieldVHeight, null) );
     
     // Rabbit SSL checkbox
-    chl = new HorizontalLayout();
-    innerConfigVL.addComponent( chl );
-    innerConfigVL.setComponentAlignment( chl, Alignment.TOP_LEFT );
-    
-
+    hl = new HorizontalLayout();
+    configContents.addComponent( hl );
     rabbitSslCheck = new CheckBox("Use Rabbit SSL?");
     rabbitSslCheck.setValue( useRabbitSSL  );
-    chl.addComponent(UILayoutUtil.createSpace( "210" , null, true ));
-    chl.addComponent( rabbitSslCheck );
+    hl.addComponent( rabbitSslCheck );
 
-    
     // Space
-    innerConfigVL.addComponent(UILayoutUtil.createSpace( "25", null ));
+    configContents.addComponent( UILayoutUtil.createSpace( fieldVHeight, null) );
     
     // Draws a line
     Label line = new Label( "<hr/>", Label.CONTENT_XHTML );
-    innerConfigVL.addComponent( line );
+    configContents.addComponent( line );
     
     // Space
-    innerConfigVL.addComponent(UILayoutUtil.createSpace( "15", null));
-    
+    configContents.addComponent( UILayoutUtil.createSpace( fieldVHeight, null) );
     
     // Database config fields
-    chl = new HorizontalLayout();
-    innerConfigVL.addComponent( chl );
-    innerConfigVL.setComponentAlignment( chl, Alignment.TOP_LEFT );
+    hl = new HorizontalLayout();
+    configContents.addComponent( hl );
     Label dbUrlLabel  = new Label ( "Database URL:" );
     dbUrlLabel.setWidth( labelWidth );
-    chl.addComponent(UILayoutUtil.createSpace( hSpace, null, true));
-    chl.addComponent( dbUrlLabel );
+    hl.addComponent(UILayoutUtil.createSpace( hSpace, null, true));
+    hl.addComponent( dbUrlLabel );
     dbUrlText = new TextField();
     dbUrlText.setValue( dbUrl );
     dbUrlText.setWidth( textWidth );
-    chl.addComponent( dbUrlText );
+    hl.addComponent( dbUrlText );
     
-     // Space
-    innerConfigVL.addComponent(UILayoutUtil.createSpace( "15", null));
+    // Space
+    configContents.addComponent( UILayoutUtil.createSpace( fieldVHeight, null) );
     
-    chl = new HorizontalLayout();
-    innerConfigVL.addComponent( chl );
-    innerConfigVL.setComponentAlignment( chl, Alignment.TOP_LEFT );
+    hl = new HorizontalLayout();
+    configContents.addComponent( hl );
     Label dbNameLabel  = new Label ( "Database Name:" );
     dbNameLabel.setWidth( labelWidth );
-    chl.addComponent(UILayoutUtil.createSpace( hSpace, null, true));
-    chl.addComponent( dbNameLabel );
+    hl.addComponent(UILayoutUtil.createSpace( hSpace, null, true));
+    hl.addComponent( dbNameLabel );
     dbNameText = new TextField();
     dbNameText.setValue( dbName );
     dbNameText.setWidth( textWidth );
-    chl.addComponent( dbNameText );
+    hl.addComponent( dbNameText );
     
-     // Space
-    innerConfigVL.addComponent(UILayoutUtil.createSpace( "15", null));
+    // Space
+    configContents.addComponent( UILayoutUtil.createSpace( fieldVHeight, null) );
     
-    chl = new HorizontalLayout();
-    innerConfigVL.addComponent( chl );
-    innerConfigVL.setComponentAlignment( chl, Alignment.TOP_LEFT );
+    hl = new HorizontalLayout();
+    configContents.addComponent( hl );
     Label dbUsernameLabel  = new Label ( "Database Username:" );
     dbUsernameLabel.setWidth( labelWidth );
-    chl.addComponent(UILayoutUtil.createSpace( hSpace, null, true));
-    chl.addComponent( dbUsernameLabel );
+    hl.addComponent(UILayoutUtil.createSpace( hSpace, null, true));
+    hl.addComponent( dbUsernameLabel );
     dbUserameText = new TextField();
     dbUserameText.setValue( dbUsername );
     dbUserameText.setWidth( textWidth );
-    chl.addComponent( dbUserameText );
+    hl.addComponent( dbUserameText );
     
-      // Space
-    innerConfigVL.addComponent(UILayoutUtil.createSpace( "15", null));
+    // Space
+    configContents.addComponent( UILayoutUtil.createSpace( fieldVHeight, null) );
     
-    chl = new HorizontalLayout();
-    innerConfigVL.addComponent( chl );
-    innerConfigVL.setComponentAlignment( chl, Alignment.TOP_LEFT );
+    hl = new HorizontalLayout();
+    configContents.addComponent( hl );
     Label dbPasswordLabel  = new Label ( "Database Password:" );
     dbPasswordLabel.setWidth( labelWidth );
-    chl.addComponent(UILayoutUtil.createSpace( hSpace, null, true));
-    chl.addComponent( dbPasswordLabel );
+    hl.addComponent(UILayoutUtil.createSpace( hSpace, null, true));
+    hl.addComponent( dbPasswordLabel );
     dbPasswordText = new PasswordField();
     dbPasswordText.setValue( dbPassword );
     dbPasswordText.setWidth( textWidth );
-    chl.addComponent( dbPasswordText );
+    hl.addComponent( dbPasswordText );
     
-       // Space
-    innerConfigVL.addComponent(UILayoutUtil.createSpace( "15", null));
-   
-    
-    chl = new HorizontalLayout();
-    innerConfigVL.addComponent( chl );
-    innerConfigVL.setComponentAlignment( chl, Alignment.TOP_LEFT );
+    // Space
+    configContents.addComponent( UILayoutUtil.createSpace( fieldVHeight, null) );
+  
+    hl = new HorizontalLayout();
+    configContents.addComponent( hl );
     Label dbTypeLabel = new Label ( "Database Type:" );
     dbTypeLabel.setWidth( labelWidth );
-    chl.addComponent(UILayoutUtil.createSpace( hSpace, null, true));
-    chl.addComponent( dbTypeLabel );
+    hl.addComponent(UILayoutUtil.createSpace( hSpace, null, true));
+    hl.addComponent( dbTypeLabel );
     dbTypeText = new TextField();
     dbTypeText.setValue( dbType );
     dbTypeText.setWidth( textWidth );
-    chl.addComponent( dbTypeText );
+    hl.addComponent( dbTypeText );
     
-       // Space
-    innerConfigVL.addComponent(UILayoutUtil.createSpace( "15", null));
+    // Space
+    configContents.addComponent( UILayoutUtil.createSpace( fieldVHeight, null) );
     
     // Draws a line
     Label line2 = new Label( "<hr/>", Label.CONTENT_XHTML );
-    innerConfigVL.addComponent( line2 );
+    configContents.addComponent( line2 );
     
-      // Space
-    innerConfigVL.addComponent(UILayoutUtil.createSpace( "15", null));
+    // Space
+    configContents.addComponent( UILayoutUtil.createSpace( fieldVHeight, null) );
     
-    chl = new HorizontalLayout();
-    innerConfigVL.addComponent( chl );
-    innerConfigVL.setComponentAlignment( chl, Alignment.TOP_LEFT );
+    hl = new HorizontalLayout();
+    configContents.addComponent( hl );
     Label snapshotCountLabel   = new Label ( "Snapshot Count:" );
     snapshotCountLabel.setWidth( labelWidth );
-    chl.addComponent(UILayoutUtil.createSpace( hSpace, null, true));
-    chl.addComponent( snapshotCountLabel );
+    hl.addComponent(UILayoutUtil.createSpace( hSpace, null, true));
+    hl.addComponent( snapshotCountLabel );
     snapshotCountText = new TextField();
     snapshotCountText.setValue( snapshotCount );
     snapshotCountText.setWidth( textWidth );
-    chl.addComponent( snapshotCountText );
+    hl.addComponent( snapshotCountText );
     
+    // Space
+    configContents.addComponent( UILayoutUtil.createSpace( fieldVHeight, null) );
     
-    
-      // Space
-    innerConfigVL.addComponent(UILayoutUtil.createSpace( "15", null));
-    
-    chl = new HorizontalLayout();
-    innerConfigVL.addComponent( chl );
-    innerConfigVL.setComponentAlignment( chl, Alignment.TOP_LEFT );
+    hl = new HorizontalLayout();
+    configContents.addComponent( hl );
     Label nagiosUrlLabel  = new Label ( "Nagios URL:" );
     nagiosUrlLabel.setWidth( labelWidth );
-    chl.addComponent(UILayoutUtil.createSpace( hSpace, null, true));
-    chl.addComponent( nagiosUrlLabel );
+    hl.addComponent(UILayoutUtil.createSpace( hSpace, null, true));
+    hl.addComponent( nagiosUrlLabel );
     nagiosUrlText = new TextField();
     nagiosUrlText.setValue( nagiosUrl );
     nagiosUrlText.setWidth( textWidth );
-    chl.addComponent( nagiosUrlText );
+    hl.addComponent( nagiosUrlText );
     
-    
-         // Space
-    innerConfigVL.addComponent(UILayoutUtil.createSpace( "15", null));
+    // Space
+    configContents.addComponent( UILayoutUtil.createSpace( fieldVHeight, null) );
     
     // Draws a line
     Label line3 = new Label( "<hr/>", Label.CONTENT_XHTML );
-    innerConfigVL.addComponent( line3 );
-
+    configContents.addComponent( line3 );
     
     // Use this configuration checkbox
-    chl = new HorizontalLayout();
-    innerConfigVL.addComponent( chl );
-    innerConfigVL.setComponentAlignment( chl, Alignment.BOTTOM_LEFT );
     useConfigCheck = new CheckBox( "Use this configuration" );
     useConfigCheck.setImmediate( true );
-    chl.addComponent( useConfigCheck );  
-    
-    // Adds the config panel to the main layout
-    innerVL.addComponent(configPanel);
+    configContents.addComponent( useConfigCheck );  
     
     // Space
-    innerVL.addComponent(UILayoutUtil.createSpace( "20", null));
-    
-    // Sets the config panel alignment
-    innerVL.setComponentAlignment( configPanel, Alignment.TOP_CENTER );
-    
+    configContents.addComponent( UILayoutUtil.createSpace( "8", null) );
   }
    
   // Event handlers-------------------------------------------------------------
   /**
    * Method to handle a button click event which sends the project name to the
    * controller in order to find configuration data fro a specified component feature.
-   * 
-   * @throws Exception 
    */
-  public void onFindClicked() throws Exception
+  public void onFindClicked()
   {
       // check the project text field is not null
       String projectName = projectNameText.getValue().toString();
@@ -528,14 +454,12 @@ public class DashConfigView extends SimpleView
       {
           // send the project name to the controller to find configurations
           viewlistener.onFindConfigurations( projectName );
-            
       }
       else
       {
           // message:  "The project name is not valid"
          this.displayWarning( "Configuration error" , "The project name is not valid" );
       }
-
   }
   
  /**
@@ -593,24 +517,15 @@ public class DashConfigView extends SimpleView
         throw new Exception( error, ex );
     }
 }  
-
+  
   /**
    * A button click listener class
    */
   private class FindButtonListener implements Button.ClickListener
   {
-       @Override
-    public void buttonClick(Button.ClickEvent ce) 
-       {   
-           try 
-           {
-               onFindClicked();
-           } 
-           catch (Exception ex) 
-           {
-               Logger.getLogger(DashConfigView.class.getName()).log(Level.SEVERE, null, ex);
-           }
-        }
+     @Override
+    public void buttonClick(Button.ClickEvent ce)
+    { onFindClicked(); }
  }
   
   /**
@@ -618,19 +533,15 @@ public class DashConfigView extends SimpleView
    */
   private class UpdateButtonListener implements Button.ClickListener
   {
-       @Override
-        public void buttonClick( Button.ClickEvent ce ) 
-       {
-           try 
-           {
-               onUpdateConfigurationClicked();
-           } 
-           catch (Exception ex) 
-           {
-               Logger.getLogger(DashConfigView.class.getName()).log(Level.SEVERE, null, ex);
-           }
-        }
+     @Override
+     public void buttonClick( Button.ClickEvent ce ) 
+     {
+         try 
+         {
+             onUpdateConfigurationClicked();
+         } 
+         catch (Exception ex) 
+         { Logger.getLogger(DashConfigView.class.getName()).log(Level.SEVERE, null, ex); }
+     }
   }
-  
-  
 }

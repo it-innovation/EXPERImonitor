@@ -31,4 +31,6 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views;
 public interface WelcomeViewListener
 {
   void onStartECCClicked();
+  
+  void onBackToConfigClicked();
 }
