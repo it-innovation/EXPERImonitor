@@ -25,31 +25,20 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveData;
 
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.VerticalLayout;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.UUID;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.HighlightView;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.HighlightViewListener;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.SimpleView;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.UILayoutUtil;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.UIResource;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.visualizers.metrics.BaseMetricVisual;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.visualizers.metrics.BaseMetricVisualListener;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.visualizers.metrics.*;
 import uk.ac.soton.itinnovation.robust.cat.core.components.viewEngine.spec.uif.types.UFAbstractEventManager;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
+
+import com.vaadin.ui.*;
+
+import java.util.*;
 
 
 
-public class LiveMonitorView extends SimpleView
-                             implements BaseMetricVisualListener
+public class LiveMetricView extends SimpleView
+                            implements BaseMetricVisualListener
 {
   private VerticalLayout metricsNavList;
   private VerticalLayout metricsVisualList;
@@ -59,7 +48,7 @@ public class LiveMonitorView extends SimpleView
   private transient UUID                            currSelectedNavView;
   
   
-  public LiveMonitorView()
+  public LiveMetricView()
   {
     super();
     
@@ -202,8 +191,8 @@ public class LiveMonitorView extends SimpleView
     if ( targetID != null )
     {
       // Notify listeners if required
-      Collection<LiveMonitorViewListener> listeners = getListenersByType();
-      for ( LiveMonitorViewListener listener : listeners )
+      Collection<LiveMetricViewListener> listeners = getListenersByType();
+      for ( LiveMetricViewListener listener : listeners )
           listener.onRemoveVisualClicked( targetID );
     }
   }

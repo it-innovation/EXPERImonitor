@@ -47,12 +47,14 @@ import java.util.*;
 
 
 public class LiveMonitorController extends UFAbstractEventManager
-                                   implements LiveMonitorViewListener
+                                   implements LiveMetricViewListener
 {
   private final IECCLogger liveMonLogger  = Logger.getLogger( LiveMonitorController.class );
   private final Object     updateViewLock = new Object();
   
-  private LiveMonitorView liveMonitorView;
+  private LiveDataView   liveDataView;
+  private LiveMetricView liveMetricView;
+  private LiveProvView   liveProvView;
   
   private transient HashMap<UUID, MSUpdateInfo> measurementUpdates;
   private transient HashSet<UUID>               activeMSVisuals;
@@ -64,11 +66,11 @@ public class LiveMonitorController extends UFAbstractEventManager
   {
     super();
     
-    icePusher             = pusher;
+    icePusher          = pusher;
     measurementUpdates = new HashMap<UUID, MSUpdateInfo>();
-    activeMSVisuals       = new HashSet<UUID>();
+    activeMSVisuals    = new HashSet<UUID>();
     
-    createView();
+    createViews();
   }
   
   public void initialse( IReportDAO dao )
@@ -98,7 +100,7 @@ public class LiveMonitorController extends UFAbstractEventManager
           if ( activeMSVisuals.contains(msID) )
           {
             MeasurementSet ms = report.getMeasurementSet();
-            liveMonitorView.updateMetricVisual( msID, ms );
+            liveMetricView.updateMetricVisual( msID, ms );
 
             if ( icePusher !=null ) icePusher.push();
           }
@@ -109,19 +111,19 @@ public class LiveMonitorController extends UFAbstractEventManager
   public void processLivePROVData( EMClient client, EDMProvReport statement ) throws Exception
   {
     if ( client == null || statement == null ) throw new Exception( "Live monitoring provenance parameters were null" );
-      
-    liveMonLogger.info( "Got PROV statement from: " + statement.getCopyOfDate().toString() );
     
-    // More to do here later
+    // To finish off 
+    
+    if ( icePusher !=null ) icePusher.push();
   }
   
   public IUFView getLiveView()
-  { return liveMonitorView; }
+  { return liveDataView; }
   
   public void reset()
   {
     activeMSVisuals.clear();
-    liveMonitorView.resetView();
+    liveMetricView.resetView();
   }
   
   public void shutDown()
@@ -169,7 +171,7 @@ public class LiveMonitorController extends UFAbstractEventManager
           if ( visual != null )
             synchronized ( updateViewLock )
             {
-              liveMonitorView.addMetricVisual( client.getName(),
+              liveMetricView.addMetricVisual( client.getName(),
                                                entity.getName(),
                                                attribute.getName(),
                                                msID, visual );
@@ -198,7 +200,7 @@ public class LiveMonitorController extends UFAbstractEventManager
             UUID msID = msIt.next().getID();
 
             activeMSVisuals.remove( msID );
-            liveMonitorView.removeMetricVisual( msID ); 
+            liveMetricView.removeMetricVisual( msID ); 
           }
           
           if ( icePusher !=null ) icePusher.push();
@@ -216,7 +218,7 @@ public class LiveMonitorController extends UFAbstractEventManager
       synchronized ( updateViewLock )
       {
         activeMSVisuals.remove( msID );
-        liveMonitorView.removeMetricVisual( msID );
+        liveMetricView.removeMetricVisual( msID );
         
         if ( icePusher !=null ) icePusher.push();
       }
@@ -224,10 +226,15 @@ public class LiveMonitorController extends UFAbstractEventManager
   }
   
   // Private methods -----------------------------------------------------------
-  private void createView()
+  private void createViews()
   {
-    liveMonitorView = new LiveMonitorView();
-    liveMonitorView.addListener( this );
+    liveDataView = new LiveDataView();
+    
+    liveMetricView = liveDataView.getLiveMetricView();
+    liveMetricView.addListener( this );
+    
+    liveProvView = liveDataView.getLiveProvView();
+    liveProvView.addListener( this );
   }
   
   private void removeOldMeasurements( Report report )

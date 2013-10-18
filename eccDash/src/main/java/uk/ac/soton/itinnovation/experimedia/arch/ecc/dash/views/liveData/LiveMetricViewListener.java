@@ -30,7 +30,7 @@ import java.util.UUID;
 
 
 
-public interface LiveMonitorViewListener
+public interface LiveMetricViewListener
 {
   void onRemoveVisualClicked( UUID msID );
 }
