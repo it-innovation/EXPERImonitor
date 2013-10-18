@@ -56,7 +56,7 @@ public class EDMProvClassesTest {
 			
 			//Bob logs in to his FB account and posts something
 			EDMActivity writePost = bob.startActivity("experimedia:writePostActivity");
-			EDMEntity bobsFacebookPost = writePost.generateEntity("experimedia:bobsFacebookPost");
+			EDMEntity bobsFacebookPost = writePost.generateEntity("experimedia:bobsFacebookPost", "1280512800");
 			bob.stopActivity(writePost);
 			
 			//Bob goes back to watch the rest of the video.
