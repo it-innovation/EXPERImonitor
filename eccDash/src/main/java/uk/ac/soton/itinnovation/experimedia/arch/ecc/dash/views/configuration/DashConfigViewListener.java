@@ -64,10 +64,7 @@ public interface DashConfigViewListener
     * Method to find out if a configuration data is available for a specified project.
     * If no existing configuration data is available the method will look in the
     * 'Default' directory for default configuration for each specified component feature.
-    * 
-    * @param projectName
-    * @throws Exception 
     */
-    void onFindConfigurations( String projectName ) throws Exception;
+    void onFindConfigurations( String projectName );
 
 }

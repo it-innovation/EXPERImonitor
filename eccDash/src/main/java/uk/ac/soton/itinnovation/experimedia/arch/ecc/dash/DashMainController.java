@@ -25,6 +25,7 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveData.LiveMonitorController;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.configuration.DashConfigController;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.configuration.ConfigControllerListener;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.schedulers.LiveMetricSchedulerListener;
@@ -46,7 +47,6 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.client.*;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.dataExport.DataExportController;
 
@@ -62,7 +62,7 @@ import org.vaadin.artur.icepush.ICEPush;
 import java.io.*;
 import java.net.URL;
 import java.util.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveMetrics.visualizers.metrics.BaseMetricVisual;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.visualizers.metrics.BaseMetricVisual;
 
 
 
@@ -119,7 +119,7 @@ public class DashMainController extends UFAbstractEventManager
     if ( rootWin != null )
     {
       rootWindow = rootWin;
-      rootWindow.setStyleName( "eccDashDefault" );
+      rootWindow.setStyleName( "eccDashDefault" );      
       rootWindow.addListener( new DashWindowResizeListener() );
 
       initialiseConfiguration();
@@ -596,6 +596,23 @@ public class DashMainController extends UFAbstractEventManager
       dashMainLog.error( problem );
       welcomeView.addLogInfo( problem );
     }
+  }
+  
+  @Override
+  public void onBackToConfigClicked()
+  {
+    rootWindow.removeAllComponents(); // Remove all views
+    
+    // Re-display config view to user
+    SimpleView configView = configController.getConfigView();
+    
+    if ( configView != null )
+    {
+      // Listen to high level configuration view events
+      configView.addListener( this );
+      rootWindow.addComponent( (Component) configView.getImplContainer() );
+    }
+    else dashMainLog.error( "Tried to redisplay config view, but it is not ready" );
   }
   
   // MainDashViewListener ------------------------------------------------------
