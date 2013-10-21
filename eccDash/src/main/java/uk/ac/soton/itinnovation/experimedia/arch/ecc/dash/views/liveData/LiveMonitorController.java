@@ -112,7 +112,7 @@ public class LiveMonitorController extends UFAbstractEventManager
   {
     if ( client == null || statement == null ) throw new Exception( "Live monitoring provenance parameters were null" );
     
-    // To finish off 
+    liveProvView.echoPROVData( statement );
     
     if ( icePusher !=null ) icePusher.push();
   }

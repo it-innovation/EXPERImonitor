@@ -25,26 +25,86 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveData;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.SimpleView;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.*;
+
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.*;
 
 import com.vaadin.ui.*;
 import com.vaadin.terminal.FileResource;
 
 import java.io.File;
+import java.util.*;
+
 
 
 
 
 public class LiveProvView extends SimpleView
 {
-  private Embedded embeddedPROVView;
+  private HashSet<UUID> knownPROVObjects;
+  private HashSet<UUID> knownTriples;
+  
+  private Table         provElementView;
+  private Table         provDataView;
+  private Embedded      embeddedPROVView;
 
   
   public LiveProvView()
   {
     super();
     
+    knownPROVObjects = new HashSet<UUID>();
+    knownTriples     = new HashSet<UUID>();
+    
     createComponents();
+  }
+  
+  public void echoPROVData( EDMProvReport statement )
+  {
+    if ( statement != null )
+    {
+      HashMap<String, EDMProvBaseElement> pEls = statement.getProvElements();
+      for ( EDMProvBaseElement el : pEls.values() )
+      {
+        // Echo new PROV objects
+        UUID elInstID = el.getInstanceID();
+        if ( !knownPROVObjects.contains(elInstID) )
+        {
+          switch ( el.getProvType() )
+          {
+            case ePROV_ENTITY :
+              provElementView.addItem( new Object[] { "Entity", el.getIri() }, elInstID ); break;
+              
+            case ePROV_AGENT :
+              provElementView.addItem( new Object[] { "Agent", el.getIri() }, elInstID ); break;
+                
+            case ePROV_ACTIVITY :
+              provElementView.addItem( new Object[] { "Activity", el.getIri() }, elInstID ); break;
+          }
+          
+          knownPROVObjects.add( elInstID );
+        }
+        
+        // Echo new triples
+        LinkedList<EDMProvTriple> triples = el.getTriples();
+        
+        if ( triples != null && !triples.isEmpty() )
+          for ( EDMProvTriple triple : triples )
+          {
+            UUID tripleID = triple.getID();
+            
+            if ( !knownTriples.contains(tripleID) )
+            {
+              provDataView.addItem( new Object[]{ triple.getSubject(),
+                                                  triple.getPredicate(),
+                                                  triple.getObject() },
+                                                  tripleID );
+              
+              knownTriples.add( tripleID );
+            }
+          }
+      }
+    }
   }
   
   public void renderPROVVizFile( String path, String targetName )
@@ -87,9 +147,33 @@ public class LiveProvView extends SimpleView
     panel.setSizeFull();
     vl.addComponent( panel );
     
+    vl = (VerticalLayout) panel.getContent();
+    
+    HorizontalLayout hl = new HorizontalLayout();
+    vl.addComponent( hl );
+    
+    provElementView = new Table( "PROV Elements" );
+    provElementView.addStyleName( "striped" );
+    provElementView.setWidth( "300px" );
+    provElementView.setHeight( "120px" );
+    provElementView.addContainerProperty( "PROV Element", String.class, null );
+    provElementView.addContainerProperty( "PROV ID", String.class, null );
+    hl.addComponent( provElementView );
+    
+    hl.addComponent( UILayoutUtil.createSpace( "4px", null, true) );
+    
+    provDataView = new Table( "PROV Triple statements" );
+    provDataView.addStyleName( "striped" );
+    provDataView.setWidth( "600px" );
+    provDataView.setHeight( "120px" );
+    provDataView.addContainerProperty( "Subject", String.class, null );
+    provDataView.addContainerProperty( "Predicate", String.class, null );
+    provDataView.addContainerProperty( "Object", String.class, null );
+    hl.addComponent( provDataView );
+    
     embeddedPROVView = new Embedded();
     embeddedPROVView.setType( Embedded.TYPE_IMAGE );
     
-    panel.addComponent( embeddedPROVView );
+    vl.addComponent( embeddedPROVView );
   }
 }
