@@ -32,6 +32,8 @@ public class EDMAgent extends EDMProvBaseElement {
 
 	public EDMAgent(String iri) {
 		super(iri);
+    
+    this.provType = PROV_TYPE.ePROV_AGENT;
 		this.addOwlClass("prov:Agent");
 	}
 	

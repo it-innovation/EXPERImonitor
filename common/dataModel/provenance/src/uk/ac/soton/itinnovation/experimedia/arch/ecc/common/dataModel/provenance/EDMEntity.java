@@ -31,6 +31,8 @@ public class EDMEntity extends EDMProvBaseElement {
 
 	public EDMEntity(String iri) {
 		super(iri);
+    
+    this.provType = PROV_TYPE.ePROV_ENTITY;
 		this.addOwlClass("prov:Entity");
 	}
 	

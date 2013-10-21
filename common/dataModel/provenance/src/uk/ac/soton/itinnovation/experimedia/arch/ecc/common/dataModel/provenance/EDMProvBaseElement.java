@@ -32,12 +32,19 @@ import java.util.UUID;
 
 public class EDMProvBaseElement {
 
-    private   UUID instanceID;
+    private UUID instanceID;
+    
+    protected PROV_TYPE provType = PROV_TYPE.ePROV_UNKNOWN_TYPE;
     protected String iri;
     protected LinkedList<EDMProvTriple> triples;
     
     protected static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z^^xsd:dateTime'");
 	
+    public enum PROV_TYPE { ePROV_UNKNOWN_TYPE, 
+                            ePROV_ENTITY, 
+                            ePROV_AGENT, 
+                            ePROV_ACTIVITY };
+    
     public EDMProvBaseElement() {
         instanceID = UUID.randomUUID();
         triples = new LinkedList<EDMProvTriple>();
@@ -61,6 +68,10 @@ public class EDMProvBaseElement {
     
     public UUID getInstanceID() {
         return instanceID;
+    }
+    
+    public PROV_TYPE getProvType() {
+        return provType;
     }
     
     public boolean contains(EDMProvTriple triple) {

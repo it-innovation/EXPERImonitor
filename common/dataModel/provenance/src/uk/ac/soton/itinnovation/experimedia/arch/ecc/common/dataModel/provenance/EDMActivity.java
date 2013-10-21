@@ -33,11 +33,15 @@ public class EDMActivity extends EDMProvBaseElement {
 
 	public EDMActivity(String iri) {
 		super(iri);
+    
+    this.provType = PROV_TYPE.ePROV_ACTIVITY;
 		this.addOwlClass("prov:Activity");
 	}
 	
 	public EDMEntity generateEntity(String entity, String timestamp) throws DataFormatException {
-		EDMEntity newEntity = EDMProvFactory.getInstance().getEntity(entity);	
+		EDMProvFactory factory = EDMProvFactory.getInstance();
+    
+    EDMEntity newEntity = factory.getEntity(entity);	
 		newEntity.addProperty(entity, "prov:wasGeneratedBy", this.iri);
 		newEntity.addProperty(entity, "prov:generatedAtTime", format.format(new Date(Long.valueOf(timestamp)*1000)));
     factory.elementUpdated(this); // Queue to re-send in next report
