@@ -41,20 +41,14 @@ import java.util.*;
 
 public class LiveProvView extends SimpleView
 {
-  private HashSet<UUID> knownPROVObjects;
-  private HashSet<UUID> knownTriples;
-  
-  private Table         provElementView;
-  private Table         provDataView;
-  private Embedded      embeddedPROVView;
+  private Table    provElementView;
+  private Table    provDataView;
+  private Embedded embeddedPROVView;
 
   
   public LiveProvView()
   {
     super();
-    
-    knownPROVObjects = new HashSet<UUID>();
-    knownTriples     = new HashSet<UUID>();
     
     createComponents();
   }
@@ -63,26 +57,24 @@ public class LiveProvView extends SimpleView
   {
     if ( statement != null )
     {
+      provElementView.removeAllItems();
+      
       HashMap<String, EDMProvBaseElement> pEls = statement.getProvElements();
       for ( EDMProvBaseElement el : pEls.values() )
       {
         // Echo new PROV objects
         UUID elInstID = el.getInstanceID();
-        if ( !knownPROVObjects.contains(elInstID) )
+   
+        switch ( el.getProvType() )
         {
-          switch ( el.getProvType() )
-          {
-            case ePROV_ENTITY :
-              provElementView.addItem( new Object[] { "Entity", el.getIri() }, elInstID ); break;
-              
-            case ePROV_AGENT :
-              provElementView.addItem( new Object[] { "Agent", el.getIri() }, elInstID ); break;
-                
-            case ePROV_ACTIVITY :
-              provElementView.addItem( new Object[] { "Activity", el.getIri() }, elInstID ); break;
-          }
-          
-          knownPROVObjects.add( elInstID );
+          case ePROV_ENTITY :
+            provElementView.addItem( new Object[] { "Entity", el.getIri() }, elInstID ); break;
+
+          case ePROV_AGENT :
+            provElementView.addItem( new Object[] { "Agent", el.getIri() }, elInstID ); break;
+
+          case ePROV_ACTIVITY :
+            provElementView.addItem( new Object[] { "Activity", el.getIri() }, elInstID ); break;
         }
         
         // Echo new triples
@@ -90,35 +82,26 @@ public class LiveProvView extends SimpleView
         
         if ( triples != null && !triples.isEmpty() )
           for ( EDMProvTriple triple : triples )
-          {
-            UUID tripleID = triple.getID();
-            
-            if ( !knownTriples.contains(tripleID) )
-            {
-              provDataView.addItem( new Object[]{ triple.getSubject(),
-                                                  triple.getPredicate(),
-                                                  triple.getObject() },
-                                                  tripleID );
-              
-              knownTriples.add( tripleID );
-            }
-          }
+            provDataView.addItem( new Object[]{ triple.getSubject(),
+                                                triple.getPredicate(),
+                                                triple.getObject() },
+                                                triple.getID() );
       }
     }
   }
   
-  public void renderPROVVizFile( String path, String targetName )
+  public void renderPROVVizFile( String basePath, String targetName )
   {
-    if ( path != null && targetName != null && embeddedPROVView != null )
+    if ( basePath != null && targetName != null && embeddedPROVView != null )
     {
-      File fileTarget = new File( path + "/" + targetName + ".dot" );
+      File fileTarget = new File( basePath + "/" + targetName + ".dot" );
       
       if ( fileTarget.exists() && fileTarget.isFile() )
       {
         try
         {
-          final String pngTarget = path + targetName + ".png";
-          final String cmd = "dot -Tpng " + path + targetName + ".dot -o " + pngTarget;
+          final String pngTarget = basePath + targetName + ".svg";
+          final String cmd = "dot -Tsvg " + basePath + "/" + targetName + ".dot -o " + pngTarget;
           
           Process rtProc = Runtime.getRuntime().exec( cmd );
           rtProc.waitFor();
@@ -142,12 +125,21 @@ public class LiveProvView extends SimpleView
   {
     VerticalLayout vl = getViewContents();
     
+    // Space
+    vl.addComponent( UILayoutUtil.createSpace( "2px", null) );
+    
     Panel panel = new Panel();
-    panel.addStyleName( "borderless" );
-    panel.setSizeFull();
+    panel.addStyleName( "light" );
+    panel.setScrollable( true );
     vl.addComponent( panel );
     
-    vl = (VerticalLayout) panel.getContent();
+    embeddedPROVView = new Embedded();
+    embeddedPROVView.setType( Embedded.TYPE_OBJECT );
+    embeddedPROVView.setMimeType( "image/svg+xml" );
+    embeddedPROVView.setWidth( "600px" );
+    embeddedPROVView.setHeight( "400px" );
+    
+    panel.getContent().addComponent( embeddedPROVView );
     
     HorizontalLayout hl = new HorizontalLayout();
     vl.addComponent( hl );
@@ -169,11 +161,6 @@ public class LiveProvView extends SimpleView
     provDataView.addContainerProperty( "Subject", String.class, null );
     provDataView.addContainerProperty( "Predicate", String.class, null );
     provDataView.addContainerProperty( "Object", String.class, null );
-    hl.addComponent( provDataView );
-    
-    embeddedPROVView = new Embedded();
-    embeddedPROVView.setType( Embedded.TYPE_IMAGE );
-    
-    vl.addComponent( embeddedPROVView );
+    hl.addComponent( provDataView ); 
   }
 }

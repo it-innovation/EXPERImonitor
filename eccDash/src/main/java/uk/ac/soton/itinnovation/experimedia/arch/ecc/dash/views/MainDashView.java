@@ -29,15 +29,18 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.client.ClientInf
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.client.ClientConnectionsView;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.SimpleView;
 
-import com.vaadin.ui.*;
-import com.vaadin.ui.TabSheet.Tab;
-import java.net.URL;
-import java.util.Collection;
-import org.vaadin.artur.icepush.ICEPush;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMPhase;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.UILayoutUtil;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.dataExport.DataExportController;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveData.LiveMonitorController;
+
+import com.vaadin.ui.*;
+import com.vaadin.ui.TabSheet.Tab;
+import org.vaadin.artur.icepush.ICEPush;
+
+import java.net.URL;
+import java.util.Collection;
+
 
 
 

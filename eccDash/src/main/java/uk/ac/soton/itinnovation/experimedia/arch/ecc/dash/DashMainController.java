@@ -26,13 +26,12 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveData.LiveMonitorController;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.configuration.DashConfigController;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.configuration.ConfigControllerListener;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.schedulers.LiveMetricSchedulerListener;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.schedulers.LiveMetricScheduler;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.configuration.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.schedulers.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDM;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.*;
+
 import uk.ac.soton.itinnovation.robust.cat.core.components.viewEngine.spec.uif.types.UFAbstractEventManager;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMInterfaceFactory;
@@ -44,15 +43,12 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvReport;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.client.*;
-
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.visualizers.metrics.BaseMetricVisual;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.dataExport.DataExportController;
-
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.*;
-
-
 
 import com.vaadin.ui.*;
 import com.vaadin.Application;
@@ -62,9 +58,6 @@ import org.vaadin.artur.icepush.ICEPush;
 import java.io.*;
 import java.net.URL;
 import java.util.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.visualizers.metrics.BaseMetricVisual;
-
-
 
 
 

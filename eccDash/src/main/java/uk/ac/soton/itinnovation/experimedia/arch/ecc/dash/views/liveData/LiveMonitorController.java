@@ -37,11 +37,16 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMClient;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvReport;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.prov.PROVToolBoxUtil;
 
-
+import com.vaadin.Application;
+import com.vaadin.ui.Component;
 import org.vaadin.artur.icepush.ICEPush;
 
 import java.util.*;
+
+import org.openprovenance.prov.model.Document;
+
 
 
 
@@ -60,15 +65,18 @@ public class LiveMonitorController extends UFAbstractEventManager
   private transient HashSet<UUID>               activeMSVisuals;
   private transient IReportDAO                  expReportAccessor;
   private transient ICEPush                     icePusher;
+  
+  private transient EDMProvReport aggregatedPROVReport;
 
   
   public LiveMonitorController( ICEPush pusher )
   {
     super();
     
-    icePusher          = pusher;
-    measurementUpdates = new HashMap<UUID, MSUpdateInfo>();
-    activeMSVisuals    = new HashSet<UUID>();
+    icePusher            = pusher;
+    measurementUpdates   = new HashMap<UUID, MSUpdateInfo>();
+    activeMSVisuals      = new HashSet<UUID>();
+    aggregatedPROVReport = new EDMProvReport();
     
     createViews();
   }
@@ -108,11 +116,30 @@ public class LiveMonitorController extends UFAbstractEventManager
     }
   }
   
-  public void processLivePROVData( EMClient client, EDMProvReport statement ) throws Exception
+  public void processLivePROVData( EMClient client, EDMProvReport report ) throws Exception
   {
-    if ( client == null || statement == null ) throw new Exception( "Live monitoring provenance parameters were null" );
+    if ( client == null || report == null ) throw new Exception( "Live monitoring provenance parameters were null" );
     
-    liveProvView.echoPROVData( statement );
+    aggregatedPROVReport = PROVToolBoxUtil.aggregateReport( aggregatedPROVReport, report );
+    
+    liveProvView.echoPROVData( aggregatedPROVReport );
+    
+    // TO REMOVE LATER WITH JUNG VISUALISATION ---------------------------------
+    try
+    { 
+      Document ptDocument = PROVToolBoxUtil.createPTBDocument( aggregatedPROVReport );
+      
+      Component comp      = (Component) liveProvView.getImplContainer();
+      Application thisApp = comp.getApplication();
+      String basePath     = thisApp.getContext().getBaseDirectory().getAbsolutePath();
+      
+      PROVToolBoxUtil.createVizDOTFile( ptDocument, basePath + "/" + "dotViz" );
+      
+      liveProvView.renderPROVVizFile( basePath, "dotViz" );
+    }
+    catch ( Exception ex )
+    { liveMonLogger.error( "Could not create PROV visualisation", ex ); }
+    // --------------------------------- TO REMOVE LATER WITH JUNG VISUALISATION
     
     if ( icePusher !=null ) icePusher.push();
   }

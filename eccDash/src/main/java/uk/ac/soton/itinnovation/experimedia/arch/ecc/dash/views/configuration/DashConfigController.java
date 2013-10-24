@@ -25,21 +25,17 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.configuration;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.SimpleView;
-
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.configRegistry.api.ECCConfigAPIFactory;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.configRegistry.api.IECCDirectoryConfig;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.configRegistry.api.IECCProjectConfig;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.configRegistry.api.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.SimpleView;
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.*;
 
 import java.util.*;
-
 
 
 
@@ -562,7 +558,7 @@ public class DashConfigController implements DashConfigViewListener
                     if ( pcf.componentFeatureConfigExists( component , featureRb ) )
                         targetRabbitConfigData = pcf.getConfigData( component, featureRb );
                     else
-                        targetRabbitConfigData = pcf.getDefaultConfigData( component , featureRb );
+                        targetRabbitConfigData = null; // TODO: FIX THIS: pcf.getDefaultConfigData( component , featureRb );
                 }
                 catch ( Exception e )
                 { configLogger.fatal( "Could not find remote dashboard config data : " + e.getMessage() ); }
@@ -573,7 +569,7 @@ public class DashConfigController implements DashConfigViewListener
                     if ( pcf.componentFeatureConfigExists( component , featureDB ) )
                         targetDatabaseConfigData = pcf.getConfigData( component, featureDB );
                     else
-                        targetDatabaseConfigData = pcf.getDefaultConfigData( component , featureDB );
+                        targetDatabaseConfigData = null; // TODO: FIX THIS: pcf.getDefaultConfigData( component , featureDB );
                 }
                 catch ( Exception e )
                 { configLogger.fatal( "Could not find remote database config data: " + e.getMessage() ); }
@@ -584,7 +580,7 @@ public class DashConfigController implements DashConfigViewListener
                     if ( pcf.componentFeatureConfigExists( component , featureDash ) )
                         targetDashboardConfigData = pcf.getConfigData( component, featureDash );
                     else
-                        targetDashboardConfigData = pcf.getDefaultConfigData( component , featureDash );
+                        targetDashboardConfigData = null; // TODO: FIX THIS: pcf.getDefaultConfigData( component , featureDash );
                 }
                 catch ( Exception e )
                 { configLogger.fatal( "Could not find remote database config data: " + e.getMessage() ); }

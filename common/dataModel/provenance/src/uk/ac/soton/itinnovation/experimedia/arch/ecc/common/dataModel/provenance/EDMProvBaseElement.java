@@ -89,6 +89,20 @@ public class EDMProvBaseElement {
       return triples;
     }
     
+    public LinkedList<EDMProvTriple> getTriplesWithPredicate(String pred) {
+      LinkedList<EDMProvTriple> result = new LinkedList<EDMProvTriple>();
+      
+      if (pred != null) {
+        for (EDMProvTriple triple : triples) {
+          if (triple.hasPredicate(pred)) {
+            result.add(triple);
+          }
+        }
+      }
+      
+      return result;
+    }
+    
     public void addProperty(String predicate, String object) {
     	this.addProperty(this.iri, predicate, object);
     }

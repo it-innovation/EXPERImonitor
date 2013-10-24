@@ -51,6 +51,16 @@ public class EDMProvTriple {
 		}
 	}
   
+  public boolean hasPredicate(String pred) {
+    if (pred == null || predicate == null) 
+      return false;
+    
+    if (predicate.equals(pred))
+      return true;
+    
+    return false;
+  }
+  
   public UUID getID() {
     return tripleID;
   }
