@@ -46,7 +46,6 @@ import org.vaadin.artur.icepush.ICEPush;
 import java.util.*;
 
 import org.openprovenance.prov.model.Document;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
 
 
 
