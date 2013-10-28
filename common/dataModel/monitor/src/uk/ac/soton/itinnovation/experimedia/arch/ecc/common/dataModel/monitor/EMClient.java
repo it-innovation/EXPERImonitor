@@ -25,11 +25,9 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 
 import java.util.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Entity;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricHelper;
 
 
 
@@ -206,8 +204,7 @@ public class EMClient
     if ( found != null ) target = new Entity( found );
     
     return target;
-  }
-  
+  }  
   
   /**
    * Returns whether the client has declared it is capable of pushing. This

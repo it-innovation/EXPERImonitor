@@ -49,9 +49,7 @@ public class EMMetricGenSetupPhase extends AbstractEMLCPhase
   
   private EMMetricGenSetupPhaseListener phaseListener;
   private HashSet<UUID>                 clientsSettingUp;
-  
-  private volatile boolean setupStopping; // Atomic
-  
+ 
   
   public EMMetricGenSetupPhase( AMQPBasicChannel channel,
                                 UUID providerID,
@@ -76,14 +74,12 @@ public class EMMetricGenSetupPhase extends AbstractEMLCPhase
     clearAllClients();
     
     phaseActive   = false;
-    setupStopping = false;
   }
   
   @Override
   public void start() throws Exception
   {
     if ( phaseActive ) throw new Exception( "Phase already active" );
-    if ( !hasClients()  ) throw new Exception( "No clients available for this phase" );
     
     phaseActive = true;
     
@@ -117,27 +113,18 @@ public class EMMetricGenSetupPhase extends AbstractEMLCPhase
   }
   
   @Override
-  public void controlledStop() throws Exception
+  public void controlledStop()
   {
-    if ( phaseActive && !setupStopping )
-    {
-      phaseActive   = false;
-      setupStopping = true;
-      
-      synchronized ( controlledStopLock )
-      {
-        if ( clientsSettingUp.isEmpty() )
-          phaseListener.onSetupPhaseCompleted();
-      }
-    }
+    if ( !clientsSettingUp.isEmpty() )
+      phaseLogger.warn( "Stopping setup phase whilst it still has clients" );
+    
+    phaseActive = false;
   }
   
   @Override
   public void hardStop()
   {
-    phaseActive   = false;
-    setupStopping = false;
-    
+    phaseActive = false;
     phaseMsgPump.stopPump();
   }
   
@@ -163,7 +150,8 @@ public class EMMetricGenSetupPhase extends AbstractEMLCPhase
   @Override
   public void accelerateClient( EMClientEx client ) throws Exception
   {
-    if ( client == null ) throw new Exception( "Cannot accelerate client (setup) - client is null" );
+    if ( !phaseActive ) throw new Exception( "Cannot accelerate client (set-up) - phase is not active" );
+    if ( client == null ) throw new Exception( "Cannot accelerate client (set-up) - client is null" );
     
     synchronized ( acceleratorLock )
     {
@@ -223,20 +211,17 @@ public class EMMetricGenSetupPhase extends AbstractEMLCPhase
   @Override
   public void onNotifyReadyToSetup( UUID senderID )
   {
-    if ( !setupStopping )
-    {
-      EMClientEx client = getClient( senderID );
+    EMClientEx client = getClient( senderID );
 
-      if ( client != null )
+    if ( client != null )
+    {
+      if ( client.hasGeneratorToSetup() )
       {
-        if ( client.hasGeneratorToSetup() )
-        {
-          UUID genID = client.iterateNextMGToSetup();
-          client.getSetupInterface().setupMetricGenerator( genID );
-        }
-        else
-          clientsSettingUp.remove( senderID ); // Don't ask again
+        UUID genID = client.iterateNextMGToSetup();
+        client.getSetupInterface().setupMetricGenerator( genID );
       }
+      else
+        clientsSettingUp.remove( senderID ); // Don't ask again
     }
   }
   
@@ -266,14 +251,7 @@ public class EMMetricGenSetupPhase extends AbstractEMLCPhase
       }
     }
     
-    // Notify end of phase (if phase is active)
-    if ( phaseActive && clientsSettingUp.isEmpty() )
-    {
-      phaseActive = false;
-      phaseListener.onSetupPhaseCompleted();
-    }
-    else // Otherwise, accelerate client
-      if ( client.isPhaseAccelerating() )
-        phaseListener.onSetupPhaseCompleted( client );
+    // Notify listener of client exit
+    phaseListener.onSetupPhaseCompleted( client );
   }
 }

@@ -79,7 +79,8 @@ public class MeasurementSet implements Serializable
         measurementCountMax = ms.getMeasurementCountMax();
         samplingInterval    = ms.getSamplingInterval();
         
-        if ( ms.getMetric() != null ) metric = new Metric( ms.getMetric() );
+        Metric met = ms.getMetric();
+        if ( met != null ) metric = new Metric( met );
         
         if ( copyMeasurements && ms.getMeasurements() != null )
         {

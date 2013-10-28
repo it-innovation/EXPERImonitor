@@ -30,7 +30,7 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.basicECCContainer;
 
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMClient;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 
 import javax.swing.DefaultListModel;
@@ -82,32 +82,54 @@ public class EMView extends javax.swing.JFrame
     
     beginMonitoringProcButton.setText( "Begin monitoring process" );
     beginMonitoringProcButton.setEnabled( true );
-    nextPhaseButton.setEnabled( false );
     loggingText.setText( "" );
     phaseLabel.setText( "Waiting for clients" );
-    nextPhaseLabel.setText( "Not available" );
+    nextPhaseLabel.setText( "" );
+    nextPhaseButton.setEnabled( false );
     postReportButton.setEnabled( false );
     pullMetricButton.setEnabled( false );
     autoFireButton.setEnabled( false );
     timeOutButton.setEnabled( false );
   }
   
-  public synchronized void setMonitoringPhaseValue( String phase, String nextPhase )
+  public synchronized void setMonitoringPhaseValue( EMPhase phase )
   {
-    phaseLabel.setText( phase );
-    setNextPhaseValue( nextPhase );
-  }
-  
-  public synchronized void setNextPhaseValue( String phase )
-  {
-    if ( phase != null )
+    phaseLabel.setText( phase.toString() );
+    
+    // Update controls, based on state
+    switch ( phase )
     {
-      nextPhaseLabel.setText( phase );
+      case eEMLiveMonitoring :
+      {
+        pullMetricButton.setEnabled( true );
+        autoFireButton.setEnabled( true );
+      } break;
+        
+      case eEMPostMonitoringReport :
+      {
+        pullMetricButton.setEnabled( false );
+        autoFireButton.setEnabled( false );
+        postReportButton.setEnabled( true );
+        
+      } break;
+        
+      default :
+      {
+        pullMetricButton.setEnabled( false );
+        autoFireButton.setEnabled( false );
+        postReportButton.setEnabled( false );
+      }
+    }
+    
+    // Update next phase & button state
+    if ( !phase.nextPhase().equals( EMPhase.eEMProtocolComplete) )
+    {
       nextPhaseButton.setEnabled( true );
+      nextPhaseLabel.setText( phase.nextPhase().toString() );
     }
     else
     {
-      nextPhaseLabel.setText( "Not yet available" );
+      nextPhaseLabel.setText( "No further phases" );
       nextPhaseButton.setEnabled( false );
     }
   }
@@ -421,7 +443,6 @@ public class EMView extends javax.swing.JFrame
       }
     });
 
-    nextPhaseLabel.setText("Not available");
     nextPhaseLabel.setMaximumSize(new java.awt.Dimension(200, 14));
     nextPhaseLabel.setMinimumSize(new java.awt.Dimension(200, 14));
 

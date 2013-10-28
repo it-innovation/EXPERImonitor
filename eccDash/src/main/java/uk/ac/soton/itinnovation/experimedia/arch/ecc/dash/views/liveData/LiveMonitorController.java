@@ -46,6 +46,7 @@ import org.vaadin.artur.icepush.ICEPush;
 import java.util.*;
 
 import org.openprovenance.prov.model.Document;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
 
 
 
@@ -91,7 +92,7 @@ public class LiveMonitorController extends UFAbstractEventManager
     if ( expReportAccessor == null ) throw new Exception( "Live monitoring control has not been initialised" );
     
     // Check to see if we have anything useful store, and try store
-    if ( sanitiseMetricReport(report) )
+    if ( sanitiseMetricReport(client, report) )
     {
       try
       { expReportAccessor.saveMeasurements( report ); }
@@ -321,22 +322,37 @@ public class LiveMonitorController extends UFAbstractEventManager
     }
   }
   
-  private boolean sanitiseMetricReport( Report reportOUT )
-  {
-    if ( reportOUT.getNumberOfMeasurements() == 0 ) return false;
+  private boolean sanitiseMetricReport( EMClient client, Report reportOUT )
+  { 
+    // Check that we apparently have data
+    if ( reportOUT.getNumberOfMeasurements() == 0 )
+    {
+      liveMonLogger.error( "Metric report error: measurement count = 0" );
+      return false;
+    }
     
-    MeasurementSet ms = reportOUT.getMeasurementSet();
-    if ( ms == null ) return false;
+    // Make sure we have a valid measurement set
+    MeasurementSet clientMS = reportOUT.getMeasurementSet();
+    if ( clientMS == null )
+    {
+      liveMonLogger.error( "Metric report error: Measurement set is null" );
+      return false;
+    }
     
-    Metric metric = ms.getMetric();
-    if ( metric == null ) return false;
+    Metric metric = clientMS.getMetric();
+    if ( metric == null )
+    {
+      liveMonLogger.error( "Metric report error: Metric is null" );
+      return false;
+    }
     
     MetricType mt = metric.getMetricType();
     
-    // Sanitise data
-    MeasurementSet cleanSet = new MeasurementSet( ms, false );
+    // Sanitise data based on full semantic info
+    MeasurementSet cleanSet = new MeasurementSet( clientMS, false );
     
-    for ( Measurement m : ms.getMeasurements() )
+    // Run through each measurement checking that it is sane
+    for ( Measurement m : clientMS.getMeasurements() )
     {
       String val = m.getValue();
       

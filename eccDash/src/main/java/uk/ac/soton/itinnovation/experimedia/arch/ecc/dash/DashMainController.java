@@ -94,9 +94,8 @@ public class DashMainController extends UFAbstractEventManager
   private transient LiveMetricScheduler   liveMetricScheduler;
   private transient LiveMonitorController liveMonitorController;
   
-  private boolean isShuttingDown       = false;
-  private boolean waitingForPhaseToEnd = false;
-  private EMPhase currentPhase         = EMPhase.eEMUnknownPhase;
+  private boolean isShuttingDown = false;
+  private EMPhase currentPhase   = EMPhase.eEMUnknownPhase;
   
   private ICEPush icePusher;
   
@@ -253,7 +252,7 @@ public class DashMainController extends UFAbstractEventManager
   {
     if ( client != null && phase != null)
     {
-      connectionsView.updateClientPhase( client.getID(), phase);
+      connectionsView.updateClientPhase( client.getID(), phase );
       icePusher.push();
     }
   }
@@ -273,53 +272,57 @@ public class DashMainController extends UFAbstractEventManager
       {
         liveMetricScheduler.start( expMonitor );
       } break;
+        
+      case eEMPostMonitoringReport :
+      {
+        liveMetricScheduler.stop();
+      } break;
     }
   }
   
   @Override
   public void onLifecyclePhaseCompleted( EMPhase phase )
   {
-    // Perform stopping actions, as required
-    switch ( currentPhase )
-    {
-      case eEMLiveMonitoring: liveMetricScheduler.stop();
-    }
+    String msg = phase.toString() + " has completed.";
     
-    // If we have been waiting for a phase to end (so we can move to the next)
-    // then advance the phase
-    if ( waitingForPhaseToEnd )
-      try
-      {
-        waitingForPhaseToEnd = false;
-        expMonitor.goToNextPhase();
-      }
-      catch ( Exception e )
-      {
-        String problem = "Could not advance to next phase: " + e.getMessage();
-        mainDashView.addLogMessage( problem );
-        dashMainLog.error( problem );
-      }
+    mainDashView.addLogMessage( msg );
+    dashMainLog.info( msg );
   }
   
   @Override
   public void onNoFurtherLifecyclePhases()
   {
-    waitingForPhaseToEnd = false;
+    String msg = "No further experiment phases available";
+    
+    mainDashView.addLogMessage( msg );
+    dashMainLog.info( msg );
     
     mainDashView.setExperimentPhase( EMPhase.eEMProtocolComplete );
   }
   
   @Override
-  public void onLifecycleReset()
+  public void onLifecycleEnded()
   {
-    // Reset to start and wait for new connections
-    waitingForPhaseToEnd = false;
+    mainDashView.displayMessage( "Experiment ended", "Now creating a new experiment..." );
     
+    liveMetricScheduler.stop();
     liveMetricScheduler.reset();
     mainDashView.resetViews();
     
     // Create a new experiment
     createExperiment();
+    
+    try
+    {
+      expMonitor.resetLifecycle();
+      expMonitor.startLifecycle( currentExperiment, EMPhase.eEMLiveMonitoring );
+    }
+    catch ( Exception ex )
+    {
+      String error = "Could not reset experiment lifecycle: " + ex.getMessage();
+      dashMainLog.error( error );
+      mainDashView.addLogMessage( error );
+    }
   }
   
   @Override
@@ -582,6 +585,9 @@ public class DashMainController extends UFAbstractEventManager
                                               emProps.getProperty( "Monitor_ID" ),
                                               currentExperiment );
       }
+      
+      // Go straight into live monitoring
+      expMonitor.startLifecycle( currentExperiment, EMPhase.eEMLiveMonitoring );
     }
     catch ( Exception e )
     {
@@ -628,38 +634,21 @@ public class DashMainController extends UFAbstractEventManager
   @Override
   public void onStartLifecycleClicked()
   {
-    try
-    { 
-      expMonitor.startLifecycle( currentExperiment ); 
-    }
-    catch ( Exception e )
-    { dashMainLog.error( "Could not start experiment lifecycle: " + e.getMessage() ); }
+    // TO BE REMOVED
   }
   
   @Override
   public void onNextPhaseClicked()
   {
-    if ( expMonitor != null )
-    {      
-      if ( expMonitor.isCurrentPhaseActive() && !waitingForPhaseToEnd )
-      {
-        try
-        {
-          waitingForPhaseToEnd = true;
-          expMonitor.stopCurrentPhase();
-        }
-        catch ( Exception e )
-        { 
-          dashMainLog.error( "Could not stop phase: " + expMonitor.getCurrentPhase().name() +
-                             " because " + e.getMessage());
-          
-          waitingForPhaseToEnd = false;
-        }
-      }
-      else
-        try { expMonitor.goToNextPhase(); }
-        catch ( Exception e )
-        { dashMainLog.error( "Could not stop current phase: it is inactive"); }
+    try
+    {
+      expMonitor.goToNextPhase();
+    }
+    catch ( Exception ex )
+    {
+      String error = "Could not move on to next phase: " + ex.getMessage();
+      mainDashView.addLogMessage( error );
+      dashMainLog.error( error );
     }
   }
   
@@ -667,8 +656,11 @@ public class DashMainController extends UFAbstractEventManager
   public void onRestartExperimentClicked()
   {
     mainDashView.addLogMessage( "Attempting to re-start with a new experiment" );
+    
     try
-    { expMonitor.resetLifecycle(); }
+    {
+      expMonitor.endLifecycle(); 
+    }
     catch ( Exception e )
     {
       String problem = "Could not re-start ECC because: " + e.getMessage();

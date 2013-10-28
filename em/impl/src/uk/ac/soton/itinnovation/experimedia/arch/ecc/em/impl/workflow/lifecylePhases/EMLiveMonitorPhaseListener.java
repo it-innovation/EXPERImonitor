@@ -44,6 +44,4 @@ public interface EMLiveMonitorPhaseListener
   void onGotPROVData( EMClientEx client, EDMProvReport statement );
   
   void onLiveMonitorPhaseCompleted( EMClientEx client );
-  
-  void onLiveMonitorPhaseCompleted();
 }

@@ -58,7 +58,6 @@ public class ExperimentMonitor implements IExperimentMonitor,
   private HashSet<IEMLifecycleListener> lifecycleListeners;
   
   private IExperimentMonitor.eStatus monitorStatus = IExperimentMonitor.eStatus.NOT_YET_INITIALISED;
-  private boolean isResettingMonitor;
   
   
   public ExperimentMonitor()
@@ -202,10 +201,7 @@ public class ExperimentMonitor implements IExperimentMonitor,
     if ( expInfo == null ) throw new Exception( "Experiment info is NULL" );
     
     if ( monitorStatus != IExperimentMonitor.eStatus.ENTRY_POINT_OPEN )
-      throw new Exception( "Not in a state ready to start lifecycle" );
-    
-    if ( connectionManager.getConnectedClientCount() == 0 )
-      throw new Exception( "No clients connected to monitor" );
+      throw new Exception( "Cannot start life-cycle: client entry point is not open" );
     
     if ( lifecycleManager.isLifecycleActive() )
       throw new Exception( "Lifecycle has already started" );
@@ -213,6 +209,22 @@ public class ExperimentMonitor implements IExperimentMonitor,
     lifecycleManager.setExperimentInfo( expInfo );
     
     return lifecycleManager.iterateLifecycle();
+  }
+  
+  @Override
+  public void startLifecycle( Experiment expInfo, EMPhase startPhase ) throws Exception
+  {
+    if ( expInfo == null ) throw new Exception( "Experiment info is NULL" );
+    
+    if ( monitorStatus != IExperimentMonitor.eStatus.ENTRY_POINT_OPEN )
+      throw new Exception( "Cannot start life-cycle: client entry point is not open" );
+    
+    try 
+    {
+      lifecycleManager.setExperimentInfo( expInfo );
+      lifecycleManager.startLifeCycleAt( startPhase );
+    }
+    catch ( Exception ex ) { throw ex; /* Throw this up*/ }
   }
   
   @Override
@@ -227,55 +239,36 @@ public class ExperimentMonitor implements IExperimentMonitor,
   }
   
   @Override
-  public EMPhase getNextPhase()
-  { return lifecycleManager.getNextActivePhase(); }
-  
-  @Override
   public boolean isCurrentPhaseActive()
   { return lifecycleManager.isCurrentPhaseActive(); }
   
   @Override
-  public void stopCurrentPhase() throws Exception
-  {
-    if ( lifecycleManager.isWindingCurrentPhaseDown() )
-    {
-      throw new Exception( "Could not stop as currently winding down phase: " 
-                           + lifecycleManager.getCurrentPhase().toString() );
-    }
-    else
-      lifecycleManager.windCurrentPhaseDown();
-  }
-  
-  @Override
   public void goToNextPhase() throws Exception
   {
-    if ( lifecycleManager.isWindingCurrentPhaseDown() )
-    {
-      throw new Exception( "Current winding down phase: " 
-                           + lifecycleManager.getCurrentPhase().toString() );
-    }
-    else
-      lifecycleManager.iterateLifecycle();
+    lifecycleManager.iterateLifecycle();
   }
   
   @Override
   public void endLifecycle() throws Exception
   {
-    if ( lifecycleManager.isLifecycleActive() )
-      lifecycleManager.endLifecycle();
+    if ( !lifecycleManager.isLifecycleActive() ) throw new Exception( "Cannot end lifecycle: it is not active" );
+    
+    lifecycleManager.endLifecycle();
+    
+    connectionManager.disconnectAllClients( "Experiment lifecycle has ended" );
+    connectionManager.clearAllAssociatedClients();
+    
+    // Notify EM client of reset completion
+    onLifecycleEnded();
   }
   
   @Override
   public void resetLifecycle() throws Exception
   {
-    // We have an active life-cycle, try stopping it first
-    if ( lifecycleManager.isLifecycleActive() )
-    {
-      isResettingMonitor = true;
-      lifecycleManager.endLifecycle();
-    }
-    else
-      resetExperimentMonitor(); // Otherwise, just reset
+    // Only reset if we have ended the lifecycle
+    if ( lifecycleManager.isLifecycleActive() ) throw new Exception( "Lifecycle must be ended first" );
+        
+    lifecycleManager.resetLifecycle();
   }  
   
   @Override
@@ -326,12 +319,17 @@ public class ExperimentMonitor implements IExperimentMonitor,
   @Override
   public void onClientDisconnected( EMClient client )
   {
-    connectionManager.disconnectAndRemoveClient( client.getID() );
-    
-    Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
-    
-    while ( listIt.hasNext() )
-    { listIt.next().onClientDisconnected( client ); }
+    try
+    {
+      connectionManager.removeDisconnectedClient( client.getID() );
+      
+      for ( IEMLifecycleListener listener : lifecycleListeners )
+        listener.onClientDisconnected( client );
+    }
+    catch ( Exception ex )
+    {
+      emLogger.warn( "Could not properly clean up disconnected client: " + ex.getMessage() );
+    }
   }
   
   @Override
@@ -354,30 +352,9 @@ public class ExperimentMonitor implements IExperimentMonitor,
   
   @Override
   public void onLifecyclePhaseCompleted( EMPhase phase )
-  {
-    // If we're currently in the process of resetting, then we're ready to
-    // execute a full reset
-    if ( isResettingMonitor )
-    {
-      // Send a de-registration message to clients, but don't wait for a reponse
-      Iterator<EMClientEx> cIt = connectionManager.getCopyOfConnectedClients().iterator();
-      while ( cIt.hasNext() )
-      {
-        EMClientEx client = cIt.next();
-        try { deregisterClient( client, "ECC is resetting" ); }
-        catch ( Exception e )
-        { emLogger.error( "Problems de-registering client during reset: " + e.getMessage() ); }
-      }
-      
-      resetExperimentMonitor();
-    }
-    else // otherwise, announce the end of this phase
-    {
-      Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
-    
-      while ( listIt.hasNext() )
-      { listIt.next().onLifecyclePhaseCompleted( phase ); }
-    }
+  {    
+    for ( IEMLifecycleListener listIt : lifecycleListeners )
+      listIt.onLifecyclePhaseCompleted( phase );
   }
   
   @Override
@@ -390,14 +367,14 @@ public class ExperimentMonitor implements IExperimentMonitor,
   }
   
   @Override
-  public void onLifecycleReset()
+  public void onLifecycleEnded()
   {
     // This event is not geneated by the Lifecycle Manager, but used internally
     // to signal to EM clients that the reset process has completed.
     Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator(); 
     
     while ( listIt.hasNext() )
-    { listIt.next().onLifecycleReset(); }
+    { listIt.next().onLifecycleEnded(); }
   }
   
   @Override
@@ -574,18 +551,5 @@ public class ExperimentMonitor implements IExperimentMonitor,
     {  simpleClients.add( (EMClient) exIt.next() ); }
     
     return simpleClients;
-  }
-  
-  private void resetExperimentMonitor()
-  {
-    connectionManager.disconnectAllClients();
-    connectionManager.clearAllAssociatedClients();
-    
-    lifecycleManager.resetLifecycle();
-    
-    isResettingMonitor = false;
-    
-    // Notify EM client of reset completion
-    onLifecycleReset();
   }
 }

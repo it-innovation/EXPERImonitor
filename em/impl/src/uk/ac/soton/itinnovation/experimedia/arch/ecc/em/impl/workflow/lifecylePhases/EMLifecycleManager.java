@@ -62,8 +62,7 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   private EnumMap<EMPhase, AbstractEMLCPhase> lifecyclePhases;
   private HashMap<UUID, EMClientEx>           phaseDeferredClients; // Clients waiting to engage in a future phase
   
-  private EMPhase currentPhase         = EMPhase.eEMUnknownPhase;
-  private boolean windingCurrPhaseDown = false;
+  private EMPhase currentPhase = EMPhase.eEMUnknownPhase;
  
   private IEMLifecycleListener lifecycleListener;
   
@@ -129,9 +128,8 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
     
     phaseDeferredClients.clear();
     
-    currentExperiment    = null;
-    windingCurrPhaseDown = false;
-    currentPhase         = EMPhase.eEMUnknownPhase;
+    currentExperiment = null;
+    currentPhase      = EMPhase.eEMUnknownPhase;
   }
   
   public boolean isLifecycleActive()
@@ -155,29 +153,7 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   
   public EMPhase getCurrentPhase()
   { return currentPhase; }
-  
-  public EMPhase getNextActivePhase()
-  {
-    EMPhase activePhase = currentPhase.nextPhase();
     
-    // Iterate through the following phases until we find clients or run out
-    // of phases
-    while ( activePhase != EMPhase.eEMProtocolComplete )
-    {
-      Set<EMClientEx> clients = null;
-    
-      AbstractEMLCPhase currPhase = lifecyclePhases.get( activePhase );
-      if ( currPhase != null )
-        clients = currPhase.getCopySetOfCurrentClients();
-      
-      if ( clients != null && !clients.isEmpty() ) break;
-      
-      activePhase = activePhase.nextPhase();
-    }
-    
-    return activePhase;
-  }
-  
   public Set<EMClientEx> getCopySetOfCurrentPhaseClients()
   {
     Set<EMClientEx> clients = new HashSet<EMClientEx>();
@@ -189,9 +165,6 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
     return clients;
   }
   
-  public boolean isWindingCurrentPhaseDown()
-  { return windingCurrPhaseDown; }
-  
   public boolean isCurrentPhaseActive()
   {
     AbstractEMLCPhase currPhase = lifecyclePhases.get( currentPhase );
@@ -202,15 +175,50 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
     return false;
   }
   
-  public EMPhase iterateLifecycle()
+  public void startLifeCycleAt( EMPhase startPhase ) throws Exception
+  {
+    if ( startPhase == EMPhase.eEMUnknownPhase || startPhase == EMPhase.eEMProtocolComplete )
+      throw new Exception( "Cannot start lifecycle at: " + startPhase.toString() );
+    
+    // Run through all previous phases, making sure they are active
+    EMPhase phaseStep = EMPhase.eEMDiscoverMetricGenerators;
+    
+    while ( !phaseStep.equals(phaseStep, startPhase) )
+    {
+      String startError = tryStartPhase( phaseStep );
+      
+      if ( startError == null )
+        lmLogger.info( "Started phase: " + phaseStep.name() );
+      else
+        lmLogger.warn( lmLogger );
+      
+      // Move forward to next phase
+      phaseStep = phaseStep.nextPhase();
+    }
+    
+    // Then start the target phase
+    currentPhase      = phaseStep;
+    String startError = tryStartPhase( currentPhase );
+      
+    if ( startError == null )
+    {
+      lmLogger.info( "Started phase: " + currentPhase.name() );
+      
+      // Notify listener of target phase
+      lifecycleListener.onLifecyclePhaseStarted( currentPhase );
+    }
+    else
+      lmLogger.warn( lmLogger );
+  }
+  
+  public EMPhase iterateLifecycle() throws Exception
   {
     if ( currentPhase != EMPhase.eEMProtocolComplete && !lifecyclePhases.isEmpty() )
-    {      
-      // Find out what the next phase is
-      currentPhase = currentPhase.nextPhase();
+    {         
+      EMPhase nextPhase = currentPhase.nextPhase();
       
       // If there are no more phases to execute, notify we're done
-      if ( currentPhase.equals(EMPhase.eEMProtocolComplete) )
+      if ( nextPhase.equals(EMPhase.eEMProtocolComplete) )
       {
         lifecycleListener.onNoFurtherLifecyclePhases();
       }
@@ -220,93 +228,48 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
         // waiting to be added in
         tryDeferredClientsForRemaingPhases();
         
-        // Now start the phase
-        AbstractEMLCPhase lcPhase = lifecyclePhases.get( currentPhase );
-        if ( lcPhase != null )
+        // Try starting the next phase
+        String startError = tryStartPhase( nextPhase );
+        if ( startError == null )
         {
-          // If there are clients in the next phase, start it
-          if ( !lcPhase.getCopySetOfCurrentClients().isEmpty() )
-          {
-            try
-            { 
-              lcPhase.start();
+          lmLogger.info( "Started phase: " + currentPhase.toString() );
 
-              // Notify listener
-              lifecycleListener.onLifecyclePhaseStarted( lcPhase.getPhaseType() );
-            }
-            catch( Exception e ) 
-            {
-              String msg = "Could not start lifecycle phase: " + lcPhase.getPhaseType() + "\n"
-                         + "Life-cycle exception: " + e.getMessage();
-
-              lmLogger.warn( msg );
-              lmLogger.info( "Trying next phase: " + currentPhase.nextPhase() );
-              currentPhase = iterateLifecycle();
-            }
-          }
-          else // No clients, so move onto the next phase
-          {
-            // Notify listener phase has started and stopped
-            lifecycleListener.onLifecyclePhaseCompleted( currentPhase );
-            lifecycleListener.onLifecyclePhaseCompleted( currentPhase );
-            
-            currentPhase = iterateLifecycle();
-          }
+          // Notify listener
+          lifecycleListener.onLifecyclePhaseStarted( currentPhase );
         }
+        else 
+          throw new Exception( startError );
       }
     }
     
     return currentPhase;
   }
-  
-  public void windCurrentPhaseDown()
-  {
-    if ( !windingCurrPhaseDown )
-    {
-      AbstractEMLCPhase windDownPhase = lifecyclePhases.get( currentPhase );
-      if ( windDownPhase != null )
-        try 
-        {
-          windingCurrPhaseDown = true;
-          windDownPhase.controlledStop();
-        }
-        catch ( Exception e )
-        {
-          windingCurrPhaseDown = false;
-          
-          String msg = "Did not wind-down this phase: " + windDownPhase.toString() + e.getMessage();
-          lmLogger.info( msg ); 
-        }
-    }
-    else
-      lmLogger.warn( "Request to wind-down ignored: already winding current phase down" );
-  }
-  
+    
   public void endLifecycle()
   {
+    // Clean up deferred clients
+    phaseDeferredClients.clear();
+    
     // Tidy up current phase, if we have one in progress
     if ( isLifecycleActive() )
     {
-      AbstractEMLCPhase phase = lifecyclePhases.get( currentPhase );
-      if ( phase != null )
+      for ( AbstractEMLCPhase phase : lifecyclePhases.values() )
       {
-        // Reset the phase...
-        currentPhase = EMPhase.eEMUnknownPhase;
-        
-        // ...before trying a controlled stop
         try
-        { phase.controlledStop(); }
+        { 
+          phase.controlledStop(); 
+          lifecycleListener.onLifecyclePhaseCompleted( currentPhase );
+        }
         // If a controlled stop is not possible, just notify end of phase
         catch ( Exception e )
         { 
           phase.hardStop();
-          lifecycleListener.onLifecyclePhaseCompleted( currentPhase );
         }
       }
     }
     
-    // Clean up deferred clients
-    phaseDeferredClients.clear();
+    // Set end of lifecycle status
+    currentPhase = EMPhase.eEMProtocolComplete;
   }
   
   public void tryPullMetric( EMClient client, UUID measurementSetID ) throws Exception
@@ -602,13 +565,6 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
       advanceClientPhase( client );
   }
   
-  @Override
-  public void onDiscoveryPhaseCompleted()
-  {
-    windingCurrPhaseDown = false;
-    lifecycleListener.onLifecyclePhaseCompleted( EMPhase.eEMDiscoverMetricGenerators );
-  }
-  
   // EMNMetricGenSetupPhaseListener --------------------------------------------
   @Override
   public void onMetricGenSetupResult( EMClientEx client, boolean success )
@@ -622,14 +578,7 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
     if ( client.isPhaseAccelerating() )
       advanceClientPhase( client );
   }
-  
-  @Override
-  public void onSetupPhaseCompleted()
-  {
-    windingCurrPhaseDown = false;
-    lifecycleListener.onLifecyclePhaseCompleted( EMPhase.eEMSetUpMetricGenerators );
-  }
-  
+    
   // EMLiveMonitorPhaseListener ------------------------------------------------
   @Override
   public void onClientDeclaredCanPush( EMClientEx client )
@@ -661,14 +610,7 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
     if ( client.isPhaseAccelerating() )
       advanceClientPhase( client );
   }
-  
-  @Override
-  public void onLiveMonitorPhaseCompleted()
-  {
-    windingCurrPhaseDown = false;
-    lifecycleListener.onLifecyclePhaseCompleted( EMPhase.eEMLiveMonitoring );
-  }
-  
+ 
   // EMPostReportPhaseListener -------------------------------------------------
   @Override
   public void onGotSummaryReport( EMClientEx client, EMPostReportSummary summary )
@@ -701,14 +643,7 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
     if ( client.isPhaseAccelerating() )
       advanceClientPhase( client );
   }
-  
-  @Override
-  public void onPostReportPhaseCompleted()
-  {
-    windingCurrPhaseDown = false;
-    lifecycleListener.onLifecyclePhaseCompleted( EMPhase.eEMPostMonitoringReport );
-  }
-  
+    
   // EMTearDownPhaseListener ---------------------------------------------------
   @Override
   public void onClientTearDownResult( EMClientEx client, boolean success )
@@ -722,14 +657,38 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
     // We don't actually need to accelerate the client any further here
   }
   
-  @Override
-  public void onTearDownPhaseCompleted()
+  // Private methods -----------------------------------------------------------  
+  private String tryStartPhase( EMPhase target )
   {
-    windingCurrPhaseDown = false;
-    lifecycleListener.onLifecyclePhaseCompleted( EMPhase.eEMTearDown );
+    String startError = null;
+    
+    // First remove focus from previous phase
+    AbstractEMLCPhase lcPhase = lifecyclePhases.get( currentPhase );
+    if ( lcPhase != null && lcPhase.isActive() )
+      lcPhase.setInFocus( false );
+    
+    // Now start & focus the next phase
+    lcPhase = lifecyclePhases.get( target );
+    if ( lcPhase != null && !lcPhase.isActive() )
+    {
+      try
+      {
+        lcPhase.start();
+        lcPhase.setInFocus( true );
+        
+        currentPhase = target;
+      }
+      catch ( Exception ex )
+      {
+        startError = "Could not start lifecycle phase: " + lcPhase.getPhaseType() + "\n"
+                   + "Life-cycle exception: " + ex.getMessage();
+      }
+    }
+    else startError = "Lifecycle phase : " + target.name() + " is not available to start";
+    
+    return startError;
   }
   
-  // Private methods -----------------------------------------------------------
   private void advanceClientPhase( EMClientEx client )
   {
     EMPhase targetClientPhase = client.getCurrentPhaseActivity();
@@ -787,9 +746,13 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
     String accelProblem = null;
     
     if ( accPhase != null )
+    {
       try
-      { accPhase.accelerateClient( client ); }
+      { 
+        accPhase.accelerateClient( client ); 
+      }
       catch ( Exception e ) { accelProblem = "Phase could not accelerate client" + e.getMessage(); }
+    }
     else
       accelProblem = "Could not find phase to accelerate to!";
 

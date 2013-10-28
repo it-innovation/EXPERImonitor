@@ -85,7 +85,6 @@ public class EMPostReportPhase extends AbstractEMLCPhase
   public void start() throws Exception
   {
     if ( phaseActive ) throw new Exception( "Phase already active" );
-    if ( !hasClients() ) throw new Exception( "No clients available for this phase" );
     
     phaseActive       = true;
     reportingStopping = false;
@@ -117,16 +116,13 @@ public class EMPostReportPhase extends AbstractEMLCPhase
   }
   
   @Override
-  public void controlledStop() throws Exception
+  public void controlledStop()
   {
     // Only engage client if we're actually active and not trying to stop
     if ( phaseActive && !reportingStopping )
     {
       synchronized ( controlledStopLock )
       {
-        phaseActive       = false;
-        reportingStopping = true;
-        
         // Get a copy of all the clients currently trying to report
         Iterator<EMClientEx> clientIt = getCopySetOfCurrentClients().iterator();
         while ( clientIt.hasNext() )
@@ -137,17 +133,16 @@ public class EMPostReportPhase extends AbstractEMLCPhase
             stoppingReportClients.put( client.getID(), client );
         }
         
-        // Check to see if we're actually already ready to stop - and do so if
-        // nothing left to tidy up
+        // If we've nothing to wait for, then just stop
         if ( stoppingReportClients.isEmpty() )
         {
+          phaseActive = false;
           reportingStopping = false;
-          phaseListener.onPostReportPhaseCompleted();
         }
+        else
+          reportingStopping = true; // Otherwise make sure we stop in a controlled fashion
       }
     }
-    else throw new Exception( "Phase already stopped or is inactive" );
-     
   }
   
   @Override
@@ -177,14 +172,15 @@ public class EMPostReportPhase extends AbstractEMLCPhase
   @Override
   public void accelerateClient( EMClientEx client ) throws Exception
   {
-    if ( client == null ) throw new Exception( "Cannot accelerate client (live monitoring) - client is null" );
+    if ( !phaseActive ) throw new Exception( "Cannot accelerate client (post-reporting) - phase is inactive" );
+    if ( client == null ) throw new Exception( "Cannot accelerate client (post-reporting) - client is null" );
    
     synchronized ( acceleratorLock )
     {
       client.setCurrentPhaseActivity( EMPhase.eEMPostMonitoringReport );
       
-      // Only engage client if we're actually active
-      if ( phaseActive && !reportingStopping )
+      // Only engage client if we're in focus and not trying to stop
+      if ( phaseInFocus && !reportingStopping )
       {
         // Need to manually add/setup accelerated clients
         addClient( client );
@@ -192,10 +188,10 @@ public class EMPostReportPhase extends AbstractEMLCPhase
       
         client.getDiscoveryInterface().createInterface( EMInterfaceType.eEMPostReport );
       }
-      else // Client is too late.. refer them out of this phase immediately
+      else // Otherwise client is too late.. refer them out of this phase immediately
       {
         phaseListener.onPostReportPhaseCompleted( client );
-        phaseLogger.info( "Tried accelerating client (post reporting) but we're not active or we are stopping" );
+        phaseLogger.info( "Tried accelerating client (post reporting) but phase is stopping/no longer in focus" );
       }
     }
   }
@@ -370,18 +366,6 @@ public class EMPostReportPhase extends AbstractEMLCPhase
         // Notify we're done with this client
         phaseListener.onAllDataBatchesRequestComplete( client );
       }
-    }
-    
-    // Finally, check to see if we're doing batch for all clients
-    boolean noFurtherBatchingClients;
-    synchronized ( controlledStopLock )
-    { noFurtherBatchingClients = stoppingReportClients.isEmpty(); }
-    
-    // Notify the phase has ended
-    if ( noFurtherBatchingClients )
-    {
-      phaseActive = false;
-      phaseListener.onPostReportPhaseCompleted();
     }
   }
   

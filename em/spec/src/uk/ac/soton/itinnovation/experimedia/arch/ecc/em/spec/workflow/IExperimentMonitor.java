@@ -164,18 +164,21 @@ public interface IExperimentMonitor
   EMPhase startLifecycle( Experiment expInfo ) throws Exception;
   
   /**
+   * Starts the experiment life-cycle in at a specific phase. Currently connected
+   * clients are accelerated through.
+   * 
+   * @param expInfo     - Information describing the experiment
+   * @param startPhase  - Phase in which to start the experiment
+   * @throws Exception  - throws if input parameters are invalid or experiment has already started.
+   */
+  void startLifecycle( Experiment expInfo, EMPhase startPhase ) throws Exception;
+  
+  /**
    * Use this method to find out which experimental phase the EM is currently running.
    * 
    * @return - the current phase of the EM.
    */
   EMPhase getCurrentPhase();
-  
-  /**
-   * Use this method to find out which phase follows the currently running phase.
-   * 
-   * @return - the next phase to be run by the EM.
-   */
-  EMPhase getNextPhase();
   
   /**
    * Use this method to find out whether the current phase has been completed by
@@ -186,16 +189,6 @@ public interface IExperimentMonitor
    * @return - returns true if the protocol relating to the phase has been completed.
    */
   boolean isCurrentPhaseActive();
-  
-  /**
-   * Use this method to forcefully stop the currently running phase. This process may 
-   * sometimes begin with a 'winding down' process during which time the EM communicates 
-   * to clients that the current phase is stopping, so to prepare for the commencement of the 
-   * next phase.
-   * 
-   * @throws Exception - Throws if the current phase is already winding down.
-   */
-  void stopCurrentPhase() throws Exception;
   
   /**
    * Use this method to progress to the next phase in the experiment life-cycle.

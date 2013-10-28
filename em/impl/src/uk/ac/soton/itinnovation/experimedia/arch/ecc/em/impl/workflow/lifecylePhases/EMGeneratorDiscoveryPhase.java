@@ -90,7 +90,6 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
   public void start() throws Exception
   {
     if ( phaseActive )               throw new Exception( "Phase already active" );
-    if ( !hasClients() )             throw new Exception( "No clients available for this phase" );
     if ( currentExperiment == null ) throw new Exception( "Experiment info is NULL" );
   
     phaseActive = true;
@@ -130,9 +129,15 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
   }
   
   @Override
-  public void controlledStop() throws Exception
-  { 
-    phaseListener.onDiscoveryPhaseCompleted();
+  public void controlledStop()
+  {
+    synchronized ( acceleratorLock )
+    {
+      if ( !clientsExpectingGeneratorInfo.isEmpty() )
+        phaseLogger.warn( "Stopping discovery phase: still have clients in this phase." );
+      
+      phaseActive = false;
+    }
   }
   
   @Override
@@ -164,6 +169,7 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
   @Override
   public void accelerateClient( EMClientEx client ) throws Exception
   {
+    if ( !phaseActive ) throw new Exception( "Cannot accelerate client (discovery) - phase is not active" );
     if ( client == null ) throw new Exception( "Cannot accelerate client (discovery) - client is null" );
     
     // Initially assume all clients will offer metric generators
@@ -297,16 +303,8 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
       { clientsExpectingGeneratorInfo.remove( client.getID() ); }
     }
     
-    // If the phase is currently 'active' then determine it has completed
-    if ( phaseActive && clientsExpectingGeneratorInfo.isEmpty() )
-    {
-      phaseActive = false;
-      phaseListener.onDiscoveryPhaseCompleted();
-    }
-    else // Otherwise, accelerate the client
-      if ( client.isPhaseAccelerating() ) 
-        phaseListener.onDiscoveryPhaseCompleted( client );
-    
+    // Notify listener
+    phaseListener.onDiscoveryPhaseCompleted( client );
   }
   
   @Override

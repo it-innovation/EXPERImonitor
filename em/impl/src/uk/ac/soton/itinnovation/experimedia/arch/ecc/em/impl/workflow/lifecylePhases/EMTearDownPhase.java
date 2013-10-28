@@ -47,8 +47,6 @@ public class EMTearDownPhase extends AbstractEMLCPhase
   private EMTearDownPhaseListener phaseListener;
   private HashSet<UUID>           clientsStillToTearDown;
   
-  private volatile boolean tearingStopping; // Atomic
-  
   
   public EMTearDownPhase( AMQPBasicChannel channel,
                           UUID providerID,
@@ -67,8 +65,7 @@ public class EMTearDownPhase extends AbstractEMLCPhase
   @Override
   public void reset()
   {
-    phaseActive     = false;
-    tearingStopping = false;
+    phaseActive = false;
     
     clearAllClients();
     
@@ -79,10 +76,8 @@ public class EMTearDownPhase extends AbstractEMLCPhase
   public void start() throws Exception
   {
     if ( phaseActive ) throw new Exception( "Phase already active" );
-    if ( !hasClients() ) throw new Exception( "No clients available for this phase" );
     
     phaseActive     = true;
-    tearingStopping = false;
     
     // Create tear-down interfaces
     synchronized ( acceleratorLock )
@@ -114,28 +109,18 @@ public class EMTearDownPhase extends AbstractEMLCPhase
   }
   
   @Override
-  public void controlledStop() throws Exception
+  public void controlledStop()
   {
-    if ( phaseActive && !tearingStopping )
-    {
-      synchronized ( controlledStopLock )
-      {
-        phaseActive     = false;
-        tearingStopping = false;
-        
-        // Nothing else to do here actually - tearing down is a 'single interaction' phase
-        // if we're already finished, notify
-        if ( clientsStillToTearDown.isEmpty() )
-          phaseListener.onTearDownPhaseCompleted();
-      }
-    }
+    if ( !clientsStillToTearDown.isEmpty() )
+      phaseLogger.warn( "Stopping Tear-Down phase will some clients yet to finish tearing down" );
+    
+    phaseActive = false;
   }
   
   @Override
   public void hardStop()
   {
     phaseActive     = false;
-    tearingStopping = false;
     phaseMsgPump.stopPump();
   }
   
@@ -161,23 +146,21 @@ public class EMTearDownPhase extends AbstractEMLCPhase
   @Override
   public void accelerateClient( EMClientEx client ) throws Exception
   {
-    if ( client == null ) throw new Exception( "Cannot accelerate client (setup) - client is null" );
+    if ( !phaseActive ) throw new Exception( "Cannot accelerate client (tear-down) - phase is not active" );
+    if ( client == null ) throw new Exception( "Cannot accelerate client (tear-down) - client is null" );
     
     synchronized ( acceleratorLock )
     {
-      if ( !tearingStopping )
-      {
-        client.setCurrentPhaseActivity( EMPhase.eEMSetUpMetricGenerators );
-      
-        // Need to manually add/setup accelerated clients
-        addClient( client );
-        setupClientInterface( client );
-        
-        clientsStillToTearDown.add( client.getID() );
+      client.setCurrentPhaseActivity( EMPhase.eEMSetUpMetricGenerators );
 
-        // Tell client to initialise their tear-down phase
-        client.getDiscoveryInterface().createInterface( EMInterfaceType.eEMTearDown );
-      }
+      // Need to manually add/setup accelerated clients
+      addClient( client );
+      setupClientInterface( client );
+
+      clientsStillToTearDown.add( client.getID() );
+
+      // Tell client to initialise their tear-down phase
+      client.getDiscoveryInterface().createInterface( EMInterfaceType.eEMTearDown );
     }
   }
   
@@ -235,25 +218,9 @@ public class EMTearDownPhase extends AbstractEMLCPhase
     {
       client.setTearDownResult( success );
       
-      boolean noFurtherClientsTearingDown;
-      
-      synchronized ( controlledStopLock )
-      {
-        clientsStillToTearDown.remove( client.getID() );
-        noFurtherClientsTearingDown = clientsStillToTearDown.isEmpty();
-      }
-     
-      // Notify of tear-down result
+      clientsStillToTearDown.remove( client.getID() );
       phaseListener.onClientTearDownResult( client, success );
-      
-      // Check to see if we're done actively tearing down
-      if ( phaseActive )
-      {
-        if ( noFurtherClientsTearingDown ) phaseListener.onTearDownPhaseCompleted();
-      }
-      else
-        if ( client.isPhaseAccelerating() )
-          phaseListener.onTearDownPhaseCompleted( client );
+      phaseListener.onTearDownPhaseCompleted( client );          
     }
   }
 }

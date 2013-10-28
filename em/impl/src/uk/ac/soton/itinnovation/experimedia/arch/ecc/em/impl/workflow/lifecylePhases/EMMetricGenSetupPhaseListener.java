@@ -35,6 +35,4 @@ public interface EMMetricGenSetupPhaseListener
   void onMetricGenSetupResult( EMClientEx client, boolean success );
   
   void onSetupPhaseCompleted( EMClientEx client );
-  
-  void onSetupPhaseCompleted();
 }
