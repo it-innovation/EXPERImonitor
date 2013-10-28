@@ -3,7 +3,7 @@
 // © University of Southampton IT Innovation Centre, 2013
 //
 // Copyright in this software belongs to University of Southampton
-// IT Innovation Centre of Gamma House, Enterprise Road, 
+// IT Innovation Centre of Gamma House, Enterprise Road,
 // Chilworth Science Park, Southampton, SO16 7NS, UK.
 //
 // This software may not be used, sold, licensed, transferred, copied
@@ -45,26 +45,26 @@ public class LiveProvView extends SimpleView
   private Table    provDataView;
   private Embedded embeddedPROVView;
 
-  
+
   public LiveProvView()
   {
     super();
-    
+
     createComponents();
   }
-  
+
   public void echoPROVData( EDMProvReport statement )
   {
     if ( statement != null )
     {
       provElementView.removeAllItems();
-      
+
       HashMap<String, EDMProvBaseElement> pEls = statement.getProvElements();
       for ( EDMProvBaseElement el : pEls.values() )
       {
         // Echo new PROV objects
         UUID elInstID = el.getInstanceID();
-   
+
         switch ( el.getProvType() )
         {
           case ePROV_ENTITY :
@@ -76,10 +76,10 @@ public class LiveProvView extends SimpleView
           case ePROV_ACTIVITY :
             provElementView.addItem( new Object[] { "Activity", el.getIri() }, elInstID ); break;
         }
-        
+
         // Echo new triples
         LinkedList<EDMProvTriple> triples = el.getTriples();
-        
+
         if ( triples != null && !triples.isEmpty() )
           for ( EDMProvTriple triple : triples )
             provDataView.addItem( new Object[]{ triple.getSubject(),
@@ -89,25 +89,25 @@ public class LiveProvView extends SimpleView
       }
     }
   }
-  
+
   public void renderPROVVizFile( String basePath, String targetName )
   {
     if ( basePath != null && targetName != null && embeddedPROVView != null )
     {
       File fileTarget = new File( basePath + "/" + targetName + ".dot" );
-      
+
       if ( fileTarget.exists() && fileTarget.isFile() )
       {
         try
         {
           final String pngTarget = basePath + targetName + ".svg";
           final String cmd = "dot -Tsvg " + basePath + "/" + targetName + ".dot -o " + pngTarget;
-          
+
           Process rtProc = Runtime.getRuntime().exec( cmd );
           rtProc.waitFor();
-          
+
           fileTarget = new File( pngTarget );
-          
+
           if ( fileTarget.exists() )
           {
             FileResource rs = new FileResource( fileTarget, embeddedPROVView.getApplication() );
@@ -119,31 +119,31 @@ public class LiveProvView extends SimpleView
       }
     }
   }
-  
+
   // Private methods -----------------------------------------------------------
   private void createComponents()
   {
     VerticalLayout vl = getViewContents();
-    
+
     // Space
     vl.addComponent( UILayoutUtil.createSpace( "2px", null) );
-    
+
     Panel panel = new Panel();
     panel.addStyleName( "light" );
     panel.setScrollable( true );
     vl.addComponent( panel );
-    
+
     embeddedPROVView = new Embedded();
     embeddedPROVView.setType( Embedded.TYPE_OBJECT );
     embeddedPROVView.setMimeType( "image/svg+xml" );
-    embeddedPROVView.setWidth( "600px" );
+    embeddedPROVView.setWidth( "100%" );
     embeddedPROVView.setHeight( "400px" );
-    
+
     panel.getContent().addComponent( embeddedPROVView );
-    
+
     HorizontalLayout hl = new HorizontalLayout();
     vl.addComponent( hl );
-    
+
     provElementView = new Table( "PROV Elements" );
     provElementView.addStyleName( "striped" );
     provElementView.setWidth( "300px" );
@@ -151,9 +151,9 @@ public class LiveProvView extends SimpleView
     provElementView.addContainerProperty( "PROV Element", String.class, null );
     provElementView.addContainerProperty( "PROV ID", String.class, null );
     hl.addComponent( provElementView );
-    
+
     hl.addComponent( UILayoutUtil.createSpace( "4px", null, true) );
-    
+
     provDataView = new Table( "PROV Triple statements" );
     provDataView.addStyleName( "striped" );
     provDataView.setWidth( "600px" );
@@ -161,6 +161,6 @@ public class LiveProvView extends SimpleView
     provDataView.addContainerProperty( "Subject", String.class, null );
     provDataView.addContainerProperty( "Predicate", String.class, null );
     provDataView.addContainerProperty( "Object", String.class, null );
-    hl.addComponent( provDataView ); 
+    hl.addComponent( provDataView );
   }
 }
