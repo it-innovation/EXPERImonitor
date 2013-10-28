@@ -319,17 +319,24 @@ public class ExperimentMonitor implements IExperimentMonitor,
   @Override
   public void onClientDisconnected( EMClient client )
   {
-    try
+    if ( client != null )
     {
-      connectionManager.removeDisconnectedClient( client.getID() );
+      EMClientEx cx = (EMClientEx) client;
+      cx.setIsConnected( false );
       
-      for ( IEMLifecycleListener listener : lifecycleListeners )
-        listener.onClientDisconnected( client );
+      try
+      {
+        connectionManager.removeDisconnectedClient( client.getID() );
+
+        for ( IEMLifecycleListener listener : lifecycleListeners )
+          listener.onClientDisconnected( client );
+      }
+      catch ( Exception ex )
+      { emLogger.warn( "Could not properly clean up disconnected client: " + ex.getMessage() ); }
     }
-    catch ( Exception ex )
-    {
-      emLogger.warn( "Could not properly clean up disconnected client: " + ex.getMessage() );
-    }
+    else emLogger.warn( "Got disconnection notice from null client!" );
+    
+    
   }
   
   @Override
