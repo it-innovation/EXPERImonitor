@@ -41,10 +41,10 @@ public class EDMActivity extends EDMProvBaseElement {
 	public EDMEntity generateEntity(String entity, String timestamp) throws DataFormatException {
 		EDMProvFactory factory = EDMProvFactory.getInstance();
     
-    EDMEntity newEntity = factory.getEntity(entity);	
+		EDMEntity newEntity = factory.getEntity(entity);	
 		newEntity.addProperty(entity, "prov:wasGeneratedBy", this.iri);
 		newEntity.addProperty(entity, "prov:generatedAtTime", format.format(new Date(Long.valueOf(timestamp)*1000)));
-    factory.elementUpdated(this); // Queue to re-send in next report
+		factory.elementUpdated(this); // Queue to re-send in next report
     
 		return newEntity;
 	}
@@ -56,12 +56,12 @@ public class EDMActivity extends EDMProvBaseElement {
 	public EDMEntity deriveEntity(EDMEntity entity) throws DataFormatException {
 		EDMProvFactory factory = EDMProvFactory.getInstance();
     
-    EDMEntity derivation = factory.getEntity(entity.iri + "_derivation" +
+		EDMEntity derivation = factory.getEntity(entity.iri + "_derivation" +
 			String.valueOf(System.currentTimeMillis() / 1000L));
 		
-    derivation.addProperty(derivation.iri, "prov:wasDerivedFrom", this.iri);
+		derivation.addProperty(derivation.iri, "prov:wasDerivedFrom", this.iri);
     
-    factory.elementUpdated(this); // Queue to re-send in next report
+		factory.elementUpdated(this); // Queue to re-send in next report
     
 		return derivation;
 	}
@@ -78,24 +78,24 @@ public class EDMActivity extends EDMProvBaseElement {
 	public void associateWith(EDMAgent agent) {
 		agent.addProperty(agent.iri, "prov:wasAssociatedWith", this.iri);
     
-    EDMProvFactory.getInstance().elementUpdated(this); // Queue to re-send in next report
+		EDMProvFactory.getInstance().elementUpdated(this); // Queue to re-send in next report
 	}
 	
 	public void useEntity(EDMEntity entity) {
 		this.useEntity(entity.iri);
-    // Updated below in overloaded method
+		// Updated below in overloaded method
 	}
 	
 	public void useEntity(String entity) {
 		this.addProperty(this.iri, "prov:used", entity);
     
-    EDMProvFactory.getInstance().elementUpdated(this); // Queue to re-send in next report
+		EDMProvFactory.getInstance().elementUpdated(this); // Queue to re-send in next report
 	}
 	
 	public void informActivity(EDMActivity activity) {
 		activity.addProperty(activity.iri, "prov:wasInformedBy", this.iri);
     
-    EDMProvFactory.getInstance().elementUpdated(this); // Queue to re-send in next report
+		EDMProvFactory.getInstance().elementUpdated(this); // Queue to re-send in next report
 	}
 	
 	

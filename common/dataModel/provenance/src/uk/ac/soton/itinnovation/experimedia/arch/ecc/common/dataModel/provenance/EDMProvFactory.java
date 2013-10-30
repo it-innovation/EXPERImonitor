@@ -33,7 +33,7 @@ public class EDMProvFactory {
 	
 	private static EDMProvFactory factory = null;
 	private HashMap<String, EDMProvBaseElement> allProvElements;
-  private HashMap<String, EDMProvBaseElement> currentProvReportElements;
+	private HashMap<String, EDMProvBaseElement> currentProvReportElements;
 	
 	private EDMProvFactory() {
 		init();
@@ -49,11 +49,11 @@ public class EDMProvFactory {
     
 	private void init() {
 		allProvElements = new HashMap<String, EDMProvBaseElement>();
-    currentProvReportElements = new HashMap<String, EDMProvBaseElement>();
+		currentProvReportElements = new HashMap<String, EDMProvBaseElement>();
 	}
 	
 	public EDMAgent getAgent(String iri) throws DataFormatException {
-		EDMAgent agent = (EDMAgent) this.getElement(iri, Type.EDMAgent);
+		EDMAgent agent = (EDMAgent) this.getElement(iri, EDMProvBaseElement.PROV_TYPE.ePROV_AGENT);
 		if (!agent.contains(new EDMProvTriple(iri,"rdf:type","prov:Agent"))) {
 			throw new DataFormatException("The prov element you tried to get already exists but is not an EDMAgent.");
 		}
@@ -61,7 +61,7 @@ public class EDMProvFactory {
 	}
 	
 	public EDMActivity getActivity(String iri) throws DataFormatException {
-		EDMActivity activity = (EDMActivity) this.getElement(iri, Type.EDMActivity);
+		EDMActivity activity = (EDMActivity) this.getElement(iri, EDMProvBaseElement.PROV_TYPE.ePROV_ACTIVITY);
 		if (!activity.contains(new EDMProvTriple(iri,"rdf:type","prov:Activity"))) {
 			throw new DataFormatException("The prov element you tried to get already exists but is not an EDMActivity.");
 		}
@@ -69,7 +69,7 @@ public class EDMProvFactory {
 	}
 	
 	public EDMEntity getEntity(String iri) throws DataFormatException {
-		EDMEntity entity = (EDMEntity) this.getElement(iri, Type.EDMEntity);
+		EDMEntity entity = (EDMEntity) this.getElement(iri, EDMProvBaseElement.PROV_TYPE.ePROV_ENTITY);
 		if (!entity.contains(new EDMProvTriple(iri,"rdf:type","prov:Entity"))) {
 			throw new DataFormatException("The prov element you tried to get already exists but is not an EDMEntity.");
 		}
@@ -85,19 +85,19 @@ public class EDMProvFactory {
       }
   }
 
-	public EDMProvBaseElement getElement(String iri, Type type) {
+	public EDMProvBaseElement getElement(String iri, EDMProvBaseElement.PROV_TYPE type) {
 		if (allProvElements.containsKey(iri)) {
 			return allProvElements.get(iri);
 		} else {
 			EDMProvBaseElement element = null;
 			switch (type) {
-			case EDMAgent:
+			case ePROV_AGENT:
 				element = new EDMAgent(iri);
 				break;
-			case EDMActivity:
+			case ePROV_ACTIVITY:
 				element = new EDMActivity(iri);
 				break;
-			case EDMEntity:
+			case ePROV_ENTITY:
 				element = new EDMEntity(iri);
 				break;
 			default:
@@ -105,7 +105,7 @@ public class EDMProvFactory {
 			}
       
 			allProvElements.put(iri, element);
-      currentProvReportElements.put(iri, element);
+			currentProvReportElements.put(iri, element);
       
 			return element;
 		}
@@ -127,8 +127,4 @@ public class EDMProvFactory {
 		}
 		return contents;
 	}
-	
-	public enum Type {
-		EDMAgent, EDMActivity, EDMEntity
-	};
 }

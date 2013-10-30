@@ -142,11 +142,37 @@ class PROVTBDataManager
     else if ( triple.hasPredicate("prov:wasInvalidatedBy") )
     {
       // TODO: PROVToolBox support?
+    	// 	newWasInvalidatedBy(String id, IDRef eid, IDRef aid) 
     }
     else if ( triple.hasPredicate("prov:invalidatedAtTime") )
     {
       // TODO: PROVToolBox support?
     }
+    else if ( triple.hasPredicate("prov:wasAssociatedWith") )
+    {
+    	Activity lhs = ptActivities.get( triple.getSubject() );
+        Agent rhs = ptAgents.get( triple.getObject() );
+         
+        if ( lhs != null && rhs != null )
+        	//TODO: what's the string exactly?
+        	statement = ptFactory.newWasAssociatedWith("some annotation?!", lhs, rhs );
+    }
+    else if ( triple.hasPredicate("prov:wasInformedBy") )
+    {
+    	Activity lhs = ptActivities.get( triple.getSubject() );
+    	Activity rhs = ptActivities.get( triple.getObject() );
+         
+        if ( lhs != null && rhs != null )
+        	//TODO: what's the string exactly?
+        	statement = ptFactory.newWasInformedBy("some annotation?!", lhs, rhs );
+    }
+    // 	newAlternateOf(QName e2, QName e1) 
+    // 	newSpecializationOf(QName e2, QName e1) 
+ 	//	newUsed(Activity p, String role, Entity a) 
+    //	newWasAttributedTo(String id, IDRef eid, IDRef agid) (IDRef = wrapper for QName)
+    //	newWasEndedBy(String id, IDRef aid, IDRef eid) 
+    //	newWasInfluencedBy(String id, IDRef influencee, IDRef influencer) 
+    //	newWasStartedBy(String id, IDRef aid, IDRef eid) 
     
     if ( statement != null )
       ptStatements.add( statement );
