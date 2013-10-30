@@ -47,6 +47,11 @@ public class EDMProvReport
   public Date getCopyOfDate()
   { return new Date( statementCreationDate.getTime() ); }
   
+  public EDMProvBaseElement getElement( String iriID )
+  {
+    return provElements.get( iriID );
+  }
+  
   public HashMap<String, EDMProvBaseElement> getProvElements()
   {
     return provElements;

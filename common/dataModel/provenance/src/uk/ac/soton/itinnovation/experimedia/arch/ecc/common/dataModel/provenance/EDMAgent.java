@@ -53,14 +53,14 @@ public class EDMAgent extends EDMProvBaseElement {
 		return startActivity(activity, String.valueOf(System.currentTimeMillis() / 1000L));
 	}
 	
-	public void stopActivity(EDMActivity activity, String timestamp) {
-		activity.addProperty("prov:endedAtTime", format.format(format.format(new Date(Long.valueOf(timestamp)*1000))));
+	public void stopActivity(EDMActivity activity, String timestamp) throws DataFormatException {
+		activity.addProperty("prov:endedAtTime", format.format(new Date(Long.valueOf(timestamp)*1000)));
 		activity.addProperty("prov:wasEndedBy", this.iri);
     
 		EDMProvFactory.getInstance().elementUpdated(this); // Queue to re-send in next report
 	}
 	
-	public void stopActivity(EDMActivity activity) {
+	public void stopActivity(EDMActivity activity) throws DataFormatException {
 		stopActivity(activity, String.valueOf(System.currentTimeMillis() / 1000L));
 	}
 	
