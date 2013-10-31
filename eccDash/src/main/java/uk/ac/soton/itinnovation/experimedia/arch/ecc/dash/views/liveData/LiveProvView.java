@@ -100,7 +100,7 @@ public class LiveProvView extends SimpleView
       {
         try
         {
-          final String pngTarget = basePath + targetName + ".svg";
+          final String pngTarget = basePath + "/" + targetName + ".svg";
           final String cmd = "dot -Tsvg " + basePath + "/" + targetName + ".dot -o " + pngTarget;
 
           Process rtProc = Runtime.getRuntime().exec( cmd );
@@ -115,7 +115,7 @@ public class LiveProvView extends SimpleView
           }
         }
         catch( Exception ex )
-        {}
+        {ex.printStackTrace();}
       }
     }
   }
