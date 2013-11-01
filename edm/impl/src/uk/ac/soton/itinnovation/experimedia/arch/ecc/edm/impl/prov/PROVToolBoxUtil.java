@@ -162,7 +162,7 @@ public class PROVToolBoxUtil
       
       // Add new triples into OUT element
       for ( EDMProvTriple triple : newTriples )
-        lhsOUT.addProperty( triple.getSubject(),
+        lhsOUT.addTriple( triple.getSubject(),
                             triple.getPredicate(),
                             triple.getObject() );
         

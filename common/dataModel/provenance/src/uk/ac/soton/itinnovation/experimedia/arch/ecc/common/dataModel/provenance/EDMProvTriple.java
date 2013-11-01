@@ -29,16 +29,46 @@ import java.util.UUID;
 
 public class EDMProvTriple {
 	
-  private UUID   tripleID;
+	public enum TRIPLE_TYPE {
+		UNKNOWN_TYPE, 
+		CLASS_ASSERTION, 
+		OBJECT_PROPERTY,
+		DATA_PROPERTY,
+		ANNOTATION_PROPERTY
+	};
+	
+	private UUID   tripleID;
 	private String subject;
 	private String predicate;
 	private String object;
+	private String prefix;
+	private TRIPLE_TYPE type;
 	
 	public EDMProvTriple(String subject, String predicate, String object) {
-    this.tripleID = UUID.randomUUID();
+		this(subject, predicate, object, TRIPLE_TYPE.UNKNOWN_TYPE);
+	}
+	
+	public EDMProvTriple(String subject, String predicate, String object, TRIPLE_TYPE type) {
+		this.tripleID = UUID.randomUUID();
 		this.subject = subject;
 		this.predicate = predicate;
 		this.object = object;
+		this.type = type;
+		//get prefix from predicate
+		if (this.predicate.indexOf(":")>0) {
+			this.prefix = predicate.substring(0, predicate.indexOf(":")).trim();
+		} else {
+			this.prefix = null;
+		}
+		//attach predicate from type
+		if (this.type==TRIPLE_TYPE.CLASS_ASSERTION &&
+			(this.predicate.equals("") || this.predicate==null)) {
+			this.predicate = "rdf:type";
+		//attach type from predicate
+		} else if (this.type==TRIPLE_TYPE.UNKNOWN_TYPE && this.predicate.equals("rdf:type")) {
+			this.type = TRIPLE_TYPE.CLASS_ASSERTION;
+		}
+		
 	}
 	
 	public boolean equals(EDMProvTriple t) {
@@ -61,9 +91,9 @@ public class EDMProvTriple {
     return false;
   }
   
-  public UUID getID() {
-    return tripleID;
-  }
+	public UUID getID() {
+		return tripleID;
+	}
 	
 	public String getSubject() {
 		return subject;
@@ -87,6 +117,22 @@ public class EDMProvTriple {
 	
 	public void setObject(String object) {
 		this.object = object;
+	}
+
+	public TRIPLE_TYPE getType() {
+		return type;
+	}
+
+	public void setType(TRIPLE_TYPE type) {
+		this.type = type;
+	}
+
+	public String getPrefix() {
+		return prefix;
+	}
+
+	public void setPrefix(String prefix) {
+		this.prefix = prefix;
 	}
 
 }

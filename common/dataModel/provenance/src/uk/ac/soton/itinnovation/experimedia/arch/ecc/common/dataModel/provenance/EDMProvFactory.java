@@ -53,7 +53,11 @@ public class EDMProvFactory {
 	}
 	
 	public EDMAgent getAgent(String iri) throws DataFormatException {
-		EDMAgent agent = (EDMAgent) this.getElement(iri, EDMProvBaseElement.PROV_TYPE.ePROV_AGENT);
+		return getAgent(iri, null);
+	}
+	
+	public EDMAgent getAgent(String iri, String label) throws DataFormatException {
+		EDMAgent agent = (EDMAgent) this.getElement(iri, label, EDMProvBaseElement.PROV_TYPE.ePROV_AGENT);
 		if (!agent.contains(new EDMProvTriple(iri,"rdf:type","prov:Agent"))) {
 			throw new DataFormatException("The prov element you tried to get already exists but is not an EDMAgent.");
 		}
@@ -61,7 +65,11 @@ public class EDMProvFactory {
 	}
 	
 	public EDMActivity getActivity(String iri) throws DataFormatException {
-		EDMActivity activity = (EDMActivity) this.getElement(iri, EDMProvBaseElement.PROV_TYPE.ePROV_ACTIVITY);
+		return getActivity(iri, null);
+	}
+	
+	public EDMActivity getActivity(String iri, String label) throws DataFormatException {
+		EDMActivity activity = (EDMActivity) this.getElement(iri, label, EDMProvBaseElement.PROV_TYPE.ePROV_ACTIVITY);
 		if (!activity.contains(new EDMProvTriple(iri,"rdf:type","prov:Activity"))) {
 			throw new DataFormatException("The prov element you tried to get already exists but is not an EDMActivity.");
 		}
@@ -69,7 +77,11 @@ public class EDMProvFactory {
 	}
 	
 	public EDMEntity getEntity(String iri) throws DataFormatException {
-		EDMEntity entity = (EDMEntity) this.getElement(iri, EDMProvBaseElement.PROV_TYPE.ePROV_ENTITY);
+		return getEntity(iri, null);
+	}
+	
+	public EDMEntity getEntity(String iri, String label) throws DataFormatException {
+		EDMEntity entity = (EDMEntity) this.getElement(iri, label, EDMProvBaseElement.PROV_TYPE.ePROV_ENTITY);
 		if (!entity.contains(new EDMProvTriple(iri,"rdf:type","prov:Entity"))) {
 			throw new DataFormatException("The prov element you tried to get already exists but is not an EDMEntity.");
 		}
@@ -85,20 +97,20 @@ public class EDMProvFactory {
       }
   }
 
-	public EDMProvBaseElement getElement(String iri, EDMProvBaseElement.PROV_TYPE type) {
+	public EDMProvBaseElement getElement(String iri, String label, EDMProvBaseElement.PROV_TYPE type) {
 		if (allProvElements.containsKey(iri)) {
 			return allProvElements.get(iri);
 		} else {
 			EDMProvBaseElement element = null;
 			switch (type) {
 			case ePROV_AGENT:
-				element = new EDMAgent(iri);
+				element = new EDMAgent(label);
 				break;
 			case ePROV_ACTIVITY:
-				element = new EDMActivity(iri);
+				element = new EDMActivity(label);
 				break;
 			case ePROV_ENTITY:
-				element = new EDMEntity(iri);
+				element = new EDMEntity(label);
 				break;
 			default:
 				break;

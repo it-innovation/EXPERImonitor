@@ -25,7 +25,7 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.test.prov;
 
-import java.util.logging.Logger;
+//import java.util.logging.Logger;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMActivity;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMAgent;
@@ -34,7 +34,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance
 
 public class EDMProvClassesTest {
 	
-	private static Logger logger = Logger.getLogger("ProvTest");
+	//private static Logger logger = Logger.getLogger("ProvTest");
 
 	public static void main(String[] args) {
 		
@@ -42,25 +42,25 @@ public class EDMProvClassesTest {
 		
 		try {
 			//This is Bob.
-			EDMAgent bob = factory.getAgent("experimedia:BobSmith");
+			EDMAgent bob = factory.getAgent("Bob");
 			bob.addOwlClass("foaf:Person");
 			
 			//This is a video about Schladming.
-			EDMEntity video = factory.getEntity("experimedia:reallyCoolFacebookVideo");
+			EDMEntity video = factory.getEntity("reallyCoolFacebookVideo");
 			
 			//Bob starts to watch the video and pauses it when he sees something interesting.
-			EDMActivity watchVideo = bob.startActivity("experimedia:watchVideo");
+			EDMActivity watchVideo = bob.startActivity("WatchVideo");
 			watchVideo.useEntity(video);
-			EDMActivity pauseVideo = bob.doDiscreteActivity("experimedia:pauseVideo");
+			EDMActivity pauseVideo = bob.doDiscreteActivity("PauseVideo");
 			pauseVideo.useEntity(video);
 			
 			//Bob logs in to his FB account and posts something
-			EDMActivity writePost = bob.startActivity("experimedia:writePostActivity");
-			EDMEntity bobsFacebookPost = writePost.generateEntity("experimedia:bobsFacebookPost", "1280512800");
+			EDMActivity writePost = bob.startActivity("WritePost");
+			writePost.generateEntity("BobsFacebookPost", "1280512800");
 			bob.stopActivity(writePost);
 			
 			//Bob goes back to watch the rest of the video.
-			EDMActivity resumeVideo = bob.doDiscreteActivity("experimedia:resumeVideo");
+			EDMActivity resumeVideo = bob.doDiscreteActivity("ResumeVideo");
 			resumeVideo.useEntity(video);
 			bob.stopActivity(watchVideo);
 		

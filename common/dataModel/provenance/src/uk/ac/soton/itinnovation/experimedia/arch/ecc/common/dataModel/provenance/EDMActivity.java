@@ -28,38 +28,40 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenanc
 import java.util.Date;
 import java.util.zip.DataFormatException;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvTriple.TRIPLE_TYPE;
+
 
 public class EDMActivity extends EDMProvBaseElement {
 
-	public EDMActivity(String iri) {
-		super(iri);
+	public EDMActivity(String label) {
+		super(label);
     
     this.provType = PROV_TYPE.ePROV_ACTIVITY;
 		this.addOwlClass("prov:Activity");
 	}
+
+	public EDMEntity generateEntity(String entityLabel) throws DataFormatException {
+		return generateEntity(entityLabel, String.valueOf(System.currentTimeMillis() / 1000L));
+	}
 	
-	public EDMEntity generateEntity(String entity, String timestamp) throws DataFormatException {
+	public EDMEntity generateEntity(String entityLabel, String timestamp) throws DataFormatException {
 		EDMProvFactory factory = EDMProvFactory.getInstance();
     
-		EDMEntity newEntity = factory.getEntity(entity);	
-		newEntity.addProperty(entity, "prov:wasGeneratedBy", this.iri);
-		newEntity.addProperty(entity, "prov:generatedAtTime", format.format(new Date(Long.valueOf(timestamp)*1000)));
+		EDMEntity newEntity = factory.getEntity(entityLabel);	
+		newEntity.addTriple(entityLabel, "prov:wasGeneratedBy", this.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
+		newEntity.addTriple(entityLabel, "prov:generatedAtTime", format.format(new Date(Long.valueOf(timestamp)*1000)), TRIPLE_TYPE.DATA_PROPERTY);
 		factory.elementUpdated(this); // Queue to re-send in next report
     
 		return newEntity;
 	}
-	
-	public EDMEntity generateEntity(String entity) throws DataFormatException {
-		return generateEntity(entity, String.valueOf(System.currentTimeMillis() / 1000L));
-	}
-	
+
 	public EDMEntity deriveEntity(EDMEntity entity) throws DataFormatException {
 		EDMProvFactory factory = EDMProvFactory.getInstance();
     
 		EDMEntity derivation = factory.getEntity(entity.iri + "_derivation" +
 			String.valueOf(System.currentTimeMillis() / 1000L));
 		
-		derivation.addProperty(derivation.iri, "prov:wasDerivedFrom", this.iri);
+		derivation.addTriple(derivation.iri, "prov:wasDerivedFrom", this.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
     
 		factory.elementUpdated(this); // Queue to re-send in next report
     
@@ -67,8 +69,8 @@ public class EDMActivity extends EDMProvBaseElement {
 	}
 	
 	public void invalidateEntity(EDMEntity entity, String timestamp) {
-		entity.addProperty(entity.iri, "prov:wasInvalidatedBy", this.iri);
-		entity.addProperty(entity.iri, "prov:invalidatedAtTime", format.format(new Date(Long.valueOf(timestamp)*1000)));
+		entity.addTriple(entity.iri, "prov:wasInvalidatedBy", this.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
+		entity.addTriple(entity.iri, "prov:invalidatedAtTime", format.format(new Date(Long.valueOf(timestamp)*1000)), TRIPLE_TYPE.DATA_PROPERTY);
 	}
 	
 	public void invalidateEntity(EDMEntity entity) {
@@ -76,7 +78,7 @@ public class EDMActivity extends EDMProvBaseElement {
 	}
 	
 	public void associateWith(EDMAgent agent) {
-		agent.addProperty(agent.iri, "prov:wasAssociatedWith", this.iri);
+		agent.addTriple(agent.iri, "prov:wasAssociatedWith", this.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
     
 		EDMProvFactory.getInstance().elementUpdated(this); // Queue to re-send in next report
 	}
@@ -87,21 +89,21 @@ public class EDMActivity extends EDMProvBaseElement {
 	}
 	
 	public void useEntity(String entity) {
-		this.addProperty(this.iri, "prov:used", entity);
+		this.addTriple(this.iri, "prov:used", entity, TRIPLE_TYPE.OBJECT_PROPERTY);
     
 		EDMProvFactory.getInstance().elementUpdated(this); // Queue to re-send in next report
 	}
 	
 	public void informActivity(EDMActivity activity) {
-		activity.addProperty(activity.iri, "prov:wasInformedBy", this.iri);
+		activity.addTriple(activity.iri, "prov:wasInformedBy", this.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
     
 		EDMProvFactory.getInstance().elementUpdated(this); // Queue to re-send in next report
 	}
 	
 	
 	public void influenceActivity(EDMActivity activity) {
-		activity.addProperty(activity.iri, "prov:wasInfluencedBy", this.iri);
-		this.addProperty(this.iri, "prov:influenced", activity.iri);
+		activity.addTriple(activity.iri, "prov:wasInfluencedBy", this.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
+		this.addTriple(this.iri, "prov:influenced", activity.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
 	}
 
 }

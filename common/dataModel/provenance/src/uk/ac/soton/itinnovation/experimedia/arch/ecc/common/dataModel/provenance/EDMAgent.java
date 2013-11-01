@@ -28,34 +28,37 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenanc
 import java.util.Date;
 import java.util.zip.DataFormatException;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvTriple.TRIPLE_TYPE;
+
 public class EDMAgent extends EDMProvBaseElement {
 
-	public EDMAgent(String iri) {
-		super(iri);
+	
+	public EDMAgent(String label) {
+		super(label);
     
-    this.provType = PROV_TYPE.ePROV_AGENT;
+		this.provType = PROV_TYPE.ePROV_AGENT;
 		this.addOwlClass("prov:Agent");
 	}
 	
-	public EDMActivity startActivity(String activity, String timestamp) throws DataFormatException {
+	public EDMActivity startActivity(String activityLabel, String timestamp) throws DataFormatException {
 		EDMProvFactory factory = EDMProvFactory.getInstance();
 	    
-		EDMActivity newActivity = factory.getActivity(activity);
-		newActivity.addProperty(activity, "prov:startedAtTime", format.format(new Date(Long.valueOf(timestamp)*1000)));
-		newActivity.addProperty(activity, "prov:wasStartedBy", this.iri);
+		EDMActivity newActivity = factory.getActivity(activityLabel);
+		newActivity.addTriple(activityLabel, "prov:startedAtTime", format.format(new Date(Long.valueOf(timestamp)*1000)), TRIPLE_TYPE.DATA_PROPERTY);
+		newActivity.addTriple(activityLabel, "prov:wasStartedBy", this.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
     
 		factory.elementUpdated(this); // Queue to re-send in next report
     
 		return newActivity;
 	}
 	
-	public EDMActivity startActivity(String activity) throws DataFormatException {
-		return startActivity(activity, String.valueOf(System.currentTimeMillis() / 1000L));
+	public EDMActivity startActivity(String activityLabel) throws DataFormatException {
+		return startActivity(activityLabel, String.valueOf(System.currentTimeMillis() / 1000L));
 	}
 	
 	public void stopActivity(EDMActivity activity, String timestamp) throws DataFormatException {
-		activity.addProperty("prov:endedAtTime", format.format(new Date(Long.valueOf(timestamp)*1000)));
-		activity.addProperty("prov:wasEndedBy", this.iri);
+		activity.addTriple("prov:endedAtTime", format.format(new Date(Long.valueOf(timestamp)*1000)), TRIPLE_TYPE.DATA_PROPERTY);
+		activity.addTriple("prov:wasEndedBy", this.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
     
 		EDMProvFactory.getInstance().elementUpdated(this); // Queue to re-send in next report
 	}
@@ -64,8 +67,8 @@ public class EDMAgent extends EDMProvBaseElement {
 		stopActivity(activity, String.valueOf(System.currentTimeMillis() / 1000L));
 	}
 	
-	public EDMActivity doDiscreteActivity(String activity, String timestamp) throws DataFormatException {
-		EDMActivity discreteActivity = this.startActivity(activity, timestamp);
+	public EDMActivity doDiscreteActivity(String activityLabel, String timestamp) throws DataFormatException {
+		EDMActivity discreteActivity = this.startActivity(activityLabel, timestamp);
 		this.stopActivity(discreteActivity, timestamp);
     
 		EDMProvFactory.getInstance().elementUpdated(this); // Queue to re-send in next report
@@ -73,12 +76,12 @@ public class EDMAgent extends EDMProvBaseElement {
 		return discreteActivity;
 	}
 	
-	public EDMActivity doDiscreteActivity(String activity) throws DataFormatException {
-		return doDiscreteActivity(activity, String.valueOf(System.currentTimeMillis() / 1000L));
+	public EDMActivity doDiscreteActivity(String activityLabel) throws DataFormatException {
+		return doDiscreteActivity(activityLabel, String.valueOf(System.currentTimeMillis() / 1000L));
 	}
 	
 	public void actOnBehalfOf(EDMAgent agent) {
-		this.addProperty(this.iri, "prov:actedOnBehalfOf", agent.iri);
+		this.addTriple(this.iri, "prov:actedOnBehalfOf", agent.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
     
 		EDMProvFactory.getInstance().elementUpdated(this); // Queue to re-send in next report
 	}
