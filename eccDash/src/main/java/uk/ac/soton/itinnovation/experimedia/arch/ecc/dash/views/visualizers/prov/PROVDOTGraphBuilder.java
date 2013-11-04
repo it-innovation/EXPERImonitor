@@ -106,11 +106,25 @@ public class PROVDOTGraphBuilder
     return "digraph \"" + report.getID().toString() + "\" \n{\n";
   }
 
-  private String makeLabel(String input) {
-//      return ",label=\"" + input.replaceFirst("experimedia:", "").replaceFirst("_", "\n") + "\"";
-      int start = input.indexOf(":");
-      int end = input.indexOf("_");
-      return ",label=\"" + input.substring(start + 1, end) + "\"";
+  private String makeLabel(String input)
+  {
+    int start = input.indexOf(":");
+    int end   = input.indexOf("_");
+    
+    String abrvLabel = "";
+    
+    // Check boundaries
+    if ( start > -1 )
+    {
+      // Make sure we don't run out of bounds
+      if ( end < start ) end = input.length();
+      
+      abrvLabel = ",label=\"" + input.substring(start + 1, end) + "\"";
+    }
+    else
+      abrvLabel = input;
+    
+    return abrvLabel;
   }
 
   private String writeNodes() throws Exception

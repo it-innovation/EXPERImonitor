@@ -25,11 +25,8 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveData;
 
-import org.apache.log4j.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMClient;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMAgent;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvBaseElement;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvReport;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
@@ -48,7 +45,6 @@ import com.vaadin.Application;
 import com.vaadin.ui.Component;
 import org.vaadin.artur.icepush.ICEPush;
 
-import org.openprovenance.prov.model.Document;
 
 import java.io.PrintWriter;
 import java.util.*;
@@ -60,7 +56,6 @@ public class LiveMonitorController extends UFAbstractEventManager
                                    implements LiveMetricViewListener
 {
   private final IECCLogger liveMonLogger  = Logger.getLogger( LiveMonitorController.class );
-  private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(LiveMonitorController.class);
   private final Object     updateViewLock = new Object();
 
   private LiveDataView   liveDataView;
@@ -133,14 +128,9 @@ public class LiveMonitorController extends UFAbstractEventManager
     // TO REMOVE LATER WITH JUNG VISUALISATION ---------------------------------
     try
     {
-//      Document ptDocument = PROVToolBoxUtil.createPTBDocument( aggregatedPROVReport );
-
       Component comp      = (Component) liveProvView.getImplContainer();
       Application thisApp = comp.getApplication();
       String basePath     = thisApp.getContext().getBaseDirectory().getAbsolutePath();
-
-//      PROVToolBoxUtil.createVizDOTFile( ptDocument, basePath + "/" + "dotViz" );
-
 
       PROVDOTGraphBuilder gb = new PROVDOTGraphBuilder();
       String dotAsString = gb.createDOT(aggregatedPROVReport);
@@ -150,7 +140,6 @@ public class LiveMonitorController extends UFAbstractEventManager
       out.close();
 
       liveProvView.renderPROVVizFile( basePath, "dotViz" );
-
     }
     catch ( Exception ex )
     { liveMonLogger.error( "Could not create PROV visualisation", ex ); }
