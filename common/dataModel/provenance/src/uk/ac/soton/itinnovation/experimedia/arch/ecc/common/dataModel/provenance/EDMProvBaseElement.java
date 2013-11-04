@@ -43,11 +43,12 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance
  */
 public class EDMProvBaseElement {
 
-    private UUID instanceID;
-    
+    protected UUID instanceID;
     protected PROV_TYPE provType = PROV_TYPE.ePROV_UNKNOWN_TYPE;
     protected String iri;
-    protected HashMap<UUID, EDMProvTriple> triples;
+    protected String prefix;
+    protected String uniqueIdentifier;
+	protected HashMap<UUID, EDMProvTriple> triples;
     
     protected static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z^^xsd:dateTime'");
 	
@@ -55,30 +56,27 @@ public class EDMProvBaseElement {
                             ePROV_ENTITY, 
                             ePROV_AGENT, 
                             ePROV_ACTIVITY };
-    
-    public EDMProvBaseElement() {
-        instanceID = UUID.randomUUID();
-        triples = new HashMap<UUID, EDMProvTriple>();
-    }
 
     /**
      * Creates an EDMProvBaseElement
      * 
+     * @param prefix the prefix of the element
+     * @param a unique identifier. This could be something like domain_uniqueID, e.g. facebook_56735762153. It needs to be unique across clients.
      * @param label a human readable name
      */
-    protected EDMProvBaseElement(String label) {
-        this(label, "experimedia");
-    }
-    
-    protected EDMProvBaseElement(String label, String prefix) {
+    protected EDMProvBaseElement(String prefix, String uniqueIdentifier, String label) {
     	this.instanceID = UUID.randomUUID();
-        this.iri = prefix + ":" + label + "_" + instanceID;
+    	this.prefix = prefix;
+    	this.uniqueIdentifier = uniqueIdentifier;
+        this.iri = prefix + ":" + uniqueIdentifier;
         this.triples = new HashMap<UUID, EDMProvTriple>();
         
         EDMProvBaseElement.format.setTimeZone(TimeZone.getTimeZone("UTC"));
         
-        EDMProvTriple triple = new EDMProvTriple(this.iri, "rdfs:label", label, TRIPLE_TYPE.ANNOTATION_PROPERTY);
-        triples.put(triple.getID(), triple);
+        if (label!=null) {
+        	EDMProvTriple triple = new EDMProvTriple(this.iri, "rdfs:label", label, TRIPLE_TYPE.ANNOTATION_PROPERTY);
+        	triples.put(triple.getID(), triple);
+        }
     }
     
     /**
@@ -96,22 +94,9 @@ public class EDMProvBaseElement {
     public String toString() {
     	String contents = "[" + this.getProvType() + "] " + this.iri + "\n";
     	for(Entry<UUID, EDMProvTriple> e: this.triples.entrySet()) {
-    		contents += "\t" + "[" + e.getValue().getType() + "] " + e.getValue().getSubject() + " "
-    		+ e.getValue().getPredicate() + " " + e.getValue().getObject() + "\n";
+    		contents += "\t" + e.getValue().toString() + "\n";
     	}
     	return contents;
-    }
-    
-    public UUID getInstanceID() {
-        return instanceID;
-    }
-    
-    /**
-     * 
-     * @return the type of the element (Agent, Entity or Activity)
-     */
-    public PROV_TYPE getProvType() {
-        return provType;
     }
     
     /**
@@ -132,15 +117,6 @@ public class EDMProvBaseElement {
     }
     
     /**
-     * Returns all triples
-     * 
-     * @return all the triples of the element
-     */
-    public HashMap<UUID, EDMProvTriple> getTriples() {
-      return triples;
-    }
-
-    /**
      * Returns triples of a specific type and/or prefix.
      * null means it isn't a restriction, so getTriples(null, null);
      * returns the exact same result as getTriples();
@@ -158,7 +134,7 @@ public class EDMProvBaseElement {
             	 continue;
     		}
     		//check for prefix if applicable
-    		if (prefix !=null && !e.getValue().getPrefix().equals(prefix)) {
+    		if (prefix !=null && !e.getValue().getPredicatePrefix().equals(prefix)) {
     			continue;
     		}
         	result.put(e.getKey(), e.getValue());
@@ -244,6 +220,8 @@ public class EDMProvBaseElement {
     	//TODO: what if this is called on an existing element (already in store)?
     	this.removeTriple(this.iri, "rdf:type", c);
     }
+    
+    //GETTERS/SETTERS//////////////////////////////////////////////////////////////////////////////
 
     /**
      * Get the element's IRI
@@ -257,6 +235,34 @@ public class EDMProvBaseElement {
 
 	protected void setIri(String iri) {
 		this.iri = iri;
+	}
+	
+    public UUID getInstanceID() {
+        return instanceID;
+    }
+    
+    public PROV_TYPE getProvType() {
+        return provType;
+    }
+
+    public HashMap<UUID, EDMProvTriple> getTriples() {
+        return triples;
+    }
+
+    public String getPrefix() {
+		return prefix;
+	}
+
+	public void setPrefix(String prefix) {
+		this.prefix = prefix;
+	}
+
+	public String getUniqueIdentifier() {
+		return uniqueIdentifier;
+	}
+
+	public void setUniqueIdentifier(String uniqueIdentifier) {
+		this.uniqueIdentifier = uniqueIdentifier;
 	}
 
 }

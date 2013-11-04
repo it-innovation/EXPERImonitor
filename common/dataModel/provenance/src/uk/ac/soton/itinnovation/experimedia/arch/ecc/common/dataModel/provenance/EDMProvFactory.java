@@ -29,20 +29,34 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.zip.DataFormatException;
 
+import javax.xml.datatype.DatatypeConfigurationException;
+
 public class EDMProvFactory {
 	
+	public static final String FALLBACK_PREFIX = "experimedia";
+	
 	private static EDMProvFactory factory = null;
+	public static String prefix = null;
 	private HashMap<String, EDMProvBaseElement> allProvElements;
 	private HashMap<String, EDMProvBaseElement> currentProvReportElements;
 	
-	private EDMProvFactory() {
+	private EDMProvFactory(String prefix) {
+		this.setPrefix(prefix);
 		init();
 	}
+	
+	public static synchronized EDMProvFactory getInstance() {
+		if (prefix!=null) {
+			return getInstance(prefix);
+		} else {
+			return getInstance(FALLBACK_PREFIX);
+		}
+	}
 
-  public static synchronized EDMProvFactory getInstance() {
-    if (factory==null) {
-        factory = new EDMProvFactory();
-        }
+	public static synchronized EDMProvFactory getInstance(String prefix) {
+		if (factory==null) {
+			factory = new EDMProvFactory(prefix);
+		}
     
         return factory;
     }
@@ -52,85 +66,89 @@ public class EDMProvFactory {
 		currentProvReportElements = new HashMap<String, EDMProvBaseElement>();
 	}
 	
-	public EDMAgent getAgent(String iri) throws DataFormatException {
-		return getAgent(iri, null);
+	public EDMAgent getOrCreateAgent(String uniqueIdentifier, String label) throws DataFormatException, DatatypeConfigurationException {
+		return (EDMAgent) this.getOrCreateElement(EDMProvFactory.prefix, uniqueIdentifier, label, EDMProvBaseElement.PROV_TYPE.ePROV_AGENT);
 	}
 	
-	public EDMAgent getAgent(String iri, String label) throws DataFormatException {
-		EDMAgent agent = (EDMAgent) this.getElement(iri, label, EDMProvBaseElement.PROV_TYPE.ePROV_AGENT);
-		if (!agent.contains(new EDMProvTriple(iri,"rdf:type","prov:Agent"))) {
-			throw new DataFormatException("The prov element you tried to get already exists but is not an EDMAgent.");
-		}
-		return agent;
+	public EDMActivity getOrCreateActivity(String uniqueIdentifier, String label) throws DataFormatException, DatatypeConfigurationException {
+		return (EDMActivity) this.getOrCreateElement(EDMProvFactory.prefix, uniqueIdentifier, label, EDMProvBaseElement.PROV_TYPE.ePROV_ACTIVITY);
 	}
 	
-	public EDMActivity getActivity(String iri) throws DataFormatException {
-		return getActivity(iri, null);
+	public EDMEntity getOrCreateEntity(String uniqueIdentifier, String label) throws DataFormatException, DatatypeConfigurationException {
+		return  (EDMEntity) this.getOrCreateElement(EDMProvFactory.prefix, uniqueIdentifier, label, EDMProvBaseElement.PROV_TYPE.ePROV_ENTITY);
 	}
-	
-	public EDMActivity getActivity(String iri, String label) throws DataFormatException {
-		EDMActivity activity = (EDMActivity) this.getElement(iri, label, EDMProvBaseElement.PROV_TYPE.ePROV_ACTIVITY);
-		if (!activity.contains(new EDMProvTriple(iri,"rdf:type","prov:Activity"))) {
-			throw new DataFormatException("The prov element you tried to get already exists but is not an EDMActivity.");
-		}
-		return activity;
-	}
-	
-	public EDMEntity getEntity(String iri) throws DataFormatException {
-		return getEntity(iri, null);
-	}
-	
-	public EDMEntity getEntity(String iri, String label) throws DataFormatException {
-		EDMEntity entity = (EDMEntity) this.getElement(iri, label, EDMProvBaseElement.PROV_TYPE.ePROV_ENTITY);
-		if (!entity.contains(new EDMProvTriple(iri,"rdf:type","prov:Entity"))) {
-			throw new DataFormatException("The prov element you tried to get already exists but is not an EDMEntity.");
-		}
-		return entity;
-	}
-  
-  public void elementUpdated(EDMProvBaseElement element) {
-      if (element != null) {
-          String iri = element.getIri();
-          
-          if ( !currentProvReportElements.containsKey(iri) )
-              currentProvReportElements.put(iri, element);
-      }
-  }
 
-	public EDMProvBaseElement getElement(String iri, String label, EDMProvBaseElement.PROV_TYPE type) {
-		if (allProvElements.containsKey(iri)) {
-			return allProvElements.get(iri);
+	private EDMProvBaseElement getOrCreateElement(String prefix, String uniqueIdentifier, String label, EDMProvBaseElement.PROV_TYPE type) throws DatatypeConfigurationException, DataFormatException {
+		if (allProvElements.containsKey(prefix + ":" + uniqueIdentifier)) {
+			return allProvElements.get(prefix + ":" + uniqueIdentifier);
 		} else {
-			EDMProvBaseElement element = null;
+			EDMProvBaseElement element = factory.createElement(uniqueIdentifier, label, type);
+
+			String owlClass = "";
 			switch (type) {
-			case ePROV_AGENT:
-				element = new EDMAgent(label);
-				break;
-			case ePROV_ACTIVITY:
-				element = new EDMActivity(label);
-				break;
-			case ePROV_ENTITY:
-				element = new EDMEntity(label);
-				break;
-			default:
-				break;
+				case ePROV_ACTIVITY:
+					owlClass = "prov:Activity";
+					break;
+				case ePROV_AGENT:
+					owlClass = "prov:Agent";
+					break;
+				case ePROV_ENTITY:
+					owlClass = "prov:Entity";
+					break;
+				default:
+					throw new DataFormatException("Please specify a PROV_TYPE!");
 			}
-      
-			allProvElements.put(iri, element);
-			currentProvReportElements.put(iri, element);
+			
+			if (!element.contains(new EDMProvTriple(prefix + ":" + uniqueIdentifier,"rdf:type",owlClass))) {
+				throw new DataFormatException("The prov element you tried to get already exists but is not a " + owlClass);
+			}
       
 			return element;
 		}
 	}
+	
+	public EDMProvBaseElement createElement(String uniqueIdentifier, String label, EDMProvBaseElement.PROV_TYPE type) throws DatatypeConfigurationException {
+		
+		EDMProvBaseElement element = null;
+		
+		switch (type) {
+			case ePROV_AGENT:
+				element = new EDMAgent(factory.getPrefix(), uniqueIdentifier, label);
+				break;
+			case ePROV_ACTIVITY:
+				element = new EDMActivity(factory.getPrefix(), uniqueIdentifier, label);
+				break;
+			case ePROV_ENTITY:
+				element = new EDMEntity(factory.getPrefix(), uniqueIdentifier, label);
+				break;
+			default:
+				throw new DatatypeConfigurationException(type + " is not a correct provenance type. Please use ePROV_AGENT, ePROV_ACTIVITY or ePROV_ENTITY.");
+		}
+		
+		if (element!=null) {
+			allProvElements.put(prefix + ":" + uniqueIdentifier, element);
+			currentProvReportElements.put(prefix + ":" + uniqueIdentifier, element);
+		}
+		return element;
+	}
+	
+	public void elementUpdated(EDMProvBaseElement element) {
+		if (element != null) {
+			String iri = element.getIri();
+          
+			if ( !currentProvReportElements.containsKey(iri) )
+				currentProvReportElements.put(iri, element);
+		}
+	}
   
-  public EDMProvReport createProvReport()
-  {
-    EDMProvReport report = new EDMProvReport( currentProvReportElements );
+	public EDMProvReport createProvReport()
+	{
+		EDMProvReport report = new EDMProvReport( currentProvReportElements );
     
-    currentProvReportElements.clear();
+		currentProvReportElements.clear();
     
-    return report;
-  }
+		return report;
+	}
 	
 	public String toString() {
 		String contents = "EDMProvFactory contents:\n########################\n";
@@ -139,4 +157,19 @@ public class EDMProvFactory {
 		}
 		return contents;
 	}
+	
+	//GETTERS/SETTERS//////////////////////////////////////////////////////////////////////////////
+
+	public String getPrefix() {
+		if (prefix!=null) {
+			return prefix;
+		} else {
+			return FALLBACK_PREFIX;
+		}
+	}
+
+	public void setPrefix(String prefix) {
+		EDMProvFactory.prefix = prefix;
+	}
+
 }

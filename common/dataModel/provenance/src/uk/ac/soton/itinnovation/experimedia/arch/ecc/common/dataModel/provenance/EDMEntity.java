@@ -27,21 +27,23 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenanc
 
 import java.util.zip.DataFormatException;
 
+import javax.xml.datatype.DatatypeConfigurationException;
+
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvTriple.TRIPLE_TYPE;
 
 public class EDMEntity extends EDMProvBaseElement {
 
-	public EDMEntity(String label) {
-		super(label);
+	public EDMEntity(String prefix, String uniqueIdentifier, String label) {
+		super(prefix, uniqueIdentifier, label);
     
 		this.provType = PROV_TYPE.ePROV_ENTITY;
 		this.addOwlClass("prov:Entity");
 	}
 	
-	public EDMActivity startActivity(String activityLabel) throws DataFormatException {
-		EDMActivity newActivity = EDMProvFactory.getInstance().getActivity(activityLabel);
-    
-    EDMProvFactory.getInstance().elementUpdated(this); // Queue to re-send in next report
+	public EDMActivity startActivity(String uniqueIdentifier, String label) throws DataFormatException, DatatypeConfigurationException {
+		EDMActivity newActivity = (EDMActivity) EDMProvFactory.getInstance().createElement(uniqueIdentifier, label, PROV_TYPE.ePROV_ACTIVITY);
+
+		EDMProvFactory.getInstance().elementUpdated(this); // Queue to re-send in next report
 		
 		return newActivity;
 	}

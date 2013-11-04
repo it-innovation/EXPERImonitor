@@ -38,29 +38,30 @@ public class EDMProvClassesTest {
 
 	public static void main(String[] args) {
 		
-		EDMProvFactory factory = EDMProvFactory.getInstance();
+		EDMProvFactory factory = EDMProvFactory.getInstance("experimedia");
 		
 		try {
 			//This is Bob.
-			EDMAgent bob = factory.getAgent("Bob");
+			EDMAgent bob = factory.getOrCreateAgent("facebook_154543445", "Bob");
 			bob.addOwlClass("foaf:Person");
 			
 			//This is a video about Schladming.
-			EDMEntity video = factory.getEntity("reallyCoolFacebookVideo");
+			EDMEntity video = factory.getOrCreateEntity("facebook_1545879879", "reallyCoolFacebookVideo");
 			
 			//Bob starts to watch the video and pauses it when he sees something interesting.
-			EDMActivity watchVideo = bob.startActivity("WatchVideo");
+			EDMActivity watchVideo = bob.startActivity("activity123", "WatchVideo");
 			watchVideo.useEntity(video);
-			EDMActivity pauseVideo = bob.doDiscreteActivity("PauseVideo");
+			EDMActivity pauseVideo = bob.doDiscreteActivity("activity234", "PauseVideo");
 			pauseVideo.useEntity(video);
 			
 			//Bob logs in to his FB account and posts something
-			EDMActivity writePost = bob.startActivity("WritePost");
-			writePost.generateEntity("BobsFacebookPost", "1280512800");
+			EDMActivity writePost = bob.startActivity("activity345", "WritePost");
+			writePost.generateEntity("facebook_98763242347", "BobsFacebookPost", "1280512800");
 			bob.stopActivity(writePost);
 			
 			//Bob goes back to watch the rest of the video.
-			EDMActivity resumeVideo = bob.doDiscreteActivity("ResumeVideo");
+			EDMAgent copyOfBob = factory.getOrCreateAgent("facebook_154543445", "Bob");
+			EDMActivity resumeVideo = copyOfBob.doDiscreteActivity("activity456", "ResumeVideo");
 			resumeVideo.useEntity(video);
 			bob.stopActivity(watchVideo);
 		

@@ -41,7 +41,7 @@ public class EDMProvTriple {
 	private String subject;
 	private String predicate;
 	private String object;
-	private String prefix;
+	private String predicatePrefix;
 	private TRIPLE_TYPE type;
 	
 	public EDMProvTriple(String subject, String predicate, String object) {
@@ -54,11 +54,11 @@ public class EDMProvTriple {
 		this.predicate = predicate;
 		this.object = object;
 		this.type = type;
-		//get prefix from predicate
+		//get predicatePrefix from predicate
 		if (this.predicate.indexOf(":")>0) {
-			this.prefix = predicate.substring(0, predicate.indexOf(":")).trim();
+			this.predicatePrefix = predicate.substring(0, predicate.indexOf(":")).trim();
 		} else {
-			this.prefix = null;
+			this.predicatePrefix = null;
 		}
 		//attach predicate from type
 		if (this.type==TRIPLE_TYPE.CLASS_ASSERTION &&
@@ -71,7 +71,13 @@ public class EDMProvTriple {
 		
 	}
 	
+	public String toString() {
+		return "[" + getType() + "] " + getSubject() + " " + getPredicate() + " " + getObject();
+	}
+	
 	public boolean equals(EDMProvTriple t) {
+		//TODO: special cases: full prefix is case insensitive but individual name is case sensitive.
+		// not sure about predicate.
 		if (this.subject.equals(t.getSubject())
 			&& this.predicate.equals(t.getPredicate())
 			&& this.object.equals(t.getObject())) {
@@ -81,16 +87,18 @@ public class EDMProvTriple {
 		}
 	}
   
-  public boolean hasPredicate(String pred) {
-    if (pred == null || predicate == null) 
-      return false;
+	public boolean hasPredicate(String pred) {
+		if (pred == null || predicate == null) 
+			return false;
     
-    if (predicate.equals(pred))
-      return true;
+		if (predicate.equals(pred))
+			return true;
     
-    return false;
-  }
-  
+		return false;
+	}
+
+	//GETTERS/SETTERS//////////////////////////////////////////////////////////////////////////////
+	
 	public UUID getID() {
 		return tripleID;
 	}
@@ -127,12 +135,12 @@ public class EDMProvTriple {
 		this.type = type;
 	}
 
-	public String getPrefix() {
-		return prefix;
+	public String getPredicatePrefix() {
+		return predicatePrefix;
 	}
 
-	public void setPrefix(String prefix) {
-		this.prefix = prefix;
+	public void setPredicatePrefix(String prefix) {
+		this.predicatePrefix = prefix;
 	}
 
 }
