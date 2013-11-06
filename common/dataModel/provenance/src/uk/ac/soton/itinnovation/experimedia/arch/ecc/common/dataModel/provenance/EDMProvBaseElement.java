@@ -27,19 +27,17 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenanc
 
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.TimeZone;
 import java.util.UUID;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvTriple.TRIPLE_TYPE;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMTriple.TRIPLE_TYPE;
 
 /**
- * @author sw
- *
  * This is a class which implements the functionality shared by the three Provenance elements
  * (Agent, Activity and Entity). All the information for prov individuals is stored in this
  * class in triple form.
- * 
  */
 public class EDMProvBaseElement {
 
@@ -48,9 +46,9 @@ public class EDMProvBaseElement {
     protected String iri;
     protected String prefix;
     protected String uniqueIdentifier;
-	protected HashMap<UUID, EDMProvTriple> triples;
+	protected HashMap<UUID, EDMTriple> triples;
     
-    protected static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z^^xsd:dateTime'");
+    protected static SimpleDateFormat format = new SimpleDateFormat("\"yyyy-MM-dd'T'HH:mm:ss'Z\"^^xsd:dateTime'");
 	
     public enum PROV_TYPE { ePROV_UNKNOWN_TYPE, 
                             ePROV_ENTITY, 
@@ -61,7 +59,8 @@ public class EDMProvBaseElement {
      * Creates an EDMProvBaseElement
      * 
      * @param prefix the prefix of the element
-     * @param a unique identifier. This could be something like domain_uniqueID, e.g. facebook_56735762153. It needs to be unique across clients.
+     * @param a unique identifier. This could be something like domain_uniqueID, e.g. facebook_56735762153.
+     * 		  It needs to be unique across clients.
      * @param label a human readable name
      */
     protected EDMProvBaseElement(String prefix, String uniqueIdentifier, String label) {
@@ -69,12 +68,12 @@ public class EDMProvBaseElement {
     	this.prefix = prefix;
     	this.uniqueIdentifier = uniqueIdentifier;
         this.iri = prefix + ":" + uniqueIdentifier;
-        this.triples = new HashMap<UUID, EDMProvTriple>();
+        this.triples = new HashMap<UUID, EDMTriple>();
         
         EDMProvBaseElement.format.setTimeZone(TimeZone.getTimeZone("UTC"));
         
         if (label!=null) {
-        	EDMProvTriple triple = new EDMProvTriple(this.iri, "rdfs:label", label, TRIPLE_TYPE.ANNOTATION_PROPERTY);
+        	EDMTriple triple = new EDMTriple(this.iri, "rdfs:label", "\"" + label + "\"^^xsd:string", TRIPLE_TYPE.ANNOTATION_PROPERTY);
         	triples.put(triple.getID(), triple);
         }
     }
@@ -85,15 +84,20 @@ public class EDMProvBaseElement {
      * @return the label or IRI
      */
     public String getFriendlyName() {
-    	for (Entry<UUID, EDMProvTriple> e: this.getTriples(null, "rdfs:label").entrySet()) {
-    		return e.getValue().getObject();
+    	for (Entry<UUID, EDMTriple> e: this.getTriplesWithPredicate("rdfs:label").entrySet()) {
+    		String friendlyName = e.getValue().getObject();
+    		//cut type in case of "proper" usage (e.g. "Label"^^xsd:string)
+    		if (friendlyName.indexOf("\"")>0) {
+    			friendlyName = friendlyName.substring(friendlyName.indexOf("\"") + 1, friendlyName.lastIndexOf("\""));
+    		}
+    		return friendlyName;
     	}
     	return this.iri;
     }
     
     public String toString() {
-    	String contents = "[" + this.getProvType() + "] " + this.iri + "\n";
-    	for(Entry<UUID, EDMProvTriple> e: this.triples.entrySet()) {
+    	String contents = "[" + this.getProvType() + "] " + this.getFriendlyName() + " (" + this.iri + ")\n";
+    	for(Entry<UUID, EDMTriple> e: this.triples.entrySet()) {
     		contents += "\t" + e.getValue().toString() + "\n";
     	}
     	return contents;
@@ -105,15 +109,30 @@ public class EDMProvBaseElement {
      * @param triple The triple for which it should be checked
      * @return Whether that triple is already in the element or not
      */
-    public boolean contains(EDMProvTriple triple) {
+    public boolean contains(EDMTriple triple) {
     	boolean contains = false;
-    	for (Entry<UUID, EDMProvTriple> e: this.triples.entrySet()) {
+    	for (Entry<UUID, EDMTriple> e: this.triples.entrySet()) {
     		if (e.getValue().equals(triple)) {
     			contains = true;
     			break;
     		}
     	}
     	return contains;
+    }
+    
+    /**
+     * Get all the prefixes from triples in this element.
+     * 
+     * @return the prefixes
+     */
+    public HashSet<String> getPrefixes() {
+    	HashSet<String> prefixes = new HashSet<String>();
+    	for (Entry<UUID, EDMTriple> e: this.triples.entrySet()) {
+    		if (!prefixes.contains(e.getValue().getPredicatePrefix())) {
+    			prefixes.add(e.getValue().getPredicatePrefix());
+    		}
+    	}
+    	return prefixes;
     }
     
     /**
@@ -124,11 +143,10 @@ public class EDMProvBaseElement {
      * @param type the type of triples that should be returned
      * @return the triples of the specified type
      */
-    public HashMap<UUID, EDMProvTriple> getTriples(EDMProvTriple.TRIPLE_TYPE type, String prefix) {
-    	HashMap<UUID, EDMProvTriple> result = new HashMap<UUID, EDMProvTriple>();
-
+    public HashMap<UUID, EDMTriple> getTriples(EDMTriple.TRIPLE_TYPE type, String prefix) {
+    	HashMap<UUID, EDMTriple> result = new HashMap<UUID, EDMTriple>();
     	//check all triples
-    	for (Entry<UUID, EDMProvTriple> e : triples.entrySet()) {
+    	for (Entry<UUID, EDMTriple> e : triples.entrySet()) {
     		//check for type if applicable
     		if (type!=null && e.getValue().getType()!=type) {
             	 continue;
@@ -139,7 +157,6 @@ public class EDMProvBaseElement {
     		}
         	result.put(e.getKey(), e.getValue());
     	}
-
     	return result;
     }
     
@@ -149,11 +166,11 @@ public class EDMProvBaseElement {
      * @param pred The predicate of the triple
      * @return All the triples that match the given predicate
      */
-    public HashMap<UUID, EDMProvTriple> getTriplesWithPredicate(String pred) {
-      HashMap<UUID, EDMProvTriple> result = new HashMap<UUID, EDMProvTriple>();
+    public HashMap<UUID, EDMTriple> getTriplesWithPredicate(String pred) {
+      HashMap<UUID, EDMTriple> result = new HashMap<UUID, EDMTriple>();
       
       if (pred != null) {
-        for (Entry<UUID, EDMProvTriple> e : triples.entrySet()) {
+        for (Entry<UUID, EDMTriple> e : triples.entrySet()) {
           if (e.getValue().hasPredicate(pred)) {
             result.put(e.getKey(), e.getValue());
           }
@@ -173,12 +190,19 @@ public class EDMProvBaseElement {
     	this.addTriple(predicate, object, TRIPLE_TYPE.UNKNOWN_TYPE);
     }
     
+    /**
+     * Adds a triple of a specific typr to the element
+     * 
+     * @param predicate the predicate of the new triple
+     * @param object the object of the new triple
+     * @param type the triple type
+     */
     public void addTriple(String predicate, String object, TRIPLE_TYPE type) {
     	this.addTriple(this.iri, predicate, object, type);
     }
     
-    protected void addTriple(String subject, String predicate, String object, TRIPLE_TYPE type) {
-    	EDMProvTriple newTriple = new EDMProvTriple(subject, predicate, object, type);
+    private void addTriple(String subject, String predicate, String object, TRIPLE_TYPE type) {
+    	EDMTriple newTriple = new EDMTriple(subject, predicate, object, type);
     	if (!this.triples.containsValue(newTriple)) {
     		this.triples.put(newTriple.getID(), newTriple);
     	}
@@ -195,8 +219,8 @@ public class EDMProvBaseElement {
     	this.removeTriple(this.iri, predicate, object);
     }
     
-    protected void removeTriple(String subject, String predicate, String object) {
-    	EDMProvTriple triple = new EDMProvTriple(subject, predicate, object);
+    private void removeTriple(String subject, String predicate, String object) {
+    	EDMTriple triple = new EDMTriple(subject, predicate, object);
     	if (this.triples.containsValue(triple)) {
     		this.triples.remove(triple);
     	}
@@ -245,7 +269,7 @@ public class EDMProvBaseElement {
         return provType;
     }
 
-    public HashMap<UUID, EDMProvTriple> getTriples() {
+    public HashMap<UUID, EDMTriple> getTriples() {
         return triples;
     }
 
@@ -253,7 +277,7 @@ public class EDMProvBaseElement {
 		return prefix;
 	}
 
-	public void setPrefix(String prefix) {
+	protected void setPrefix(String prefix) {
 		this.prefix = prefix;
 	}
 
@@ -261,7 +285,7 @@ public class EDMProvBaseElement {
 		return uniqueIdentifier;
 	}
 
-	public void setUniqueIdentifier(String uniqueIdentifier) {
+	protected void setUniqueIdentifier(String uniqueIdentifier) {
 		this.uniqueIdentifier = uniqueIdentifier;
 	}
 

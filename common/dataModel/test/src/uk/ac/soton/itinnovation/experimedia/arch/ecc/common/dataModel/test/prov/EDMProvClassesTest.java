@@ -60,7 +60,7 @@ public class EDMProvClassesTest {
 			bob.stopActivity(writePost);
 			
 			//Bob goes back to watch the rest of the video.
-			EDMAgent copyOfBob = factory.getOrCreateAgent("facebook_154543445", "Bob");
+			EDMAgent copyOfBob = factory.getOrCreateAgent("facebook_154543445", null);
 			EDMActivity resumeVideo = copyOfBob.doDiscreteActivity("activity456", "ResumeVideo");
 			resumeVideo.useEntity(video);
 			bob.stopActivity(watchVideo);

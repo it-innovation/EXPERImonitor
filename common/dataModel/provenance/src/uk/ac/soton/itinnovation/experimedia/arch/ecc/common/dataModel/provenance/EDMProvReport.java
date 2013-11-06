@@ -31,14 +31,14 @@ public class EDMProvReport
 {
   private UUID statementID;
   private Date statementCreationDate;
-  
-  private HashMap<String, EDMProvBaseElement> provElements;
+
+  private HashMap<UUID, EDMTriple> triples;
   
   public EDMProvReport()
   {
     statementID           = UUID.randomUUID();
     statementCreationDate = new Date();
-    provElements          = new HashMap<String, EDMProvBaseElement>();
+    triples               = new HashMap<UUID, EDMTriple>();
   }
   
   public UUID getID()
@@ -47,22 +47,17 @@ public class EDMProvReport
   public Date getCopyOfDate()
   { return new Date( statementCreationDate.getTime() ); }
   
-  public EDMProvBaseElement getElement( String iriID )
-  {
-    return provElements.get( iriID );
-  }
-  
-  public HashMap<String, EDMProvBaseElement> getProvElements()
-  {
-    return provElements;
-  }
-  
+	public HashMap<UUID, EDMTriple> getTriples() {
+		return triples;
+	}
+
   // Protected methods ---------------------------------------------------------
-  protected EDMProvReport( HashMap<String, EDMProvBaseElement> pElements )
-  {
-    this();
-    
-    if ( pElements != null && !pElements.isEmpty() )
-      provElements.putAll( pElements );
-  }
+  
+	protected EDMProvReport(HashMap<UUID, EDMTriple> triples) {
+		this();
+		
+		if (triples!=null && !triples.isEmpty()) {
+			this.triples.putAll(triples);
+		}
+	}
 }

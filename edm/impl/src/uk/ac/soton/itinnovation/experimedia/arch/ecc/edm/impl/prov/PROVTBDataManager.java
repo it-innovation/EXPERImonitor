@@ -99,7 +99,7 @@ class PROVTBDataManager
     return activity;
   }
   
-  public Statement createEntityRelation( EDMProvTriple triple ) throws Exception
+  public Statement createEntityRelation( EDMTriple triple ) throws Exception
   {
     Statement statement = null;
     
@@ -182,7 +182,7 @@ class PROVTBDataManager
     return statement;
   }
   
-  public Statement createAgentRelation( EDMProvTriple triple ) throws Exception
+  public Statement createAgentRelation( EDMTriple triple ) throws Exception
   {
     Statement statement = null;
     
@@ -207,7 +207,7 @@ class PROVTBDataManager
     return statement;
   }
   
-  public Statement createActivityRelation( EDMProvTriple triple ) throws Exception
+  public Statement createActivityRelation( EDMTriple triple ) throws Exception
   {
     Statement statement = null;
     

@@ -153,15 +153,15 @@ public class PROVToolBoxUtil
       
       if ( !lhsOUT.getIri().equals( rhs.getIri()) ) throw new Exception( "Could not integrate PROV elements: IRIs are not identical" );
       
-      LinkedList<EDMProvTriple> newTriples = new LinkedList<EDMProvTriple>();
-      LinkedList<EDMProvTriple> rhsTriples = rhs.getTriples();
+      LinkedList<EDMTriple> newTriples = new LinkedList<EDMTriple>();
+      LinkedList<EDMTriple> rhsTriples = rhs.getTriples();
       
       // Create a list of new triples for this element
-      for ( EDMProvTriple triple : rhsTriples )
+      for ( EDMTriple triple : rhsTriples )
         if ( !lhsOUT.contains(triple) ) newTriples.add( triple );
       
       // Add new triples into OUT element
-      for ( EDMProvTriple triple : newTriples )
+      for ( EDMTriple triple : newTriples )
         lhsOUT.addTriple( triple.getSubject(),
                             triple.getPredicate(),
                             triple.getObject() );
@@ -196,7 +196,7 @@ public class PROVToolBoxUtil
           {
             case ePROV_ENTITY :
             {
-              for ( EDMProvTriple triple : el.getTriples() )
+              for ( EDMTriple triple : el.getTriples() )
                 try
                 { 
                   ptdb.createEntityRelation( triple ); 
@@ -207,7 +207,7 @@ public class PROVToolBoxUtil
 
             case ePROV_AGENT :
             {
-              for ( EDMProvTriple triple : el.getTriples() )
+              for ( EDMTriple triple : el.getTriples() )
                 try
                 {
                   ptdb.createAgentRelation( triple );
@@ -219,7 +219,7 @@ public class PROVToolBoxUtil
 
             case ePROV_ACTIVITY :
             {
-              for ( EDMProvTriple triple : el.getTriples() )
+              for ( EDMTriple triple : el.getTriples() )
                 try
                 {
                   ptdb.createActivityRelation( triple );

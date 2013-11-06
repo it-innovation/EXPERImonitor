@@ -29,7 +29,7 @@ import java.util.zip.DataFormatException;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvTriple.TRIPLE_TYPE;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMTriple.TRIPLE_TYPE;
 
 public class EDMEntity extends EDMProvBaseElement {
 
@@ -41,7 +41,7 @@ public class EDMEntity extends EDMProvBaseElement {
 	}
 	
 	public EDMActivity startActivity(String uniqueIdentifier, String label) throws DataFormatException, DatatypeConfigurationException {
-		EDMActivity newActivity = (EDMActivity) EDMProvFactory.getInstance().createElement(uniqueIdentifier, label, PROV_TYPE.ePROV_ACTIVITY);
+		EDMActivity newActivity = (EDMActivity) EDMProvFactory.getInstance().getOrCreateActivity(uniqueIdentifier, label);
 
 		EDMProvFactory.getInstance().elementUpdated(this); // Queue to re-send in next report
 		
@@ -49,19 +49,19 @@ public class EDMEntity extends EDMProvBaseElement {
 	}
 	
 	public void endActivity(EDMActivity activity) {
-		activity.addTriple(activity.iri, "prov:wasEndedBy", this.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
+		activity.addTriple("prov:wasEndedBy", this.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
 	}
 
 	public void quoteFrom(EDMEntity entity) {
-		this.addTriple(this.iri, "prov:wasQuotedFrom", entity.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
+		this.addTriple("prov:wasQuotedFrom", entity.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
 	}
 	
 	public void hadPrimarySource(EDMEntity entity) {
-		this.addTriple(this.iri, "prov:hadPrimarySource", entity.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
+		this.addTriple("prov:hadPrimarySource", entity.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
 	}
 
 	public void wasRevisionOf(EDMEntity entity) {
-		this.addTriple(this.iri, "prov:wasRevisionOf", entity.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
+		this.addTriple("prov:wasRevisionOf", entity.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
 	}
 
 }

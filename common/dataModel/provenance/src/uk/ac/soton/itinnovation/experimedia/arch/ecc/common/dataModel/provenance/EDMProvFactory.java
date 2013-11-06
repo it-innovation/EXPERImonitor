@@ -27,24 +27,37 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenanc
 
 import java.util.HashMap;
 import java.util.Map.Entry;
+import java.util.UUID;
 import java.util.zip.DataFormatException;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 
+/**
+ * The EDMProvFactory is a singleton factory which helps create provenance.
+ */
 public class EDMProvFactory {
 	
 	public static final String FALLBACK_PREFIX = "experimedia";
 	
 	private static EDMProvFactory factory = null;
 	public static String prefix = null;
+	
 	private HashMap<String, EDMProvBaseElement> allProvElements;
-	private HashMap<String, EDMProvBaseElement> currentProvReportElements;
+	
+	//related to report
+	private HashMap<UUID, EDMTriple> currentTriples;
+	private HashMap<UUID, EDMTriple> sentTriples;
 	
 	private EDMProvFactory(String prefix) {
 		this.setPrefix(prefix);
 		init();
 	}
 	
+	/**
+	 * Returns a factory with either the prefix it already has or the fallback prefix.
+	 * 
+	 * @return the factory
+	 */
 	public static synchronized EDMProvFactory getInstance() {
 		if (prefix!=null) {
 			return getInstance(prefix);
@@ -53,9 +66,16 @@ public class EDMProvFactory {
 		}
 	}
 
+	/**
+	 * Returns a factory with the desired prefix. Will override the prefix if it exists.
+	 * @param prefix the desired prefix
+	 * @return
+	 */
 	public static synchronized EDMProvFactory getInstance(String prefix) {
 		if (factory==null) {
 			factory = new EDMProvFactory(prefix);
+		} else {
+			factory.setPrefix(prefix);
 		}
     
         return factory;
@@ -63,17 +83,45 @@ public class EDMProvFactory {
     
 	private void init() {
 		allProvElements = new HashMap<String, EDMProvBaseElement>();
-		currentProvReportElements = new HashMap<String, EDMProvBaseElement>();
+		currentTriples = new HashMap<UUID, EDMTriple>();
+		sentTriples = new HashMap<UUID, EDMTriple>();
 	}
 	
+	/**
+	 * Get an agent (new or existing) identified by its unique ID from the factory
+	 * 
+	 * @param uniqueIdentifier
+	 * @param label
+	 * @return the element
+	 * @throws DataFormatException
+	 * @throws DatatypeConfigurationException
+	 */
 	public EDMAgent getOrCreateAgent(String uniqueIdentifier, String label) throws DataFormatException, DatatypeConfigurationException {
 		return (EDMAgent) this.getOrCreateElement(EDMProvFactory.prefix, uniqueIdentifier, label, EDMProvBaseElement.PROV_TYPE.ePROV_AGENT);
 	}
 	
+	/**
+	 * Get an activity (new or existing) identified by its unique ID from the factory
+	 * 
+	 * @param uniqueIdentifier
+	 * @param label
+	 * @return the element
+	 * @throws DataFormatException
+	 * @throws DatatypeConfigurationException
+	 */
 	public EDMActivity getOrCreateActivity(String uniqueIdentifier, String label) throws DataFormatException, DatatypeConfigurationException {
 		return (EDMActivity) this.getOrCreateElement(EDMProvFactory.prefix, uniqueIdentifier, label, EDMProvBaseElement.PROV_TYPE.ePROV_ACTIVITY);
 	}
 	
+	/**
+	 * Get an entity (new or existing) identified by its unique ID from the factory
+	 * 
+	 * @param uniqueIdentifier
+	 * @param label
+	 * @return the element
+	 * @throws DataFormatException
+	 * @throws DatatypeConfigurationException
+	 */
 	public EDMEntity getOrCreateEntity(String uniqueIdentifier, String label) throws DataFormatException, DatatypeConfigurationException {
 		return  (EDMEntity) this.getOrCreateElement(EDMProvFactory.prefix, uniqueIdentifier, label, EDMProvBaseElement.PROV_TYPE.ePROV_ENTITY);
 	}
@@ -99,7 +147,7 @@ public class EDMProvFactory {
 					throw new DataFormatException("Please specify a PROV_TYPE!");
 			}
 			
-			if (!element.contains(new EDMProvTriple(prefix + ":" + uniqueIdentifier,"rdf:type",owlClass))) {
+			if (!element.contains(new EDMTriple(prefix + ":" + uniqueIdentifier,"rdf:type",owlClass))) {
 				throw new DataFormatException("The prov element you tried to get already exists but is not a " + owlClass);
 			}
       
@@ -107,7 +155,7 @@ public class EDMProvFactory {
 		}
 	}
 	
-	public EDMProvBaseElement createElement(String uniqueIdentifier, String label, EDMProvBaseElement.PROV_TYPE type) throws DatatypeConfigurationException {
+	private EDMProvBaseElement createElement(String uniqueIdentifier, String label, EDMProvBaseElement.PROV_TYPE type) throws DatatypeConfigurationException {
 		
 		EDMProvBaseElement element = null;
 		
@@ -127,25 +175,39 @@ public class EDMProvFactory {
 		
 		if (element!=null) {
 			allProvElements.put(prefix + ":" + uniqueIdentifier, element);
-			currentProvReportElements.put(prefix + ":" + uniqueIdentifier, element);
+			
+			for (Entry<UUID, EDMTriple> e: element.triples.entrySet()) {
+				currentTriples.put(e.getKey(), e.getValue());
+			}
 		}
 		return element;
 	}
 	
+	/**
+	 * Update prov record after making changes to an element.
+	 * 
+	 * @param element the element that was updated
+	 */
 	public void elementUpdated(EDMProvBaseElement element) {
 		if (element != null) {
-			String iri = element.getIri();
-          
-			if ( !currentProvReportElements.containsKey(iri) )
-				currentProvReportElements.put(iri, element);
+
+			//add all the triples that haven't been processed yet into the current report
+			for (Entry<UUID, EDMTriple> e: element.triples.entrySet()) {
+				if (!currentTriples.containsKey(e.getKey()) && !sentTriples.containsKey(e.getKey())) {
+					currentTriples.put(e.getKey(), e.getValue());
+				}
+			}
 		}
 	}
   
+	/**
+	 * Create a prov report which contains all the elements that have been changed since the last time a report was created.
+	 * @return the report
+	 */
 	public EDMProvReport createProvReport()
 	{
-		EDMProvReport report = new EDMProvReport( currentProvReportElements );
-    
-		currentProvReportElements.clear();
+		EDMProvReport report = new EDMProvReport( currentTriples );
+		currentTriples.clear();
     
 		return report;
 	}
@@ -170,6 +232,14 @@ public class EDMProvFactory {
 
 	public void setPrefix(String prefix) {
 		EDMProvFactory.prefix = prefix;
+	}
+
+	public HashMap<UUID, EDMTriple> getSentTriples() {
+		return sentTriples;
+	}
+
+	public HashMap<UUID, EDMTriple> getCurrentTriples() {
+		return currentTriples;
 	}
 
 }

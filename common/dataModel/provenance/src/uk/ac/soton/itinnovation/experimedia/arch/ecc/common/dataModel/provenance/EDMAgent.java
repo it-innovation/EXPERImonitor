@@ -30,7 +30,7 @@ import java.util.zip.DataFormatException;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvTriple.TRIPLE_TYPE;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMTriple.TRIPLE_TYPE;
 
 public class EDMAgent extends EDMProvBaseElement {
 
@@ -47,9 +47,9 @@ public class EDMAgent extends EDMProvBaseElement {
 	public EDMActivity startActivity(String uniqueIdentifier, String label, String timestamp) throws DataFormatException, DatatypeConfigurationException {
 		EDMProvFactory factory = EDMProvFactory.getInstance();
 	    
-		EDMActivity newActivity = (EDMActivity) factory.createElement(uniqueIdentifier, label, PROV_TYPE.ePROV_ACTIVITY);
-		newActivity.addTriple(newActivity.iri, "prov:startedAtTime", format.format(new Date(Long.valueOf(timestamp)*1000)), TRIPLE_TYPE.DATA_PROPERTY);
-		newActivity.addTriple(newActivity.iri, "prov:wasStartedBy", this.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
+		EDMActivity newActivity = (EDMActivity) factory.getOrCreateActivity(uniqueIdentifier, label);
+		newActivity.addTriple("prov:startedAtTime", format.format(new Date(Long.valueOf(timestamp)*1000)), TRIPLE_TYPE.DATA_PROPERTY);
+		newActivity.addTriple("prov:wasStartedBy", this.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
     
 		factory.elementUpdated(this); // Queue to re-send in next report
     
@@ -85,7 +85,7 @@ public class EDMAgent extends EDMProvBaseElement {
 	}
 	
 	public void actOnBehalfOf(EDMAgent agent) {
-		this.addTriple(this.iri, "prov:actedOnBehalfOf", agent.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
+		this.addTriple("prov:actedOnBehalfOf", agent.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
     
 		EDMProvFactory.getInstance().elementUpdated(this); // Queue to re-send in next report
 	}

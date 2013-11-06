@@ -30,7 +30,7 @@ import java.util.zip.DataFormatException;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvTriple.TRIPLE_TYPE;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMTriple.TRIPLE_TYPE;
 
 
 public class EDMActivity extends EDMProvBaseElement {
@@ -52,9 +52,9 @@ public class EDMActivity extends EDMProvBaseElement {
 	public EDMEntity generateEntity(String uniqueIdentifier, String label, String timestamp) throws DataFormatException, DatatypeConfigurationException {
 		EDMProvFactory factory = EDMProvFactory.getInstance();
     
-		EDMEntity newEntity = (EDMEntity) factory.createElement(uniqueIdentifier, label, PROV_TYPE.ePROV_ENTITY);	
-		newEntity.addTriple(label, "prov:wasGeneratedBy", this.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
-		newEntity.addTriple(label, "prov:generatedAtTime", format.format(new Date(Long.valueOf(timestamp)*1000)), TRIPLE_TYPE.DATA_PROPERTY);
+		EDMEntity newEntity = (EDMEntity) factory.getOrCreateEntity(uniqueIdentifier, label);	
+		newEntity.addTriple("prov:wasGeneratedBy", this.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
+		newEntity.addTriple("prov:generatedAtTime", format.format(new Date(Long.valueOf(timestamp)*1000)), TRIPLE_TYPE.DATA_PROPERTY);
 		factory.elementUpdated(this); // Queue to re-send in next report
     
 		return newEntity;
@@ -65,9 +65,9 @@ public class EDMActivity extends EDMProvBaseElement {
     
 		String newUniqueIdentifier = entity.getUniqueIdentifier() + "_derivation_"
 			+ String.valueOf(System.currentTimeMillis() / 1000L);
-		EDMEntity derivation = (EDMEntity) factory.createElement(newUniqueIdentifier, derivationLabel, PROV_TYPE.ePROV_ENTITY);
+		EDMEntity derivation = factory.getOrCreateEntity(newUniqueIdentifier, derivationLabel);
 		
-		derivation.addTriple(derivation.iri, "prov:wasDerivedFrom", this.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
+		derivation.addTriple("prov:wasDerivedFrom", this.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
     
 		factory.elementUpdated(this); // Queue to re-send in next report
     
@@ -75,8 +75,8 @@ public class EDMActivity extends EDMProvBaseElement {
 	}
 	
 	public void invalidateEntity(EDMEntity entity, String timestamp) {
-		entity.addTriple(entity.iri, "prov:wasInvalidatedBy", this.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
-		entity.addTriple(entity.iri, "prov:invalidatedAtTime", format.format(new Date(Long.valueOf(timestamp)*1000)), TRIPLE_TYPE.DATA_PROPERTY);
+		entity.addTriple("prov:wasInvalidatedBy", this.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
+		entity.addTriple("prov:invalidatedAtTime", format.format(new Date(Long.valueOf(timestamp)*1000)), TRIPLE_TYPE.DATA_PROPERTY);
 	}
 	
 	public void invalidateEntity(EDMEntity entity) {
@@ -84,7 +84,7 @@ public class EDMActivity extends EDMProvBaseElement {
 	}
 	
 	public void associateWith(EDMAgent agent) {
-		agent.addTriple(agent.iri, "prov:wasAssociatedWith", this.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
+		agent.addTriple("prov:wasAssociatedWith", this.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
     
 		EDMProvFactory.getInstance().elementUpdated(this); // Queue to re-send in next report
 	}
@@ -95,20 +95,20 @@ public class EDMActivity extends EDMProvBaseElement {
 	}
 	
 	private void useEntity(String entity) {
-		this.addTriple(this.iri, "prov:used", entity, TRIPLE_TYPE.OBJECT_PROPERTY);
+		this.addTriple("prov:used", entity, TRIPLE_TYPE.OBJECT_PROPERTY);
     
 		EDMProvFactory.getInstance().elementUpdated(this); // Queue to re-send in next report
 	}
 	
 	public void informActivity(EDMActivity activity) {
-		activity.addTriple(activity.iri, "prov:wasInformedBy", this.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
+		activity.addTriple("prov:wasInformedBy", this.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
     
 		EDMProvFactory.getInstance().elementUpdated(this); // Queue to re-send in next report
 	}
 	
 	public void influenceActivity(EDMActivity activity) {
-		activity.addTriple(activity.iri, "prov:wasInfluencedBy", this.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
-		this.addTriple(this.iri, "prov:influenced", activity.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
+		activity.addTriple("prov:wasInfluencedBy", this.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
+		this.addTriple("prov:influenced", activity.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
 	}
 
 }

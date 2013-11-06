@@ -27,7 +27,13 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenanc
 
 import java.util.UUID;
 
-public class EDMProvTriple {
+/**
+ * 
+ * A class to handle RDF triples which use the short form, i.e.
+ * prefix:subject prefix:predicate prefix:object
+ *
+ */
+public class EDMTriple {
 	
 	public enum TRIPLE_TYPE {
 		UNKNOWN_TYPE, 
@@ -44,11 +50,26 @@ public class EDMProvTriple {
 	private String predicatePrefix;
 	private TRIPLE_TYPE type;
 	
-	public EDMProvTriple(String subject, String predicate, String object) {
+	/**
+	 * Create a triple of unknown type
+	 * 
+	 * @param subject
+	 * @param predicate
+	 * @param object
+	 */
+	public EDMTriple(String subject, String predicate, String object) {
 		this(subject, predicate, object, TRIPLE_TYPE.UNKNOWN_TYPE);
 	}
 	
-	public EDMProvTriple(String subject, String predicate, String object, TRIPLE_TYPE type) {
+	/**
+	 * Create a triple of a specific type.
+	 * 
+	 * @param subject
+	 * @param predicate
+	 * @param object
+	 * @param type
+	 */
+	public EDMTriple(String subject, String predicate, String object, TRIPLE_TYPE type) {
 		this.tripleID = UUID.randomUUID();
 		this.subject = subject;
 		this.predicate = predicate;
@@ -75,7 +96,13 @@ public class EDMProvTriple {
 		return "[" + getType() + "] " + getSubject() + " " + getPredicate() + " " + getObject();
 	}
 	
-	public boolean equals(EDMProvTriple t) {
+	/**
+	 * Compare two triples. They are equal if they have the same subject, predicate and object.
+	 * 
+	 * @param t The triple to compare to this one
+	 * @return whether the triples are equal
+	 */
+	public boolean equals(EDMTriple t) {
 		//TODO: special cases: full prefix is case insensitive but individual name is case sensitive.
 		// not sure about predicate.
 		if (this.subject.equals(t.getSubject())
@@ -87,6 +114,12 @@ public class EDMProvTriple {
 		}
 	}
   
+	/**
+	 * Check whether the triple has the given predicate.
+	 * 
+	 * @param pred
+	 * @return
+	 */
 	public boolean hasPredicate(String pred) {
 		if (pred == null || predicate == null) 
 			return false;

@@ -78,10 +78,10 @@ public class LiveProvView extends SimpleView
         }
 
         // Echo new triples
-        LinkedList<EDMProvTriple> triples = el.getTriples();
+        LinkedList<EDMTriple> triples = el.getTriples();
 
         if ( triples != null && !triples.isEmpty() )
-          for ( EDMProvTriple triple : triples )
+          for ( EDMTriple triple : triples )
             provDataView.addItem( new Object[]{ triple.getSubject(),
                                                 triple.getPredicate(),
                                                 triple.getObject() },
