@@ -41,16 +41,28 @@ import java.util.*;
 
 public class LiveProvView extends SimpleView
 {
+  private Panel    provViewPanel;
+  private Embedded embeddedPROVView;
+  
   private Table    provElementView;
   private Table    provDataView;
-  private Embedded embeddedPROVView;
-
+ 
 
   public LiveProvView()
   {
     super();
 
     createComponents();
+  }
+  
+  public void resetView()
+  {
+    provElementView.removeAllItems();
+    provDataView.removeAllItems();
+    
+    provViewPanel.removeAllComponents();
+    embeddedPROVView = createEmbeddedView();
+    provViewPanel.addComponent( embeddedPROVView );
   }
 
   public void echoPROVData( EDMProvReport statement )
@@ -116,7 +128,7 @@ public class LiveProvView extends SimpleView
           }
         }
         catch( Exception ex )
-        {ex.printStackTrace();}
+        { displayWarning( "Problems rendering PROV", ex.getMessage() ); }
       }
     }
   }
@@ -129,16 +141,13 @@ public class LiveProvView extends SimpleView
     // Space
     vl.addComponent( UILayoutUtil.createSpace( "2px", null) );
 
-    Panel panel = new Panel();
-    panel.addStyleName( "light" );
-    panel.setScrollable( true );
-    vl.addComponent( panel );
+    provViewPanel = new Panel();
+    provViewPanel.addStyleName( "light" );
+    provViewPanel.setScrollable( true );
+    vl.addComponent( provViewPanel );
     
-    embeddedPROVView = new Embedded();
-    embeddedPROVView.setType( Embedded.TYPE_OBJECT ); // Do not set mime type until write time
-    embeddedPROVView.setWidth( "100%" );
-    embeddedPROVView.setHeight( "400px" );
-    panel.addComponent( embeddedPROVView );
+    embeddedPROVView = createEmbeddedView();
+    provViewPanel.addComponent( embeddedPROVView );
 
     HorizontalLayout hl = new HorizontalLayout();
     vl.addComponent( hl );
@@ -161,5 +170,15 @@ public class LiveProvView extends SimpleView
     provDataView.addContainerProperty( "Predicate", String.class, null );
     provDataView.addContainerProperty( "Object", String.class, null );
     hl.addComponent( provDataView );
+  }
+  
+  private Embedded createEmbeddedView()
+  {
+    Embedded embedded = new Embedded();
+    embedded.setType( Embedded.TYPE_OBJECT ); // Do not set mime type until write time
+    embedded.setWidth( "100%" );
+    embedded.setHeight( "400px" );
+    
+    return embedded;
   }
 }
