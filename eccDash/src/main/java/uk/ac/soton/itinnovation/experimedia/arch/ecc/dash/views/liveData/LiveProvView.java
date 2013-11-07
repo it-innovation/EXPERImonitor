@@ -100,7 +100,7 @@ public class LiveProvView extends SimpleView
       {
         try
         {
-          final String pngTarget = basePath + targetName + ".svg";
+          final String pngTarget = basePath + "/" + targetName + ".svg";
           final String cmd = "dot -Tsvg " + basePath + "/" + targetName + ".dot -o " + pngTarget;
 
           Process rtProc = Runtime.getRuntime().exec( cmd );
@@ -111,11 +111,12 @@ public class LiveProvView extends SimpleView
           if ( fileTarget.exists() )
           {
             FileResource rs = new FileResource( fileTarget, embeddedPROVView.getApplication() );
+            embeddedPROVView.setMimeType( "image/svg+xml" );
             embeddedPROVView.setSource( rs );
           }
         }
         catch( Exception ex )
-        {}
+        {ex.printStackTrace();}
       }
     }
   }
@@ -132,21 +133,19 @@ public class LiveProvView extends SimpleView
     panel.addStyleName( "light" );
     panel.setScrollable( true );
     vl.addComponent( panel );
-
+    
     embeddedPROVView = new Embedded();
-    embeddedPROVView.setType( Embedded.TYPE_OBJECT );
-    embeddedPROVView.setMimeType( "image/svg+xml" );
+    embeddedPROVView.setType( Embedded.TYPE_OBJECT ); // Do not set mime type until write time
     embeddedPROVView.setWidth( "100%" );
     embeddedPROVView.setHeight( "400px" );
-
-    panel.getContent().addComponent( embeddedPROVView );
+    panel.addComponent( embeddedPROVView );
 
     HorizontalLayout hl = new HorizontalLayout();
     vl.addComponent( hl );
 
     provElementView = new Table( "PROV Elements" );
     provElementView.addStyleName( "striped" );
-    provElementView.setWidth( "300px" );
+    provElementView.setWidth( "400px" );
     provElementView.setHeight( "120px" );
     provElementView.addContainerProperty( "PROV Element", String.class, null );
     provElementView.addContainerProperty( "PROV ID", String.class, null );

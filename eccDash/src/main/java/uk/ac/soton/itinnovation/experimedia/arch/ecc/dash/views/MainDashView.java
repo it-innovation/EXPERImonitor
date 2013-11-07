@@ -254,7 +254,6 @@ public class MainDashView extends SimpleView
     nagiosView = new NAGIOSView();
     systemView = new SystemView(connectionsView, clientInfoView, nagiosView, logView);
     subViewsSheet.addTab( (Component) systemView.getImplContainer(), "System", null );
-//    subViewsSheet.addTab( (Component) clientInfoView.getImplContainer(), "Client info", null );
 
     liveMonitorController = new LiveMonitorController( pusher );
     subViewsSheet.addTab( (Component) liveMonitorController.getLiveView().getImplContainer(),
@@ -263,10 +262,6 @@ public class MainDashView extends SimpleView
     dataExportController = new DataExportController();
     subViewsSheet.addTab( (Component) dataExportController.getExportView().getImplContainer(),
                           "Data export", null );
-
-//    subViewsSheet.addTab( (Component) nagiosView.getImplContainer(), "Systems monitor", null );
-
-//    subViewsSheet.addTab( (Component) logView.getImplContainer(), "ECC log", null );
 
     subViewsReady = true;
 

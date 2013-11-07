@@ -31,8 +31,10 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.visualizers.metrics.*;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.visualizers.prov.PROVDOTGraphBuilder;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IReportDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.prov.PROVToolBoxUtil;
 
@@ -43,8 +45,8 @@ import com.vaadin.Application;
 import com.vaadin.ui.Component;
 import org.vaadin.artur.icepush.ICEPush;
 
-import org.openprovenance.prov.model.Document;
 
+import java.io.PrintWriter;
 import java.util.*;
 
 
@@ -126,19 +128,23 @@ public class LiveMonitorController extends UFAbstractEventManager
     // TO REMOVE LATER WITH JUNG VISUALISATION ---------------------------------
     try
     {
-      Document ptDocument = PROVToolBoxUtil.createPTBDocument( aggregatedPROVReport );
-
       Component comp      = (Component) liveProvView.getImplContainer();
       Application thisApp = comp.getApplication();
       String basePath     = thisApp.getContext().getBaseDirectory().getAbsolutePath();
 
-      PROVToolBoxUtil.createVizDOTFile( ptDocument, basePath + "/" + "dotViz" );
+      PROVDOTGraphBuilder gb = new PROVDOTGraphBuilder();
+      String dotAsString = gb.createDOT(aggregatedPROVReport);
+
+      PrintWriter out = new PrintWriter(basePath + "/" + "dotViz.dot");
+      out.print(dotAsString);
+      out.close();
 
       liveProvView.renderPROVVizFile( basePath, "dotViz" );
     }
     catch ( Exception ex )
     { liveMonLogger.error( "Could not create PROV visualisation", ex ); }
     // --------------------------------- TO REMOVE LATER WITH JUNG VISUALISATION
+
 
     if ( icePusher !=null ) icePusher.push();
   }
@@ -321,7 +327,7 @@ public class LiveMonitorController extends UFAbstractEventManager
   }
 
   private boolean sanitiseMetricReport( EMClient client, Report reportOUT )
-  { 
+  {
     // Check that we apparently have data
     if ( reportOUT.getNumberOfMeasurements() == 0 )
     {
