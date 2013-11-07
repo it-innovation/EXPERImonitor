@@ -26,12 +26,9 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.zip.DataFormatException;
-
-import javax.lang.model.element.ElementKind;
 import javax.xml.datatype.DatatypeConfigurationException;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMTriple.TRIPLE_TYPE;
@@ -306,6 +303,10 @@ public class EDMProvFactory {
 
 	public HashMap<UUID, EDMTriple> getCurrentTriples() {
 		return currentTriples;
+	}
+	
+	public HashMap<String, EDMProvBaseElement> getAllElements() {
+		return allProvElements;
 	}
 
 }

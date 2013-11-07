@@ -41,66 +41,6 @@ public class PROVToolBoxUtil
 {
     private static IECCLogger ptuLogger = Logger.getLogger( PROVToolBoxUtil.class );
     
-  
-    public static EDMProvReport aggregateReport( EDMProvReport lhs, EDMProvReport rhs ) throws Exception
-    {
-      // Safety first
-      if ( lhs == null || rhs == null ) throw new Exception( "Could not aggregate PROV report - lhs/rhs report is null" );
-
-      // Create indexed LHS & RHS elements
-      HashMap<UUID, EDMProvBaseElement> lhsElements = new HashMap<UUID, EDMProvBaseElement>();
-      HashMap<UUID, EDMProvBaseElement> rhsElements = new HashMap<UUID, EDMProvBaseElement>();
-      
-      for ( EDMProvBaseElement be : lhs.getProvElements().values() )
-        lhsElements.put( be.getInstanceID(), be );
-      
-      for ( EDMProvBaseElement be : rhs.getProvElements().values() )
-        rhsElements.put( be.getInstanceID(), be );
-      
-      // Create target report
-      EDMProvReport aggReport = new EDMProvReport();
-      HashMap<String, EDMProvBaseElement> aggElements = aggReport.getProvElements();
-      
-      // Create a set of unique elements from the LHS
-      HashSet<UUID> lhsIDs = new HashSet<UUID>();
-      for ( EDMProvBaseElement be : lhsElements.values() )
-      {
-        UUID lhsID = be.getInstanceID();
-        if ( !lhsIDs.contains(lhsID) )
-        {
-          aggElements.put( be.getIri(), be );
-          lhsIDs.add( lhsID );
-        }
-      }
-      
-      // Update lhs elements from updates in RHS
-      for ( EDMProvBaseElement be : rhsElements.values() )
-      {
-        UUID elID = be.getInstanceID();
-        if ( lhsIDs.contains(elID) )
-        {
-          EDMProvBaseElement lhsEl = lhsElements.get( elID );
-          EDMProvBaseElement rhsEl = rhsElements.get( elID );
-          
-          try { integratePROVElement( lhsEl, rhsEl ); }
-          catch ( Exception ex ) { throw ex; } // throw this problem upwards
-        }
-      }
-      
-      // And new elements from RHS
-      for ( EDMProvBaseElement be : rhsElements.values() )
-      {
-        UUID rhsID = be.getInstanceID();
-        if ( !lhsIDs.contains(rhsID) )
-        {
-          aggElements.put( be.getIri(), be );
-          lhsIDs.add( rhsID );
-        }
-      }
-      
-      return aggReport;
-    }
-    
     /**
      * Creates a PROV ToolBox Document using the ECC PROV Model classes
      * 
@@ -114,10 +54,12 @@ public class PROVToolBoxUtil
       
       PROVTBDataManager ptdb = new PROVTBDataManager();
       
-      HashMap<String, EDMProvBaseElement> provElements = eccPROVReport.getProvElements();
+      EDMProvFactory factory = EDMProvFactory.getInstance("experimedia");
+      factory.clear();
+      factory.loadReport(eccPROVReport);
       
-      createPTBElements( provElements, ptdb );
-      createPTBStatements( provElements, ptdb );
+      createPTBElements( factory.getAllElements(), ptdb );
+      createPTBStatements( factory.getAllElements(), ptdb );
       
       return ptdb.createPTDocument();
     }
@@ -146,40 +88,19 @@ public class PROVToolBoxUtil
     }
     
     // Private methods --------------------------------------------------------- 
-    private static void integratePROVElement( EDMProvBaseElement lhsOUT, EDMProvBaseElement rhs ) throws Exception
-    {
-      // Safety first
-      if ( lhsOUT == null || rhs == null ) throw new Exception( "Could not integrate PROV elements: lhs/rhs is null" );
-      
-      if ( !lhsOUT.getIri().equals( rhs.getIri()) ) throw new Exception( "Could not integrate PROV elements: IRIs are not identical" );
-      
-      LinkedList<EDMTriple> newTriples = new LinkedList<EDMTriple>();
-      LinkedList<EDMTriple> rhsTriples = rhs.getTriples();
-      
-      // Create a list of new triples for this element
-      for ( EDMTriple triple : rhsTriples )
-        if ( !lhsOUT.contains(triple) ) newTriples.add( triple );
-      
-      // Add new triples into OUT element
-      for ( EDMTriple triple : newTriples )
-        lhsOUT.addTriple( triple.getSubject(),
-                            triple.getPredicate(),
-                            triple.getObject() );
-        
-    }
     
-    private static void createPTBElements( HashMap<String, EDMProvBaseElement> provElements,
+    private static void createPTBElements( HashMap<String, EDMProvBaseElement> hashMap,
                                            PROVTBDataManager ptdb )
     {
-      for ( EDMProvBaseElement el : provElements.values() )
+      for ( EDMProvBaseElement e : hashMap.values() )
       {
         try
         {
-          switch ( el.getProvType() )
+          switch ( e.getProvType() )
           {
-            case ePROV_ENTITY   : ptdb.createPTBEntity( el ); break;
-            case ePROV_AGENT    : ptdb.createPTBAgent( el ); break;
-            case ePROV_ACTIVITY : ptdb.createPTBActivity( el ); break;
+            case ePROV_ENTITY   : ptdb.createPTBEntity( e ); break;
+            case ePROV_AGENT    : ptdb.createPTBAgent( e ); break;
+            case ePROV_ACTIVITY : ptdb.createPTBActivity( e ); break;
           }
         }
         catch ( Exception ex )
@@ -187,16 +108,16 @@ public class PROVToolBoxUtil
       }
     }
     
-    private static void createPTBStatements( HashMap<String, EDMProvBaseElement> provElements,
+    private static void createPTBStatements( HashMap<String, EDMProvBaseElement> hashMap,
                                              PROVTBDataManager ptdb )
     {
-      for ( EDMProvBaseElement el : provElements.values() )
+      for ( EDMProvBaseElement el : hashMap.values() )
       {
           switch ( el.getProvType() )
           {
             case ePROV_ENTITY :
             {
-              for ( EDMTriple triple : el.getTriples() )
+              for ( EDMTriple triple : el.getTriples().values() )
                 try
                 { 
                   ptdb.createEntityRelation( triple ); 
@@ -207,7 +128,7 @@ public class PROVToolBoxUtil
 
             case ePROV_AGENT :
             {
-              for ( EDMTriple triple : el.getTriples() )
+              for ( EDMTriple triple : el.getTriples().values() )
                 try
                 {
                   ptdb.createAgentRelation( triple );
@@ -219,7 +140,7 @@ public class PROVToolBoxUtil
 
             case ePROV_ACTIVITY :
             {
-              for ( EDMTriple triple : el.getTriples() )
+              for ( EDMTriple triple : el.getTriples().values() )
                 try
                 {
                   ptdb.createActivityRelation( triple );

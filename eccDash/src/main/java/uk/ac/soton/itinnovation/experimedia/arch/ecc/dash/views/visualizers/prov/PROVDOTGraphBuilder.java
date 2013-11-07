@@ -84,7 +84,11 @@ public class PROVDOTGraphBuilder
   // Private methods -----------------------------------------------------------
   private void parseProvReport( EDMProvReport report ) throws Exception
   {
-    HashMap<String, EDMProvBaseElement> provElements = report.getProvElements();
+	EDMProvFactory factory = EDMProvFactory.getInstance("experimedia");
+	factory.clear();
+	factory.loadReport(report);
+	
+    HashMap<String, EDMProvBaseElement> provElements = factory.getAllElements();
 
     if ( provElements.isEmpty() ) throw new Exception( "Could not parse Prov report - no PROV elements are found" );
 
@@ -163,18 +167,18 @@ public class PROVDOTGraphBuilder
 
     // Agent relations
     for ( EDMProvBaseElement agent : agents.values() )
-      for ( EDMProvTriple triple : getProvRelations(agent) )
+      for ( EDMTriple triple : getProvRelations(agent) )
         provOUT += writeRelation( triple);
 
     // Entity relations
     for ( EDMProvBaseElement entity : entities.values() )
-      for ( EDMProvTriple triple : getProvRelations(entity) )
+      for ( EDMTriple triple : getProvRelations(entity) )
         provOUT += writeRelation( triple);
 
 
     // Activity relations
     for ( EDMProvBaseElement activity : activities.values() )
-      for ( EDMProvTriple triple : getProvRelations(activity) )
+      for ( EDMTriple triple : getProvRelations(activity) )
         provOUT += writeRelation( triple);
 
     provOUT += "\n";
@@ -197,7 +201,7 @@ public class PROVDOTGraphBuilder
     {
       String activityID = activity.getIri();
 
-      LinkedList<EDMProvTriple> triples = activity.getTriplesWithPredicate( "prov:startedAtTime" );
+      HashMap<UUID, EDMTriple> triples = activity.getTriplesWithPredicate( "prov:startedAtTime" );
 
       // Make a note of any problems we find as we go along
       if ( triples.isEmpty() )
@@ -252,13 +256,13 @@ public class PROVDOTGraphBuilder
 
   // Private methods -----------------------------------------------------------
   // This blunt method just returns anything that looks vaguely like a PROV relation
-  private Set<EDMProvTriple> getProvRelations( EDMProvBaseElement el )
+  private Set<EDMTriple> getProvRelations( EDMProvBaseElement el )
   {
-    HashSet<EDMProvTriple> triples = new HashSet<EDMProvTriple>();
+    HashSet<EDMTriple> triples = new HashSet<EDMTriple>();
 
     if ( el != null )
     {
-      for ( EDMProvTriple triple : el.getTriples() )
+      for ( EDMTriple triple : el.getTriples().values() )
       {
         String pred = triple.getPredicate();
 
@@ -273,7 +277,7 @@ public class PROVDOTGraphBuilder
     return triples;
   }
 
-  private String writeRelation( EDMProvTriple triple )
+  private String writeRelation( EDMTriple triple )
   {
     String label = triple.getPredicate();
     label = label.replaceFirst("prov:", "");
