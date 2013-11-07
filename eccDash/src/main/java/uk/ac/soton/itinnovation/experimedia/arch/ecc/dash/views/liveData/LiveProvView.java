@@ -32,7 +32,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance
 import com.vaadin.ui.*;
 import com.vaadin.terminal.FileResource;
 
-import java.io.File;
+import java.io.*;
 import java.util.*;
 
 
@@ -121,10 +121,13 @@ public class LiveProvView extends SimpleView
           fileTarget = new File( pngTarget );
 
           if ( fileTarget.exists() )
-          {
+          { 
             FileResource rs = new FileResource( fileTarget, embeddedPROVView.getApplication() );
             embeddedPROVView.setMimeType( "image/svg+xml" );
             embeddedPROVView.setSource( rs );
+            
+            // Try to update embedded view to match SVG view size
+            updateSVGDimensions( fileTarget );
           }
         }
         catch( Exception ex )
@@ -142,8 +145,11 @@ public class LiveProvView extends SimpleView
     vl.addComponent( UILayoutUtil.createSpace( "2px", null) );
 
     provViewPanel = new Panel();
-    provViewPanel.addStyleName( "light" );
+    provViewPanel.setWidth( "830px" );
+    provViewPanel.setHeight( "400px" );
     provViewPanel.setScrollable( true );
+    provViewPanel.addStyleName( "light" );
+    provViewPanel.getContent().setSizeUndefined(); // Scroll internal contents
     vl.addComponent( provViewPanel );
     
     embeddedPROVView = createEmbeddedView();
@@ -154,7 +160,7 @@ public class LiveProvView extends SimpleView
 
     provElementView = new Table( "PROV Elements" );
     provElementView.addStyleName( "striped" );
-    provElementView.setWidth( "400px" );
+    provElementView.setWidth( "330px" );
     provElementView.setHeight( "120px" );
     provElementView.addContainerProperty( "PROV Element", String.class, null );
     provElementView.addContainerProperty( "PROV ID", String.class, null );
@@ -164,7 +170,7 @@ public class LiveProvView extends SimpleView
 
     provDataView = new Table( "PROV Triple statements" );
     provDataView.addStyleName( "striped" );
-    provDataView.setWidth( "600px" );
+    provDataView.setWidth( "496px" );
     provDataView.setHeight( "120px" );
     provDataView.addContainerProperty( "Subject", String.class, null );
     provDataView.addContainerProperty( "Predicate", String.class, null );
@@ -176,9 +182,49 @@ public class LiveProvView extends SimpleView
   {
     Embedded embedded = new Embedded();
     embedded.setType( Embedded.TYPE_OBJECT ); // Do not set mime type until write time
-    embedded.setWidth( "100%" );
-    embedded.setHeight( "400px" );
     
     return embedded;
+  }
+  
+  private void updateSVGDimensions( File svg )
+  {
+    String width = null, height = null;
+    try
+    {
+      // Try reading in the SVG file
+      FileReader     fr = new FileReader( svg );
+      BufferedReader br = new BufferedReader( fr );
+
+      boolean search = true;
+      while ( search )
+      {
+        String line = br.readLine();
+        if ( line != null )
+        {
+          // Try find the SVG width & height
+          if ( line.startsWith("<svg width=") )
+          {
+            int start = line.indexOf( "width=" );
+            int end   = line.indexOf( "pt", start );
+            width = line.substring( start + 7, end ) + "px";
+            
+            start = line.indexOf( "height=" );
+            end   = line.indexOf( "pt", start );
+            height = line.substring( start + 8, end ) + "px";        
+            
+            search = false;
+          }
+        }
+        else search = false;
+      }
+    }
+    catch ( Exception ex )
+    { displayWarning( "Problems framing PROV render", ex.getMessage() ); }
+    
+    if ( width != null && height != null )
+    {
+      embeddedPROVView.setWidth( width );
+      embeddedPROVView.setHeight( height );
+    }
   }
 }
