@@ -155,7 +155,11 @@ public class LiveMonitorController extends UFAbstractEventManager
   public void reset()
   {
     activeMSVisuals.clear();
+    
     liveMetricView.resetView();
+    liveProvView.resetView();
+    
+    aggregatedPROVReport = new EDMProvReport();
   }
 
   public void shutDown()
