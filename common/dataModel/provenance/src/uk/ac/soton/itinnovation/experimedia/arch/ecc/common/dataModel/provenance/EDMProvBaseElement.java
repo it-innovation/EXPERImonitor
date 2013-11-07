@@ -87,7 +87,7 @@ public class EDMProvBaseElement {
     	for (Entry<UUID, EDMTriple> e: this.getTriplesWithPredicate("rdfs:label").entrySet()) {
     		String friendlyName = e.getValue().getObject();
     		//cut type in case of "proper" usage (e.g. "Label"^^xsd:string)
-    		if (friendlyName.indexOf("\"")>0) {
+    		if (friendlyName.indexOf("\"")>=0) {
     			friendlyName = friendlyName.substring(friendlyName.indexOf("\"") + 1, friendlyName.lastIndexOf("\""));
     		}
     		return friendlyName;
@@ -203,7 +203,15 @@ public class EDMProvBaseElement {
     
     private void addTriple(String subject, String predicate, String object, TRIPLE_TYPE type) {
     	EDMTriple newTriple = new EDMTriple(subject, predicate, object, type);
-    	if (!this.triples.containsValue(newTriple)) {
+    	boolean contained = false;
+    	//we have to iterate because UUIDs might be different for same triples (subject/predicate/object)
+    	for (EDMTriple t: this.triples.values()) {
+    		if (newTriple.equals(t)) {
+    			contained = true;
+    			break;
+    		}
+    	}
+    	if (!contained) {
     		this.triples.put(newTriple.getID(), newTriple);
     	}
     }

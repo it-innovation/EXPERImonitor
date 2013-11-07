@@ -27,10 +27,18 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.test.prov
 
 //import java.util.logging.Logger;
 
+import java.util.Map.Entry;
+import java.util.UUID;
+import java.util.zip.DataFormatException;
+
+import javax.xml.datatype.DatatypeConfigurationException;
+
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMActivity;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMAgent;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMEntity;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvFactory;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvReport;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMTriple;
 
 public class EDMProvClassesTest {
 	
@@ -67,6 +75,23 @@ public class EDMProvClassesTest {
 		
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
+			e.printStackTrace();
+		}
+		
+		//test print of resulting data
+		//System.out.println(factory.toString());
+		
+		EDMProvReport report = factory.createProvReport();
+		
+		//clear factory
+		factory.clear();
+		factory = EDMProvFactory.getInstance("experimedia");
+		
+		//load prov report contents into factory
+		try {
+			factory.loadReport(report);
+		} catch (Exception e) {
+			System.out.println("Error loading report into factory.");
 			e.printStackTrace();
 		}
 		

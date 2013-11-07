@@ -26,11 +26,15 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.zip.DataFormatException;
 
+import javax.lang.model.element.ElementKind;
 import javax.xml.datatype.DatatypeConfigurationException;
+
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMTriple.TRIPLE_TYPE;
 
 /**
  * The EDMProvFactory is a singleton factory which helps create provenance.
@@ -210,6 +214,68 @@ public class EDMProvFactory {
 		currentTriples.clear();
     
 		return report;
+	}
+	
+	/**
+	 * Clears the factory contents.
+	 */
+	public void clear() {
+		factory.allProvElements.clear();
+		factory.currentTriples.clear();
+		factory.sentTriples.clear();
+		
+		factory = null;
+		prefix = null;
+	}
+	
+	public void loadReport(EDMProvReport report) throws DataFormatException, DatatypeConfigurationException {
+		
+		HashMap<String, HashMap<UUID, EDMTriple>> elements = new HashMap<String, HashMap<UUID,EDMTriple>>();
+		
+		//first group triples by element
+		for (Entry<UUID, EDMTriple> e: report.getTriples().entrySet()) {
+			
+			if (!elements.containsKey(e.getValue().getSubject())) {
+				elements.put(e.getValue().getSubject(), new HashMap<UUID, EDMTriple>());
+			}
+			elements.get(e.getValue().getSubject()).put(e.getKey(), e.getValue());
+		}
+		
+		//look at each element identified in the factory
+		for (HashMap<UUID, EDMTriple> element: elements.values()) {
+			
+			//first run: identify prov elements
+			for (Entry<UUID, EDMTriple> e: element.entrySet()) {
+				if (e.getValue().getType().equals(TRIPLE_TYPE.CLASS_ASSERTION)) {
+					//look at prov classes only
+					if (e.getValue().getObject().startsWith("prov:")) {
+						String uniqueId = e.getValue().getSubject();
+						if (uniqueId.contains(":")) {
+							uniqueId = uniqueId.split(":")[1];
+						}
+						if (e.getValue().getObject().equals("prov:Agent")) {
+							factory.getOrCreateAgent(uniqueId, null);
+						} else if (e.getValue().getObject().equals("prov:Entity")) {
+							factory.getOrCreateEntity(uniqueId, null);
+						} else if (e.getValue().getObject().equals("prov:Activity")) {
+							factory.getOrCreateActivity(uniqueId, null);
+						}
+					}
+				}
+			}
+			
+			//second run: add triples
+			for (EDMTriple triple: element.values()) {
+				String shortIri = triple.getSubject();
+				if (shortIri.contains(":")) {
+					String prefix = shortIri.split(":")[0];
+					String uniqueId = shortIri.split(":")[1];
+					//should only need prefix and unique identifier - can get both from triple
+					factory.allProvElements.get(prefix + ":" + uniqueId).addTriple(
+							triple.getPredicate(), triple.getObject(), triple.getType());
+				}
+			}
+		}
 	}
 	
 	public String toString() {
