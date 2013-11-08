@@ -263,7 +263,7 @@ public class PROVDOTGraphBuilder
         String pred = triple.getPredicate();
 
         if ( pred.contains("prov:was") || pred.contains("prov:used") ||
-             pred.contains("prov:acted") || pred.contains( "prov:had") )
+             pred.contains("prov:acted") || pred.contains( "prov:had") || pred.contains( "prov:atLocation") )
         {
           triples.add( triple );
         }
