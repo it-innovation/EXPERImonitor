@@ -145,8 +145,7 @@ public class LiveProvView extends SimpleView
     vl.addComponent( UILayoutUtil.createSpace( "2px", null) );
 
     provViewPanel = new Panel();
-    provViewPanel.setWidth( "830px" );
-    provViewPanel.setHeight( "400px" );
+    provViewPanel.setWidth( "100%" );
     provViewPanel.setScrollable( true );
     provViewPanel.addStyleName( "light" );
     provViewPanel.getContent().setSizeUndefined(); // Scroll internal contents
