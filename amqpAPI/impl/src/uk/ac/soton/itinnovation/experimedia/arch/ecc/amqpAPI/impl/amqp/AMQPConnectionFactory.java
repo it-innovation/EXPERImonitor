@@ -76,7 +76,8 @@ public class AMQPConnectionFactory
           amqpConnection.close();
           amqpConnection = null;
         }
-        catch (Exception e) { factoryLog.error("Could not close down connection"); }
+        catch (Exception ex) 
+        { factoryLog.error("Could not close down connection" + ex.getMessage() ); }
     }
 
     public boolean setAMQPHostPort( int port )
@@ -110,7 +111,8 @@ public class AMQPConnectionFactory
           InetAddress localIP = InetAddress.getLocalHost();
           localIPValue = localIP.getHostAddress();
       }
-      catch ( UnknownHostException uhe ) {}
+      catch ( UnknownHostException uhe ) 
+      { factoryLog.error( "Could not create valid IP address: " + uhe.getMessage() ); }
 
       return localIPValue;
     }
@@ -146,8 +148,8 @@ public class AMQPConnectionFactory
         
         // Execute log-in
         try { amqpConnection = amqpFactory.newConnection(); }
-        catch ( Exception e )
-        { throw new Exception( "Could not create AMQP host connection: " + e.getMessage() ); }
+        catch ( Exception ex )
+        { throw new Exception( "Could not create AMQP host connection", ex ); }
     }
 
     public void connectToAMQPSSLHost() throws Exception
@@ -162,8 +164,8 @@ public class AMQPConnectionFactory
         amqpFactory.useSslProtocol();
 
         try { amqpConnection = amqpFactory.newConnection(); }
-        catch ( Exception e )
-        { throw new Exception( "Could not create AMQP host SSL connection: " + e.getMessage() ); }
+        catch ( Exception ex )
+        { throw new Exception( "Could not create AMQP host SSL connection: ", ex ); }
     }
 
     public void connectToVerifiedAMQPHost( InputStream keystore,
@@ -177,10 +179,10 @@ public class AMQPConnectionFactory
         char[] trustPassphrase = password.toCharArray();  
         KeyStore tks = KeyStore.getInstance( "JKS" );
         try { tks.load( keystore, trustPassphrase ); }
-        catch ( Exception e )
+        catch ( Exception ex )
         {
-          factoryLog.error( "Had problems loading keystore: " + e.getMessage() );
-          throw e;
+          factoryLog.error( "Had problems loading keystore: " + ex.getMessage() );
+          throw ex;
         }
 
         TrustManagerFactory tmf = TrustManagerFactory.getInstance( "SunX509" );
@@ -196,7 +198,7 @@ public class AMQPConnectionFactory
 
         try { amqpConnection = amqpFactory.newConnection(); }
         catch ( IOException ioe )
-        { throw new Exception( "Could not create secure AMQP host connection" ); }
+        { throw new Exception( "Could not create secure AMQP host connection", ioe ); }
     }
     
     public void connectToAMQPHost( Properties emProps ) throws Exception
@@ -244,8 +246,8 @@ public class AMQPConnectionFactory
 
                 try
                 { connectToVerifiedAMQPHost( ksStream, ksPassword ); }
-                catch ( Exception e )
-                { factoryLog.error( "Could not connect to AMQP Bus: " + e.getMessage() ); }
+                catch ( Exception ex )
+                { throw ex; }
             }
             else
             {
@@ -261,14 +263,12 @@ public class AMQPConnectionFactory
                     else
                       connectToAMQPHost();
                 }
-                catch ( Exception e )
-                { 
-                  factoryLog.error( "Could not connect to " +
-                                    (useSSL ? "(SSL)" : "(insecure)") +
-                                    "AMQP Bus: " + e.getMessage() );
-                }
+                catch ( Exception ex )
+                { throw ex; }
             }
         }
+        else
+          throw new Exception( "Could not connect: IP/Port are invalid" ); 
     }
 
     public boolean isConnectionValid()
