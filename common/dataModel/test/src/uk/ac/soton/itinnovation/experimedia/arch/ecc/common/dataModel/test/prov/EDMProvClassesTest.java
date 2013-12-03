@@ -27,6 +27,8 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.test.prov
 
 //import java.util.logging.Logger;
 
+import org.apache.log4j.Logger;
+
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMActivity;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMAgent;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMEntity;
@@ -35,16 +37,19 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance
 
 public class EDMProvClassesTest {
 	
-	//private static Logger logger = Logger.getLogger("ProvTest");
+	static Logger logger = Logger.getLogger(EDMProvClassesTest.class);
 
 	public static void main(String[] args) {
 		
-		EDMProvFactory factory = EDMProvFactory.getInstance("experimedia");
+		EDMProvFactory factory = EDMProvFactory.getInstance("experimedia",
+				"http://it-innovation.soton.ac.uk/ontologies/experimedia#");
+		
+		factory.addOntology("foaf", "http://xmlns.com/foaf/0.1/");	
 		
 		try {
 			//This is Bob.
 			EDMAgent bob = factory.getOrCreateAgent("facebook_154543445", "Bob");
-			bob.addOwlClass("foaf:Person");
+			bob.addOwlClass(factory.getNamespaceForPrefix("foaf") + "Person");
 			
 			//This is a video about Schladming.
 			EDMEntity video = factory.getOrCreateEntity("facebook_1545879879", "reallyCoolFacebookVideo");
@@ -67,29 +72,28 @@ public class EDMProvClassesTest {
 			bob.stopActivity(watchVideo);
 		
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
-			e.printStackTrace();
+			logger.error("Error filling EDMProvFactory with test data", e);
 		}
 		
 		//test print of resulting data
-		//System.out.println(factory.toString());
+		logger.info(factory.toString());
 		
 		EDMProvReport report = factory.createProvReport();
 		
 		//clear factory
 		factory.clear();
-		factory = EDMProvFactory.getInstance("experimedia");
+		factory = EDMProvFactory.getInstance("experimedia",
+				"http://it-innovation.soton.ac.uk/ontologies/experimedia#");
 		
 		//load prov report contents into factory
 		try {
 			factory.loadReport(report);
 		} catch (Exception e) {
-			System.out.println("Error loading report into factory.");
-			e.printStackTrace();
+			logger.error("Error loading EDMProvReport", e);
 		}
 		
 		//test print of resulting data
-		System.out.println(factory.toString());
+		logger.info(factory.toString());
 	}
 
 }

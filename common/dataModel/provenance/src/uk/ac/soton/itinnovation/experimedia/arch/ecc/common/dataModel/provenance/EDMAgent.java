@@ -39,7 +39,7 @@ public class EDMAgent extends EDMProvBaseElement {
 		super(prefix, uniqueIdentifier, label);
     
 		this.provType = PROV_TYPE.ePROV_AGENT;
-		this.addOwlClass("prov:Agent");
+		this.addOwlClass(EDMProvBaseElement.prov + "Agent");
 	}
 	
 	// PROV FUNCTIONAL CLASSES HERE: //////////////////////////////////////////////////////////////
@@ -48,8 +48,8 @@ public class EDMAgent extends EDMProvBaseElement {
 		EDMProvFactory factory = EDMProvFactory.getInstance();
 	    
 		EDMActivity newActivity = (EDMActivity) factory.getOrCreateActivity(uniqueIdentifier, label);
-		newActivity.addTriple("prov:startedAtTime", format.format(new Date(Long.valueOf(timestamp)*1000)), TRIPLE_TYPE.DATA_PROPERTY);
-		newActivity.addTriple("prov:wasStartedBy", this.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
+		newActivity.addTriple(EDMProvBaseElement.prov + "startedAtTime", format.format(new Date(Long.valueOf(timestamp)*1000)), TRIPLE_TYPE.DATA_PROPERTY);
+		newActivity.addTriple(EDMProvBaseElement.prov + "wasStartedBy", this.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
     
 		factory.elementUpdated(this); // Queue to re-send in next report
     
@@ -61,8 +61,8 @@ public class EDMAgent extends EDMProvBaseElement {
 	}
 	
 	public void stopActivity(EDMActivity activity, String timestamp) throws DataFormatException {
-		activity.addTriple("prov:endedAtTime", format.format(new Date(Long.valueOf(timestamp)*1000)), TRIPLE_TYPE.DATA_PROPERTY);
-		activity.addTriple("prov:wasEndedBy", this.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
+		activity.addTriple(EDMProvBaseElement.prov + "endedAtTime", format.format(new Date(Long.valueOf(timestamp)*1000)), TRIPLE_TYPE.DATA_PROPERTY);
+		activity.addTriple(EDMProvBaseElement.prov + "wasEndedBy", this.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
     
 		EDMProvFactory.getInstance().elementUpdated(this); // Queue to re-send in next report
 	}
@@ -85,7 +85,7 @@ public class EDMAgent extends EDMProvBaseElement {
 	}
 	
 	public void actOnBehalfOf(EDMAgent agent) {
-		this.addTriple("prov:actedOnBehalfOf", agent.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
+		this.addTriple(EDMProvBaseElement.prov + "actedOnBehalfOf", agent.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
     
 		EDMProvFactory.getInstance().elementUpdated(this); // Queue to re-send in next report
 	}

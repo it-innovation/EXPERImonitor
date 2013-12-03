@@ -49,6 +49,10 @@ public class EDMProvBaseElement {
 	protected HashMap<UUID, EDMTriple> triples;
     
     protected static SimpleDateFormat format = new SimpleDateFormat("\"yyyy-MM-dd'T'HH:mm:ss'Z\"^^xsd:dateTime'");
+    
+    protected static final String rdfType = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
+    protected static final String rdfsLabel = "http://www.w3.org/2000/01/rdf-schema#label";
+    protected static final String prov = "http://www.w3.org/ns/prov#";
 	
     public enum PROV_TYPE { ePROV_UNKNOWN_TYPE, 
                             ePROV_ENTITY, 
@@ -67,16 +71,23 @@ public class EDMProvBaseElement {
     	this.instanceID = UUID.randomUUID();
     	this.prefix = prefix;
     	this.uniqueIdentifier = uniqueIdentifier;
-        this.iri = prefix + ":" + uniqueIdentifier;
+        this.iri = prefix + uniqueIdentifier;
         this.triples = new HashMap<UUID, EDMTriple>();
         
         EDMProvBaseElement.format.setTimeZone(TimeZone.getTimeZone("UTC"));
         
-        if (label!=null) {
-        	EDMTriple triple = new EDMTriple(this.iri, "rdfs:label", "\"" + label + "\"^^xsd:string", TRIPLE_TYPE.ANNOTATION_PROPERTY);
-        	triples.put(triple.getID(), triple);
-        }
+        setLabel(label);
     }
+    
+    public void setLabel(String label) {
+    	if (label!=null) {
+        	EDMTriple triple = new EDMTriple(this.iri, rdfsLabel,
+        			"\"" + label + "\"^^xsd:string", TRIPLE_TYPE.ANNOTATION_PROPERTY);
+        	if (!this.contains(triple)) {
+        		triples.put(triple.getID(), triple);
+        	}
+        }
+	}
     
     /**
      * Returns the label, if it exists. Otherwise falls back to IRI
@@ -84,7 +95,7 @@ public class EDMProvBaseElement {
      * @return the label or IRI
      */
     public String getFriendlyName() {
-    	for (Entry<UUID, EDMTriple> e: this.getTriplesWithPredicate("rdfs:label").entrySet()) {
+    	for (Entry<UUID, EDMTriple> e: this.getTriplesWithPredicate(rdfsLabel).entrySet()) {
     		String friendlyName = e.getValue().getObject();
     		//cut type in case of "proper" usage (e.g. "Label"^^xsd:string)
     		if (friendlyName.indexOf("\"")>=0) {
@@ -235,12 +246,23 @@ public class EDMProvBaseElement {
     }
     
     /**
+     * Adds a relationship to the element to connect it to a location
+     * 
+     * @param location the element which represents the location
+     */
+    public void atLocation(EDMProvBaseElement location) {
+    	//note that the EDMBaseElement doesn't need to be classified as a prov:Location;
+    	//this will be discovered by the reasoner automatically
+    	this.addTriple(prov + "atLocation", location.iri);
+    }
+    
+    /**
      * Adds a class assertion making the element an individual of that class.
      * 
      * @param c the class to which the element should belong
      */
     public void addOwlClass(String c) {
-    	this.addTriple(this.iri, "rdf:type", c, TRIPLE_TYPE.CLASS_ASSERTION);
+    	this.addTriple(this.iri, rdfType, c, TRIPLE_TYPE.CLASS_ASSERTION);
     }
     
     /**
@@ -250,7 +272,7 @@ public class EDMProvBaseElement {
      */
     public void removeOwlClass(String c) {
     	//TODO: what if this is called on an existing element (already in store)?
-    	this.removeTriple(this.iri, "rdf:type", c);
+    	this.removeTriple(this.iri, rdfType, c);
     }
     
     //GETTERS/SETTERS//////////////////////////////////////////////////////////////////////////////
@@ -265,10 +287,6 @@ public class EDMProvBaseElement {
 		return iri;
 	}
 
-	protected void setIri(String iri) {
-		this.iri = iri;
-	}
-	
     public UUID getInstanceID() {
         return instanceID;
     }
@@ -285,16 +303,8 @@ public class EDMProvBaseElement {
 		return prefix;
 	}
 
-	protected void setPrefix(String prefix) {
-		this.prefix = prefix;
-	}
-
 	public String getUniqueIdentifier() {
 		return uniqueIdentifier;
-	}
-
-	protected void setUniqueIdentifier(String uniqueIdentifier) {
-		this.uniqueIdentifier = uniqueIdentifier;
 	}
 
 }

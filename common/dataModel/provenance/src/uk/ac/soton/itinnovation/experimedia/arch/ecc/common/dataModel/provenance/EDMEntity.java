@@ -37,7 +37,7 @@ public class EDMEntity extends EDMProvBaseElement {
 		super(prefix, uniqueIdentifier, label);
     
 		this.provType = PROV_TYPE.ePROV_ENTITY;
-		this.addOwlClass("prov:Entity");
+		this.addOwlClass(EDMProvBaseElement.prov + "Entity");
 	}
 	
 	public EDMActivity startActivity(String uniqueIdentifier, String label) throws DataFormatException, DatatypeConfigurationException {
@@ -49,19 +49,19 @@ public class EDMEntity extends EDMProvBaseElement {
 	}
 	
 	public void endActivity(EDMActivity activity) {
-		activity.addTriple("prov:wasEndedBy", this.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
+		activity.addTriple(EDMProvBaseElement.prov + "wasEndedBy", this.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
 	}
 
 	public void quoteFrom(EDMEntity entity) {
-		this.addTriple("prov:wasQuotedFrom", entity.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
+		this.addTriple(EDMProvBaseElement.prov + "wasQuotedFrom", entity.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
 	}
 	
 	public void hadPrimarySource(EDMEntity entity) {
-		this.addTriple("prov:hadPrimarySource", entity.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
+		this.addTriple(EDMProvBaseElement.prov + "hadPrimarySource", entity.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
 	}
 
 	public void wasRevisionOf(EDMEntity entity) {
-		this.addTriple("prov:wasRevisionOf", entity.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
+		this.addTriple(EDMProvBaseElement.prov + "wasRevisionOf", entity.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
 	}
 
 }

@@ -53,7 +53,7 @@ public class EDMProvReport
 
   // Protected methods ---------------------------------------------------------
   
-	protected EDMProvReport(HashMap<UUID, EDMTriple> triples) {
+	public EDMProvReport(HashMap<UUID, EDMTriple> triples) {
 		this();
 		
 		if (triples!=null && !triples.isEmpty()) {

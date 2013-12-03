@@ -29,19 +29,21 @@ import java.util.UUID;
 
 /**
  * 
- * A class to handle RDF triples which use the short form, i.e.
- * prefix:subject prefix:predicate prefix:object
+ * A class to handle RDF triples which use the long form, e.g.
+ * http://www.w3.org/1999/02/22-rdf-syntax-ns#type instead of rdf:type
  *
  */
 public class EDMTriple {
 	
 	public enum TRIPLE_TYPE {
-		UNKNOWN_TYPE, 
 		CLASS_ASSERTION, 
 		OBJECT_PROPERTY,
 		DATA_PROPERTY,
-		ANNOTATION_PROPERTY
+		ANNOTATION_PROPERTY,
+		UNKNOWN_TYPE
 	};
+	
+	protected static final String rdfType = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 	
 	private UUID   tripleID;
 	private String subject;
@@ -75,23 +77,45 @@ public class EDMTriple {
 		this.predicate = predicate;
 		this.object = object;
 		this.type = type;
+
 		//get predicatePrefix from predicate
-		if (this.predicate.indexOf(":")>0) {
-			this.predicatePrefix = predicate.substring(0, predicate.indexOf(":")).trim();
-		} else {
-			this.predicatePrefix = null;
-		}
+		this.predicatePrefix = splitURI(predicate, 0);
+				
 		//attach predicate from type
 		if (this.type==TRIPLE_TYPE.CLASS_ASSERTION &&
 			(this.predicate.equals("") || this.predicate==null)) {
-			this.predicate = "rdf:type";
+			this.predicate = rdfType;
 		//attach type from predicate
-		} else if (this.type==TRIPLE_TYPE.UNKNOWN_TYPE && this.predicate.equals("rdf:type")) {
+		} else if (this.type==TRIPLE_TYPE.UNKNOWN_TYPE && this.predicate.equals(rdfType)) {
 			this.type = TRIPLE_TYPE.CLASS_ASSERTION;
 		}
 		
 	}
 	
+	public static String splitURI(String URI, int part) {
+		String result = null;
+		int splitIndex = -1;
+		
+		if (URI.indexOf("#")>0) {
+			splitIndex = URI.indexOf("#");	
+		} else if (URI.lastIndexOf("/")>0) {
+			splitIndex = URI.lastIndexOf("/");
+		} else if (URI.lastIndexOf(":")>0) {
+			splitIndex = URI.lastIndexOf(":");
+		}
+		
+		if (splitIndex>=0) {
+			//get prefix
+			if (part==0) {
+				result = URI.substring(0, splitIndex+1).trim();
+			//get local name
+			} else {
+				result = URI.substring(splitIndex+1).trim();
+			}
+		}
+		return result;
+	}
+
 	public String toString() {
 		return "[" + getType() + "] " + getSubject() + " " + getPredicate() + " " + getObject();
 	}
