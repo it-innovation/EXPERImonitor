@@ -43,6 +43,7 @@ public class EDMProvFactory {
 	private static EDMProvFactory factory = null;
 	public static String prefix = null;
 	
+	//all the elements in the factory
 	private HashMap<String, EDMProvBaseElement> allProvElements;
 	
 	//related to report
