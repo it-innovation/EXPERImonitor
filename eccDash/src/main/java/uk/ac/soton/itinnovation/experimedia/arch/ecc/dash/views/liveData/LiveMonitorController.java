@@ -36,7 +36,6 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.visualizers.metr
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.visualizers.prov.PROVDOTGraphBuilder;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IReportDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.prov.PROVToolBoxUtil;
 
 import uk.ac.soton.itinnovation.robust.cat.core.components.viewEngine.spec.uif.mvc.IUFView;
 import uk.ac.soton.itinnovation.robust.cat.core.components.viewEngine.spec.uif.types.UFAbstractEventManager;
@@ -121,7 +120,7 @@ public class LiveMonitorController extends UFAbstractEventManager
   {
     if ( client == null || report == null ) throw new Exception( "Live monitoring provenance parameters were null" );
 
-    aggregatedPROVReport = PROVToolBoxUtil.aggregateReport( aggregatedPROVReport, report );
+    aggregatedPROVReport = report;
 
     liveProvView.echoPROVData( aggregatedPROVReport );
 

@@ -33,10 +33,6 @@ import com.vaadin.ui.*;
 import com.vaadin.terminal.FileResource;
 
 import java.io.*;
-import java.util.*;
-
-
-
 
 
 public class LiveProvView extends SimpleView
@@ -71,33 +67,12 @@ public class LiveProvView extends SimpleView
     {
       provElementView.removeAllItems();
 
-      HashMap<String, EDMProvBaseElement> pEls = statement.getProvElements();
-      for ( EDMProvBaseElement el : pEls.values() )
-      {
-        // Echo new PROV objects
-        UUID elInstID = el.getInstanceID();
-
-        switch ( el.getProvType() )
-        {
-          case ePROV_ENTITY :
-            provElementView.addItem( new Object[] { "Entity", el.getIri() }, elInstID ); break;
-
-          case ePROV_AGENT :
-            provElementView.addItem( new Object[] { "Agent", el.getIri() }, elInstID ); break;
-
-          case ePROV_ACTIVITY :
-            provElementView.addItem( new Object[] { "Activity", el.getIri() }, elInstID ); break;
-        }
-
-        // Echo new triples
-        LinkedList<EDMProvTriple> triples = el.getTriples();
-
-        if ( triples != null && !triples.isEmpty() )
-          for ( EDMProvTriple triple : triples )
-            provDataView.addItem( new Object[]{ triple.getSubject(),
-                                                triple.getPredicate(),
-                                                triple.getObject() },
-                                                triple.getID() );
+      //no need to iterate over elements because only new triples have been sent
+      for (EDMTriple triple: statement.getTriples().values()) {
+	      provDataView.addItem( new Object[]{ triple.getSubject(),
+	              triple.getPredicate(),
+	              triple.getObject() },
+	              triple.getID() );
       }
     }
   }

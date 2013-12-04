@@ -36,6 +36,8 @@ import java.util.*;
 
 
 /**
+ * FOR USE ONLY WITH LUC MOREAU'S Provenance ToolBox: TO BE REMOVED 
+ * 
  * PROVTBDataManager is an internal data manager for PROVToolBox data - it should not 
  * be used for client side development. This container assists in the data inter-operation
  * with ECC PROV data.
@@ -99,7 +101,7 @@ class PROVTBDataManager
     return activity;
   }
   
-  public Statement createEntityRelation( EDMProvTriple triple ) throws Exception
+  public Statement createEntityRelation( EDMTriple triple ) throws Exception
   {
     Statement statement = null;
     
@@ -182,7 +184,7 @@ class PROVTBDataManager
     return statement;
   }
   
-  public Statement createAgentRelation( EDMProvTriple triple ) throws Exception
+  public Statement createAgentRelation( EDMTriple triple ) throws Exception
   {
     Statement statement = null;
     
@@ -207,7 +209,7 @@ class PROVTBDataManager
     return statement;
   }
   
-  public Statement createActivityRelation( EDMProvTriple triple ) throws Exception
+  public Statement createActivityRelation( EDMTriple triple ) throws Exception
   {
     Statement statement = null;
     

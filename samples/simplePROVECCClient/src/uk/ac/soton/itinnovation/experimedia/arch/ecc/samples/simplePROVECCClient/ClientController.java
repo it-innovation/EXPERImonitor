@@ -120,17 +120,17 @@ public class ClientController implements ClientViewListener
       try
       {
         // This is Bobette
-        EDMAgent bobette = factory.getAgent( "experimedia:BobetteSmith" );
+        EDMAgent bobette = factory.getOrCreateAgent( "154544544345", "BobetteSmith" );
         bobette.addOwlClass( "foaf:Person" );
         
         // This is a video about football
-        EDMEntity video = factory.getEntity( "experimedia:reallyDullVideo" );
+        EDMEntity video = factory.getOrCreateEntity( "68743354574", "reallyDullVideo" );
         
         // Bobette starts to watch a video and pauses it when she gets bored
-        EDMActivity watchVideo = bobette.startActivity( "experimedia:watchVideo" );
+        EDMActivity watchVideo = bobette.startActivity( "54673434736", "watchVideo" );
         watchVideo.useEntity(video);
         
-        EDMActivity pauseVideo = bobette.doDiscreteActivity( "experimedia:pauseVideo" );
+        EDMActivity pauseVideo = bobette.doDiscreteActivity( "87645468454", "pauseVideo" );
         pauseVideo.useEntity(video);
       
         // Get factory to create a report containing the above PROV elements
