@@ -32,7 +32,11 @@ public interface ClientViewListener
 {
   void onClientViewClosed();
   
-  void onSendServerPROVClicked();
+  void onAgentSelected( String agent );
   
-  void onSendClientPROVClicked();
+  void onActivitySelected( String predicate );
+  
+  void onEntitySelected( String entity );
+  
+  void onSendProvData();
 }

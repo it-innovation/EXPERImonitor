@@ -259,8 +259,8 @@ public class EDMProvFactory extends AEDMProvFactory {
 	public void clear() {
 		currentTriples.clear();
 		sentTriples.clear();
-		super.clear();
-		factory = null;
+    
+    super.clear();
 	}
 	
 	public void loadReport(EDMProvReport report) throws DataFormatException, DatatypeConfigurationException {
