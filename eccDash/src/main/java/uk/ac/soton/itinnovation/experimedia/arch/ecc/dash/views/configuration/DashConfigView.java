@@ -25,20 +25,18 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.configuration;
 
-import com.vaadin.data.Property;
-import com.vaadin.event.ShortcutAction.KeyCode;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.*;
 
 import com.vaadin.ui.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.vaadin.event.ShortcutAction.KeyCode;
+
 
 
 
 public class DashConfigView extends SimpleView
 {
    // View listener
-   private DashConfigViewListener viewlistener;
+   private transient DashConfigViewListener viewlistener;
        
    // View root components  
    private Panel mainPanel;
@@ -463,12 +461,10 @@ public class DashConfigView extends SimpleView
   }
   
  /**
-  *A method to handle a button click event which collects input data and sends it 
+  * A method to handle a button click event which collects input data and sends it 
   * to the controller in order to update the online repository.
-  * 
-  * @throws Exception - Throws if the data cannot be updated.
   */ 
-  public void onUpdateConfigurationClicked() throws Exception 
+  public void onUpdateConfigurationClicked()
   {       
       // collect data from online config text boxes
       // send data to the controller
@@ -492,31 +488,11 @@ public class DashConfigView extends SimpleView
       String snapshotCount = snapshotCountText.getValue().toString();
       String nagiosUrl = nagiosUrlText.getValue().toString();
 
-
-    try
-    {
-          viewlistener.onUpdateConfiguration( monitorID, 
-                                            rabbitIP, 
-                                            rabbitPort, 
-                                            rabbitKeystore, 
-                                            rabbitPassword, 
-                                            useRabbitSSL,
-                                            dbUrl,
-                                            dbName,
-                                            dbUsername,
-                                            dbPassword,
-                                            dbType,
-                                            snapshotCount,
-                                            nagiosUrl                                   
-                                            );
-          
-    }
-   catch ( Exception ex )
-   {
-        String error = "Could not update the configuration because : " + ex.getMessage();
-        throw new Exception( error, ex );
-    }
-}  
+      viewlistener.onUpdateConfiguration( monitorID, rabbitIP, rabbitPort, 
+                                          rabbitKeystore, rabbitPassword, useRabbitSSL,
+                                          dbUrl, dbName, dbUsername, dbPassword, dbType,
+                                          snapshotCount, nagiosUrl );
+  }  
   
   /**
    * A button click listener class
@@ -536,12 +512,7 @@ public class DashConfigView extends SimpleView
      @Override
      public void buttonClick( Button.ClickEvent ce ) 
      {
-         try 
-         {
-             onUpdateConfigurationClicked();
-         } 
-         catch (Exception ex) 
-         { Logger.getLogger(DashConfigView.class.getName()).log(Level.SEVERE, null, ex); }
+       onUpdateConfigurationClicked();
      }
   }
 }

@@ -46,6 +46,7 @@ public class DashConfigController implements DashConfigViewListener
   private final transient IECCLogger configLogger = Logger.getLogger( DashConfigController.class );
   
   private DashConfigView configView;
+  
   private ConfigControllerListener configListener;
   private IECCDirectoryConfig dcf;
   private IECCProjectConfig   pcf;
@@ -143,7 +144,7 @@ public class DashConfigController implements DashConfigViewListener
    * @param repoPassword    - The password of the online repository.
    * @throws Exception      - Throws if the API cannot be accessed or component features cannot be created
    */
-  private void  initialiseProject( String projName, String repoUsername, String repoPassword ) throws Exception
+  private void initialiseProject( String projName, String repoUsername, String repoPassword ) throws Exception
   {
       // Safety first
       if ( projName == null || repoUsername == null || repoPassword == null )
@@ -273,27 +274,16 @@ public class DashConfigController implements DashConfigViewListener
               }
               
           }
+          
           // Send the configuration data to the view.
-              configView.showConfig( 
-                                  monitorID, 
-                                  rabbitIP, 
-                                  rabbitPort, 
-                                  rabbitKeystore, 
-                                  rabbitPassword, 
-                                  useRabbitSSL,
-                                  dbUrl,
-                                  dbName,
-                                  dbUsername,
-                                  dbPassword,
-                                  dbType,
-                                  snapshotCount,
-                                  nagiosUrl);
+          configView.showConfig( monitorID, rabbitIP, rabbitPort, 
+                                 rabbitKeystore, rabbitPassword, useRabbitSSL,
+                                 dbUrl, dbName, dbUsername, dbPassword, dbType,
+                                 snapshotCount, nagiosUrl );
           
           // Tell the view to display the footer after the config panel
           configView.showConfigFooter( true );
-          
       }
-      
   }
   
   /**
@@ -450,41 +440,49 @@ public class DashConfigController implements DashConfigViewListener
                                        String dbPassword,
                                        String dbType,
                                        String snapshotCount,
-                                       String nagiosUrl) throws Exception
+                                       String nagiosUrl )
     {
-            String rabbitSsl = String.valueOf( useRabbitSSL );
+      try
+      {
+        String rabbitSsl = String.valueOf( useRabbitSSL );
             
-            emConfigProperties.put( "Monitor_ID", monitorID );
-            emConfigProperties.put( "Rabbit_IP", rabbitIP );
-            emConfigProperties.put( "Rabbit_Port" , rabbitPort );
-            emConfigProperties.put( "Rabbit_Use_SSL" , rabbitSsl );
-            
-            // Ensure properties are written correctly for SSL options
-            if ( useRabbitSSL )
-            {
-                emConfigProperties.put( "Rabbit_Keystore" , rabbitKeystore );
-                emConfigProperties.put( "Rabbit_KeystorePassword" , rabbitPassword );
-            }
-            
-            String emConfigString = configJsonString( emConfigProperties );
-            saveConfiguration( "ECC" , "RabbitMQ", emConfigString );
-            
-            edmConfigProperties.put( "dbName", dbName );
-            edmConfigProperties.put( "dbURL" , dbUrl );
-            edmConfigProperties.put( "dbUsername" , dbUsername );
-            edmConfigProperties.put( "dbPassword", dbPassword );
-            edmConfigProperties.put( "dbType" , dbType );
-            
-            String edmConfigString = configJsonString( edmConfigProperties );
-            saveConfiguration( "ECC" , "Database", edmConfigString );
-            
-            dashConfigProperties.put( "livemonitor.defaultSnapshotCountMax" , snapshotCount );
-            dashConfigProperties.put( "nagios.fullurl", nagiosUrl );
-            
-            String dashConfigString = configJsonString( dashConfigProperties );
-            saveConfiguration( "ECC" , "Dashboard", dashConfigString );
-            
-            configurationComplete();
+        emConfigProperties.put( "Monitor_ID", monitorID );
+        emConfigProperties.put( "Rabbit_IP", rabbitIP );
+        emConfigProperties.put( "Rabbit_Port" , rabbitPort );
+        emConfigProperties.put( "Rabbit_Use_SSL" , rabbitSsl );
+
+        // Ensure properties are written correctly for SSL options
+        if ( useRabbitSSL )
+        {
+          emConfigProperties.put( "Rabbit_Keystore" , rabbitKeystore );
+          emConfigProperties.put( "Rabbit_KeystorePassword" , rabbitPassword );
+        }
+
+        String emConfigString = configJsonString( emConfigProperties );
+        saveConfiguration( "ECC" , "RabbitMQ", emConfigString );
+
+        edmConfigProperties.put( "dbName", dbName );
+        edmConfigProperties.put( "dbURL" , dbUrl );
+        edmConfigProperties.put( "dbUsername" , dbUsername );
+        edmConfigProperties.put( "dbPassword", dbPassword );
+        edmConfigProperties.put( "dbType" , dbType );
+
+        String edmConfigString = configJsonString( edmConfigProperties );
+        saveConfiguration( "ECC" , "Database", edmConfigString );
+
+        dashConfigProperties.put( "livemonitor.defaultSnapshotCountMax" , snapshotCount );
+        dashConfigProperties.put( "nagios.fullurl", nagiosUrl );
+
+        String dashConfigString = configJsonString( dashConfigProperties );
+        
+        saveConfiguration( "ECC" , "Dashboard", dashConfigString );
+
+        configurationComplete();
+      }
+      catch ( Exception ex )
+      {
+        configLogger.error( "Could not update configuration:" + ex.getMessage() );
+      }
     }
 
     @Override
@@ -558,7 +556,7 @@ public class DashConfigController implements DashConfigViewListener
                     if ( pcf.componentFeatureConfigExists( component , featureRb ) )
                         targetRabbitConfigData = pcf.getConfigData( component, featureRb );
                     else
-                        targetRabbitConfigData = null; // TODO: FIX THIS: pcf.getDefaultConfigData( component , featureRb );
+                        targetRabbitConfigData = pcf.getDefaultConfigData( component , featureRb );
                 }
                 catch ( Exception e )
                 { configLogger.fatal( "Could not find remote dashboard config data : " + e.getMessage() ); }
@@ -569,7 +567,7 @@ public class DashConfigController implements DashConfigViewListener
                     if ( pcf.componentFeatureConfigExists( component , featureDB ) )
                         targetDatabaseConfigData = pcf.getConfigData( component, featureDB );
                     else
-                        targetDatabaseConfigData = null; // TODO: FIX THIS: pcf.getDefaultConfigData( component , featureDB );
+                        targetDatabaseConfigData = pcf.getDefaultConfigData( component , featureDB );
                 }
                 catch ( Exception e )
                 { configLogger.fatal( "Could not find remote database config data: " + e.getMessage() ); }
@@ -580,7 +578,7 @@ public class DashConfigController implements DashConfigViewListener
                     if ( pcf.componentFeatureConfigExists( component , featureDash ) )
                         targetDashboardConfigData = pcf.getConfigData( component, featureDash );
                     else
-                        targetDashboardConfigData = null; // TODO: FIX THIS: pcf.getDefaultConfigData( component , featureDash );
+                        targetDashboardConfigData = pcf.getDefaultConfigData( component , featureDash );
                 }
                 catch ( Exception e )
                 { configLogger.fatal( "Could not find remote database config data: " + e.getMessage() ); }
