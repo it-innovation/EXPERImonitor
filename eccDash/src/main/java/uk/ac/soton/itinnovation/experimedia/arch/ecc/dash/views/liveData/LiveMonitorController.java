@@ -54,8 +54,10 @@ import java.util.*;
 public class LiveMonitorController extends UFAbstractEventManager
                                    implements LiveMetricViewListener
 {
-  private final IECCLogger liveMonLogger  = Logger.getLogger( LiveMonitorController.class );
-  private final Object     updateViewLock = new Object();
+  private final IECCLogger liveMonLogger        = Logger.getLogger( LiveMonitorController.class );
+  private final Object     metricViewUpdateLock = new Object();
+  private final Object     provViewUpdateLock   = new Object();
+  private final int        liveUpdateRate       = 2500;
 
   private LiveDataView   liveDataView;
   private LiveMetricView liveMetricView;
@@ -67,6 +69,9 @@ public class LiveMonitorController extends UFAbstractEventManager
   private transient UIPushManager               pushManager;
 
   private transient EDMProvReport aggregatedPROVReport;
+  private transient boolean       provUpdatePending;
+  
+  private Timer liveUpdateTimer; 
 
 
   public LiveMonitorController( UIPushManager pushMgr )
@@ -82,7 +87,15 @@ public class LiveMonitorController extends UFAbstractEventManager
   }
 
   public void initialse( IReportDAO dao )
-  { expReportAccessor = dao; }
+  { 
+    expReportAccessor = dao;
+    
+    // Set up live update callback
+    liveUpdateTimer = new Timer();
+    
+    LiveUpdateCallback luc = new LiveUpdateCallback();
+    liveUpdateTimer.scheduleAtFixedRate( luc, liveUpdateRate, liveUpdateRate );
+  }
 
   public void processLiveMetricData( EMClient client, Report report ) throws Exception
   {
@@ -102,15 +115,13 @@ public class LiveMonitorController extends UFAbstractEventManager
 
       // Display (if we have an active display and there is still data)
       if ( report.getNumberOfMeasurements() > 0 )
-        synchronized ( updateViewLock )
+        synchronized ( metricViewUpdateLock )
         {
           UUID msID = report.getMeasurementSet().getID();
           if ( activeMSVisuals.contains(msID) )
           {
             MeasurementSet ms = report.getMeasurementSet();
-            liveMetricView.updateMetricVisual( msID, ms );
-
-            if ( pushManager !=null ) pushManager.pushUIUpdates();
+            liveMetricView.appendMetricData( msID, ms );
           }
         }
     }
@@ -120,32 +131,14 @@ public class LiveMonitorController extends UFAbstractEventManager
   {
     if ( client == null || report == null ) throw new Exception( "Live monitoring provenance parameters were null" );
 
-    aggregatedPROVReport = report;
-
-    liveProvView.echoPROVData( aggregatedPROVReport );
-
-    // TO REMOVE LATER WITH JUNG VISUALISATION ---------------------------------
-    try
+    synchronized ( provViewUpdateLock )
     {
-      Component comp      = (Component) liveProvView.getImplContainer();
-      Application thisApp = comp.getApplication();
-      String basePath     = thisApp.getContext().getBaseDirectory().getAbsolutePath();
-
-      PROVDOTGraphBuilder gb = new PROVDOTGraphBuilder();
-      String dotAsString = gb.createDOT(aggregatedPROVReport);
-
-      PrintWriter out = new PrintWriter(basePath + "/" + "dotViz.dot");
-      out.print(dotAsString);
-      out.close();
-
-      liveProvView.renderPROVVizFile( basePath, "dotViz" );
+      // Stefanie TODO: Always receiving ALL PROV data from client; report no longer aggregating :(
+      //                Until persistence is in place, we need to aggregate in memory
+      aggregatedPROVReport = report;
+      
+      provUpdatePending    = true;
     }
-    catch ( Exception ex )
-    { liveMonLogger.error( "Could not create PROV visualisation", ex ); }
-    // --------------------------------- TO REMOVE LATER WITH JUNG VISUALISATION
-
-
-    if ( pushManager !=null ) pushManager.pushUIUpdates();
   }
 
   public IUFView getLiveView()
@@ -153,16 +146,28 @@ public class LiveMonitorController extends UFAbstractEventManager
 
   public void reset()
   {
-    activeMSVisuals.clear();
+    synchronized( metricViewUpdateLock )
+    {
+      activeMSVisuals.clear();
+      liveMetricView.resetView();
+    }
     
-    liveMetricView.resetView();
-    liveProvView.resetView();
+    synchronized( provViewUpdateLock )
+    {
+      liveProvView.resetView();
+      provUpdatePending = false;
+    }
     
     aggregatedPROVReport = new EDMProvReport();
   }
 
   public void shutDown()
   {
+    reset();
+    
+    liveUpdateTimer.cancel();
+    liveUpdateTimer.purge();
+    
     pushManager = null;
   }
 
@@ -204,7 +209,7 @@ public class LiveMonitorController extends UFAbstractEventManager
           }
 
           if ( visual != null )
-            synchronized ( updateViewLock )
+            synchronized ( metricViewUpdateLock )
             {
               liveMetricView.addMetricVisual( client.getName(),
                                                entity.getName(),
@@ -228,7 +233,7 @@ public class LiveMonitorController extends UFAbstractEventManager
         Map<UUID, MeasurementSet> mSets = MetricHelper.getAllMeasurementSets( msGens );
         Iterator<MeasurementSet> msIt = mSets.values().iterator();
 
-        synchronized ( updateViewLock )
+        synchronized ( metricViewUpdateLock )
         {
           while ( msIt.hasNext() )
           {
@@ -237,9 +242,10 @@ public class LiveMonitorController extends UFAbstractEventManager
             activeMSVisuals.remove( msID );
             liveMetricView.removeMetricVisual( msID );
           }
-
-          if ( pushManager !=null ) pushManager.pushUIUpdates();
         }
+        
+        // Removal could be the result of a client disconnection, to push an update
+        pushManager.pushUIUpdates();
       }
     }
   }
@@ -250,13 +256,13 @@ public class LiveMonitorController extends UFAbstractEventManager
   {
     if ( msID != null )
     {
-      synchronized ( updateViewLock )
+      synchronized ( metricViewUpdateLock )
       {
         activeMSVisuals.remove( msID );
         liveMetricView.removeMetricVisual( msID );
-
-        if ( pushManager !=null ) pushManager.pushUIUpdates();
       }
+      
+      if ( pushManager !=null ) pushManager.pushUIUpdates();
     }
   }
 
@@ -394,7 +400,56 @@ public class LiveMonitorController extends UFAbstractEventManager
 
     return true;
   }
+  
+  private void updateLiveViews()
+  {
+    boolean pushRequired = false;
+    
+    synchronized ( metricViewUpdateLock )
+    {
+      if ( !activeMSVisuals.isEmpty() )
+      {
+        liveMetricView.updateView();
+        pushRequired = true;
+      }
+    }
+    
+    synchronized( provViewUpdateLock )
+    {
+      if ( provUpdatePending )
+      {
+        liveProvView.echoPROVData( aggregatedPROVReport );
+        
+        // TO REMOVE LATER WITH JUNG VISUALISATION ---------------------------------
+        try
+        {
+          Component comp      = (Component) liveProvView.getImplContainer();
+          Application thisApp = comp.getApplication();
+          String basePath     = thisApp.getContext().getBaseDirectory().getAbsolutePath();
 
+          PROVDOTGraphBuilder gb = new PROVDOTGraphBuilder();
+          String dotAsString = gb.createDOT(aggregatedPROVReport);
+
+          PrintWriter out = new PrintWriter(basePath + "/" + "dotViz.dot");
+          out.print(dotAsString);
+          out.close();
+
+          liveProvView.renderPROVVizFile( basePath, "dotViz" );
+          
+          pushRequired = true;
+        }
+        catch ( Exception ex )
+        { liveMonLogger.error( "Could not create PROV visualisation", ex ); }
+        // --------------------------------- TO REMOVE LATER WITH JUNG VISUALISATION
+
+        provUpdatePending = false;
+      }
+    }
+    
+    // Push UI updates, if required
+    if ( pushManager !=null && pushRequired ) pushManager.pushUIUpdates();
+  }
+  
   // Private classes -----------------------------------------------------------
   private class MSUpdateInfo
   {
@@ -406,5 +461,12 @@ public class LiveMonitorController extends UFAbstractEventManager
       lastUpdate = update;
       lastMeasurementID = measurementID;
     }
+  }
+  
+  public class LiveUpdateCallback extends TimerTask
+  {
+    @Override
+    public void run()
+    { updateLiveViews(); }
   }
 }

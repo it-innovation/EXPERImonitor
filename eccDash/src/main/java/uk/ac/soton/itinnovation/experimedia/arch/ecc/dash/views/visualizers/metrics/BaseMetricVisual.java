@@ -100,7 +100,6 @@ public abstract class BaseMetricVisual extends SimpleView
   public void clearMeasurements()
   {
     cachedMeasurements.clear();
-    updateView();
   }
   
   public void addMeasurementData( MeasurementSet ms )
@@ -121,8 +120,6 @@ public abstract class BaseMetricVisual extends SimpleView
             cachedMeasurements.removeFirst();
         }
       }
-      
-      updateView();
     }
   }
   
@@ -134,7 +131,6 @@ public abstract class BaseMetricVisual extends SimpleView
       { cachedMeasurements.removeFirst(); } 
       
       maxCachedMeasurements = max;
-      updateView();
     }
   }
   

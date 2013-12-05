@@ -38,8 +38,8 @@ import java.util.*;
 public class LiveMetricScheduler extends UFAbstractEventManager
 {
   private final IECCLogger metLogger  = Logger.getLogger( LiveMetricScheduler.class );
-  private final int pullSpeed     = 2000;
-  private final Object clientLock = new Object();
+  private final int        pullSpeed  = 1000;
+  private final Object     clientLock = new Object();
   
   private IExperimentMonitor            expMonitor;
   private HashMap<UUID, MetricPullTask> liveClients;
@@ -113,7 +113,7 @@ public class LiveMetricScheduler extends UFAbstractEventManager
   }
   
   // Private methods -----------------------------------------------------------
-  private synchronized void tryPullClientMetrics( EMClient client )
+  private void tryPullClientMetrics( EMClient client )
   {
     // Only make the pull if we're scheduling and the client is not busy
     if ( isScheduling && !client.isPullingMetricData() )

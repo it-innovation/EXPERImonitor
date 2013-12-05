@@ -45,6 +45,7 @@ public class LiveMetricView extends SimpleView
   
   private transient HashMap<UUID, BaseMetricVisual> visualsByMSID;
   private transient HashMap<UUID, VisualNavView>    navViewsByMSID;
+  private transient HashSet<UUID>                   liveUpdatesPending;
   private transient UUID                            currSelectedNavView;
   
   
@@ -52,8 +53,9 @@ public class LiveMetricView extends SimpleView
   {
     super();
     
-    visualsByMSID  = new HashMap<UUID, BaseMetricVisual>();
-    navViewsByMSID = new HashMap<UUID, VisualNavView>();
+    visualsByMSID      = new HashMap<UUID, BaseMetricVisual>();
+    navViewsByMSID     = new HashMap<UUID, VisualNavView>();
+    liveUpdatesPending = new HashSet<UUID>();
     
     createComponents();
   }
@@ -68,31 +70,47 @@ public class LiveMetricView extends SimpleView
     navViewsByMSID.clear();
   }
   
+  @Override
+  public void updateView()
+  {
+    // Update any graphs that have had new data appended to them
+    for ( UUID msID : liveUpdatesPending )
+    {
+       BaseMetricVisual visual = visualsByMSID.get( msID );
+
+       if ( visual != null ) visual.updateView();
+    }
+
+    liveUpdatesPending.clear();
+  }
+  
   public void addMetricVisual( String clientName, String entityName,
                                String attributeName,
                                UUID msID, BaseMetricVisual visual )
   {
     if ( clientName    != null && entityName != null && 
          attributeName != null && msID       != null && visual != null )
+    {
       if ( !visualsByMSID.containsKey(msID) )
       {
         VisualNavView navView = new VisualNavView( clientName, entityName,
                                                    attributeName, msID );
-        
+
         metricsNavList.addComponent( (Component) navView.getImplContainer() );
         navViewsByMSID.put( msID, navView );
-        
+
         metricsVisualList.addComponent( (Component) visual.getImplContainer() );
         visualsByMSID.put( msID, visual );
-        
+
         // Space
         metricsVisualList.addComponent( UILayoutUtil.createSpace("5px", null) );
-        
+
         // High-light if first selected
         if ( currSelectedNavView == null ) onNavViewSelected( msID );
-        
+
         visual.addListener( this );
       }
+    }
   }
   
   public void removeMetricVisual( UUID msID )
@@ -105,27 +123,34 @@ public class LiveMetricView extends SimpleView
         metricsNavList.removeComponent( (Component) view.getImplContainer() );
         navViewsByMSID.remove( msID );
       }
-      
+
       BaseMetricVisual visual = visualsByMSID.get( msID );
       if ( visual != null )
       {
         metricsVisualList.removeComponent( (Component) visual.getImplContainer() );
         visualsByMSID.remove( msID );
-        
+
         // Do not listen to this visual any more
         unhookNotifier( visual );
       }
+
+      liveUpdatesPending.remove( msID );
     }
   }
   
-  public void updateMetricVisual( UUID msID, MeasurementSet ms )
+  public void appendMetricData( UUID msID, MeasurementSet ms )
   {
     if ( msID != null && ms != null )
     {
       BaseMetricVisual visual = visualsByMSID.get( msID );
-      
-      if ( visual != null ) 
+
+      if ( visual != null )
+      {
+        // Add measuement data for visualisation to view; actual update
+        // is managed asychronously via a call to updateView by the controller
         visual.addMeasurementData( ms );
+        liveUpdatesPending.add( msID );
+      } 
     }
   }
   
