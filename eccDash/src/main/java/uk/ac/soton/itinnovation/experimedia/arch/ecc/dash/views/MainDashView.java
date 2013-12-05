@@ -30,18 +30,17 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.client.ClientCon
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.SimpleView;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMPhase;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.UILayoutUtil;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.dataExport.DataExportController;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveData.LiveMonitorController;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.system.SystemView;
 
 import com.vaadin.ui.*;
 import com.vaadin.ui.TabSheet.Tab;
 import org.vaadin.artur.icepush.ICEPush;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.system.SystemView;
 
 import java.net.URL;
 import java.util.Collection;
-
 
 
 
@@ -75,9 +74,9 @@ public class MainDashView extends SimpleView
     createFrameworkComponents();
   }
 
-  public void initialise( ICEPush pusher )
+  public void initialise( UIPushManager pushMgr )
   {
-    createMainDashControls( pusher );
+    createMainDashControls( pushMgr );
   }
 
   public void resetViews()
@@ -225,7 +224,7 @@ public class MainDashView extends SimpleView
     bodyVL.addComponent( label );
   }
 
-  private void createMainDashControls( ICEPush pusher )
+  private void createMainDashControls( UIPushManager pushMgr )
   {
     controlView = new MonitorControlView();
     dashHeaderView.addComponent( (Component) controlView.getImplContainer() );
@@ -233,10 +232,10 @@ public class MainDashView extends SimpleView
     connectionsView = new ClientConnectionsView();
     dashSideView.addComponent( (Component) connectionsView.getImplContainer() );
 
-    createSubViews( pusher );
+    createSubViews( pushMgr );
   }
 
-  private void createSubViews( ICEPush pusher )
+  private void createSubViews( UIPushManager pushMgr )
   {
     dashContentView.removeAllComponents();
 
@@ -255,7 +254,7 @@ public class MainDashView extends SimpleView
     systemView = new SystemView(connectionsView, clientInfoView, nagiosView, logView);
     subViewsSheet.addTab( (Component) systemView.getImplContainer(), "System", null );
 
-    liveMonitorController = new LiveMonitorController( pusher );
+    liveMonitorController = new LiveMonitorController( pushMgr );
     subViewsSheet.addTab( (Component) liveMonitorController.getLiveView().getImplContainer(),
                           "Live monitor", null );
 

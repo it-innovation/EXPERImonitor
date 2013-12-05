@@ -31,22 +31,22 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.Logger;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.visualizers.metrics.*;
-
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.visualizers.prov.PROVDOTGraphBuilder;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IReportDAO;
-
 import uk.ac.soton.itinnovation.robust.cat.core.components.viewEngine.spec.uif.mvc.IUFView;
 import uk.ac.soton.itinnovation.robust.cat.core.components.viewEngine.spec.uif.types.UFAbstractEventManager;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.UIPushManager;
+
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.visualizers.metrics.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.visualizers.prov.PROVDOTGraphBuilder;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IReportDAO;
+
 import com.vaadin.Application;
 import com.vaadin.ui.Component;
-import org.vaadin.artur.icepush.ICEPush;
 
 
 import java.io.PrintWriter;
 import java.util.*;
+
 
 
 
@@ -64,16 +64,16 @@ public class LiveMonitorController extends UFAbstractEventManager
   private transient HashMap<UUID, MSUpdateInfo> measurementUpdates;
   private transient HashSet<UUID>               activeMSVisuals;
   private transient IReportDAO                  expReportAccessor;
-  private transient ICEPush                     icePusher;
+  private transient UIPushManager               pushManager;
 
   private transient EDMProvReport aggregatedPROVReport;
 
 
-  public LiveMonitorController( ICEPush pusher )
+  public LiveMonitorController( UIPushManager pushMgr )
   {
     super();
 
-    icePusher            = pusher;
+    pushManager          = pushMgr;
     measurementUpdates   = new HashMap<UUID, MSUpdateInfo>();
     activeMSVisuals      = new HashSet<UUID>();
     aggregatedPROVReport = new EDMProvReport();
@@ -110,7 +110,7 @@ public class LiveMonitorController extends UFAbstractEventManager
             MeasurementSet ms = report.getMeasurementSet();
             liveMetricView.updateMetricVisual( msID, ms );
 
-            if ( icePusher !=null ) icePusher.push();
+            if ( pushManager !=null ) pushManager.pushUIUpdates();
           }
         }
     }
@@ -145,7 +145,7 @@ public class LiveMonitorController extends UFAbstractEventManager
     // --------------------------------- TO REMOVE LATER WITH JUNG VISUALISATION
 
 
-    if ( icePusher !=null ) icePusher.push();
+    if ( pushManager !=null ) pushManager.pushUIUpdates();
   }
 
   public IUFView getLiveView()
@@ -163,7 +163,7 @@ public class LiveMonitorController extends UFAbstractEventManager
 
   public void shutDown()
   {
-    icePusher = null;
+    pushManager = null;
   }
 
   public void addliveView( EMClient client, Entity entity, Attribute attribute,
@@ -238,7 +238,7 @@ public class LiveMonitorController extends UFAbstractEventManager
             liveMetricView.removeMetricVisual( msID );
           }
 
-          if ( icePusher !=null ) icePusher.push();
+          if ( pushManager !=null ) pushManager.pushUIUpdates();
         }
       }
     }
@@ -255,7 +255,7 @@ public class LiveMonitorController extends UFAbstractEventManager
         activeMSVisuals.remove( msID );
         liveMetricView.removeMetricVisual( msID );
 
-        if ( icePusher !=null ) icePusher.push();
+        if ( pushManager !=null ) pushManager.pushUIUpdates();
       }
     }
   }

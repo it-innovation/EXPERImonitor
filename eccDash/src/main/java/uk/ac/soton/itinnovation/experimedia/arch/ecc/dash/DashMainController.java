@@ -53,7 +53,6 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.dataExport.DataE
 import com.vaadin.ui.*;
 import com.vaadin.Application;
 import com.vaadin.terminal.FileResource;
-import org.vaadin.artur.icepush.ICEPush;
 
 import java.io.*;
 import java.net.URL;
@@ -97,7 +96,7 @@ public class DashMainController extends UFAbstractEventManager
   private boolean isShuttingDown = false;
   private EMPhase currentPhase   = EMPhase.eEMUnknownPhase;
   
-  private ICEPush icePusher;
+  private UIPushManager pushManager;
   
 
   public DashMainController()
@@ -124,10 +123,10 @@ public class DashMainController extends UFAbstractEventManager
     {
       isShuttingDown = true;
       
-      if ( icePusher != null )
+      if ( pushManager != null )
       {
-        rootWindow.removeComponent( icePusher );
-        icePusher = null;
+        pushManager.shutdown();
+        pushManager = null;
       }
       
       viewResource.cleanUp();
@@ -221,7 +220,7 @@ public class DashMainController extends UFAbstractEventManager
         dashMainLog.error( problem );
       }
       
-      icePusher.push();
+      pushManager.pushUIUpdates();
     }
   }
   
@@ -243,7 +242,7 @@ public class DashMainController extends UFAbstractEventManager
         }
       
       if ( liveMonitorController != null ) liveMonitorController.removeClientLiveView( client );
-      if ( icePusher != null ) icePusher.push();
+      if ( pushManager != null ) pushManager.pushUIUpdates();
     }
   }
   
@@ -253,7 +252,7 @@ public class DashMainController extends UFAbstractEventManager
     if ( client != null && phase != null)
     {
       connectionsView.updateClientPhase( client.getID(), phase );
-      icePusher.push();
+      pushManager.pushUIUpdates();
     }
   }
   
@@ -368,7 +367,7 @@ public class DashMainController extends UFAbstractEventManager
         mainDashView.addLogMessage( client.getName() + "Got new metrics model from " + client.getName() );
       }
         
-      icePusher.push();
+      pushManager.pushUIUpdates();
     }
   }
   
@@ -406,7 +405,7 @@ public class DashMainController extends UFAbstractEventManager
           String problem = "Could not add pulling client to live monitoring: " + e.getMessage();
           mainDashView.addLogMessage( problem );
           dashMainLog.error( problem );
-          icePusher.push();
+          pushManager.pushUIUpdates();
         }
       }
       else
@@ -414,7 +413,7 @@ public class DashMainController extends UFAbstractEventManager
         String problem = "Client trying to start pull process whilst not in Live monitoring";
         mainDashView.addLogMessage( problem );
         dashMainLog.error( problem );
-        icePusher.push();
+        pushManager.pushUIUpdates();
       }
     }
   }
@@ -546,12 +545,11 @@ public class DashMainController extends UFAbstractEventManager
       
       createCommonUIResources(); // Create common resources before we create the main view
       
-      icePusher = new ICEPush();
-      rootWindow.addComponent( icePusher );
+      pushManager = new UIPushManager( rootWindow );
       
       mainDashView = new MainDashView();
       rootWindow.addComponent( (Component) mainDashView.getImplContainer() );
-      mainDashView.initialise( icePusher );
+      mainDashView.initialise( pushManager );
       mainDashView.addListener( this );
     
       Properties emProps = configController.getEMConfig();
@@ -1066,10 +1064,10 @@ public class DashMainController extends UFAbstractEventManager
   // Event handlers ------------------------------------------------------------
   private void onDashWindowResized()
   {
-    if ( mainDashView != null && icePusher != null )
+    if ( mainDashView != null && pushManager != null )
     {
       mainDashView.updateViewport();
-      icePusher.push();
+      pushManager.pushUIUpdates();
     }
   }
 
