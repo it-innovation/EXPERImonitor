@@ -44,7 +44,11 @@ namespace ecc_amqpAPI_impl
 {
 
   AMQPConnectionFactory::AMQPConnectionFactory()
-    : amqpHostIP( L"127.0.0.1" ), amqpPortNumber(5672), connectionEstablished(false)
+    : userName( L"guest" ),
+      userPass( L"guest" ),
+      amqpHostIP( L"127.0.0.1" ), 
+      amqpPortNumber(5672), 
+      connectionEstablished( false )
   {
   }
 
@@ -85,6 +89,15 @@ namespace ecc_amqpAPI_impl
     amqpPortNumber = port;
 
     return true;
+  }
+
+  void AMQPConnectionFactory::setRabbitUserLogin( const String& name, const String& password )
+  {
+    if ( !name.empty() && !password.empty() )
+    {
+      userName = name;
+      userPass = password;
+    }
   }
 
   wstring AMQPConnectionFactory::getLocalIP()
@@ -163,10 +176,12 @@ namespace ecc_amqpAPI_impl
     if ( !amqpHostIP.empty() )
     {
       string ip =  toNarrow( amqpHostIP );
-      channelImpl = Channel::Create( ip, amqpPortNumber );
+
+      channelImpl = Channel::Create( ip, amqpPortNumber,
+                                     toNarrow( userName ), 
+                                     toNarrow( userPass ) );
     }
 
     return channelImpl;
   }
-
 }

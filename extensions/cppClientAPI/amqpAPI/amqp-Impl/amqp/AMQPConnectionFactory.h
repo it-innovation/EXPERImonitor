@@ -51,6 +51,8 @@ namespace ecc_amqpAPI_impl
 
     bool setAMQPHostPort( const int port );
 
+    void setRabbitUserLogin( const String& name, const String& password );
+
     String getLocalIP();
 
     void connectToAMQPHost();
