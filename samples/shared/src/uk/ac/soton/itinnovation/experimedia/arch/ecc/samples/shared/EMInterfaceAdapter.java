@@ -54,14 +54,13 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
                                            IEMPostReport_UserListener,
                                            IEMTearDown_UserListener
 {
-    protected EMIAdapterListener       emiListener;
-    protected EMILegacyAdapterListener emiLegListener;
+    protected EMIAdapterListener emiListener;
     
-    protected String             clientName;
-    protected AMQPBasicChannel   amqpChannel;
-    protected UUID               expMonitorID;
-    protected UUID               clientID;
-    protected Experiment         currentExperiment;
+    protected String           clientName;
+    protected AMQPBasicChannel amqpChannel;
+    protected UUID             expMonitorID;
+    protected UUID             clientID;
+    protected Experiment       currentExperiment;
 
     protected EMInterfaceFactory       interfaceFactory;
     protected IAMQPMessageDispatchPump dispatchPump;
@@ -77,28 +76,17 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
     protected boolean clientRegistered = false;
 
     // Supported phases & metric Generators
-    protected EnumSet<EMPhase>     supportedPhases;
+    protected EnumSet<EMPhase> supportedPhases;
 
     
     /**
      * Constructor for the EMInterfaceAdapter using the most recent listener to ECC events.
      * 
-     * @param listener - ECC event listener (V1.0)
+     * @param listener - ECC event listener
      */
     public EMInterfaceAdapter( EMIAdapterListener listener )
     {
         emiListener     = listener; 
-        supportedPhases = EnumSet.noneOf( EMPhase.class );
-    }
-    
-    /**
-     * Constructor for the EMInterfaceAdapter using an older listener to ECC events (V0.9).
-     * 
-     * @param listener - ECC event listener (V0.9)
-     */
-    public EMInterfaceAdapter ( EMILegacyAdapterListener legListener )
-    {
-        emiLegListener  = legListener;
         supportedPhases = EnumSet.noneOf( EMPhase.class );
     }
 
@@ -111,10 +99,10 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
      * @param ourID      - The UUID of this client (as a unique instance)
      * @throws Exception - Registration will throw if any of the parameters are NULL.
      */
-    public void registerWithEM( String name,
+    public void registerWithEM( String           name,
                                 AMQPBasicChannel channel, 
-                                UUID emID,
-                                UUID ourID ) throws Exception
+                                UUID             emID,
+                                UUID             ourID ) throws Exception
     {
         // Safety first
         if ( name == null ) throw new Exception( "Client name is null" );
@@ -127,6 +115,9 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
         clientName       = name;
         expMonitorID     = emID;
         clientID         = ourID;
+        
+        // Set up listener for unexpected connectivity events
+        amqpChannel.setListener( new ChannelListener() );
 
         // Create interface factory to support interfaces required by the EM
         interfaceFactory = new EMInterfaceFactory( amqpChannel, false );
@@ -301,12 +292,6 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
                             // Tell listener that the Live Monitoring phase has begun
                             emiListener.onLiveMonitoringStarted();
                         }
-                        else
-                        {
-                            // Legacy behaviour: report that we can both push and be pulled
-                            liveMonitorFace.notifyReadyToPush();
-                            liveMonitorFace.notifyReadyForPull();
-                        }
                     }
 
                 } break;
@@ -367,9 +352,7 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
                                                 createTime );
           
             if ( emiListener != null )
-              emiListener.onEMConnectionResult( confirmed, currentExperiment );
-            else
-              emiLegListener.onEMConnectionResult( confirmed );
+                emiListener.onEMConnectionResult( confirmed, currentExperiment );
             
             discoveryFace.readyToInitialise();
         }
@@ -378,26 +361,17 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
     @Override
     public void onDeregisteringThisClient( UUID senderID, String reason )
     {
-        if ( senderID.equals(expMonitorID) )
-            if ( emiListener != null )
-                emiListener.onEMDeregistration( reason );
+        if ( senderID.equals(expMonitorID) && emiListener != null )
+            emiListener.onEMDeregistration( reason );
     }
 
     @Override
     public void onRequestActivityPhases( UUID senderID )
     {
-        if ( senderID.equals(expMonitorID) )
-        {
-            if ( emiListener != null )
-                emiListener.onDescribeSupportedPhases( supportedPhases );
-            else
-            {
-                // Legacy behaviour: specify full support
-                supportedPhases = EnumSet.allOf( EMPhase.class );
-            }
-            
-            discoveryFace.sendActivePhases( supportedPhases );
-        }
+        if ( senderID.equals(expMonitorID) && emiListener != null )
+            emiListener.onDescribeSupportedPhases( supportedPhases );
+        
+        discoveryFace.sendActivePhases( supportedPhases );
     }
 
     @Override
@@ -411,21 +385,14 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
     @Override
     public void onRequestMetricGeneratorInfo( UUID senderID )
     {      
-        if ( senderID.equals(expMonitorID) )
-        {
-             if ( emiListener != null )
-                emiListener.onPopulateMetricGeneratorInfo();
-             else
-               emiLegListener.onPopulateMetricGeneratorInfo();
-            
-          
-        }
+        if ( senderID.equals(expMonitorID) && emiListener != null )
+            emiListener.onPopulateMetricGeneratorInfo();
     }
 
     @Override
     public void onDiscoveryTimeOut( UUID senderID )
     { 
-        if ( emiListener != null ) 
+        if ( emiListener != null )
             emiListener.onDiscoveryTimeOut();
     }
 
@@ -445,8 +412,6 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
 
             if ( emiListener != null )
                 emiListener.onSetupMetricGenerator( genID, result );
-            else
-                emiLegListener.onSetupMetricGenerator( genID, result );
             
             setupFace.notifyMetricGeneratorSetupResult( genID, result[0] );
         }
@@ -463,35 +428,22 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
     @Override
     public void onStartPushing( UUID senderID )
     {
-        if ( senderID.equals(expMonitorID) )
-        {
-            if ( emiListener != null )
-                emiListener.onStartPushingMetricData();
-            else
-              emiLegListener.onStartPushingMetricData();
-        }       
+        if ( senderID.equals(expMonitorID) && emiListener != null )
+            emiListener.onStartPushingMetricData();    
     }
 
     @Override
     public void onReceivedPush( UUID senderID, UUID lastReportID )
     {
-        if ( senderID.equals(expMonitorID) )
-        {
-            if ( emiListener != null )
-                emiListener.onPushReportReceived( lastReportID );
-            else
-                emiLegListener.onLastPushProcessed( lastReportID );
-        }
+        if ( senderID.equals(expMonitorID) && emiListener != null )
+            emiListener.onPushReportReceived( lastReportID );
     }
     
     @Override
     public void onReceivedPull( UUID senderID, UUID lastReportID )
     {
-        if ( senderID.equals(expMonitorID) )
-        {
-            if ( emiListener != null )
-                emiListener.onPullReportReceived( lastReportID );
-        }
+        if ( senderID.equals(expMonitorID) && emiListener != null )
+            emiListener.onPullReportReceived( lastReportID );
     }
 
     @Override
@@ -501,9 +453,7 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
         {
             if ( emiListener != null )
                 emiListener.onStopPushingMetricData();
-            else
-                emiLegListener.onStopPushingMetricData();
-              
+            
             liveMonitorFace.notifyPushingCompleted();
         }
     }
@@ -519,8 +469,6 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
 
             if ( emiListener != null )
                 emiListener.onPullMetric( measurementSetID, reportOUT );
-            else
-                emiLegListener.onPullMetric( measurementSetID, reportOUT );
 
             liveMonitorFace.sendPulledMetric( reportOUT );
         }
@@ -536,11 +484,8 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
     @Override
     public void onPullingStopped( UUID senderID )
     {
-        if ( senderID.equals(expMonitorID) )
-        {
-            if ( emiListener != null )
-                emiListener.onPullingStopped();
-        }
+        if ( senderID.equals(expMonitorID) && emiListener != null  )
+            emiListener.onPullingStopped();
     }
 
     // IEMPostReport_UserListener ----------------------------------------------
@@ -553,8 +498,6 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
             
             if ( emiListener != null )
                 emiListener.onPopulateSummaryReport( summary );
-            else
-              emiLegListener.onPopulateSummaryReport( summary );
 
             postReportFace.sendReportSummary( summary );
         }
@@ -567,11 +510,6 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
         {
             if ( emiListener != null )
                  emiListener.onPopulateDataBatch( reqBatch );
-            else
-            {
-                // Probably won't support this request in the legacy version
-                // so just return an empty batch
-            }
 
           postReportFace.sendDataBatch( reqBatch );
         }
@@ -594,8 +532,6 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
             
             if ( emiListener != null )
                 emiListener.onGetTearDownResult( result );
-            else
-                emiLegListener.onGetTearDownResult( result );
 
             tearDownFace.sendTearDownResult( result[0] );
         }
@@ -604,10 +540,21 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
     @Override
     public void onTearDownTimeOut( UUID senderID )
     { 
-        if ( senderID.equals(expMonitorID) )
-        {
-            if ( emiListener != null )
-                emiListener.onTearDownTimeOut();
-        }
+        if ( senderID.equals(expMonitorID) && emiListener != null )
+            emiListener.onTearDownTimeOut();
+    }
+    
+    // Private methods/listening classes ---------------------------------------
+    private void onAMQPChannelShutdown( boolean connectionOK, String reason )
+    {
+      // Try to re-establish channels & interfaces if the connection is OK
+      
+    }
+    
+    private class ChannelListener implements IAMQPChannelListener
+    {
+      @Override
+      public void onChannelShutdown( boolean connectionOK, String reason )
+      { onAMQPChannelShutdown( connectionOK, reason ); }
     }
 }
