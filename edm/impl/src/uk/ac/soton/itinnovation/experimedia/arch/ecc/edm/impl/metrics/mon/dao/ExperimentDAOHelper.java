@@ -217,6 +217,59 @@ public class ExperimentDAOHelper
         }
     }
     
+    public static void finaliseExperiment( Experiment exp, Connection connection ) throws Exception
+    {
+      // Check the experiment and finish date are OK before attempting finalisation
+      String problem = null;
+      
+      // Check experiment data and connection
+      if ( exp != null )
+      {
+        if ( !DBUtil.isClosed(connection) )
+        {
+          // Check in-coming data
+          if ( exp.getUUID() == null      ) problem = "Experiment UUID is null";
+          if ( exp.getStartTime() == null ) problem = "Experiment start date is null";
+          if ( exp.getEndTime() == null   ) problem = "Experiment end date is null";
+        }
+        else problem = "Connection to the DB is closed";
+      }
+      else problem = "Experiment is null";
+      
+      // Try updating database if still OK
+      if ( problem == null )
+        try
+        {
+          UUID expID = exp.getUUID();
+          
+          if ( objectExists(expID, connection, false) )
+          {
+            String query = "UPDATE experiment SET endtime = ? " + "WHERE experiment.expuuid = ?";
+            PreparedStatement ps = connection.prepareStatement( query );
+            ps.setLong( 1, exp.getEndTime().getTime() );
+            ps.setObject( 2, expID, java.sql.Types.OTHER );
+            
+            ps.executeUpdate();
+          }
+          else problem = "Experiment ID cannot be found in database";
+        }
+        catch ( Exception ex )
+        {
+          problem = ex.getMessage();
+          connection.rollback();
+          connection.close();
+        }
+      
+      // Report problems and throw if required
+      if ( problem != null )
+      {
+        String errorMsg = "Problems finalising epxeriment data:" + problem;
+        
+        log.error( errorMsg );
+        throw new RuntimeException( errorMsg );
+      }
+    }
+    
     /**
      * Overloaded method, with the option to set a flag whether to close the
      * DB connection or not.

@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////
 //
-// © University of Southampton IT Innovation Centre, 2012
+// © University of Southampton IT Innovation Centre, 2013
 //
 // Copyright in this software belongs to University of Southampton
 // IT Innovation Centre of Gamma House, Enterprise Road, 
@@ -18,7 +18,7 @@
 // the software.
 //
 //      Created By :            Simon Crowle
-//      Created Date :          02-Feb-2013
+//      Created Date :          10-Dec-2013
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
@@ -28,11 +28,9 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views;
 
 
 
-public interface MonitorControlViewListener
+public interface CreateExperimentViewListener
 {
-  void onStartLifecycleClicked();
+  void onStartExperiment( String projName, String expName, String expDesc );
   
-  void onNextPhaseClicked();
-  
-  void onStopExperimentClicked();
+  void onCancelStartExperiment();
 }

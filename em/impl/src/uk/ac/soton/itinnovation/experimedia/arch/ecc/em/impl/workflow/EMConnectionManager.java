@@ -84,7 +84,6 @@ public class EMConnectionManager implements IEMMonitorEntryPoint_ProviderListene
                                                        dispatch,
                                                        entryPointID,
                                                        true );
-
         entryPointInterface.setListener( this );
 
         entryPointOpen = true;

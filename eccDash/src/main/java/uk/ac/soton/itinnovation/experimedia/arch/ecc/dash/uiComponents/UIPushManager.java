@@ -52,6 +52,15 @@ public class UIPushManager
     rootWindow.addComponent( icePush );
   }
   
+  public void restart()
+  {
+    synchronized( pushLock )
+    {
+      rootWindow.addComponent( icePush );
+      pushActive = false;
+    }
+  }
+  
   public void shutdown()
   {
     synchronized( pushLock )

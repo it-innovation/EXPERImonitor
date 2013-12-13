@@ -255,16 +255,12 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
     {
       for ( AbstractEMLCPhase phase : lifecyclePhases.values() )
       {
-        try
-        { 
-          phase.controlledStop(); 
-          lifecycleListener.onLifecyclePhaseCompleted( currentPhase );
-        }
-        // If a controlled stop is not possible, just notify end of phase
-        catch ( Exception e )
-        { 
-          phase.hardStop();
-        }
+        boolean phaseInFocus = phase.isInFocus();
+        
+        phase.controlledStop();
+        
+        if ( phaseInFocus )
+          lifecycleListener.onLifecyclePhaseCompleted( phase.getPhaseType() );
       }
     }
     

@@ -33,11 +33,9 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces.EMPostReport;
-
-import java.util.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMDataBatchEx;
 
-
+import java.util.*;
 
 
 public class EMPostReportPhase extends AbstractEMLCPhase

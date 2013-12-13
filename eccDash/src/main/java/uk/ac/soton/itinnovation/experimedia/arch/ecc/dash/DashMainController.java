@@ -76,6 +76,7 @@ public class DashMainController extends UFAbstractEventManager
   private final transient UIResource viewResource = new UIResource();
   
   private Window                rootWindow;
+  private CreateExperimentView  createExpView;
   private MainDashView          mainDashView;
   private WelcomeView           welcomeView;
   private MonitorControlView    monitorControlView;
@@ -93,7 +94,9 @@ public class DashMainController extends UFAbstractEventManager
   private transient LiveMetricScheduler   liveMetricScheduler;
   private transient LiveMonitorController liveMonitorController;
   
-  private boolean isShuttingDown = false;
+  private boolean entryPointOpened = false;
+  private boolean isShuttingDown   = false;
+  
   private EMPhase currentPhase   = EMPhase.eEMUnknownPhase;
   
   private UIPushManager pushManager;
@@ -114,6 +117,15 @@ public class DashMainController extends UFAbstractEventManager
       rootWindow.addListener( new DashWindowResizeListener() );
 
       initialiseConfiguration();
+      
+      // Create common resources
+      createCommonUIResources();
+      
+      expMonitor = EMInterfaceFactory.createEM();
+      expMonitor.addLifecyleListener( this );
+      
+      liveMetricScheduler = new LiveMetricScheduler();
+      pushManager         = new UIPushManager( rootWindow );
     }
   }
   
@@ -137,6 +149,7 @@ public class DashMainController extends UFAbstractEventManager
       if ( expMonitor != null )            expMonitor.shutDown();
       if ( mainDashView != null )          mainDashView.shutDownUI();
       
+      createExpView       = null;
       mainDashView        = null;
       expMonitor          = null;
       liveMetricScheduler = null;
@@ -150,8 +163,6 @@ public class DashMainController extends UFAbstractEventManager
   public void onConfigurationCompleted()
   {
     String problem = null;
-   
-    liveMetricScheduler = new LiveMetricScheduler();
     
     createWelcomeView();
     
@@ -196,11 +207,7 @@ public class DashMainController extends UFAbstractEventManager
     // If no problems, allow experiment to start
     if ( problem == null )
     {
-      // Ready the EM for connection
-      expMonitor = EMInterfaceFactory.createEM();
-      expMonitor.addLifecyleListener( this );
-
-      welcomeView.addLogInfo( "Waiting to open client enty point." );
+      welcomeView.addLogInfo( "Waiting to open RabbitMQ entry point..." );
       welcomeView.setReadyToStart( true );
     }
   }
@@ -306,15 +313,15 @@ public class DashMainController extends UFAbstractEventManager
     
     liveMetricScheduler.stop();
     liveMetricScheduler.reset();
-    mainDashView.resetViews();
-    
-    // Create a new experiment
-    createExperiment();
     
     try
     {
       expMonitor.resetLifecycle();
-      expMonitor.startLifecycle( currentExperiment, EMPhase.eEMLiveMonitoring );
+      
+      // Create a new experiment
+      mainDashView.resetViews();
+      
+      displayCreateExperimentView();
     }
     catch ( Exception ex )
     {
@@ -538,61 +545,60 @@ public class DashMainController extends UFAbstractEventManager
   @Override
   public void onStartECCClicked()
   {
-    if ( configController != null )
-    try
+    rootWindow.removeAllComponents(); // Get rid of all other views
+
+    // Create views, if they do not already exist
+    if ( mainDashView == null )
     {
-      rootWindow.removeAllComponents(); // Get rid of all other views
-      
-      createCommonUIResources(); // Create common resources before we create the main view
-      
-      pushManager = new UIPushManager( rootWindow );
-      
+      // Main view
       mainDashView = new MainDashView();
       rootWindow.addComponent( (Component) mainDashView.getImplContainer() );
       mainDashView.initialise( pushManager );
       mainDashView.addListener( this );
-    
-      Properties emProps = configController.getEMConfig();
-      expMonitor.openEntryPoint( emProps );
-      createExperiment();
-    
+
+      // Monitor control view
       monitorControlView = mainDashView.getMonitorControlView();
       monitorControlView.addListener( this );
-      
+
+      // Connections view
       connectionsView = mainDashView.getConnectionsView();
       connectionsView.addListener( this );
-      
+
       clientInfoView = mainDashView.getClientInfoView();
       clientInfoView.addListener( this );
-      
+
+      // Live monitor view
       liveMonitorController = mainDashView.getLiveMonitorController();
       liveMonitorController.initialse( expReportAccessor );
-      
+
       // Just initialise this component - don't need to hang on to it
       DataExportController dec = mainDashView.getDataExportController();
       dec.initialise( expMonitor, expReportAccessor );
-      
+
+      // Configure dashboard specifics
       trySetupDashboard();
       
-      if ( emProps != null && currentExperiment != null )
+      // Try open Entry Point on RabbitMQ & start a new experiment
+      try
       {
-        String rabbitConInfo = emProps.getProperty( "Rabbit_IP" ) + ":" + 
-                               emProps.getProperty( "Rabbit_Port" );
+        Properties emProps = configController.getEMConfig();
+        expMonitor.openEntryPoint( emProps );
         
-        monitorControlView.setExperimentInfo( rabbitConInfo,
-                                              emProps.getProperty( "Monitor_ID" ),
-                                              currentExperiment );
+        entryPointOpened = true;        
       }
-      
-      // Go straight into live monitoring
-      expMonitor.startLifecycle( currentExperiment, EMPhase.eEMLiveMonitoring );
+      catch ( Exception ex )
+      {
+       String problem = "Had problems opening an entry point on the RabbitMQ server";
+       mainDashView.displayWarning( problem, ex.getMessage() );
+
+       dashMainLog.error( problem + ": " + ex.getMessage() );
+      }
     }
-    catch ( Exception e )
-    {
-      String problem = "Could not start the ECC: " + e.getMessage();
-      dashMainLog.error( problem );
-      welcomeView.addLogInfo( problem );
-    }
+    else // Just plug views back into window
+      rootWindow.addComponent( (Component) mainDashView.getImplContainer() );
+    
+    // Start a new experiment if all OK
+    if ( entryPointOpened ) displayCreateExperimentView();
   }
   
   @Override
@@ -651,20 +657,18 @@ public class DashMainController extends UFAbstractEventManager
   }
   
   @Override
-  public void onRestartExperimentClicked()
+  public void onStopExperimentClicked()
   {
-    mainDashView.addLogMessage( "Attempting to re-start with a new experiment" );
+    // Check user really wants to start a new experiment
+    String[] options = { "no", "yes" };
     
-    try
-    {
-      expMonitor.endLifecycle(); 
-    }
-    catch ( Exception e )
-    {
-      String problem = "Could not re-start ECC because: " + e.getMessage();
-      mainDashView.addLogMessage( problem );
-      dashMainLog.error( problem );
-    }
+    AlertView av = new AlertView( "Stop current experiment confirmation",
+                                  "Are you sure you want to stop this experiment? " +
+                                  "You may want to export your data before finishing.",
+                                  options,
+                                  new StopExperimentListener() );
+    
+    rootWindow.addWindow( av.getWindow() );
   }
   
   // ClientConnectionsViewListener ---------------------------------------------
@@ -880,27 +884,16 @@ public class DashMainController extends UFAbstractEventManager
     rootWindow.addComponent( (Component) welcomeView.getImplContainer() );
   }
   
-  private boolean createExperiment()
-  {
-    Date expDate = new Date();
-    currentExperiment  = new Experiment();
-    currentExperiment.setName( UUID.randomUUID().toString() );
-    currentExperiment.setDescription( "Current experiment" );
-    currentExperiment.setStartTime( expDate );
-    currentExperiment.setExperimentID( expDate.toString() );
-    
-    try
-    {      
-      IExperimentDAO expDAO = expDataManager.getExperimentDAO();
-      expDAO.saveExperiment( currentExperiment );
+  private void displayCreateExperimentView()
+  {    
+    if ( rootWindow != null && configController != null )
+    { 
+      createExpView = 
+              new CreateExperimentView( configController.getProjectName(),
+                                        new CreateExperimentListener() );
+      
+      rootWindow.addWindow( createExpView.getWindow() );
     }
-    catch ( Exception e )
-    {
-      dashMainLog.error( "Could not create new experiment: " + e.getMessage() );
-      return false;
-    }
-    
-    return true;
   }
   
   private void initialiseConfiguration()
@@ -924,6 +917,115 @@ public class DashMainController extends UFAbstractEventManager
         rootWindow.addComponent( (Component) configView.getImplContainer() );
       }
     }
+  }
+  
+  private void tryCreateExperiment( String projName, String expName, String expDesc )
+  {
+    if ( projName != null && expName != null && expDesc != null &&
+         expMonitor != null && monitorControlView != null )
+    {
+      // Destory view
+      Window cevWindow = createExpView.getWindow();
+      rootWindow.removeWindow( cevWindow );
+      cevWindow = null;
+      
+      pushManager.restart();
+    
+      // Create new experiment
+      currentExperiment = new Experiment();
+      currentExperiment.setExperimentID( projName );
+      currentExperiment.setName( expName );
+      currentExperiment.setDescription( expDesc );
+      currentExperiment.setStartTime( new Date() );
+      
+      try
+      {
+        IExperimentDAO expDAO = expDataManager.getExperimentDAO();
+        expDAO.saveExperiment( currentExperiment );
+        
+        Properties emProps = configController.getEMConfig();
+        if ( emProps != null )
+        {
+          String rabbitConInfo = emProps.getProperty( "Rabbit_IP" ) + ":" + 
+                                 emProps.getProperty( "Rabbit_Port" );
+        
+          monitorControlView.setExperimentInfo( rabbitConInfo,
+                                                emProps.getProperty( "Monitor_ID" ),
+                                                currentExperiment );
+        }
+      
+        // Go straight into live monitoring
+        expMonitor.startLifecycle( currentExperiment, EMPhase.eEMLiveMonitoring );
+      }
+      catch ( Exception e )
+      {
+        String problem = "Could not start experiment because: " + e.getMessage();
+        dashMainLog.error( problem );
+        monitorControlView.displayWarning( "Problems starting experiment", problem );
+      }
+    }
+    else
+    {
+      String problem = "Failed to start experiment: initialisation incomplete";
+      dashMainLog.error( problem );
+      
+      if ( monitorControlView != null )
+        monitorControlView.displayWarning( "Problems starting experiment", problem );
+    }
+  }
+  
+  private void cancelCreateExperiment()
+  {
+    // Destory view
+    Window cevWindow = createExpView.getWindow();
+    rootWindow.removeWindow( cevWindow );
+    cevWindow = null;
+    
+    dashMainLog.info( "Experiment creation was cancelled by user" );
+    
+    // Return to configuration completed state
+    onConfigurationCompleted();
+  }
+  
+  private void finishCurrentExperiment()
+  {
+    boolean saveSuccess = false;
+    
+    if ( currentExperiment != null )
+      try
+      {
+        mainDashView.addLogMessage( "Attempting to save experiment end time" );
+        
+        currentExperiment.setEndTime( new Date() );
+        IExperimentDAO expDAO = expDataManager.getExperimentDAO();
+        expDAO.finaliseExperiment( currentExperiment );
+
+        saveSuccess = true;
+      }
+      catch ( Exception ex )
+      {
+        String problem = "Could not update Experiment finish date" + ex.getMessage();
+        mainDashView.addLogMessage( problem );
+        dashMainLog.error( problem );
+      }
+    
+    if ( saveSuccess )
+    {
+      try
+      {
+        mainDashView.addLogMessage( "Saved OK" );
+        expMonitor.endLifecycle(); 
+      }
+      catch ( Exception e )
+      {
+        String problem = "Could not re-start ECC because: " + e.getMessage();
+        mainDashView.addLogMessage( problem );
+        dashMainLog.error( problem );
+      }
+    }
+    else
+      mainDashView.displayMessage( "Experiment save error",
+                                   "Could not finalise experiment data; please contact EXPERIMEDIA team" );
   }
   
   private boolean trySetupEDM()
@@ -1081,8 +1183,24 @@ public class DashMainController extends UFAbstractEventManager
   {
     @Override
     public void onAlertResponse( String option )
-    {
-      if ( option.equals("yes") ) shutdown();
-    }
+    { if ( option.equals("yes") ) shutdown(); }
+  }
+  
+  private class StopExperimentListener implements AlertViewListener
+  {
+    @Override
+    public void onAlertResponse( String option )
+    { if ( option.equals("yes") ) finishCurrentExperiment(); }
+  }
+  
+  private class CreateExperimentListener implements CreateExperimentViewListener
+  {
+    @Override
+    public void onStartExperiment( String projName, String expName, String expDesc )
+    { tryCreateExperiment( projName, expName, expDesc ); }
+    
+    @Override
+    public void onCancelStartExperiment()
+    { cancelCreateExperiment();}
   }
 }

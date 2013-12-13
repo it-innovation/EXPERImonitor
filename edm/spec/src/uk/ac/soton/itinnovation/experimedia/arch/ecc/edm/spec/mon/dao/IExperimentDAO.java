@@ -50,6 +50,15 @@ public interface IExperimentDAO
     void saveExperiment(Experiment exp) throws IllegalArgumentException, Exception;
     
     /**
+     * Saves the experiment's end time in the database. If the experiment has not
+     * already been saved to the database, or does not have correct start/end dates, this method will throw.
+     * 
+     * @param exp - The experiment instance to finalise
+     * @throws Exception - Throws if there are technical persistence problems or experiment data is incomplete.
+     */
+    void finaliseExperiment(Experiment exp) throws Exception;
+    
+    /**
      * Get an experiment instance according to an experiment UUID.
      * @param expUUID The UUID of the experiment.
      * @param withSubClasses Flag to say whether to return subclasses too; MetricGenerator and sub-classes below that.

@@ -69,11 +69,11 @@ public class MonitorControlView extends SimpleView
     if ( id != null && info != null )
     {
       rabbitIPLabel.setValue( "Rabbit IP: " + ip );
-      entryPointLabel.setValue( "Entry point ID: " + id );
+      entryPointLabel.setValue( "Project entry point ID: " + id );
       
       experimentNameLabel.setValue( "Experiment: " + info.getName() );
       experimentDescLabel.setValue( "Description: " + info.getDescription() );
-      experimentIDLabel.setValue( "ID: " + info.getExperimentID() );
+      experimentIDLabel.setValue( "Project ID: " + info.getExperimentID() );
       experimentStartDateLabel.setValue( "Started: " + info.getStartTime().toString() );
     } 
   }
@@ -106,8 +106,14 @@ public class MonitorControlView extends SimpleView
   public void resetView()
   {
     currentPhase = EMPhase.eEMUnknownPhase;
+    
     currentPhaseLabel.setValue( "Waiting for clients" );
     phaseControlButton.setCaption( "Start discovery phase" );
+    experimentNameLabel.setValue( "Awaiting experiment info" );
+    experimentDescLabel.setValue( "No description yet" );
+    experimentIDLabel.setValue( "No Project ID yet" );
+    experimentStartDateLabel.setValue( "No start time yet" );
+    
     phaseControlButton.setEnabled( true );
     experimentStopButton.setEnabled( false );
   }
@@ -243,7 +249,7 @@ public class MonitorControlView extends SimpleView
   {
     Collection<MonitorControlViewListener> listeners = getListenersByType();
         for( MonitorControlViewListener listener : listeners )
-          listener.onRestartExperimentClicked();
+          listener.onStopExperimentClicked();
   }
   
   private class PhaseControlClicked implements Button.ClickListener

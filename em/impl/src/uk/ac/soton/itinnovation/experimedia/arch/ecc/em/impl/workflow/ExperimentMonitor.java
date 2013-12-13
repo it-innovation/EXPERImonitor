@@ -38,8 +38,9 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
 
-import java.util.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvReport;
+
+import java.util.*;
 
 
 
@@ -497,8 +498,8 @@ public class ExperimentMonitor implements IExperimentMonitor,
   // Private methods -----------------------------------------------------------
   private void basicInitialise( String rabbitServerIP ) throws Exception
   {
-   if ( amqpConnectionFactory.isConnectionValid() )
-     throw new Exception( "Already connected to AMQP Bus" );
+   if ( amqpConnectionFactory.isConnectionValid() ) // Try to close down any previous connection
+     amqpConnectionFactory.closeDownConnection();
     
     if ( !amqpConnectionFactory.setAMQPHostIPAddress(rabbitServerIP) )
       throw new Exception( "Could not set the server IP correctly" );
@@ -512,8 +513,8 @@ public class ExperimentMonitor implements IExperimentMonitor,
   
   private void configInitialise( Properties emProps ) throws Exception
   {
-    if ( amqpConnectionFactory.isConnectionValid() )
-     throw new Exception( "Already connected to AMQP Bus" );
+    if ( amqpConnectionFactory.isConnectionValid() ) // Try to close down any previous connection
+     amqpConnectionFactory.closeDownConnection();
     
     try
     {
@@ -528,6 +529,14 @@ public class ExperimentMonitor implements IExperimentMonitor,
   
   private void initialiseManagers() throws Exception
   {
+    // Tidy up previous managers, if the exist
+    if ( lifecycleManager != null )
+      lifecycleManager.shutdown();
+    
+    if ( connectionManager != null )
+      connectionManager.shutdown();
+      
+    // Create new managers
     connectionManager = new EMConnectionManager();
     lifecycleManager  = new EMLifecycleManager();
     

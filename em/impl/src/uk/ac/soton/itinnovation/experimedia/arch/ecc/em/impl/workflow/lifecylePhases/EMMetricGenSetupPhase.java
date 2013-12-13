@@ -73,7 +73,7 @@ public class EMMetricGenSetupPhase extends AbstractEMLCPhase
     
     clearAllClients();
     
-    phaseActive   = false;
+    phaseActive = false;
   }
   
   @Override

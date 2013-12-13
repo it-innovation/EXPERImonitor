@@ -119,6 +119,26 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
     }
     
     @Override
+    public void finaliseExperiment(Experiment exp) throws Exception
+    {
+        Connection connection = null;
+          try {
+              connection = dbCon.getConnection(Connection.TRANSACTION_READ_COMMITTED);
+          } catch (Exception ex) {
+              log.error("Unable to finalise experiment, because a connection to the database cannot be made: " + ex.getMessage(), ex);
+              throw new RuntimeException("Unable to finalise experiment, because a connection to the database cannot be made: " + ex.getMessage(), ex);
+          }
+          try {
+              ExperimentDAOHelper.finaliseExperiment(exp, connection);
+          } catch (Exception ex) {
+              throw ex;
+          } finally {
+              if (DBUtil.isConnected(connection))
+                  connection.close();
+          }
+    }
+    
+    @Override
     public Experiment getExperiment(UUID expUUID, boolean withSubClasses) throws Exception
     {
         Connection connection = null;
