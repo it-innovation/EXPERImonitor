@@ -39,29 +39,29 @@ public class DashConfigView extends SimpleView
    private transient DashConfigViewListener viewlistener;
        
    // View root components  
-   private Panel mainPanel;
+   private Panel          mainPanel;
    private VerticalLayout innerVL;
     
-   // Project name field
+   // Project panel & naming
+   private Panel     configPanel;
    private TextField projectNameText;
    private Button    projectSearchButton;
 
    // Fields for rabbit configuration data
-   private TextField dashboardIdText;
-   private TextField rabbitIpText;
-   private TextField rabbitPortText;
-   private TextField rabbitKeystoreText;
+   private TextField     dashboardIdText;
+   private TextField     rabbitIpText;
+   private TextField     rabbitPortText;
+   private TextField     rabbitUsernameText;
    private PasswordField rabbitPasswordText;
-   private CheckBox rabbitSslCheck;
+   private TextField     rabbitKeystoreText;
+   private CheckBox      rabbitSslCheck;
    
    // Fields for database configuration
-   private TextField dbUrlText;
-   private TextField dbNameText;
-   private TextField dbUserameText;
+   private TextField     dbUrlText;
+   private TextField     dbNameText;
+   private TextField     dbUserameText;
    private PasswordField dbPasswordText;
-   private TextField dbTypeText;
-
-   private CheckBox useConfigCheck;
+   private TextField     dbTypeText;
    
    // Fields for dashboard configuration
    private TextField snapshotCountText;
@@ -91,13 +91,72 @@ public class DashConfigView extends SimpleView
     VerticalLayout vl = getViewContents();
     
     mainPanel = new Panel();
-    mainPanel.setWidth( "800px" );
+    mainPanel.setWidth( "700px" );
     vl.addComponent( mainPanel );
     vl.setComponentAlignment( mainPanel, Alignment.MIDDLE_CENTER );
     
     // Add inner layout items
     innerVL = (VerticalLayout) mainPanel.getContent();
     
+    // Create sub-components of configuration UI
+    createProjectSearchComponents();
+    createProjectConfigComponents();
+    createConfigFooter();
+  }
+  
+  /**
+   * Method to display configuration data in the user interface in forms that can be
+   * modified.  Online and local configuration data will be displayed in separate panels.
+   * 
+   * @param monitorID - Dashboard ID field.
+   * @param rabbitIP    - Rabbit server IP address.
+   * @param rabbitPort  - Rabbit server port number.
+   * @param rabbitUsername - Rabbit server username
+   * @param rabbitPassword - Rabbit server password.
+   * @param rabbitKeystore - Rabbit server username.
+   * @param useRabbitSSL    - Option to use SSL on the Rabbit server.
+   */
+  public void showConfig( String  monitorID, 
+                          String  rabbitIP, 
+                          String  rabbitPort,
+                          String  rabbitUsername,
+                          String  rabbitPassword,
+                          String  rabbitKeystore,
+                          boolean useRabbitSSL,
+                          String  dbUrl,
+                          String  dbName,
+                          String  dbUsername,
+                          String  dbPassword,
+                          String  dbType,
+                          String  snapshotCount,
+                          String  nagiosUrl )
+  {
+    // Remove short cut once config is shown
+    projectSearchButton.removeClickShortcut();
+   
+    // Update fields
+    configPanel.setCaption( "Current " + projectNameText + " configuration" );
+    
+    dashboardIdText.setValue( monitorID );
+    rabbitIpText.setValue( rabbitIP );
+    rabbitPortText.setValue( rabbitPort );
+    rabbitUsernameText.setValue( rabbitUsername );
+    rabbitPasswordText.setValue( rabbitPassword );
+    rabbitKeystoreText.setValue( rabbitKeystore );
+    rabbitSslCheck.setValue( useRabbitSSL  );
+    dbUrlText.setValue( dbUrl );
+    dbNameText.setValue( dbName );
+    dbUserameText.setValue( dbUsername );
+    dbPasswordText.setValue( dbPassword );
+    dbTypeText.setValue( dbType );
+    snapshotCountText.setValue( snapshotCount );
+    nagiosUrlText.setValue( nagiosUrl );
+    
+    configPanel.setVisible( true );
+  }
+  
+  private void createProjectSearchComponents()
+  {
     // Space
     innerVL.addComponent( UILayoutUtil.createSpace( "20px", null ) );
     
@@ -147,81 +206,24 @@ public class DashConfigView extends SimpleView
     // Space
     innerVL.addComponent( UILayoutUtil.createSpace( "16px", null ) );
   }
-    
-  /**
-   * Method shows the configuration footer if the user interface is showing configuration data panels.
-   * 
-   * @param showingConfigs - A boolean value to indicate if configuration data is being shown.
-   */
-  public void showConfigFooter( boolean showingConfigs)
-  {
-    if ( showingConfigs )
-    {
-      // Space
-      innerVL.addComponent( UILayoutUtil.createSpace( "8", null) );
-
-      // Footer section directly below the config panels
-      Label message = new Label ( "Values in the fields can be modified.  The online configuration only will be updated" );
-      innerVL.addComponent( message );
-
-      innerVL.addComponent(UILayoutUtil.createSpace( "8" , null ));
-
-      // Update configuration button
-      Button updateConfigButton = new Button ( "Update Configuration" );
-      updateConfigButton.addListener( new UpdateButtonListener() );
-      innerVL.addComponent( updateConfigButton );
-      innerVL.setComponentAlignment( updateConfigButton, Alignment.BOTTOM_CENTER );
-      
-      innerVL.addComponent(UILayoutUtil.createSpace( "8" , null ));
-    }
-  }
   
-  /**
-   * Method to display configuration data in the user interface in forms that can be
-   * modified.  Online and local configuration data will be displayed in separate panels.
-   * 
-   * @param monitorID - Dashboard ID field.
-   * @param rabbitIP    - Rabbit server IP address.
-   * @param rabbitPort  - Rabbit server port number.
-   * @param rabbitKeystore - Rabbit server username.
-   * @param rabbitPassword - Rabbit server password
-   * @param useRabbitSSL    - Option to use SSL on the Rabbit server.
-   */
-  public void showConfig( String monitorID, 
-                          String rabbitIP, 
-                          String rabbitPort,
-                          String rabbitKeystore,
-                          String rabbitPassword,
-                          boolean useRabbitSSL,
-                          String dbUrl,
-                          String dbName,
-                          String dbUsername,
-                          String dbPassword,
-                          String dbType,
-                          String snapshotCount,
-                          String nagiosUrl )
+  private void createProjectConfigComponents()
   {
-    // Remove short cut once config is shown
-    projectSearchButton.removeClickShortcut();
-    
     // Layout constants
     final String fieldVHeight = "4px";
-    final String labelWidth   = "150px";
-    final String hSpace       = "80px";
+    final String labelWidth   = "140px";
+    final String hSpace       = "60px";
     final String textWidth    = "270px";
     
     // Sets up a config panel  
-    Panel configPanel = new Panel();
+    configPanel = new Panel();
+    configPanel.setWidth( "530px" );
     configPanel.addStyleName( "light" );
-    configPanel.setCaption( "Current " + projectNameText + " configuration" );
+    configPanel.setVisible( false ); // Keep invisible for now
     innerVL.addComponent( configPanel );
     innerVL.setComponentAlignment( configPanel, Alignment.TOP_CENTER );
     
-    VerticalLayout pVL = (VerticalLayout) configPanel.getContent();
-    VerticalLayout configContents = new VerticalLayout();
-    configContents.setWidth( "600px" );
-    pVL.addComponent( configContents );
-    pVL.setComponentAlignment(configContents, Alignment.TOP_CENTER );
+    VerticalLayout configContents = (VerticalLayout) configPanel.getContent();
     
     // Space
     configContents.addComponent( UILayoutUtil.createSpace( "4", null) );
@@ -235,7 +237,6 @@ public class DashConfigView extends SimpleView
     hl.addComponent(UILayoutUtil.createSpace( hSpace, null, true));
     hl.addComponent( dashboardIdLabel );
     dashboardIdText = new TextField();
-    dashboardIdText.setValue( monitorID );
     dashboardIdText.setWidth( textWidth );
     hl.addComponent( dashboardIdText );   
    
@@ -250,7 +251,6 @@ public class DashConfigView extends SimpleView
     hl.addComponent(UILayoutUtil.createSpace( hSpace, null, true));
     hl.addComponent( rabbitIpLabel);
     rabbitIpText = new TextField();
-    rabbitIpText.setValue( rabbitIP );
     rabbitIpText.setWidth( textWidth );
     hl.addComponent( rabbitIpText );
 
@@ -265,7 +265,6 @@ public class DashConfigView extends SimpleView
     hl.addComponent(UILayoutUtil.createSpace( hSpace, null, true));
     hl.addComponent( rabbitPortLabel );   
     rabbitPortText = new TextField();
-    rabbitPortText.setValue( rabbitPort );
     rabbitPortText.setWidth( "75" );
     hl.addComponent( rabbitPortText );
 
@@ -275,14 +274,13 @@ public class DashConfigView extends SimpleView
     // Rabbit username label and text box
     hl = new HorizontalLayout();
     configContents.addComponent( hl );
-    Label rabbitUsernameLabel = new Label ( "Rabbit Keystore:" );
+    Label rabbitUsernameLabel = new Label ( "Rabbit Username:" );
     rabbitUsernameLabel.setWidth( labelWidth );
     hl.addComponent(UILayoutUtil.createSpace( hSpace, null, true));
     hl.addComponent( rabbitUsernameLabel );
-    rabbitKeystoreText = new TextField();
-    rabbitKeystoreText.setValue( rabbitKeystore );
-    rabbitKeystoreText.setWidth( textWidth );
-    hl.addComponent( rabbitKeystoreText );
+    rabbitUsernameText = new TextField();
+    rabbitUsernameText.setWidth( textWidth );
+    hl.addComponent( rabbitUsernameText );
         
     // Space
     configContents.addComponent( UILayoutUtil.createSpace( fieldVHeight, null) );
@@ -295,19 +293,30 @@ public class DashConfigView extends SimpleView
     hl.addComponent(UILayoutUtil.createSpace( hSpace, null, true));
     hl.addComponent( rabbitPasswordLabel );
     rabbitPasswordText = new PasswordField();
-    rabbitPasswordText.setValue( rabbitPassword );
     rabbitPasswordText.setWidth( textWidth );
     hl.addComponent( rabbitPasswordText );
     
     // Space
     configContents.addComponent( UILayoutUtil.createSpace( fieldVHeight, null) );
     
-    // Rabbit SSL checkbox
+    // Rabbit keystore
     hl = new HorizontalLayout();
     configContents.addComponent( hl );
+    Label rabbitKeyStoreLabel = new Label ( "Rabbit Keystore:" );
+    rabbitKeyStoreLabel.setWidth( labelWidth );
+    hl.addComponent(UILayoutUtil.createSpace( hSpace, null, true));
+    hl.addComponent( rabbitKeyStoreLabel );
+    rabbitKeystoreText = new TextField();
+    rabbitKeystoreText.setWidth( textWidth );
+    hl.addComponent( rabbitKeystoreText );
+    
+    // Space
+    configContents.addComponent( UILayoutUtil.createSpace( fieldVHeight, null) );
+    
+    // Rabbit SSL checkbox
     rabbitSslCheck = new CheckBox("Use Rabbit SSL?");
-    rabbitSslCheck.setValue( useRabbitSSL  );
-    hl.addComponent( rabbitSslCheck );
+    configContents.addComponent( rabbitSslCheck );
+    configContents.setComponentAlignment( rabbitSslCheck, Alignment.MIDDLE_RIGHT );
 
     // Space
     configContents.addComponent( UILayoutUtil.createSpace( fieldVHeight, null) );
@@ -327,7 +336,6 @@ public class DashConfigView extends SimpleView
     hl.addComponent(UILayoutUtil.createSpace( hSpace, null, true));
     hl.addComponent( dbUrlLabel );
     dbUrlText = new TextField();
-    dbUrlText.setValue( dbUrl );
     dbUrlText.setWidth( textWidth );
     hl.addComponent( dbUrlText );
     
@@ -341,7 +349,6 @@ public class DashConfigView extends SimpleView
     hl.addComponent(UILayoutUtil.createSpace( hSpace, null, true));
     hl.addComponent( dbNameLabel );
     dbNameText = new TextField();
-    dbNameText.setValue( dbName );
     dbNameText.setWidth( textWidth );
     hl.addComponent( dbNameText );
     
@@ -355,7 +362,6 @@ public class DashConfigView extends SimpleView
     hl.addComponent(UILayoutUtil.createSpace( hSpace, null, true));
     hl.addComponent( dbUsernameLabel );
     dbUserameText = new TextField();
-    dbUserameText.setValue( dbUsername );
     dbUserameText.setWidth( textWidth );
     hl.addComponent( dbUserameText );
     
@@ -369,7 +375,6 @@ public class DashConfigView extends SimpleView
     hl.addComponent(UILayoutUtil.createSpace( hSpace, null, true));
     hl.addComponent( dbPasswordLabel );
     dbPasswordText = new PasswordField();
-    dbPasswordText.setValue( dbPassword );
     dbPasswordText.setWidth( textWidth );
     hl.addComponent( dbPasswordText );
     
@@ -383,7 +388,6 @@ public class DashConfigView extends SimpleView
     hl.addComponent(UILayoutUtil.createSpace( hSpace, null, true));
     hl.addComponent( dbTypeLabel );
     dbTypeText = new TextField();
-    dbTypeText.setValue( dbType );
     dbTypeText.setWidth( textWidth );
     hl.addComponent( dbTypeText );
     
@@ -404,7 +408,6 @@ public class DashConfigView extends SimpleView
     hl.addComponent(UILayoutUtil.createSpace( hSpace, null, true));
     hl.addComponent( snapshotCountLabel );
     snapshotCountText = new TextField();
-    snapshotCountText.setValue( snapshotCount );
     snapshotCountText.setWidth( textWidth );
     hl.addComponent( snapshotCountText );
     
@@ -418,7 +421,6 @@ public class DashConfigView extends SimpleView
     hl.addComponent(UILayoutUtil.createSpace( hSpace, null, true));
     hl.addComponent( nagiosUrlLabel );
     nagiosUrlText = new TextField();
-    nagiosUrlText.setValue( nagiosUrl );
     nagiosUrlText.setWidth( textWidth );
     hl.addComponent( nagiosUrlText );
     
@@ -429,15 +431,28 @@ public class DashConfigView extends SimpleView
     Label line3 = new Label( "<hr/>", Label.CONTENT_XHTML );
     configContents.addComponent( line3 );
     
-    // Use this configuration checkbox
-    useConfigCheck = new CheckBox( "Use this configuration" );
-    useConfigCheck.setImmediate( true );
-    configContents.addComponent( useConfigCheck );  
-    
     // Space
     configContents.addComponent( UILayoutUtil.createSpace( "8", null) );
   }
-   
+  
+  private void createConfigFooter()
+  {
+    VerticalLayout pVL = (VerticalLayout) configPanel.getContent();
+    
+    // Space
+    pVL.addComponent( UILayoutUtil.createSpace( "8", null) );
+
+    // Update configuration button
+    Button updateConfigButton = new Button ( "Use this configuration" );
+    updateConfigButton.addListener( new UpdateButtonListener() );
+    pVL.addComponent( updateConfigButton );
+    pVL.setComponentAlignment( updateConfigButton, Alignment.BOTTOM_CENTER );
+
+    // Space
+    pVL.addComponent(UILayoutUtil.createSpace( "8" , null ));
+  }
+  
+  
   // Event handlers-------------------------------------------------------------
   /**
    * Method to handle a button click event which sends the project name to the
@@ -470,26 +485,28 @@ public class DashConfigView extends SimpleView
       // send data to the controller
 
       // Rabbit configuration
-      String monitorID = dashboardIdText.getValue().toString();
-      String rabbitIP = rabbitIpText.getValue().toString();
-      String rabbitPort = rabbitPortText.getValue().toString();
-      String rabbitKeystore = rabbitKeystoreText.getValue().toString();
+      String monitorID      = dashboardIdText.getValue().toString();
+      String rabbitIP       = rabbitIpText.getValue().toString();
+      String rabbitPort     = rabbitPortText.getValue().toString();
+      String rabbitUsername = rabbitUsernameText.getValue().toString();
       String rabbitPassword = rabbitPasswordText.getValue().toString();
-      boolean useRabbitSSL = rabbitSslCheck.booleanValue();
+      String rabbitKeystore = rabbitKeystoreText.getValue().toString();
+      boolean useRabbitSSL  = rabbitSslCheck.booleanValue();
 
       // Database configuration
-      String dbUrl = dbUrlText.getValue().toString();
-      String dbName = dbNameText.getValue().toString();
+      String dbUrl      = dbUrlText.getValue().toString();
+      String dbName     = dbNameText.getValue().toString();
       String dbUsername = dbUserameText.getValue().toString();
       String dbPassword = dbPasswordText.getValue().toString();
-      String dbType = dbTypeText.getValue().toString();
+      String dbType     = dbTypeText.getValue().toString();
 
       // Dashboard configuration
       String snapshotCount = snapshotCountText.getValue().toString();
-      String nagiosUrl = nagiosUrlText.getValue().toString();
+      String nagiosUrl     = nagiosUrlText.getValue().toString();
 
       viewlistener.onUpdateConfiguration( monitorID, rabbitIP, rabbitPort, 
-                                          rabbitKeystore, rabbitPassword, useRabbitSSL,
+                                          rabbitUsername, rabbitPassword, 
+                                          rabbitKeystore, useRabbitSSL,
                                           dbUrl, dbName, dbUsername, dbPassword, dbType,
                                           snapshotCount, nagiosUrl );
   }  

@@ -38,7 +38,6 @@ import com.rabbitmq.client.*;
 
 
 
-
 public class AMQPConnectionFactory
 {
     private IECCLogger factoryLog = Logger.getLogger( AMQPConnectionFactory.class );
@@ -210,22 +209,22 @@ public class AMQPConnectionFactory
         String rabbitServerPort = emProps.getProperty( "Rabbit_Port" );
         
         // If a password exists for the Rabbit connection, use it
-        if ( emProps.containsKey("password") ) 
+        if ( emProps.containsKey("Rabbit_Password") ) 
         {
             factoryLog.info( "Will be using password to connect to AMQP" );
-            userPass = emProps.getProperty( "password" );
+            userPass = emProps.getProperty( "Rabbit_Password" );
         } 
         else
-          factoryLog.info( "No password provided, let's hope AMQP does not require authentication" );
+          factoryLog.info( "No password provided, will try guest login" );
         
         // If username and password are supplied, use these
-        if ( emProps.containsKey("username") )
+        if ( emProps.containsKey("Rabbit_Username") )
         {
-            userName = emProps.getProperty("username");
+            userName = emProps.getProperty("Rabbit_Username");
             factoryLog.info("Will be using username \'" + userName + "\' to connect to AMQP");
         } 
         else 
-            factoryLog.info("No username provided, let's hope AMQP has user \'guest\'");
+            factoryLog.info("No username provided, will try guest login");
         
         factoryLog.info( "Trying to connect to AMQP bus..." );
         
@@ -238,14 +237,12 @@ public class AMQPConnectionFactory
             setAMQPHostPort( portNumber );
           
             // Now check to see if we're using a verified connection type
-            if ( emProps.containsKey("Rabbit_Keystore") && 
-                 emProps.containsKey("Rabbit_KeystorePassword") )
+            if ( emProps.containsKey("Rabbit_Keystore") )
             {
-                InputStream ksStream = AMQPConnectionFactory.class.getResourceAsStream( emProps.getProperty("Rabbit_Keystore") ); 
-                String ksPassword    = emProps.getProperty( "Rabbit_KeystorePassword" );
+                InputStream ksStream = AMQPConnectionFactory.class.getResourceAsStream( emProps.getProperty("Rabbit_Keystore") );
 
                 try
-                { connectToVerifiedAMQPHost( ksStream, ksPassword ); }
+                { connectToVerifiedAMQPHost( ksStream, userPass ); }
                 catch ( Exception ex )
                 { throw ex; }
             }
@@ -277,7 +274,7 @@ public class AMQPConnectionFactory
     public AMQPBasicChannel createNewChannel() throws Exception
     {
         if ( amqpConnection == null ) throw new Exception( "No AMSQP connection available" );
-
+        
         return new AMQPBasicChannel( amqpConnection.createChannel() );
     }
 }
