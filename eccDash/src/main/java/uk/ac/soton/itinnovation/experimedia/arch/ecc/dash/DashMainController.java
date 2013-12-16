@@ -94,10 +94,11 @@ public class DashMainController extends UFAbstractEventManager
   private transient LiveMetricScheduler   liveMetricScheduler;
   private transient LiveMonitorController liveMonitorController;
   
+  private String  eccBasePath;
   private boolean entryPointOpened = false;
   private boolean isShuttingDown   = false;
   
-  private EMPhase currentPhase   = EMPhase.eEMUnknownPhase;
+  private EMPhase currentPhase = EMPhase.eEMUnknownPhase;
   
   private UIPushManager pushManager;
   
@@ -115,6 +116,9 @@ public class DashMainController extends UFAbstractEventManager
       rootWindow = rootWin;
       rootWindow.setStyleName( "eccDashDefault" );      
       rootWindow.addListener( new DashWindowResizeListener() );
+      
+      Application thisApp = rootWindow.getApplication();
+      eccBasePath = thisApp.getContext().getBaseDirectory().getAbsolutePath();
 
       initialiseConfiguration();
       
@@ -900,11 +904,8 @@ public class DashMainController extends UFAbstractEventManager
   {
     // Create configuration controller if we do not already have one
     if ( configController == null && rootWindow != null )
-    {
-      Application thisApp = rootWindow.getApplication();
-      String basePath = thisApp.getContext().getBaseDirectory().getAbsolutePath();
-    
-      configController = new DashConfigController( basePath + "/configs/", this );
+    {    
+      configController = new DashConfigController( eccBasePath + "/configs/", this );
       
       // Display config view to user
       SimpleView configView = configController.getConfigView();
@@ -940,8 +941,12 @@ public class DashMainController extends UFAbstractEventManager
       
       try
       {
+        // Prepare metrics database
         IExperimentDAO expDAO = expDataManager.getExperimentDAO();
         expDAO.saveExperiment( currentExperiment );
+        
+        // Prepare PROV logging
+        liveMonitorController.createPROVLog( currentExperiment.getUUID(), eccBasePath );
         
         Properties emProps = configController.getEMConfig();
         if ( emProps != null )
@@ -996,9 +1001,13 @@ public class DashMainController extends UFAbstractEventManager
       {
         mainDashView.addLogMessage( "Attempting to save experiment end time" );
         
+        // Finish up metrics
         currentExperiment.setEndTime( new Date() );
         IExperimentDAO expDAO = expDataManager.getExperimentDAO();
         expDAO.finaliseExperiment( currentExperiment );
+        
+        // Finish up PROV logging
+        liveMonitorController.closePROVLog();
 
         saveSuccess = true;
       }

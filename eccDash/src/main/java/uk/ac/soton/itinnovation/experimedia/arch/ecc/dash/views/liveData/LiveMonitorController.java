@@ -27,7 +27,7 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveData;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMClient;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvReport;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
 
@@ -37,15 +37,12 @@ import uk.ac.soton.itinnovation.robust.cat.core.components.viewEngine.spec.uif.t
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.UIPushManager;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.visualizers.metrics.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.visualizers.prov.PROVDOTGraphBuilder;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IReportDAO;
 
-import com.vaadin.Application;
-import com.vaadin.ui.Component;
 
-
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.*;
+
 
 
 
@@ -68,8 +65,8 @@ public class LiveMonitorController extends UFAbstractEventManager
   private transient IReportDAO                  expReportAccessor;
   private transient UIPushManager               pushManager;
 
-  private transient EDMProvReport aggregatedPROVReport;
-  private transient boolean       provUpdatePending;
+  private transient PROVFileLogger provLogger;
+  private transient boolean        provUpdatePending;
   
   private Timer liveUpdateTimer; 
 
@@ -78,10 +75,10 @@ public class LiveMonitorController extends UFAbstractEventManager
   {
     super();
 
-    pushManager          = pushMgr;
-    measurementUpdates   = new HashMap<UUID, MSUpdateInfo>();
-    activeMSVisuals      = new HashSet<UUID>();
-    aggregatedPROVReport = new EDMProvReport();
+    pushManager        = pushMgr;
+    measurementUpdates = new HashMap<UUID, MSUpdateInfo>();
+    activeMSVisuals    = new HashSet<UUID>();
+    provLogger         = new PROVFileLogger();
 
     createViews();
   }
@@ -95,6 +92,26 @@ public class LiveMonitorController extends UFAbstractEventManager
     
     LiveUpdateCallback luc = new LiveUpdateCallback();
     liveUpdateTimer.scheduleAtFixedRate( luc, liveUpdateRate, liveUpdateRate );
+  }
+  
+  public void createPROVLog( UUID expID, String basePath )
+  {
+    // Close last log (if it exists)
+    if ( provLogger.isLogging() ) provLogger.closeLog();
+    
+    // Create a new log
+    if ( !provLogger.createLog(expID, basePath) )
+    {
+      String problem = "Could not create PROV log file for experiment " + expID.toString();
+      liveMetricView.displayWarning( "PROV Logging error", problem );
+      
+      liveMonLogger.error( problem );
+    }
+  }
+  
+  public void closePROVLog()
+  {
+    provLogger.closeLog();
   }
 
   public void processLiveMetricData( EMClient client, Report report ) throws Exception
@@ -133,11 +150,20 @@ public class LiveMonitorController extends UFAbstractEventManager
 
     synchronized ( provViewUpdateLock )
     {
-      // Stefanie TODO: Always receiving ALL PROV data from client; report no longer aggregating :(
-      //                Until persistence is in place, we need to aggregate in memory
-      aggregatedPROVReport = report;
-      
-      provUpdatePending    = true;
+      if ( provLogger.isLogging() )
+      {
+        provLogger.writePROV( report );
+        
+        // TO DO: Update UI with tail of PROV data
+        
+        liveMonLogger.info( "Got PROV data from client " + client.getName() );
+        
+        provUpdatePending = true;
+      }
+      else
+      {
+        liveMonLogger.error( "Unable to log PROV data" );
+      }
     }
   }
 
@@ -155,10 +181,9 @@ public class LiveMonitorController extends UFAbstractEventManager
     synchronized( provViewUpdateLock )
     {
       liveProvView.resetView();
+      provLogger.closeLog();
       provUpdatePending = false;
     }
-    
-    aggregatedPROVReport = new EDMProvReport();
   }
 
   public void shutDown()
@@ -169,6 +194,8 @@ public class LiveMonitorController extends UFAbstractEventManager
     liveUpdateTimer.purge();
     
     pushManager = null;
+    
+    provLogger.closeLog();
   }
 
   public void addliveView( EMClient client, Entity entity, Attribute attribute,
@@ -418,30 +445,8 @@ public class LiveMonitorController extends UFAbstractEventManager
     {
       if ( provUpdatePending )
       {
-        liveProvView.echoPROVData( aggregatedPROVReport );
+        // TODO: Update tail of PROV reports to UI
         
-        // TO REMOVE LATER WITH JUNG VISUALISATION ---------------------------------
-        try
-        {
-          Component comp      = (Component) liveProvView.getImplContainer();
-          Application thisApp = comp.getApplication();
-          String basePath     = thisApp.getContext().getBaseDirectory().getAbsolutePath();
-
-          PROVDOTGraphBuilder gb = new PROVDOTGraphBuilder();
-          String dotAsString = gb.createDOT(aggregatedPROVReport);
-
-          PrintWriter out = new PrintWriter(basePath + "/" + "dotViz.dot");
-          out.print(dotAsString);
-          out.close();
-
-          liveProvView.renderPROVVizFile( basePath, "dotViz" );
-          
-          pushRequired = true;
-        }
-        catch ( Exception ex )
-        { liveMonLogger.error( "Could not create PROV visualisation", ex ); }
-        // --------------------------------- TO REMOVE LATER WITH JUNG VISUALISATION
-
         provUpdatePending = false;
       }
     }
@@ -468,5 +473,150 @@ public class LiveMonitorController extends UFAbstractEventManager
     @Override
     public void run()
     { updateLiveViews(); }
+  }
+  
+  private class PROVFileLogger
+  {
+    private FileWriter     provFW;
+    private BufferedWriter provBW;
+    
+    private boolean isLoggingPROV;
+    
+    
+    public PROVFileLogger()
+    {}
+    
+    public boolean createLog( UUID expID, String basePath )
+    {
+      isLoggingPROV = false;
+      
+      // An old log may exist, make sure we close it
+      closeLog();
+      
+      if ( expID != null && basePath != null )
+      {
+        String provBasePath = basePath + "/provLogs";
+        
+        if ( createPROVDirectory(provBasePath) )
+        {
+          String provLog = provBasePath + "/" + expID.toString() + ".txt";
+          
+          if ( createPROVFile(provLog) )
+            isLoggingPROV = true;
+          else
+            liveMonLogger.error( "Could not create PROV log: cannot create PROV file" );
+        }
+        else
+          liveMonLogger.error( "Could not create PROV log: cannot create PROV directory" );
+      }
+      else
+        liveMonLogger.error( "Could not create PROV log: experiment ID/path is null" );
+      
+      return isLoggingPROV;
+    }
+    
+    public boolean isLogging()
+    { return isLoggingPROV; }
+    
+    public void closeLog()
+    {
+      if ( isLoggingPROV )
+      {
+        try
+        {
+          provFW.flush();
+          provBW.close();
+          
+          provBW   = null;
+          provFW   = null;
+          
+          isLoggingPROV = false;
+        }
+        catch ( IOException ex )
+        {
+          liveMonLogger.error( "Could not close PROV log: " + ex.getMessage() );
+        }
+      }
+    }
+    
+    public boolean writePROV( EDMProvReport report )
+    {
+      boolean result = false;
+      
+      if ( isLoggingPROV && report != null )
+      {
+        Collection<EDMTriple> triples = report.getTriples().values();
+        
+        try
+        {
+          for ( EDMTriple triple : triples )
+          {
+            provBW.write( triple.toString() );
+            provBW.newLine();
+          }
+                    
+          result = true;
+          
+        }
+        catch ( IOException ex )
+        {
+          liveMonLogger.error( "Problems writing triple data: " + ex.getMessage() );
+        }
+      }
+      else
+        liveMonLogger.error( "Could not write PROV log: not ready to log" );
+      
+      return result;
+    }
+    
+    // Private methods ---------------------------------------------------------
+    private boolean createPROVDirectory( String basePath )
+    {
+      boolean result = false;
+      
+      // If PROV diretory does not exist, create it
+      File provDir = new File( basePath );
+      if ( provDir.exists() && provDir.isDirectory() )
+        result = true;
+      else
+      {
+        if ( provDir.mkdir() )
+          result = true;
+        else
+        { liveMonLogger.error( "Could not create PROV logging directory" ); }
+      }
+        
+      return result;
+    }
+    
+    private boolean createPROVFile( String provPath )
+    {
+      boolean result = false;
+      
+      // Try creating a new PROV file
+      File provFile = new File( provPath );
+      
+      // Do not overwrite old experiment data
+      if ( !provFile.exists() )
+      {
+        try
+        {
+          provFile.createNewFile();
+
+          provFW = new FileWriter( provFile.getAbsoluteFile() );
+          provBW = new BufferedWriter( provFW );
+
+          result = true;
+        }
+        catch ( IOException ex )
+        {
+          liveMonLogger.error( "Could not create new PROV log: " + ex.getMessage() );
+        }
+      }
+      else // Do not overwrite old experiment log data!
+        liveMonLogger.error( "Will not overwrite old PROV log - please create new experiment" );
+      
+      return result;
+    }
   }
 }
