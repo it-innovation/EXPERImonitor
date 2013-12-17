@@ -248,6 +248,7 @@ public class EDMProvFactory extends AEDMProvFactory {
 		}
 
 		EDMProvReport report = new EDMProvReport( currentTriples );
+    sentTriples.putAll( currentTriples );
 		currentTriples.clear();
     
 		return report;
