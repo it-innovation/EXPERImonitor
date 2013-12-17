@@ -25,6 +25,8 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.visualizers.metrics;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Measurement;
+
 import com.invient.vaadin.charts.Color.RGB;
 import com.invient.vaadin.charts.InvientCharts;
 import com.invient.vaadin.charts.InvientCharts.DateTimePoint;
@@ -44,13 +46,10 @@ import com.invient.vaadin.charts.InvientChartsConfig.XAxis;
 import com.invient.vaadin.charts.InvientChartsConfig.YAxis;
 import com.vaadin.ui.CustomLayout;
 import com.vaadin.ui.VerticalLayout;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.UUID;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Measurement;
+
+import java.io.*;
+import java.util.*;
+
 
 
 

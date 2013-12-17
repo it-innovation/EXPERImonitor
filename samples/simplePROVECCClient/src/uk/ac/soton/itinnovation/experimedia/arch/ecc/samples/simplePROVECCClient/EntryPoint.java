@@ -29,83 +29,27 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.loggin.impl.Log4JImpl;
 
 import java.util.Properties;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.configRegistry.api.ECCConfigAPIFactory;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.configRegistry.api.IECCProjectConfig;
 
 
 
 
 public class EntryPoint
 {
-  private static IECCLogger clientLogger = Logger.getLogger( EntryPoint.class );
-  
-  public static void main( String args[] )
-  {
-    // Configure logging system
-    Logger.setLoggerImpl( new Log4JImpl() );
-    
-    String error = null;
-    
-    if ( args.length == 1 && !args[0].isEmpty() )
+    public static void main( String args[] )
     {
-      String projectName = args[0];
-      
-      try
-      {
-        Properties eccProps = tryGetECCConfig( projectName );
-        
-        if ( eccProps != null )
-        {
-          ClientController cc = new ClientController();
-          cc.initialise( eccProps );
-        }
-      }
-      catch ( Exception ex )
-      { error = "Could not initialise properly for project " + projectName; }
-    }
-    else error = "Need one argument, the project name ('gandalf' for example)";
-    
-    if ( error != null ) clientLogger.error( error );
-  }
-  
-  private static Properties tryGetECCConfig( String projectName ) throws Exception
-  {
-    Properties eccProps = null;
-    String setupError   = null;
-    
-    if ( projectName != null )
-    {
-      try
-      {
-        IECCProjectConfig projConfig = 
-            ECCConfigAPIFactory.getProjectConfigAccessor( projectName, 
-                                                          "experimedia",  // 'Pre-configured' for now
-                                                          "ConfiG2013" ); // 'Pre-configured' for now
-        final String comp    = "ECC";
-        final String feature = "RabbitMQ";
-        
-        if ( projConfig.componentFeatureConfigExists(comp, feature) )
-        {
-          String rabbitJSON = projConfig.getConfigData(comp, feature);
-          
-          // The API doesn't offer data as properties; this needs to be added.
-          // Return to this later
-          eccProps = new Properties();
-          eccProps.put( "Rabbit_IP"  , "127.0.0.1" );
-          eccProps.put( "Rabbit_Port", "5672" );
-          eccProps.put( "Monitor_ID" , "00000000-0000-0000-0000-000000000000" );
-        }
-        else setupError = "Cannot find ECC Rabbit configuration data!";
-      }
-      catch ( Exception ex )
-      {
+        // Configure logging system
+        Logger.setLoggerImpl( new Log4JImpl() );
 
-      }
+        // Create a configuration for connection to a locally hosted ECC
+        Properties eccProps = new Properties();
+        eccProps.put( "Rabbit_IP"  , "127.0.0.1" );
+        eccProps.put( "Rabbit_Port", "5672" );
+        eccProps.put( "Rabbit_Username", "guest" );
+        eccProps.put( "Rabbit_Password", "guest" );
+        eccProps.put( "Monitor_ID" , "00000000-0000-0000-0000-000000000000" );
+
+        // Create controller and initialise
+        ClientController cc = new ClientController();
+        cc.initialise( eccProps );
     }
-    else setupError = "Could not ECC config: project name is null";
-    
-    if ( setupError != null ) throw new Exception( setupError );
-    
-    return eccProps;
-  }
 }

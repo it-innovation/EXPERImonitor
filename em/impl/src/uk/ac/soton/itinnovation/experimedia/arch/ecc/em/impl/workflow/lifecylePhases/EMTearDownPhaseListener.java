@@ -35,6 +35,4 @@ public interface EMTearDownPhaseListener
   void onClientTearDownResult( EMClientEx client, boolean success );
   
   void onTearDownPhaseCompleted( EMClientEx client );
-
-  void onTearDownPhaseCompleted();
 }

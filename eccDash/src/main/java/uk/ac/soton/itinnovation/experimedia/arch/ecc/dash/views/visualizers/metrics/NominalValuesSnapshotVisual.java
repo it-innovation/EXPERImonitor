@@ -39,9 +39,7 @@ import com.invient.vaadin.charts.InvientChartsConfig.NumberYAxis;
 import com.invient.vaadin.charts.InvientChartsConfig.PieConfig;
 import com.invient.vaadin.charts.InvientChartsConfig.XAxis;
 import com.invient.vaadin.charts.InvientChartsConfig.YAxis;
-import com.vaadin.ui.Component;
 import com.vaadin.ui.TabSheet;
-import com.vaadin.ui.TabSheet.Tab;
 import com.vaadin.ui.VerticalLayout;
 import java.util.ArrayList;
 
@@ -125,8 +123,6 @@ public class NominalValuesSnapshotVisual extends BaseMetricVisual
           }
         }
       }
-      
-      updateView();
     }
   }
   

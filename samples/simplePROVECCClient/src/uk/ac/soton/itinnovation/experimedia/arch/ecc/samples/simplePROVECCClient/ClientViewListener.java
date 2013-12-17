@@ -30,9 +30,36 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.simplePROVECCClien
 
 public interface ClientViewListener
 {
-  void onClientViewClosed();
-  
-  void onSendServerPROVClicked();
-  
-  void onSendClientPROVClicked();
+    /*
+     * Notify controller that the UI has been closed
+     * 
+     */
+    void onClientViewClosed();
+
+    /**
+     * Notify controller of the name of the agent selected by the user
+     * 
+     * @param agent - Name of agent selected
+     */
+    void onAgentSelected( String agent );
+
+    /**
+     * Notify the controller of the activity selected by the user
+     * 
+     * @param activity - Name of activity selected
+     */
+    void onActivitySelected( String activity );
+
+    /**
+     * Notify the controller of the entity selected by the user
+     * 
+     * @param entity - Name of entity selected
+     */
+    void onEntitySelected( String entity );
+
+    /**
+     * Notify the controller that the user wishes to send the current provenance statement
+     * 
+     */
+    void onSendECCData();
 }

@@ -84,7 +84,6 @@ public class EMConnectionManager implements IEMMonitorEntryPoint_ProviderListene
                                                        dispatch,
                                                        entryPointID,
                                                        true );
-
         entryPointInterface.setListener( this );
 
         entryPointOpen = true;
@@ -96,7 +95,7 @@ public class EMConnectionManager implements IEMMonitorEntryPoint_ProviderListene
   
   public void shutdown()
   {
-    disconnectAllClients();
+    disconnectAllClients( "ECC is shutting down" );
     entryPointPump.stopPump();
     entryPointInterface.shutdown();
   }
@@ -110,7 +109,7 @@ public class EMConnectionManager implements IEMMonitorEntryPoint_ProviderListene
   public void clearAllAssociatedClients()
   { synchronized( clientListLock ) { associatedClients.clear(); } }
   
-  public void disconnectAllClients()
+  public void disconnectAllClients( String reason )
   { 
     // Get copy of all clients to remove
     HashSet<UUID> clientIDs = new HashSet<UUID>();
@@ -125,7 +124,7 @@ public class EMConnectionManager implements IEMMonitorEntryPoint_ProviderListene
     // Disconnect and remove clients
     Iterator<UUID> idIt = clientIDs.iterator();
     while ( idIt.hasNext() )
-    { disconnectAndRemoveClient( idIt.next() ); }
+    { disconnectAndRemoveClient( idIt.next(), reason ); }
   }
   
   public int getConnectedClientCount()
@@ -141,7 +140,30 @@ public class EMConnectionManager implements IEMMonitorEntryPoint_ProviderListene
   public EMClientEx getClient( UUID clientID )
   { return connectedClients.get( clientID ); }
   
-  public void disconnectAndRemoveClient( UUID clientID )
+  public void removeDisconnectedClient( UUID clientID ) throws Exception
+  {
+    if ( clientID == null ) throw new Exception( "Cannot remove client: UUID is invalid" );
+    
+    EMClientEx client;
+    
+    synchronized( clientListLock )
+    { client = connectedClients.get( clientID ); }
+    
+    if ( client != null )
+    {
+      if ( client.isConnected() ) throw new Exception( "Cannot remove disconnected client (" +
+                                                        clientID.toString() + "): client is still connected" );
+      
+      client.setIsDisconnecting( false );
+      client.destroyAllInterfaces();
+      
+      synchronized( clientListLock )
+      { connectedClients.remove( clientID ); }
+    }
+    else throw new Exception( "Cannot remove disconnected client: Client is unknown" );    
+  }
+  
+  public void disconnectAndRemoveClient( UUID clientID, String reason )
   {
     // Destroy all ECC interfaces and set as disconnected
     EMClientEx client;
@@ -151,9 +173,11 @@ public class EMConnectionManager implements IEMMonitorEntryPoint_ProviderListene
     
     if ( client != null && client.isConnected() )
     {
-      client.setIsDisconnecting( false );
+      client.getDiscoveryInterface().deregisteringThisClient( reason );
+      
       client.setIsConnected( false );
-      client.destroyAllInterfaces(); 
+      client.setIsDisconnecting( true );
+      client.destroyAllInterfaces();
       
       synchronized( clientListLock )
       { connectedClients.remove( clientID ); }

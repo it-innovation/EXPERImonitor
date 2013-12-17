@@ -17,57 +17,140 @@
 // PURPOSE, except where stated in the Licence Agreement supplied with
 // the software.
 //
-//      Created By :            Stefanie Wiegand
+//      Created By :            Simon Crowle
 //      Created Date :          17-Oct-2013
-//      Created for Project :   experimedia-arch-ecc-edm-impl
+//      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.prov;
 
-import org.openprovenance.prov.model.Document;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.*;
+
+import org.openprovenance.prov.model.*;
+import org.openprovenance.prov.dot.ProvToDot;
+
+import java.util.*;
+import java.io.File;
 
 
 
 
 public class PROVToolBoxUtil
 {
-    public PROVToolBoxUtil()
-    {}
+    private static IECCLogger ptuLogger = Logger.getLogger( PROVToolBoxUtil.class );
     
     /**
      * Creates a PROV ToolBox Document using the ECC PROV Model classes
      * 
-     * @param eccPROVReport - Stefanie, please change Object type
+     * @param eccPROVReport - PROV report
      * @return              - PROV Toolbox Document (empty if eccPROVReport is erroneous)
      */
-    public Document createPTBDocument( Object eccPROVReport )
+    public static Document createPTBDocument( EDMProvReport eccPROVReport ) throws Exception
     {
-      return null;
+      // Safety first
+      if ( eccPROVReport == null ) throw new Exception( "Could not create PROVToolBox Document: ECC PROV report is null" );
+      
+      PROVTBDataManager ptdb = new PROVTBDataManager();
+      
+      EDMProvFactory factory = EDMProvFactory.getInstance();
+      factory.clear();
+      factory.loadReport(eccPROVReport);
+      
+      createPTBElements( factory.getAllElements(), ptdb );
+      createPTBStatements( factory.getAllElements(), ptdb );
+      
+      return ptdb.createPTDocument();
     }
-    
+        
     /**
-     * Combines two PROV ToolBox documents contents together. Does not include 
-     * duplicate PROV elements.
-     * 
-     * @param lhs - First PROV ToolBox document
-     * @param rhs - Second PROV ToolBox document
-     * @return    - Combined ToolBox document
-     */
-    public Document combinePTBDocuments( Document lhs, Document rhs )
-    {
-      return null;
-    }
-    
-    /**
-     * Creates a PDF document based on a PROV ToolBox document.
+     * Creates a DOT document based on a PROV ToolBox document.
      * 
      * @param target      - PROV ToolBox document
      * @param fileTarget  - Path and filename of expected PDF document
      * @throws Exception  - Throws on target data, path or file writing problems
      */
-    public void createPDFVisualisation( Document target, String fileTarget ) throws Exception
+    public static void createVizDOTFile( Document target, String fileTarget ) throws Exception
     {
+      // Safety first
+      if ( target == null || fileTarget == null ) throw new Exception( "Could not create PROV DOT file because input param(s) are null" );
       
+      ProvToDot ptd = new ProvToDot( true );
+      try
+      {
+        File outFile = new File( fileTarget + ".dot" );
+        
+        ptd.convert( target, outFile, "PROV Visualisation" );
+      }
+      catch( Exception ex )
+      { throw ex; } // Throw exception upwards
+    }
+    
+    // Private methods --------------------------------------------------------- 
+    
+    private static void createPTBElements( HashMap<String, EDMProvBaseElement> hashMap,
+                                           PROVTBDataManager ptdb )
+    {
+      for ( EDMProvBaseElement e : hashMap.values() )
+      {
+        try
+        {
+          switch ( e.getProvType() )
+          {
+            case ePROV_ENTITY   : ptdb.createPTBEntity( e ); break;
+            case ePROV_AGENT    : ptdb.createPTBAgent( e ); break;
+            case ePROV_ACTIVITY : ptdb.createPTBActivity( e ); break;
+          }
+        }
+        catch ( Exception ex )
+        { ptuLogger.error( "Could not create PROVToolBox element:" + ex.getMessage() ); }
+      }
+    }
+    
+    private static void createPTBStatements( HashMap<String, EDMProvBaseElement> hashMap,
+                                             PROVTBDataManager ptdb )
+    {
+      for ( EDMProvBaseElement el : hashMap.values() )
+      {
+          switch ( el.getProvType() )
+          {
+            case ePROV_ENTITY :
+            {
+              for ( EDMTriple triple : el.getTriples().values() )
+                try
+                { 
+                  ptdb.createEntityRelation( triple ); 
+                }
+                catch (Exception ex) { ptuLogger.warn( "Could not create relation: " + ex.getMessage() ); }
+              
+            } break;
+
+            case ePROV_AGENT :
+            {
+              for ( EDMTriple triple : el.getTriples().values() )
+                try
+                {
+                  ptdb.createAgentRelation( triple );
+                }
+                catch (Exception ex) { ptuLogger.warn( "Could not create relation: " + ex.getMessage() );
+            
+              }
+            } break;
+
+            case ePROV_ACTIVITY :
+            {
+              for ( EDMTriple triple : el.getTriples().values() )
+                try
+                {
+                  ptdb.createActivityRelation( triple );
+                }
+                catch (Exception ex) { ptuLogger.warn( "Could not create relation: " + ex.getMessage() );
+
+            } break;
+          }
+        }
+      }
     }
 }
+

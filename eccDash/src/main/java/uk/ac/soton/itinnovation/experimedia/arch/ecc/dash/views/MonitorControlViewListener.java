@@ -34,5 +34,5 @@ public interface MonitorControlViewListener
   
   void onNextPhaseClicked();
   
-  void onRestartExperimentClicked();
+  void onStopExperimentClicked();
 }

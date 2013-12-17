@@ -3,7 +3,7 @@
 // © University of Southampton IT Innovation Centre, 2012
 //
 // Copyright in this software belongs to University of Southampton
-// IT Innovation Centre of Gamma House, Enterprise Road, 
+// IT Innovation Centre of Gamma House, Enterprise Road,
 // Chilworth Science Park, Southampton, SO16 7NS, UK.
 //
 // This software may not be used, sold, licensed, transferred, copied
@@ -29,15 +29,18 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.client.ClientInf
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.client.ClientConnectionsView;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.SimpleView;
 
-import com.vaadin.ui.*;
-import com.vaadin.ui.TabSheet.Tab;
-import java.net.URL;
-import java.util.Collection;
-import org.vaadin.artur.icepush.ICEPush;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMPhase;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.UILayoutUtil;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.dataExport.DataExportController;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveData.LiveMonitorController;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.system.SystemView;
+
+import com.vaadin.ui.*;
+import com.vaadin.ui.TabSheet.Tab;
+import org.vaadin.artur.icepush.ICEPush;
+
+import java.net.URL;
+import java.util.Collection;
 
 
 
@@ -49,106 +52,107 @@ public class MainDashView extends SimpleView
   private Panel          dashContentContainer;
   private VerticalLayout dashContentView;
   private VerticalLayout dashSideView;
-  
+
   private MonitorControlView    controlView;
   private ClientConnectionsView connectionsView;
   private ClientInfoView        clientInfoView;
+  private SystemView            systemView;
   private NAGIOSView            nagiosView;
   private DashLogView           logView;
   private boolean               subViewsReady;
-  
+
   private TabSheet subViewsSheet;
-  
+
   private transient LiveMonitorController liveMonitorController;
   private transient DataExportController  dataExportController;
 
-  
+
   public MainDashView()
   {
     super();
-    
+
     createFrameworkComponents();
   }
-  
-  public void initialise( ICEPush pusher )
+
+  public void initialise( UIPushManager pushMgr )
   {
-    createMainDashControls( pusher );
+    createMainDashControls( pushMgr );
   }
-  
+
   public void resetViews()
   {
     controlView.resetView();
     connectionsView.resetView();
     clientInfoView.resetView();
-    
+
     liveMonitorController.reset();
     dataExportController.reset();
   }
-  
+
   public void updateViewport()
   {
     if ( subViewsReady )
     {
       VerticalLayout vl = getViewContents();
       Window mainWindow = vl.getApplication().getMainWindow();
-      
+
       if ( mainWindow != null )
       {
         final float vMargin = 220;
         final float hMargin = 200;
-        
+
         VerticalLayout cVL = (VerticalLayout) controlView.getImplContainer();
         float bodyHeight   = mainWindow.getHeight() - cVL.getHeight();
         bodyHeight -= vMargin;
-        
+
         float bodyWidth = mainWindow.getWidth() - cVL.getWidth();
         bodyWidth -= hMargin;
-        
+
         subViewsSheet.setWidth( bodyWidth, TabSheet.UNITS_PIXELS );
         dashViewBody.setHeight( bodyHeight, VerticalLayout.UNITS_PIXELS );
       }
     }
   }
-  
+
   public void shutDownUI()
   {
     if ( liveMonitorController != null ) liveMonitorController.shutDown();
     if ( dataExportController != null  ) dataExportController.shutDown();
   }
-  
+
   public void addLogMessage( String message )
   { if ( logView != null ) logView.addLogMessage( message ); }
-  
+
   public void switchViewFocus( int index )
   {
     if ( subViewsSheet != null )
     {
-      Tab t = subViewsSheet.getTab( index );  
+      Tab t = subViewsSheet.getTab( index );
       if ( t != null ) subViewsSheet.setSelectedTab( t );
     }
   }
-  
+
   public MonitorControlView getMonitorControlView()
   { return controlView; }
-  
+
   public ClientConnectionsView getConnectionsView()
   { return connectionsView; }
-  
+
   public ClientInfoView getClientInfoView()
   { return clientInfoView; }
-  
+
   public LiveMonitorController getLiveMonitorController()
   { return liveMonitorController; }
-  
+
   public DataExportController getDataExportController()
   { return dataExportController; }
-  
+
   public void setExperimentPhase( EMPhase phase )
   {
     switch ( phase )
     {
       case eEMUnknownPhase : logView.addLogMessage( "Tried an displaying an unknown phase!" ); break;
-              
+
       default:
       {
         controlView.setPhase( phase );
@@ -156,21 +160,21 @@ public class MainDashView extends SimpleView
       }
     }
   }
-  
+
   public void pointToNAGIOS( URL fullURL )
   {
     if ( fullURL != null && nagiosView != null )
       nagiosView.pointToNAGIOS( fullURL );
   }
-  
+
   // Private methods -----------------------------------------------------------
   private void createFrameworkComponents()
   {
     VerticalLayout vl = getViewContents();
-    
+
     dashHeaderView = new VerticalLayout();
     vl.addComponent( dashHeaderView );
-    
+
     // Body of the view (will adjust to window size and scroll contents)
     dashViewBody = new Panel();
     dashViewBody.setImmediate( true );
@@ -180,14 +184,14 @@ public class MainDashView extends SimpleView
     VerticalLayout bodyVL = (VerticalLayout) dashViewBody.getContent();
     bodyVL.setMargin( false );
     bodyVL.setSizeUndefined();
-    
+
     // Horizontal: side and main content container
     HorizontalLayout hl = new HorizontalLayout();
     dashViewBody.addComponent( hl );
-    
+
     dashSideView = new VerticalLayout();
     hl.addComponent( dashSideView );
-    
+
     // Main content view
     dashContentContainer = new Panel();
     dashContentContainer.addStyleName( "borderless light" );
@@ -197,83 +201,80 @@ public class MainDashView extends SimpleView
 
     dashContentView = new VerticalLayout();
     dashContentContainer.addComponent( dashContentView );
-    
+
     // Space
     bodyVL.addComponent( UILayoutUtil.createSpace( "20px", null ) );
-    
+
     // Footer
     hl = new HorizontalLayout();
     bodyVL.addComponent( hl );
     bodyVL.setComponentAlignment( hl, Alignment.BOTTOM_LEFT );
-    
+
     // Shutdown button
     Button button = new Button( "Shut down ECC" );
     button.addStyleName( "small" );
     button.addListener( new ShutdownButtonListener() );
     bodyVL.addComponent( button );
-    
+
     // Space
     bodyVL.addComponent( UILayoutUtil.createSpace( "30px", null, true ) );
-    
+
     Label label = new Label( "© University of Southampton IT Innovation Centre 2013" );
     label.setStyleName( "small" );
     bodyVL.addComponent( label );
   }
-  
-  private void createMainDashControls( ICEPush pusher )
+
+  private void createMainDashControls( UIPushManager pushMgr )
   {
     controlView = new MonitorControlView();
     dashHeaderView.addComponent( (Component) controlView.getImplContainer() );
-    
+
     connectionsView = new ClientConnectionsView();
     dashSideView.addComponent( (Component) connectionsView.getImplContainer() );
-    
-    createSubViews( pusher );
+
+    createSubViews( pushMgr );
   }
-  
-  private void createSubViews( ICEPush pusher )
+
+  private void createSubViews( UIPushManager pushMgr )
   {
     dashContentView.removeAllComponents();
-    
+
     // Space
     dashContentView.addComponent( UILayoutUtil.createSpace( "4px", null ) );
-    
+
     subViewsSheet = new TabSheet();
     subViewsSheet.addStyleName( "borderless" );
     subViewsSheet.addStyleName( "large" );
     subViewsSheet.setSizeFull();
     dashContentView.addComponent( subViewsSheet );
-    
+
     clientInfoView = new ClientInfoView();
-    subViewsSheet.addTab( (Component) clientInfoView.getImplContainer(), "Client info", null );
-    
-    liveMonitorController = new LiveMonitorController( pusher );
-    subViewsSheet.addTab( (Component) liveMonitorController.getLiveView().getImplContainer(), 
-                          "Live monitor", null );
-    
-    dataExportController = new DataExportController();
-    subViewsSheet.addTab( (Component) dataExportController.getExportView().getImplContainer(), 
-                          "Data export", null );
-    
-    nagiosView = new NAGIOSView();
-    subViewsSheet.addTab( (Component) nagiosView.getImplContainer(), "Systems monitor", null );
-    
     logView = new DashLogView();
-    subViewsSheet.addTab( (Component) logView.getImplContainer(), "ECC log", null );
-    
+    nagiosView = new NAGIOSView();
+    systemView = new SystemView(connectionsView, clientInfoView, nagiosView, logView);
+    subViewsSheet.addTab( (Component) systemView.getImplContainer(), "System", null );
+
+    liveMonitorController = new LiveMonitorController( pushMgr );
+    subViewsSheet.addTab( (Component) liveMonitorController.getLiveView().getImplContainer(),
+                          "Live monitor", null );
+
+    dataExportController = new DataExportController();
+    subViewsSheet.addTab( (Component) dataExportController.getExportView().getImplContainer(),
+                          "Data export", null );
+
     subViewsReady = true;
-    
+
     updateViewport();
   }
-  
+
   // Event handlers ------------------------------------------------------------
   private void onShutdownClicked()
-  {    
+  {
     Collection<MainDashViewListener> listeners = getListenersByType();
     for( MainDashViewListener listener : listeners )
       listener.onShutdownECCClicked();
   }
-  
+
   private class ShutdownButtonListener implements Button.ClickListener
   {
     @Override

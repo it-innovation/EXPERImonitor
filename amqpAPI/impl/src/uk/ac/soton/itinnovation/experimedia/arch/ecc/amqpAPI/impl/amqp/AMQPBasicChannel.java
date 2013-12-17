@@ -25,6 +25,8 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.spec.IAMQPChannelListener;
+
 import com.rabbitmq.client.*;
 
 import java.io.IOException;
@@ -32,12 +34,36 @@ import java.io.IOException;
 
 
 
+
 public class AMQPBasicChannel
 {
-  private Channel amqpChannel;
+  private Channel                 amqpChannel;
+  private ChannelShutdownListener rabbitListener;
+  private IAMQPChannelListener    channelListener;
+  private boolean                 isClosingDown;
+  
   
   public AMQPBasicChannel( Channel channel )
-  { amqpChannel = channel; }
+  { 
+    amqpChannel = channel;
+  }
+  
+  public void setListener( IAMQPChannelListener listener )
+  {
+    if ( listener == null )
+    {
+      // Remove any existing listener is new listener is null
+      if ( rabbitListener != null )
+        amqpChannel.removeShutdownListener( rabbitListener );
+    }
+    else
+    {
+      rabbitListener = new ChannelShutdownListener();
+      amqpChannel.addShutdownListener( rabbitListener );
+      
+      channelListener = listener;
+    }
+  }
   
   public Object getChannelImpl()
   { return amqpChannel; }
@@ -52,14 +78,38 @@ public class AMQPBasicChannel
   
   public void close()
   {
-    if ( amqpChannel != null )
+    if ( amqpChannel != null && !isClosingDown )
       if ( amqpChannel.isOpen() )
         try 
-        { 
+        {
+          isClosingDown = true;
+          
+          if ( rabbitListener != null )
+            amqpChannel.removeShutdownListener( rabbitListener );
+          
           amqpChannel.close();
           amqpChannel = null;
         }
         catch (IOException ioe) {}
+  } 
+  
+  // Private methods/classes ---------------------------------------------------
+  private void notifyChannelClosed( ShutdownSignalException sse )
+  {
+    if ( !isClosingDown && sse != null )
+    {
+      boolean connectionOK = ( !sse.isHardError() );
+      
+      if ( channelListener != null )
+        channelListener.onChannelShutdown( connectionOK,
+                                           sse.getMessage() );
+    }
   }
   
+  private class ChannelShutdownListener implements ShutdownListener
+  {
+    @Override
+    public void shutdownCompleted( ShutdownSignalException cause )
+    { notifyChannelClosed(cause);}
+  }
 }

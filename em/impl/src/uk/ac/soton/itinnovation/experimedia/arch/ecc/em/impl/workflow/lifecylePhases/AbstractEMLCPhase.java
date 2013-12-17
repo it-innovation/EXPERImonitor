@@ -54,8 +54,8 @@ public abstract class AbstractEMLCPhase
   protected UUID                    emProviderID;
   protected AMQPMessageDispatchPump phaseMsgPump;
   
-  protected volatile boolean phaseActive = false; // Atomic
-  
+  protected volatile boolean phaseActive  = false; // Atomics
+  protected volatile boolean phaseInFocus = false;
   
   public EMPhase getPhaseType()
   { return phaseType; }
@@ -65,6 +65,12 @@ public abstract class AbstractEMLCPhase
   
   public boolean isActive()
   { return phaseActive; }
+  
+  public boolean isInFocus()
+  { return phaseInFocus; }
+  
+  public void setInFocus( boolean focus )
+  { phaseInFocus = focus; }
   
   public boolean isTimeOutSupported()
   { return phaseSupportsTimeOuts; }
@@ -97,7 +103,7 @@ public abstract class AbstractEMLCPhase
   
   public abstract void start() throws Exception;
   
-  public abstract void controlledStop() throws Exception;
+  public abstract void controlledStop();
   
   public abstract void hardStop();
   

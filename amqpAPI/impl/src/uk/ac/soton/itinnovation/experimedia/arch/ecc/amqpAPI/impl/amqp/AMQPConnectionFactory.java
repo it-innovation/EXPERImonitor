@@ -38,7 +38,6 @@ import com.rabbitmq.client.*;
 
 
 
-
 public class AMQPConnectionFactory
 {
     private IECCLogger factoryLog = Logger.getLogger( AMQPConnectionFactory.class );
@@ -76,7 +75,8 @@ public class AMQPConnectionFactory
           amqpConnection.close();
           amqpConnection = null;
         }
-        catch (Exception e) { factoryLog.error("Could not close down connection"); }
+        catch (Exception ex) 
+        { factoryLog.error("Could not close down connection" + ex.getMessage() ); }
     }
 
     public boolean setAMQPHostPort( int port )
@@ -110,7 +110,8 @@ public class AMQPConnectionFactory
           InetAddress localIP = InetAddress.getLocalHost();
           localIPValue = localIP.getHostAddress();
       }
-      catch ( UnknownHostException uhe ) {}
+      catch ( UnknownHostException uhe ) 
+      { factoryLog.error( "Could not create valid IP address: " + uhe.getMessage() ); }
 
       return localIPValue;
     }
@@ -146,8 +147,8 @@ public class AMQPConnectionFactory
         
         // Execute log-in
         try { amqpConnection = amqpFactory.newConnection(); }
-        catch ( Exception e )
-        { throw new Exception( "Could not create AMQP host connection: " + e.getMessage() ); }
+        catch ( Exception ex )
+        { throw new Exception( "Could not create AMQP host connection", ex ); }
     }
 
     public void connectToAMQPSSLHost() throws Exception
@@ -162,8 +163,8 @@ public class AMQPConnectionFactory
         amqpFactory.useSslProtocol();
 
         try { amqpConnection = amqpFactory.newConnection(); }
-        catch ( Exception e )
-        { throw new Exception( "Could not create AMQP host SSL connection: " + e.getMessage() ); }
+        catch ( Exception ex )
+        { throw new Exception( "Could not create AMQP host SSL connection: ", ex ); }
     }
 
     public void connectToVerifiedAMQPHost( InputStream keystore,
@@ -177,10 +178,10 @@ public class AMQPConnectionFactory
         char[] trustPassphrase = password.toCharArray();  
         KeyStore tks = KeyStore.getInstance( "JKS" );
         try { tks.load( keystore, trustPassphrase ); }
-        catch ( Exception e )
+        catch ( Exception ex )
         {
-          factoryLog.error( "Had problems loading keystore: " + e.getMessage() );
-          throw e;
+          factoryLog.error( "Had problems loading keystore: " + ex.getMessage() );
+          throw ex;
         }
 
         TrustManagerFactory tmf = TrustManagerFactory.getInstance( "SunX509" );
@@ -196,7 +197,7 @@ public class AMQPConnectionFactory
 
         try { amqpConnection = amqpFactory.newConnection(); }
         catch ( IOException ioe )
-        { throw new Exception( "Could not create secure AMQP host connection" ); }
+        { throw new Exception( "Could not create secure AMQP host connection", ioe ); }
     }
     
     public void connectToAMQPHost( Properties emProps ) throws Exception
@@ -208,22 +209,22 @@ public class AMQPConnectionFactory
         String rabbitServerPort = emProps.getProperty( "Rabbit_Port" );
         
         // If a password exists for the Rabbit connection, use it
-        if ( emProps.containsKey("password") ) 
+        if ( emProps.containsKey("Rabbit_Password") ) 
         {
             factoryLog.info( "Will be using password to connect to AMQP" );
-            userPass = emProps.getProperty( "password" );
+            userPass = emProps.getProperty( "Rabbit_Password" );
         } 
         else
-          factoryLog.info( "No password provided, let's hope AMQP does not require authentication" );
+          factoryLog.info( "No password provided, will try guest login" );
         
         // If username and password are supplied, use these
-        if ( emProps.containsKey("username") )
+        if ( emProps.containsKey("Rabbit_Username") )
         {
-            userName = emProps.getProperty("username");
+            userName = emProps.getProperty("Rabbit_Username");
             factoryLog.info("Will be using username \'" + userName + "\' to connect to AMQP");
         } 
         else 
-            factoryLog.info("No username provided, let's hope AMQP has user \'guest\'");
+            factoryLog.info("No username provided, will try guest login");
         
         factoryLog.info( "Trying to connect to AMQP bus..." );
         
@@ -236,16 +237,14 @@ public class AMQPConnectionFactory
             setAMQPHostPort( portNumber );
           
             // Now check to see if we're using a verified connection type
-            if ( emProps.containsKey("Rabbit_Keystore") && 
-                 emProps.containsKey("Rabbit_KeystorePassword") )
+            if ( emProps.containsKey("Rabbit_Keystore") )
             {
-                InputStream ksStream = AMQPConnectionFactory.class.getResourceAsStream( emProps.getProperty("Rabbit_Keystore") ); 
-                String ksPassword    = emProps.getProperty( "Rabbit_KeystorePassword" );
+                InputStream ksStream = AMQPConnectionFactory.class.getResourceAsStream( emProps.getProperty("Rabbit_Keystore") );
 
                 try
-                { connectToVerifiedAMQPHost( ksStream, ksPassword ); }
-                catch ( Exception e )
-                { factoryLog.error( "Could not connect to AMQP Bus: " + e.getMessage() ); }
+                { connectToVerifiedAMQPHost( ksStream, userPass ); }
+                catch ( Exception ex )
+                { throw ex; }
             }
             else
             {
@@ -261,14 +260,12 @@ public class AMQPConnectionFactory
                     else
                       connectToAMQPHost();
                 }
-                catch ( Exception e )
-                { 
-                  factoryLog.error( "Could not connect to " +
-                                    (useSSL ? "(SSL)" : "(insecure)") +
-                                    "AMQP Bus: " + e.getMessage() );
-                }
+                catch ( Exception ex )
+                { throw ex; }
             }
         }
+        else
+          throw new Exception( "Could not connect: IP/Port are invalid" ); 
     }
 
     public boolean isConnectionValid()
@@ -277,7 +274,7 @@ public class AMQPConnectionFactory
     public AMQPBasicChannel createNewChannel() throws Exception
     {
         if ( amqpConnection == null ) throw new Exception( "No AMSQP connection available" );
-
+        
         return new AMQPBasicChannel( amqpConnection.createChannel() );
     }
 }

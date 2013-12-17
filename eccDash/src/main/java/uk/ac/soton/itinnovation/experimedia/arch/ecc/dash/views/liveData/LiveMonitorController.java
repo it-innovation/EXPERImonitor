@@ -3,7 +3,7 @@
 // © University of Southampton IT Innovation Centre, 2012
 //
 // Copyright in this software belongs to University of Southampton
-// IT Innovation Centre of Gamma House, Enterprise Road, 
+// IT Innovation Centre of Gamma House, Enterprise Road,
 // Chilworth Science Park, Southampton, SO16 7NS, UK.
 //
 // This software may not be used, sold, licensed, transferred, copied
@@ -25,23 +25,25 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveData;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.visualizers.metrics.NumericTimeSeriesVisual;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.visualizers.metrics.BaseMetricVisual;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.visualizers.metrics.NominalValuesSnapshotVisual;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.visualizers.metrics.RawDataVisual;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IReportDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMClient;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.*;
+
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
+
 import uk.ac.soton.itinnovation.robust.cat.core.components.viewEngine.spec.uif.mvc.IUFView;
 import uk.ac.soton.itinnovation.robust.cat.core.components.viewEngine.spec.uif.types.UFAbstractEventManager;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMClient;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvReport;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.UIPushManager;
+
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.visualizers.metrics.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IReportDAO;
 
 
-import org.vaadin.artur.icepush.ICEPush;
-
+import java.io.*;
 import java.util.*;
+
+
 
 
 
@@ -49,88 +51,153 @@ import java.util.*;
 public class LiveMonitorController extends UFAbstractEventManager
                                    implements LiveMetricViewListener
 {
-  private final IECCLogger liveMonLogger  = Logger.getLogger( LiveMonitorController.class );
-  private final Object     updateViewLock = new Object();
-  
+  private final IECCLogger liveMonLogger        = Logger.getLogger( LiveMonitorController.class );
+  private final Object     metricViewUpdateLock = new Object();
+  private final Object     provViewUpdateLock   = new Object();
+  private final int        liveUpdateRate       = 2500;
+
   private LiveDataView   liveDataView;
   private LiveMetricView liveMetricView;
   private LiveProvView   liveProvView;
-  
+
   private transient HashMap<UUID, MSUpdateInfo> measurementUpdates;
   private transient HashSet<UUID>               activeMSVisuals;
   private transient IReportDAO                  expReportAccessor;
-  private transient ICEPush                     icePusher;
+  private transient UIPushManager               pushManager;
 
+  private transient PROVFileLogger provLogger;
+  private transient boolean        provUpdatePending;
   
-  public LiveMonitorController( ICEPush pusher )
+  private Timer liveUpdateTimer; 
+
+
+  public LiveMonitorController( UIPushManager pushMgr )
   {
     super();
-    
-    icePusher          = pusher;
+
+    pushManager        = pushMgr;
     measurementUpdates = new HashMap<UUID, MSUpdateInfo>();
     activeMSVisuals    = new HashSet<UUID>();
-    
+    provLogger         = new PROVFileLogger();
+
     createViews();
   }
-  
+
   public void initialse( IReportDAO dao )
-  { expReportAccessor = dao; }
+  { 
+    expReportAccessor = dao;
+    
+    // Set up live update callback
+    liveUpdateTimer = new Timer();
+    
+    LiveUpdateCallback luc = new LiveUpdateCallback();
+    liveUpdateTimer.scheduleAtFixedRate( luc, liveUpdateRate, liveUpdateRate );
+  }
   
+  public void createPROVLog( UUID expID, String basePath )
+  {
+    // Close last log (if it exists)
+    if ( provLogger.isLogging() ) provLogger.closeLog();
+    
+    // Create a new log
+    if ( !provLogger.createLog(expID, basePath) )
+    {
+      String problem = "Could not create PROV log file for experiment " + expID.toString();
+      liveMetricView.displayWarning( "PROV Logging error", problem );
+      
+      liveMonLogger.error( problem );
+    }
+  }
+  
+  public void closePROVLog()
+  {
+    provLogger.closeLog();
+  }
+
   public void processLiveMetricData( EMClient client, Report report ) throws Exception
   {
     // Safety first
     if ( report == null || client == null ) throw new Exception( "Live monitoring metric parameters were null" );
     if ( expReportAccessor == null ) throw new Exception( "Live monitoring control has not been initialised" );
-    
+
     // Check to see if we have anything useful store, and try store
-    if ( sanitiseMetricReport(report) )
+    if ( sanitiseMetricReport(client, report) )
     {
       try
       { expReportAccessor.saveMeasurements( report ); }
       catch ( Exception e ) { throw e; }
-      
+
       // Remove measurements we've already displayed 'live'
       removeOldMeasurements( report );
-      
+
       // Display (if we have an active display and there is still data)
       if ( report.getNumberOfMeasurements() > 0 )
-        synchronized ( updateViewLock )
+        synchronized ( metricViewUpdateLock )
         {
           UUID msID = report.getMeasurementSet().getID();
           if ( activeMSVisuals.contains(msID) )
           {
             MeasurementSet ms = report.getMeasurementSet();
-            liveMetricView.updateMetricVisual( msID, ms );
-
-            if ( icePusher !=null ) icePusher.push();
+            liveMetricView.appendMetricData( msID, ms );
           }
         }
     }
   }
-  
-  public void processLivePROVData( EMClient client, EDMProvReport statement ) throws Exception
+
+  public void processLivePROVData( EMClient client, EDMProvReport report ) throws Exception
   {
-    if ( client == null || statement == null ) throw new Exception( "Live monitoring provenance parameters were null" );
-    
-    // To finish off 
-    
-    if ( icePusher !=null ) icePusher.push();
+    if ( client == null || report == null ) throw new Exception( "Live monitoring provenance parameters were null" );
+
+    synchronized ( provViewUpdateLock )
+    {
+      if ( provLogger.isLogging() )
+      {
+        provLogger.writePROV( report );
+        
+        // TO DO: Update UI with tail of PROV data
+        
+        liveMonLogger.info( "Got PROV data from client " + client.getName() );
+        
+        provUpdatePending = true;
+      }
+      else
+      {
+        liveMonLogger.error( "Unable to log PROV data" );
+      }
+    }
   }
-  
+
   public IUFView getLiveView()
   { return liveDataView; }
-  
+
   public void reset()
   {
-    activeMSVisuals.clear();
-    liveMetricView.resetView();
+    synchronized( metricViewUpdateLock )
+    {
+      activeMSVisuals.clear();
+      liveMetricView.resetView();
+    }
+    
+    synchronized( provViewUpdateLock )
+    {
+      liveProvView.resetView();
+      provLogger.closeLog();
+      provUpdatePending = false;
+    }
   }
-  
+
   public void shutDown()
   {
-    icePusher = null;
+    reset();
+    
+    liveUpdateTimer.cancel();
+    liveUpdateTimer.purge();
+    
+    pushManager = null;
+    
+    provLogger.closeLog();
   }
-  
+
   public void addliveView( EMClient client, Entity entity, Attribute attribute,
                            Collection<MeasurementSet> mSets )
   {
@@ -143,7 +210,7 @@ public class LiveMonitorController extends UFAbstractEventManager
         UUID msID               = ms.getID();
         Metric metric           = ms.getMetric();
         BaseMetricVisual visual = null;
-        
+
         if ( !activeMSVisuals.contains(msID) )
         {
           switch ( ms.getMetric().getMetricType() )
@@ -153,23 +220,23 @@ public class LiveMonitorController extends UFAbstractEventManager
                                                         metric.getUnit().getName(),
                                                         metric.getMetricType().name(),
                                                         msID ); break;
-              
+
             case ORDINAL :
             case INTERVAL:
               visual = new RawDataVisual( attribute.getName(),
                                           metric.getUnit().getName(),
                                           metric.getMetricType().name(),
-                                          msID ); break;  
-              
+                                          msID ); break;
+
             case RATIO   :
               visual = new NumericTimeSeriesVisual( attribute.getName(),
                                                     metric.getUnit().getName(),
                                                     metric.getMetricType().name(),
                                                     msID ); break;
           }
-          
+
           if ( visual != null )
-            synchronized ( updateViewLock )
+            synchronized ( metricViewUpdateLock )
             {
               liveMetricView.addMetricVisual( client.getName(),
                                                entity.getName(),
@@ -181,7 +248,7 @@ public class LiveMonitorController extends UFAbstractEventManager
       }
     }
   }
-  
+
   public void removeClientLiveView( EMClient client )
   {
     if ( client != null )
@@ -190,59 +257,60 @@ public class LiveMonitorController extends UFAbstractEventManager
       Set<MetricGenerator> msGens = client.getCopyOfMetricGenerators();
       if ( !msGens.isEmpty() )
       {
-        Map<UUID, MeasurementSet> mSets = MetricHelper.getAllMeasurementSets( msGens );        
+        Map<UUID, MeasurementSet> mSets = MetricHelper.getAllMeasurementSets( msGens );
         Iterator<MeasurementSet> msIt = mSets.values().iterator();
-        
-        synchronized ( updateViewLock )
+
+        synchronized ( metricViewUpdateLock )
         {
           while ( msIt.hasNext() )
           {
             UUID msID = msIt.next().getID();
 
             activeMSVisuals.remove( msID );
-            liveMetricView.removeMetricVisual( msID ); 
+            liveMetricView.removeMetricVisual( msID );
           }
-          
-          if ( icePusher !=null ) icePusher.push();
         }
+        
+        // Removal could be the result of a client disconnection, to push an update
+        pushManager.pushUIUpdates();
       }
     }
   }
-  
+
   // LiveMonitorViewListener ---------------------------------------------------
   @Override
   public void onRemoveVisualClicked( UUID msID )
   {
     if ( msID != null )
     {
-      synchronized ( updateViewLock )
+      synchronized ( metricViewUpdateLock )
       {
         activeMSVisuals.remove( msID );
         liveMetricView.removeMetricVisual( msID );
-        
-        if ( icePusher !=null ) icePusher.push();
       }
+      
+      if ( pushManager !=null ) pushManager.pushUIUpdates();
     }
   }
-  
+
   // Private methods -----------------------------------------------------------
   private void createViews()
   {
     liveDataView = new LiveDataView();
-    
+
     liveMetricView = liveDataView.getLiveMetricView();
     liveMetricView.addListener( this );
-    
+
     liveProvView = liveDataView.getLiveProvView();
     liveProvView.addListener( this );
   }
-  
+
   private void removeOldMeasurements( Report report )
   {
     if ( report != null )
     {
       MeasurementSet ms = report.getMeasurementSet();
-      
+
       if ( ms != null )
       {
         Set<Measurement> targetMeasurements = ms.getMeasurements();
@@ -258,31 +326,31 @@ public class LiveMonitorController extends UFAbstractEventManager
           {
             Date date = new Date();
             date.setTime( 0 );
-            
+
             lastRecent = new MSUpdateInfo( date, UUID.randomUUID() );
           }
-          
+
           MSUpdateInfo mostRecentInfo = lastRecent;
-          
+
           // Find old measurements (if any)
           Iterator<Measurement> mIt = targetMeasurements.iterator();
           while( mIt.hasNext() )
           {
             Measurement m = mIt.next();
             Date mDate    = m.getTimeStamp();
-            
-            if ( mostRecentInfo.lastUpdate.after(mDate) || 
+
+            if ( mostRecentInfo.lastUpdate.after(mDate) ||
                  mostRecentInfo.lastMeasurementID.equals(m.getUUID()) ) // If it is an old or repeated
               oldMeasurements.add( m );                                 // measurement, we don't want it
             else
-              mostRecentInfo = new MSUpdateInfo( mDate, m.getUUID() ); 
+              mostRecentInfo = new MSUpdateInfo( mDate, m.getUUID() );
           }
-          
+
           // Remove old measurements
           mIt = oldMeasurements.iterator();
           while ( mIt.hasNext() )
             targetMeasurements.remove( mIt.next() );
-          
+
           // Update measurement count and recency
           report.setNumberOfMeasurements( targetMeasurements.size() );
           measurementUpdates.remove( msID );
@@ -293,26 +361,41 @@ public class LiveMonitorController extends UFAbstractEventManager
       else report.setNumberOfMeasurements( 0 );
     }
   }
-  
-  private boolean sanitiseMetricReport( Report reportOUT )
+
+  private boolean sanitiseMetricReport( EMClient client, Report reportOUT )
   {
-    if ( reportOUT.getNumberOfMeasurements() == 0 ) return false;
-    
-    MeasurementSet ms = reportOUT.getMeasurementSet();
-    if ( ms == null ) return false;
-    
-    Metric metric = ms.getMetric();
-    if ( metric == null ) return false;
-    
+    // Check that we apparently have data
+    if ( reportOUT.getNumberOfMeasurements() == 0 )
+    {
+      liveMonLogger.error( "Metric report error: measurement count = 0" );
+      return false;
+    }
+
+    // Make sure we have a valid measurement set
+    MeasurementSet clientMS = reportOUT.getMeasurementSet();
+    if ( clientMS == null )
+    {
+      liveMonLogger.error( "Metric report error: Measurement set is null" );
+      return false;
+    }
+
+    Metric metric = clientMS.getMetric();
+    if ( metric == null )
+    {
+      liveMonLogger.error( "Metric report error: Metric is null" );
+      return false;
+    }
+
     MetricType mt = metric.getMetricType();
-    
-    // Sanitise data
-    MeasurementSet cleanSet = new MeasurementSet( ms, false );
-    
-    for ( Measurement m : ms.getMeasurements() )
+
+    // Sanitise data based on full semantic info
+    MeasurementSet cleanSet = new MeasurementSet( clientMS, false );
+
+    // Run through each measurement checking that it is sane
+    for ( Measurement m : clientMS.getMeasurements() )
     {
       String val = m.getValue();
-      
+
       switch ( mt )
       {
         case NOMINAL:
@@ -328,7 +411,7 @@ public class LiveMonitorController extends UFAbstractEventManager
             {
               // Make sure we have a sensible number
               Double dVal = Double.parseDouble(val);
-              
+
               if ( !dVal.isNaN() && !dVal.isInfinite() )
                 cleanSet.addMeasurement( m );
             }
@@ -337,12 +420,39 @@ public class LiveMonitorController extends UFAbstractEventManager
         } break;
       }
     }
-    
+
     // Use update report with clean measurement set
     reportOUT.setMeasurementSet( cleanSet );
     reportOUT.setNumberOfMeasurements( cleanSet.getMeasurements().size() );
-    
+
     return true;
+  }
+  
+  private void updateLiveViews()
+  {
+    boolean pushRequired = false;
+    
+    synchronized ( metricViewUpdateLock )
+    {
+      if ( !activeMSVisuals.isEmpty() )
+      {
+        liveMetricView.updateView();
+        pushRequired = true;
+      }
+    }
+    
+    synchronized( provViewUpdateLock )
+    {
+      if ( provUpdatePending )
+      {
+        // TODO: Update tail of PROV reports to UI
+        
+        provUpdatePending = false;
+      }
+    }
+    
+    // Push UI updates, if required
+    if ( pushManager !=null && pushRequired ) pushManager.pushUIUpdates();
   }
   
   // Private classes -----------------------------------------------------------
@@ -350,11 +460,163 @@ public class LiveMonitorController extends UFAbstractEventManager
   {
     final Date lastUpdate;
     final UUID lastMeasurementID;
-    
+
     public MSUpdateInfo( Date update, UUID measurementID )
     {
       lastUpdate = update;
       lastMeasurementID = measurementID;
+    }
+  }
+  
+  public class LiveUpdateCallback extends TimerTask
+  {
+    @Override
+    public void run()
+    { updateLiveViews(); }
+  }
+  
+  private class PROVFileLogger
+  {
+    private FileWriter     provFW;
+    private BufferedWriter provBW;
+    
+    private boolean isLoggingPROV;
+    
+    
+    public PROVFileLogger()
+    {}
+    
+    public boolean createLog( UUID expID, String basePath )
+    {
+      isLoggingPROV = false;
+      
+      // An old log may exist, make sure we close it
+      closeLog();
+      
+      if ( expID != null && basePath != null )
+      {
+        String provBasePath = basePath + "/provLogs";
+        
+        if ( createPROVDirectory(provBasePath) )
+        {
+          String provLog = provBasePath + "/" + expID.toString() + ".txt";
+          
+          if ( createPROVFile(provLog) )
+            isLoggingPROV = true;
+          else
+            liveMonLogger.error( "Could not create PROV log: cannot create PROV file" );
+        }
+        else
+          liveMonLogger.error( "Could not create PROV log: cannot create PROV directory" );
+      }
+      else
+        liveMonLogger.error( "Could not create PROV log: experiment ID/path is null" );
+      
+      return isLoggingPROV;
+    }
+    
+    public boolean isLogging()
+    { return isLoggingPROV; }
+    
+    public void closeLog()
+    {
+      if ( isLoggingPROV )
+      {
+        try
+        {
+          provFW.flush();
+          provBW.close();
+          
+          provBW   = null;
+          provFW   = null;
+          
+          isLoggingPROV = false;
+        }
+        catch ( IOException ex )
+        {
+          liveMonLogger.error( "Could not close PROV log: " + ex.getMessage() );
+        }
+      }
+    }
+    
+    public boolean writePROV( EDMProvReport report )
+    {
+      boolean result = false;
+      
+      if ( isLoggingPROV && report != null )
+      {
+        Collection<EDMTriple> triples = report.getTriples().values();
+        
+        try
+        {
+          for ( EDMTriple triple : triples )
+          {
+            provBW.write( triple.toString() );
+            provBW.newLine();
+          }
+                    
+          result = true;
+          
+        }
+        catch ( IOException ex )
+        {
+          liveMonLogger.error( "Problems writing triple data: " + ex.getMessage() );
+        }
+      }
+      else
+        liveMonLogger.error( "Could not write PROV log: not ready to log" );
+      
+      return result;
+    }
+    
+    // Private methods ---------------------------------------------------------
+    private boolean createPROVDirectory( String basePath )
+    {
+      boolean result = false;
+      
+      // If PROV diretory does not exist, create it
+      File provDir = new File( basePath );
+      if ( provDir.exists() && provDir.isDirectory() )
+        result = true;
+      else
+      {
+        if ( provDir.mkdir() )
+          result = true;
+        else
+        { liveMonLogger.error( "Could not create PROV logging directory" ); }
+      }
+        
+      return result;
+    }
+    
+    private boolean createPROVFile( String provPath )
+    {
+      boolean result = false;
+      
+      // Try creating a new PROV file
+      File provFile = new File( provPath );
+      
+      // Do not overwrite old experiment data
+      if ( !provFile.exists() )
+      {
+        try
+        {
+          provFile.createNewFile();
+
+          provFW = new FileWriter( provFile.getAbsoluteFile() );
+          provBW = new BufferedWriter( provFW );
+
+          result = true;
+        }
+        catch ( IOException ex )
+        {
+          liveMonLogger.error( "Could not create new PROV log: " + ex.getMessage() );
+        }
+      }
+      else // Do not overwrite old experiment log data!
+        liveMonLogger.error( "Will not overwrite old PROV log - please create new experiment" );
+      
+      return result;
     }
   }
 }

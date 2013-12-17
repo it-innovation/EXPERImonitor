@@ -44,6 +44,4 @@ public interface EMPostReportPhaseListener
   void onAllDataBatchesRequestComplete( EMClientEx client );
   
   void onPostReportPhaseCompleted( EMClientEx client );
-  
-  void onPostReportPhaseCompleted();
 }

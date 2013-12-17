@@ -45,26 +45,26 @@ public interface DashConfigViewListener
      * @param dbType
      * @param snapshotCount
      * @param nagiosUrl
-     * @throws Exception - Throws exception if update is unsuccessful.
      */
-    void onUpdateConfiguration( String dashboardID, 
-                                String rabbitIP,
-                                String rabbitPort,
-                                String rabbitUsername,
-                                String rabbitPassword,
+    void onUpdateConfiguration( String  dashboardID, 
+                                String  rabbitIP,
+                                String  rabbitPort,
+                                String  rabbitKeystore,
+                                String  rabbitUsername,
+                                String  rabbitPassword,
                                 boolean userRabbitSSL,
-                                String dbUrl,
-                                String dbName,
-                                String dbUsername,
-                                String dbPassword,
-                                String dbType,
-                                String snapshotCount,
-                                String nagiosUrl) throws Exception;
-   /**
+                                String  dbUrl,
+                                String  dbName,
+                                String  dbUsername,
+                                String  dbPassword,
+                                String  dbType,
+                                String  snapshotCount,
+                                String  nagiosUrl );
+   
+    /**
     * Method to find out if a configuration data is available for a specified project.
     * If no existing configuration data is available the method will look in the
     * 'Default' directory for default configuration for each specified component feature.
     */
     void onFindConfigurations( String projectName );
-
 }

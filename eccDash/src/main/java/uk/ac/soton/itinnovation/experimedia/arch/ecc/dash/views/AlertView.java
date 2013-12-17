@@ -25,16 +25,16 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views;
 
-import com.vaadin.ui.*;
-import java.util.Collection;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.UILayoutUtil;
+
+import com.vaadin.ui.*;
+
 
 
 
 public class AlertView
 {
   private Window            alertWindow;
-  private String[]          viewOptions;
   private AlertViewListener alertListener;
   
   
@@ -42,9 +42,7 @@ public class AlertView
                     String message,
                     String[] options,
                     AlertViewListener listener )
-  {
-    super();
-    
+  {    
     alertListener = listener;
     
     createComponents( title, message, options );

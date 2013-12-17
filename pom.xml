@@ -294,6 +294,20 @@
       <name>maven repository for PROV toolbox</name>
       <url>http://openprovenance.org/java/maven-releases/</url>
     </repository>
+
+    <repository>
+        <id>aduna</id>
+        <name>Aduna Software - Sesame</name>
+        <url>http://repo.aduna-software.org/maven2/releases/</url>
+    </repository>
+    
+    <repository>
+		<id>itinnovation-edmprov</id>
+		<url>http://altano.it-innovation.soton.ac.uk/maven2/release/edmprov</url>
+		<snapshots>
+			<enabled>true</enabled>
+		</snapshots>
+	</repository>
     
   </repositories>
 

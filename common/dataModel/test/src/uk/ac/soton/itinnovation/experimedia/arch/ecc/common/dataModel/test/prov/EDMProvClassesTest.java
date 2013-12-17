@@ -25,52 +25,75 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.test.prov;
 
-import java.util.logging.Logger;
+//import java.util.logging.Logger;
+
+import org.apache.log4j.Logger;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMActivity;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMAgent;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMEntity;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvFactory;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvReport;
 
 public class EDMProvClassesTest {
 	
-	private static Logger logger = Logger.getLogger("ProvTest");
+	static Logger logger = Logger.getLogger(EDMProvClassesTest.class);
 
 	public static void main(String[] args) {
 		
-		EDMProvFactory factory = EDMProvFactory.getInstance();
+		EDMProvFactory factory = EDMProvFactory.getInstance("experimedia",
+				"http://it-innovation.soton.ac.uk/ontologies/experimedia#");
+		
+		factory.addOntology("foaf", "http://xmlns.com/foaf/0.1/");	
 		
 		try {
 			//This is Bob.
-			EDMAgent bob = factory.getAgent("experimedia:BobSmith");
-			bob.addOwlClass("foaf:Person");
+			EDMAgent bob = factory.getOrCreateAgent("facebook_154543445", "Bob");
+			bob.addOwlClass(factory.getNamespaceForPrefix("foaf") + "Person");
 			
 			//This is a video about Schladming.
-			EDMEntity video = factory.getEntity("experimedia:reallyCoolFacebookVideo");
+			EDMEntity video = factory.getOrCreateEntity("facebook_1545879879", "reallyCoolFacebookVideo");
 			
 			//Bob starts to watch the video and pauses it when he sees something interesting.
-			EDMActivity watchVideo = bob.startActivity("experimedia:watchVideo");
+			EDMActivity watchVideo = bob.startActivity("activity123", "WatchVideo");
 			watchVideo.useEntity(video);
-			EDMActivity pauseVideo = bob.doDiscreteActivity("experimedia:pauseVideo");
+			EDMActivity pauseVideo = bob.doDiscreteActivity("activity234", "PauseVideo");
 			pauseVideo.useEntity(video);
 			
 			//Bob logs in to his FB account and posts something
-			EDMActivity writePost = bob.startActivity("experimedia:writePostActivity");
-			EDMEntity bobsFacebookPost = writePost.generateEntity("experimedia:bobsFacebookPost");
+			EDMActivity writePost = bob.startActivity("activity345", "WritePost");
+			writePost.generateEntity("facebook_98763242347", "BobsFacebookPost", "1280512800");
 			bob.stopActivity(writePost);
 			
 			//Bob goes back to watch the rest of the video.
-			EDMActivity resumeVideo = bob.doDiscreteActivity("experimedia:resumeVideo");
+			EDMAgent copyOfBob = factory.getOrCreateAgent("facebook_154543445", null);
+			EDMActivity resumeVideo = copyOfBob.doDiscreteActivity("activity456", "ResumeVideo");
 			resumeVideo.useEntity(video);
 			bob.stopActivity(watchVideo);
 		
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
-			e.printStackTrace();
+			logger.error("Error filling EDMProvFactory with test data", e);
 		}
 		
 		//test print of resulting data
-		System.out.println(factory.toString());
+		logger.info(factory.toString());
+		
+		EDMProvReport report = factory.createProvReport();
+		
+		//clear factory
+		factory.clear();
+		factory = EDMProvFactory.getInstance("experimedia",
+				"http://it-innovation.soton.ac.uk/ontologies/experimedia#");
+		
+		//load prov report contents into factory
+		try {
+			factory.loadReport(report);
+		} catch (Exception e) {
+			logger.error("Error loading EDMProvReport", e);
+		}
+		
+		//test print of resulting data
+		logger.info(factory.toString());
 	}
 
 }

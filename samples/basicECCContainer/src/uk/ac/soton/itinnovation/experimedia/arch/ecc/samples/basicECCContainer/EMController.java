@@ -39,11 +39,11 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.loggin.impl.Log4JImp
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvReport;
 
 import java.awt.event.*;
 import java.io.*;
 import java.util.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvReport;
 
 
 
@@ -55,7 +55,6 @@ public class EMController implements IEMLifecycleListener
   private IExperimentMonitor expMonitor;
   private EMLoginView        loginView;
   private EMView             mainView;
-  private boolean            waitingToStartNextPhase = false;
   
   private IMonitoringEDM      expDataMgr;
   private IMetricGeneratorDAO expMGAccessor;
@@ -142,56 +141,33 @@ public class EMController implements IEMLifecycleListener
     }
     
     mainView.enableTimeOuts( true );
-    
-    EMPhase nextPhase  = expMonitor.getNextPhase();
-    mainView.setMonitoringPhaseValue( phase.toString(), nextPhase.toString() );
+    mainView.setMonitoringPhaseValue( phase );
   }
   
   @Override
   public void onLifecyclePhaseCompleted( EMPhase phase )
-  {    
-    switch( phase )
-    {
-      case eEMLiveMonitoring: stopAutoPulling(); break;
-    }
-    
-    mainView.setNextPhaseValue( expMonitor.getNextPhase().toString() );
-    
-    // Switch off all UI controls here - they will be separately switched on
-    // when a new phase starts
-    mainView.enablePulling( false );
-    mainView.enabledPostReportPulling( false );
-    
-    if ( waitingToStartNextPhase )
-    {
-      waitingToStartNextPhase = false;
-      try 
-      { expMonitor.goToNextPhase(); }
-      catch ( Exception e )
-      { emCtrlLogger.error("Could not go to next phase: " + e.getMessage()); }
-    }
-    else
-      mainView.enableTimeOuts( false );
+  {
+    mainView.addLogText( "Completed phase: " + phase.name() );
   }
   
   @Override
   public void onNoFurtherLifecyclePhases()
   {
-    mainView.setMonitoringPhaseValue( "Experiment process complete",
-                                      "No further phases" );
+    mainView.addLogText( "No further lifecycle phases are available" );
   }
   
   @Override
-  public void onLifecycleReset()
-  {
-    // Reset to start and wait for new connections
-    waitingToStartNextPhase = false;
-    
-    // Create a new experiment
-    createExperiment();
-    
-    // Reset the view
-    mainView.resetView();
+  public void onLifecycleEnded()
+  {    
+    try
+    {
+      expMonitor.resetLifecycle();
+      mainView.resetView();
+    }
+    catch ( Exception ex )
+    {
+      mainView.addLogText( "Had problems resetting the experiment lifecycle: " + ex.getMessage() );
+    }
   }
   
   @Override
@@ -451,13 +427,16 @@ public class EMController implements IEMLifecycleListener
   
   private void startMonitoringProcess() throws Exception
   {
+    createExperiment();
+    
     if ( expMonitor == null || expInstance == null )
       throw new Exception( "Experiment monitor and/or experiment information is not ready" );
     
       try
       {         
         EMPhase phase = expMonitor.startLifecycle( expInstance );
-        mainView.setMonitoringPhaseValue( phase.toString(), null );
+        
+        mainView.setMonitoringPhaseValue( phase );
       }
       catch ( Exception e ) { throw e; }
   }
@@ -468,11 +447,11 @@ public class EMController implements IEMLifecycleListener
     {
       try
       {
-        mainView.addLogText( "Re-starting the experiment monitor..." );
-        expMonitor.resetLifecycle();
+        mainView.addLogText( "Ending experiment lifecycle..." );
+        expMonitor.endLifecycle();
       }
       catch (Exception e )
-      { mainView.addLogText( "Had problems resetting the monitor: " + e.getMessage() ); }
+      { mainView.addLogText( "Had problems ending experiment lifecycle: " + e.getMessage() ); }
     } 
     else
       mainView.addLogText( "Could not re-start experiment monitor - monitor is NULL" );
@@ -480,24 +459,24 @@ public class EMController implements IEMLifecycleListener
   
   private void startUpNextPhase()
   {
-    if ( expMonitor != null && !waitingToStartNextPhase )
+    if ( expMonitor != null )
     {
-      if ( expMonitor.isCurrentPhaseActive() )
-      {
-        try
-        {
-          waitingToStartNextPhase = true;
-          expMonitor.stopCurrentPhase();
-        }
-        catch ( Exception e )
-        { emCtrlLogger.error( "Could not stop phase: " + expMonitor.getCurrentPhase().name() +
-                              " because " + e.getMessage()); }
+      try
+      { 
+        expMonitor.goToNextPhase();
+        EMPhase phase = expMonitor.getCurrentPhase();
+
+        mainView.setMonitoringPhaseValue( phase );
+
+        mainView.addLogText( "Started phase:" + phase.toString() );
       }
-      else
-        try { expMonitor.goToNextPhase(); }
-        catch ( Exception e )
-        { emCtrlLogger.error( "Could not stop current phase: it is inactive"); }
-    }  
+      catch ( Exception ex )
+      {
+        String error = "Could not go to next phase: " + ex.getMessage();
+        mainView.addLogText( error );
+        emCtrlLogger.error( error );
+      }
+    } 
   }
   
   private synchronized void pullMetrics( boolean noteBusyClients )
@@ -577,9 +556,7 @@ public class EMController implements IEMLifecycleListener
     {
       try
       {
-        // Clear old data out ------------------- REMOVE -----------------------
         expDataMgr.clearMetricsDatabase();
-        // ---- REMOVE THIS ----------------------------------------------------
         
         expMGAccessor     = expDataMgr.getMetricGeneratorDAO();
         expReportAccessor = expDataMgr.getReportDAO();
@@ -685,7 +662,10 @@ public class EMController implements IEMLifecycleListener
     @Override
     public void onStartMonitoringClicked()
     { 
-      try { startMonitoringProcess(); }
+      try 
+      { 
+        startMonitoringProcess(); 
+      }
       catch ( Exception e )
       { emCtrlLogger.error( "Could not start the monitoring process: " + e.getMessage() ); }
     }
