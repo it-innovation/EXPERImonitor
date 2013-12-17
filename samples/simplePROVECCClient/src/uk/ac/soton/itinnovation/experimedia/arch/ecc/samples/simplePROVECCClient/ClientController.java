@@ -32,7 +32,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.*;
 
 import java.util.*;
@@ -49,93 +49,243 @@ public class ClientController implements ClientViewListener
     // ECC connection gear
     private AMQPConnectionFactory amqpFactory;
     private EMInterfaceAdapter    eccAdapter;
-    private EMEventHandler        eventHandler;
     private boolean               connectedToECC;
+    private boolean               monitoringActive;
 
-    // Names of selected items in the UI
+    // The UI and names of selected items in the UI
+    private ClientView view;
     private String selectedAgent;
     private String selectedActivity;
     private String selectedEntity;
     
-    // Simple model of which activity an agent is currently associated with
-    private HashMap<EDMAgent, EDMActivity> currentAgentActivities;
+    // Simple metric generator and group for this client
+    private MetricGenerator metricGenGenerator;
+    private MetricGroup     agentMetricGroup;
+    
+    // Simple agent activity model: what agents did last & how many activities they have started
+    private HashMap<String, EDMActivity> currentAgentActivities;      // Agent IRI x last PROV activity
+    private HashMap<String, Integer>     currentAgentActivityCount;   // Agent IRI x activity count
 
-    // The UI
-    private ClientView view;
-
-
+    
     public ClientController()
     {
-      currentAgentActivities = new HashMap<EDMAgent, EDMActivity>();
+        metricGenGenerator = new MetricGenerator();
+        agentMetricGroup   = MetricHelper.createMetricGroup( "Agent group", 
+                                                             "Metrics associated with PROV agents", 
+                                                             metricGenGenerator );
+        
+        currentAgentActivities    = new HashMap<String, EDMActivity>();
+        currentAgentActivityCount = new HashMap<String, Integer>();
     }
 
     public void initialise( Properties eccProps )
     {
-      // Try to connect to the ECC
-      if ( tryConnectToECC(eccProps) )
-      {      
-        view = new ClientView( this );
-        view.setVisible( true );
-      }
-      else // If that fails, shutdown
-        shutdown();
+        // Try to connect to the ECC
+        if ( tryConnectToECC(eccProps) )
+        {      
+            view = new ClientView( this );
+            view.setVisible( true );
+        }
+        else // If that fails, shutdown
+            shutdown();
     }
 
     // ClientViewListener ------------------------------------------------------
     @Override
     public void onClientViewClosed()
     {
-      shutdown();
+        shutdown();
     }
 
     @Override
     public void onAgentSelected( String agent )
     {
-      if ( agent != null ) selectedAgent = agent;
+        if ( agent != null ) selectedAgent = agent;
     }
 
     @Override
     public void onActivitySelected( String activity )
     {
-      if ( activity != null ) selectedActivity = activity;
+        if ( activity != null ) selectedActivity = activity;
     }
 
     @Override
     public void onEntitySelected( String entity )
     {
-      if ( entity != null ) selectedEntity = entity;
+        if ( entity != null ) selectedEntity = entity;
     }
 
     @Override
-    public void onSendProvData()
+    public void onSendECCData()
     {
-      if ( connectedToECC )
-      {
-        // Make sure our basic PROV selections are good
-        if ( selectedAgent != null && selectedActivity != null && selectedEntity != null )
+        // Check we are connected and in live monitoring mode
+        if ( connectedToECC && monitoringActive )
         {
-          EDMProvFactory factory = EDMProvFactory.getInstance();
+            // Make sure we have selections from the UI
+            if ( selectedAgent != null && selectedActivity != null && selectedEntity != null )
+            {
+                try
+                {
+                    // Get the PROV agent the user has selected
+                    EDMProvFactory factory = EDMProvFactory.getInstance();
 
-          try
-          {
+                    EDMAgent currPROVAgent = factory.getOrCreateAgent( "experimedia:" + selectedAgent, // Unique identifier
+                                                                       selectedAgent );                // Friendly name
+
+                    // Update ECC with PROV report
+                    sendPROVData( currPROVAgent );
+
+                    // Update ECC with agent activity observation
+                    sendMetricData( currPROVAgent );
+                    
+                    // Notify user data has been sent
+                    JOptionPane.showMessageDialog( view, "Sent PROV & Metric data to ECC", "Send status", 
+                                                   JOptionPane.INFORMATION_MESSAGE );
+                }
+                catch ( Exception ex )
+                { displayError( "Problems sending to ECC", "Could not find PROV agent to send to ECC: " + ex.getMessage() ); }
+            }
+            else
+              displayError( "Not ready to send", "Please select an Agent, Activity & Entity" ); 
+        }
+        else
+          displayError( "Not connected to ECC/monitoring anymore", "Please check connection to ECC" );
+    }
+
+    // Private methods ---------------------------------------------------------
+    private void createPROVAgents()
+    {
+        // Create agents with some additional example ontology data
+        EDMProvFactory factory = EDMProvFactory.getInstance();
+
+        try
+        {
+            // Create Alice
+            EDMAgent agentAlice = factory.getOrCreateAgent( "experimedia:Alice",
+                                                            "Alice" );
+            // Create Bob
+            EDMAgent agentBob   = factory.getOrCreateAgent( "experimedia:Bob",
+                                                            "Bob" );
+            // Create Carol
+            EDMAgent agentCarol = factory.getOrCreateAgent( "experimedia:Carol",
+                                                            "Carol" );
+
+            // Create FOAF ontology mapping in factory
+            factory.addOntology("foaf", "http://xmlns.com/foaf/0.1/");
+
+            // Describe agents as FOAF 'Person'
+            agentAlice.addOwlClass( factory.getNamespaceForPrefix( "foaf" ) + "Person" );
+            agentBob.addOwlClass( factory.getNamespaceForPrefix( "foaf" ) + "Person" );
+            agentCarol.addOwlClass( factory.getNamespaceForPrefix( "foaf" ) + "Person" );
+
+            // Create some simple relationships...
+            // Alice knows Bob
+            agentAlice.addTriple( factory.getNamespaceForPrefix( "foaf" ) + "knows", 
+                                  agentBob.getIri(), 
+                                  EDMTriple.TRIPLE_TYPE.OBJECT_PROPERTY );
+
+            // Bob knows Carol
+            agentBob.addTriple( factory.getNamespaceForPrefix( "foaf" ) + "knows", 
+                                agentCarol.getIri(), 
+                                EDMTriple.TRIPLE_TYPE.OBJECT_PROPERTY );
+
+            // Carol knows Alice
+            agentCarol.addTriple( factory.getNamespaceForPrefix( "foaf" ) + "knows", 
+                                  agentAlice.getIri(), 
+                                  EDMTriple.TRIPLE_TYPE.OBJECT_PROPERTY );
+
+        }
+        catch ( Exception ex )
+        { displayError( "Could not create PROV Agents", ex.getMessage() ); }
+    }
+    
+    private void createAgentMetrics()
+    {
+        // We'll model how many times each PROV agent starts a new activity      
+        try
+        {
+            EDMProvFactory factory = EDMProvFactory.getInstance();
+
+            makeAgentMetric( factory.getOrCreateAgent( "experimedia:Alice", "Alice" ) );
+            makeAgentMetric( factory.getOrCreateAgent( "experimedia:Bob"  , "Bob"   ) );
+            makeAgentMetric( factory.getOrCreateAgent( "experimedia:Carol", "Carol" ) );
+        }
+        catch ( Exception ex )
+        { displayError( "Could not create metrics for agents: ", ex.getMessage() ); } 
+    }
+    
+    private void makeAgentMetric( EDMAgent agent )
+    {
+        // Metric entity
+        Entity metEntity = new Entity();              // Create
+        metEntity.setName( agent.getFriendlyName() ); // Friendly name
+        metEntity.setEntityID( agent.getIri() );      // Link to PROV agent
+
+        metricGenGenerator.addEntity( metEntity );    // Add to our generator
+
+        // We'll observe how active this agent will be at run-time
+        Attribute activityCount = MetricHelper.createAttribute( "Agent activity count", 
+                                                                "Number of times this agent has started an activity", 
+                                                                metEntity );
+
+        // Create a measurement set for the attribute
+        MetricHelper.createMeasurementSet( activityCount, MetricType.RATIO, 
+                                           new Unit( "PROV Activity total" ), 
+                                           agentMetricGroup );
+
+        // Set their activity count to zero
+        currentAgentActivityCount.put( agent.getIri(), new Integer(0) );
+    }
+
+    private void sendMetricData( EDMAgent agent )
+    { 
+        // Find metric agent using PROV agent IRI
+        String provIRI = agent.getIri();
+
+        Entity observedAgent = MetricHelper.getEntityFromID( provIRI,
+                                                             metricGenGenerator );
+        if ( observedAgent != null )
+        {
+            // Get attribute
+            Attribute attr = MetricHelper.getAttributeByName( "Agent activity count", 
+                                                              observedAgent );
+
+            // Get measurement set
+            MeasurementSet ms = MetricHelper.getMeasurementSetForAttribute( attr, 
+                                                                            metricGenGenerator );
+
+            // Update the activity count for this agent
+            Integer count       = currentAgentActivityCount.get( provIRI );
+            Measurement measure = new Measurement( count.toString() );
+
+            // Make a report for the ECC
+            Report eccReport = MetricHelper.createMeasurementReport( ms, measure );
+
+            // Push report to ECC
+            eccAdapter.pushMetric( eccReport );
+        }
+        else displayError( "Could not send metric data", "Could not find metric entity to send ECC" );   
+    }
+    
+    private void sendPROVData( EDMAgent agent )
+    {
+        try
+        {
+            EDMProvFactory factory = EDMProvFactory.getInstance();
+
             // First make sure we have stopped the last activity associated with the
-            // current agent (if an activity exists)...
-            EDMAgent agent = factory.getOrCreateAgent( "experimedia:" + selectedAgent, // Unique identifier
-                                                       selectedAgent );                // Friendly name
-
-            EDMActivity lastActivity = currentAgentActivities.get( agent );
+            EDMActivity lastActivity = currentAgentActivities.get( agent.getIri() );
             if ( lastActivity != null )
               agent.stopActivity( lastActivity ); // Get the agent to stop the last activity
 
             // Now create a unique activity associated with this statement
-            EDMActivity activity = agent.startActivity( "experimedia:" + UUID.randomUUID().toString(),  // Unique identifier
-                                                        selectedActivity );                             // Friendly name
+            EDMActivity activity = agent.startActivity( "experimedia:activity_" + UUID.randomUUID().toString(), // Unique identifier
+                                                        selectedActivity );                                     // Friendly name
 
-            // Remember this new activity so that we can stop it next time the 
-            // agent does something new
+            // Update the activity model for this agent
             updateCurrentAgentActivity( agent, activity );
 
-            // Link activity with the entity
+            // Link activity with PROV entity
             EDMEntity entity = activity.generateEntity( selectedEntity, selectedEntity );
             activity.useEntity( entity );
 
@@ -143,170 +293,125 @@ public class ClientController implements ClientViewListener
             EDMProvReport report = factory.createProvReport();
             eccAdapter.pushPROVStatement( report );
 
-            // Tell user we've sent the message
-            displayPROVReportSent( report );
-          }
-          catch ( Exception ex )
-          { displayError( "Could not create PROV report", ex.getMessage() ); }
+            // Log out the prov we have just generated
+            logPROVReportSent( report );
         }
-        else
-          displayError( "Not ready to send", "Please select an Agent, Activity & Entity" );
-      }
-      else
-        displayError( "Not connected to ECC", "Have you got an ECC running?" );
+        catch ( Exception ex )
+        { displayError( "Could not create PROV report", ex.getMessage() ); }   
     }
-
-    // Private methods -----------------------------------------------------------
-    private void createPROVAgents()
+    
+    private void logPROVReportSent( EDMProvReport report )
     {
-      // Pre-create agents with some additional example ontology data
-      EDMProvFactory factory = EDMProvFactory.getInstance();
+        if ( report != null )
+        {
+            Collection<EDMTriple> triples = report.getTriples().values();
 
-      try
-      {
-        // Create Alice
-        EDMAgent agentAlice = factory.getOrCreateAgent( "experimedia:Alice",
-                                                        "Alice" );
-        // Create Bob
-        EDMAgent agentBob   = factory.getOrCreateAgent( "experimedia:Bob",
-                                                        "Bob" );
-        // Create Carol
-        EDMAgent agentCarol = factory.getOrCreateAgent( "experimedia:Carol",
-                                                        "Carol" );
-        
-        // Create FOAF ontology mapping in factory
-        factory.addOntology("foaf", "http://xmlns.com/foaf/0.1/");
-        
-        // Describe agents as FOAF 'Person'
-        agentAlice.addOwlClass( factory.getNamespaceForPrefix( "foaf" ) + "Person" );
-        agentBob.addOwlClass( factory.getNamespaceForPrefix( "foaf" ) + "Person" );
-        agentCarol.addOwlClass( factory.getNamespaceForPrefix( "foaf" ) + "Person" );
-        
-        // Create some simple relationships...
-        
-        // Alice knows Bob
-        agentAlice.addTriple( factory.getNamespaceForPrefix( "foaf" ) + "knows", 
-                              agentBob.getIri(), 
-                              EDMTriple.TRIPLE_TYPE.OBJECT_PROPERTY );
-        
-        // Bob knows Carol
-        agentBob.addTriple( factory.getNamespaceForPrefix( "foaf" ) + "knows", 
-                            agentCarol.getIri(), 
-                            EDMTriple.TRIPLE_TYPE.OBJECT_PROPERTY );
-        
-        // Carol knows Alice
-        agentCarol.addTriple( factory.getNamespaceForPrefix( "foaf" ) + "knows", 
-                              agentAlice.getIri(), 
-                              EDMTriple.TRIPLE_TYPE.OBJECT_PROPERTY );
-        
-      }
-      catch ( Exception ex )
-      {
-        displayError( "Could not create PROV Agents", ex.getMessage() );
-      }
-    }
+            String provTripleList = "";
 
-    private void displayPROVReportSent( EDMProvReport report )
-    {
-      if ( report != null )
-      {
-        Collection<EDMTriple> triples = report.getTriples().values();
+            for ( EDMTriple triple : triples )
+                provTripleList += triple.toString() + "\n";
 
-        String provTripleList = "";
-
-        for ( EDMTriple triple : triples )
-          provTripleList += triple.toString() + "\n";
-
-        JOptionPane.showMessageDialog( view, provTripleList, "Sent PROV triples to ECC",
-                                       JOptionPane.INFORMATION_MESSAGE );
-
-      }
+            ctrLogger.info( "Sent PROV: \n" + provTripleList );
+        }
     }
 
     private void displayError( String title, String detail )
     {
-      JOptionPane.showMessageDialog( view, detail, title, 
-                                     JOptionPane.ERROR_MESSAGE );
+        JOptionPane.showMessageDialog( view, detail, title, 
+                                       JOptionPane.ERROR_MESSAGE );
     }
 
     private boolean tryConnectToECC( Properties eccProps )
     {
-      String error = null;
+        String error;
 
-      if ( eccProps != null )
-      {
-        // Create connection to Rabbit server ------------------------------------
-        try
+        if ( eccProps != null )
         {
-          amqpFactory = new AMQPConnectionFactory();
-          amqpFactory.connectToAMQPHost( eccProps );
+            // Create connection to Rabbit server ----------------------------------
+            try
+            {
+                amqpFactory = new AMQPConnectionFactory();
+                amqpFactory.connectToAMQPHost( eccProps );
 
-          AMQPBasicChannel amqpChannel = amqpFactory.createNewChannel();
+                AMQPBasicChannel amqpChannel = amqpFactory.createNewChannel();
 
-          eventHandler = new EMEventHandler();
-          eccAdapter = new EMInterfaceAdapter( eventHandler );
+                EMEventHandler eventHandler = new EMEventHandler();
+                eccAdapter = new EMInterfaceAdapter( eventHandler );
 
-          String eccIDVal = (String) eccProps.get( "Monitor_ID" );
-          UUID eccID = UUID.fromString( eccIDVal );
+                String eccIDVal = (String) eccProps.get( "Monitor_ID" );
+                UUID eccID = UUID.fromString( eccIDVal );
 
-          eccAdapter.registerWithEM( "ECC Simple PROV Client", amqpChannel, 
-                                     eccID, 
-                                     UUID.randomUUID() );
+                eccAdapter.registerWithEM( "ECC Simple PROV Client", amqpChannel, 
+                                           eccID, 
+                                           UUID.randomUUID() );
 
-          return true;
+              return true;
+            }
+            catch ( Exception ex )
+            { error = "Could not connect to RabbitMQ: " + ex.getMessage(); }
         }
-        catch ( Exception ex )
-        { error = "Could not connect to RabbitMQ: " + ex.getMessage(); }
-      }
-      else error = "ECC Properties are null";
+        else error = "ECC Properties are null";
 
-      if ( error != null ) displayError( "ECC Connection error", error );
+        if ( error != null ) displayError( "ECC Connection error", error );
 
-      return false;
+        return false;
     }
 
     private void onConnectionResult( boolean connected )
     {
-      connectedToECC = connected;
+        if ( connected )
+        {
+            connectedToECC = connected;
 
-      if ( connectedToECC )
-        createPROVAgents();
+            createPROVAgents();
+
+            createAgentMetrics();
+        }
     }
 
     private void setMonitoringActive( boolean active )
-    {
-    }
+    { monitoringActive = active; }
 
     private void sendMetricInfoToECC()
     {
-      HashSet<MetricGenerator> empty = new HashSet<MetricGenerator>();
+        // Put generator in a set and send to ECC
+        HashSet<MetricGenerator> mGens = new HashSet<MetricGenerator>();
+        mGens.add( metricGenGenerator );
 
-      eccAdapter.sendMetricGenerators( empty );
+        eccAdapter.sendMetricGenerators( mGens );
     }
 
     private void shutdown()
     {
-      if ( eccAdapter != null )
-        try
-        { 
-          eccAdapter.disconnectFromEM();
-          connectedToECC = false;
-        }
-        catch ( Exception ex )
-        { ctrLogger.error( "Could not cleanly disconnect from ECC", ex ); }
+        if ( eccAdapter != null )
+            try
+            { 
+                eccAdapter.disconnectFromEM();
+                connectedToECC = false;
+            }
+            catch ( Exception ex )
+            { ctrLogger.error( "Could not cleanly disconnect from ECC", ex ); }
 
-      eccAdapter = null;
+        eccAdapter = null;
 
-      if ( amqpFactory != null ) amqpFactory.closeDownConnection();
+        if ( amqpFactory != null ) amqpFactory.closeDownConnection();
     }
 
     private void updateCurrentAgentActivity( EDMAgent agent, EDMActivity activity )
     {
-      if ( agent != null )
-      {
-        currentAgentActivities.remove( agent );
-        currentAgentActivities.put( agent, activity ); // Activity can be null
-      }
+        if ( agent != null )
+        {
+            // Update activity count for this agent
+            String agentIRI = agent.getIri();
+            
+            Integer count = currentAgentActivityCount.get( agentIRI );
+            count++;
+            currentAgentActivityCount.put( agentIRI, count );
+          
+            // Update the current activity
+            currentAgentActivities.remove( agentIRI );
+            currentAgentActivities.put( agentIRI, activity ); // Activity can be null
+        }
     }
 
     // Private classes -----------------------------------------------------------

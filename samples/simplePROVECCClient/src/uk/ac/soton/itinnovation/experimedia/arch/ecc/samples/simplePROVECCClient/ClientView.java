@@ -208,7 +208,7 @@ public class ClientView extends javax.swing.JFrame {
   }//GEN-LAST:event_onObjectSelected
 
   private void onSendPROVSample(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_onSendPROVSample
-    clientViewListener.onSendProvData();
+    clientViewListener.onSendECCData();
   }//GEN-LAST:event_onSendPROVSample
 
 
