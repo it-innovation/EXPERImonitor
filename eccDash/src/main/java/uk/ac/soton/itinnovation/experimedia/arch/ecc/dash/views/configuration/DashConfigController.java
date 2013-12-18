@@ -686,7 +686,7 @@ public class DashConfigController implements DashConfigViewListener
       
       final String targetRabbitConfigData = "{\"Rabbit_Use_SSL\":\"false\",\"Rabbit_Keystore\":\"/main/resources/rabbitKeyStore.jks\",\"Rabbit_IP\":\"127.0.0.1\",\"Rabbit_Port\":\"5672\",\"Rabbit_Password\":\"guest\",\"Rabbit_Username\":\"guest\",\"Monitor_ID\":\"00000000-0000-0000-0000-000000000000\"}";
       final String targetDatabaseConfigData = "{\"dbPassword\":\"password\",\"dbName\":\"edm-metrics\",\"dbType\":\"postgresql\",\"dbURL\":\"localhost:5432\",\"dbUsername\":\"postgres\"}";
-      final String targetDashboardConfigData = "{\"livemonitor.defaultSnapshotCountMax\":\"50\",\"nagios.fullurl\":\"http://username:password@host/nagios\"}";
+      final String targetDashboardConfigData = "{\"livemonitor.defaultSnapshotCountMax\":\"20\",\"nagios.fullurl\":\"http://username:password@host/nagios\"}";
       
       configList.put( featureRb,   targetRabbitConfigData    );
       configList.put( featureDB,   targetDatabaseConfigData  );
