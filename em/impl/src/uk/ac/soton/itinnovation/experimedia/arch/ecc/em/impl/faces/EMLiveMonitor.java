@@ -293,7 +293,7 @@ public class EMLiveMonitor extends EMBaseInterface
           UUID reportID = jsonMapper.fromJson( methodData.get(1), UUID.class );
           userListener.onReceivedPull( interfaceProviderID, reportID );
         }
-      }
+      } break;
         
       case ( 13 ) :
       {
@@ -302,7 +302,7 @@ public class EMLiveMonitor extends EMBaseInterface
           EDMProvReport statement = jsonMapper.fromJson( methodData.get(1), EDMProvReport.class );
           providerListener.onPushPROVStatement( interfaceUserID, statement );
         }
-      }
+      } break;
     }
   }
 }
