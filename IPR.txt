@@ -27,6 +27,8 @@ experimedia-arch-ecc-samples-shared-2.0-SNAPSHOT.jar
 
 robust-cat-core-components-viewEngine-spec-uif-1.3-SNAPSHOT.jar
 
+OWLimProvStore-0.9-SNAPSHOT.jar
+
 BasicAndroidClient-debug.apk
 BasicAndroidClient-debug-unaligned.apk
 
