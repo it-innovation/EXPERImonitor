@@ -464,7 +464,7 @@ public class DashConfigController implements DashConfigViewListener
           emConfigProperties.put( "Rabbit_Keystore" , rabbitKeystore );
 
         String emConfigString = configJsonString( emConfigProperties );
-        saveConfiguration( "ECC" , "RabbitMQ", emConfigString, false ); // Do not try to save to server
+        saveConfiguration( "ECC" , "RabbitMQ", emConfigString, true );
 
         edmConfigProperties.put( "dbName", dbName );
         edmConfigProperties.put( "dbURL" , dbUrl );
@@ -473,14 +473,14 @@ public class DashConfigController implements DashConfigViewListener
         edmConfigProperties.put( "dbType" , dbType );
 
         String edmConfigString = configJsonString( edmConfigProperties );
-        saveConfiguration( "ECC" , "Database", edmConfigString, false  ); // Do not try to save to server
+        saveConfiguration( "ECC" , "Database", edmConfigString, true  );
 
         dashConfigProperties.put( "livemonitor.defaultSnapshotCountMax" , snapshotCount );
         dashConfigProperties.put( "nagios.fullurl", nagiosUrl );
 
         String dashConfigString = configJsonString( dashConfigProperties );
         
-        saveConfiguration( "ECC" , "Dashboard", dashConfigString, false ); // Do not try to save to server
+        saveConfiguration( "ECC" , "Dashboard", dashConfigString, true );
 
         configurationComplete();
       }
