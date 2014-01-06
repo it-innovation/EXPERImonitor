@@ -91,7 +91,17 @@ Building and running the ECC
 ============================
 The ECC dashboard can be quickly built to run on your local development machine by following these steps:
 
-1. Using a command line in the root of the ECC API type:
+1. Install third party libraries required to build the ECC
+
+	1.1 Open a command line and navigate to:
+	
+		<ECC API root>/thirdPartyLib
+		
+	1.2 Run the installLibraries.bat file
+		- Note that Linux users will need to run a shell script version of this file
+	
+
+2. Using a command line in the root of the ECC API type:
 
       mvn clean install
 
@@ -99,56 +109,26 @@ The ECC dashboard can be quickly built to run on your local development machine 
   
   You should find the ECC web dashboard WAR file created in the following location:
   
-      <ECC API root>\eccDash\target\experimedia-arch-ecc-eccDash-1.2-SNAPSHOT.war
+      <ECC API root>\eccDash\target\experimedia-arch-ecc-eccDash-2.0-SNAPSHOT.war
 
  
-2. Deploy and run the ECC dashboard, using:
+3. Deploy and run the ECC dashboard, using:
 
-	2.1 Tomcat (default deployment)
+	3.1 Tomcat (default deployment)
 	---------------------------------------------------------------------------------------------------
 	  Step 1: Start up Tomcat
 
 	  Step 2: Copy WAR file generated in step 1 to Tomcat's 'webapps' directory
 	          (Tomcat should automatically unpack and deploy for you)
 	  
-	  Result: You should see the ECC dashboard running on: http://localhost:8080/experimedia-arch-ecc-eccDash-1.2/
-
-	2.2 Tomcat (your particular configuration)
-	---------------------------------------------------------------------------------------------------
-	  Step 1: Follow step 2.1
-
-	  Step 2: Using Tomcat's management UI, STOP the current ECC dashboard
-
-	  Step 3: Modify the any of the ECC property files you require:
-		  <Tomcat root>\webapps\experimedia-arch-ecc-eccDash-1.2\WEB-INF\dashboard.properites
-		  <Tomcat root>\webapps\experimedia-arch-ecc-eccDash-1.2\WEB-INF\edm.properites       (PostgreSQL login details here)
-		  <Tomcat root>\webapps\experimedia-arch-ecc-eccDash-1.2\WEB-INF\em.properites        (RabbitMQ server details here)
-
-	  Step 4: Using Tomcat's management UI:
-		> Expire any existing ECC dashboard sessions
-		> RELOAD the ECC dashboard
+	  Result: You should see the ECC dashboard running on: http://localhost:8080/experimedia-arch-ecc-eccDash-2.0-SNAPSHOT/
 
 
-Using JuJu to deploy the ECC
-============================
-Juju can be used to deploy the ECC in a cloud environment - for instance EC2, OpenStack or in local virtual machines. For more information about Juju please refer to the Ubuntu documentation.
+Using Vagrant to deploy the ECC
+===============================
+Vagrant can be used to automatically deploy the ECC, for more information on using Vagrant, look in:
+
+	<ECC API root>/doc/ECC_Vagrant
+	
 
 
-Installing the ECC using Juju/OpenStack
----------------------------------------
-1. Make sure juju is bootstrapped and "juju status" returns something like:
-
-machines:
-  0:
-    agent-state: running
-    dns-name: 192.168.0.7
-    instance-id: f0b8f237-aac6-49a0-9766-d0103edc9138
-    instance-state: running
-
-2. Ensure that Maven and Java (1.5 or better) are installed
-
-3. Download the ECC source code
-
-4. Build the ECC (mvn clean install from the source folder, see above for build instructions)
-
-5. Run script deployDashboard.sh in this folder to deploy ECC Dashboard

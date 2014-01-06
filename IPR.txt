@@ -3,28 +3,31 @@ This software distribution is licenced under the terms found in the file <ECC AP
 The IT Innovation software is the source code and the following associated jars/war:
 ------------------------------------------------------------------------------------------------------------
 
-experimedia-arch-ecc-amqpAPI-impl-1.2.jar
-experimedia-arch-ecc-amqpAPI-spec-1.2.jar
-experimedia-arch-ecc-common-dataModel-experiment-1.2.jar
-experimedia-arch-ecc-common-dataModel-metrics-1.2.jar
-experimedia-arch-ecc-common-dataModel-monitor-1.2.jar
-experimedia-arch-ecc-common-dataModel-provenance-1.2.jar
-experimedia-arch-ecc-edm-factory-1.2.jar
-experimedia-arch-ecc-edm-impl-1.2.jar
-experimedia-arch-ecc-edm-spec-1.2.jar
-experimedia-arch-ecc-edm-test-1.2.jar
-experimedia-arch-ecc-em-factory-1.2.jar
-experimedia-arch-ecc-em-impl-1.2.jar
-experimedia-arch-ecc-em-spec-1.2.jar
-experimedia-arch-ecc-em-test-1.2.jar
-experimedia-arch-ecc-samples-basicECCClient-1.2.jar
-experimedia-arch-ecc-samples-basicECCContainer-1.2.jar
-experimedia-arch-ecc-samples-headlessECCClient-1.2.jar
-experimedia-arch-ecc-samples-dynamicEntityDemoClient-1.2.jar
-experimedia-arch-ecc-samples-metricGeneratorExamples-1.2.jar
-experimedia-arch-ecc-samples-shared-1.2.jar
+experimedia-arch-ecc-amqpAPI-impl-2.0-SNAPSHOT.jar
+experimedia-arch-ecc-amqpAPI-spec-2.0-SNAPSHOT.jar
+experimedia-arch-ecc-common-dataModel-experiment-2.0-SNAPSHOT.jar
+experimedia-arch-ecc-common-dataModel-metrics-2.0-SNAPSHOT.jar
+experimedia-arch-ecc-common-dataModel-monitor-2.0-SNAPSHOT.jar
+experimedia-arch-ecc-common-dataModel-provenance-2.0-SNAPSHOT.jar
+experimedia-arch-ecc-edm-factory-2.0-SNAPSHOT.jar
+experimedia-arch-ecc-edm-impl-2.0-SNAPSHOT.jar
+experimedia-arch-ecc-edm-spec-2.0-SNAPSHOT.jar
+experimedia-arch-ecc-edm-test-2.0-SNAPSHOT.jar
+experimedia-arch-ecc-em-factory-2.0-SNAPSHOT.jar
+experimedia-arch-ecc-em-impl-2.0-SNAPSHOT.jar
+experimedia-arch-ecc-em-spec-2.0-SNAPSHOT.jar
+experimedia-arch-ecc-em-test-2.0-SNAPSHOT.jar
+experimedia-arch-ecc-samples-basicECCClient-2.0-SNAPSHOT.jar
+experimedia-arch-ecc-samples-basicECCContainer-2.0-SNAPSHOT.jar
+experimedia-arch-ecc-samples-headlessECCClient-2.0-SNAPSHOT.jar
+experimedia-arch-ecc-samples-dynamicEntityDemoClient-2.0-SNAPSHOT.jar
+experimedia-arch-ecc-samples-metricGeneratorExamples-2.0-SNAPSHOT.jar
+experimedia-arch-ecc-samples-simplePROVECCClient-2.0-SNAPSHOT.jar
+experimedia-arch-ecc-samples-shared-2.0-SNAPSHOT.jar
 
 robust-cat-core-components-viewEngine-spec-uif-1.3-SNAPSHOT.jar
+
+OWLimProvStore-0.9-SNAPSHOT.jar
 
 BasicAndroidClient-debug.apk
 BasicAndroidClient-debug-unaligned.apk
@@ -55,7 +58,7 @@ eccCommonDataModel_d.lib
 eccEMClient-Impl.lib
 eccEMClient-Impl_d.lib
 
-experimedia-arch-ecc-eccDash-1.2.war
+experimedia-arch-ecc-eccDash-2.0-SNAPSHOT.war
 
 ------------------------------------------------------------------------------------------------------------
 This software requires various third-party libraries to compile and/or execute.
@@ -65,12 +68,13 @@ These libraries and their associated licences are:
 The Apache Software License, Version 2.0
 -----------------------------------------------
 gson-2.2.2.jar
-log4j-1.2.17.jar
+log4j-2.0-SNAPSHOT.17.jar
 vaadin-6.8.2.jar
 gwt-user-2.3.0.jar
 gwt-dev-2.3.0.jar
 commons-cli-1.1.jar
-commons-io-1.2.jar
+commons-io-2.4-SNAPSHOT.jar
+commons-io-2.0-SNAPSHOT.jar
 javax.validation-api-1.0.0.GA.jar
 javax.validation-api-1.0.0.GA-sources.jar
 org.apache.maven.surefire:common-junit3:2.12.4.jar
@@ -84,6 +88,7 @@ icepush-0.2.1.jar
 icepush-3.0.1.jar
 RabbitMQ.Client.dll
 log4net.dll
+sardine-5.0.1.jar
 
 CPL 1.0
 -----------------------------------------------
@@ -101,11 +106,12 @@ CDDL / GPLv2 with classpath exception
 -----------------------------------------------
 servlet-api-2.3.jar
 
-BSD
+BSD (and variants)
 -----------------------------------------------
 postgresql-9.1-901.jdbc4.jar
 org.hamcrest:hamcrest-core:1.1.jar
 invient-charts-0.8.6.jar
+sesame-1.2.7.jar (Aduna BSD)
 
 Creative Commons Attribution-NonCommercial 3.0
 -----------------------------------------------
@@ -120,6 +126,17 @@ SimpleAmqpClient (see https://github.com/alanxz/SimpleAmqpClient)
 BOOST Licence
 -------------
 Boost 1.53.0
+
+OWLIM-Lite Licence
+------------------
+OWLIM-Lite_licence_v5.3
+
+University of Southampton
+-------------------------
+prov-dot-0.3.0.jar
+prov-model-0.3.0.jar
+prov-n-0.3.0.jar
+prov-xml-0.3.0.jar
 
 Public domain
 -----------------------------------------------

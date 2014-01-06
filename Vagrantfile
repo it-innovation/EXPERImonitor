@@ -1,6 +1,8 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+# To use, install vagrant and VirtualBox and type "vagrant up"
+
 # ECC service will be available at http://localhost:8080/ECC on host machine.
 # RabbitMQ AMQP bus will be available on port http://localhost:5672 on host machine and http://10.0.0.10:5672.
 # RabbitMQ management interface will be available at http://localhost:55672 on host machine (username: guest / password: guest).
@@ -29,7 +31,6 @@ apt-get update
 
 ## Install dependencies ##
 
-apt-get update
 apt-get install -y git
 apt-get install -y maven2
 apt-get install -y tomcat7
@@ -44,15 +45,15 @@ apt-get install -y rabbitmq-server
 rm -rf experimedia-ecc
 
 # get the latest ECC code from Git
-git clone git://soave.it-innovation.soton.ac.uk/git/experimedia-ecc
-cd experimedia-ecc
-git checkout sgc-master
-cd ..
+#git clone git://soave.it-innovation.soton.ac.uk/git/experimedia-ecc
+#cd experimedia-ecc
+#git checkout sgc-master
+#cd ..
 
 # or copy ECC code from guest machine to host machine
 # (need to do this before PostgreSQL config)
-#mkdir experimedia-ecc
-#rsync -a /vagrant/ experimedia-ecc --exclude '.git' --exclude 'target'
+mkdir experimedia-ecc
+rsync -a /vagrant/ experimedia-ecc --exclude '.git' --exclude 'target'
 
 ## Set up PostgreSQL ##
 

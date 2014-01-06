@@ -68,82 +68,9 @@ later on in the set up process.
 ECC Dependencies and Licenses
 -----------------------------
 
-This software requires various third-party libraries to compile and/or execute.
-These libraries and their associated licences are:
+This software requires various third-party libraries to compile and/or execute. These libraries and their associated licences are detailed in the following file with the ECC API:
 
-
-+-----------------------------------------------------------+---------------------------------------------------+
-|**Library Dependencies**                                   |  **License**                                      |
-|                                                           |                                                   |                                
-|                                                           |                                                   |                                
-|                                                           |                                                   |                                
-+===========================================================+===================================================+
-|   |                                                       |                                                   |
-|   | gson-2.2.2.jar                                        |                                                   |
-|   | log4j-1.2.17.jar                                      | |                                                 |
-|   | vaadin-6.8.2.jar                                      | | Apache Software Version 2.0                     |                                              
-|   | gwt-user-2.3.0.jar                                    |                                                   |
-|   | gwt-dev-2.3.0.jar                                     |                                                   |
-|   | commons-cli-1.1.jar                                   |                                                   |                                                                                                   
-|   | commons-io-1.2.jar                                    |                                                   |                                           
-|   | javax.validation-api-1.0.0.GA.jar                     |                                                   |                                    
-|   | javax.validation-api-1.0.0.GA-sources.jar             |                                                   |                                                        
-|   | org.apache.maven.surefire:common-junit3:2.12.4.jar    |                                                   |                                                    
-|   | org.apache.maven.surefire:common-junit4:2.12.4.jar    |                                                   |                                                     
-|   | org.apache.maven.surefire:surefire-junit47:2.12.4.jar |                                                   |                                                                                      
-|   | org.apache.maven.surefire:common-junit48:2.12.4.jar   |                                                   |                                                                                                 
-|   | org.apache.maven.surefire:surefire-grouper:2.12.4.jar |                                                   |                                                                                                 
-|   | joda-time-2.1.jar                                     |                                                   |                                                                                                         
-|   | invient-charts-0.8.6.jar                              |                                                   |                                                                                                           
-|   | icepush-0.2.1.jar                                     |                                                   |                                                                                                          
-|   | icepush-3.0.1.jar                                     |                                                   |                                                                                                            
-|   | RabbitMQ.Client.dll                                   |                                                   |                                                                                                          
-|   | log4net.dll                                           |                                                   |                                
-|                                                           |                                                   |                                                              
-+-----------------------------------------------------------+---------------------------------------------------+
-|   |                                                       |   |                                               |                                
-|   | junit-4.10.jar                                        |   | CPL 1.0                                       |                                
-|                                                           |                                                   |                                
-|                                                           |                                                   |                                
-+-----------------------------------------------------------+---------------------------------------------------+
-|  |                                                        |                                                   |
-|  | amqp-client-2.8.6.jar                                  |   |                                               |
-|  | invient-charts-0.8.6.jar                               |   | GPL v2 / MPL v1.1                             |
-|  | icepush-2.0.0-alpha3.jar                               |                                                   |
-|  | icepush-gwt-2.0.0-alpha3.jar                           |                                                   |                                                               
-|                                                           |                                                   |                                
-+-----------------------------------------------------------+---------------------------------------------------+
-|  |                                                        |   |                                               |                                
-|  | servlet-api-2.3.jar                                    |   | CDDL / GPLv2 with classpath exception         |                                
-|                                                           |                                                   |                                                              
-+-----------------------------------------------------------+---------------------------------------------------+
-| |                                                         |   |                                               |                                
-| | postgresql-9.1-901.jdbc4.jar                            |   | BSD                                           |
-| | org.hamcrest:hamcrest-core:1.1.jar                      |                                                   |
-| | invient-charts-0.8.6.jar                                |                                                   |                                
-|                                                           |                                                   |                                                             
-+-----------------------------------------------------------+---------------------------------------------------+
-| |                                                         |  |                                                |                                
-| | invient-charts-0.8.6.jar                                |  | Creative Commons Attribution-NonCommercial 3.0 |                                
-|                                                           |                                                   |                                
-|                                                           |                                                   |                                
-+-----------------------------------------------------------+---------------------------------------------------+
-| |                                                         |                                                   |
-| | Newtonsoft.Json.dll                                     |  |                                                |                                
-| | rabbitmq-c-v0.3.0 project                               |  | MIT License                                    |
-| | SimpleAmqpClient project                                |                                                   |                                
-|                                                           |                                                   |                                                                                         
-+-----------------------------------------------------------+---------------------------------------------------+
-| |                                                         | |                                                 |                                
-| | Boost 1.53.0                                            | | BOOST Licence                                   |                                
-|                                                           |                                                   |                                
-|                                                           |                                                   |                                
-+-----------------------------------------------------------+---------------------------------------------------+
-|   |                                                       |    |                                              |                                
-|   | base64-2.3.8.jar                                      |    | Public domain                                |                                
-|                                                           |                                                   |                                
-|                                                           |                                                   |                                
-+-----------------------------------------------------------+---------------------------------------------------+
+	<ECC API root>\IPR.txt
 
 
 Installing JavaJDK
@@ -248,12 +175,19 @@ follow these steps:
 
 1. Using a command line in the root of the ECC API type::
 
-       mvn clean install
-       all modules in the ECC API should be reported as successfully built.
+			cd thirdPartyLibs
+			
+			installLibraries.[bat] or [sh]
+			
+			cd ..
+
+      mvn clean install
+      
+			all modules in the ECC API should be reported as successfully built.
   
     You should find the ECC web dashboard WAR file created in the following location::
   
-       <ECC API root>\eccDash\target\experimedia-arch-ecc-eccDash-1.2-SNAPSHOT.war
+       <ECC API root>\eccDash\target\experimedia-arch-ecc-eccDash-2.0-SNAPSHOT.war
 
  
 2. Deploy and run the ECC dashboard, using:
@@ -265,28 +199,25 @@ follow these steps:
 	   Step 2: Copy WAR file generated in step 1 to Tomcat's 'webapps' directory
 	          (Tomcat should automatically unpack and deploy for you)
 	  
-	        Result: You should see the ECC dashboard running on: http://localhost:8080/experimedia-arch-ecc-eccDash-1.2-SNAPSHOT/
+	        Result: You should see the ECC dashboard running on: http://localhost:8080/experimedia-arch-ecc-eccDash-2.0-SNAPSHOT/
 
-	2.2 Tomcat (your particular configuration)
+
+3. Enter the ECC for your project
+
+  3.1 Enter your project and and click 'Find'
 	
-	   Step 1: Follow step 2.1
-
-	   Step 2: Using Tomcat's management UI, STOP the current ECC dashboard
-
-	   Step 3: Modify the any of the ECC property files you require::
-	  
-		  <Tomcat root>\webapps\experimedia-arch-ecc-eccDash-1.2-SNAPSHOT\WEB-INF\dashboard.properites
-		  <Tomcat root>\webapps\experimedia-arch-ecc-eccDash-1.2-SNAPSHOT\WEB-INF\edm.properites       (PostgreSQL login details here)
-		  <Tomcat root>\webapps\experimedia-arch-ecc-eccDash-1.2-SNAPSHOT\WEB-INF\em.properites        (RabbitMQ server details here)
-
-	  Step 4: Using Tomcat's management UI::
-	  
-		> Expire any existing ECC dashboard sessions
-		> RELOAD the ECC dashboard
-
-
-3.  Direct your web browser to your deployed ECC dashboard, which should look similar to this:
-
+	3.2 You will be presented a series of configuration fields for:
+	
+		Connection to the RabbitMQ service (this allows clients to connect to the ECC remotely)
+		
+		Configuration of the PostgreSQL database (allowing the ECC to store metric data)
+		
+		Various dashboard options
+		
+	At this point, the ECC will attempt to connect to the EXPERIMEDIA configuration service to retrieve your project's configuration data. If this fails,
+	the ECC will revert to the default settings for a local set up - modify your settings appropriately and continue: your configuration will be saved locally and re-used.
+					
+4.  After configuring your ECC dashboard, you should see a welcome screen similar to this:
 
 |image11_png|
 
@@ -297,37 +228,4 @@ follow these steps:
 The ‘Open ECC’ button will activate if your installation is correct. For more information on configuring/customizing your ECC installation, see section
 .
 The ECC software package also contains some basic client software that can be used to connect to the ECC and send
-test metrics. An example of how to build and run
-of one of these client applications is described in the 'Building Sample ECC Clients' section 
-
-
-Using JuJu to deploy the ECC
-----------------------------
-
-Juju can be used to deploy the ECC in a cloud environment - for instance EC2, OpenStack or in local virtual machines. For more information about Juju please refer to the Ubuntu documentation.
-
-
-Installing the ECC using Juju/OpenStack
----------------------------------------
-
-   1. Make sure juju is bootstrapped and "juju status" returns something like::
-
-	   machines:
-	   0:
-	   agent-state: running
-	   dns-name: 192.168.0.7
-	   instance-id: f0b8f237-aac6-49a0-9766-d0103edc9138
-	   instance-state: running
-
-  2. Ensure that Maven and Java (1.5 or better) are installed
-
-  3. Download the ECC source code
-
-  4. Build the ECC (mvn clean install from the source folder, see above for build instructions)
-
-  5. Run script deployDashboard.sh in this folder to deploy ECC Dashboard
-
-  
-  
-.. |image11_png| image:: images/image11.png
-	:scale: 70
+test metrics. An example of how to build and run of one of these client applications is described in the 'Building Sample ECC Clients' section
