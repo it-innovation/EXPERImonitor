@@ -1,23 +1,36 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+# To use, install vagrant and VirtualBox and type "vagrant up"
+
 # ECC service will be available at http://localhost:8080/ECC on host machine.
-# RabbitMQ AMQP bus will be available on port http://localhost:5672 on host machine and http://192.168.1.100:5672.
+# RabbitMQ AMQP bus will be available on port http://localhost:5672 on host machine and http://10.0.0.10:5672.
 # RabbitMQ management interface will be available at http://localhost:55672 on host machine (username: guest / password: guest).
 # Tomcat manager will be on http://localhost:8080/manager/html with username manager, password manager
 # Tail the log file with: vagrant ssh -c "tail -f /var/lib/tomcat7/logs/catalina.out"
 
+## Configuration for this script (this part is Ruby) ##
+
 hostname = "ECC"
 ram = "512"
-ip = "192.168.1.100"
+# Deploying with a static IP like this means that VirtualBox will set up a virtual network card that listens on 10.0.0.0/48
+# If you have other machines on that subnet then change the IP or you will have to delete the virtual card from the
+# VirtualBox GUI afterwards.  The purpose of using a static IP is so that other services deployed in the same way can 
+# communicate.
+ip = "10.0.0.10"
 
-rabbit_ip = "192.168.1.100"
+rabbit_ip = ip
 #rabbit_ip = "rabbitmq.experimedia.eu"
 uuid = "00000000-0000-0000-0000-000000000000"
 
+## The following shell script is run once the VM is built (this part is bash) ##
+
 $script = <<SCRIPT
-# install all dependencies
 apt-get update
+#apt-get upgrade -y  # could upgrade base OS packages if you want
+
+## Install dependencies ##
+
 apt-get install -y git
 apt-get install -y maven2
 apt-get install -y tomcat7
@@ -26,12 +39,23 @@ apt-get install -y openjdk-6-jdk
 apt-get install -y postgresql-9.1
 apt-get install -y rabbitmq-server
 
+## Get the ECC code ##
+
+# remove old code in case we are reprovisioning
+rm -rf experimedia-ecc
+
 # get the latest ECC code from Git
 #git clone git://soave.it-innovation.soton.ac.uk/git/experimedia-ecc
+#cd experimedia-ecc
+#git checkout sgc-master
+#cd ..
+
 # or copy ECC code from guest machine to host machine
 # (need to do this before PostgreSQL config)
 mkdir experimedia-ecc
 rsync -a /vagrant/ experimedia-ecc --exclude '.git' --exclude 'target'
+
+## Set up PostgreSQL ##
 
 # create the database
 sudo -u postgres createdb -T template0 edm-metrics --encoding=UTF8 --locale=en_US.utf8
@@ -45,13 +69,19 @@ echo "host all postgres 127.0.0.1/0 password" > /tmp/pg_hba.conf
 sudo -u postgres cp /tmp/pg_hba.conf /etc/postgresql/9.1/main
 service postgresql reload
 
+## Set up RabbitMQ ##
+
 # enable rabbitmq management plugin so we can see what's happening
 /usr/lib/rabbitmq/lib/rabbitmq_server-2.7.1/sbin/rabbitmq-plugins enable rabbitmq_management
 service rabbitmq-server restart
 
+## Set up Tomcat ##
+
 # enable the tomcat manager webapp with username manager, password manager
 echo "<?xml version='1.0' encoding='utf-8'?><tomcat-users><user rolename='manager-gui'/><user username='manager' password='manager' roles='manager-gui'/></tomcat-users>" > /etc/tomcat7/tomcat-users.xml
 service tomcat7 restart
+
+## Configure ECC Service ##
 
 # configure location of Rabbit
 # configure uuid
@@ -64,14 +94,18 @@ cp /tmp/em.properties experimedia-ecc/eccDash/src/main/webapp/WEB-INF/
 echo "**** ECC config:"
 cat experimedia-ecc/eccDash/src/main/webapp/WEB-INF/em.properties
 
-# build the ECC
+## Build ##
+
 echo "**** Building ECC"
 cd experimedia-ecc
+cd thirdPartyLibs && ./installLibraries.sh && cd ..
 mvn install
+
+## Deploy ##
 
 # deploy the ECC into Tomcat
 echo "**** Deploying ECC into Tomcat"
-cp eccDash/target/experimedia-arch-ecc-eccDash-1.3-SNAPSHOT.war /var/lib/tomcat7/webapps/ECC.war
+cp eccDash/target/*.war /var/lib/tomcat7/webapps/ECC.war
 
 echo "**** Finished: ECC deployed in Tomcat port running on port 8080.  Mapped to localhost:8080/ECC on host machine."
 SCRIPT
