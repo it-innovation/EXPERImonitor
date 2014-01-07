@@ -3,17 +3,18 @@
 
 # To use, install vagrant and VirtualBox and type "vagrant up"
 
-# ECC service will be available at http://localhost:8080/ECC on host machine.
-# RabbitMQ AMQP bus will be available on port http://localhost:5672 on host machine and http://10.0.0.10:5672.
-# RabbitMQ management interface will be available at http://localhost:55672 on host machine (username: guest / password: guest).
-# Tomcat manager will be on http://localhost:8080/manager/html with username manager, password manager
-# Tail the log file with: vagrant ssh -c "tail -f /var/lib/tomcat7/logs/catalina.out"
+comment = '
+ECC service is at http://localhost:8080/ECC
+RabbitMQ AMQP bus is at http://localhost:5672
+RabbitMQ management interface is at http://localhost:55672 (username: guest / password: guest).
+Tomcat manager is at http://localhost:8080/manager/html (username manager, password manager).
+Tail the tomcat log file with: vagrant ssh -c "tail -f /var/lib/tomcat7/logs/catalina.out"'
 
 ## Configuration for this script (this part is Ruby) ##
 
 hostname = "ECC"
 ram = "512"
-# Deploying with a static IP like this means that VirtualBox will set up a virtual network card that listens on 10.0.0.0/48
+# Deploying with a static IP like this means that VirtualBox will set up a virtual network card that listens on 10.0.0.0/24
 # If you have other machines on that subnet then change the IP or you will have to delete the virtual card from the
 # VirtualBox GUI afterwards.  The purpose of using a static IP is so that other services deployed in the same way can 
 # communicate.
@@ -26,23 +27,23 @@ uuid = "00000000-0000-0000-0000-000000000000"
 ## The following shell script is run once the VM is built (this part is bash) ##
 
 $script = <<SCRIPT
-apt-get update
-#apt-get upgrade -y  # could upgrade base OS packages if you want
+apt-get -yq update
+#apt-get -yq upgrade  # could upgrade base OS packages if you want
 
 ## Install dependencies ##
 
-apt-get install -y git
-apt-get install -y maven2
-apt-get install -y tomcat7
-apt-get install -y tomcat7-admin
-apt-get install -y openjdk-6-jdk
-apt-get install -y postgresql-9.1
-apt-get install -y rabbitmq-server
+apt-get -yq install git
+apt-get -yq install maven2
+apt-get -yq install tomcat7
+apt-get -yq install tomcat7-admin
+apt-get -yq install openjdk-6-jdk
+apt-get -yq install postgresql-9.1
+apt-get -yq install rabbitmq-server
 
 ## Get the ECC code ##
 
 # remove old code in case we are reprovisioning
-rm -rf experimedia-ecc
+#rm -rf experimedia-ecc
 
 # get the latest ECC code from Git
 #git clone git://soave.it-innovation.soton.ac.uk/git/experimedia-ecc
@@ -107,7 +108,9 @@ mvn install
 echo "**** Deploying ECC into Tomcat"
 cp eccDash/target/*.war /var/lib/tomcat7/webapps/ECC.war
 
-echo "**** Finished: ECC deployed in Tomcat port running on port 8080.  Mapped to localhost:8080/ECC on host machine."
+echo "#{comment}"
+echo VM deployed on #{ip}
+echo Using RabbitMQ on #{rabbit_ip} with UUID #{uuid}
 SCRIPT
 
 Vagrant.configure("2") do |config|
