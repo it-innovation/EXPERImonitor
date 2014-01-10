@@ -87,7 +87,9 @@ public class EDMProvDataContainer {
 	
 	public void addNamespaces(HashMap<String, String> namespaces) {
 		for (Entry<String, String> e: namespaces.entrySet()) {
-			this.namespaces.put(e.getKey(), e.getValue());
+			if (!this.namespaces.containsKey(e.getKey())) {
+				this.namespaces.put(e.getKey(), e.getValue());
+			}
 		}
 	}
 

@@ -50,12 +50,7 @@ public class EDMProvFactory {
 	private HashMap<UUID, EDMTriple> currentTriples;
 	private HashMap<UUID, EDMTriple> sentTriples;
 	
-	private EDMProvFactory(String prefix, String baseURI) {
-		//prefix in this context is a short prefix (?)
-		container = new EDMProvDataContainer(prefix, baseURI);
-		EDMProvFactory.factory = (EDMProvFactory) EDMProvFactory.factory;
-		init();
-	}
+	private EDMProvFactory(String prefix, String baseURI) {}
 	
 	/**
 	 * Returns a factory with either the prefix/baseURI it already has or the fallback prefix/baseURI.
@@ -63,6 +58,7 @@ public class EDMProvFactory {
 	 * @return the factory
 	 */
 	public static synchronized EDMProvFactory getInstance() {
+
 		if (EDMProvDataContainer.prefix==null) {
 			EDMProvDataContainer.prefix = FALLBACK_PREFIX;
 		}
@@ -71,6 +67,7 @@ public class EDMProvFactory {
 		}
 		
 		return getInstance(EDMProvDataContainer.prefix, EDMProvDataContainer.baseURI);
+		
 	}
 
 	/**
@@ -82,11 +79,13 @@ public class EDMProvFactory {
 	public static synchronized EDMProvFactory getInstance(String prefix, String baseURI) {
 		if (factory==null) {
 			factory = new EDMProvFactory(prefix, baseURI);
+			factory.container = new EDMProvDataContainer(prefix, baseURI);
+			factory.init();
 		} else {
 			factory.container.setPrefix(prefix);
 			factory.container.setBaseURI(baseURI);
 		}
-        return (EDMProvFactory) factory;
+        return factory;
     }
     
 	protected void init() {
