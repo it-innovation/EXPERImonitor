@@ -29,10 +29,7 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 
-/**
- * The AEDMProvFactory is an abstract class which converts between representations of provenance
- */
-abstract class AEDMProvFactory {
+public class EDMProvDataContainer {
 
 	protected static String prefix = null;
 	protected static String baseURI = null;
@@ -40,9 +37,9 @@ abstract class AEDMProvFactory {
 	protected HashMap<String, EDMProvBaseElement> allProvElements;
 	protected HashMap<String, String> namespaces;
 	
-	protected static Logger logger = Logger.getLogger(AEDMProvFactory.class.getName());
+	protected Logger logger = Logger.getLogger(EDMProvDataContainer.class.getName());
 	
-	protected AEDMProvFactory(String prefix, String baseURI) {
+	protected EDMProvDataContainer(String prefix, String baseURI) {
 		this.setPrefix(prefix);
 		this.setBaseURI(baseURI);
 		init();
@@ -73,11 +70,11 @@ abstract class AEDMProvFactory {
 	//GETTERS/SETTERS//////////////////////////////////////////////////////////////////////////////
 
 	public void setPrefix(String prefix) {
-		AEDMProvFactory.prefix = prefix;
+		EDMProvDataContainer.prefix = prefix;
 	}
 
 	public void setBaseURI(String baseURI) {
-		AEDMProvFactory.baseURI = baseURI;
+		EDMProvDataContainer.baseURI = baseURI;
 	}
 
 	public HashMap<String, EDMProvBaseElement> getAllElements() {

@@ -37,16 +37,12 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance
  * @author sw
  *
  */
-public class EDMProvDisplayFactory extends AEDMProvFactory {
+public class EDMProvDisplayFactory {
+	
+	private EDMProvDataContainer container;
 	
 	public EDMProvDisplayFactory(String prefix, String baseURI) {
-		super(prefix, baseURI);
-	}
-	
-	@SuppressWarnings("unused")
-	public static void main(String[] args) {
-		EDMProvDisplayFactory df = new EDMProvDisplayFactory("experimedia",
-				"http://it-innovation.soton.ac.uk/ontologies/experimedia#");
+		container = new EDMProvDataContainer(prefix, baseURI);
 	}
 	
 	public void loadSPARQLResult(LinkedList<HashMap<String, String>> result) {
@@ -103,7 +99,7 @@ public class EDMProvDisplayFactory extends AEDMProvFactory {
 				}
 
 				//add to elements
-				allProvElements.put(newElement.iri, newElement);
+				container.allProvElements.put(newElement.iri, newElement);
 			}
 		}
 	}

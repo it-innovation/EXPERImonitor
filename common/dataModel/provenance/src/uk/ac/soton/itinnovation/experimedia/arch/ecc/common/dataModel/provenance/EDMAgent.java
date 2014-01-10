@@ -47,7 +47,7 @@ public class EDMAgent extends EDMProvBaseElement {
 	public EDMActivity startActivity(String uniqueIdentifier, String label, String timestamp) throws DataFormatException, DatatypeConfigurationException {
 		EDMProvFactory factory = EDMProvFactory.getInstance();
 	    
-		EDMActivity newActivity = (EDMActivity) factory.getOrCreateActivity(uniqueIdentifier, label);
+		EDMActivity newActivity = (EDMActivity) factory.getActivity(uniqueIdentifier, label);
 		newActivity.addTriple(EDMProvBaseElement.prov + "startedAtTime", format.format(new Date(Long.valueOf(timestamp)*1000)), TRIPLE_TYPE.DATA_PROPERTY);
 		newActivity.addTriple(EDMProvBaseElement.prov + "wasStartedBy", this.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
     

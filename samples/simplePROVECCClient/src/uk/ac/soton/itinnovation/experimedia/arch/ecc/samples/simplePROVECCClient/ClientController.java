@@ -120,7 +120,7 @@ public class ClientController implements ClientViewListener
           {
             // First make sure we have stopped the last activity associated with the
             // current agent (if an activity exists)...
-            EDMAgent agent = factory.getOrCreateAgent( "experimedia:" + selectedAgent, // Unique identifier
+            EDMAgent agent = factory.getAgent( "experimedia:" + selectedAgent, // Unique identifier
                                                        selectedAgent );                // Friendly name
 
             EDMActivity lastActivity = currentAgentActivities.get( agent );
@@ -165,13 +165,13 @@ public class ClientController implements ClientViewListener
       try
       {
         // Create Alice
-        EDMAgent agentAlice = factory.getOrCreateAgent( "experimedia:Alice",
+        EDMAgent agentAlice = factory.getAgent( "experimedia:Alice",
                                                         "Alice" );
         // Create Bob
-        EDMAgent agentBob   = factory.getOrCreateAgent( "experimedia:Bob",
+        EDMAgent agentBob   = factory.getAgent( "experimedia:Bob",
                                                         "Bob" );
         // Create Carol
-        EDMAgent agentCarol = factory.getOrCreateAgent( "experimedia:Carol",
+        EDMAgent agentCarol = factory.getAgent( "experimedia:Carol",
                                                         "Carol" );
         
         // Create FOAF ontology mapping in factory

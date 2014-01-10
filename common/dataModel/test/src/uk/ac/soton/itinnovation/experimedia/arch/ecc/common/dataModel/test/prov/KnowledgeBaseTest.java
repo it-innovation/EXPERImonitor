@@ -168,11 +168,11 @@ public class KnowledgeBaseTest {
 	private void fillFactory() {
 		try {
 			//This is Bob.
-			EDMAgent bob = factory.getOrCreateAgent("facebook_154543445", "Bob");
+			EDMAgent bob = factory.getAgent("facebook_154543445", "Bob");
 			bob.addOwlClass(factory.getNamespaceForPrefix("foaf") + "Person");
 			
 			//This is a video about Schladming.
-			EDMEntity video = factory.getOrCreateEntity("facebook_1545879879", "reallyCoolFacebookVideo");
+			EDMEntity video = factory.getEntity("facebook_1545879879", "reallyCoolFacebookVideo");
 
 			//Bob starts to watch the video and pauses it when he sees something interesting.
 			EDMActivity watchVideo = bob.startActivity("activity123", "WatchVideo");
@@ -186,13 +186,13 @@ public class KnowledgeBaseTest {
 			bob.stopActivity(writePost);
 			
 			//Bob goes back to watch the rest of the video.
-			EDMAgent copyOfBob = factory.getOrCreateAgent("facebook_154543445", null);
+			EDMAgent copyOfBob = factory.getAgent("facebook_154543445", null);
 			EDMActivity resumeVideo = copyOfBob.doDiscreteActivity("activity456", "ResumeVideo");
 			resumeVideo.useEntity(video);
 			bob.stopActivity(watchVideo);
 			
 			//example data to check whether inferring statements works
-			EDMEntity ea = factory.getOrCreateEntity("InheritanceTest", "Should inherit classes prov:Agent, " +
+			EDMEntity ea = factory.getEntity("InheritanceTest", "Should inherit classes prov:Agent, " +
 			"dcterms:Agent, experimedia:ValuePartition, foaf:Document and sioc:Item");
 			ea.addOwlClass(factory.getNamespaceForPrefix("prov") + "Person");
 			ea.addOwlClass(factory.getNamespaceForPrefix("foaf") + "Person");
@@ -206,12 +206,13 @@ public class KnowledgeBaseTest {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private void clearAndReloadFactory() {
 
 		//clear factory
 		factory.clear();
 		factory = EDMProvFactory.getInstance(ontPrefix, ontBaseURI);
-		factory.addNamespaces(sCon.getNamespacesForRepository(repositoryID));
+		factory.container.addNamespaces(sCon.getNamespacesForRepository(repositoryID));
 
 		//load prov report contents into factory
 		try {
