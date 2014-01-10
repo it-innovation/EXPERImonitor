@@ -56,7 +56,36 @@ public class MetricHelper
     }
     
     /**
-     * Returns an entity identified by the ID, if it exists, from the metric generator collection.
+     * Returns an entity identified by its ID (String, not UUID), if it exists, from the metric generator.
+     * 
+     * @param entityID - ID of entity (not UUID) - must not be null
+     * @param mgenSet  - Metric generator in which to search
+     * @return         - Returned entity instance, if it exists, otherwise null
+     */
+    public static Entity getEntityFromID ( String entityID,
+                                           MetricGenerator mgenSet )
+    {
+      Entity entity = null;
+      
+      if ( entityID != null && mgenSet != null )
+      {
+        Map<UUID, Entity> entities = MetricHelper.getAllEntities( mgenSet );
+        
+        for ( Entity ent : entities.values() )
+        {
+          if ( ent.getEntityID().equals(entityID) )
+          {
+            entity = ent;
+            break;
+          }
+        }
+      }
+      
+      return entity;
+    }
+    
+    /**
+     * Returns an entity identified by its UNIQUE ID, if it exists, from the metric generator collection.
      * 
      * @param entityID  - ID of the entity required, must not be null.
      * @param mgenSet   - Collection of metric generators, must not be null.
@@ -75,6 +104,32 @@ public class MetricHelper
       
       return entity;
     }
+    
+    /**
+     * Returns an entity identified by the name, if it exists, from the metric generator
+     * 
+     * @param name    - Name of the entity required, must not be null
+     * @param mgenSet - Collection of metric generators, must not be null
+     * @return        - Returned entity instance, if it exists, otherwise null
+     */
+    public static Entity getEntityFromName( String name,
+                                            MetricGenerator mgenSet )
+    {
+        Entity entity = null;
+
+        if ( name != null && mgenSet != null )
+        {
+            for ( Entity ent : mgenSet.getEntities() )
+              if ( ent.getName().equals(name) )
+              {
+                  entity = ent;
+                  break;
+              }
+        }
+
+        return entity;
+    }
+    
     /**
      * Returns an entity identified by the name, if it exists, from the metric generator collection.
      * 
@@ -87,7 +142,7 @@ public class MetricHelper
     {
        Entity entity = null;
        
-       if(name != null && mgenSet != null)
+       if (name != null && mgenSet != null)
        {
            Iterator<MetricGenerator> mgenIt = mgenSet.iterator();
            
@@ -649,6 +704,24 @@ public class MetricHelper
       }
       
       return targetReport;      
+    }
+    
+    public static Report createMeasurementReport( MeasurementSet sourceMS,
+                                                  Measurement newMeasurement )
+    {
+      Report targetReport = null;
+      
+      if ( sourceMS != null && newMeasurement != null )
+      {
+        MeasurementSet newMS = new MeasurementSet( sourceMS, false );
+        Date now = new Date();
+        
+        newMS.addMeasurement( newMeasurement );
+        targetReport = new Report( UUID.randomUUID(), newMS, now, now, now );
+        targetReport.setNumberOfMeasurements( 1 );
+      }
+      
+      return targetReport;
     }
     
     /**

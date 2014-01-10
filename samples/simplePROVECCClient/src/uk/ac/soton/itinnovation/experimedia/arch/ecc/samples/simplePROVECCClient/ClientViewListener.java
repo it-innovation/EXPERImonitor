@@ -61,5 +61,5 @@ public interface ClientViewListener
      * Notify the controller that the user wishes to send the current provenance statement
      * 
      */
-    void onSendProvData();
+    void onSendECCData();
 }

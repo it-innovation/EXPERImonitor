@@ -142,6 +142,13 @@ public class DashConfigController implements DashConfigViewListener
    */
   private void initialise()
   {
+    // Test to see if local configuration folder is available; create it if not
+    if ( localConfigLocation != null )
+      createFolder( localConfigLocation );
+    else 
+      configLogger.error( "Configuration local is null - cannot save configurations locally" );
+    
+    // Create configuration view
     configView = new DashConfigView (this);
   }
 
@@ -165,25 +172,24 @@ public class DashConfigController implements DashConfigViewListener
       throw new Exception( error );
     }
 
-    final String component = "ECC";
     projectName = projName;
+    
+    // Create local configuration folders first
+    createProjConfigFolders( projectName, "ECC", "RabbitMQ" );
+    createProjConfigFolders( projectName, "ECC", "Database" );
+    createProjConfigFolders( projectName, "ECC", "Dashboard" );
 
+    // Now try accessing the configuration server
     try
     {
         // Starts API and sets up project
-        dcf = ECCConfigAPIFactory.getDirectoryConfigAccessor( projectName, repoUsername, repoPassword );
         pcf = ECCConfigAPIFactory.getProjectConfigAccessor( projectName, repoUsername, repoPassword );
+        dcf = ECCConfigAPIFactory.getDirectoryConfigAccessor( projectName, repoUsername, repoPassword );
 
         // Set up online directories for RabbitMQ, Database and Dashboard configuration
-        pcf.createComponentFeature( component, "RabbitMQ" );
-        pcf.createComponentFeature( component, "Dashboard" );
-        pcf.createComponentFeature( component, "Database" );
-
-        // Set up local directories for RabbitMQ, Database and Dashboard configuration
-        pcf.createLocalComponentFeature( localConfigLocation, component, "RabbitMQ" );
-        pcf.createLocalComponentFeature( localConfigLocation, component, "Dashboard" );
-        pcf.createLocalComponentFeature( localConfigLocation,component, "Database" );
-
+        pcf.createComponentFeature( "ECC", "RabbitMQ" );
+        pcf.createComponentFeature( "ECC", "Dashboard" );
+        pcf.createComponentFeature( "ECC", "Database" );
     }
     catch ( Exception ex )
     {
@@ -503,46 +509,15 @@ public class DashConfigController implements DashConfigViewListener
        
         if ( projectName != null )
         {
-            final String component          = "ECC";
-            final String featureRb          = "RabbitMQ";
-            final String featureDB          = "Database";
-            final String featureDash        = "Dashboard";
-            final String localProjectTarget = localConfigLocation + projectName + "/" + component;
-            
-            String targetRabbitConfigData = null;
-            String targetDatabaseConfigData = null;
-            String targetDashboardConfigData = null;
+            final String component   = "ECC";
+            final String featureRb   = "RabbitMQ";
+            final String featureDB   = "Database";
+            final String featureDash = "Dashboard";
             
             // Attempts to find local configuration data------------------------
-            try
-            {
-                File file = new File( localProjectTarget + "/" + featureRb + "/config.json" );
-                
-                if ( file.exists() )
-                    targetRabbitConfigData = pcf.getLocalComponentFeature( localConfigLocation, component, featureRb );
-            }
-            catch (Exception e)
-            { configLogger.warn( "Could not find local Rabbit config data : " + e.getMessage() ); }
-            
-            try
-            {
-                File file = new File( localProjectTarget + "/" + featureDB + "/config.json" );
-                
-                if ( file.exists() )
-                    targetDatabaseConfigData = pcf.getLocalComponentFeature( localConfigLocation, component, featureDB );
-            }
-            catch(Exception e)
-            { configLogger.warn( "Could not find local Database config data : " + e.getMessage() ); }
-            
-            try
-            {
-                File file = new File( localProjectTarget + "/" + featureDash + "/config.json" );
-                
-                if ( file.exists() )
-                      targetDashboardConfigData = pcf.getLocalComponentFeature( localConfigLocation, component, featureDash );
-            }
-            catch(Exception e)
-            { configLogger.warn( "Could not find local dashboard config data : " + e.getMessage() ); }
+            String targetRabbitConfigData    = loadLocalConfigFeature( projectName, component, featureRb );
+            String targetDatabaseConfigData  = loadLocalConfigFeature( projectName, component, featureDB );
+            String targetDashboardConfigData = loadLocalConfigFeature( projectName, component, featureDash );
             
             // If no local data, try the remote configuration server (if available )
             if ( configServiceOK && ( targetRabbitConfigData    == null ||
@@ -584,20 +559,20 @@ public class DashConfigController implements DashConfigViewListener
             }
             
             // Check for indications of poor configuration data
-            boolean remoteConfigOK = true;
+            boolean configOK = true;
             
             if ( targetRabbitConfigData    == null ||
                  targetDatabaseConfigData  == null ||
                  targetDashboardConfigData == null )
-              remoteConfigOK = false;
+              configOK = false;
             
             else if ( targetRabbitConfigData.equals("no_config") ||
                       targetDatabaseConfigData.equals("no_config") ||
                       targetDashboardConfigData.equals("no_config") )
-              remoteConfigOK = false;
+              configOK = false;
             
             // If we have config data, present to user, otherwise throw
-            if ( remoteConfigOK )
+            if ( configOK )
             {
                 configList.put( featureRb,   targetRabbitConfigData    );
                 configList.put( featureDB,   targetDatabaseConfigData  );
@@ -619,6 +594,88 @@ public class DashConfigController implements DashConfigViewListener
    }
     
     // Private methods ---------------------------------------------------------
+    private boolean createProjConfigFolders( String projectName,
+                                             String compName,
+                                             String feature )
+    {
+      // Test to see if local configuration folder is available; create it if not
+      if ( localConfigLocation != null )
+      {
+        String configPath = localConfigLocation + "/" + projectName;
+        
+        if ( createFolder(configPath) )
+        {
+          configPath += "/" + compName;
+          
+          if ( createFolder(configPath) )
+          {
+            configPath += "/" + feature;
+            
+            if ( createFolder(configPath) )
+              configLogger.info( "Create project config folder: " + configPath );
+          }
+        }
+      }
+      else configLogger.error( "Configuration local is null - cannot save configurations locally" );
+      
+      return false;
+    }
+    
+    private String loadLocalConfigFeature( String projectName,
+                                           String compName,
+                                           String feature )
+    {
+      String configData = "";
+      
+      File confFile = new File( localConfigLocation + "/" + projectName + "/" + 
+                                compName + "/" + feature + "/config.json" );
+      
+      if ( confFile.exists() )
+      {
+        try
+        {
+          BufferedReader br = new BufferedReader( new FileReader(confFile) );
+          
+          String confLine;
+          do
+          {
+            confLine = br.readLine();
+            
+            if ( confLine != null ) configData += confLine;
+            
+          } while (confLine != null);
+          
+          br.close();
+        }
+        catch ( IOException ioe )
+        { configLogger.error( "Error reading local configuration for: " + projectName ); }
+      }
+      
+      // Invalidate data if nothing found
+      if ( configData.length() == 0 ) configData = null;
+      
+      return configData;
+    }
+    
+    private boolean createFolder( String folderPath )
+    {
+      boolean result = false;
+      
+      File folder = new File( folderPath );
+      
+      if ( folder.exists() && folder.isDirectory() )
+        result = true;
+      else
+      {
+        if ( folder.mkdir() )
+          result = true;
+        else
+          configLogger.error( "Could not create config path: " + folderPath );
+      }
+      
+      return result;
+    }
+    
     private void fallbackToLocalMachineConfig()
     {
       configList.clear();
