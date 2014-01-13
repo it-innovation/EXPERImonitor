@@ -3,7 +3,9 @@
 *.settings
 *.classpath
 **/lib/
+lib/
 **/target/
+target/
 **/bin/
 bin/
 **/obj/
