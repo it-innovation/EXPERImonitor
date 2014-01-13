@@ -18,27 +18,24 @@
 // the software.
 //
 //      Created By :            Vegard Engen
-//      Created Date :          2012-08-13
+//      Created Date :          2012-08-22
 //      Created for Project :   BonFIRE
 //
 /////////////////////////////////////////////////////////////////////////
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IEntityDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IExperimentDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IMeasurementDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IMeasurementSetDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IMetricDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IMetricGeneratorDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IMetricGroupDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IReportDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao.IEntityDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao.IExperimentDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao.IMetricGeneratorDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao.IReportDAO;
 
 /**
- * Interface for the Experiment Data Manager for Monitoring data.
+ * Interface to the Experiment Data Manager for Monitoring data.
+ * This is the Light version, intended to be used on the clients that generate metrics.
  * 
  * @author Vegard Engen
  */
-public interface IMonitoringEDM
+public interface IMonitoringEDMAgent
 {
     /**
      * Get the experiment DAO, allowing saving and getting Experiment objects.
@@ -62,39 +59,11 @@ public interface IMonitoringEDM
     IMetricGeneratorDAO getMetricGeneratorDAO() throws Exception;
     
     /**
-     * Get the metric group DAO, allowing saving and getting MetricGroup objects.
-     * @return MetricGroup DAO interface.
-     * @throws Exception 
-     */
-    IMetricGroupDAO getMetricGroupDAO() throws Exception;
-    
-    /**
-     * Get the measurement set DAO, allowing saving and getting MeasurementSet objects.
-     * @return MeasurementSet DAO interface.
-     * @throws Exception 
-     */
-    IMeasurementSetDAO getMeasurementSetDAO() throws Exception;
-    
-    /**
-     * Get the metric DAO, allowing saving and getting Metric objects.
-     * @return Metric DAO interface.
-     * @throws Exception 
-     */
-    IMetricDAO getMetricDAO() throws Exception;
-    
-    /**
      * Get the report DAO, allowing saving and getting Report objects.
      * @return Report DAO interface.
      * @throws Exception 
      */
     IReportDAO getReportDAO() throws Exception;
-    
-    /**
-     * Get the measurement DAO, allowing saving and getting Measurement objects.
-     * @return Measurement DAO interface.
-     * @throws Exception 
-     */
-    IMeasurementDAO getMeasurementDAO() throws Exception;
     
     /**
      * Check if the database has been set up correctly and is accessible.

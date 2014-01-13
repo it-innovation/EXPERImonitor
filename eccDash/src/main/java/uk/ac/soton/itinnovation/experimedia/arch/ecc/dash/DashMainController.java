@@ -28,9 +28,9 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveData.LiveMonitorController;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.configuration.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.schedulers.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDM;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.IMonitoringEDM;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao.*;
 
 import uk.ac.soton.itinnovation.robust.cat.core.components.viewEngine.spec.uif.types.UFAbstractEventManager;
 

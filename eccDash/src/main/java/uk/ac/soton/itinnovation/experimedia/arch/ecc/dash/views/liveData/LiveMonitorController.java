@@ -37,7 +37,7 @@ import uk.ac.soton.itinnovation.robust.cat.core.components.viewEngine.spec.uif.t
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.UIPushManager;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.visualizers.metrics.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IReportDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao.IReportDAO;
 
 
 import java.io.*;
@@ -153,11 +153,8 @@ public class LiveMonitorController extends UFAbstractEventManager
       if ( provLogger.isLogging() )
       {
         provLogger.writePROV( report );
-        
-        // TO DO: Update UI with tail of PROV data
-        
-        liveMonLogger.info( "Got PROV data from client " + client.getName() );
-        
+				liveProvView.echoPROVData( report );
+				
         provUpdatePending = true;
       }
       else

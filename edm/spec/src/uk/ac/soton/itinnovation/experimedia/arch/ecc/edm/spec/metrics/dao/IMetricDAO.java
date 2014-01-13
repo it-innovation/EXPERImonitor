@@ -22,11 +22,11 @@
 //      Created for Project :   BonFIRE
 //
 /////////////////////////////////////////////////////////////////////////
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao;
 
 import java.util.UUID;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Metric;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.NoDataException;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.NoDataException;
 
 /**
  * A DAO to save and get Metric objects from storage.

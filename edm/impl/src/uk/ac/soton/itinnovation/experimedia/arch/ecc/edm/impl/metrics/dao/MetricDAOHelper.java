@@ -22,7 +22,7 @@
 //      Created for Project :   BonFIRE
 //
 /////////////////////////////////////////////////////////////////////////
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.metrics.mon.dao;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.metrics.dao;
 
 import java.io.ByteArrayInputStream;
 import java.io.ObjectInputStream;
@@ -36,7 +36,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Un
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.IECCLogger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.metrics.db.DBUtil;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.NoDataException;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.NoDataException;
 
 /**
  * A helper class for validating and executing queries for the Metrics.

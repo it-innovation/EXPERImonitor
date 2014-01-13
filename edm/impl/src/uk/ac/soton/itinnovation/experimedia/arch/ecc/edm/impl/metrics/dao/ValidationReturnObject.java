@@ -22,7 +22,7 @@
 //      Created for Project :   BonFIRE
 //
 /////////////////////////////////////////////////////////////////////////
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.metrics.mon.dao;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.metrics.dao;
 
 /**
  * A very simple class to encapsulate whether a function call evaluated to

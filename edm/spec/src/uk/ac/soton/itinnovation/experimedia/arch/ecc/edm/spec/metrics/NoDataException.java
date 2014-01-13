@@ -22,7 +22,7 @@
 //      Created for Project :   BonFIRE
 //
 /////////////////////////////////////////////////////////////////////////
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics;
 
 /**
  *
