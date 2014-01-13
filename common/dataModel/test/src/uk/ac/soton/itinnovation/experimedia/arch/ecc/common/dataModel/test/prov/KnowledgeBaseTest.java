@@ -54,6 +54,8 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvReport;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMTriple;
 
+//test comment for git
+
 public class KnowledgeBaseTest {
 
 	private EDMProvFactory factory;
@@ -123,6 +125,9 @@ public class KnowledgeBaseTest {
 				"http://xmlns.com/foaf/0.1/", "foaf");
 			importOntologyToKnowledgeBase("http://rdfs.org/sioc/ns#",
 				"http://rdfs.org/sioc/ns#", "sioc");
+			
+			importOntologyToKnowledgeBase("./resources/skiing.rdf",
+					"http://www.semanticweb.org/sw/ontologies/skiing#", "ski");
 
 			logger.info("Adding EDMProvFactory contents");
 			storeToKnowledgeBase();
@@ -167,12 +172,42 @@ public class KnowledgeBaseTest {
 	
 	private void fillFactory() {
 		try {
+			
+			//add skiing ontology
+			factory.addOntology("ski", "http://www.semanticweb.org/sw/ontologies/skiing#");
+			
 			//This is Bob.
-			EDMAgent bob = factory.getOrCreateAgent("facebook_154543445", "Bob");
+			EDMAgent bob = factory.createAgent("facebook_154543445", "Bob");
 			bob.addOwlClass(factory.getNamespaceForPrefix("foaf") + "Person");
+
+			EDMEntity skilift1 = factory.createEntity("skilift1-dfkjhdsjf", "Skilift 1");
+			skilift1.addOwlClass(factory.getNamespaceForPrefix("ski") + "Skilift");
+
+			EDMEntity skilift2 = factory.createEntity("skilift2-dfkdfgdjf", "Skilift 2");
+			skilift2.addOwlClass(factory.getNamespaceForPrefix("ski") + "Skilift");
+
+			EDMActivity usingSkilift1 = bob.startActivity("usingskilift1-dskfhskdfh", "Using skilift 1", "1280512800");
+			usingSkilift1.addOwlClass(factory.getNamespaceForPrefix("ski") + "UsingSkiliftActivity");
+			usingSkilift1.useEntity(skilift1);
+			bob.stopActivity(usingSkilift1, "1280513800");
+			
+			EDMActivity skiing1 = bob.startActivity("skiing1-hdskjdshfjsd", "Skiing 1", "1280513800");
+			skiing1.addOwlClass(factory.getNamespaceForPrefix("ski") + "SkiingActivity");
+			
+			EDMActivity usingSkilift2 = bob.startActivity("usingskilift2-dsdsfdsffh", "Using skilift 1", "1280515800");
+			usingSkilift2.addOwlClass(factory.getNamespaceForPrefix("ski") + "UsingSkiliftActivity");
+			usingSkilift2.useEntity(skilift2);
+			bob.stopActivity(usingSkilift2, "1280516800");
+			
+			EDMActivity skiing2 = bob.startActivity("skiing2-hhffghfghfjsd", "Skiing 2", "1280516800");
+			skiing2.addOwlClass(factory.getNamespaceForPrefix("ski") + "SkiingActivity");
+			
+			EDMActivity finish = bob.doDiscreteActivity("finish-dskfhkjsdhf", "Finish skiing", "1280519800");
+			finish.addOwlClass(factory.getNamespaceForPrefix("ski") + "FinishActivity");
+			/*
 			
 			//This is a video about Schladming.
-			EDMEntity video = factory.getOrCreateEntity("facebook_1545879879", "reallyCoolFacebookVideo");
+			EDMEntity video = factory.getEntity("facebook_1545879879", "reallyCoolFacebookVideo");
 
 			//Bob starts to watch the video and pauses it when he sees something interesting.
 			EDMActivity watchVideo = bob.startActivity("activity123", "WatchVideo");
@@ -186,13 +221,15 @@ public class KnowledgeBaseTest {
 			bob.stopActivity(writePost);
 			
 			//Bob goes back to watch the rest of the video.
-			EDMAgent copyOfBob = factory.getOrCreateAgent("facebook_154543445", null);
+			EDMAgent copyOfBob = factory.getAgent("facebook_154543445", null);
 			EDMActivity resumeVideo = copyOfBob.doDiscreteActivity("activity456", "ResumeVideo");
 			resumeVideo.useEntity(video);
 			bob.stopActivity(watchVideo);
 			
+			*/
+			
 			//example data to check whether inferring statements works
-			EDMEntity ea = factory.getOrCreateEntity("InheritanceTest", "Should inherit classes prov:Agent, " +
+			EDMEntity ea = factory.createEntity("InheritanceTest", "Should inherit classes prov:Agent, " +
 			"dcterms:Agent, experimedia:ValuePartition, foaf:Document and sioc:Item");
 			ea.addOwlClass(factory.getNamespaceForPrefix("prov") + "Person");
 			ea.addOwlClass(factory.getNamespaceForPrefix("foaf") + "Person");
@@ -206,12 +243,15 @@ public class KnowledgeBaseTest {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private void clearAndReloadFactory() {
 
 		//clear factory
+		//HashMap<String, String> namespaces = factory.container.getNamespaces();
 		factory.clear();
 		factory = EDMProvFactory.getInstance(ontPrefix, ontBaseURI);
-		factory.addNamespaces(sCon.getNamespacesForRepository(repositoryID));
+		//factory.container.addNamespaces(namespaces);
+		factory.container.addNamespaces(sCon.getNamespacesForRepository(repositoryID));
 
 		//load prov report contents into factory
 		try {

@@ -26,6 +26,7 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance;
 
 import java.util.*;
+import java.util.Map.Entry;
 
 public class EDMProvReport
 {
@@ -51,13 +52,20 @@ public class EDMProvReport
 		return triples;
 	}
 
-  // Protected methods ---------------------------------------------------------
-  
 	public EDMProvReport(HashMap<UUID, EDMTriple> triples) {
 		this();
 		
 		if (triples!=null && !triples.isEmpty()) {
 			this.triples.putAll(triples);
 		}
+	}
+	
+	public String toString() {
+		String result = "";
+		Map<UUID, EDMTriple> map = new TreeMap<UUID, EDMTriple>(triples);
+		for (Entry<UUID, EDMTriple> e: map.entrySet()) {
+			result += e.getKey() + ":\t" + e.getValue().toString() + "\n";
+		}
+		return result;
 	}
 }

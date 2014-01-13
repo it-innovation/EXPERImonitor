@@ -49,6 +49,7 @@ public class ClientController implements ClientViewListener
     // ECC connection gear
     private AMQPConnectionFactory amqpFactory;
     private EMInterfaceAdapter    eccAdapter;
+    private EMEventHandler        eventHandler;
     private boolean               connectedToECC;
     private boolean               monitoringActive;
 
@@ -129,7 +130,7 @@ public class ClientController implements ClientViewListener
                     // Get the PROV agent the user has selected
                     EDMProvFactory factory = EDMProvFactory.getInstance();
 
-                    EDMAgent currPROVAgent = factory.getOrCreateAgent( "experimedia:" + selectedAgent, // Unique identifier
+                    EDMAgent currPROVAgent = factory.createAgent( "experimedia:" + selectedAgent, // Unique identifier
                                                                        selectedAgent );                // Friendly name
 
                     // Update ECC with PROV report
@@ -161,13 +162,13 @@ public class ClientController implements ClientViewListener
         try
         {
             // Create Alice
-            EDMAgent agentAlice = factory.getOrCreateAgent( "experimedia:Alice",
+            EDMAgent agentAlice = factory.createAgent( "experimedia:Alice",
                                                             "Alice" );
             // Create Bob
-            EDMAgent agentBob   = factory.getOrCreateAgent( "experimedia:Bob",
+            EDMAgent agentBob   = factory.createAgent( "experimedia:Bob",
                                                             "Bob" );
             // Create Carol
-            EDMAgent agentCarol = factory.getOrCreateAgent( "experimedia:Carol",
+            EDMAgent agentCarol = factory.createAgent( "experimedia:Carol",
                                                             "Carol" );
 
             // Create FOAF ontology mapping in factory
@@ -206,9 +207,9 @@ public class ClientController implements ClientViewListener
         {
             EDMProvFactory factory = EDMProvFactory.getInstance();
 
-            makeAgentMetric( factory.getOrCreateAgent( "experimedia:Alice", "Alice" ) );
-            makeAgentMetric( factory.getOrCreateAgent( "experimedia:Bob"  , "Bob"   ) );
-            makeAgentMetric( factory.getOrCreateAgent( "experimedia:Carol", "Carol" ) );
+            makeAgentMetric( factory.createAgent( "experimedia:Alice", "Alice" ) );
+            makeAgentMetric( factory.createAgent( "experimedia:Bob"  , "Bob"   ) );
+            makeAgentMetric( factory.createAgent( "experimedia:Carol", "Carol" ) );
         }
         catch ( Exception ex )
         { displayError( "Could not create metrics for agents: ", ex.getMessage() ); } 

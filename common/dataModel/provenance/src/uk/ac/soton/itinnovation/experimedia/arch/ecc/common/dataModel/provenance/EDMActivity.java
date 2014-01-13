@@ -52,7 +52,7 @@ public class EDMActivity extends EDMProvBaseElement {
 	public EDMEntity generateEntity(String uniqueIdentifier, String label, String timestamp) throws DataFormatException, DatatypeConfigurationException {
 		EDMProvFactory factory = EDMProvFactory.getInstance();
     
-		EDMEntity newEntity = (EDMEntity) factory.getOrCreateEntity(uniqueIdentifier, label);	
+		EDMEntity newEntity = (EDMEntity) factory.getEntity(uniqueIdentifier, label);	
 		newEntity.addTriple(EDMProvBaseElement.prov + "wasGeneratedBy", this.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
 		newEntity.addTriple(EDMProvBaseElement.prov + "generatedAtTime", format.format(new Date(Long.valueOf(timestamp)*1000)), TRIPLE_TYPE.DATA_PROPERTY);
 		factory.elementUpdated(this); // Queue to re-send in next report
@@ -65,7 +65,7 @@ public class EDMActivity extends EDMProvBaseElement {
     
 		String newUniqueIdentifier = entity.getUniqueIdentifier() + "_derivation_"
 			+ String.valueOf(System.currentTimeMillis() / 1000L);
-		EDMEntity derivation = factory.getOrCreateEntity(newUniqueIdentifier, derivationLabel);
+		EDMEntity derivation = factory.getEntity(newUniqueIdentifier, derivationLabel);
 		
 		derivation.addTriple(EDMProvBaseElement.prov + "wasDerivedFrom", this.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
     
