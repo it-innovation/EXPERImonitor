@@ -58,8 +58,8 @@ public class PROVToolBoxUtil
       factory.clear();
       factory.loadReport(eccPROVReport);
       
-      createPTBElements( factory.getAllElements(), ptdb );
-      createPTBStatements( factory.getAllElements(), ptdb );
+      createPTBElements( factory.container.getAllElements(), ptdb );
+      createPTBStatements( factory.container.getAllElements(), ptdb );
       
       return ptdb.createPTDocument();
     }
