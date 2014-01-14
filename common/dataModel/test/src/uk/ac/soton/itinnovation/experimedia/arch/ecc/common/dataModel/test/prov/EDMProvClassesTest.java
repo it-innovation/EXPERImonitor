@@ -50,11 +50,11 @@ public class EDMProvClassesTest {
 		
 		try {
 			//This is Bob.
-			EDMAgent bob = factory.getAgent("facebook_154543445", "Bob");
+			EDMAgent bob = factory.createAgent("facebook_154543445", "Bob");
 			bob.addOwlClass(factory.getNamespaceForPrefix("foaf") + "Person");
 			
 			//This is a video about Schladming.
-			EDMEntity video = factory.getEntity("facebook_1545879879", "reallyCoolFacebookVideo");
+			EDMEntity video = factory.createEntity("facebook_1545879879", "reallyCoolFacebookVideo");
 			
 			//Bob starts to watch the video and pauses it when he sees something interesting.
 			EDMActivity watchVideo = bob.startActivity("activity123", "WatchVideo");
@@ -71,7 +71,7 @@ public class EDMProvClassesTest {
 			bob.stopActivity(writePost);
 			
 			//Bob goes back to watch the rest of the video.
-			EDMAgent copyOfBob = factory.getAgent("facebook_154543445", null);
+			EDMAgent copyOfBob = factory.getAgent("facebook_154543445");
 			EDMActivity resumeVideo = copyOfBob.doDiscreteActivity("activity456", "ResumeVideo");
 			resumeVideo.useEntity(video);
 			bob.stopActivity(watchVideo);

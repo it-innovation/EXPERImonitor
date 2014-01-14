@@ -25,6 +25,7 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance;
 
+import java.rmi.AlreadyBoundException;
 import java.util.Date;
 import java.util.zip.DataFormatException;
 
@@ -45,14 +46,14 @@ public class EDMActivity extends EDMProvBaseElement {
 	
 	// PROV FUNCTIONAL CLASSES HERE: //////////////////////////////////////////////////////////////
 
-	public EDMEntity generateEntity(String uniqueIdentifier, String entityLabel) throws DataFormatException, DatatypeConfigurationException {
+	public EDMEntity generateEntity(String uniqueIdentifier, String entityLabel) throws DataFormatException, DatatypeConfigurationException, AlreadyBoundException {
 		return generateEntity(uniqueIdentifier, entityLabel, String.valueOf(System.currentTimeMillis() / 1000L));
 	}
 	
-	public EDMEntity generateEntity(String uniqueIdentifier, String label, String timestamp) throws DataFormatException, DatatypeConfigurationException {
+	public EDMEntity generateEntity(String uniqueIdentifier, String label, String timestamp) throws DataFormatException, DatatypeConfigurationException, AlreadyBoundException {
 		EDMProvFactory factory = EDMProvFactory.getInstance();
     
-		EDMEntity newEntity = (EDMEntity) factory.getEntity(uniqueIdentifier, label);	
+		EDMEntity newEntity = (EDMEntity) factory.createEntity(uniqueIdentifier, label);	
 		newEntity.addTriple(EDMProvBaseElement.prov + "wasGeneratedBy", this.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
 		newEntity.addTriple(EDMProvBaseElement.prov + "generatedAtTime", format.format(new Date(Long.valueOf(timestamp)*1000)), TRIPLE_TYPE.DATA_PROPERTY);
 		factory.elementUpdated(this); // Queue to re-send in next report
@@ -65,7 +66,7 @@ public class EDMActivity extends EDMProvBaseElement {
     
 		String newUniqueIdentifier = entity.getUniqueIdentifier() + "_derivation_"
 			+ String.valueOf(System.currentTimeMillis() / 1000L);
-		EDMEntity derivation = factory.getEntity(newUniqueIdentifier, derivationLabel);
+		EDMEntity derivation = factory.getEntity(newUniqueIdentifier);
 		
 		derivation.addTriple(EDMProvBaseElement.prov + "wasDerivedFrom", this.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
     

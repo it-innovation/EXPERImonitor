@@ -167,8 +167,8 @@ public class EDMProvFactory {
 	 * @throws DataFormatException
 	 * @throws DatatypeConfigurationException
 	 */
-	public EDMAgent getAgent(String uniqueIdentifier, String label) throws DataFormatException, DatatypeConfigurationException {
-		return (EDMAgent) this.getElement(EDMProvDataContainer.baseURI, uniqueIdentifier, label, EDMProvBaseElement.PROV_TYPE.ePROV_AGENT);
+	public EDMAgent getAgent(String uniqueIdentifier) throws DataFormatException, DatatypeConfigurationException {
+		return (EDMAgent) this.getElement(EDMProvDataContainer.baseURI + uniqueIdentifier);
 	}
 	
 	/**
@@ -180,8 +180,8 @@ public class EDMProvFactory {
 	 * @throws DataFormatException
 	 * @throws DatatypeConfigurationException
 	 */
-	public EDMActivity getActivity(String uniqueIdentifier, String label) throws DataFormatException, DatatypeConfigurationException {
-		return (EDMActivity) this.getElement(EDMProvDataContainer.baseURI, uniqueIdentifier, label, EDMProvBaseElement.PROV_TYPE.ePROV_ACTIVITY);
+	public EDMActivity getActivity(String uniqueIdentifier) throws DataFormatException, DatatypeConfigurationException {
+		return (EDMActivity) this.getElement(EDMProvDataContainer.baseURI + uniqueIdentifier);
 	}
 	
 	/**
@@ -193,47 +193,16 @@ public class EDMProvFactory {
 	 * @throws DataFormatException
 	 * @throws DatatypeConfigurationException
 	 */
-	public EDMEntity getEntity(String uniqueIdentifier, String label) throws DataFormatException, DatatypeConfigurationException {
-		return  (EDMEntity) this.getElement(EDMProvDataContainer.baseURI, uniqueIdentifier, label, EDMProvBaseElement.PROV_TYPE.ePROV_ENTITY);
+	public EDMEntity getEntity(String uniqueIdentifier) throws DataFormatException, DatatypeConfigurationException {
+		return (EDMEntity) this.getElement(EDMProvDataContainer.baseURI + uniqueIdentifier);
 	}
 
-	protected EDMProvBaseElement getElement(String prefix, String uniqueIdentifier, String label, EDMProvBaseElement.PROV_TYPE type) throws DatatypeConfigurationException, DataFormatException {
+	protected EDMProvBaseElement getElement(String iri) throws DatatypeConfigurationException, DataFormatException {
 		//check if element exists in factory
-		if (container.allProvElements.containsKey(prefix + uniqueIdentifier)) {
-			return container.allProvElements.get(prefix + uniqueIdentifier);
+		if (container.allProvElements.containsKey(iri)) {
+			return container.allProvElements.get(iri);
 		} else {
 			return null;
-			
-			/* sw: commented out to separate get- & create methods
-			 * 
-			EDMProvBaseElement element = factory.createElement(uniqueIdentifier, label, type);
-
-			String owlClass = "";
-			switch (type) {
-				case ePROV_ACTIVITY:
-					owlClass = "http://www.w3.org/ns/prov#Activity";
-					break;
-				case ePROV_AGENT:
-					owlClass = "http://www.w3.org/ns/prov#Agent";
-					break;
-				case ePROV_ENTITY:
-					owlClass = "http://www.w3.org/ns/prov#Entity";
-					break;
-				default:
-					throw new DataFormatException("Please specify a PROV_TYPE!");
-			}
-			
-			EDMTriple classAssertion = new EDMTriple(element.iri ,"http://www.w3.org/1999/02/22-rdf-syntax-ns#type", owlClass);
-			
-			//special case: element exists but has additional prov class (agent=entity)
-			if (!element.contains(classAssertion)) {
-				element.addOwlClass(owlClass);
-				container.logger.info("Element " + element.uniqueIdentifier + " already exists as a " + element.provType
-						+ "\n      Additional class " + type + " was added to the element");
-			}
-      
-			return element;
-			*/
 		}
 	}
 	
@@ -343,11 +312,11 @@ public class EDMProvFactory {
 						String localName = EDMTriple.splitURI(e.getValue().getSubject(), 1);
 						
 						if (e.getValue().getObject().endsWith("#Agent")) {
-							factory.getAgent(localName, null);
+							factory.getAgent(localName);
 						} else if (e.getValue().getObject().endsWith("#Entity")) {
-							factory.getEntity(localName, null);
+							factory.getEntity(localName);
 						} else if (e.getValue().getObject().endsWith("#Activity")) {
-							factory.getActivity(localName, null);
+							factory.getActivity(localName);
 						}
 					}
 				}
