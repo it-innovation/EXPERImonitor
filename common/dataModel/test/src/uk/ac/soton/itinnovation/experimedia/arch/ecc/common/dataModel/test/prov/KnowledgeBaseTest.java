@@ -165,7 +165,7 @@ public class KnowledgeBaseTest {
 	}
 
 	private void init() {
-		factory = EDMProvFactory.getInstance(ontPrefix, ontBaseURI);
+		factory = EDMProvFactory.getInstance();
 		factory.addOntology("foaf", "http://xmlns.com/foaf/0.1/");
 		factory.addOntology("sioc", "http://rdfs.org/sioc/ns#");
 	}
