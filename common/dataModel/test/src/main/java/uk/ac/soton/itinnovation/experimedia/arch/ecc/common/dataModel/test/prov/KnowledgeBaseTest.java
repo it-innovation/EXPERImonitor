@@ -26,6 +26,7 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.test.prov;
 
 import java.io.File;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -82,7 +83,7 @@ public class KnowledgeBaseTest {
 		
 		logger.info("Loading properties file");
 		try {
-			props.load(KnowledgeBaseTest.class.getResourceAsStream("config.properties"));
+			props.load(KnowledgeBaseTest.class.getClassLoader().getResourceAsStream("config.properties"));
 		} catch (Exception e) {
 			logger.error("Error loading properties file", e);
 		}
@@ -117,7 +118,7 @@ public class KnowledgeBaseTest {
 			}
 			
 			logger.info("Adding ontologies");
-			importOntologyToKnowledgeBase("./resources/experimedia.rdf",
+			importOntologyToKnowledgeBase("experimedia.rdf",
 				"http://it-innovation.soton.ac.uk/ontologies/experimedia#", "experimedia");
 			importOntologyToKnowledgeBase("http://www.w3.org/ns/prov-o#/",
 				"http://www.w3.org/ns/prov#", "prov");
@@ -126,8 +127,7 @@ public class KnowledgeBaseTest {
 			importOntologyToKnowledgeBase("http://rdfs.org/sioc/ns#",
 				"http://rdfs.org/sioc/ns#", "sioc");
 			
-			importOntologyToKnowledgeBase("./resources/skiing.rdf",
-					"http://www.semanticweb.org/sw/ontologies/skiing#", "ski");
+			importOntologyToKnowledgeBase("skiing.rdf", "http://www.semanticweb.org/sw/ontologies/skiing#", "ski");
 
 			logger.info("Adding EDMProvFactory contents");
 			storeToKnowledgeBase();
@@ -266,13 +266,26 @@ public class KnowledgeBaseTest {
 		OntologyDetails od = new OntologyDetails();
 		File ontfile = new File(ontologypath);
 		if (!ontfile.exists()) {
-			try {
-				URL remoteOntology = new URL(ontologypath);
-				od.setURL(remoteOntology);
-				        
-			} catch (Exception e) {
-				logger.error("Error loading ontology from URL " + ontologypath, e);
+			//try URL
+			if (ontologypath.startsWith("http://")) {
+				try {
+					URL remoteOntology = new URL(ontologypath);
+					od.setURL(remoteOntology);
+					        
+				} catch (Exception e) {
+					logger.error("Error loading ontology from URL " + ontologypath, e);
+				}
+			//try file from classpath
+			} else {
+				String resourcepath = KnowledgeBaseTest.class.getClassLoader().getResource(ontologypath).getPath();
+				try {
+					ontfile = new File(resourcepath);
+					od.setURL(ontfile.toURI().toURL());
+				} catch (MalformedURLException e) {
+					logger.error("Error reading resource file", e);
+				}
 			}
+			
 		} else {
 			try {
 				od.setURL(ontfile.toURI().toURL());
