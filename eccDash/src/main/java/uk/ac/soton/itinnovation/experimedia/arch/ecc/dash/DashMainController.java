@@ -112,7 +112,10 @@ public class DashMainController extends UFAbstractEventManager
   public void initialise( Window rootWin )
   {
     if ( rootWin != null )
-    {
+		{
+			// Set up push management first (needs to be linked to Vaadin window)
+			pushManager = new UIPushManager( rootWin );
+			
       rootWindow = rootWin;
       rootWindow.setStyleName( "eccDashDefault" );      
       rootWindow.addListener( new DashWindowResizeListener() );
@@ -129,7 +132,6 @@ public class DashMainController extends UFAbstractEventManager
       expMonitor.addLifecyleListener( this );
       
       liveMetricScheduler = new LiveMetricScheduler();
-      pushManager         = new UIPushManager( rootWindow );
     }
   }
   
@@ -223,15 +225,16 @@ public class DashMainController extends UFAbstractEventManager
     if ( client != null )
     {
       if ( connectionsView != null )
+			{
         connectionsView.addClient( client );
+				pushManager.pushUIUpdates();
+			}
       else
       {
         String problem = "Client tried to connect before ECC has fully initialised: " + client.getName();
         if ( mainDashView != null ) mainDashView.addLogMessage( problem );
         dashMainLog.error( problem );
       }
-      
-      pushManager.pushUIUpdates();
     }
   }
   
