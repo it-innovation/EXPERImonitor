@@ -288,8 +288,12 @@ public class ClientController implements ClientViewListener
             // Update the activity model for this agent
             updateCurrentAgentActivity( agent, activity );
 
-            // Link activity with PROV entity
-            EDMEntity entity = activity.generateEntity( selectedEntity, selectedEntity );
+            // Link activity with PROV entity (creating it if it does not exist)
+						EDMEntity entity = factory.getEntity( selectedEntity );
+						
+						if ( entity == null )
+							entity = activity.generateEntity( selectedEntity, selectedEntity );
+						
             activity.useEntity( entity );
 
             // We're finished. Send a report to the ECC

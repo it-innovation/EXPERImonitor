@@ -33,27 +33,31 @@ import com.vaadin.ui.*;
 import com.vaadin.terminal.FileResource;
 
 import java.io.*;
+import java.util.*;
 
 
 public class LiveProvView extends SimpleView
 {
+	private final int PROV_TRIPLE_MAX = 50;
+	
   private Panel    provViewPanel;
   private Embedded embeddedPROVView;
-  
-  private Table    provElementView;
-  private Table    provDataView;
+  private Table		 provDataView;
+	
+	private LinkedList<EDMTriple> tripleLog;
  
 
   public LiveProvView()
   {
     super();
+		
+		tripleLog = new LinkedList<EDMTriple>();
 
     createComponents();
   }
   
   public void resetView()
   {
-    provElementView.removeAllItems();
     provDataView.removeAllItems();
     
     provViewPanel.removeAllComponents();
@@ -65,15 +69,29 @@ public class LiveProvView extends SimpleView
   {
     if ( statement != null )
     {
-      provElementView.removeAllItems();
-
-      //no need to iterate over elements because only new triples have been sent
-      for (EDMTriple triple: statement.getTriples().values()) {
+			// Count all known triples
+			Collection<EDMTriple> statementTriples = statement.getTriples().values();
+			
+			int oldTripleCount = ( tripleLog.size() + statementTriples.size() ) - PROV_TRIPLE_MAX; 
+			
+			// Remove old triples before displaying tail
+			if ( oldTripleCount > 0 )
+				for ( int i = 0; i < oldTripleCount; i++ )
+					tripleLog.removeFirst();
+			
+			// Add new triples
+			for ( EDMTriple triple : statementTriples )
+				tripleLog.add( triple );
+			
+			// Clear current display
+			provDataView.removeAllItems();
+			
+      // Display triples
+      for (EDMTriple triple: tripleLog )
 	      provDataView.addItem( new Object[]{ triple.getSubject(),
 	              triple.getPredicate(),
 	              triple.getObject() },
 	              triple.getID() );
-      }
     }
   }
 
@@ -132,23 +150,19 @@ public class LiveProvView extends SimpleView
     HorizontalLayout hl = new HorizontalLayout();
     vl.addComponent( hl );
 
-    provElementView = new Table( "PROV Elements" );
-    provElementView.addStyleName( "striped" );
-    provElementView.setWidth( "330px" );
-    provElementView.setHeight( "120px" );
-    provElementView.addContainerProperty( "PROV Element", String.class, null );
-    provElementView.addContainerProperty( "PROV ID", String.class, null );
-    hl.addComponent( provElementView );
-
-    hl.addComponent( UILayoutUtil.createSpace( "4px", null, true) );
-
     provDataView = new Table( "PROV Triple statements" );
     provDataView.addStyleName( "striped" );
-    provDataView.setWidth( "496px" );
     provDataView.setHeight( "120px" );
-    provDataView.addContainerProperty( "Subject", String.class, null );
-    provDataView.addContainerProperty( "Predicate", String.class, null );
-    provDataView.addContainerProperty( "Object", String.class, null );
+    
+		provDataView.addContainerProperty( "Subject", String.class, null );
+		provDataView.setColumnWidth( "Subject", 300 );
+    
+		provDataView.addContainerProperty( "Predicate", String.class, null );
+		provDataView.setColumnWidth( "Predicate", 300 );
+    
+		provDataView.addContainerProperty( "Object", String.class, null );
+		provDataView.setColumnWidth( "Object", 300 );
+		
     hl.addComponent( provDataView );
   }
   
