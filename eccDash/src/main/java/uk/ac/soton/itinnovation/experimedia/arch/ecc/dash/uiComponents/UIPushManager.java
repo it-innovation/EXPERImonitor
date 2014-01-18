@@ -36,6 +36,7 @@ import java.util.*;
 public class UIPushManager
 {
   private final Object pushLock = new Object();
+	private boolean			 pushRootOK;
   private boolean      pushActive;
   
   private Window  rootWindow;
@@ -58,6 +59,7 @@ public class UIPushManager
     {
       rootWindow.addComponent( icePush );
       pushActive = false;
+			pushRootOK = false;
     }
   }
   
@@ -65,6 +67,7 @@ public class UIPushManager
   {
     synchronized( pushLock )
     {
+			pushRootOK = false;
       pushActive = false;
       iceTimer.cancel();
       iceTimer.purge();
@@ -77,32 +80,49 @@ public class UIPushManager
   public boolean pushUIUpdates()
   {
     boolean pushedOK = false;
-    
-    synchronized( pushLock )
-    {
-      if ( icePush != null )
-      {
-        if ( !pushActive )
-        {
-          pushActive = true;
-          
-          icePush.push();
-          
-          pushedOK = true;
-          
-          // Control the rate at which we push updates to the web client; do not
-          // want to overload the browser
-          PushCallback pcb = new PushCallback();
-          iceTimer.schedule( pcb, 1000 ); // 1 update/second max
-        }
-      }
-    }
+		
+		if ( !pushRootOK ) // Don't push if not connected to the root window
+			checkPushRoot();
+		else
+		{
+			synchronized( pushLock )
+			{
+				if ( icePush != null )
+				{
+					if ( !pushActive )
+					{
+						pushActive = true;
+
+						icePush.push();
+
+						pushedOK = true;
+
+						// Control the rate at which we push updates to the web client; do not
+						// want to overload the browser
+						PushCallback pcb = new PushCallback();
+						iceTimer.schedule( pcb, 1000 ); // 1 update/second max
+					}
+				}
+			}
+		}
     
     return pushedOK;
   }
   
   // Private classes & methods -------------------------------------------------  
-  private void finishPush()
+  private boolean checkPushRoot()
+	{
+		// The dashboard may sometimes try to push before the Vaadin root window has
+		// completed adding the ICE pusher. We need to check the pusher is linked to
+		// the root before pushing
+		
+		if ( icePush != null )
+			pushRootOK = ( icePush.getParent() != null );
+		
+		return pushRootOK;		
+	}
+	
+	private void finishPush()
   {
     synchronized ( pushLock )
     { pushActive = false; }
