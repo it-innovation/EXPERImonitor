@@ -27,8 +27,8 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.headlessECCClient;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.headlessECCClient.tools.PsuedoRandomWalkTool;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.headlessECCClient.tools.MemoryUsageTool;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 

@@ -29,7 +29,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.loggin.impl.Log4JImpl;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMInterfaceFactory;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDMAgent;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.IMonitoringEDMAgent;
 
 import java.io.*;
 import java.util.*;

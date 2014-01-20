@@ -18,33 +18,36 @@
 // the software.
 //
 //      Created By :            Vegard Engen
-//      Created Date :          2012-08-22
+//      Created Date :          2012-09-24
 //      Created for Project :   BonFIRE
 //
 /////////////////////////////////////////////////////////////////////////
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.metrics.mon.dao;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics;
 
 /**
- * A very simple class to encapsulate whether a function call evaluated to
- * true or false, with details of the exception that may have been thrown.
- * 
+ *
  * @author Vegard Engen
  */
-public class ValidationReturnObject
+public class NoDataException extends Exception
 {
-    public boolean valid;
-    public Exception exception;
-    
-    public ValidationReturnObject(){}
-    
-    public ValidationReturnObject(boolean valid)
+    public NoDataException()
     {
-        this.valid = valid;
+        super();
+    }
+
+    public NoDataException(String message)
+    {
+        super(message);
+    }
+
+    public NoDataException(Exception ex)
+    {
+        super(ex);
     }
     
-    public ValidationReturnObject(boolean valid, Exception ex)
+    public NoDataException(String message, Exception ex)
     {
-        this (valid);
-        this.exception = ex;
+        super(message, ex);
     }
 }
+

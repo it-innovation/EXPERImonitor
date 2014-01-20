@@ -22,13 +22,13 @@
 //      Created for Project :   BonFIRE
 //
 /////////////////////////////////////////////////////////////////////////
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao;
 
 import java.util.Set;
 import java.util.UUID;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Attribute;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Entity;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.NoDataException;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.NoDataException;
 
 /**
  * A DAO to save and get Entity and Attribute objects from storage.

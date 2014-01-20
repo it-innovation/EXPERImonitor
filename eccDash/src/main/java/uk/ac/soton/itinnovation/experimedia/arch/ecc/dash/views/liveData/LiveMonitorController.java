@@ -37,7 +37,7 @@ import uk.ac.soton.itinnovation.robust.cat.core.components.viewEngine.spec.uif.t
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.UIPushManager;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.visualizers.metrics.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IReportDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao.IReportDAO;
 
 
 import java.io.*;
@@ -119,15 +119,16 @@ public class LiveMonitorController extends UFAbstractEventManager
     // Safety first
     if ( report == null || client == null ) throw new Exception( "Live monitoring metric parameters were null" );
     if ( expReportAccessor == null ) throw new Exception( "Live monitoring control has not been initialised" );
-
+		
     // Check to see if we have anything useful store, and try store
     if ( sanitiseMetricReport(client, report) )
     {
+			// First get the EDM to save the measurements
       try
       { expReportAccessor.saveMeasurements( report ); }
       catch ( Exception e ) { throw e; }
 
-      // Remove measurements we've already displayed 'live'
+      // Now, remove measurements we've already displayed 'live'
       removeOldMeasurements( report );
 
       // Display (if we have an active display and there is still data)
@@ -153,11 +154,8 @@ public class LiveMonitorController extends UFAbstractEventManager
       if ( provLogger.isLogging() )
       {
         provLogger.writePROV( report );
-        
-        // TO DO: Update UI with tail of PROV data
-        
-        liveMonLogger.info( "Got PROV data from client " + client.getName() );
-        
+				liveProvView.echoPROVData( report );
+				
         provUpdatePending = true;
       }
       else
@@ -321,16 +319,18 @@ public class LiveMonitorController extends UFAbstractEventManager
           UUID msID = ms.getID();
 
           // Get latest measurement (if one does not exist, create a dummy measurement)
-          MSUpdateInfo lastRecent = measurementUpdates.get( msID );
-          if ( lastRecent == null )
+          MSUpdateInfo oldestMSInfo = measurementUpdates.get( msID );
+          if ( oldestMSInfo == null )
           {
             Date date = new Date();
             date.setTime( 0 );
 
-            lastRecent = new MSUpdateInfo( date, UUID.randomUUID() );
+            oldestMSInfo = new MSUpdateInfo( date, UUID.randomUUID() );
           }
-
-          MSUpdateInfo mostRecentInfo = lastRecent;
+					
+					// Keep track on the most recent date measurement as well
+					Date mostRecentMeasure = new Date();
+					mostRecentMeasure.setTime( 0 );
 
           // Find old measurements (if any)
           Iterator<Measurement> mIt = targetMeasurements.iterator();
@@ -339,11 +339,13 @@ public class LiveMonitorController extends UFAbstractEventManager
             Measurement m = mIt.next();
             Date mDate    = m.getTimeStamp();
 
-            if ( mostRecentInfo.lastUpdate.after(mDate) ||
-                 mostRecentInfo.lastMeasurementID.equals(m.getUUID()) ) // If it is an old or repeated
-              oldMeasurements.add( m );                                 // measurement, we don't want it
-            else
-              mostRecentInfo = new MSUpdateInfo( mDate, m.getUUID() );
+						// Check measurement is new/not a repeated measurement (by ID)
+            if ( oldestMSInfo.lastUpdate.after(mDate) || 
+								 oldestMSInfo.lastMeasurementID.equals(m.getUUID()) ) 
+              oldMeasurements.add( m ); // If it is an old or repeated measurement, we don't want it
+						
+						// Update the most recent measurement
+						if ( mDate.after(mostRecentMeasure) ) mostRecentMeasure = mDate;
           }
 
           // Remove old measurements
@@ -353,8 +355,10 @@ public class LiveMonitorController extends UFAbstractEventManager
 
           // Update measurement count and recency
           report.setNumberOfMeasurements( targetMeasurements.size() );
-          measurementUpdates.remove( msID );
-          measurementUpdates.put( msID, mostRecentInfo );
+          
+					measurementUpdates.remove( msID );
+					oldestMSInfo.lastUpdate.setTime( mostRecentMeasure.getTime() );
+          measurementUpdates.put( msID, oldestMSInfo );
         }
         else report.setNumberOfMeasurements( 0 );
       }
@@ -365,9 +369,10 @@ public class LiveMonitorController extends UFAbstractEventManager
   private boolean sanitiseMetricReport( EMClient client, Report reportOUT )
   {
     // Check that we apparently have data
-    if ( reportOUT.getNumberOfMeasurements() == 0 )
+		Integer nom = reportOUT.getNumberOfMeasurements();
+    if ( nom == null ||  nom == 0 )
     {
-      liveMonLogger.error( "Metric report error: measurement count = 0" );
+      liveMonLogger.warn( "Did not process metric report: measurement count = 0" );
       return false;
     }
 
@@ -375,14 +380,14 @@ public class LiveMonitorController extends UFAbstractEventManager
     MeasurementSet clientMS = reportOUT.getMeasurementSet();
     if ( clientMS == null )
     {
-      liveMonLogger.error( "Metric report error: Measurement set is null" );
+      liveMonLogger.error( "Did not process metric report: Measurement set is null" );
       return false;
     }
 
     Metric metric = clientMS.getMetric();
     if ( metric == null )
     {
-      liveMonLogger.error( "Metric report error: Metric is null" );
+      liveMonLogger.error( "Did not process metric report: Metric is null" );
       return false;
     }
 
@@ -415,7 +420,7 @@ public class LiveMonitorController extends UFAbstractEventManager
               if ( !dVal.isNaN() && !dVal.isInfinite() )
                 cleanSet.addMeasurement( m );
             }
-            catch( Exception ex ) { /*Not INTERVAL OR RATIO, so don't include*/ }
+            catch( Exception ex ) { liveMonLogger.warn("Caught NaN value in measurement: dropping"); }
           }
         } break;
       }
@@ -445,14 +450,14 @@ public class LiveMonitorController extends UFAbstractEventManager
     {
       if ( provUpdatePending )
       {
-        // TODO: Update tail of PROV reports to UI
-        
+        liveProvView.updateView();
         provUpdatePending = false;
+				pushRequired      = true;
       }
     }
     
     // Push UI updates, if required
-    if ( pushManager !=null && pushRequired ) pushManager.pushUIUpdates();
+    if ( pushManager !=null && pushRequired  ) pushManager.pushUIUpdates();
   }
   
   // Private classes -----------------------------------------------------------
@@ -554,6 +559,9 @@ public class LiveMonitorController extends UFAbstractEventManager
             provBW.write( triple.toString() );
             provBW.newLine();
           }
+					
+					// Flush data out immediately
+					provBW.flush();
                     
           result = true;
           

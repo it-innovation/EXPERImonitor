@@ -27,8 +27,8 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.metrics.MonitoringEDM;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.metrics.MonitoringEDMAgent;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDM;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDMAgent;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.IMonitoringEDM;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.IMonitoringEDMAgent;
 
 import java.util.Properties;
 

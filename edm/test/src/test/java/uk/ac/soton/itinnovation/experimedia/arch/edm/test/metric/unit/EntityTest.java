@@ -39,8 +39,8 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.loggin.impl.Log4JImp
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.IECCLogger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMInterfaceFactory;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDM;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IEntityDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.IMonitoringEDM;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao.IEntityDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.edm.test.metrics.PopulateDB;
 
 /**

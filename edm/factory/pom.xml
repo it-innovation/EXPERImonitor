@@ -58,7 +58,11 @@
     
     <dependency>
       <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
+<<<<<<< HEAD
       <artifactId>experimedia-arch-ecc-edm-impl</artifactId>
+=======
+      <artifactId>experimedia-arch-ecc-edm-impl-metrics</artifactId>
+>>>>>>> 8352757aabdc5fb0391146c535f272c4fc967b23
       <version>2.0-SNAPSHOT</version>
     </dependency>
 	

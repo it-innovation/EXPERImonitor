@@ -22,12 +22,12 @@
 //      Created for Project :   BonFIRE
 //
 /////////////////////////////////////////////////////////////////////////
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao;
 
 import java.util.Date;
 import java.util.UUID;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.NoDataException;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.NoDataException;
 
 /**
  * A DAO to save and get Report objects from storage, which gives access to 
