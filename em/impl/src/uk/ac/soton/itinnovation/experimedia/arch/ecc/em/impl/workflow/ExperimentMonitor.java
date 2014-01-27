@@ -121,7 +121,6 @@ public class ExperimentMonitor implements IExperimentMonitor,
       if ( connectionManager != null ) connectionManager.shutdown();
       if ( lifecycleManager != null )  lifecycleManager.shutdown();
       
-      amqpChannel.close();
       amqpChannel = null;
       
       amqpConnectionFactory.closeDownConnection();
@@ -336,8 +335,6 @@ public class ExperimentMonitor implements IExperimentMonitor,
       { emLogger.warn( "Could not properly clean up disconnected client: " + ex.getMessage() ); }
     }
     else emLogger.warn( "Got disconnection notice from null client!" );
-    
-    
   }
   
   @Override
