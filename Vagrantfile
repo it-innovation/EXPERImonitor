@@ -1,27 +1,31 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-# To use, install vagrant and VirtualBox and type "vagrant up"
-
-# ECC service will be available at http://localhost:8080/ECC on host machine.
-# RabbitMQ AMQP bus will be available on port http://localhost:5672 on host machine and http://10.0.0.10:5672.
-# RabbitMQ management interface will be available at http://localhost:55672 on host machine (username: guest / password: guest).
-# Tomcat manager will be on http://localhost:8080/manager/html with username manager, password manager
-# Tail the log file with: vagrant ssh -c "tail -f /var/lib/tomcat7/logs/catalina.out"
+# Deploy SAD into a VM with IP 10.0.0.11
+# SAD service will be available at http://localhost:8081/SAD on host machine.
+# Tomcat manager will be on http://localhost:8081/manager/html with username manager, password manager
+# Tail the log file with: vagrant ssh -c "tail -f /var/log/tomcat7/catalina.out"
 
 ## Configuration for this script (this part is Ruby) ##
 
-hostname = "ECC"
+hostname = "SAD"
 ram = "512"
 # Deploying with a static IP like this means that VirtualBox will set up a virtual network card that listens on 10.0.0.0/48
 # If you have other machines on that subnet then change the IP or you will have to delete the virtual card from the
-# VirtualBox GUI afterwards.  The purpose of using a static IP is so that other services deployed in the same way can 
-# communicate.
-ip = "10.0.0.10"
+# VirtualBox GUI afterwards.  The purpose of using a static IP is so that it can talk to the Rabbit/ECC deployed in the same way.
+ip = "10.0.0.11"
 
-rabbit_ip = ip
+rabbit_ip = "10.0.0.10"
 #rabbit_ip = "rabbitmq.experimedia.eu"
 uuid = "00000000-0000-0000-0000-000000000000"
+
+# if deploying in Jetty:
+#plugin_path = "..\\/sad-plugins"
+#coordinator_path = "src\\/main\\/resources\\/coordinator.json"
+
+# if deploying in Tomcat:
+plugin_path = "/home/vagrant/experimedia-sad/sad-plugins"
+coordinator_path = "webapps/SAD/WEB-INF/classes/coordinator.json"
 
 ## The following shell script is run once the VM is built (this part is bash) ##
 
@@ -31,49 +35,53 @@ apt-get update
 
 ## Install dependencies ##
 
+# sort out switching to Java 7 before installing Tomcat
+apt-get install -y openjdk-7-jdk
+update-alternatives --set java /usr/lib/jvm/java-7-openjdk-i386/jre/bin/java
+rm /usr/lib/jvm/default-java
+ln -s /usr/lib/jvm/java-1.7.0-openjdk-i386 /usr/lib/jvm/default-java
+# install everything else we need
 apt-get install -y git
 apt-get install -y maven2
+apt-get install -y postgresql-9.1  # needed for local EDM
+apt-get install -y mongodb
 apt-get install -y tomcat7
-apt-get install -y tomcat7-admin
-apt-get install -y openjdk-6-jdk
-apt-get install -y postgresql-9.1
-apt-get install -y rabbitmq-server
+apt-get install -y sphinx-doc
+apt-get install -y sphinx-common
 
-## Get the ECC code ##
+## Get the SAD code ##
+# (need to do this before PostgreSQL config)
 
 # remove old code in case we are reprovisioning
-rm -rf experimedia-ecc
+rm -rf experimedia-sad
 
-# get the latest ECC code from Git
-#git clone git://soave.it-innovation.soton.ac.uk/git/experimedia-ecc
-#cd experimedia-ecc
-#git checkout sgc-master
-#cd ..
+# get the latest SAD code from IT Innovation internal Git
+git clone git://soave.it-innovation.soton.ac.uk/git/experimedia-sad
+cd experimedia-sad
+git checkout mvb-prov-master
 
-# or copy ECC code from guest machine to host machine
-# (need to do this before PostgreSQL config)
-mkdir experimedia-ecc
-rsync -a /vagrant/ experimedia-ecc --exclude '.git' --exclude 'target'
+# or get the code from GitHub  TODO: test this
+#git clone https://github.com/it-innovation/SAD experimedia-sad
+#cd experimedia-sad
 
-## Set up PostgreSQL ##
+# or copy SAD code from guest machine to host machine
+#mkdir experimedia-sad
+#rsync -a /vagrant/ experimedia-sad --exclude '.git' --exclude 'target'
+#cd experimedia-sad
 
-# create the database
-sudo -u postgres createdb -T template0 edm-metrics --encoding=UTF8 --locale=en_US.utf8
-sudo -u postgres psql -d edm-metrics -f experimedia-ecc/edm/resources/edm-metrics-postgres.sql
+## Set up PostgreSQL (needed if using local EDM) ##
 
-# set postgres user's password to "password"
-sudo -u postgres psql --command="ALTER USER postgres WITH PASSWORD 'password';"
+# create the PostgreSQL database for the client metric cache
+sudo -u postgres createdb -T template0 agent-edm-metrics --encoding=UTF8 --locale=en_US.utf8
+sudo -u postgres psql -d edm-metrics -f sad-service/src/main/resources/edm-metrics-postgres.sql
+
+# set postgres user's password to "sofia"
+sudo -u postgres psql --command="ALTER USER postgres WITH PASSWORD 'sofia';"
 
 # set postgres user to need password for local connections (and reload)
 echo "host all postgres 127.0.0.1/0 password" > /tmp/pg_hba.conf
 sudo -u postgres cp /tmp/pg_hba.conf /etc/postgresql/9.1/main
 service postgresql reload
-
-## Set up RabbitMQ ##
-
-# enable rabbitmq management plugin so we can see what's happening
-/usr/lib/rabbitmq/lib/rabbitmq_server-2.7.1/sbin/rabbitmq-plugins enable rabbitmq_management
-service rabbitmq-server restart
 
 ## Set up Tomcat ##
 
@@ -81,34 +89,78 @@ service rabbitmq-server restart
 echo "<?xml version='1.0' encoding='utf-8'?><tomcat-users><user rolename='manager-gui'/><user username='manager' password='manager' roles='manager-gui'/></tomcat-users>" > /etc/tomcat7/tomcat-users.xml
 service tomcat7 restart
 
-## Configure ECC Service ##
+## SAD service configuration ##
 
 # configure location of Rabbit
 # configure uuid
-sed \
-  -e 's/^Rabbit_IP=127\\.0\\.0\\.1/Rabbit_IP=#{rabbit_ip}/' \
-  -e 's/^Monitor_ID=00000000-0000-0000-0000-000000000000/Monitor_ID=#{uuid}/' \
-  experimedia-ecc/eccDash/src/main/webapp/WEB-INF/em.properties \
-  > /tmp/em.properties
-cp /tmp/em.properties experimedia-ecc/eccDash/src/main/webapp/WEB-INF/
-echo "**** ECC config:"
-cat experimedia-ecc/eccDash/src/main/webapp/WEB-INF/em.properties
+# configure location of plugins
+# configure coordinator.json location
+
+#sed \
+#  -e 's/127\.0\.0\.1/#{rabbit_ip}/' \
+#  -e 's/00000000-0000-0000-0000-000000000000/#{uuid}/' \
+#  -e 's/\\.\\.\\/sad-plugins/#{plugin_path}/' \
+#  -e 's/src\\/main\\/resources\\/coordinator\\.json/#{coordinator_path}/' \
+#  sad-service/src/main/resources/sadproperties.json \
+#  > /tmp/sadproperties.json
+#cp /tmp/sadproperties.json sad-service/src/main/resources/
+#echo "**** SAD config:"
+
+cat > sad-service/src/main/resources/sadproperties.json <<SADCONFIG
+{
+    "plugins": {
+        "path": "#{plugin_path}"
+    },
+    "coordinator": {
+        "path": "#{coordinator_path}",
+        "reset_database_on_start": "y"
+    },
+    "basepath": "http://localhost:8080/SAD",
+    "ecc": {
+        "enabled": "y",
+        "Rabbit_IP": "#{rabbit_ip}",
+        "Rabbit_Port": "5672",
+        "Monitor_ID": "#{uuid}",
+        "Client_Name": "Social Analytics Dashboard"
+    },
+    "edm": {
+        "enabled": "n",
+        "dbURL": "localhost:5432",
+        "dbName": "agent-edm-metrics",
+        "dbUsername": "postgres",
+        "dbPassword": "sofia",
+        "dbType": "postgresql"
+    }
+}
+SADCONFIG
+
+# add in sample plugin visualisations
+cp -a sad-plugins/basic-sns-stats/src/main/resources/visualise sad-service/src/main/webapp/visualise/basic-sns-stats
+cp -a sad-plugins/facebook-collector/src/main/resources/visualise sad-service/src/main/webapp/visualise/facebook-collector
+cp -a sad-plugins/twitter-searcher/src/main/resources/visualise sad-service/src/main/webapp/visualise/twitter-searcher
 
 ## Build ##
 
-echo "**** Building ECC"
-cd experimedia-ecc
-cd thirdPartyLibs && ./installLibraries.sh && cd ..
+echo "**** Building SAD"
+cd lib
+./install_into_maven
+cd ..
 mvn install
 
-## Deploy ##
+## Deployment ##
 
-# deploy the ECC into Tomcat
-echo "**** Deploying ECC into Tomcat"
-cp eccDash/target/*.war /var/lib/tomcat7/webapps/ECC.war
+# deploy the SAD into Tomcat
+echo "**** Deploying SAD into Tomcat"
+cp sad-service/target/SAD*.war /var/lib/tomcat7/webapps/SAD.war
+echo "**** Finished: SAD deployed in Tomcat port running on port 8080.  Mapped to localhost:8081/SAD on host machine."
 
-echo "**** Finished: ECC deployed in Tomcat port running on port 8080.  Mapped to localhost:8080/ECC on host machine."
+# or run the SAD using Jetty launched from maven
+#cd sad-service
+#mvn jetty:run-war
+
 SCRIPT
+
+## Configuration of the VM (Ruby again) ##
 
 Vagrant.configure("2") do |config|
 
@@ -117,12 +169,10 @@ Vagrant.configure("2") do |config|
     config.vm.box_url = "http://files.vagrantup.com/precise32.box"
     config.vm.hostname = hostname
 	
-	# Forward host port 8080 to guest port 8080 for Tomcat
-	config.vm.network :forwarded_port, host: 8080, guest: 8080
-	# Forward host port 5672 to guest port 5672 for RabbitMQ messages
-	config.vm.network :forwarded_port, host: 5672, guest: 5672
-	# Forward host port 55672 to guest port 55672 for RabbitMQ management page
-	config.vm.network :forwarded_port, host: 55672, guest: 55672
+	# Forward host port 8081 to guest port 8080 for Tomcat
+	config.vm.network :forwarded_port, host: 8081, guest: 8080
+	## Forward host port 8081 to guest port 8081 for Jetty
+	#config.vm.network :forwarded_port, host: 8081, guest: 8081
 	
 	# Set static private network address
 	config.vm.network "private_network", ip: ip
