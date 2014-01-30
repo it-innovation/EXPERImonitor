@@ -25,8 +25,53 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.prov.dao;
 
+import java.util.Date;
+import java.util.Properties;
+import java.util.Set;
+import org.apache.log4j.Logger;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvBaseElement;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMTriple;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.prov.db.EDMProvStoreWrapper;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.prov.dao.IEDMProvRelationReader;
 
-public class EDMProvRelationReaderImpl implements IEDMProvRelationReader {
+public final class EDMProvRelationReaderImpl implements IEDMProvRelationReader {
+	
+	private final Properties props;
+	private final Logger logger;
+	
+	private EDMProvStoreWrapper sCon;
+	
+	public EDMProvRelationReaderImpl(Properties props) {
+		logger = Logger.getLogger(EDMProvRelationReaderImpl.class);
+		this.props = props;
+		init();
+	}
+	
+	private void init() {
+		connect();
+	}
+	
+	private void connect() {
+		try {
+            sCon = new EDMProvStoreWrapper(props);
+        } catch (Exception e) {
+			logger.error("Error connecting to sesame server at " + props.getProperty("owlim.sesameServerURL"), e);
+        }
+	}
+
+	@Override
+	public Set<EDMTriple> getRelations(EDMProvBaseElement element) {
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	@Override
+	public Set<EDMTriple> getRelations(EDMProvBaseElement element, Date start, Date end) {
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	@Override
+	public Set<EDMTriple> getRelations(EDMProvBaseElement element, Date start, Date end, boolean inputsOnly) {
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
 
 }

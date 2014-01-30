@@ -23,9 +23,10 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.test.prov;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.test;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -55,7 +56,6 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvReport;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMTriple;
 
-//test comment for git
 
 public class KnowledgeBaseTest {
 
@@ -64,18 +64,18 @@ public class KnowledgeBaseTest {
 	private EDMProvReport report;
 	private ASesameConnector sCon;
 	
-	private static Properties props = new Properties();
+	private static final Properties props = new Properties();
 	
 	//ontology config
-	private static String ontPrefix = "experimedia";
-	private static String ontBaseURI = "http://it-innovation.soton.ac.uk/ontologies/experimedia#";
+	private static final String ontPrefix = "experimedia";
+	private static final String ontBaseURI = "http://it-innovation.soton.ac.uk/ontologies/experimedia#";
 	
 	//triple store config
-	private static String sesameServerURL = "http://localhost:8080/openrdf-sesame";
-	private static String repositoryID = "experimedia";
-	private static String repositoryName = "EXPERIMEDIA provenance store";
+	private static final String sesameServerURL = "http://localhost:8080/openrdf-sesame";
+	private static final String repositoryID = "experimedia";
+	private static final String repositoryName = "EXPERIMEDIA provenance store";
 	
-	private static Logger logger = Logger.getLogger(KnowledgeBaseTest.class);
+	private static final Logger logger = Logger.getLogger(KnowledgeBaseTest.class);
 
 	private KnowledgeBaseTest() {
 		
@@ -84,7 +84,7 @@ public class KnowledgeBaseTest {
 		logger.info("Loading properties file");
 		try {
 			props.load(KnowledgeBaseTest.class.getClassLoader().getResourceAsStream("config.properties"));
-		} catch (Exception e) {
+		} catch (IOException e) {
 			logger.error("Error loading properties file", e);
 		}
 		
@@ -149,7 +149,7 @@ public class KnowledgeBaseTest {
 			logger.info("Recreating EDMProvFactory from results");
 			recreateProv(result);
 		
-		} catch (Throwable t) {
+		} catch (Exception t) {
 			logger.error("Exception caught: " + t, t);
 		} finally {
 			if ((sCon != null) && sCon.isConnected()) {

@@ -25,6 +25,10 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.prov.dao;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvReport;
+
 public interface IEDMProvWriter {
+    
+    public void storeReport(EDMProvReport report);
 
 }

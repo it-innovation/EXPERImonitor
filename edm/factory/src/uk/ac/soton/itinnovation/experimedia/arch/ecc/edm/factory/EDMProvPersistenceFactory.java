@@ -25,6 +25,21 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory;
 
-public class EDMProvPersistenceFactory {
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.prov.dao.IEDMProvDataStore;
 
+public final class EDMProvPersistenceFactory {
+	
+	private IEDMProvDataStore store;
+	
+	public EDMProvPersistenceFactory() {
+		store = createStore(null, null);
+	}
+
+    public IEDMProvDataStore createStore(String experiment, String owlimServerURL) {
+        return null;
+    }
+    
+    public IEDMProvDataStore loadStore(String experiment, String owlimServerURL) {
+        return null;
+    }
 }

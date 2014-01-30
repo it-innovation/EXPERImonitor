@@ -25,6 +25,24 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.prov.dao;
 
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Properties;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvDisplayFactory;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvFactory;
+
 public class SPARQLProvTranslator {
+	
+	private Properties props;
+	
+	public SPARQLProvTranslator(Properties props) {
+		this.props = props;
+	}
+	
+	public EDMProvDisplayFactory translate(LinkedList<HashMap<String,String>> queryResult) {
+		EDMProvDisplayFactory factory = new EDMProvDisplayFactory(null, null);
+		factory.loadSPARQLResult(queryResult);
+		return factory;
+	}
 
 }

@@ -23,7 +23,7 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.test.prov;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.test;
 
 import java.io.IOException;
 import java.io.StringWriter;

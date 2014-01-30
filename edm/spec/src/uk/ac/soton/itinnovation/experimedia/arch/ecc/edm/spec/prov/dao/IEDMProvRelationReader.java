@@ -25,6 +25,19 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.prov.dao;
 
+import java.util.Date;
+import java.util.Properties;
+import java.util.Set;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvBaseElement;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMTriple;
+
 public interface IEDMProvRelationReader {
 
+    public Set<EDMTriple> getRelations(EDMProvBaseElement element);
+    
+    public Set<EDMTriple> getRelations(EDMProvBaseElement element, Date start, Date end);
+    
+    //sw: Simon, did you mean incoming relationships only?
+    public Set<EDMTriple> getRelations(EDMProvBaseElement element, Date start, Date end, boolean inputsOnly);
+    
 }

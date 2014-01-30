@@ -25,6 +25,22 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.prov.dao;
 
-public interface IEDMProvElementReader {
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Set;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvBaseElement;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMTriple;
 
+public interface IEDMProvElementReader {
+    
+    public EDMProvBaseElement getElement(String IRI);
+
+    public EDMProvBaseElement getElement(String IRI, Date start, Date end);
+    
+    public HashMap<String,EDMProvBaseElement> getElements(Date start, Date end);
+    
+    public HashMap<String,EDMProvBaseElement> getElements(EDMProvBaseElement.PROV_TYPE type, Date start, Date end);
+    
+    public HashMap<String,EDMProvBaseElement> getElements(Set<EDMTriple> rels);
+    
 }
