@@ -231,9 +231,9 @@ public class EDMProvFactory {
 		}
 		
 		if (element!=null) {
-			container.allProvElements.put(element.iri, element);
+			container.allProvElements.put(element.getIri(), element);
 
-			for (Entry<UUID, EDMTriple> e: element.triples.entrySet()) {
+			for (Entry<UUID, EDMTriple> e: element.getTriples().entrySet()) {
 				currentTriples.put(e.getKey(), e.getValue());
 			}
 		}
@@ -249,7 +249,7 @@ public class EDMProvFactory {
 		if (element != null) {
 
 			//add all the triples that haven't been processed yet into the current report
-			for (Entry<UUID, EDMTriple> e: element.triples.entrySet()) {
+			for (Entry<UUID, EDMTriple> e: element.getTriples().entrySet()) {
 				if (!currentTriples.containsKey(e.getKey()) && !sentTriples.containsKey(e.getKey())) {
 					currentTriples.put(e.getKey(), e.getValue());
 				}

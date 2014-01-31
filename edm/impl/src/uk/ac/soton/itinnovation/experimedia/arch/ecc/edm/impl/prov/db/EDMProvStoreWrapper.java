@@ -40,6 +40,7 @@ import uk.ac.soton.itinnovation.edmprov.sesame.RemoteSesameConnector;
 public class EDMProvStoreWrapper extends RemoteSesameConnector {
 	
 	private Properties props;
+	private String prefixes;
 	
 	public EDMProvStoreWrapper(Properties props) throws Exception {
             super(props, props.getProperty("owlim.sesameServerURL"));
@@ -47,16 +48,23 @@ public class EDMProvStoreWrapper extends RemoteSesameConnector {
 			logger.debug("Connecting to sesame server");
 			
 			this.props = props;
+			this.prefixes = null;
 	}
-
-    public LinkedList<HashMap<String,String>> query(String sparql) {
-		
+	
+	public void loadPrefixes() {
 		//get prefixes
-		String prefixes = "";
+		this.prefixes = "";
 		if (this.getNamespacesForRepository(props.getProperty("owlim.repositoryID"))!=null) {
 			for (Map.Entry<String, String> e: this.getNamespacesForRepository(props.getProperty("owlim.repositoryID")).entrySet()) {
-				prefixes += "PREFIX " + e.getKey() + ":<" + e.getValue() + ">\n";
+				this.prefixes += "PREFIX " + e.getKey() + ":<" + e.getValue() + ">\n";
 			}
+		}
+	}
+	
+    public LinkedList<HashMap<String,String>> query(String sparql) {
+		
+		if (this.prefixes==null) {
+			loadPrefixes();
 		}
 		sparql = prefixes + sparql;
 				

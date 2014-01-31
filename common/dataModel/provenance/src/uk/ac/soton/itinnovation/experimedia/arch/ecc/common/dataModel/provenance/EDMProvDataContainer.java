@@ -39,7 +39,7 @@ public class EDMProvDataContainer {
 	
 	protected Logger logger = Logger.getLogger(EDMProvDataContainer.class.getName());
 	
-	protected EDMProvDataContainer(String prefix, String baseURI) {
+	public EDMProvDataContainer(String prefix, String baseURI) {
 		this.setPrefix(prefix);
 		this.setBaseURI(baseURI);
 		init();
@@ -65,6 +65,14 @@ public class EDMProvDataContainer {
 			contents += e.getValue().toString();
 		}
 		return contents;
+	}
+	
+	public void addElement(EDMProvBaseElement element) {
+		if (element!=null && element.getIri()!=null) {
+			this.allProvElements.put(element.getIri(), element);
+		} else {
+			logger.warning("Skipping invalid EDMProvBaseElement");
+		}
 	}
 	
 	//GETTERS/SETTERS//////////////////////////////////////////////////////////////////////////////

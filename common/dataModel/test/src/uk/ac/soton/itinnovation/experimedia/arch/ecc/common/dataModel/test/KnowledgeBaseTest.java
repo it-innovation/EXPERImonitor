@@ -27,7 +27,6 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.test;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -51,16 +50,16 @@ import uk.ac.soton.itinnovation.edmprov.sesame.RemoteSesameConnector;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMActivity;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMAgent;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMEntity;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvDisplayFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvReport;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMTriple;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.prov.dao.SPARQLProvTranslator;
 
 
 public class KnowledgeBaseTest {
 
 	private EDMProvFactory factory;
-	private EDMProvDisplayFactory factory2;
+	private SPARQLProvTranslator factory2;
 	private EDMProvReport report;
 	private ASesameConnector sCon;
 	
@@ -354,7 +353,7 @@ public class KnowledgeBaseTest {
 				HashMap<String, String> row = new HashMap<String, String>();
 				while (i.hasNext()) {
 					Binding b = i.next();
-					row.put(b.getName(), b.getValue().stringValue());
+					row.put(b.getName(), b.getValue().toString());
 				}
 				results.add(row);
 			}
@@ -377,8 +376,8 @@ public class KnowledgeBaseTest {
 	}
 	
 	private void recreateProv(LinkedList<HashMap<String, String>> result) {	
-		factory2 = new EDMProvDisplayFactory(ontPrefix, ontBaseURI);
-		factory2.loadSPARQLResult(result);
+		factory2 = new SPARQLProvTranslator(props);
+		factory2.translate(result);
 		logger.info(factory2.toString());
 	}
 

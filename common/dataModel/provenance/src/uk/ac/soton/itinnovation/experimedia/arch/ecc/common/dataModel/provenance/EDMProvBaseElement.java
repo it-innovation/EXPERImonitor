@@ -41,12 +41,12 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance
  */
 public class EDMProvBaseElement {
 
-    protected UUID instanceID;
-    protected PROV_TYPE provType = PROV_TYPE.ePROV_UNKNOWN_TYPE;
-    protected String iri;
-    protected String prefix;
-    protected String uniqueIdentifier;
-	protected HashMap<UUID, EDMTriple> triples;
+    private UUID instanceID;
+    private PROV_TYPE provType = PROV_TYPE.ePROV_UNKNOWN_TYPE;
+    private String iri;
+    private String prefix;
+    private String uniqueIdentifier;
+	private HashMap<UUID, EDMTriple> triples;
     
     protected static SimpleDateFormat format = new SimpleDateFormat("\"yyyy-MM-dd'T'HH:mm:ss'Z\"^^xsd:dateTime'");
     
@@ -67,7 +67,7 @@ public class EDMProvBaseElement {
      * 		  It needs to be unique across clients.
      * @param label a human readable name
      */
-    protected EDMProvBaseElement(String prefix, String uniqueIdentifier, String label) {
+    public EDMProvBaseElement(String prefix, String uniqueIdentifier, String label) {
     	this.instanceID = UUID.randomUUID();
     	this.prefix = prefix;
     	this.uniqueIdentifier = uniqueIdentifier;
@@ -306,5 +306,12 @@ public class EDMProvBaseElement {
 	public String getUniqueIdentifier() {
 		return uniqueIdentifier;
 	}
+
+	public void setProvType(PROV_TYPE provType) {
+		this.provType = provType;
+	}
+
+	
+	
 
 }

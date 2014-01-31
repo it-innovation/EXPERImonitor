@@ -32,14 +32,14 @@ public final class EDMProvPersistenceFactory {
 	private IEDMProvDataStore store;
 	
 	public EDMProvPersistenceFactory() {
-		store = createStore(null, null);
+		store = createStore(null);
 	}
 
-    public IEDMProvDataStore createStore(String experiment, String owlimServerURL) {
+    public IEDMProvDataStore createStore(String experiment) {
         return null;
     }
     
-    public IEDMProvDataStore loadStore(String experiment, String owlimServerURL) {
+    public IEDMProvDataStore loadStore(String experiment) {
         return null;
     }
 }
