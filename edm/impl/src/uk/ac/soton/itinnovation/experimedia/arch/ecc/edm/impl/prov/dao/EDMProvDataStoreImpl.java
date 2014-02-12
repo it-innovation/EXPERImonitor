@@ -25,14 +25,13 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.prov.dao;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.edmprov.owlim.common.NoSuchRepositoryException;
-import uk.ac.soton.itinnovation.edmprov.owlim.common.OntologyDetails;
 import uk.ac.soton.itinnovation.edmprov.owlim.common.RepositoryExistsException;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.prov.db.EDMProvStoreWrapper;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.prov.dao.IEDMProvDataStore;
@@ -46,55 +45,48 @@ public final class EDMProvDataStoreImpl implements IEDMProvDataStore {
     private IEDMProvElementReader provElementReader;
     private IEDMProvRelationReader provRelationReader;
     
-    private EDMProvStoreWrapper sCon;
-    private final Properties props;
+    private EDMProvStoreWrapper edmProvStoreWrapper;
+    private Properties props;
     private final Logger logger;
     
     public EDMProvDataStoreImpl() {
-        
-        props = new Properties();
-        logger = Logger.getLogger(EDMProvDataStoreImpl.class);
-        
-        provWriter = createIEDMProvWriter(props);
-        provElementReader = createIEDMProvElementReader(props);
-        provRelationReader = createIEDMProvRelationReader(props);
-        
-        init();  
+		
+		logger = Logger.getLogger(EDMProvDataStoreImpl.class);
+		logger.setLevel(Level.INFO);	//TODO: remove
+		
+		try {
+			logger.debug("Loading properties file");
+			this.props.load(EDMProvDataStoreImpl.class.getClassLoader().getResourceAsStream("config.properties"));
+		} catch (IOException e) {
+			logger.error("Error loading properties file", e);
+		}
+		
+		init();
     }
+	
+	public EDMProvDataStoreImpl(Properties props) {
+
+	    logger = Logger.getLogger(EDMProvDataStoreImpl.class);
+		this.props = props;
+
+		this.init();
+	}
     
     private void init() {
-        
-        try {
-            logger.debug("Loading properties file");
-            props.load(EDMProvDataStoreImpl.class.getClassLoader().getResourceAsStream("config.properties"));
-        } catch (IOException e) {
-            logger.error("Error loading properties file", e);
-        }
-        
+
+        provWriter = new EDMProvWriterImpl(props);
+        provElementReader = new EDMProvElementReaderImpl(props);
+        provRelationReader = new EDMProvRelationReaderImpl(props);
+		
         connect();
 		
 		createRepository(props.getProperty("owlim.repositoryID"), props.getProperty("owlim.repositoryName"));
     }
 
-    @Override
-    public IEDMProvWriter createIEDMProvWriter(Properties props) {
-        return new EDMProvWriterImpl(props);
-    }
-
-    @Override
-    public IEDMProvElementReader createIEDMProvElementReader(Properties props) {
-        return new EDMProvElementReaderImpl(props);
-    }
-
-    @Override
-    public IEDMProvRelationReader createIEDMProvRelationReader(Properties props) {
-        return new EDMProvRelationReaderImpl(props);
-    }
-
 	@Override
 	public void connect() {
 		try {
-            sCon = new EDMProvStoreWrapper(props);
+            edmProvStoreWrapper = new EDMProvStoreWrapper(props);
         } catch (Exception e) {
 			logger.error("Error connecting to sesame server at " + props.getProperty("owlim.sesameServerURL"), e);
         }
@@ -104,7 +96,7 @@ public final class EDMProvDataStoreImpl implements IEDMProvDataStore {
 	public void createRepository(String repositoryID, String repositoryName) {
 		try {
 			logger.debug("Creating owlim repository");
-			sCon.createNewRepository(repositoryID, repositoryName);
+			edmProvStoreWrapper.createNewRepository(repositoryID, repositoryName);
 		} catch (RepositoryExistsException e) {
 			logger.info("Repository " + repositoryID + " already existed - fine, will continue...");
 			//TODO: clear?
@@ -114,62 +106,62 @@ public final class EDMProvDataStoreImpl implements IEDMProvDataStore {
 	}
 
 	@Override
-	public void importOntology(String ontologypath, String baseURI, String prefix) {
-		logger.info("Importing ontology " + prefix + " (" + baseURI + ")");
-		OntologyDetails od = new OntologyDetails();
-		File ontfile = new File(ontologypath);
-		if (!ontfile.exists()) {
-			//try URL
-			if (ontologypath.startsWith("http://")) {
-				try {
-					URL remoteOntology = new URL(ontologypath);
-					od.setURL(remoteOntology);       
-				} catch (MalformedURLException e) {
-					logger.error("Error loading ontology from URL " + ontologypath, e);
-				}
-			//try file from classpath
-			} else {
-				String resourcepath = EDMProvDataStoreImpl.class.getClassLoader().getResource(ontologypath).getPath();
-				try {
-					ontfile = new File(resourcepath);
-					od.setURL(ontfile.toURI().toURL());
-				} catch (MalformedURLException e) {
-					logger.error("Error getting ontology from resource path", e);
-				}
-			}
-			
-		} else {
-			try {
-				od.setURL(ontfile.toURI().toURL());
-			} catch (MalformedURLException e) {
-				logger.error("Ontology path invalid", e);
-			}
-		}
-		od.setBaseURI(baseURI);
-		od.setPrefix(prefix);
-		try {
-			sCon.addOntology(props.getProperty("owlim.repositoryID"), od);
-		} catch (Exception e) {
-			logger.error("Error importing ontology", e);
-		}
-	}
-
-	@Override
-	public void clearRepository(String repositoryID) {
-		String sparql = "";	//TODO
-		sCon.query(sparql);
-	}
-
-	@Override
 	public void deleteRepository(String repositoryID) {
 		try {
 			logger.info("Deleting repository");
-			sCon.deleteRepository(repositoryID);
+			edmProvStoreWrapper.deleteRepository(repositoryID);
 		} catch (NoSuchRepositoryException e) {
 			logger.debug("Repository doesn't exist");
 		} catch (Exception e) {
 			logger.error("Error deleting repository " + repositoryID, e);
 		}
 	}
+	
+	@Override
+	public void disconnect() {
+		if ((edmProvStoreWrapper != null) && edmProvStoreWrapper.isConnected()) {
+			logger.warn("EDMProvStoreWrapper has still got an open connection - disconnecting now");
+			edmProvStoreWrapper.disconnect();
+		}
+		provWriter.disconnect();
+		provElementReader.disconnect();
+		provRelationReader.disconnect();
+	}
+	
+	public void importOntology(String ontologypath, String baseURI, String prefix, Class resourcepathclass) {
 
+		provWriter.importOntology(ontologypath, baseURI, prefix, resourcepathclass);
+		
+//		if (((EDMProvWriterImpl)provWriter).getEDMProvStoreWrapper().getRepositoryNamespaces()!=null &&
+//			((EDMProvWriterImpl)provWriter).getEDMProvStoreWrapper().getRepositoryNamespaces().containsKey(props.getProperty("owlim.repositoryID"))) {
+///			System.out.println("prefixes after import:");
+//			for (Map.Entry<String, String> e: ((EDMProvWriterImpl)provWriter).getEDMProvStoreWrapper().getRepositoryNamespaces().get(props.getProperty("owlim.repositoryID")).entrySet()) {
+//				System.out.println( -   e.getKey() + ": " + e.getValue());
+//			}
+//		}
+		logger.debug("Sharing prefixes between prov store access classes");
+		((EDMProvElementReaderImpl)provElementReader).getEDMProvStoreWrapper().setRepositoryNamespaces(
+				((EDMProvWriterImpl)provWriter).getEDMProvStoreWrapper().getRepositoryNamespaces());
+		((EDMProvRelationReaderImpl)provRelationReader).getEDMProvStoreWrapper().setRepositoryNamespaces(
+				((EDMProvWriterImpl)provWriter).getEDMProvStoreWrapper().getRepositoryNamespaces());
+		edmProvStoreWrapper.setRepositoryNamespaces(
+				((EDMProvWriterImpl)provWriter).getEDMProvStoreWrapper().getRepositoryNamespaces());
+	}
+
+	public IEDMProvWriter getProvWriter() {
+		return provWriter;
+	}
+
+	public IEDMProvElementReader getProvElementReader() {
+		return provElementReader;
+	}
+
+	public IEDMProvRelationReader getProvRelationReader() {
+		return provRelationReader;
+	}
+
+	public EDMProvStoreWrapper getEDMProvStoreWrapper() {
+		return edmProvStoreWrapper;
+	}
+	
 }

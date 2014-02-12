@@ -40,49 +40,72 @@ public final class EDMProvElementReaderImpl implements IEDMProvElementReader {
 	private final Properties props;
 	private final Logger logger;
 	
-	private EDMProvStoreWrapper sCon;
+	private EDMProvStoreWrapper edmProvStoreWrapper;
+	private SPARQLProvTranslator translator;
 	
 	public EDMProvElementReaderImpl(Properties props) {
 		logger = Logger.getLogger(EDMProvElementReaderImpl.class);
 		this.props = props;
-		init();
-	}
-	
-	private void init() {
+		translator = new SPARQLProvTranslator(props);
 		connect();
 	}
+
 	
 	private void connect() {
 		try {
-            sCon = new EDMProvStoreWrapper(props);
+            edmProvStoreWrapper = new EDMProvStoreWrapper(props);
         } catch (Exception e) {
 			logger.error("Error connecting to sesame server at " + props.getProperty("owlim.sesameServerURL"), e);
         }
 	}
+	
+	@Override
+	public void disconnect() {
+		if ((edmProvStoreWrapper != null) && edmProvStoreWrapper.isConnected()) {
+			logger.warn("EDMProvStoreWrapper has still got an open connection - disconnecting now");
+			edmProvStoreWrapper.disconnect();
+		} else {
+			logger.debug("EDMProvStoreWrapper is already disconnected");
+		}
+	}
 
 	@Override
 	public EDMProvBaseElement getElement(String IRI) {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+		return getElement(IRI, null, null);	//TODO: get earliest/latest date
 	}
 
 	@Override
 	public EDMProvBaseElement getElement(String IRI, Date start, Date end) {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+		EDMProvBaseElement element = null;
+		String query = "SELECT * WHERE { ?e  }";	//TODO: get element by id
+		translator.translate(edmProvStoreWrapper.query(query));
+		if (IRI!=null && translator.getContainer().getAllElements().containsKey(IRI)) {
+			element = translator.getContainer().getAllElements().get(IRI);
+		}
+		
+		return element;
 	}
 
 	@Override
 	public HashMap<String, EDMProvBaseElement> getElements(Date start, Date end) {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+		return getElements(EDMProvBaseElement.PROV_TYPE.ePROV_UNKNOWN_TYPE, start, end);
 	}
 
 	@Override
 	public HashMap<String, EDMProvBaseElement> getElements(EDMProvBaseElement.PROV_TYPE type, Date start, Date end) {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+		String query = "SELECT * WHERE { ?s ?p ?o . }";	//TODO: handle unknown as all types and get earliest/latest date
+		translator.translate(edmProvStoreWrapper.query(query));
+
+		return translator.getContainer().getAllElements();
 	}
 
 	@Override
 	public HashMap<String, EDMProvBaseElement> getElements(Set<EDMTriple> rels) {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+		throw new UnsupportedOperationException("Not supported yet."); //TODO: get elements from relationship(s)
+	}
+
+	public EDMProvStoreWrapper getEDMProvStoreWrapper() {
+		return edmProvStoreWrapper;
 	}
 
 }

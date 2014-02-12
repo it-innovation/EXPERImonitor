@@ -25,14 +25,12 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.prov.dao;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Properties;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.edmprov.owlim.common.RelationshipType;
 import uk.ac.soton.itinnovation.edmprov.owlim.common.Triple;
-import uk.ac.soton.itinnovation.edmprov.sesame.ASesameConnector;
-import uk.ac.soton.itinnovation.edmprov.sesame.RemoteSesameConnector;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvReport;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMTriple;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.prov.db.EDMProvStoreWrapper;
@@ -43,25 +41,32 @@ public class EDMProvWriterImpl implements IEDMProvWriter {
 	private final Properties props;
 	private final Logger logger;
 	
-	private EDMProvStoreWrapper sCon;
+	private EDMProvStoreWrapper edmProvStoreWrapper;
     
     public EDMProvWriterImpl(Properties props) {
-		logger = Logger.getLogger(EDMProvDataStoreImpl.class);
+		logger = Logger.getLogger(EDMProvWriterImpl.class);
+		logger.setLevel(Level.INFO);	//TODO: remove
 		this.props = props;
 		
-		init();
-    }
-	
-	private void init() {
 		connect();
-	}
+    }
 	
 	private void connect() {
 		try {
-            sCon = new EDMProvStoreWrapper(props);
+            edmProvStoreWrapper = new EDMProvStoreWrapper(props);
         } catch (Exception e) {
 			logger.error("Error connecting to sesame server at " + props.getProperty("owlim.sesameServerURL"), e);
         }
+	}
+	
+	@Override
+	public void disconnect() {
+		if ((edmProvStoreWrapper != null) && edmProvStoreWrapper.isConnected()) {
+			logger.warn("EDMProvStoreWrapper has still got an open connection - disconnecting now");
+			edmProvStoreWrapper.disconnect();
+		} else {
+			logger.debug("EDMProvStoreWrapper is already disconnected");
+		}
 	}
 
     @Override
@@ -79,10 +84,25 @@ public class EDMProvWriterImpl implements IEDMProvWriter {
 		}
 		
     	try {
-			sCon.addTriples(props.getProperty("owlim.repositoryID"), triples);
+			edmProvStoreWrapper.addTriples(props.getProperty("owlim.repositoryID"), triples);
 		} catch (Exception e) {
 			logger.error("Error adding triples", e);
 		}
     }
+	
+	@Override
+	public void importOntology(String ontologypath, String baseURI, String prefix, Class resourcepathclass) {
+		edmProvStoreWrapper.importOntologyToKnowledgeBase(ontologypath, baseURI, prefix, resourcepathclass);
+	}
+	
+	@Override
+	public void clearRepository(String repositoryID) {
+		String sparql = "";	//TODO
+		edmProvStoreWrapper.query(sparql);
+	}
+	
+	public EDMProvStoreWrapper getEDMProvStoreWrapper() {
+		return edmProvStoreWrapper;
+	}
 
 }

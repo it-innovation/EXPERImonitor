@@ -39,7 +39,7 @@ public final class EDMProvRelationReaderImpl implements IEDMProvRelationReader {
 	private final Properties props;
 	private final Logger logger;
 	
-	private EDMProvStoreWrapper sCon;
+	private EDMProvStoreWrapper edmProvStoreWrapper;
 	
 	public EDMProvRelationReaderImpl(Properties props) {
 		logger = Logger.getLogger(EDMProvRelationReaderImpl.class);
@@ -53,10 +53,20 @@ public final class EDMProvRelationReaderImpl implements IEDMProvRelationReader {
 	
 	private void connect() {
 		try {
-            sCon = new EDMProvStoreWrapper(props);
+            edmProvStoreWrapper = new EDMProvStoreWrapper(props);
         } catch (Exception e) {
 			logger.error("Error connecting to sesame server at " + props.getProperty("owlim.sesameServerURL"), e);
         }
+	}
+	
+	@Override
+	public void disconnect() {
+		if ((edmProvStoreWrapper != null) && edmProvStoreWrapper.isConnected()) {
+			logger.warn("EDMProvStoreWrapper has still got an open connection - disconnecting now");
+			edmProvStoreWrapper.disconnect();
+		} else {
+			logger.debug("EDMProvStoreWrapper is already disconnected");
+		}
 	}
 
 	@Override
@@ -72,6 +82,10 @@ public final class EDMProvRelationReaderImpl implements IEDMProvRelationReader {
 	@Override
 	public Set<EDMTriple> getRelations(EDMProvBaseElement element, Date start, Date end, boolean inputsOnly) {
 		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	public EDMProvStoreWrapper getEDMProvStoreWrapper() {
+		return edmProvStoreWrapper;
 	}
 
 }

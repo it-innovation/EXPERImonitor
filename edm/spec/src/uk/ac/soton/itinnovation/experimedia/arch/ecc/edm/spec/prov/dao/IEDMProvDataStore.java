@@ -25,24 +25,14 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.prov.dao;
 
-import java.util.Properties;
-
 public interface IEDMProvDataStore {
-
-	public IEDMProvWriter createIEDMProvWriter(Properties props);
-
-	public IEDMProvElementReader createIEDMProvElementReader(Properties props);
-
-	public IEDMProvRelationReader createIEDMProvRelationReader(Properties props);
-
+	
 	public void connect();
 	
 	public void createRepository(String repositoryID, String repositoryName);
 	
-	public void importOntology(String ontologypath, String baseURI, String prefix);
-	
-	public void clearRepository(String repositoryID);
-	
 	public void deleteRepository(String repositoryID);
+	
+	public void disconnect();
 
 }

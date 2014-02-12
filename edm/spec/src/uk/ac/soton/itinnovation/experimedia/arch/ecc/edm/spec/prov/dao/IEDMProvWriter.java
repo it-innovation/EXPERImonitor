@@ -29,6 +29,12 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance
 
 public interface IEDMProvWriter {
     
+	public void importOntology(String ontologypath, String baseURI, String prefix, Class resourcepathclass);
+	
     public void storeReport(EDMProvReport report);
 
+	public void clearRepository(String repositoryID);
+	
+	public void disconnect();
+	
 }

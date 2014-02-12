@@ -25,48 +25,102 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.prov.db;
 
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Properties;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.openrdf.query.Binding;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.TupleQueryResult;
+import uk.ac.soton.itinnovation.edmprov.owlim.common.OntologyDetails;
 import uk.ac.soton.itinnovation.edmprov.sesame.RemoteSesameConnector;
 
 public class EDMProvStoreWrapper extends RemoteSesameConnector {
 	
-	private Properties props;
+	private final Properties props;
 	private String prefixes;
 	
 	public EDMProvStoreWrapper(Properties props) throws Exception {
-            super(props, props.getProperty("owlim.sesameServerURL"));
-			logger = Logger.getLogger(EDMProvStoreWrapper.class);
-			logger.debug("Connecting to sesame server");
+		
+		super(props.getProperty("owlim.sesameServerURL"));
+		logger = Logger.getLogger(EDMProvStoreWrapper.class);
+		logger.setLevel(Level.INFO);	//TODO: remove
 			
-			this.props = props;
-			this.prefixes = null;
+		this.props = props;
+		this.prefixes = null;
 	}
 	
 	public void loadPrefixes() {
 		//get prefixes
 		this.prefixes = "";
-		if (this.getNamespacesForRepository(props.getProperty("owlim.repositoryID"))!=null) {
-			for (Map.Entry<String, String> e: this.getNamespacesForRepository(props.getProperty("owlim.repositoryID")).entrySet()) {
+		if (this.getRepositoryNamespaces().get(props.getProperty("owlim.repositoryID"))!=null) {
+			for (Map.Entry<String, String> e: this.getRepositoryNamespaces().get(props.getProperty("owlim.repositoryID")).entrySet()) {
 				this.prefixes += "PREFIX " + e.getKey() + ":<" + e.getValue() + ">\n";
 			}
+		}
+	}
+	
+	public void importOntologyToKnowledgeBase(String ontologypath, String baseURI, String prefix, Class resourcepathclass) {
+		logger.info(" - " + prefix + " (" + baseURI + ")");
+		OntologyDetails od = new OntologyDetails();
+		File ontfile = new File(ontologypath);
+		if (!ontfile.exists()) {
+			logger.debug("file " + ontologypath + " doesn't exist in working directory");
+			//try URL
+			if (ontologypath.startsWith("http://")) {
+				logger.debug("Loading from URL " + ontologypath);
+				try {
+					URL remoteOntology = new URL(ontologypath);
+					od.setURL(remoteOntology);
+					        
+				} catch (MalformedURLException e) {
+					logger.error("Error loading ontology from URL " + ontologypath, e);
+				}
+			//try file from classpath
+			} else {
+				logger.debug("Trying to find ontology in classpath...");
+				try {
+					ontfile = new File(resourcepathclass.getClassLoader().getResource(ontologypath).getPath());
+					logger.debug("Reading file from path " + resourcepathclass.getClassLoader().getResource(ontologypath).getPath());
+					od.setURL(ontfile.toURI().toURL());
+				} catch (MalformedURLException e) {
+					logger.error("Error reading resource file", e);
+				}
+			}
+			
+		} else {
+			logger.debug("Loading ontology from file " + ontologypath);
+			try {
+				od.setURL(ontfile.toURI().toURL());
+			} catch (MalformedURLException e) {
+				logger.error("Ontology path invalid", e);
+			}
+		}
+		od.setBaseURI(baseURI);
+		od.setPrefix(prefix);
+		try {
+			super.addOntology(props.getProperty("owlim.repositoryID"), od);
+		} catch (Exception e) {
+			logger.error("Error importing ontology", e);
 		}
 	}
 	
     public LinkedList<HashMap<String,String>> query(String sparql) {
 		
 		if (this.prefixes==null) {
+			logger.info("prefixes are null");
 			loadPrefixes();
 		}
 		sparql = prefixes + sparql;
+		
+		logger.debug(sparql);
 				
         TupleQueryResult result = null;
         LinkedList<HashMap<String, String>> results = new LinkedList<HashMap<String,String>>();
@@ -107,8 +161,19 @@ public class EDMProvStoreWrapper extends RemoteSesameConnector {
 					logger.error("Error closing connection to KB", e);
 				}
 			}
-			
 		}
 		return results;
 	}
+	
+	public HashMap<String, HashMap<String, String>> getRepositoryNamespaces() {
+		return super.repositoryNamespaces;
+	}
+	
+	public void setRepositoryNamespaces(HashMap<String, HashMap<String, String>> ns) {
+		//TODO: necessary? filter out standard namespace (":"), otherwise it would be overwritten with every ontology import
+		//ns.get(props.getProperty("owlim.repositoryID")).remove(""); => doesn't work
+		super.repositoryNamespaces = ns;
+		this.loadPrefixes();
+	}
+	
 }

@@ -66,8 +66,7 @@ public class EDMProvFactory {
 			EDMProvDataContainer.baseURI = FALLBACK_URI;
 		}
 		
-		return getInstance(EDMProvDataContainer.prefix, EDMProvDataContainer.baseURI);
-		
+		return getInstance(EDMProvDataContainer.prefix, EDMProvDataContainer.baseURI);	
 	}
 
 	/**

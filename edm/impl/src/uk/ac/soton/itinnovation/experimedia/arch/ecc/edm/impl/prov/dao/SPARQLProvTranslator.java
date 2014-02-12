@@ -29,19 +29,26 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Properties;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMActivity;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMAgent;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMEntity;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvBaseElement;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvDataContainer;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMTriple;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.prov.db.EDMProvStoreWrapper;
 
 public class SPARQLProvTranslator {
 	
-	private Properties props;
+	private final Properties props;
 	private EDMProvDataContainer container;
+	private Logger logger;
 	
 	public SPARQLProvTranslator(Properties props) {
+		logger = Logger.getLogger(SPARQLProvTranslator.class);
+		logger.setLevel(Level.INFO);	//TODO: remove
+		
 		this.props = props;
 		container = new EDMProvDataContainer(props.getProperty("ont.Prefix"), props.getProperty("ont.BaseURI"));
 	}
@@ -109,4 +116,7 @@ public class SPARQLProvTranslator {
 		}
 	}
 
+	public EDMProvDataContainer getContainer() {
+		return container;
+	}
 }

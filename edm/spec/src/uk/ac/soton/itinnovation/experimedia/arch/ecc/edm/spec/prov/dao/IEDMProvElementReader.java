@@ -42,5 +42,7 @@ public interface IEDMProvElementReader {
     public HashMap<String,EDMProvBaseElement> getElements(EDMProvBaseElement.PROV_TYPE type, Date start, Date end);
     
     public HashMap<String,EDMProvBaseElement> getElements(Set<EDMTriple> rels);
+	
+	public void disconnect();
     
 }

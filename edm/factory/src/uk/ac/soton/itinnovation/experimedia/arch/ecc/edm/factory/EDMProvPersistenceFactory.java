@@ -25,21 +25,58 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.prov.dao.IEDMProvDataStore;
+import java.util.Properties;
+import org.apache.log4j.Logger;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.prov.dao.EDMProvDataStoreImpl;
 
 public final class EDMProvPersistenceFactory {
 	
-	private IEDMProvDataStore store;
+	private static Properties props;
+	private static Logger logger;
+
+	private static EDMProvPersistenceFactory factory;
 	
-	public EDMProvPersistenceFactory() {
-		store = createStore(null);
+	private EDMProvPersistenceFactory(java.util.Properties props) {}
+	
+	public static synchronized EDMProvPersistenceFactory getInstance(Properties props) {
+		
+		EDMProvPersistenceFactory.props = props;
+		logger = Logger.getLogger(EDMProvPersistenceFactory.class);
+
+		if (factory==null) {
+			factory = new EDMProvPersistenceFactory(props);
+			logger.debug("Created new EDMProvPersistenceFactory");
+		} else {
+			logger.debug("Returned existing EDMProvPersistenceFactory");
+		}
+		
+        return factory;	
+	}
+	
+	public EDMProvDataStoreImpl getStore() {
+		return getStore(props);
 	}
 
-    public IEDMProvDataStore createStore(String experiment) {
-        return null;
+    public EDMProvDataStoreImpl getStore(String experimentID, String owlimServerURL) {
+
+		Properties newprops = props;
+		newprops.setProperty("owlim.sesameServerURL", owlimServerURL);
+		newprops.setProperty("owlim.repositoryID", experimentID);
+		
+		return getStore(newprops);
     }
-    
-    public IEDMProvDataStore loadStore(String experiment) {
-        return null;
-    }
+	
+	public EDMProvDataStoreImpl getStore(Properties props) {
+		
+		EDMProvDataStoreImpl store = null;
+		
+		try {
+			store = new EDMProvDataStoreImpl(props);
+		} catch (Exception e) {
+			logger.error("Error creating new EDMProvStoreWrapper", e);
+		}
+		
+		return store;
+	}
+
 }
