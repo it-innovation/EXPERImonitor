@@ -25,17 +25,21 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.prov.dao;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TimeZone;
 import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvBaseElement;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvDataContainer;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMTriple;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.prov.db.EDMProvStoreWrapper;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.prov.dao.IEDMProvElementReader;
 
 public final class EDMProvElementReaderImpl implements IEDMProvElementReader {
+	
+	private static final SimpleDateFormat format = new SimpleDateFormat("\"yyyy-MM-dd'T'HH:mm:ss'Z\"^^xsd:dateTime'");
 	
 	private final Properties props;
 	private final Logger logger;
@@ -47,6 +51,8 @@ public final class EDMProvElementReaderImpl implements IEDMProvElementReader {
 		logger = Logger.getLogger(EDMProvElementReaderImpl.class);
 		this.props = props;
 		translator = new SPARQLProvTranslator(props);
+		format.setTimeZone(TimeZone.getTimeZone("UTC"));
+		
 		connect();
 	}
 
@@ -71,37 +77,72 @@ public final class EDMProvElementReaderImpl implements IEDMProvElementReader {
 
 	@Override
 	public EDMProvBaseElement getElement(String IRI) {
-		return getElement(IRI, null, null);	//TODO: get earliest/latest date
+		return getElement(IRI, null, null);
 	}
 
 	@Override
 	public EDMProvBaseElement getElement(String IRI, Date start, Date end) {
 		EDMProvBaseElement element = null;
-		String query = "SELECT * WHERE { ?e  }";	//TODO: get element by id
-		translator.translate(edmProvStoreWrapper.query(query));
-		if (IRI!=null && translator.getContainer().getAllElements().containsKey(IRI)) {
-			element = translator.getContainer().getAllElements().get(IRI);
+		
+		//first get all elements between the start- and end time
+		EDMProvDataContainer elements = getElements(start, end);
+		
+		//then filter by iri (faster than using another filter in SPARQL query)
+		if (IRI!=null && elements.getAllElements().containsKey(IRI)) {
+			element = elements.getAllElements().get(IRI);
 		}
 		
 		return element;
 	}
 
 	@Override
-	public HashMap<String, EDMProvBaseElement> getElements(Date start, Date end) {
+	public EDMProvDataContainer getElements(Date start, Date end) {
 		return getElements(EDMProvBaseElement.PROV_TYPE.ePROV_UNKNOWN_TYPE, start, end);
 	}
 
 	@Override
-	public HashMap<String, EDMProvBaseElement> getElements(EDMProvBaseElement.PROV_TYPE type, Date start, Date end) {
-		String query = "SELECT * WHERE { ?s ?p ?o . }";	//TODO: handle unknown as all types and get earliest/latest date
+	public EDMProvDataContainer getElements(EDMProvBaseElement.PROV_TYPE type, Date start, Date end) {
+		
+		String t1 = "\"0001-01-01T00:00:00Z\"^^xsd:dateTime";
+		String t2 = "\"9999-12-31T23:59:59Z\"^^xsd:dateTime";
+		
+		if (start!=null) {
+			t1 = format.format(start);
+		}
+		if (end!=null) {
+			t2 = format.format(end);
+		}
+		
+		//important: don't change variable names as SPARQLProvTranslator depends on them!
+		String query = "SELECT DISTINCT * WHERE { " +
+			"?s ?p ?o ." +
+			"?s rdf:type prov:Activity ." +	//TODO: prov type - expected behaviour?
+				
+			//filter by class: only prov classes
+			"?s a ?c ." +
+			"FILTER(?c in(prov:Agent, prov:Activity, prov:Entity)) ." +
+				
+			//filter by property type
+			"?p a ?t ." +
+			"FILTER(?t in(owl:ObjectProperty, owl:DatatypeProperty, owl:AnnotationProperty) " +
+				"|| (?p=rdf:type && ?t=rdf:Property)) ." +
+				
+			//time span
+			"?s prov:startedAtTime ?t1 ." +
+			"?s prov:endedAtTime ?t2 ." +
+			"FILTER((?t1 <= " + t2 + ") && (?t2 >= " + t1 + ")) ." +
+			
+			"} ORDER BY ?c ?s ?t1 ?t2 ?t ?p ";
+		System.out.println(query);
 		translator.translate(edmProvStoreWrapper.query(query));
 
-		return translator.getContainer().getAllElements();
+		return translator.getContainer();
 	}
 
 	@Override
-	public HashMap<String, EDMProvBaseElement> getElements(Set<EDMTriple> rels) {
-		throw new UnsupportedOperationException("Not supported yet."); //TODO: get elements from relationship(s)
+	public EDMProvDataContainer getElements(Set<EDMTriple> rels) {
+		logger.warn("Not yet implemented"); //TODO: expected behaviour?
+		return null;
 	}
 
 	public EDMProvStoreWrapper getEDMProvStoreWrapper() {

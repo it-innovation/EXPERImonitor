@@ -27,7 +27,7 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.prov.dao;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.LinkedList;
 import java.util.Properties;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -146,6 +146,10 @@ public final class EDMProvDataStoreImpl implements IEDMProvDataStore {
 				((EDMProvWriterImpl)provWriter).getEDMProvStoreWrapper().getRepositoryNamespaces());
 		edmProvStoreWrapper.setRepositoryNamespaces(
 				((EDMProvWriterImpl)provWriter).getEDMProvStoreWrapper().getRepositoryNamespaces());
+	}
+	
+	public LinkedList<HashMap<String, String>> query(String sparql) {
+		return this.edmProvStoreWrapper.query(sparql);
 	}
 
 	public IEDMProvWriter getProvWriter() {

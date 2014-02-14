@@ -60,7 +60,7 @@ public class EDMProvDataContainer {
 	}
 	
 	public String toString() {
-		String contents = "EDMProvFactory contents:\n########################\n";
+		String contents = "EDMProvDataContainer contents:\n########################\n";
 		for (Entry<String, EDMProvBaseElement> e: this.allProvElements.entrySet()) {
 			contents += e.getValue().toString();
 		}

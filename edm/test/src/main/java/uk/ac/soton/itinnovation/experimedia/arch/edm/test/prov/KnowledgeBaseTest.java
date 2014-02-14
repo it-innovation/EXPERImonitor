@@ -33,6 +33,8 @@ import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMActivity;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMAgent;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMEntity;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvBaseElement;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvDataContainer;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMProvPersistenceFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.prov.dao.EDMProvDataStoreImpl;
@@ -91,22 +93,8 @@ public class KnowledgeBaseTest {
 			store.getProvWriter().storeReport(factory.createProvReport());
 			
 			logger.info("Getting prov elements back from KB");
-			String sparql = "SELECT DISTINCT * " +
-				"WHERE {" +
-				"?s ?p ?o ." +
-				"?s a ?c ." +
-				"?p a ?t ." +
-				"FILTER(?c in(prov:Agent, prov:Activity, prov:Entity))." +
-				"FILTER regex(str(?s),\"experimedia#.\")." +
-				"FILTER(?t in(owl:ObjectProperty, owl:DatatypeProperty, owl:AnnotationProperty) " +
-				"|| (?p=rdf:type && ?t=rdf:Property))" +
-				"} ORDER BY ?c ?s ?t ?p";
-			LinkedList<HashMap<String,String>> result = store.getEDMProvStoreWrapper().query(sparql);
-			
-			logger.info("Recreating EDMProvFactory from results");
-			SPARQLProvTranslator translator = new SPARQLProvTranslator(props);
-			translator.translate(result);
-			logger.debug(translator.getContainer().toString());
+			EDMProvDataContainer result = store.getProvElementReader().getElements(null, null);
+			logger.info(result.toString());
 		
 		} catch (Exception e) {
 			logger.error("Exception caught: ", e);
