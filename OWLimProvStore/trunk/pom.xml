@@ -78,6 +78,13 @@
 			<artifactId>sesame-runtime</artifactId>
             <version>2.7.7</version>
 		</dependency>
+		
+		<dependency>
+            <groupId>org.openrdf.sesame</groupId>
+            <artifactId>sesame-http-client</artifactId>
+            <version>2.7.7</version>
+            <type>jar</type>
+        </dependency>
         
         <!-- OWLim -->
         <dependency>
@@ -133,3 +140,4 @@
 	</distributionManagement>
 	
 </project>
+

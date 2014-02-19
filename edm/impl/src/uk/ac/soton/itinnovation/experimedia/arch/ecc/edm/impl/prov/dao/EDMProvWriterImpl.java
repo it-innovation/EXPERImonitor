@@ -97,8 +97,10 @@ public class EDMProvWriterImpl implements IEDMProvWriter {
 	
 	@Override
 	public void clearRepository(String repositoryID) {
-		String sparql = "";	//TODO
-		edmProvStoreWrapper.query(sparql);
+		logger.debug("Clearing repository " + repositoryID + " by deleting all triples");
+		//String sparql = "DELETE WHERE { ?s ?p ?o } ;";
+		//edmProvStoreWrapper.query(sparql);
+		edmProvStoreWrapper.clearRepository(repositoryID);
 	}
 	
 	public EDMProvStoreWrapper getEDMProvStoreWrapper() {

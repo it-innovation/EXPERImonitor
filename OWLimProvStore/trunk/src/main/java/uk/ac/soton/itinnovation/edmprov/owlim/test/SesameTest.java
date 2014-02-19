@@ -35,6 +35,9 @@ public class SesameTest
 			logger.info("Connecting to Sesame server");
 			sCon = new RemoteSesameConnector(sesameServerURL);
 			
+			logger.info("Clearing repository");
+			sCon.clearRepository(repositoryID);
+			
 			logger.info("Deleting repository");
 			try {
 				sCon.deleteRepository(repositoryID);

@@ -95,12 +95,16 @@ public class SPARQLProvTranslator {
 				//set label
 				if (triple.get("p").equals("http://www.w3.org/2000/01/rdf-schema#label")) {
 					newElement.setLabel(triple.get("o"));
-				//attach triple	TODO: get xsd:datatype and attach to datatype properties
+				//attach triple
 				} else {
 					String type = triple.get("t");
 					EDMTriple.TRIPLE_TYPE tripletype = EDMTriple.TRIPLE_TYPE.UNKNOWN_TYPE;
 					if (type.equals("http://www.w3.org/2002/07/owl#DatatypeProperty")) {
 						tripletype = EDMTriple.TRIPLE_TYPE.DATA_PROPERTY;
+						
+						//TODO: get xsd:datatype and attach to datatype properties
+						System.out.println(triple.get("o"));
+						
 					} else if (type.equals("http://www.w3.org/2002/07/owl#ObjectProperty")) {
 						tripletype = EDMTriple.TRIPLE_TYPE.OBJECT_PROPERTY;
 					} else if (type.equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#Property")) {

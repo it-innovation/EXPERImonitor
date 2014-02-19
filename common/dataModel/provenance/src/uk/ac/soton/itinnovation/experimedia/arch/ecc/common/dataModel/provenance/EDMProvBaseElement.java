@@ -63,6 +63,7 @@ public class EDMProvBaseElement {
      * Creates an EDMProvBaseElement
      * 
      * @param prefix the prefix of the element
+	 * @param uniqueIdentifier
      * @param a unique identifier. This could be something like domain_uniqueID, e.g. facebook_56735762153.
      * 		  It needs to be unique across clients.
      * @param label a human readable name
@@ -106,6 +107,7 @@ public class EDMProvBaseElement {
     	return this.iri;
     }
     
+	@Override
     public String toString() {
     	String contents = "[" + this.getProvType() + "] " + this.getFriendlyName() + " (" + this.iri + ")\n";
     	for(Entry<UUID, EDMTriple> e: this.triples.entrySet()) {
@@ -241,7 +243,7 @@ public class EDMProvBaseElement {
     private void removeTriple(String subject, String predicate, String object) {
     	EDMTriple triple = new EDMTriple(subject, predicate, object);
     	if (this.triples.containsValue(triple)) {
-    		this.triples.remove(triple);
+    		this.triples.remove(triple.getID());
     	}
     }
     

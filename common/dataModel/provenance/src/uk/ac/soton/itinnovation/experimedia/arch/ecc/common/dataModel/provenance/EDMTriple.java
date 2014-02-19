@@ -116,6 +116,7 @@ public class EDMTriple {
 		return result;
 	}
 
+	@Override
 	public String toString() {
 		return "[" + getType() + "] " + getSubject() + " " + getPredicate() + " " + getObject();
 	}
@@ -128,7 +129,6 @@ public class EDMTriple {
 	 */
 	public boolean equals(EDMTriple t) {
 		//TODO: special cases: full prefix is case insensitive but individual name is case sensitive.
-		// not sure about predicate.
 		if (this.subject.equals(t.getSubject())
 			&& this.predicate.equals(t.getPredicate())
 			&& this.object.equals(t.getObject())) {
@@ -150,7 +150,7 @@ public class EDMTriple {
     
 		if (predicate.equals(pred))
 			return true;
-    
+		
 		return false;
 	}
 

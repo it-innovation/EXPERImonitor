@@ -63,7 +63,7 @@ public abstract class ASesameConnector
 {
 	protected RepositoryManager manager;
 	protected String managerID;
-	private RDFFormat rdfFormat = RDFFormat.TURTLE;
+	private final RDFFormat rdfFormat = RDFFormat.TURTLE;;
 	protected String repositoryConfigTemplate;
 	protected HashMap<String, HashMap<String, String>> repositoryNamespaces;
 	
@@ -219,7 +219,7 @@ public abstract class ASesameConnector
 
 			Resource s = new URIImpl(translatePrefixToFullName(repositoryID, t.getSubject()));
 			URI p = new URIImpl(translatePrefixToFullName(repositoryID, t.getPredicate()));
-			Value o = null;
+			Value o;
 			
 			// check if the relationship type is given
 			if ((t.getRelationshipType() == null) || (t.getRelationshipType().equals(RelationshipType.UNKNOWN))){
@@ -252,8 +252,9 @@ public abstract class ASesameConnector
 				throw new NullPointerException("Could not get a connection to the repository with ID " + repositoryID);
 			}
 		} catch (Exception ex) {
-			if (con != null) { try { con.close(); con = null; } catch (Exception exx){} }
-			try { repo.shutDown(); } catch (Exception exx){}
+			if (con != null) { try { con.close(); con = null; } catch (RepositoryException exx){} }
+			if (repo != null) { try { repo.shutDown(); } catch (RepositoryException exx){} }
+
 			throw new RuntimeException("Unable to connect to repository to add triples: " + ex, ex);
 		}
 		
@@ -265,8 +266,8 @@ public abstract class ASesameConnector
 			con.rollback();
 			throw new SesameException("Failed to add triples to repo: " + ex, ex);
 		} finally {
-			try { con.close(); } catch (Exception ex) { }
-			try { repo.shutDown(); } catch (Exception ex) { }
+			try { con.close(); } catch (RepositoryException ex) { }
+			try { repo.shutDown(); } catch (RepositoryException ex) { }
 		}
 	}
 	
@@ -389,8 +390,8 @@ public abstract class ASesameConnector
 				throw new NullPointerException("Could not get a connection to the repository with ID " + repositoryID);
 			}
 		} catch (Exception ex) {
-			if (con != null) { try { con.close(); con = null; } catch (Exception exx){} }
-			try { repo.shutDown(); } catch (Exception exx){}
+			if (con != null) { try { con.close(); con = null; } catch (RepositoryException exx){} }
+			if (repo != null) { try { repo.shutDown(); } catch (RepositoryException exx){} }
 			throw new RuntimeException("Unable to connect to repository to add ontology: " + ex, ex);
 		}
 		
@@ -405,7 +406,7 @@ public abstract class ASesameConnector
 			//update namespaces map
 			try {
 				setNamespacesFromRepository(repositoryID, con);
-			} catch (Exception ex) { throw ex; }
+			} catch (SesameException ex) { throw ex; }
 		} catch (OpenRDFException e) {
 			con.rollback();
 			throw new SesameException("Failed to add ontology: " + e, e);
@@ -447,8 +448,8 @@ public abstract class ASesameConnector
 				throw new NullPointerException("Could not get a connection to the repository with ID " + repositoryID);
 			}
 		} catch (Exception ex) {
-			if (con != null) { try { con.close(); con = null; } catch (Exception exx){} }
-			try { repo.shutDown(); } catch (Exception exx){}
+			if (con != null) { try { con.close(); con = null; } catch (RepositoryException exx){} }
+			if (repo != null) { try { repo.shutDown(); } catch (RepositoryException exx){} }
 			throw new RuntimeException("Unable to query the repository: " + ex, ex);
 		}
 
@@ -462,6 +463,34 @@ public abstract class ASesameConnector
 		}
 
 		return result;
+	}
+	
+	/**
+	 * Clear a repository of the given ID, i.e. delete all the triples.
+	 * @param repositoryID ID of the repository to be deleted
+	 */	
+	public void clearRepository(String repositoryID) {
+		if (repositoryID == null) {
+			throw new NullPointerException("Cannot clear repository because the repository ID given was NULL");
+		}
+		
+		try
+		{
+			Repository repo = getRepository(repositoryID);
+			if (repo == null) {
+				throw new NullPointerException("Could not get repository with ID " + repositoryID);
+			}
+			
+			RepositoryConnection con = repo.getConnection();
+			if (con == null) {
+				throw new NullPointerException("Could not get a connection to the repository with ID " + repositoryID);
+			}
+			
+			con.clear();
+			
+		} catch (Exception e) {
+			logger.error("Error clearing repository " + repositoryID, e);
+		}
 	}
 	
 	/**
@@ -493,7 +522,7 @@ public abstract class ASesameConnector
 		
 		try {
 			repository.shutDown();
-		} catch (Exception ex) {
+		} catch (RepositoryException ex) {
 			throw new SesameException("Unable to shut down repository that should be deleted: " + ex, ex);
 		}
 		
@@ -515,8 +544,7 @@ public abstract class ASesameConnector
 				logger.debug(" - not safe to delete; sleeping for 500ms before trying again");
 				Thread.currentThread().sleep(500); // sleeping for 500 ms
 			}
-			
-			
+						
 			attemptNr++;
 		} while (attemptNr < maxAttempts);
 	}
@@ -556,6 +584,7 @@ public abstract class ASesameConnector
 	 * @param newManager
 	 * @param newManagerID
 	 * @return
+	 * @throws uk.ac.soton.itinnovation.edmprov.owlim.common.SesameException
 	 */
 	protected void installNewManager(RepositoryManager newManager, String newManagerID) throws SesameException
 	{
@@ -612,19 +641,19 @@ public abstract class ASesameConnector
 			RepositoryConnection con = null;
 			try {
 				con = repo.getConnection();
-			} catch (Exception ex) { 
-				try { repo.shutDown(); } catch (Exception exx){}
+			} catch (RepositoryException ex) { 
+				try { repo.shutDown(); } catch (RepositoryException exx){}
 				throw new SesameException("Unable to create a connection to the repository: " + ex, ex);
 			} 
 			
 			try {
 				setNamespacesFromRepository(repositoryID, con);
-			} catch (Exception ex) { // if we can't set the name spaces, then there's an issue with the repo, so throw an exception and shut it down
-				if (con != null) { try { con.close(); con = null; } catch (Exception exx){} }
-				try { repo.shutDown(); } catch (Exception exx){}
+			} catch (SesameException ex) { // if we can't set the name spaces, then there's an issue with the repo, so throw an exception and shut it down
+				if (con != null) { try { con.close(); con = null; } catch (RepositoryException exx){} }
+				try { repo.shutDown(); } catch (RepositoryException exx){}
 				throw new SesameException("Cannot return Repository because of a technical issue encountered when getting namespaces from the repository (required for future interactions when adding triples): " + ex, ex);
 			} finally {
-				if (con != null) { try { con.close(); } catch (Exception ex){} }
+				if (con != null) { try { con.close(); } catch (RepositoryException ex){} }
 			}
 		}
 		
@@ -649,15 +678,15 @@ public abstract class ASesameConnector
 		BufferedReader br = null;
 		try {
 			br = new BufferedReader(new FileReader(f));
-			String line = null;
+			String line;
 			while ((line = br.readLine()) != null) {
 				config += line + "\n";
 			}
-		} catch (Exception ex) {
+		} catch (IOException ex) {
 			throw new IOException("Unable to read file: " + f.getAbsolutePath(), ex);
 		} finally {
 			if (br != null) {
-				try { br.close(); } catch (Exception ex2) {}
+				try { br.close(); } catch (IOException ex2) {}
 			}
 		}
 		
@@ -767,8 +796,8 @@ public abstract class ASesameConnector
 			logger.error("Unable to establish a connection to the repository '" + repositoryID + "': " + e.getMessage());
 			throw new SesameException("Unable to establish a connection to the repository '" + repositoryID + "': " + e.getMessage(), e);
 		} finally {
-			if (con != null) { try { con.close(); } catch (Exception ex) {} }
-			if (repository != null) { try { repository.shutDown(); } catch (Exception ex) {} }
+			if (con != null) { try { con.close(); } catch (RepositoryException ex) {} }
+			if (repository != null) { try { repository.shutDown(); } catch (RepositoryException ex) {} }
 		}
 		
 		return repositoryID;
@@ -855,8 +884,8 @@ public abstract class ASesameConnector
 		} catch (SesameException e) {
 			throw e;
 		} finally {
-			try { con.close(); } catch (Exception ex) { }
-			try { myRepository.shutDown(); } catch (Exception ex) { }
+			try { con.close(); } catch (RepositoryException ex) { }
+			try { myRepository.shutDown(); } catch (RepositoryException ex) { }
 		}
 	}
 	

@@ -99,7 +99,7 @@ public final class EDMProvDataStoreImpl implements IEDMProvDataStore {
 			edmProvStoreWrapper.createNewRepository(repositoryID, repositoryName);
 		} catch (RepositoryExistsException e) {
 			logger.info("Repository " + repositoryID + " already existed - fine, will continue...");
-			//TODO: clear?
+			provWriter.clearRepository(repositoryID);
 		} catch (Exception e) {
 			logger.error("Error creating repository \"" + repositoryID + "\" on sesame server", e);
 		}

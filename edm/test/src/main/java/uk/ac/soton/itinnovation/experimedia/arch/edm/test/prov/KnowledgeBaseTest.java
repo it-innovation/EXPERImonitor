@@ -26,20 +26,18 @@
 package uk.ac.soton.itinnovation.experimedia.arch.edm.test.prov;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.LinkedList;
+import java.rmi.AlreadyBoundException;
 import java.util.Properties;
+import java.util.zip.DataFormatException;
+import javax.xml.datatype.DatatypeConfigurationException;
 import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMActivity;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMAgent;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMEntity;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvBaseElement;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvDataContainer;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMProvPersistenceFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.prov.dao.EDMProvDataStoreImpl;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.prov.dao.SPARQLProvTranslator;
-
 
 public class KnowledgeBaseTest {
 
@@ -183,7 +181,13 @@ public class KnowledgeBaseTest {
 			ea.addOwlClass("http://some-mysterious-URI.com/ontology/ont#unknownclass");
 			ea.addOwlClass("http://some-mysterious-URI.com/ontology/ont#unknownclass");
 		
-		} catch (Exception e) {
+		} catch (DatatypeConfigurationException e) {
+			logger.error("Error filling EDMProvFactory with test data", e);
+		} catch (AlreadyBoundException e) {
+			logger.error("Error filling EDMProvFactory with test data", e);
+		} catch (NoSuchFieldException e) {
+			logger.error("Error filling EDMProvFactory with test data", e);
+		} catch (DataFormatException e) {
 			logger.error("Error filling EDMProvFactory with test data", e);
 		}
 	}

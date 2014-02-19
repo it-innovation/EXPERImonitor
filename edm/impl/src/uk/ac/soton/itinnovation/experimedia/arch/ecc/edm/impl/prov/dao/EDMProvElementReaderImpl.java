@@ -45,7 +45,7 @@ public final class EDMProvElementReaderImpl implements IEDMProvElementReader {
 	private final Logger logger;
 	
 	private EDMProvStoreWrapper edmProvStoreWrapper;
-	private SPARQLProvTranslator translator;
+	private final SPARQLProvTranslator translator;
 	
 	public EDMProvElementReaderImpl(Properties props) {
 		logger = Logger.getLogger(EDMProvElementReaderImpl.class);

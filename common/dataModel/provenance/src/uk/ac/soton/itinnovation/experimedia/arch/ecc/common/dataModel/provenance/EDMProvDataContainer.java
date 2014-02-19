@@ -37,7 +37,7 @@ public class EDMProvDataContainer {
 	protected HashMap<String, EDMProvBaseElement> allProvElements;
 	protected HashMap<String, String> namespaces;
 	
-	protected Logger logger = Logger.getLogger(EDMProvDataContainer.class.getName());
+	protected static final Logger logger = Logger.getLogger(EDMProvDataContainer.class.getName());
 	
 	public EDMProvDataContainer(String prefix, String baseURI) {
 		this.setPrefix(prefix);
@@ -59,6 +59,7 @@ public class EDMProvDataContainer {
 		baseURI = null;
 	}
 	
+	@Override
 	public String toString() {
 		String contents = "EDMProvDataContainer contents:\n########################\n";
 		for (Entry<String, EDMProvBaseElement> e: this.allProvElements.entrySet()) {

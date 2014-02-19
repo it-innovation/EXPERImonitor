@@ -120,7 +120,7 @@ public class EDMProvStoreWrapper extends RemoteSesameConnector {
 		}
 		sparql = prefixes + sparql;
 		
-		logger.debug(sparql);
+		logger.info(sparql);
 				
         TupleQueryResult result = null;
         LinkedList<HashMap<String, String>> results = new LinkedList<HashMap<String,String>>();
