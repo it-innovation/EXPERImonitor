@@ -109,10 +109,12 @@ public class EMController implements IEMLifecycleListener
   }
   
   @Override
-  public void onClientDisconnected( EMClient client )
+  public void onClientDisconnected( UUID clientID )
   {
-    if ( mainView != null )
-      mainView.removeClient( client );
+		EMClient client = expMonitor.getClientByID( clientID );
+		
+    if ( mainView != null && client != null )
+			mainView.removeClient( client );
   }
   
   @Override

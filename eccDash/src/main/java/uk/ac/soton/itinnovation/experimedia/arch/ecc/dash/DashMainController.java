@@ -239,8 +239,10 @@ public class DashMainController extends UFAbstractEventManager
   }
   
   @Override
-  public void onClientDisconnected( EMClient client )
+  public void onClientDisconnected( UUID clientID )
   {
+		EMClient client = expMonitor.getClientByID( clientID );
+		
     if ( client != null )
     {
       if ( connectionsView != null ) connectionsView.removeClient( client );
@@ -258,6 +260,8 @@ public class DashMainController extends UFAbstractEventManager
       if ( liveMonitorController != null ) liveMonitorController.removeClientLiveView( client );
       if ( pushManager != null ) pushManager.pushUIUpdates();
     }
+		else
+			dashMainLog.error( "Could not cleanly remove disconnected client from view: client no longer exists" );
   }
   
   @Override

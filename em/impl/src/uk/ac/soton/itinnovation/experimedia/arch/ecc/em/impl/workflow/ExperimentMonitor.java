@@ -25,7 +25,6 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.IEMLifecycleListener;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecylePhases.EMLifecycleManager;
 
@@ -191,7 +190,7 @@ public class ExperimentMonitor implements IExperimentMonitor,
     if ( !client.isConnected() ) throw new Exception( "Cannot de-register client: is already disconnected" );
     
     // Don't go through registration - just remove
-    lifecycleManager.onClientIsDisconnected( (EMClientEx) client );
+    lifecycleManager.onClientIsDisconnected( (EMClientEx) client, client.getID() );
   }
   
   @Override
@@ -347,24 +346,32 @@ public class ExperimentMonitor implements IExperimentMonitor,
   }
   
   @Override
-  public void onClientDisconnected( EMClient client )
+  public void onClientDisconnected( UUID clientID )
   {
-    if ( client != null )
-    {
-      EMClientEx cx = (EMClientEx) client;
-      cx.setIsConnected( false );
-      
-      try
-      {
-        connectionManager.removeDisconnectedClient( client.getID() );
-
-        for ( IEMLifecycleListener listener : lifecycleListeners )
-          listener.onClientDisconnected( client );
-      }
-      catch ( Exception ex )
-      { emLogger.warn( "Could not properly clean up disconnected client: " + ex.getMessage() ); }
-    }
-    else emLogger.warn( "Got disconnection notice from null client!" );
+		if ( clientID != null )
+		{
+			EMClientEx client = connectionManager.getClient( clientID );
+			
+			// Update client state and notify
+			if ( client != null ) 
+			{
+				client.setIsConnected( false );
+				
+				// Notify listeners first...
+				for ( IEMLifecycleListener listener : lifecycleListeners )
+						listener.onClientDisconnected( clientID );
+				
+				// ... before removing permenantly
+				try
+				{
+					connectionManager.removeDisconnectedClient( clientID );
+				}
+				catch ( Exception ex )
+				{ emLogger.warn( "Could not properly clean up disconnected client: " + ex.getMessage() ); }
+			}
+		}
+		else emLogger.warn( "Got disconnection notice from unknown client!" );
+	    
   }
   
   @Override

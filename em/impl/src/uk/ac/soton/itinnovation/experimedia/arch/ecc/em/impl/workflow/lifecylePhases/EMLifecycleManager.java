@@ -528,28 +528,33 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   }
   
   @Override
-  public void onClientIsDisconnected( EMClientEx client )
+  public void onClientIsDisconnected( EMClientEx client, UUID clientID )
   {
-    // Remove client from phases
-    EMPhase phase = EMPhase.eEMDiscoverMetricGenerators;
-    
-    while ( !phase.equals(EMPhase.eEMProtocolComplete) )
-    {
-      AbstractEMLCPhase deregPhase = lifecyclePhases.get( phase );
-      
-      if ( deregPhase != null ) deregPhase.onClientHasBeenDeregistered( client );
-      
-      phase = phase.nextPhase();
-    }
-    
-    // And from the deferred client list (may or may not be in there)
-    phaseDeferredClients.remove( client.getID() );
+    // If client is valid (i.e., is still connected to an experiment life-cycle)
+		// then remove it
 		
-		// Reset this client phase state
-		client.resetPhaseStates();
+		if ( client != null )
+		{
+			EMPhase phase = EMPhase.eEMDiscoverMetricGenerators;
     
-    // Finally, notify listener of this disconnection
-    lifecycleListener.onClientDisconnected( client );
+			while ( !phase.equals(EMPhase.eEMProtocolComplete) )
+			{
+				AbstractEMLCPhase deregPhase = lifecyclePhases.get( phase );
+
+				if ( deregPhase != null ) deregPhase.onClientHasBeenDeregistered( client );
+
+				phase = phase.nextPhase();
+			}
+
+			// And from the deferred client list (may or may not be in there)
+			phaseDeferredClients.remove( client.getID() );
+
+			// Reset this client phase state
+			client.resetPhaseStates();
+		}
+		
+    // Finally, notify listener of this disconnection (client may be null if unknown to the life cycle)
+    lifecycleListener.onClientDisconnected( clientID );
   }
   
   @Override
