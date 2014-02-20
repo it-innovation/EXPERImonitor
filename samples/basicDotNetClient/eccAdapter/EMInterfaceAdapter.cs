@@ -247,10 +247,10 @@ public class EMInterfaceAdapter : IEMDiscovery_UserListener,
                         setupFace = interfaceFactory.createSetup( expMonitorID, 
                                                                   clientID, 
                                                                   dispatch );
-
                         setupFace.setUserListener( this );
-                        setupFace.notifyReadyToSetup();
                     }
+
+                    setupFace.notifyReadyToSetup();
 
                 } break;
 
@@ -265,27 +265,27 @@ public class EMInterfaceAdapter : IEMDiscovery_UserListener,
                                                                               clientID, 
                                                                               dispatch );
                         liveMonitorFace.setUserListener( this );
+                    }
 
-                        // Find out whether we can push or pull, or both
-                        bool[] pushPull = new bool[2];
+                    // Find out whether we can push or pull, or both
+                    bool[] pushPull = new bool[2];
                         
-                        if ( emiListener != null )
-                        {
-                            emiListener.onDescribePushPullBehaviours( ref pushPull );
+                    if ( emiListener != null )
+                    {
+                        emiListener.onDescribePushPullBehaviours( ref pushPull );
 
-                            // Notify EM of behaviours
-                            if ( pushPull[0] ) liveMonitorFace.notifyReadyToPush();
-                            if ( pushPull[1] ) liveMonitorFace.notifyReadyForPull();
+                        // Notify EM of behaviours
+                        if ( pushPull[0] ) liveMonitorFace.notifyReadyToPush();
+                        if ( pushPull[1] ) liveMonitorFace.notifyReadyForPull();
                             
-                            // Tell listener that the Live Monitoring phase has begun
-                            emiListener.onLiveMonitoringStarted();
-                        }
-                        else
-                        {
-                            // Legacy behaviour: report that we can both push and be pulled
-                            liveMonitorFace.notifyReadyToPush();
-                            liveMonitorFace.notifyReadyForPull();
-                        }
+                        // Tell listener that the Live Monitoring phase has begun
+                        emiListener.onLiveMonitoringStarted();
+                    }
+                    else
+                    {
+                        // Legacy behaviour: report that we can both push and be pulled
+                        liveMonitorFace.notifyReadyToPush();
+                        liveMonitorFace.notifyReadyForPull();
                     }
 
                 } break;
@@ -300,10 +300,10 @@ public class EMInterfaceAdapter : IEMDiscovery_UserListener,
                         postReportFace = interfaceFactory.createPostReport( expMonitorID, 
                                                                             clientID, 
                                                                             dispatch );
-
                         postReportFace.setUserListener( this );
-                        postReportFace.notifyReadyToReport();
                     }
+
+                    postReportFace.notifyReadyToReport();
 
                 } break;
 
@@ -317,10 +317,10 @@ public class EMInterfaceAdapter : IEMDiscovery_UserListener,
                         tearDownFace = interfaceFactory.createTearDown( expMonitorID, 
                                                                         clientID, 
                                                                         dispatch );
-
                         tearDownFace.setUserListener( this );
-                        tearDownFace.notifyReadyToTearDown();
                     }
+
+                    tearDownFace.notifyReadyToTearDown();
 
                 } break;
             }

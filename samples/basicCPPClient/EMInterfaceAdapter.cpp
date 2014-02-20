@@ -178,10 +178,11 @@ void EMInterfaceAdapter::onCreateInterface( const UUID& senderID,
                 setupFace = interfaceFactory->createSetup( expMonitorID, 
                                                             clientID, 
                                                             dispatch );
-          
+
                 setupFace->setUserListener( shared_from_this() );
-                setupFace->notifyReadyToSetup();
             }
+
+            setupFace->notifyReadyToSetup();
 
         } break;
     
@@ -197,28 +198,29 @@ void EMInterfaceAdapter::onCreateInterface( const UUID& senderID,
                                                                         dispatch );
           
                 liveMonitorFace->setUserListener( shared_from_this() );
-
-                // Find out whether we can push or pull, or both
-                bool pushPull[2];
-                        
-                if ( emiListener )
-                {
-                    emiListener->onDescribePushPullBehaviours( pushPull );
-            
-                    // Notify EM of behaviours
-                    if ( pushPull[0] ) liveMonitorFace->notifyReadyToPush();
-                    if ( pushPull[1] ) liveMonitorFace->notifyReadyForPull();
-                            
-                    // Tell listener that the Live Monitoring phase has begun
-                    emiListener->onLiveMonitoringStarted();
-                }
-                else
-                {
-                    // Legacy behaviour: report that we can both push and be pulled
-                    liveMonitorFace->notifyReadyToPush();
-                    liveMonitorFace->notifyReadyForPull();
-                }
             }
+
+            // Find out whether we can push or pull, or both
+            bool pushPull[2];
+                        
+            if ( emiListener )
+            {
+                emiListener->onDescribePushPullBehaviours( pushPull );
+            
+                // Notify EM of behaviours
+                if ( pushPull[0] ) liveMonitorFace->notifyReadyToPush();
+                if ( pushPull[1] ) liveMonitorFace->notifyReadyForPull();
+                            
+                // Tell listener that the Live Monitoring phase has begun
+                emiListener->onLiveMonitoringStarted();
+            }
+            else
+            {
+                // Legacy behaviour: report that we can both push and be pulled
+                liveMonitorFace->notifyReadyToPush();
+                liveMonitorFace->notifyReadyForPull();
+            }
+
         } break;
 
           case eEMPostReport :
@@ -233,8 +235,9 @@ void EMInterfaceAdapter::onCreateInterface( const UUID& senderID,
                                                                         dispatch );
             
                   postReportFace->setUserListener( shared_from_this() );
-                  postReportFace->notifyReadyToReport();
               }
+
+              postReportFace->notifyReadyToReport();
 
           } break;
       
@@ -250,8 +253,9 @@ void EMInterfaceAdapter::onCreateInterface( const UUID& senderID,
                                                                     dispatch );
             
                   tearDownFace->setUserListener( shared_from_this() );
-                  tearDownFace->notifyReadyToTearDown();
               }
+
+              tearDownFace->notifyReadyToTearDown();
 
           } break;
         }

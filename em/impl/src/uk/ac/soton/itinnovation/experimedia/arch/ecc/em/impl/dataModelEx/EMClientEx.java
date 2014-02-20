@@ -125,6 +125,11 @@ public class EMClientEx extends EMClient
 		timeOutsCalled.clear();
 	}
 	
+	public void clearHistoricMetricGenerators()
+	{
+		historicMetricGenerators.clear();
+	}
+	
 	public Set<MetricGenerator> getCopyOfHistoricMetricGenerators()
 	{
 		HashSet<MetricGenerator> histMG = new HashSet<MetricGenerator>();

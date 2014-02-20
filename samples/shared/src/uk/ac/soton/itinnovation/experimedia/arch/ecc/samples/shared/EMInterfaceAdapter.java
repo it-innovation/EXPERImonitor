@@ -258,10 +258,10 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
                         setupFace = interfaceFactory.createSetup( expMonitorID, 
                                                                   clientID, 
                                                                   dispatch );
-
                         setupFace.setUserListener( this );
-                        setupFace.notifyReadyToSetup();
                     }
+										
+										setupFace.notifyReadyToSetup();
 
                 } break;
 
@@ -275,24 +275,23 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
                         liveMonitorFace = interfaceFactory.createLiveMonitor( expMonitorID, 
                                                                               clientID, 
                                                                               dispatch );
-
                         liveMonitorFace.setUserListener( this );
+										}
 
-                        // Find out whether we can push or pull, or both
-                        Boolean[] pushPull = new Boolean[2];
-                        
-                        if ( emiListener != null )
-                        {
-                            emiListener.onDescribePushPullBehaviours( pushPull );
-                        
-                            // Notify EM of behaviours
-                            if ( pushPull[0] ) liveMonitorFace.notifyReadyToPush();
-                            if ( pushPull[1] ) liveMonitorFace.notifyReadyForPull();
-                            
-                            // Tell listener that the Live Monitoring phase has begun
-                            emiListener.onLiveMonitoringStarted();
-                        }
-                    }
+										// Find out whether we can push or pull, or both
+										Boolean[] pushPull = new Boolean[2];
+
+										if ( emiListener != null )
+										{
+												emiListener.onDescribePushPullBehaviours( pushPull );
+
+												// Notify EM of behaviours
+												if ( pushPull[0] ) liveMonitorFace.notifyReadyToPush();
+												if ( pushPull[1] ) liveMonitorFace.notifyReadyForPull();
+
+												// Tell listener that the Live Monitoring phase has begun
+												emiListener.onLiveMonitoringStarted();
+										}
 
                 } break;
 
@@ -306,10 +305,10 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
                         postReportFace = interfaceFactory.createPostReport( expMonitorID, 
                                                                             clientID, 
                                                                             dispatch );
-
                         postReportFace.setUserListener( this );
-                        postReportFace.notifyReadyToReport();
                     }
+										
+										postReportFace.notifyReadyToReport();
 
                 } break;
 
@@ -323,10 +322,10 @@ public class EMInterfaceAdapter implements IEMDiscovery_UserListener,
                         tearDownFace = interfaceFactory.createTearDown( expMonitorID, 
                                                                         clientID, 
                                                                         dispatch );
-
-                        tearDownFace.setUserListener( this );
-                        tearDownFace.notifyReadyToTearDown();
+                        tearDownFace.setUserListener( this );  
                     }
+										
+										tearDownFace.notifyReadyToTearDown();
 
                 } break;
             }

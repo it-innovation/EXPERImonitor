@@ -95,7 +95,9 @@ public class EMConnectionManager implements IEMMonitorEntryPoint_ProviderListene
   
   public void shutdown()
   {
-    disconnectAllClients( "ECC is shutting down" );
+    // We no longer send disconnect messages to clients when the ECC shuts down
+		// (the experiment life-cycle is managed elsewhere)
+		
     entryPointPump.stopPump();
     entryPointInterface.shutdown();
   }
