@@ -532,7 +532,6 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   {
     // If client is valid (i.e., is still connected to an experiment life-cycle)
 		// then remove it
-		
 		if ( client != null )
 		{
 			EMPhase phase = EMPhase.eEMDiscoverMetricGenerators;

@@ -238,13 +238,6 @@ public class ExperimentMonitor implements IExperimentMonitor,
 			// Add currently (still) connected clients and add them in to the new lifecycle
 			Set<EMClientEx> connectedClients = connectionManager.getCopyOfConnectedClients();
 			
-			// Reset each client state & metric generator history before starting experiment
-			for ( EMClientEx client : connectedClients )
-			{
-				client.resetPhaseStates();
-				client.clearHistoricMetricGenerators();
-			}
-			
 			// Notify listener of existing clients already connected
 			for ( IEMLifecycleListener lcl : lifecycleListeners )
 				for ( EMClientEx client : connectedClients )
@@ -298,6 +291,14 @@ public class ExperimentMonitor implements IExperimentMonitor,
     if ( lifecycleManager.isLifecycleActive() ) throw new Exception( "Lifecycle must be ended first" );
         
     lifecycleManager.resetLifecycle();
+		
+		// Reset currently known client states & metric generator history before starting experiment
+		Set<EMClientEx> connectedClients = connectionManager.getCopyOfAllKnownClients();
+		for ( EMClientEx client : connectedClients )
+		{
+			client.resetPhaseStates();
+			client.clearHistoricMetricGenerators();
+		}
   }  
   
   @Override
