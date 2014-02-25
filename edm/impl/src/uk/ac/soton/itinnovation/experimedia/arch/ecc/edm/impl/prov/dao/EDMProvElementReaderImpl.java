@@ -133,7 +133,7 @@ public final class EDMProvElementReaderImpl implements IEDMProvElementReader {
 			"FILTER((?t1 <= " + t2 + ") && (?t2 >= " + t1 + ")) ." +
 			
 			"} ORDER BY ?c ?s ?t1 ?t2 ?t ?p ";
-		System.out.println(query);
+		logger.debug(query);
 		translator.translate(edmProvStoreWrapper.query(query));
 
 		return translator.getContainer();

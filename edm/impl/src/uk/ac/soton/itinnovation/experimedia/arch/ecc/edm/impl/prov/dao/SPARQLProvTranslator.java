@@ -102,8 +102,10 @@ public class SPARQLProvTranslator {
 					if (type.equals("http://www.w3.org/2002/07/owl#DatatypeProperty")) {
 						tripletype = EDMTriple.TRIPLE_TYPE.DATA_PROPERTY;
 						
-						//TODO: get xsd:datatype and attach to datatype properties
-						System.out.println(triple.get("o"));
+						//get xsd:datatype and attach to datatype properties
+						if (triple.get("o").endsWith("<http://www.w3.org/2001/XMLSchema#dateTime>")) {
+							triple.put("o", triple.get("o").substring(0,triple.get("o").lastIndexOf("^")+1)+"xsd:dateTime");
+						}
 						
 					} else if (type.equals("http://www.w3.org/2002/07/owl#ObjectProperty")) {
 						tripletype = EDMTriple.TRIPLE_TYPE.OBJECT_PROPERTY;

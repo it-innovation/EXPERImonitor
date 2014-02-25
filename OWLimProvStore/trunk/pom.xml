@@ -41,14 +41,14 @@
 		</plugins>
 		
 		<!-- SSH transmission to ALTANO for deploying the jars -->
-		<extensions>
+<!--		<extensions>
 			<extension>
 				<groupId>org.apache.maven.wagon</groupId>
 				<artifactId>wagon-ssh-external</artifactId>
 				<version>${edmprov.wagon.ssh}</version>
 			</extension>
 		</extensions>
-	
+ -->	
 	</build>
 
     <dependencies>
@@ -91,6 +91,7 @@
             <groupId>com.ontotext</groupId>
             <artifactId>owlim-lite</artifactId>
             <version>5.4</version>
+			<type>jar</type>
         </dependency>
 
         <!-- Testing -->
@@ -132,12 +133,12 @@
     </repositories>
 	
 	<!-- The IT Innovation Maven repository (ALTANO) for deploying jars -->
-	<distributionManagement>
+<!--		<distributionManagement>
 		<repository>
 			<id>itinnovation-edmprov-deploy</id>
 			<url>scpexe://altano.it-innovation.soton.ac.uk/var/www/maven2/release/edmprov</url>
 		</repository>
 	</distributionManagement>
-	
+-->	
 </project>
 
