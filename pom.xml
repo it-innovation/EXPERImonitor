@@ -301,14 +301,8 @@
         <url>http://repo.aduna-software.org/maven2/releases/</url>
     </repository>
     
-    <repository>
-		<id>itinnovation-edmprov</id>
-		<url>http://altano.it-innovation.soton.ac.uk/maven2/release/edmprov</url>
-		<snapshots>
-			<enabled>true</enabled>
-		</snapshots>
-	</repository>
-    
+		<!-- Do not include ALTANO -->
+		
   </repositories>
 
   <!-- Modules _____________________________________________________________ -->
