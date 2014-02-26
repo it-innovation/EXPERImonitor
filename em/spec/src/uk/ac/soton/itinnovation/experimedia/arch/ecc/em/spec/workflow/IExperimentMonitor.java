@@ -127,6 +127,16 @@ public interface IExperimentMonitor
    */
   void deregisterClient( EMClient client, String reason ) throws Exception;
   
+	/**
+	 * Use this method to try to re-send registration messages to clients that
+	 * may already be connected to RabbitMQ and have the appropriate EM queues 
+	 * set up. This method has been included to support light-weight client persistence
+	 * in-between EM run-times
+	 * 
+	 * @param clientInfo 
+	 */
+	void tryReRegisterClients( Map<UUID, String> clientInfo ) throws Exception;
+	
   /**
    * Assumes the client is no longer connected/playing nicely; use this method to
    * forcibly remove live references to this client from the ECC's side.

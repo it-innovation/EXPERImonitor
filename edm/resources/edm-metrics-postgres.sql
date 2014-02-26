@@ -163,6 +163,17 @@ WITH (
 )
 ;
 
+CREATE TABLE Client
+(
+   clientUUID uuid NOT NULL, 
+   name text NOT NULL, 
+   CONSTRAINT clientUUID PRIMARY KEY (clientUUID)
+) 
+WITH (
+  OIDS = FALSE
+)
+;
+
 INSERT INTO MetricType VALUES ('NOMINAL');
 INSERT INTO MetricType VALUES ('ORDINAL');
 INSERT INTO MetricType VALUES ('INTERVAL');

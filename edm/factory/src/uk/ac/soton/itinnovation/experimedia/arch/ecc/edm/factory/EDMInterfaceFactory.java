@@ -24,13 +24,16 @@
 /////////////////////////////////////////////////////////////////////////
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.IMonitoringEDMAgent;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.client.IEDMClientPersistence;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.metrics.MonitoringEDM;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.metrics.MonitoringEDMAgent;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.IMonitoringEDM;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.IMonitoringEDMAgent;
 
 import java.util.Properties;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.client.EDMClientPersistence;
+
 
 /**
  * EDMInterfaceFactory is a simple factory class that generates EDM interfaces.
@@ -102,4 +105,11 @@ public class EDMInterfaceFactory
         
         return edm;
     }
+		
+		public static IEDMClientPersistence getEDMClientPersistence(Properties config) throws Exception
+		{
+			IEDMClientPersistence ecp = new EDMClientPersistence(config);
+			
+			return ecp; 
+		}
 }

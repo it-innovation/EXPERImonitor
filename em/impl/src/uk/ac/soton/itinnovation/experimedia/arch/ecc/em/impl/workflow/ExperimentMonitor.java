@@ -182,6 +182,19 @@ public class ExperimentMonitor implements IExperimentMonitor,
     clientEx.getDiscoveryInterface().deregisteringThisClient( reason );
   }
   
+	@Override
+	public void tryReRegisterClients( Map<UUID, String> clientInfo ) throws Exception
+	{
+		// Safety first
+		if ( clientInfo == null ) throw new Exception( "Could not re-register clients: client info is null" );
+		if ( connectionManager == null || lifecycleManager == null ) throw new Exception( "Could not re-register clients: internal managers are not ready" );
+		
+		// Issue a manual register event on behalf of apparently connected clients -
+		// they should respond correctly if they are still connected
+		for ( UUID clID : clientInfo.keySet() )
+			connectionManager.onRegisterAsEMClient( clID, clientInfo.get(clID) );
+	}
+	
   @Override
   public void forceClientDisconnection( EMClient client ) throws Exception
   {
