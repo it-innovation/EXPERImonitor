@@ -41,7 +41,7 @@ public class EDMEntity extends EDMProvBaseElement {
 	}
 	
 	public EDMActivity startActivity(String uniqueIdentifier, String label) throws DataFormatException, DatatypeConfigurationException {
-		EDMActivity newActivity = (EDMActivity) EDMProvFactory.getInstance().getOrCreateActivity(uniqueIdentifier, label);
+		EDMActivity newActivity = (EDMActivity) EDMProvFactory.getInstance().getActivity(uniqueIdentifier);
 
 		EDMProvFactory.getInstance().elementUpdated(this); // Queue to re-send in next report
 		

@@ -39,7 +39,7 @@ import java.util.*;
 
 public class EMClientEx extends EMClient
 {
-  private final Object pullLock   = new Object();
+  private final Object pullLock = new Object();
  
   private IEMDiscovery      discoveryFace;
   private IEMMetricGenSetup setupFace;
@@ -48,6 +48,8 @@ public class EMClientEx extends EMClient
   private IEMTearDown       tearDownFace;
   
   // Internal Set-up stage support
+	private HashMap<UUID, MetricGenerator> historicMetricGenerators;
+	
   private ArrayList<UUID> generatorsToSetup;
   
   // Internal Monitoring state support
@@ -64,8 +66,10 @@ public class EMClientEx extends EMClient
   {
     super( id, name );
     
+		historicMetricGenerators = new HashMap<UUID, MetricGenerator>();
+		generatorsToSetup        = new ArrayList<UUID>();
+		
     msSetInfoCache                    = new HashMap<UUID, EMMeasurementSetInfo>();
-    generatorsToSetup                 = new ArrayList<UUID>();
     currentMeasurementSetPulls        = new HashSet<UUID>();
     orderedCurrentMeasurementSetPulls = new LinkedList<UUID>();
   }
@@ -94,6 +98,47 @@ public class EMClientEx extends EMClient
     tearDownFace  = null;
   }
   
+	public void resetPhaseStates()
+	{
+		// Leave historic record of metric generators intact for this client
+		
+		if ( generatorsToSetup != null ) generatorsToSetup.clear();
+		if ( msSetInfoCache != null ) msSetInfoCache.clear();
+		if ( currentMeasurementSetPulls != null ) currentMeasurementSetPulls.clear();
+		if ( orderedCurrentMeasurementSetPulls != null ) orderedCurrentMeasurementSetPulls.clear();
+		
+		expectedPullMSID = null;
+		currentRequestedBatchMSID = null;
+		currentPhase = EMPhase.eEMUnknownPhase;
+		isPhaseAccelerating = false;
+		supportedPhases.clear();
+		metricGenerators.clear();
+		discoveredGenerators = false;
+		isPushCapable = false;
+		isPullCapable = false;
+		currentMGSetupID = null;
+		generatorsSetupOK.clear();
+		isQueueingMSPulls = false;
+		postReportSummary = null;
+		postReportOutstandingBatches.clear();
+		tearDownSuccessful = false;
+		timeOutsCalled.clear();
+	}
+	
+	public void clearHistoricMetricGenerators()
+	{
+		historicMetricGenerators.clear();
+	}
+	
+	public Set<MetricGenerator> getCopyOfHistoricMetricGenerators()
+	{
+		HashSet<MetricGenerator> histMG = new HashSet<MetricGenerator>();
+		
+		histMG.addAll( historicMetricGenerators.values() );
+		
+		return histMG;
+	}
+	
   public IEMDiscovery getDiscoveryInterface()
   { return discoveryFace; }
   
@@ -161,7 +206,8 @@ public class EMClientEx extends EMClient
         MetricGenerator mg = metIt.next();
         UUID            mgID = mg.getUUID();
         
-        // If metric generator is entirely new, flag it for possible set-up
+        // If metric generator is new for the client during this *connection*,
+				// flag it for possible set-up
         if ( !existingGenIDs.contains(mgID) )
           newGenerators.add( mg );
         else
@@ -170,6 +216,11 @@ public class EMClientEx extends EMClient
           metricGenerators.remove( mgID );
           metricGenerators.put( mgID, mg );
         }
+				
+				// If the metric generator is new for the complete history of the client
+				// (it may re-connect with new generators, add it to the history)
+				if ( !historicMetricGenerators.containsKey(mgID) )
+					historicMetricGenerators.put( mgID, mg );
       }
       
       // Make ready the new metric generators for subsequent phases & add to

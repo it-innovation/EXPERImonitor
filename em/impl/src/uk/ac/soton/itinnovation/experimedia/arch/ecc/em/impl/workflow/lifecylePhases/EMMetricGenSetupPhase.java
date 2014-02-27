@@ -221,7 +221,12 @@ public class EMMetricGenSetupPhase extends AbstractEMLCPhase
         client.getSetupInterface().setupMetricGenerator( genID );
       }
       else
+			{
         clientsSettingUp.remove( senderID ); // Don't ask again
+				
+				// Notify listener of client exit
+				phaseListener.onSetupPhaseCompleted( client );
+			}
     }
   }
   

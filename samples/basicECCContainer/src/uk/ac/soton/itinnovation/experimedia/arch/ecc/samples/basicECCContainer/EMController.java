@@ -27,8 +27,8 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.basicECCContainer;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.*;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDM;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.IMonitoringEDM;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.factory.EMInterfaceFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMInterfaceFactory;
@@ -109,10 +109,12 @@ public class EMController implements IEMLifecycleListener
   }
   
   @Override
-  public void onClientDisconnected( EMClient client )
+  public void onClientDisconnected( UUID clientID )
   {
-    if ( mainView != null )
-      mainView.removeClient( client );
+		EMClient client = expMonitor.getClientByID( clientID );
+		
+    if ( mainView != null && client != null )
+			mainView.removeClient( client );
   }
   
   @Override

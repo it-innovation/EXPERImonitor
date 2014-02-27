@@ -25,38 +25,28 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.dataExport;
 
-import com.vaadin.Application;
-import com.vaadin.terminal.FileResource;
-import com.vaadin.terminal.gwt.server.WebApplicationContext;
-import com.vaadin.ui.Component;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.UUID;
-import javax.servlet.ServletContext;
-import org.joda.time.DateTime;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Attribute;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Entity;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Measurement;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricHelper;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMClient;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.IECCLogger;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.Logger;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IReportDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
+
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
+
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao.IReportDAO;
+
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.IExperimentMonitor;
 import uk.ac.soton.itinnovation.robust.cat.core.components.viewEngine.spec.uif.mvc.IUFView;
 import uk.ac.soton.itinnovation.robust.cat.core.components.viewEngine.spec.uif.types.UFAbstractEventManager;
 
+import com.vaadin.Application;
+import com.vaadin.terminal.FileResource;
+import com.vaadin.terminal.gwt.server.WebApplicationContext;
+import com.vaadin.ui.Component;
 
+import java.io.*;
+import java.util.*;
+
+import javax.servlet.ServletContext;
+import org.joda.time.DateTime;
 
 
 public class DataExportController extends UFAbstractEventManager
@@ -137,7 +127,7 @@ public class DataExportController extends UFAbstractEventManager
       exportView.displayMessage( "Added client data for export",
                                  "Found " + addItemCount + " items" );
     }
-    else exportView.displayMessage( "Could not add client data to export", problem );
+    else exportView.displayMessage( "No additional client data to add", problem );
   }
   
   @Override
@@ -190,8 +180,8 @@ public class DataExportController extends UFAbstractEventManager
       Iterator<EMClient> clientIt = clients.iterator();
       while ( clientIt.hasNext() )
       {
-        EMClient client = clientIt.next();
-        Set<MetricGenerator> mGens = client.getCopyOfMetricGenerators();
+        EMClientEx client = (EMClientEx) clientIt.next();
+        Set<MetricGenerator> mGens = client.getCopyOfHistoricMetricGenerators();
 
         Iterator<Entity> entIt = MetricHelper.getAllEntities( mGens ).values().iterator();
         while( entIt.hasNext() )

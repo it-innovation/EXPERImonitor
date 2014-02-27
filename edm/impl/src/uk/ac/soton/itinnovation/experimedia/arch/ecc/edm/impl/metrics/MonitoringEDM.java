@@ -18,8 +18,10 @@
 // the software.
 //
 //      Created By :            Vegard Engen
+//															Simon Crowle
 //      Created Date :          2012-08-13
-//      Created for Project :   BonFIRE
+//															2014-02-25 (Simon)
+//      Created for Project :   BonFIRE/EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.metrics;
@@ -27,16 +29,18 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.metrics;
 import java.util.Properties;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.IECCLogger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.Logger;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.metrics.mon.dao.ExperimentDataManagerDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDM;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IEntityDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IExperimentDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IMeasurementDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IMeasurementSetDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IMetricDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IMetricGeneratorDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IMetricGroupDAO;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IReportDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.client.EDMClientPersistence;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.metrics.dao.ExperimentDataManagerDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.client.dao.IClientDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.IMonitoringEDM;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao.IEntityDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao.IExperimentDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao.IMeasurementDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao.IMeasurementSetDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao.IMetricDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao.IMetricGeneratorDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao.IMetricGroupDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao.IReportDAO;
 
 /**
  * The Experiment Monitoring Data Manager, which exposes all data access objects
@@ -49,6 +53,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.IReportDAO
 public class MonitoringEDM implements IMonitoringEDM
 {
     private ExperimentDataManagerDAO edmDAO;
+		private EDMClientPersistence     edmClientPersist;
     private Properties configParams;
     
     static IECCLogger log = Logger.getLogger(MonitoringEDM.class);
@@ -76,7 +81,12 @@ public class MonitoringEDM implements IMonitoringEDM
                 throw new IllegalArgumentException("The configuration parameters are not valid.");
             }
             
+						// Create metrics data manager
             edmDAO = new ExperimentDataManagerDAO(configParams);
+						
+						// Create client persistence
+						edmClientPersist = new EDMClientPersistence(configParams);
+						
         } catch (Exception ex) {
             log.error("Failed to create ExperimentDataManagerDAO object: " + ex.getMessage(), ex);
             throw new RuntimeException("Failed to create ExperimentDataManagerDAO object: " + ex.getMessage(), ex);
@@ -98,7 +108,12 @@ public class MonitoringEDM implements IMonitoringEDM
                 throw new IllegalArgumentException("The configuration parameters provided are not valid.");
             }
             
-            edmDAO = new ExperimentDataManagerDAO(config);
+            // Create metrics data manager
+            edmDAO = new ExperimentDataManagerDAO(configParams);
+						
+						// Create client persistence
+						edmClientPersist = new EDMClientPersistence(configParams);
+						
         } catch (Exception ex) {
             log.error("Failed to create ExperimentDataManagerDAO object: " + ex.getMessage(), ex);
             throw new IllegalArgumentException("Failed to create ExperimentDataManagerDAO object: " + ex.getMessage(), ex);
@@ -171,4 +186,13 @@ public class MonitoringEDM implements IMonitoringEDM
         
         edmDAO.clearMetricsDatabase();
     }
+		
+		@Override
+		public IClientDAO getClientDAO() throws Exception
+		{
+			if (edmClientPersist == null)
+					throw new RuntimeException("Cannot create ClientDAO; persistence is not ready");
+			
+			return edmClientPersist.getClientDAO();
+		}
 }

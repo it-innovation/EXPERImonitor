@@ -76,9 +76,7 @@ public class LiveMetricView extends SimpleView
     // Update any graphs that have had new data appended to them
     for ( UUID msID : liveUpdatesPending )
     {
-       BaseMetricVisual visual = visualsByMSID.get( msID );
-
-       if ( visual != null ) visual.updateView();
+       BaseMetricVisual visual = visualsByMSID.get( msID );       if ( visual != null ) visual.updateView();
     }
 
     liveUpdatesPending.clear();

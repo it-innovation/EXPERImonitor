@@ -128,6 +128,9 @@ public class ECCClientController implements EMIAdapterListener,
         {
           clientView.setStatus( "Connected to EM" );
           clientView.addLogMessage( "Linked to experiment: " + expInfo.getName() );
+					
+					// Clear out any old metric generators used from previous experiments
+					metricGenerators.clear();
         }
         else
           clientView.setStatus( "Refused connection to EM" );

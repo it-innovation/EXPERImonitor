@@ -51,15 +51,15 @@ public class EMConnectionManager implements IEMMonitorEntryPoint_ProviderListene
   
   private boolean entryPointOpen = false;
   
-  private HashMap<UUID, EMClientEx>   associatedClients;   // Clients connected at least once
+  private HashMap<UUID, EMClientEx>   historicClients;   // Clients connected at least once
   private HashMap<UUID, EMClientEx>   connectedClients;    // Clients currently actually connected
   private EMConnectionManagerListener connectionListener;
   
   
   public EMConnectionManager()
   {
-    associatedClients = new HashMap<UUID, EMClientEx>();
-    connectedClients  = new HashMap<UUID, EMClientEx>();
+    historicClients  = new HashMap<UUID, EMClientEx>();
+    connectedClients = new HashMap<UUID, EMClientEx>();
   }
   
   public boolean initialise( UUID epID, 
@@ -95,7 +95,9 @@ public class EMConnectionManager implements IEMMonitorEntryPoint_ProviderListene
   
   public void shutdown()
   {
-    disconnectAllClients( "ECC is shutting down" );
+    // We no longer send disconnect messages to clients when the ECC shuts down
+		// (the experiment life-cycle is managed elsewhere)
+		
     entryPointPump.stopPump();
     entryPointInterface.shutdown();
   }
@@ -106,8 +108,8 @@ public class EMConnectionManager implements IEMMonitorEntryPoint_ProviderListene
   public boolean isEntryPointOpen()
   { return entryPointOpen; }
   
-  public void clearAllAssociatedClients()
-  { synchronized( clientListLock ) { associatedClients.clear(); } }
+  public void clearAllHistoricClients()
+  { synchronized( clientListLock ) { historicClients.clear(); } }
   
   public void disconnectAllClients( String reason )
   { 
@@ -199,7 +201,7 @@ public class EMConnectionManager implements IEMMonitorEntryPoint_ProviderListene
     HashSet<EMClientEx> knownClients = new HashSet<EMClientEx>();
     
     synchronized( clientListLock )
-    { knownClients.addAll( associatedClients.values() ); }
+    { knownClients.addAll( historicClients.values() ); }
     
     return knownClients;
   }
@@ -216,17 +218,17 @@ public class EMConnectionManager implements IEMMonitorEntryPoint_ProviderListene
       // Find out what we know about this client
       synchronized( clientListLock )
       { 
-        clientKnown            = associatedClients.containsKey( userID );
+        clientKnown            = historicClients.containsKey( userID );
         clientAlreadyConnected = connectedClients.containsKey( userID );
         
         // If unknown, create the new client
         if ( !clientKnown )
         {
           incomingClient = new EMClientEx( userID, userName );
-          associatedClients.put( userID, incomingClient );
+          historicClients.put( userID, incomingClient );
         }
         else
-          incomingClient = associatedClients.get( userID );
+          incomingClient = historicClients.get( userID );
       }
       
       // If not already connected, put client on connected list

@@ -88,7 +88,7 @@ public class PROVDOTGraphBuilder
     factory.clear();
     factory.loadReport(report);
 	
-    HashMap<String, EDMProvBaseElement> provElements = factory.getAllElements();
+    HashMap<String, EDMProvBaseElement> provElements = factory.container.getAllElements();
 
     if ( provElements.isEmpty() ) throw new Exception( "Could not parse Prov report - no PROV elements are found" );
 

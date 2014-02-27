@@ -3,12 +3,16 @@
 *.settings
 *.classpath
 **/lib/
+lib/
 **/target/
+target/
 **/bin/
+bin/
 **/obj/
+obj/
 **/gen/
+**/ipch/
 /charm-rabbitmq-tal/precise/management/.bzr/
-/extensions/dotNetClientAPI/sharedLibs/
 doc/javaDoc/
 doc/manual/
 .vagrant/

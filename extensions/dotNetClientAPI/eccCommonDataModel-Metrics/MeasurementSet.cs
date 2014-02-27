@@ -39,14 +39,17 @@ namespace uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics
  * This class represents a set of measurements for a specific attribute (of an entity),
  * given a specific metric.
  * 
- * @author Vegard Engen
+ * @author Simon Crowle
  */
 public class MeasurementSet
 {
+    private MEASUREMENT_RULE msMeasurementRule;
+    private int msMeasurementCountMax;
+
     private HashSet<Measurement> setMeasurements;
 
     [JsonConverter(typeof(StringEnumConverter))]
-    public enum       MEASUREMENT_RULE { eNO_LIVE_MONITOR, eFIXED_COUNT, eINDEFINITE };
+    public enum MEASUREMENT_RULE { eNO_LIVE_MONITOR, eFIXED_COUNT, eINDEFINITE };
     
     public static int MINIMUM_SAMPLE_RATE_MS = 1000; // milliseconds
     
@@ -190,8 +193,15 @@ public class MeasurementSet
      */
     public MEASUREMENT_RULE measurementRule
     {
-        get;
-        set;
+        get
+        {
+            return msMeasurementRule;
+        }
+
+        set
+        {
+            msMeasurementRule = value;
+        }
     }
     
     /**
@@ -208,8 +218,8 @@ public class MeasurementSet
     {
         get
         {
-            if (measurementRule == MEASUREMENT_RULE.eFIXED_COUNT)
-                return measurementCountMax;
+            if ( msMeasurementRule == MEASUREMENT_RULE.eFIXED_COUNT )
+                return msMeasurementCountMax;
 
             return setMeasurements.Count;
         }
@@ -217,10 +227,10 @@ public class MeasurementSet
         set
         {
             // Safety first
-            if (measurementRule != MEASUREMENT_RULE.eFIXED_COUNT) return;
-            if (value < 1 || setMeasurements.Count > value) return;
+            if ( msMeasurementRule != MEASUREMENT_RULE.eFIXED_COUNT ) return;
+            if ( value < 1 || setMeasurements.Count > value ) return;
 
-            measurementCountMax = value;
+            msMeasurementCountMax = value;
         }
     }
     

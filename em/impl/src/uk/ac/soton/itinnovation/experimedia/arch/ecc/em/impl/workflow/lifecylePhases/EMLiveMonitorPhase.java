@@ -258,8 +258,11 @@ public class EMLiveMonitorPhase extends AbstractEMLCPhase
      
       synchronized ( controlledStopLock )
       {
+				client.clearAllLiveMeasurementSetPulls();
+				
         clientPushGroup.remove( clientID );
         clientPullGroup.remove( clientID );
+				
         removeClient( clientID );
       }
     }

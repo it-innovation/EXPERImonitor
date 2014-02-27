@@ -25,6 +25,7 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance;
 
+import java.rmi.AlreadyBoundException;
 import java.util.Date;
 import java.util.zip.DataFormatException;
 
@@ -44,10 +45,11 @@ public class EDMAgent extends EDMProvBaseElement {
 	
 	// PROV FUNCTIONAL CLASSES HERE: //////////////////////////////////////////////////////////////
 	
-	public EDMActivity startActivity(String uniqueIdentifier, String label, String timestamp) throws DataFormatException, DatatypeConfigurationException {
+	public EDMActivity startActivity(String uniqueIdentifier, String label, String timestamp) throws DataFormatException, DatatypeConfigurationException, AlreadyBoundException {
+
 		EDMProvFactory factory = EDMProvFactory.getInstance();
-	    
-		EDMActivity newActivity = (EDMActivity) factory.getOrCreateActivity(uniqueIdentifier, label);
+
+		EDMActivity newActivity = (EDMActivity) factory.createActivity(uniqueIdentifier, label);
 		newActivity.addTriple(EDMProvBaseElement.prov + "startedAtTime", format.format(new Date(Long.valueOf(timestamp)*1000)), TRIPLE_TYPE.DATA_PROPERTY);
 		newActivity.addTriple(EDMProvBaseElement.prov + "wasStartedBy", this.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
     
@@ -56,7 +58,7 @@ public class EDMAgent extends EDMProvBaseElement {
 		return newActivity;
 	}
 	
-	public EDMActivity startActivity(String uniqueIdentifier, String label) throws DataFormatException, DatatypeConfigurationException {
+	public EDMActivity startActivity(String uniqueIdentifier, String label) throws DataFormatException, DatatypeConfigurationException, AlreadyBoundException {
 		return startActivity(uniqueIdentifier, label, String.valueOf(System.currentTimeMillis() / 1000L));
 	}
 	
@@ -71,7 +73,7 @@ public class EDMAgent extends EDMProvBaseElement {
 		stopActivity(activity, String.valueOf(System.currentTimeMillis() / 1000L));
 	}
 	
-	public EDMActivity doDiscreteActivity(String uniqueIdentifier, String label, String timestamp) throws DataFormatException, DatatypeConfigurationException {
+	public EDMActivity doDiscreteActivity(String uniqueIdentifier, String label, String timestamp) throws DataFormatException, DatatypeConfigurationException, AlreadyBoundException {
 		EDMActivity discreteActivity = startActivity(uniqueIdentifier, label, timestamp);
 		this.stopActivity(discreteActivity, timestamp);
     
@@ -80,7 +82,7 @@ public class EDMAgent extends EDMProvBaseElement {
 		return discreteActivity;
 	}
 	
-	public EDMActivity doDiscreteActivity(String uniqueIdentifier, String label) throws DataFormatException, DatatypeConfigurationException {
+	public EDMActivity doDiscreteActivity(String uniqueIdentifier, String label) throws DataFormatException, DatatypeConfigurationException, AlreadyBoundException {
 		return doDiscreteActivity(uniqueIdentifier, label, String.valueOf(System.currentTimeMillis() / 1000L));
 	}
 	

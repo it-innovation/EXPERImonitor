@@ -28,9 +28,9 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.liveData.LiveMonitorController;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.configuration.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.schedulers.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.IMonitoringEDM;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.IMonitoringEDM;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao.*;
 
 import uk.ac.soton.itinnovation.robust.cat.core.components.viewEngine.spec.uif.types.UFAbstractEventManager;
 
@@ -84,6 +84,7 @@ public class DashMainController extends UFAbstractEventManager
   private ClientInfoView        clientInfoView;
   
   private transient DashConfigController configController;
+	private transient DashStateModel       dashboardStateModel;
  
   private transient IMonitoringEDM      expDataManager;
   private transient IMetricGeneratorDAO expMGAccessor;
@@ -112,7 +113,10 @@ public class DashMainController extends UFAbstractEventManager
   public void initialise( Window rootWin )
   {
     if ( rootWin != null )
-    {
+		{
+			// Set up push management first (needs to be linked to Vaadin window)
+			pushManager = new UIPushManager( rootWin );
+			
       rootWindow = rootWin;
       rootWindow.setStyleName( "eccDashDefault" );      
       rootWindow.addListener( new DashWindowResizeListener() );
@@ -129,7 +133,6 @@ public class DashMainController extends UFAbstractEventManager
       expMonitor.addLifecyleListener( this );
       
       liveMetricScheduler = new LiveMetricScheduler();
-      pushManager         = new UIPushManager( rootWindow );
     }
   }
   
@@ -222,24 +225,35 @@ public class DashMainController extends UFAbstractEventManager
   {
     if ( client != null )
     {
+			// Update dashboard state model (we don't care about reconnectedness)
+			dashboardStateModel.setClientConnectedState( client, true );
+			
+			// Update view
       if ( connectionsView != null )
+			{
         connectionsView.addClient( client );
+				pushManager.pushUIUpdates();
+			}
       else
       {
         String problem = "Client tried to connect before ECC has fully initialised: " + client.getName();
         if ( mainDashView != null ) mainDashView.addLogMessage( problem );
         dashMainLog.error( problem );
       }
-      
-      pushManager.pushUIUpdates();
     }
   }
   
   @Override
-  public void onClientDisconnected( EMClient client )
+  public void onClientDisconnected( UUID clientID )
   {
+		EMClient client = expMonitor.getClientByID( clientID );
+		
     if ( client != null )
     {
+			// Update dashboard state model
+			dashboardStateModel.setClientConnectedState( client, false );
+			
+			// Update view
       if ( connectionsView != null ) connectionsView.removeClient( client );
       if ( clientInfoView != null  ) clientInfoView.updateClientConnectivityStatus( client, false );
       
@@ -255,6 +269,8 @@ public class DashMainController extends UFAbstractEventManager
       if ( liveMonitorController != null ) liveMonitorController.removeClientLiveView( client );
       if ( pushManager != null ) pushManager.pushUIUpdates();
     }
+		else
+			dashMainLog.error( "Could not cleanly remove disconnected client from view: client no longer exists" );
   }
   
   @Override
@@ -579,24 +595,30 @@ public class DashMainController extends UFAbstractEventManager
       DataExportController dec = mainDashView.getDataExportController();
       dec.initialise( expMonitor, expReportAccessor );
 
-      // Configure dashboard specifics
-      trySetupDashboard();
-      
-      // Try open Entry Point on RabbitMQ & start a new experiment
-      try
-      {
-        Properties emProps = configController.getEMConfig();
-        expMonitor.openEntryPoint( emProps );
-        
-        entryPointOpened = true;        
-      }
-      catch ( Exception ex )
-      {
-       String problem = "Had problems opening an entry point on the RabbitMQ server";
-       mainDashView.displayWarning( problem, ex.getMessage() );
+      // If dashboard sets up OK, try opening entry point on RabbitMQ
+      if ( trySetupDashboard() )
+			{
+				try
+				{
+					Properties emProps = configController.getEMConfig();
+					expMonitor.openEntryPoint( emProps );
+					
+					// If we have noted any previously connected clients, get their
+					// identities and try re-connecting them
+					Map<UUID, String> clientInfo = dashboardStateModel.getConnectedClientInfo();
+					if ( !clientInfo.isEmpty() )
+						expMonitor.tryReRegisterClients( clientInfo );
 
-       dashMainLog.error( problem + ": " + ex.getMessage() );
-      }
+					entryPointOpened = true;        
+				}
+				catch ( Exception ex )
+				{
+				 String problem = "Had problems opening an entry point on the RabbitMQ server";
+				 mainDashView.displayWarning( problem, ex.getMessage() );
+
+				 dashMainLog.error( problem + ": " + ex.getMessage() );
+				}
+			}
     }
     else // Just plug views back into window
       rootWindow.addComponent( (Component) mainDashView.getImplContainer() );
@@ -1074,10 +1096,27 @@ public class DashMainController extends UFAbstractEventManager
   
   private boolean trySetupDashboard()
   {
-    boolean result = false;
+    boolean success = true;
     
     if ( configController != null )
     {
+			// Set up state model
+			dashboardStateModel = new DashStateModel();
+			try
+			{
+				dashboardStateModel.initialise( configController.getEDMConfig() );
+				dashMainLog.info( "Started dashboard state model" );
+			}
+			catch ( Exception ex )
+			{
+				String problem = "Could not start dashboard state model";
+				dashMainLog.error( problem );
+        welcomeView.addLogInfo( problem );
+				
+				success = false;
+			}
+			
+			// Get dashboard properties from configuration
       Properties props = configController.getDashboardConfig();
       
       String snapshotVal = props.getProperty( "livemonitor.defaultSnapshotCountMax" );
@@ -1087,7 +1126,6 @@ public class DashMainController extends UFAbstractEventManager
         if ( max != null ) BaseMetricVisual.setDefaultSnapshotMaxPointCount( max );
       }
       
-      
       String fullURL = props.getProperty( "nagios.fullurl" );
       if ( fullURL != null )
       {
@@ -1095,18 +1133,19 @@ public class DashMainController extends UFAbstractEventManager
         {
           URL url = new URL( fullURL );
           mainDashView.pointToNAGIOS( url );
-          result = true;
         }
         catch (Exception e) 
         {
           String problem = "Could not parse NAGIOS URL for systems monitor";
           dashMainLog.error( problem );
           welcomeView.addLogInfo( problem );
+					
+					success = false;
         } 
       }
     }
     
-    return result;
+    return success;
   }
   
   private Properties tryGetPropertiesFile( String configName )

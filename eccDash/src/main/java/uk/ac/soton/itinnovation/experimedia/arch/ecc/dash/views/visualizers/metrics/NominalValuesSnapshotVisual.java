@@ -55,6 +55,9 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Me
 
 public class NominalValuesSnapshotVisual extends BaseMetricVisual
 {
+	private final int    NOMINAL_GRAPH_ITEM_MAX = 5;
+	private final String NOMINAL_OTHER_VALUES   = "Other values...";
+	
   // Barchart
   private VerticalLayout       barContainer;
   private InvientCharts        barchart;
@@ -107,6 +110,11 @@ public class NominalValuesSnapshotVisual extends BaseMetricVisual
         String nomValue = m.getValue();
         if ( nomValue != null )
         {
+					// If we have reached the maximum graph visualisation, convert category
+					// to 'other'
+					if ( nominalCounts.size() > NOMINAL_GRAPH_ITEM_MAX )
+						nomValue = NOMINAL_OTHER_VALUES;
+					
           // Update the count, if one already exists
           if ( nominalCounts.containsKey(nomValue) )
           {
@@ -116,10 +124,10 @@ public class NominalValuesSnapshotVisual extends BaseMetricVisual
             count++;
             nominalCounts.put( nomValue, count );
           }
-          else
+					else // Otherwise insert as new instance (if there is space to visualise)
           {
-            nominalCounts.put( nomValue, 1 ); // First instance of this kind
-            newNominals = true;
+						nominalCounts.put( nomValue, 1 ); // First instance of this kind
+						newNominals = true;
           }
         }
       }

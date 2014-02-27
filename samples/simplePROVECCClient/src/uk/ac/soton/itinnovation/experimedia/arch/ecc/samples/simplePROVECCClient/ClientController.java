@@ -49,6 +49,7 @@ public class ClientController implements ClientViewListener
     // ECC connection gear
     private AMQPConnectionFactory amqpFactory;
     private EMInterfaceAdapter    eccAdapter;
+    private EMEventHandler        eventHandler;
     private boolean               connectedToECC;
     private boolean               monitoringActive;
 
@@ -69,13 +70,6 @@ public class ClientController implements ClientViewListener
     
     public ClientController()
     {
-        metricGenGenerator = new MetricGenerator();
-        agentMetricGroup   = MetricHelper.createMetricGroup( "Agent group", 
-                                                             "Metrics associated with PROV agents", 
-                                                             metricGenGenerator );
-        
-        currentAgentActivities    = new HashMap<String, EDMActivity>();
-        currentAgentActivityCount = new HashMap<String, Integer>();
     }
 
     public void initialise( Properties eccProps )
@@ -128,9 +122,12 @@ public class ClientController implements ClientViewListener
                 {
                     // Get the PROV agent the user has selected
                     EDMProvFactory factory = EDMProvFactory.getInstance();
-
-                    EDMAgent currPROVAgent = factory.getOrCreateAgent( "experimedia:" + selectedAgent, // Unique identifier
-                                                                       selectedAgent );                // Friendly name
+                    
+                    EDMAgent currPROVAgent = factory.getAgent(selectedAgent);
+                    if (currPROVAgent==null) {
+                    	currPROVAgent = factory.createAgent( selectedAgent, // Unique identifier
+                                                             selectedAgent );   // Friendly name
+                    }
 
                     // Update ECC with PROV report
                     sendPROVData( currPROVAgent );
@@ -161,15 +158,14 @@ public class ClientController implements ClientViewListener
         try
         {
             // Create Alice
-            EDMAgent agentAlice = factory.getOrCreateAgent( "experimedia:Alice",
-                                                            "Alice" );
+            EDMAgent agentAlice = factory.createAgent("Alice", "Alice");
+            
             // Create Bob
-            EDMAgent agentBob   = factory.getOrCreateAgent( "experimedia:Bob",
-                                                            "Bob" );
+            EDMAgent agentBob = factory.createAgent( "Bob", "Bob" );
+            
             // Create Carol
-            EDMAgent agentCarol = factory.getOrCreateAgent( "experimedia:Carol",
-                                                            "Carol" );
-
+            EDMAgent agentCarol = factory.createAgent( "Carol", "Carol" );
+            
             // Create FOAF ontology mapping in factory
             factory.addOntology("foaf", "http://xmlns.com/foaf/0.1/");
 
@@ -206,9 +202,9 @@ public class ClientController implements ClientViewListener
         {
             EDMProvFactory factory = EDMProvFactory.getInstance();
 
-            makeAgentMetric( factory.getOrCreateAgent( "experimedia:Alice", "Alice" ) );
-            makeAgentMetric( factory.getOrCreateAgent( "experimedia:Bob"  , "Bob"   ) );
-            makeAgentMetric( factory.getOrCreateAgent( "experimedia:Carol", "Carol" ) );
+            makeAgentMetric( factory.getAgent("Alice") );
+            makeAgentMetric( factory.getAgent("Bob") );
+            makeAgentMetric( factory.getAgent("Carol") );
         }
         catch ( Exception ex )
         { displayError( "Could not create metrics for agents: ", ex.getMessage() ); } 
@@ -274,19 +270,23 @@ public class ClientController implements ClientViewListener
             EDMProvFactory factory = EDMProvFactory.getInstance();
 
             // First make sure we have stopped the last activity associated with the
-            EDMActivity lastActivity = currentAgentActivities.get( agent.getIri() );
+            EDMActivity lastActivity = currentAgentActivities.get( agent.getUniqueIdentifier() );
             if ( lastActivity != null )
               agent.stopActivity( lastActivity ); // Get the agent to stop the last activity
 
             // Now create a unique activity associated with this statement
-            EDMActivity activity = agent.startActivity( "experimedia:activity_" + UUID.randomUUID().toString(), // Unique identifier
-                                                        selectedActivity );                                     // Friendly name
+            EDMActivity activity = agent.startActivity( "activity_" + UUID.randomUUID().toString(), // Unique id
+                                                        selectedActivity );                         // Friendly name
 
             // Update the activity model for this agent
             updateCurrentAgentActivity( agent, activity );
 
-            // Link activity with PROV entity
-            EDMEntity entity = activity.generateEntity( selectedEntity, selectedEntity );
+            // Link activity with PROV entity (creating it if it does not exist)
+						EDMEntity entity = factory.getEntity( selectedEntity );
+						
+						if ( entity == null )
+							entity = activity.generateEntity( selectedEntity, selectedEntity );
+						
             activity.useEntity( entity );
 
             // We're finished. Send a report to the ECC
@@ -297,7 +297,8 @@ public class ClientController implements ClientViewListener
             logPROVReportSent( report );
         }
         catch ( Exception ex )
-        { displayError( "Could not create PROV report", ex.getMessage() ); }   
+        { ex.printStackTrace();
+        	displayError( "Could not create PROV report", ex.getMessage() ); }   
     }
     
     private void logPROVReportSent( EDMProvReport report )
@@ -362,9 +363,23 @@ public class ClientController implements ClientViewListener
         if ( connected )
         {
             connectedToECC = connected;
+				
+						// Make sure old PROV data created in factory is cleared
+						EDMProvFactory factory = EDMProvFactory.getInstance();
+						factory.clear();
+						
+						// Set up basic metric generator & group
+						metricGenGenerator = new MetricGenerator();
+						
+						agentMetricGroup   = MetricHelper.createMetricGroup( "Agent group", 
+																																 "Metrics associated with PROV agents", 
+																																 metricGenGenerator );
+        
+						// Create new agent activity state
+						currentAgentActivities    = new HashMap<String, EDMActivity>();
+						currentAgentActivityCount = new HashMap<String, Integer>();
 
             createPROVAgents();
-
             createAgentMetrics();
         }
     }
