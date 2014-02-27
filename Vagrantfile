@@ -83,8 +83,11 @@ sudo -u postgres psql -d edm-metrics -f experimedia-ecc/edm/resources/edm-metric
 # set postgres user's password to "password"
 sudo -u postgres psql --command="ALTER USER postgres WITH PASSWORD 'password';"
 
-# set postgres user to need password for local connections (and reload)
-echo "host all postgres 127.0.0.1/0 password" > /tmp/pg_hba.conf
+# set connection made by postgres user from command line to not need password
+# set postgres user to need password for connections made via socket from localhost
+# reload postgresql
+echo "local all postgres trust" > /tmp/pg_hba.conf
+echo "host all postgres 127.0.0.1/0 password" >> /tmp/pg_hba.conf
 sudo -u postgres cp /tmp/pg_hba.conf /etc/postgresql/9.1/main
 service postgresql reload
 
