@@ -25,27 +25,14 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.client;
 
-import com.vaadin.ui.AbstractLayout;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Embedded;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.VerticalLayout;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Attribute;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Entity;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricHelper;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMClient;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.SimpleView;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.UILayoutUtil;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.UIResource;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.*;
+
+import com.vaadin.ui.*;
+
+import java.util.*;
+
 
 
 
@@ -61,7 +48,6 @@ public class ClientInfoView extends SimpleView
   private Embedded       tickIcon;
   private Button         enableButton;
 
-  
   private transient UUID currClientID;
   
   
@@ -349,13 +335,6 @@ public class ClientInfoView extends SimpleView
     
     // Space
     innerVL.addComponent( UILayoutUtil.createSpace( "4px", null ) );
-    
-    button = new Button( "Add to data export" );
-    button.setWidth( "120px" );
-    button.addStyleName( "small" );
-    button.setEnabled( false ); // Not ready yet
-    innerVL.addComponent( button );
-    innerVL.setComponentAlignment( button, Alignment.MIDDLE_RIGHT );
     
     // Info
     innerVL = new VerticalLayout();
