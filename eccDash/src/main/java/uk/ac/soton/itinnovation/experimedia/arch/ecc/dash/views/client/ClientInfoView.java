@@ -88,15 +88,19 @@ public class ClientInfoView extends SimpleView
     }
   }
   
-  public void updateClientConnectivityStatus( EMClient client, boolean connected )
+  public void updateClientConnectivityStatus( EMClient client, String status )
   {
     if ( client != null && client.getID().equals(currClientID) )
     {
-      if ( connected )
-        clientStatusLabel.setValue( "(connected)" );
+			// Update status message if there is something to say
+      if ( status != null )
+        clientStatusLabel.setValue( status );
       else
+			// Otherwise just clear
       {
-        clientStatusLabel.setValue( "(disconnected)" );
+				clientNameLabel.setValue( "" );
+        clientStatusLabel.setValue( "" );
+				clientIDLabel.setValue( "" );
         clientInfoHolder.removeAllComponents();
       }
     }

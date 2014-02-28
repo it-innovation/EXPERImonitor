@@ -290,7 +290,7 @@ public class ClientConnectionsView extends SimpleView
             innerVL.addComponent(UILayoutUtil.createSpace("2px", null));
 
             // Waiting for entity label
-            currentPhase = new Label("Waiting");
+            currentPhase = new Label("WAITING FOR CLIENT TO RESPOND");
             currentPhase.addStyleName("tiny");
             currentPhase.setImmediate(true);
             innerVL.addComponent(currentPhase);
