@@ -66,6 +66,7 @@ public class LiveMonitorController extends UFAbstractEventManager
   private transient UIPushManager               pushManager;
 
   private transient PROVFileLogger provLogger;
+	private transient boolean				 metricUpdatePending;
   private transient boolean        provUpdatePending;
   
   private Timer liveUpdateTimer; 
@@ -140,6 +141,8 @@ public class LiveMonitorController extends UFAbstractEventManager
           {
             MeasurementSet ms = report.getMeasurementSet();
             liveMetricView.appendMetricData( msID, ms );
+						
+						metricUpdatePending = true;
           }
         }
     }
@@ -439,9 +442,10 @@ public class LiveMonitorController extends UFAbstractEventManager
     
     synchronized ( metricViewUpdateLock )
     {
-      if ( !activeMSVisuals.isEmpty() )
+      if ( !activeMSVisuals.isEmpty() && metricUpdatePending )
       {
         liveMetricView.updateView();
+				metricUpdatePending = false;
         pushRequired = true;
       }
     }
