@@ -82,15 +82,6 @@ public class ECCHeadlessClient implements EMIAdapterListener
       
         clientName = name;
         
-        // Easy-to-find measurement sets based on their IDs
-        measurementSetMap = new HashMap<UUID, MeasurementSet>();
-        
-        // Set of measurement tasks created for attributes ( see setupMeasurementForAttribute(..) ) 
-        scheduledMeasurementTasks = new HashSet<MeasurementTask>();
-        
-        // For 'on-the-fly' measurements only - used when there is no persistence/scheduling support
-        instantMeasurers = new HashMap<UUID, ITakeMeasurement>();
-        
         // Add a shut-down hook for clean terminations
         Runtime.getRuntime().addShutdownHook( new ShutdownHook() );
     }
@@ -215,6 +206,15 @@ public class ECCHeadlessClient implements EMIAdapterListener
         // If we're connected, then store some experiment data from the ECC
         if ( connected )
         {
+						// Easy-to-find measurement sets based on their IDs
+						measurementSetMap = new HashMap<UUID, MeasurementSet>();
+
+						// Set of measurement tasks created for attributes ( see setupMeasurementForAttribute(..) ) 
+						scheduledMeasurementTasks = new HashSet<MeasurementTask>();
+
+						// For 'on-the-fly' measurements only - used when there is no persistence/scheduling support
+						instantMeasurers = new HashMap<UUID, ITakeMeasurement>();
+					
             if ( expInfo != null )
             {
               currentExperiment = new Experiment();
