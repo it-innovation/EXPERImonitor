@@ -87,6 +87,10 @@ public class MainDashView extends SimpleView
 
     liveMonitorController.reset();
     dataExportController.reset();
+		
+		// Return to System/Connect clients view
+		systemView.switchViewFocus( 0 );
+		switchViewFocus( 0 );
   }
 
   public void updateViewport()

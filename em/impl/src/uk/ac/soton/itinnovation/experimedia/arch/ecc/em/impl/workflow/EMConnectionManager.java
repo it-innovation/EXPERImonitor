@@ -205,6 +205,22 @@ public class EMConnectionManager implements IEMMonitorEntryPoint_ProviderListene
     
     return knownClients;
   }
+	
+	public void reRegisterEMClient( UUID userID, String userName )
+	{
+		if ( userID != null && userName != null )
+    {
+			boolean clientKnown				= historicClients.containsKey( userID );
+			EMClientEx incomingClient = createRegisteredClient( userID, userName );
+      
+      // Notify listener of new connection
+      if ( incomingClient != null )
+      {
+        incomingClient.setIsReRegistering( true );
+        connectionListener.onClientRegistered( incomingClient, clientKnown );
+      }
+    }
+	}
   
   // IEMMonitorEntryPoint_ProviderListener -------------------------------------
   @Override
@@ -212,28 +228,8 @@ public class EMConnectionManager implements IEMMonitorEntryPoint_ProviderListene
   {
     if ( userID != null && userName != null )
     {
-      boolean    clientKnown, clientAlreadyConnected;
-      EMClientEx incomingClient = null;
-      
-      // Find out what we know about this client
-      synchronized( clientListLock )
-      { 
-        clientKnown            = historicClients.containsKey( userID );
-        clientAlreadyConnected = connectedClients.containsKey( userID );
-        
-        // If unknown, create the new client
-        if ( !clientKnown )
-        {
-          incomingClient = new EMClientEx( userID, userName );
-          historicClients.put( userID, incomingClient );
-        }
-        else
-          incomingClient = historicClients.get( userID );
-      }
-      
-      // If not already connected, put client on connected list
-      if ( incomingClient != null && !clientAlreadyConnected )
-        synchronized( clientListLock ) { connectedClients.put( userID, incomingClient ); }
+			boolean clientKnown				= historicClients.containsKey( userID );
+			EMClientEx incomingClient = createRegisteredClient( userID, userName );
       
       // Notify listener of new connection
       if ( incomingClient != null )
@@ -243,4 +239,33 @@ public class EMConnectionManager implements IEMMonitorEntryPoint_ProviderListene
       }
     }
   }
+	
+	// Private methods -----------------------------------------------------------
+	private EMClientEx createRegisteredClient( UUID userID, String userName )
+	{
+		boolean    clientKnown, clientAlreadyConnected;
+		EMClientEx incomingClient = null;
+
+		// Find out what we know about this client
+		synchronized( clientListLock )
+		{ 
+			clientKnown            = historicClients.containsKey( userID );
+			clientAlreadyConnected = connectedClients.containsKey( userID );
+
+			// If unknown, create the new client
+			if ( !clientKnown )
+			{
+				incomingClient = new EMClientEx( userID, userName );
+				historicClients.put( userID, incomingClient );
+			}
+			else
+				incomingClient = historicClients.get( userID );
+		}
+
+		// If not already connected, put client on connected list
+		if ( incomingClient != null && !clientAlreadyConnected )
+			synchronized( clientListLock ) { connectedClients.put( userID, incomingClient ); }
+		
+		return incomingClient;
+	}
 }

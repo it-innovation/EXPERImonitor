@@ -192,7 +192,7 @@ public class ExperimentMonitor implements IExperimentMonitor,
 		// Issue a manual register event on behalf of apparently connected clients -
 		// they should respond correctly if they are still connected
 		for ( UUID clID : clientInfo.keySet() )
-			connectionManager.onRegisterAsEMClient( clID, clientInfo.get(clID) );
+			connectionManager.reRegisterEMClient( clID, clientInfo.get(clID) );
 	}
 	
   @Override
@@ -375,6 +375,8 @@ public class ExperimentMonitor implements IExperimentMonitor,
 				for ( IEMLifecycleListener listener : lifecycleListeners )
 						listener.onClientDisconnected( clientID );
 				
+				client.resetPhaseStates();
+				
 				// ... before removing permenantly
 				try
 				{
@@ -434,13 +436,21 @@ public class ExperimentMonitor implements IExperimentMonitor,
   }
   
   @Override
-  public void onFoundClientWithMetricGenerators( EMClient client, 
+  public void onFoundClientWithMetricGenerators( EMClient emClient, 
                                                  Set<MetricGenerator> newGens )
   {
-    Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
+		EMClientEx client = (EMClientEx) emClient;
+		
+		if ( client != null && newGens != null )
+		{
+			Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
     
-    while ( listIt.hasNext() )
-    { listIt.next().onFoundClientWithMetricGenerators( client, newGens ); }
+			while ( listIt.hasNext() )
+			{ listIt.next().onFoundClientWithMetricGenerators( client, newGens ); }
+			
+			// Reset re-registering state if we've got metric generators (connection is good)
+			if ( client.isReRegistering() ) client.setIsReRegistering( false );
+		}
   }
   
   @Override

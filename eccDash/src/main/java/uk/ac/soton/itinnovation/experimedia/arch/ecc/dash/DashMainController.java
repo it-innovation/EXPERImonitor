@@ -225,21 +225,26 @@ public class DashMainController extends UFAbstractEventManager
   {
     if ( client != null )
     {
-			// Update dashboard state model (we don't care about reconnectedness)
-			dashboardStateModel.setClientConnectedState( client, true );
-			
-			// Update view
-      if ( connectionsView != null )
+			// Only immediately add conencted clients if they are not already known to
+			// the ECC (as persistently connected). Re-registering client connections
+			// will be confirmed once we have some discovery dialogue
+			if ( !client.isReRegistering() )
 			{
-        connectionsView.addClient( client );
-				pushManager.pushUIUpdates();
+				dashboardStateModel.setClientConnectedState( client, true );
+				
+				// Update view
+				if ( connectionsView != null )
+				{
+					connectionsView.addClient( client );
+					pushManager.pushUIUpdates();
+				}
+				else
+				{
+					String problem = "Client tried to connect before ECC has fully initialised: " + client.getName();
+					if ( mainDashView != null ) mainDashView.addLogMessage( problem );
+					dashMainLog.error( problem );
+				}
 			}
-      else
-      {
-        String problem = "Client tried to connect before ECC has fully initialised: " + client.getName();
-        if ( mainDashView != null ) mainDashView.addLogMessage( problem );
-        dashMainLog.error( problem );
-      }
     }
   }
   
@@ -255,7 +260,7 @@ public class DashMainController extends UFAbstractEventManager
 			
 			// Update view
       if ( connectionsView != null ) connectionsView.removeClient( client );
-      if ( clientInfoView != null  ) clientInfoView.updateClientConnectivityStatus( client, false );
+      if ( clientInfoView != null  ) clientInfoView.updateClientConnectivityStatus( client, null );
       
       if ( liveMetricScheduler != null )
         try { liveMetricScheduler.removeClient( client ); }
@@ -277,7 +282,7 @@ public class DashMainController extends UFAbstractEventManager
   public void onClientStartedPhase( EMClient client, EMPhase phase )
   {
     if ( client != null && phase != null)
-    {
+    {			
       connectionsView.updateClientPhase( client.getID(), phase );
       pushManager.pushUIUpdates();
     }
@@ -356,6 +361,24 @@ public class DashMainController extends UFAbstractEventManager
   {
     if ( client != null )
     {
+			// If client is re-registering, add the client to the connected view now
+			// (we've definitely got a client that is still connected)
+			if ( client.isReRegistering() )
+			{
+				// Update view
+				if ( connectionsView != null )
+				{
+					connectionsView.addClient( client );
+					pushManager.pushUIUpdates();
+				}
+				else
+				{
+					String problem = "Client tried to connect before ECC has fully initialised: " + client.getName();
+					if ( mainDashView != null ) mainDashView.addLogMessage( problem );
+					dashMainLog.error( problem );
+				}
+			}
+			
       // Pass only new metric generators to EDM
       UUID expID = currentExperiment.getUUID();
       

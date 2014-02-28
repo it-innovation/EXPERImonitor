@@ -62,6 +62,23 @@ public class DashStateModel
 		clientDAO         = clientPersistence.getClientDAO();
 	}
 	
+	public boolean isClientConnected( EMClient client )
+	{
+		boolean result = false;
+		
+		if ( client != null )
+			try
+			{
+				result = clientDAO.isClientConnected( client.getID() );
+			}
+			catch ( Exception ex )
+			{
+				stateModelLog.error( "Dash state model could not test client connection: " + ex.getMessage() );
+			}
+		
+		return result;
+	}
+	
 	public void setClientConnectedState( EMClient client, boolean connected )
 	{
 		// Safety first

@@ -474,7 +474,6 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
       
 			// ... then set about adding them to the lifecycle
 			injectClientIntoLifecycle( client, reconnected );
-      
     }
     else lmLogger.error( "Could not register client; client is null" );
   }
@@ -547,9 +546,6 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
 
 			// And from the deferred client list (may or may not be in there)
 			phaseDeferredClients.remove( client.getID() );
-
-			// Reset this client phase state
-			client.resetPhaseStates();
 		}
 		
     // Finally, notify listener of this disconnection (client may be null if unknown to the life cycle)
