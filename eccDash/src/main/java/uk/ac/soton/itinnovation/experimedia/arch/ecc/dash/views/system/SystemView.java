@@ -17,9 +17,10 @@
 // PURPOSE, except where stated in the Licence Agreement supplied with
 // the software.
 //
-//	Created By :			Maxim Bashevoy
-//	Created Date :			2013-10-24
-//	Created for Project :   Experimedia
+//	Created By :			    Maxim Bashevoy
+//  Updates :			        Simon Crowle
+//	Created Date :			  2013-10-24
+//	Created for Project : Experimedia
 //
 /////////////////////////////////////////////////////////////////////////
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.system;
@@ -31,9 +32,13 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.NAGIOSView;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.client.ClientConnectionsView;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.client.ClientInfoView;
 
-public class SystemView extends SimpleView {
 
-    public SystemView(ClientConnectionsView connectionsView, ClientInfoView clientInfoView, NAGIOSView nagiosView, DashLogView logView) {
+public class SystemView extends SimpleView {
+		
+		private TabSheet systemTabSheet;
+	
+    public SystemView( ClientConnectionsView connectionsView, ClientInfoView clientInfoView, 
+											 NAGIOSView nagiosView, DashLogView logView ) {
         VerticalLayout vl = getViewContents();
 
         Panel panel = new Panel();
@@ -41,18 +46,27 @@ public class SystemView extends SimpleView {
         panel.setSizeFull();
         vl.addComponent(panel);
 
-        TabSheet ts = new TabSheet();
-        ts.addStyleName("borderless");
-        ts.setSizeFull();
-        panel.addComponent(ts);
+        systemTabSheet = new TabSheet();
+        systemTabSheet.addStyleName("borderless");
+        systemTabSheet.setSizeFull();
+        panel.addComponent(systemTabSheet);
 
         HorizontalLayout hl = new HorizontalLayout();
         hl.addComponent((Component) connectionsView.getImplContainer());
         hl.addComponent((Component) clientInfoView.getImplContainer());
 
-        ts.addTab(hl, "Connected clients", null);
+        systemTabSheet.addTab(hl, "Connected clients", null);
 
-        ts.addTab((Component) nagiosView.getImplContainer(), "NAGIOS", null);
-        ts.addTab((Component) logView.getImplContainer(), "Log", null);
+        systemTabSheet.addTab((Component) nagiosView.getImplContainer(), "NAGIOS", null);
+        systemTabSheet.addTab((Component) logView.getImplContainer(), "Log", null);
     }
+		
+		public void switchViewFocus( int index )
+		{
+			if ( systemTabSheet != null )
+    {
+      TabSheet.Tab t = systemTabSheet.getTab( index );
+      if ( t != null ) systemTabSheet.setSelectedTab( t );
+    }
+		}
 }
