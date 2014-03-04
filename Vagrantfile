@@ -11,6 +11,7 @@
 # RABBIT_PORT: the port to map RabbitMQ to on the host machine (default 5682)
 # RABBIT_MGT_PORT: the port to map RabbitMQ management interface to on the host machine (default 55682)
 # ECC_GIT: if defined then ECC source is checked out from git and this branch used, otherwise uses source from host machine
+# DEBUGGER_PORT: the port to map Java debugger to on the host machine (default 8000)
 
 ## Configuration for this script (this part is Ruby) ##
 
@@ -25,6 +26,7 @@ rabbit_ip = (ENV['RABBIT_IP'] ? ENV['RABBIT_IP'] : '10.0.0.10')
 rabbit_port = (ENV['RABBIT_PORT'] ? ENV['RABBIT_PORT'] : '5682')
 rabbit_mgt_port = (ENV['RABBIT_MGT_PORT'] ? ENV['RABBIT_MGT_PORT'] : '55682')
 ecc_git = (ENV['ECC_GIT'] ? ENV['ECC_GIT'] : '')
+debugger_port = (ENV['DEBUGGER_PORT'] ? ENV['DEBUGGER_PORT'] : '8000')
 
 info = "
 ECC service is deployed on VM with IP #{ecc_ip}
@@ -33,6 +35,8 @@ Tomcat manager is mapped to http://localhost:#{ecc_port}/manager/html with usern
 Using RabbitMQ deployed on #{rabbit_ip}
 RabbitMQ AMQP bus mapped to http://localhost:#{rabbit_port} on host machine.
 RabbitMQ management interface is mapped to http://localhost:#{rabbit_mgt_port} on host machine (username: guest / password: guest).
+Java debugger is mapped to port #{debugger_port} on host machine.
+
 Tail the log file with: vagrant ssh -c 'tail -f /var/lib/tomcat7/logs/catalina.out'"
 
 puts info
@@ -101,6 +105,11 @@ service rabbitmq-server restart
 
 # enable the tomcat manager webapp with username manager, password manager
 echo "<?xml version='1.0' encoding='utf-8'?><tomcat-users><user rolename='manager-gui'/><user username='manager' password='manager' roles='manager-gui'/></tomcat-users>" > /etc/tomcat7/tomcat-users.xml
+
+# turn on Java debugger on guest port 8000 (remove the comment character from the standard file)
+sed -e 's/^#\(.*-Xdebug.*\)/\1/' /etc/default/tomcat7 > /tmp/tomcat7
+cp /tmp/tomcat7 /etc/default/
+
 service tomcat7 restart
 
 ## Configure ECC Service ##
@@ -149,6 +158,8 @@ Vagrant.configure("2") do |config|
 	config.vm.network :forwarded_port, host: Integer(rabbit_port), guest: 5672
 	# Forward host port to guest port 55672 for RabbitMQ management page
 	config.vm.network :forwarded_port, host: Integer(rabbit_mgt_port), guest: 55672
+	# Forward host port to guest port 8000 for Java debugger
+	config.vm.network :forwarded_port, host: Integer(debugger_port), guest: 8000
 	
 	# Set static private network address.
 	# Deploying with a static IP like this means that VirtualBox will set up a virtual network 
