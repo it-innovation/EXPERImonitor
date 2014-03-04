@@ -1,6 +1,74 @@
 ECC API change log
 ==================
 
+Summary of V2.0-beta1 changes
+-----------------------------
+This updated ECC dashboard and API now provides better support for client connectivity over the course of a series of experiments. Given a running RabbitMQ server, experimenters can now use the following features:
+
+1. Start ECC clients before starting up the ECC dashboard or creating a new experiment
+2. Run clients continuously between experiments without needing to explicitly re-start/reconnect their clients (particularly useful for ECC clients that are services themselves)
+3. Shut down and then restart the ECC dashboard – clients that did not disconnect themselves during this time will engaged in the next new experiment
+
+Please note that [1] will work for v1.2 clients but features [2] and [3] are only available to ECC clients that are re-compiled against the new V2.0-beta API and use the V2.0-beta dashboard (see option 3 below).
+
+For users intending to use the V2.0-beta1 dashboard, please note that the message protocol has changed slightly. When an experiment is ended in the dashboard or the ECC is shutdown clients will no longer receive a disconnection message from the dashboard. If you leave your current code unchanged, you will need to manually disconnect and then re-connect your ECC client for each new experiment. More details for what this means under various scenarios is provided below.
+
+
+Option 1: Keeping using V1.2 client API
+---------------------------------------
+
+Dashboards you can use: V1.2, V2.0-SNAPSHOT, V2.0-beta1
+Code changes: none.
+
+If you choose to run the latest dashboard (V2.0-beta1) with your V1.2 client, then your client will no longer receive a disconnect message so may have to be manually halted and then reconnected. If you do not halt your client it will be partially initialised by the ECC dashboard (and appear as a connected client) at the start of the next, new experiment - it will not, however, be able to send further metrics. Re-start and reconnect your client to fix this.
+
+Option 2: Keeping using the current V2.0-SNAPSHOT client API
+------------------------------------------------------------
+Dashboards you can use: V2.0-SNAPSHOT, V2.0-beta1
+Code changes: none.
+
+Note this client API includes basic PROV support. 
+
+Exactly as above described above: if you choose to run the latest dashboard (ECC V2.0-beta) with your current V2.0-SNAPSHOT client, you will need to disconnect and re-start your client manually after each experiment has completed (this dashboard will not send a de-registering message to your client after an experiment is over).
+
+Option 3: Update your client to ECC V2.0-beta changes
+-----------------------------------------------------
+Dashboards you can use: V2.0-SNAPSHOT, V2.0-beta1
+Code changes:
+
+- Re-build your client against new API is required
+- You must ensure your create a new metric model for each new experiment
+- Minor package name refactors in the EDM specification package
+- Minor PROVENANCE API create/get method changes
+
+**Re-build your client**
+You must re-build your code against the new ECC API version.
+
+**You must ensure your create a new metric model for each new experiment**
+With the previous pattern of behaviour, clients would be created and connected for each experiment and upon connection the ECC would ask for the client's metric model.  Now that a client can remain connected to the RabbitMQ server between experiments, clients must be prepared to re-send their metric model each time a new experiment is started in the ECC (during the 'Discovery' phase: in response to the 'onPopulateMetricGeneratorInfo()' event). In this case, we recommend you re-create an entirely new metric model (new UUIDs will be generated automatically for all model elements). Note that it is recommended that any additional resources directly linked to your metric model should be re-created/updated as necessary.
+
+You also have the option of re-using Entites between experiments. To do this, follow these steps:
+
+1. Create a new Metric Generator and metric group for the new experiment
+2. Add the Entities you wish to re-use to the generator
+3. Create and map new Measurement Sets to the appropriate Attributes in the usual way
+
+**Minor package name refactors**
+Unless you use our metric database locally, these changes will not affect you:
+Package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec is now uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics
+Package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao is now uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao
+
+**Minor PROVENANCE API create/get method changes**
+If your client uses the PROVENANCE API, be aware that EDMProvFactory 'getOrCreate' method calls have been split into separate 'create' and 'get' methods. You must always create Entities, Agents and Activities; if you wish to retrieve them from the EDMProvFactory you should use the appropriate 'get' method.
+
+
+A few examples of such changes can be seen in our sample clients:
+
+- BasicECCClient: Cleared old metric model when experiment starts (see ECCClientController.java, line 132)
+
+ - PROVECCClient : Moved metric/provenance model creation from construction to when experiment starts (see ClientController.java line 372)
+
+ - HeadlessClient: Moved measurement task scheduling from constructor to when experiment starts (see ECCHeadlessClient.java line 209)
 
 V1.2 changes
 ------------

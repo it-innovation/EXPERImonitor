@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
     <artifactId>experimedia-arch-ecc</artifactId>
-    <version>2.0-SNAPSHOT</version> 
+    <version>2.0-beta-1</version> 
     <name>Experiment Content Component</name> 
     <packaging>pom</packaging>
     
