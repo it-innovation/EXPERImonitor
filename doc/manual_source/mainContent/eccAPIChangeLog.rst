@@ -11,7 +11,16 @@ This updated ECC dashboard and API now provides better support for client connec
 
 Please note that [1] will work for v1.2 clients but features [2] and [3] are only available to ECC clients that are re-compiled against the new V2.0-beta API and use the V2.0-beta dashboard (see option 3 below).
 
-For users intending to use the V2.0-beta1 dashboard, please note that the message protocol has changed slightly. When an experiment is ended in the dashboard or the ECC is shutdown clients will no longer receive a disconnection message from the dashboard. If you leave your current code unchanged, you will need to manually disconnect and then re-connect your ECC client for each new experiment. More details for what this means under various scenarios is provided below.
+For users intending to use the V2.0-beta1 dashboard, please note two important changes:
+
+- Our database schema has updated slightly (no impact on metrics data)
+- The client <-> ECC messaging protocol has changed slightly
+
+**Deployment**
+This means when deploying the ECC dashboard, you must run the schema set-up script (if you have an existing database, back this up first).
+
+**During experimentation**
+When an experiment is ended in the dashboard (or the ECC is shutdown) clients will no longer automatically receive a disconnection message. If you leave your current code unchanged, you will need to manually disconnect and then re-connect your ECC client for each new experiment. More details for what this means under various scenarios is provided below.
 
 
 Option 1: Keeping using V1.2 client API
