@@ -64,8 +64,9 @@ You also have the option of re-using Entites between experiments. To do this, fo
 
 **Minor package name refactors**
 Unless you use our metric database locally, these changes will not affect you:
-Package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec is now uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics
-Package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao is now uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao
+ - Maven artifact <artifactId>experimedia-arch-ecc-edm-impl</artifactId> is now called <artifactId>experimedia-arch-ecc-edm-impl-metrics</artifactId>
+ - Package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec is now uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics
+ - Package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao is now uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao
 
 **Minor PROVENANCE API create/get method changes**
 If your client uses the PROVENANCE API, be aware that EDMProvFactory 'getOrCreate' method calls have been split into separate 'create' and 'get' methods. You must always create Entities, Agents and Activities; if you wish to retrieve them from the EDMProvFactory you should use the appropriate 'get' method.
@@ -73,7 +74,7 @@ If your client uses the PROVENANCE API, be aware that EDMProvFactory 'getOrCreat
 
 A few examples of such changes can be seen in our sample clients:
 
-- BasicECCClient: Cleared old metric model when experiment starts (see ECCClientController.java, line 132)
+ - BasicECCClient: Cleared old metric model when experiment starts (see ECCClientController.java, line 132)
 
  - PROVECCClient : Moved metric/provenance model creation from construction to when experiment starts (see ClientController.java line 372)
 
