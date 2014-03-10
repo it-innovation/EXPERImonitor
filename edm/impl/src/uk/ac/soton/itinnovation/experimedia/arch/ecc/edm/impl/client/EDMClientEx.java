@@ -17,7 +17,7 @@
 // PURPOSE, except where stated in the Licence Agreement supplied with
 // the software.
 //
-//      Created By :            sgc
+//      Created By :            Simon Crowle
 //      Created Date :          25-Feb-2014
 //      Created for Project :   experimedia-arch-ecc-edm-impl-metrics
 //

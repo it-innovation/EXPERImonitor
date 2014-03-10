@@ -11,7 +11,16 @@ This updated ECC dashboard and API now provides better support for client connec
 
 Please note that [1] will work for v1.2 clients but features [2] and [3] are only available to ECC clients that are re-compiled against the new V2.0-beta API and use the V2.0-beta dashboard (see option 3 below).
 
-For users intending to use the V2.0-beta1 dashboard, please note that the message protocol has changed slightly. When an experiment is ended in the dashboard or the ECC is shutdown clients will no longer receive a disconnection message from the dashboard. If you leave your current code unchanged, you will need to manually disconnect and then re-connect your ECC client for each new experiment. More details for what this means under various scenarios is provided below.
+For users intending to use the V2.0-beta1 dashboard, please note two important changes:
+
+- Our database schema has updated slightly (no impact on metrics data)
+- The client <-> ECC messaging protocol has changed slightly
+
+**Deployment**
+This means when deploying the ECC dashboard, you must run the schema set-up script (if you have an existing database, back this up first).
+
+**During experimentation**
+When an experiment is ended in the dashboard (or the ECC is shutdown) clients will no longer automatically receive a disconnection message. If you leave your current code unchanged, you will need to manually disconnect and then re-connect your ECC client for each new experiment. More details for what this means under various scenarios is provided below.
 
 
 Option 1: Keeping using V1.2 client API
@@ -55,8 +64,9 @@ You also have the option of re-using Entites between experiments. To do this, fo
 
 **Minor package name refactors**
 Unless you use our metric database locally, these changes will not affect you:
-Package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec is now uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics
-Package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao is now uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao
+ - Maven artifact <artifactId>experimedia-arch-ecc-edm-impl</artifactId> is now called <artifactId>experimedia-arch-ecc-edm-impl-metrics</artifactId>
+ - Package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec is now uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics
+ - Package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao is now uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao
 
 **Minor PROVENANCE API create/get method changes**
 If your client uses the PROVENANCE API, be aware that EDMProvFactory 'getOrCreate' method calls have been split into separate 'create' and 'get' methods. You must always create Entities, Agents and Activities; if you wish to retrieve them from the EDMProvFactory you should use the appropriate 'get' method.
@@ -64,7 +74,7 @@ If your client uses the PROVENANCE API, be aware that EDMProvFactory 'getOrCreat
 
 A few examples of such changes can be seen in our sample clients:
 
-- BasicECCClient: Cleared old metric model when experiment starts (see ECCClientController.java, line 132)
+ - BasicECCClient: Cleared old metric model when experiment starts (see ECCClientController.java, line 132)
 
  - PROVECCClient : Moved metric/provenance model creation from construction to when experiment starts (see ClientController.java line 372)
 
