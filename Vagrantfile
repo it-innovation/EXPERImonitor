@@ -15,7 +15,7 @@
 
 ## Configuration for this script (this part is Ruby) ##
 
-hostname = "ECC"
+hostname = "ECC-2.0"
 ram = "512"
 
 ecc_ip = (ENV['ECC_IP'] ? ENV['ECC_IP'] : '10.0.0.10')
@@ -38,8 +38,6 @@ RabbitMQ management interface is mapped to http://localhost:#{rabbit_mgt_port} o
 Java debugger is mapped to port #{debugger_port} on host machine.
 
 Tail the log file with: vagrant ssh -c 'tail -f /var/lib/tomcat7/logs/catalina.out'"
-
-puts info
 
 ## The following shell script is run once the VM is built (this part is bash) ##
 
