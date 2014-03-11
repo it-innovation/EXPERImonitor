@@ -4,7 +4,7 @@ Experiment Content Component
 
 Copyright
 =========
-The source code in this distribution is © Copyright University of Southampton IT Innovation Centre 2012-2013.
+The source code in this distribution is © Copyright University of Southampton IT Innovation Centre 2012-2014.
 
 Licences
 ========
