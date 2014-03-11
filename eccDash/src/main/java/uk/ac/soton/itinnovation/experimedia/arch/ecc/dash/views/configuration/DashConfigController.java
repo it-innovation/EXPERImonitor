@@ -146,7 +146,7 @@ public class DashConfigController implements DashConfigViewListener
     if ( localConfigLocation != null )
       createFolder( localConfigLocation );
     else 
-      configLogger.error( "Configuration local is null - cannot save configurations locally" );
+      configLogger.error( "Configuration location is null - cannot save configurations locally" );
     
     // Create configuration view
     configView = new DashConfigView (this);
@@ -353,7 +353,7 @@ public class DashConfigController implements DashConfigViewListener
       }
       catch ( Exception e )
       {
-          String error = "Could not write local configuration data: " + e.getMessage();
+          String error = "Could not save config locally: " + e.getMessage();
           configLogger.error( error );
       }
       finally
@@ -378,7 +378,7 @@ public class DashConfigController implements DashConfigViewListener
         }
         catch ( Exception e )
         {
-            String error = "Could not save remove configuration data because : " + e.getMessage();
+            String error = "Could not save config to server: " + e.getMessage();
             configLogger.error( error );
         }
   }
@@ -533,7 +533,7 @@ public class DashConfigController implements DashConfigViewListener
                         targetRabbitConfigData = pcf.getDefaultConfigData( component , featureRb );
                 }
                 catch ( Exception e )
-                { configLogger.fatal( "Could not find remote dashboard config data : " + e.getMessage() ); }
+                { configLogger.fatal( "Could not find remote dashboard config data: " + e.getMessage() ); }
                 
                 // Database
                 try
@@ -616,7 +616,7 @@ public class DashConfigController implements DashConfigViewListener
           }
         }
       }
-      else configLogger.error( "Configuration local is null - cannot save configurations locally" );
+      else configLogger.error( "Configuration location is null - cannot save configurations locally" );
       
       return false;
     }
