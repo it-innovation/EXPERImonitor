@@ -84,8 +84,8 @@ public class LiveMetricScheduler extends UFAbstractEventManager
     if ( client == null ) throw new Exception( "Client is null" );
  
     UUID clientID = client.getID();   
+    metLogger.debug("Scheduling client: " + clientID + " (\"" + client.getName() + "\")");
     if ( liveClients.containsKey(clientID) ) throw new Exception( "Already scheduling client" );
-    
     // Scheduling pulling for this client (even if it doesn't initially have any metric generators)
     synchronized( clientLock )
     {
@@ -101,6 +101,7 @@ public class LiveMetricScheduler extends UFAbstractEventManager
     if ( client == null ) throw new Exception( "Client is null" );
  
     UUID clientID = client.getID();   
+    metLogger.debug("Unscheduling client: " + clientID + " (\"" + client.getName() + "\")");
     if ( !liveClients.containsKey(clientID) ) throw new Exception( "Client is not scheduled" );
     
     synchronized( clientLock )

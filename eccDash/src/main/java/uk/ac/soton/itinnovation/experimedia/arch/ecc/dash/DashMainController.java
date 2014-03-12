@@ -235,7 +235,12 @@ public class DashMainController extends UFAbstractEventManager
 				// Update view
 				if ( connectionsView != null )
 				{
-					connectionsView.addClient( client );
+                                        String msg = "Client " + 
+                                                (reconnected? "re": "") + 
+                                                "connected: " + 
+                                                client.getID() + " (\"" + client.getName() + "\")";
+					dashMainLog.info(msg);
+                                        connectionsView.addClient( client );
 					pushManager.pushUIUpdates();
 				}
 				else
@@ -259,7 +264,8 @@ public class DashMainController extends UFAbstractEventManager
 			dashboardStateModel.setClientConnectedState( client, false );
 			
 			// Update view
-      if ( connectionsView != null ) connectionsView.removeClient( client );
+                        dashMainLog.info("Client disconnected: " + client.getID() + " (\"" + client.getName() + "\")");
+                        if ( connectionsView != null ) connectionsView.removeClient( client );
       if ( clientInfoView != null  ) clientInfoView.updateClientConnectivityStatus( client, null );
       
       if ( liveMetricScheduler != null )
@@ -283,6 +289,7 @@ public class DashMainController extends UFAbstractEventManager
   {
     if ( client != null && phase != null)
     {			
+      dashMainLog.debug("Client started phase \"" + phase + "\": "+ client.getID() + " (\"" + client.getName() + "\")");
       connectionsView.updateClientPhase( client.getID(), phase );
       pushManager.pushUIUpdates();
     }
@@ -368,6 +375,7 @@ public class DashMainController extends UFAbstractEventManager
 				// Update view
 				if ( connectionsView != null )
 				{
+					dashMainLog.info("Known client connected: " + client.getID() + " (\"" + client.getName() + "\")");
 					connectionsView.addClient( client );
 					pushManager.pushUIUpdates();
 				}

@@ -73,7 +73,7 @@ public class DashStateModel
 			}
 			catch ( Exception ex )
 			{
-				stateModelLog.error( "Dash state model could not test client connection: " + ex.getMessage() );
+				stateModelLog.error( "Could not test client connection: " + ex.getMessage() );
 			}
 		
 		return result;
@@ -82,10 +82,10 @@ public class DashStateModel
 	public void setClientConnectedState( EMClient client, boolean connected )
 	{
 		// Safety first
-		if ( client == null ) stateModelLog.error( "Dash state model: Could not persist client connection: client is null" );
-		if ( clientDAO == null ) stateModelLog.error( "Dash state model: Could not persist client connection: Client DAO is null" );
+		if ( client == null ) stateModelLog.error( "Could not persist client connection: client is null" );
+		if ( clientDAO == null ) stateModelLog.error( "Could not persist client connection: Client DAO is null" );
 		
-		stateModelLog.info( "Dashboard state model: updating " + client.getName() + " client connection state" );
+		stateModelLog.info( "Updating client connection state: " + client.getID() + " (\"" + client.getName() + "\")");
 		
 		if ( connected )
 			setClientConnected( client );
@@ -98,7 +98,7 @@ public class DashStateModel
 		HashMap<UUID,String> clientInfo = new HashMap<UUID,String>();
 		
 		// Safety first
-		if ( clientDAO == null ) stateModelLog.error( "Dash state model: Could not get connected client IDs: Client DAO is null" );
+		if ( clientDAO == null ) stateModelLog.error( "Could not get connected client IDs: Client DAO is null" );
 		
 		try
 		{
@@ -108,7 +108,7 @@ public class DashStateModel
 		}
 		catch ( Exception ex )
 		{
-			stateModelLog.error( "Dash state model: Could not get connected client IDs: " + ex.getMessage() );
+			stateModelLog.error( "Could not get connected client IDs: " + ex.getMessage() );
 		}
 		
 		return clientInfo;
@@ -120,16 +120,16 @@ public class DashStateModel
 		try
 		{
 			if ( clientDAO.isClientConnected(client.getID()) )
-				stateModelLog.warn( "Dash state model: tried to set connected state of client already connected" );
+				stateModelLog.warn( "Tried to set connected state of client already connected: " + client.getID() + " (\"" + client.getName() + "\")");
 			else
 			{
 				clientDAO.addClientConnected( client );
-				stateModelLog.info( "Dash state model: Client " + client.getName() + " is connected");
+				stateModelLog.info( "Client is connected: " + client.getID() + " (\"" + client.getName() + "\")");
 			}
 		}
 		catch ( Exception ex )
 		{
-			String msg = "Dash state model: Could not persist client connection state: " + ex.getMessage();
+			String msg = "Could not persist client connection state: " + client.getID() + " (\"" + client.getName() + "\")" + ex.getMessage();
 			stateModelLog.error( msg );
 		}
 	}
@@ -141,14 +141,14 @@ public class DashStateModel
 			if ( clientDAO.isClientConnected(client.getID()) )
 			{
 				clientDAO.removeClientConnected( client );
-				stateModelLog.info( "Dash state model: Client " + client.getName() + " is disconnected");
+				stateModelLog.info( "Client is disconnected: " + client.getID() + " (\"" + client.getName() + "\")");
 			}
 			else
-				stateModelLog.warn( "Dash state model: tried to disconnect an already disconencted client" );
+				stateModelLog.warn( "Tried to disconnect an already disconencted client: " + client.getID() + " (\"" + client.getName() + "\")");
 		}
 		catch ( Exception ex )
 		{
-			String msg = "Dash state model: Could not persist client connection state: " + ex.getMessage();
+			String msg = "Could not persist client connection state: " + client.getID() + " (\"" + client.getName() + "\")" + ex.getMessage();
 			stateModelLog.error( msg );
 		}
 	}
