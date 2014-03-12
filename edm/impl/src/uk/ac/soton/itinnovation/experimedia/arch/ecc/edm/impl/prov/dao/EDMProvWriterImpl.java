@@ -27,9 +27,11 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.prov.dao;
 
 import java.util.ArrayList;
 import java.util.Properties;
-import org.apache.log4j.Level;
+import java.util.logging.Level;
 import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.edmprov.owlim.common.RelationshipType;
+import uk.ac.soton.itinnovation.edmprov.owlim.common.RepositoryExistsException;
+import uk.ac.soton.itinnovation.edmprov.owlim.common.SesameException;
 import uk.ac.soton.itinnovation.edmprov.owlim.common.Triple;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvReport;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMTriple;
@@ -45,7 +47,6 @@ public class EDMProvWriterImpl implements IEDMProvWriter {
     
     public EDMProvWriterImpl(Properties props) {
 		logger = Logger.getLogger(EDMProvWriterImpl.class);
-		logger.setLevel(Level.INFO);	//TODO: remove
 		this.props = props;
 		
 		connect();
@@ -57,12 +58,23 @@ public class EDMProvWriterImpl implements IEDMProvWriter {
         } catch (Exception e) {
 			logger.error("Error connecting to sesame server at " + props.getProperty("owlim.sesameServerURL"), e);
         }
+		try {
+			if (!edmProvStoreWrapper.repositoryExists(props.getProperty("owlim.repositoryID"))) {
+				try {
+					edmProvStoreWrapper.createNewRepository(props.getProperty("owlim.repositoryID"), props.getProperty("owlim.repositoryName"));
+				} catch (Exception ex) {
+					logger.error("Impossible exception: repository can't exist", ex);
+				}
+			}
+		} catch (SesameException ex) {
+			java.util.logging.Logger.getLogger(EDMProvWriterImpl.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+		}
 	}
 	
 	@Override
 	public void disconnect() {
 		if ((edmProvStoreWrapper != null) && edmProvStoreWrapper.isConnected()) {
-			logger.warn("EDMProvStoreWrapper has still got an open connection - disconnecting now");
+			logger.debug("EDMProvStoreWrapper has still got an open connection - disconnecting now");
 			edmProvStoreWrapper.disconnect();
 		} else {
 			logger.debug("EDMProvStoreWrapper is already disconnected");

@@ -39,7 +39,9 @@ import org.openrdf.query.Binding;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.TupleQueryResult;
+import uk.ac.soton.itinnovation.edmprov.owlim.common.NoSuchRepositoryException;
 import uk.ac.soton.itinnovation.edmprov.owlim.common.OntologyDetails;
+import uk.ac.soton.itinnovation.edmprov.owlim.common.SesameException;
 import uk.ac.soton.itinnovation.edmprov.sesame.RemoteSesameConnector;
 
 public class EDMProvStoreWrapper extends RemoteSesameConnector {
@@ -67,8 +69,19 @@ public class EDMProvStoreWrapper extends RemoteSesameConnector {
 		}
 	}
 	
+	public boolean repositoryExists(String repositoryID) throws SesameException {
+		try {
+			getRepository(repositoryID);
+			return true;
+		} catch (NoSuchRepositoryException e) {
+			return false;
+		} catch (SesameException e) {
+			throw new SesameException("Not connected to store", e);
+		}
+	}
+	
 	public void importOntologyToKnowledgeBase(String ontologypath, String baseURI, String prefix, Class resourcepathclass) {
-		logger.info(" - " + prefix + " (" + baseURI + ")");
+		logger.debug(" - " + prefix + " (" + baseURI + ")");
 		OntologyDetails od = new OntologyDetails();
 		File ontfile = new File(ontologypath);
 		if (!ontfile.exists()) {
@@ -115,12 +128,12 @@ public class EDMProvStoreWrapper extends RemoteSesameConnector {
     public LinkedList<HashMap<String,String>> query(String sparql) {
 		
 		if (this.prefixes==null) {
-			logger.info("prefixes are null");
+			logger.debug("prefixes are null");
 			loadPrefixes();
 		}
 		sparql = prefixes + sparql;
 		
-		logger.info(sparql);
+		logger.debug(sparql);
 				
         TupleQueryResult result = null;
         LinkedList<HashMap<String, String>> results = new LinkedList<HashMap<String,String>>();
@@ -149,7 +162,7 @@ public class EDMProvStoreWrapper extends RemoteSesameConnector {
 				results.add(row);
 			}
 			long queryEnd = System.nanoTime();
-			logger.info(" - Got " + counter + " result(s) in " + (queryEnd - queryBegin) / 1000000 + "ms.");
+			logger.debug(" - Got " + counter + " result(s) in " + (queryEnd - queryBegin) / 1000000 + "ms.");
 			
 		} catch (Exception ex) {
 			logger.error("Exception caught when querying repository: " + ex, ex);
@@ -174,6 +187,10 @@ public class EDMProvStoreWrapper extends RemoteSesameConnector {
 		//ns.get(props.getProperty("owlim.repositoryID")).remove(""); => doesn't work
 		super.repositoryNamespaces = ns;
 		this.loadPrefixes();
+	}
+	
+	public String getPrefixes() {
+		return prefixes;
 	}
 	
 }
