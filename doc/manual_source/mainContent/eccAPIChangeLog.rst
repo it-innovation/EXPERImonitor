@@ -1,6 +1,19 @@
 ECC API change log
 ==================
 
+Summary of V2.0 changes
+-----------------------
+This version of the ECC now offers:
+
+- Improved Vagrant support for ECC re-deployment
+
+- Improved ECC dashboard logging:
+	- ECC logs are now unified in a single log file (ecc.log)
+	- A single log4j configuration file can now be found in the 'WEB-INF/classes' folder
+
+If you are upgrading from V1.2, please take care to note the changes in V2.0-beta1 (below) as these also apply. As with V2.0-beta1, there is (currently not fully documented) support for Provenance modelling in the ECC client API.
+
+
 Summary of V2.0-beta1 changes
 -----------------------------
 This updated ECC dashboard and API now provides better support for client connectivity over the course of a series of experiments. Given a running RabbitMQ server, experimenters can now use the following features:
