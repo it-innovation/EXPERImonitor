@@ -15,7 +15,7 @@
 
 ## Configuration for this script (this part is Ruby) ##
 
-hostname = "ECC-2.0"
+hostname = "ECC-20"
 ram = "512"
 
 ecc_ip = (ENV['ECC_IP'] ? ENV['ECC_IP'] : '10.0.0.10')
@@ -37,7 +37,7 @@ RabbitMQ AMQP bus mapped to http://localhost:#{rabbit_port} on host machine.
 RabbitMQ management interface is mapped to http://localhost:#{rabbit_mgt_port} on host machine (username: guest / password: guest).
 Java debugger is mapped to port #{debugger_port} on host machine.
 
-Tail the log file with: vagrant ssh -c 'tail -f /var/lib/tomcat7/logs/catalina.out'"
+Tail the log file with: vagrant ssh -c 'tail -f /var/log/tomcat7/catalina.out'"
 
 ## The following shell script is run once the VM is built (this part is bash) ##
 
@@ -104,9 +104,10 @@ service rabbitmq-server restart
 # enable the tomcat manager webapp with username manager, password manager
 echo "<?xml version='1.0' encoding='utf-8'?><tomcat-users><user rolename='manager-gui'/><user username='manager' password='manager' roles='manager-gui'/></tomcat-users>" > /etc/tomcat7/tomcat-users.xml
 
-# turn on Java debugger on guest port 8000 (remove the comment character from the standard file)
-sed -e 's/^#\(.*-Xdebug.*\)/\1/' /etc/default/tomcat7 > /tmp/tomcat7
-cp /tmp/tomcat7 /etc/default/
+# Uncomment these lines to turn on Java debugger on guest port 8000
+# TODO: doesn't work from vagrant file but works from shell
+#sed -e 's/^#\(.*-Xdebug.*\)/\1/' /etc/default/tomcat7 > /tmp/tomcat7
+#cp /tmp/tomcat7 /etc/default/
 
 service tomcat7 restart
 
