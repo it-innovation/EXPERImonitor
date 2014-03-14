@@ -111,7 +111,7 @@ The ECC dashboard can be quickly built to run on your local development machine 
 
 	1.1 Open a command line and navigate to:
 	
-		<ECC API root>/thirdPartyLib
+		<ECC API root>/thirdPartyLibs
 		
 	1.2 Run the installLibraries.bat file
 		- Note that Linux users will need to run a shell script version of this file

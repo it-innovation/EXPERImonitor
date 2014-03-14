@@ -36,16 +36,16 @@ Having installed the above software, you now need compile the ECC (Maven) projec
   2. Type 'mvn clean install'
   
   3. Search for and copy the following ECC JAR files into '<root>\samples\basicAndroidClient\libs':
-      * experimedia-arch-ecc-amqpAPI-impl-1.2.jar
-      * experimedia-arch-ecc-amqpAPI-spec-1.2.jar
-      * experimedia-arch-ecc-common-dataModel-experiment-1.2.jar
-      * experimedia-arch-ecc-common-dataModel-metrics-1.2.jar
-      * experimedia-arch-ecc-common-dataModel-monitor-1.2.jar
-      * experimedia-arch-ecc-common-logging-spec-1.2.jar
-      * experimedia-arch-ecc-em-factory-1.2.jar
-      * experimedia-arch-ecc-em-impl-1.2.jar
-      * experimedia-arch-ecc-em-spec-1.2.jar
-      * experimedia-arch-ecc-samples-shared-1.2.jar
+      * experimedia-arch-ecc-amqpAPI-impl-2.0.jar
+      * experimedia-arch-ecc-amqpAPI-spec-2.0.jar
+      * experimedia-arch-ecc-common-dataModel-experiment-2.0.jar
+      * experimedia-arch-ecc-common-dataModel-metrics-2.0.jar
+      * experimedia-arch-ecc-common-dataModel-monitor-2.0.jar
+      * experimedia-arch-ecc-common-logging-spec-2.0.jar
+      * experimedia-arch-ecc-em-factory-2.0.jar
+      * experimedia-arch-ecc-em-impl-2.0.jar
+      * experimedia-arch-ecc-em-spec-2.0.jar
+      * experimedia-arch-ecc-samples-shared-2.0.jar
       
   4. Add the following third party libraries:
       * amqp-client-2.8.6.jar
