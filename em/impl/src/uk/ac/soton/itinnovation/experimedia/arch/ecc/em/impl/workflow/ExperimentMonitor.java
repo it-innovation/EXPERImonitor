@@ -87,7 +87,13 @@ public class ExperimentMonitor implements IExperimentMonitor,
     try
     { 
       basicInitialise( rabbitServerIP );
-      initialiseManagers();
+			
+			// Only initialise if entry point does not exist
+			if ( !entryPointExists() )
+				initialiseManagers();
+			else
+				throw new Exception( "Could not open entry point: ECC dashboard with ID " +
+															entryPointID.toString() + " may already be running" );
     }
     catch( Exception e ) { throw e; }
   }
@@ -107,7 +113,13 @@ public class ExperimentMonitor implements IExperimentMonitor,
     try
     {
       configInitialise( emProps );
-      initialiseManagers();
+			
+			// Only initialise if entry point does not exist
+			if ( !entryPointExists() )
+				initialiseManagers();
+			else
+				throw new Exception( "Could not open entry point: ECC dashboard with ID " +
+															entryPointID.toString() + " may already be running" );
     }
     catch ( Exception e ) { throw e; }
   }
@@ -626,4 +638,12 @@ public class ExperimentMonitor implements IExperimentMonitor,
     
     return simpleClients;
   }
+	
+	private boolean entryPointExists() throws Exception
+	{
+		String faceName  = "IECCMonitorEntryPoint 0.1_" + entryPointID.toString() + "[P]";
+		String queueName = faceName + "/" + faceName;
+		
+		return AMQPBasicChannel.amqpQueueExists( amqpConnectionFactory, queueName );
+	}
 }
