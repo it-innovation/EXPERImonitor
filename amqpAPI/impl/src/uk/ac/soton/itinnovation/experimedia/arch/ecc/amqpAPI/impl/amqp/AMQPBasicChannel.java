@@ -25,6 +25,8 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
+
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.spec.IAMQPChannelListener;
 
 import com.rabbitmq.client.*;
@@ -34,14 +36,56 @@ import java.io.IOException;
 
 
 
-
 public class AMQPBasicChannel
 {
+	private final static IECCLogger channelLogger = Logger.getLogger( AMQPBasicChannel.class );
+	
   private Channel                 amqpChannel;
   private ChannelShutdownListener rabbitListener;
   private IAMQPChannelListener    channelListener;
   private boolean                 isClosingDown;
   
+	
+	public static boolean amqpQueueExists( AMQPConnectionFactory conFactory,
+																				 String queueName ) throws Exception
+	{
+		// Safety first
+		if ( conFactory == null ) throw new Exception( "Could not test amqp queue: amqp connection factory is null" );
+		if ( queueName == null ) throw new Exception( "Could not test amqp queue: queue name is null" );
+		if ( !conFactory.isConnectionValid() ) throw new Exception( "Could not test amqp queue: factory connection is invalid" );
+		
+		// Need to create an independent connection & channel to test for a queue -
+		// a negative result automatically closes a channel.
+		
+		AMQPBasicChannel bc = conFactory.createNewChannel();
+		Channel channelImpl = (Channel) bc.getChannelImpl();
+		
+		boolean result     = false;
+		String  resultInfo = "AMQP queue ( " + queueName + ") existence result: ";
+		
+		if ( channelImpl != null && channelImpl.isOpen() )
+		{
+			// Try passively declaring the queue to see if it exists
+			try
+			{
+				channelImpl.queueDeclarePassive( queueName );
+				result = true;
+				resultInfo += "exists";
+				channelImpl.close();
+			}
+			catch ( IOException ex )
+			{ 
+				resultInfo += "does not exist";
+				// Channel will be automatically closed in this case
+			}
+
+		}
+		else resultInfo += " could not test: channel is null or closed";
+		
+		channelLogger.info( resultInfo ); 
+		
+		return result;
+	}
   
   public AMQPBasicChannel( Channel channel )
   { 

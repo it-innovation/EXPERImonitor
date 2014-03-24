@@ -32,8 +32,12 @@
 
 
 
+
 namespace ecc_amqpAPI_impl
 {
+  // Forward declarations
+  class AMQPBasicChannel;
+
 
   class AMQPConnectionFactory
   {
@@ -65,7 +69,7 @@ namespace ecc_amqpAPI_impl
 
     bool isConnectionValid();
 
-    AMQPBasicChannel::ptr_t createNewChannel();
+    boost::shared_ptr<AMQPBasicChannel> createNewChannel();
 
     AMQPBasicSubscriptionService::ptr_t getSubscriptionService();
 
