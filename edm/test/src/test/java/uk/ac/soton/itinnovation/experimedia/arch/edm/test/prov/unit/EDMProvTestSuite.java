@@ -43,8 +43,7 @@ import org.junit.runners.Suite.SuiteClasses;
 @SuiteClasses({ 
     EDMProvStoreWrapperTest.class,
 	EDMProvWriterTest.class,
-	EDMProvElementReaderTest.class,
-	EDMProvRelationReaderTest.class,
+	EDMProvReaderTest.class,
 	SPARQLProvTranslatorTest.class
 })
 public class EDMProvTestSuite {
@@ -55,8 +54,7 @@ public class EDMProvTestSuite {
     public static void beforeClass()
     {
         // Configure logging system
-        logger = Logger.getLogger(EDMTestSuite.class);
-        
+        logger = Logger.getLogger(EDMTestSuite.class);        
         logger.info("Starting EDM Prov Test Suite");
 		
 		String[] args = {
@@ -83,8 +81,7 @@ public class EDMProvTestSuite {
         Result result = org.junit.runner.JUnitCore.runClasses(
             EDMProvStoreWrapperTest.class,
 			EDMProvWriterTest.class,
-			EDMProvElementReaderTest.class,
-			EDMProvRelationReaderTest.class,
+			EDMProvReaderTest.class,
 			SPARQLProvTranslatorTest.class
 		);
 

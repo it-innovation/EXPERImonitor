@@ -26,9 +26,7 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance;
 
 import java.util.zip.DataFormatException;
-
 import javax.xml.datatype.DatatypeConfigurationException;
-
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMTriple.TRIPLE_TYPE;
 
 public class EDMEntity extends EDMProvBaseElement {

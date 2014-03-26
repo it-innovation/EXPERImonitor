@@ -27,14 +27,38 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.prov.dao;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvReport;
 
+/**
+ * This class manages all write access to the EDM prov store.
+ */
 public interface IEDMProvWriter {
     
+	/**
+	 * Imports an ontology into the store by persisting all its triples.
+	 * 
+	 * @param ontologypath the path where the ontology is located. Can be on file or on the internet
+	 * @param baseURI the ontology's base URI
+	 * @param prefix the ontology's short prefix
+	 * @param resourcepathclass any class in the resource path so the main/resources directory can be accessed
+	 */
 	public void importOntology(String ontologypath, String baseURI, String prefix, Class resourcepathclass);
 	
+	/**
+	 * Stores a prov report in the store.
+	 * 
+	 * @param report the report to store
+	 */
     public void storeReport(EDMProvReport report);
 
+	/**
+	 * Clears the repository with the given ID.
+	 * 
+	 * @param repositoryID 
+	 */
 	public void clearRepository(String repositoryID);
 	
+	/**
+	 * Disconnects from the EDM prov store.
+	 */
 	public void disconnect();
 	
 }

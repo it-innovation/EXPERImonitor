@@ -152,7 +152,7 @@ public class EDMProvStoreWrapperTest extends TestCase {
 	
 	@Test
 	public void testCreateRepository() {
-		String testrepo = "test" + UUID.randomUUID().toString();
+		String testrepo = "test-" + UUID.randomUUID().toString();
 		try {
 			store.createNewRepository(testrepo, "this is a test repo");
 		} catch (Exception e) {

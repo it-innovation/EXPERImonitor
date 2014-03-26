@@ -97,18 +97,4 @@ public class SPARQLProvTranslatorTest extends TestCase
 			fail("Error translating SPARQL result to provenance data model");
 		}
 	}
-
-	@Test
-	public void testClear() {
-		if ((translator == null)) {
-            fail("Translator not set up, cannot perform test");
-        }
-		try {
-			translator.clear();
-		} catch (Exception e) {
-			logger.error("Error clearing translator", e);
-			fail("Error clearing translator");
-		}
-	}
-
 }

@@ -27,10 +27,8 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.prov.dao;
 
 import java.util.ArrayList;
 import java.util.Properties;
-import java.util.logging.Level;
 import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.edmprov.owlim.common.RelationshipType;
-import uk.ac.soton.itinnovation.edmprov.owlim.common.RepositoryExistsException;
 import uk.ac.soton.itinnovation.edmprov.owlim.common.SesameException;
 import uk.ac.soton.itinnovation.edmprov.owlim.common.Triple;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvReport;
@@ -63,7 +61,7 @@ public class EDMProvWriterImpl implements IEDMProvWriter {
 				try {
 					edmProvStoreWrapper.createNewRepository(props.getProperty("owlim.repositoryID"), props.getProperty("owlim.repositoryName"));
 				} catch (Exception ex) {
-					logger.error("Impossible exception: repository can't exist", ex);
+					logger.error("It seems a repository has been created in the last few milliseconds - this is REALLY bas luck!", ex);
 				}
 			}
 		} catch (SesameException ex) {
@@ -110,8 +108,6 @@ public class EDMProvWriterImpl implements IEDMProvWriter {
 	@Override
 	public void clearRepository(String repositoryID) {
 		logger.debug("Clearing repository " + repositoryID + " by deleting all triples");
-		//String sparql = "DELETE WHERE { ?s ?p ?o } ;";
-		//edmProvStoreWrapper.query(sparql);
 		edmProvStoreWrapper.clearRepository(repositoryID);
 	}
 	

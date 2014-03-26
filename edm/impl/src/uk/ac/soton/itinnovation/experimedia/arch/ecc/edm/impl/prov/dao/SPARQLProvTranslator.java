@@ -29,7 +29,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Properties;
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMActivity;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMAgent;
@@ -38,6 +37,9 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvDataContainer;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMTriple;
 
+/**
+ * This class translates the results of a SPARQL query back into the EDMProv data model classes.
+ */
 public class SPARQLProvTranslator {
 	
 	private final Properties props;
@@ -46,17 +48,31 @@ public class SPARQLProvTranslator {
 	
 	public SPARQLProvTranslator(Properties props) {
 		logger = Logger.getLogger(SPARQLProvTranslator.class);
-		logger.setLevel(Level.INFO);	//TODO: remove
-		
+
 		this.props = props;
 		container = new EDMProvDataContainer(props.getProperty("ont.Prefix"), props.getProperty("ont.BaseURI"));
 	}
 	
-	public void clear() {
+	private void clear() {
 		this.container.clear();
 	}
 	
-	public void translate(LinkedList<HashMap<String, String>> sparqlResult) {
+	private void init() {
+		container.setPrefix(props.getProperty("ont.Prefix"));
+		container.setBaseURI(props.getProperty("ont.BaseURI"));
+	}
+	
+	/**
+	 * Translate a resultset
+	 * 
+	 * @param sparqlResult the SPARQL resultset, representing rows as a HashMap each, where the key is the variable name
+	 * @return the EDMProv elements in a container
+	 */
+	public EDMProvDataContainer translate(LinkedList<HashMap<String, String>> sparqlResult) {
+		
+		//start with fresh container
+		clear();
+		init();
 		
 		//first run: group by element
 		HashMap<String, LinkedList<HashMap<String,String>>> elements = new HashMap<String,LinkedList<HashMap<String,String>>>();
@@ -93,34 +109,48 @@ public class SPARQLProvTranslator {
 				}
 				
 				//set label
-				if (triple.get("p").equals("http://www.w3.org/2000/01/rdf-schema#label")) {
-					newElement.setLabel(triple.get("o"));
-				//attach triple
-				} else {
-					String type = triple.get("t");
-					EDMTriple.TRIPLE_TYPE tripletype = EDMTriple.TRIPLE_TYPE.UNKNOWN_TYPE;
-					if (type.equals("http://www.w3.org/2002/07/owl#DatatypeProperty")) {
-						tripletype = EDMTriple.TRIPLE_TYPE.DATA_PROPERTY;
-						
-						//get xsd:datatype and attach to datatype properties
-						if (triple.get("o").endsWith("<http://www.w3.org/2001/XMLSchema#dateTime>")) {
-							triple.put("o", triple.get("o").substring(0,triple.get("o").lastIndexOf("^")+1)+"xsd:dateTime");
+				if (triple.containsKey("t")) {
+					if (triple.get("p").equals("http://www.w3.org/2000/01/rdf-schema#label")) {
+						//process string
+						String tmp = triple.get("o");
+						if (tmp.startsWith("\"")) {
+							tmp = tmp.replaceFirst("\"", "");
 						}
-						
-					} else if (type.equals("http://www.w3.org/2002/07/owl#ObjectProperty")) {
-						tripletype = EDMTriple.TRIPLE_TYPE.OBJECT_PROPERTY;
-					} else if (type.equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#Property")) {
-						tripletype = EDMTriple.TRIPLE_TYPE.CLASS_ASSERTION;
+						if (tmp.contains("\"^^<http://www.w3.org/2001/XMLSchema#string>")) {
+							tmp = tmp.replace("\"^^<http://www.w3.org/2001/XMLSchema#string>", "");
+						}
+						newElement.setLabel(tmp);
+					//attach triple
+					} else {
+						String type = triple.get("t");
+						EDMTriple.TRIPLE_TYPE tripletype = EDMTriple.TRIPLE_TYPE.UNKNOWN_TYPE;
+						if (type.equals("http://www.w3.org/2002/07/owl#DatatypeProperty")) {
+							tripletype = EDMTriple.TRIPLE_TYPE.DATA_PROPERTY;
+
+							//get xsd:datatype and attach to datatype properties
+							if (triple.get("o").endsWith("<http://www.w3.org/2001/XMLSchema#dateTime>")) {
+								triple.put("o", triple.get("o").substring(0,triple.get("o").lastIndexOf("^")+1)+"xsd:dateTime");
+							}
+
+						} else if (type.equals("http://www.w3.org/2002/07/owl#ObjectProperty")) {
+							tripletype = EDMTriple.TRIPLE_TYPE.OBJECT_PROPERTY;
+						} else if (type.equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#Property")) {
+							tripletype = EDMTriple.TRIPLE_TYPE.CLASS_ASSERTION;
+						} else {
+							logger.warn("Unknown triple type: " + type);
+						}
+						newElement.addTriple(triple.get("p"), triple.get("o"), tripletype);
 					}
-					newElement.addTriple(triple.get("p"), triple.get("o"), tripletype);
 				}
 
 				//add to elements
 				container.addElement(newElement);
 			}
 		}
+		return container;
 	}
 
+	// GETTERS/SETTERS ////////////////////////////////////////////////////////////////////////////
 	public EDMProvDataContainer getContainer() {
 		return container;
 	}

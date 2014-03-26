@@ -58,7 +58,7 @@ public class EDMProvStoreWrapper extends RemoteSesameConnector {
 		this.props = props;
 		this.prefixes = null;
 	}
-	
+
 	public void loadPrefixes() {
 		//get prefixes
 		this.prefixes = "";
@@ -66,6 +66,11 @@ public class EDMProvStoreWrapper extends RemoteSesameConnector {
 			for (Map.Entry<String, String> e: this.getRepositoryNamespaces().get(props.getProperty("owlim.repositoryID")).entrySet()) {
 				this.prefixes += "PREFIX " + e.getKey() + ":<" + e.getValue() + ">\n";
 			}
+		}
+		try {
+			super.setNamespacesFromRepository(props.getProperty("owlim.repositoryID"));
+		} catch (SesameException e) {
+		
 		}
 	}
 	
@@ -131,6 +136,7 @@ public class EDMProvStoreWrapper extends RemoteSesameConnector {
 			logger.debug("prefixes are null");
 			loadPrefixes();
 		}
+		loadPrefixes();
 		sparql = prefixes + sparql;
 		
 		logger.debug(sparql);

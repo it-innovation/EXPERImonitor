@@ -28,6 +28,7 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.prov.dao;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Properties;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -35,15 +36,13 @@ import uk.ac.soton.itinnovation.edmprov.owlim.common.NoSuchRepositoryException;
 import uk.ac.soton.itinnovation.edmprov.owlim.common.RepositoryExistsException;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.prov.db.EDMProvStoreWrapper;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.prov.dao.IEDMProvDataStore;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.prov.dao.IEDMProvElementReader;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.prov.dao.IEDMProvRelationReader;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.prov.dao.IEDMProvReader;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.prov.dao.IEDMProvWriter;
 
 public final class EDMProvDataStoreImpl implements IEDMProvDataStore {
     
     private IEDMProvWriter provWriter;
-    private IEDMProvElementReader provElementReader;
-    private IEDMProvRelationReader provRelationReader;
+    private IEDMProvReader provReader;
     
     private EDMProvStoreWrapper edmProvStoreWrapper;
     private Properties props;
@@ -75,8 +74,7 @@ public final class EDMProvDataStoreImpl implements IEDMProvDataStore {
     private void init() {
 
         provWriter = new EDMProvWriterImpl(props);
-        provElementReader = new EDMProvElementReaderImpl(props);
-        provRelationReader = new EDMProvRelationReaderImpl(props);
+        provReader = new EDMProvReaderImpl(props);
 		
         connect();
 		
@@ -124,44 +122,56 @@ public final class EDMProvDataStoreImpl implements IEDMProvDataStore {
 			edmProvStoreWrapper.disconnect();
 		}
 		provWriter.disconnect();
-		provElementReader.disconnect();
-		provRelationReader.disconnect();
+		provReader.disconnect();
 	}
 	
+	//TODO: remove?
+	/**
+	 * This is just a wrapper for EDMProvWriter.importOntology(...) for more information
+	 * 
+	 * @see EDMProvWriter
+	 * @param ontologypath
+	 * @param baseURI
+	 * @param prefix
+	 * @param resourcepathclass 
+	 */
 	public void importOntology(String ontologypath, String baseURI, String prefix, Class resourcepathclass) {
 
 		provWriter.importOntology(ontologypath, baseURI, prefix, resourcepathclass);
 		
-//		if (((EDMProvWriterImpl)provWriter).getEDMProvStoreWrapper().getRepositoryNamespaces()!=null &&
-//			((EDMProvWriterImpl)provWriter).getEDMProvStoreWrapper().getRepositoryNamespaces().containsKey(props.getProperty("owlim.repositoryID"))) {
-///			System.out.println("prefixes after import:");
-//			for (Map.Entry<String, String> e: ((EDMProvWriterImpl)provWriter).getEDMProvStoreWrapper().getRepositoryNamespaces().get(props.getProperty("owlim.repositoryID")).entrySet()) {
-//				System.out.println( -   e.getKey() + ": " + e.getValue());
-//			}
-//		}
-		logger.debug("Sharing prefixes between prov store access classes");
-		((EDMProvElementReaderImpl)provElementReader).getEDMProvStoreWrapper().setRepositoryNamespaces(
-				((EDMProvWriterImpl)provWriter).getEDMProvStoreWrapper().getRepositoryNamespaces());
-		((EDMProvRelationReaderImpl)provRelationReader).getEDMProvStoreWrapper().setRepositoryNamespaces(
+		if (((EDMProvWriterImpl)provWriter).getEDMProvStoreWrapper().getRepositoryNamespaces()!=null &&
+			((EDMProvWriterImpl)provWriter).getEDMProvStoreWrapper().getRepositoryNamespaces().containsKey(props.getProperty("owlim.repositoryID"))) {
+			logger.debug("prefixes after import:");
+			for (Map.Entry<String, String> e: ((EDMProvWriterImpl)provWriter).getEDMProvStoreWrapper().getRepositoryNamespaces().get(props.getProperty("owlim.repositoryID")).entrySet()) {
+				logger.debug(" - " + e.getKey() + ":\t" + e.getValue());
+			}
+		}
+		//Sharing prefixes between prov store access classes
+		((EDMProvReaderImpl)provReader).getEDMProvStoreWrapper().setRepositoryNamespaces(
 				((EDMProvWriterImpl)provWriter).getEDMProvStoreWrapper().getRepositoryNamespaces());
 		edmProvStoreWrapper.setRepositoryNamespaces(
 				((EDMProvWriterImpl)provWriter).getEDMProvStoreWrapper().getRepositoryNamespaces());
 	}
 	
+	//TODO: remove?
+	/**
+	 * 	This is just a wrapper for EDMProvStoreWrapper.query(sparql) for more information
+	 * 
+	 * @see EDMProvStoreWrapper
+	 * @param sparql the query (no need to include prefixes here)
+	 * @return the result
+	 */
 	public LinkedList<HashMap<String, String>> query(String sparql) {
 		return this.edmProvStoreWrapper.query(sparql);
 	}
 
+	// GETTERS/SETTERS ////////////////////////////////////////////////////////////////////////////
 	public IEDMProvWriter getProvWriter() {
 		return provWriter;
 	}
 
-	public IEDMProvElementReader getProvElementReader() {
-		return provElementReader;
-	}
-
-	public IEDMProvRelationReader getProvRelationReader() {
-		return provRelationReader;
+	public IEDMProvReader getProvElementReader() {
+		return provReader;
 	}
 
 	public EDMProvStoreWrapper getEDMProvStoreWrapper() {

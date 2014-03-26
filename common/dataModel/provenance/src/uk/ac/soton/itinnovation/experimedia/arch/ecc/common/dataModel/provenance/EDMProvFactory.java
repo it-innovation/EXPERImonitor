@@ -106,6 +106,13 @@ public class EDMProvFactory {
 		addOntology("swrlb", "http://www.w3.org/2003/11/swrlb#");	
 	}
 	
+	/**
+	 * Adds an ontology to the internal list of namespaces. If the short prefix already exists,
+	 * it will warn and overwrite its matching namespace with the provided namespace.
+	 * 
+	 * @param prefix the short prefix
+	 * @param baseURI the namespace
+	 */
 	public void addOntology(String prefix, String baseURI) {
 		if (!container.namespaces.containsKey(prefix)) {
 			container.namespaces.put(prefix, baseURI);
@@ -121,8 +128,8 @@ public class EDMProvFactory {
 	/**
 	 * Create a new Agent
 	 * 
-	 * @param uniqueIdentifier
-	 * @param label
+	 * @param uniqueIdentifier the local name
+	 * @param label the human readable label (optional)
 	 * @return the agent
 	 * @throws DatatypeConfigurationException
 	 * @throws AlreadyBoundException 
@@ -134,8 +141,8 @@ public class EDMProvFactory {
 	/**
 	 * Create a new Activity
 	 * 
-	 * @param uniqueIdentifier
-	 * @param label
+	 * @param uniqueIdentifier the local name
+	 * @param label the human readable label (optional)
 	 * @return the activity
 	 * @throws DatatypeConfigurationException
 	 * @throws AlreadyBoundException 
@@ -147,8 +154,8 @@ public class EDMProvFactory {
 	/**
 	 * Create a new Entity
 	 * 
-	 * @param uniqueIdentifier
-	 * @param label
+	 * @param uniqueIdentifier the local name
+	 * @param label the human readable label (optional)
 	 * @return the entity
 	 * @throws DatatypeConfigurationException
 	 * @throws AlreadyBoundException 
@@ -160,9 +167,8 @@ public class EDMProvFactory {
 	/**
 	 * Get an agent (existing) identified by its unique ID from the factory
 	 * 
-	 * @param uniqueIdentifier
-	 * @param label
-	 * @return the element
+	 * @param uniqueIdentifier the local name
+	 * @return the agent
 	 * @throws DataFormatException
 	 * @throws DatatypeConfigurationException
 	 */
@@ -173,9 +179,8 @@ public class EDMProvFactory {
 	/**
 	 * Get an activity (existing) identified by its unique ID from the factory
 	 * 
-	 * @param uniqueIdentifier
-	 * @param label
-	 * @return the element
+	 * @param uniqueIdentifier the local name
+	 * @return the activity
 	 * @throws DataFormatException
 	 * @throws DatatypeConfigurationException
 	 */
@@ -186,9 +191,8 @@ public class EDMProvFactory {
 	/**
 	 * Get an entity (existing) identified by its unique ID from the factory
 	 * 
-	 * @param uniqueIdentifier
-	 * @param label
-	 * @return the element
+	 * @param uniqueIdentifier the local name
+	 * @return the entity
 	 * @throws DataFormatException
 	 * @throws DatatypeConfigurationException
 	 */
@@ -287,6 +291,14 @@ public class EDMProvFactory {
 		factory.container.clear();
 	}
 	
+	/**
+	 * Loads a report into the factory, recreating the prov data model from the triples in the report.
+	 * The factory will be cleared beforehand so only the triples from the report are contained.
+	 * 
+	 * @param report the report to load
+	 * @throws DataFormatException
+	 * @throws DatatypeConfigurationException 
+	 */
 	public void loadReport(EDMProvReport report) throws DataFormatException, DatatypeConfigurationException {
 		
 		HashMap<String, HashMap<UUID, EDMTriple>> elements = new HashMap<String, HashMap<UUID,EDMTriple>>();
@@ -326,6 +338,7 @@ public class EDMProvFactory {
 				String iri = triple.getSubject();
 
 				//should only need prefix and unique identifier - can get both from triple
+				//TODO: add incoming triples as well?
 				if (factory.container.allProvElements.containsKey(iri)) {
 					factory.container.allProvElements.get(iri).addTriple(
 						triple.getPredicate(), triple.getObject(), triple.getType());
@@ -336,6 +349,12 @@ public class EDMProvFactory {
 	
 	//GETTERS/SETTERS//////////////////////////////////////////////////////////////////////////////
 
+	/**
+	 * Returns the factory's base URI. If it hasn't been set, the experimedia prefix will be returned
+	 * as a fallback.
+	 * 
+	 * @return the (long) prefix
+	 */
 	public String getPrefix() {
 		if (EDMProvDataContainer.prefix!=null) {
 			return EDMProvDataContainer.prefix;
@@ -344,6 +363,13 @@ public class EDMProvFactory {
 		}
 	}
 	
+	/**
+	 * Translates a short prefix into a long one.
+	 * 
+	 * @param prefix the short prefix
+	 * @return the long prefix
+	 * @throws NoSuchFieldException 
+	 */
 	public String getNamespaceForPrefix(String prefix) throws NoSuchFieldException {
 		if (container.namespaces.containsKey(prefix)) {
 			return container.namespaces.get(prefix);
@@ -352,10 +378,21 @@ public class EDMProvFactory {
 		}
 	}
 	
+	/**
+	 * Returns all the triples that have already been sent in a prov report.
+	 * 
+	 * @return the sent triples 
+	 */
 	public HashMap<UUID, EDMTriple> getSentTriples() {
 		return sentTriples;
 	}
 
+	/**
+	 * Returns all the triples that haven't been set in a prov report yet and will be included in
+	 * the next prov report.
+	 * 
+	 * @return the current triples
+	 */
 	public HashMap<UUID, EDMTriple> getCurrentTriples() {
 		return currentTriples;
 	}

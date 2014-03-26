@@ -37,8 +37,10 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance
 /**
  * This is a class which implements the functionality shared by the three Provenance elements
  * (Agent, Activity and Entity). All the information for prov individuals is stored in this
- * class in triple form.
- */
+ * class in triple form. This includes outgoing as well as incoming relationships. While creating
+ * elements, only the outgoing relationships are necessary but later when retrieving them from the
+ * store, incoming relationships need to be included for visualisation purposes.
+*/
 public class EDMProvBaseElement {
 
     private UUID instanceID;
@@ -79,16 +81,6 @@ public class EDMProvBaseElement {
         
         setLabel(label);
     }
-    
-    public void setLabel(String label) {
-    	if (label!=null) {
-        	EDMTriple triple = new EDMTriple(this.iri, rdfsLabel,
-        			"\"" + label + "\"^^xsd:string", TRIPLE_TYPE.ANNOTATION_PROPERTY);
-        	if (!this.contains(triple)) {
-        		triples.put(triple.getID(), triple);
-        	}
-        }
-	}
     
     /**
      * Returns the label, if it exists. Otherwise falls back to IRI
@@ -154,6 +146,7 @@ public class EDMProvBaseElement {
      * returns the exact same result as getTriples();
      * 
      * @param type the type of triples that should be returned
+	 * @param prefix the prefix of the predicate to look for
      * @return the triples of the specified type
      */
     public HashMap<UUID, EDMTriple> getTriples(EDMTriple.TRIPLE_TYPE type, String prefix) {
@@ -192,6 +185,36 @@ public class EDMProvBaseElement {
       
       return result;
     }
+	
+	/**
+	 * Returns only the incoming triples, i.e. triples in which the element itself is the object.
+	 * 
+	 * @return the incoming triples
+	 */
+	public HashMap<UUID, EDMTriple> getIncomingTriples() {
+		HashMap<UUID, EDMTriple> result = new HashMap<UUID, EDMTriple>();
+		for (EDMTriple t: triples.values()) {
+			if (t.getObject().equals(iri)) {
+				result.put(t.getID(), t);
+			}
+		}
+		return result;
+	}
+	
+	/**
+	 * Returns only the outgoing triples, i.e. triples in which the element itself is the subject.
+	 * 
+	 * @return the outgoing triples
+	 */
+	public HashMap<UUID, EDMTriple> getOutgoingTriples() {
+		HashMap<UUID, EDMTriple> result = new HashMap<UUID, EDMTriple>();
+		for (EDMTriple t: triples.values()) {
+			if (t.getSubject().equals(iri)) {
+				result.put(t.getID(), t);
+			}
+		}
+		return result;
+	}
 
     /**
      * Adds a triple to the element with the element itself as subject
@@ -289,31 +312,89 @@ public class EDMProvBaseElement {
 		return iri;
 	}
 
+	/**
+	 * This returns the instance ID, a UUID which links the prov model to the metric model.
+	 * 
+	 * @return the instance id
+	 */
     public UUID getInstanceID() {
         return instanceID;
     }
     
+	/**
+	 * This returns the prov type, which can be one of the following values.
+	 * 
+	 * ePROV_UNKNOWN_TYPE, 
+     * ePROV_ENTITY, 
+     * ePROV_AGENT, 
+     * ePROV_ACTIVITY
+	 * 
+	 * @return 
+	 */
     public PROV_TYPE getProvType() {
         return provType;
     }
 
+	/**
+	 * Returns all the triples related to the element. This can be both, incoming and outgoing
+	 * relationships, i.e. the element itself can be the subject or object of the triple.
+	 * 
+	 * @return the triples
+	 */
     public HashMap<UUID, EDMTriple> getTriples() {
         return triples;
     }
 
+	/**
+	 * This returns the prefix of the element. The prefix is internally kept as the full prefix,
+	 * even when only the short prefix is used for the creation of the element.
+	 * 
+	 * @return the prefix
+	 */
     public String getPrefix() {
 		return prefix;
 	}
 
+	/**
+	 * Returns the local name of the element. This is the IRI without the prefix.
+	 * 
+	 * @return the local name
+	 */
 	public String getUniqueIdentifier() {
 		return uniqueIdentifier;
 	}
 
+	/**
+	 * Sets an element's prov type. Though the unknown type exists as a fallback, it is not
+	 * recommended to use it. Possible values are:
+	 * 
+	 * ePROV_UNKNOWN_TYPE, 
+     * ePROV_ENTITY, 
+     * ePROV_AGENT, 
+     * ePROV_ACTIVITY
+	 * 
+	 * @param provType the prov type
+	 */
 	public void setProvType(PROV_TYPE provType) {
 		this.provType = provType;
 	}
 
-	
+	/**
+	 * Sets a label for the element, which will be used for rendering the element in the UI.
+	 * 
+	 * @param label the label
+	 */
+	public void setLabel(String label) {
+		if (label!=null) {
+			//escape quotes in label
+			label = label.replace("\"", "\\\"");
+			EDMTriple triple = new EDMTriple(this.iri, rdfsLabel,
+					"\"" + label + "\"^^xsd:string", TRIPLE_TYPE.ANNOTATION_PROPERTY);
+			if (!this.contains(triple)) {
+				triples.put(triple.getID(), triple);
+			}
+		}
+	}
 	
 
 }

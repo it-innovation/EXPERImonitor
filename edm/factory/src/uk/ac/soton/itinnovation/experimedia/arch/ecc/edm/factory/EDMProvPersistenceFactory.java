@@ -29,6 +29,9 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.prov.dao.EDMProvDataStoreImpl;
 
+/**
+ * This class manages access to the provenance store.
+ */
 public final class EDMProvPersistenceFactory {
 	
 	private static Properties props;
@@ -38,6 +41,12 @@ public final class EDMProvPersistenceFactory {
 	
 	private EDMProvPersistenceFactory(java.util.Properties props) {}
 	
+	/**
+	 * Returns an instance of the persistence factory
+	 * 
+	 * @param props the properties
+	 * @return the factory
+	 */
 	public static synchronized EDMProvPersistenceFactory getInstance(Properties props) {
 		
 		EDMProvPersistenceFactory.props = props;
@@ -53,10 +62,15 @@ public final class EDMProvPersistenceFactory {
         return factory;	
 	}
 	
-	public EDMProvDataStoreImpl getStore() {
-		return getStore(props);
-	}
 
+
+	/**
+	 * Returns the specified store
+	 * 
+	 * @param experimentID	The experimentID, which is at the same time the repositoryID
+	 * @param owlimServerURL the location of the OWLIMLite server
+	 * @return the store
+	 */
     public EDMProvDataStoreImpl getStore(String experimentID, String owlimServerURL) {
 
 		Properties newprops = props;
@@ -66,6 +80,21 @@ public final class EDMProvPersistenceFactory {
 		return getStore(newprops);
     }
 	
+	/**
+	 * Returns the standard store
+	 * 
+	 * @return the store
+	 */
+	public EDMProvDataStoreImpl getStore() {
+		return getStore(props);
+	}
+		
+	/**
+	 * Returns the store defined in the properties
+	 * 
+	 * @param props the properties
+	 * @return the store
+	 */
 	public EDMProvDataStoreImpl getStore(Properties props) {
 		
 		EDMProvDataStoreImpl store = null;
@@ -78,5 +107,7 @@ public final class EDMProvPersistenceFactory {
 		
 		return store;
 	}
+
+
 
 }

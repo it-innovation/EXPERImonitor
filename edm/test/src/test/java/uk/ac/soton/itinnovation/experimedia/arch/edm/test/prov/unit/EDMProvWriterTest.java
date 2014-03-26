@@ -25,10 +25,13 @@
 package uk.ac.soton.itinnovation.experimedia.arch.edm.test.prov.unit;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Properties;
+import java.util.UUID;
 import junit.framework.TestCase;
 import org.apache.log4j.Logger;
 import org.junit.After;
@@ -58,13 +61,15 @@ public class EDMProvWriterTest extends TestCase
 	private static Properties props;
 	private EDMProvFactory factory = null;
 	private EDMProvReport report; 
-	private static final String repoID = "testrepo";
-	private static final String repoName = "This is a test repository";
+	private static String repoID = "testrepo-";
+	private static String repoName = "This is a test repository";
     
     @BeforeClass
     public static void beforeClass() {
         // Configure logging system
         logger = Logger.getLogger(EDMProvWriterTest.class);
+		repoID += UUID.randomUUID().toString();
+		repoName += ", created at " + (new SimpleDateFormat("yyyy/MM/dd, HH:mm:ss").format(Calendar.getInstance().getTime()));
         
         logger.info("EDMProvWriter tests executing...");
     }
