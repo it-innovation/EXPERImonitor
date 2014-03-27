@@ -18,6 +18,7 @@
 // the software.
 //
 //      Created By :            Simon Crowle
+//      Updates :               Dion Kitchner/Simon Crowle
 //      Created Date :          02-Feb-2013
 //      Created for Project :   EXPERIMEDIA
 //
@@ -25,20 +26,22 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.client;
 
-import com.vaadin.ui.*;
+
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMClient;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMPhase;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.*;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.UUID;
+import com.vaadin.ui.*;
+
+import java.util.*;
+
+
 
 
 public class ClientConnectionsView extends SimpleView
-        implements HighlightViewListener,
-        ClientViewListener {
+																	 implements HighlightViewListener,
+																						  ClientViewListener 
+{
     private VerticalLayout clientList;
     private transient HashMap<UUID, ClientView> connectedClients;
     private transient UUID currSelectedClient;
@@ -70,7 +73,11 @@ public class ClientConnectionsView extends SimpleView
                 connectedClients.put(id, view);
 
                 // Select first added
-                if (currSelectedClient == null) currSelectedClient = client.getID();
+                if (currSelectedClient == null)
+								{
+									currSelectedClient = client.getID();
+									view.setSelected( true );
+								}
             }
         }
     }
@@ -290,7 +297,7 @@ public class ClientConnectionsView extends SimpleView
             innerVL.addComponent(UILayoutUtil.createSpace("2px", null));
 
             // Waiting for entity label
-            currentPhase = new Label("Waiting");
+            currentPhase = new Label("WAITING FOR CLIENT TO RESPOND");
             currentPhase.addStyleName("tiny");
             currentPhase.setImmediate(true);
             innerVL.addComponent(currentPhase);

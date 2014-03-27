@@ -11,6 +11,9 @@
           <excludes>
             <exclude>**/target/**</exclude>
             <exclude>assembly/**</exclude>
+            <exclude>.vagrant/**</exclude>
+            <exclude>.git/**</exclude>
+            <exclude>juju/**</exclude>
           </excludes>    
       </fileSet>
       

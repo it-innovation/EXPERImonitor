@@ -4,7 +4,7 @@ Experiment Content Component
 
 Copyright
 =========
-The source code in this distribution is © Copyright University of Southampton IT Innovation Centre 2012-2013.
+The source code in this distribution is © Copyright University of Southampton IT Innovation Centre 2012-2014.
 
 Licences
 ========
@@ -20,7 +20,23 @@ For convenience, an HTML version of our documentation can be found here:
 <ECC API root>/doc/manual/html
 
 Javadoc for the source code may be found in /doc/javaDoc' folder. In addition to this, supplementary READMEs relating to ECC client development can be found in the 'samples' folder. 
-Brief notes 'quick start' notes can be found below.
+
+Brief 'quick start' notes can be found below regarding either using Vagrant or installing dependencies manually.
+
+
+Using Vagrant to deploy the ECC
+===============================
+Vagrant (see http://vagrantup.com) along with a suitable virtual machine system (such as Oracle VirtualBox) can be used to simply build and deploy the ECC and all its dependencies including a RabbitMQ server.  This is particularly useful for development and testing.
+
+Assuming a working vagrant system, this is done by typing "vagrant up" in the <ECC API root> folder which will execute the instructions found in the "vagrantfile" found in the same folder.  The shell script embedded in the vagrantfile is also a useful reference for deploying the system in Linux.  Once the build is completed, the ECC and a RabbitMQ server are hosted in a virtual machine with the necessary ports mapped through to the host machine.  The port mapping can be changed via environment variables in the host machine:
+
+ECC_IP: the IP address for the ECC VM to use (default 10.0.0.10)
+ECC_PORT: the port to map the ECC to on the host machine (default 8090)
+RABBIT_IP: the IP address to use for RabbitMQ (default 10.0.0.10)
+RABBIT_PORT: the port to map RabbitMQ to on the host machine (default 5682)
+RABBIT_MGT_PORT: the port to map RabbitMQ management interface to on the host machine (default 55682)
+
+The sample clients distributed with the ECC generally attempt to connect to a RabbitMQ server running on localhost with the default 5672 port.  To make these clients work with the ECC and RabbitMQ in the vagrant VM you must map the guest VM's RabbitMQ port through to port 5672 in the host machine.  This is achieved by setting the variable "RABBIT_PORT" to 5672 on the host machine.
 
 
 Installing 3rd party software required by the ECC
@@ -109,7 +125,7 @@ The ECC dashboard can be quickly built to run on your local development machine 
 
 	1.1 Open a command line and navigate to:
 	
-		<ECC API root>/thirdPartyLib
+		<ECC API root>/thirdPartyLibs
 		
 	1.2 Run the installLibraries.bat file
 		- Note that Linux users will need to run a shell script version of this file
@@ -123,7 +139,7 @@ The ECC dashboard can be quickly built to run on your local development machine 
   
   You should find the ECC web dashboard WAR file created in the following location:
   
-      <ECC API root>\eccDash\target\experimedia-arch-ecc-eccDash-2.0-SNAPSHOT.war
+      <ECC API root>\eccDash\target\experimedia-arch-ecc-eccDash-2.0-beta-1.war
 
  
 3. Deploy and run the ECC dashboard, using:
@@ -135,14 +151,9 @@ The ECC dashboard can be quickly built to run on your local development machine 
 	  Step 2: Copy WAR file generated in step 1 to Tomcat's 'webapps' directory
 	          (Tomcat should automatically unpack and deploy for you)
 	  
-	  Result: You should see the ECC dashboard running on: http://localhost:8080/experimedia-arch-ecc-eccDash-2.0-SNAPSHOT/
+	  Result: You should see the ECC dashboard running on: http://localhost:8080/experimedia-arch-eccDash-2.0-beta-1/
 
 
-Using Vagrant to deploy the ECC
-===============================
-Vagrant can be used to automatically deploy the ECC, for more information on using Vagrant, look in:
-
-	<ECC API root>/doc/ECC_Vagrant
 	
 
 

@@ -132,6 +132,8 @@ public class DataExportView extends SimpleView
       
       mainDataLink.setResource( resource );
       mainDataLink.setEnabled( true );
+			
+			displayMessage( "Metric data ready", "Please click on download links" );
     }
   }
   
@@ -221,6 +223,7 @@ public class DataExportView extends SimpleView
     innerVL.addComponent( innerHL );
     
     metaStatusLabel = new Label( "Data not ready" );
+		metaStatusLabel.setImmediate( true );
     innerHL.addComponent( metaStatusLabel );
     
     // Space
@@ -236,6 +239,7 @@ public class DataExportView extends SimpleView
     innerVL.addComponent( innerHL );
     
     mainStatusLabel = new Label( "Data not ready" );
+		mainStatusLabel.setImmediate( true );
     innerHL.addComponent( mainStatusLabel );
     
     // Space
@@ -269,6 +273,8 @@ public class DataExportView extends SimpleView
     
     mainStatusLabel.addStyleName( "loading" );
     mainStatusLabel.setValue( "Generating data" );
+		
+		displayMessage( "Please wait...", "Generating export data" );
     
     Collection<DataExportViewListener> listeners = getListenersByType();
     for ( DataExportViewListener listener : listeners )

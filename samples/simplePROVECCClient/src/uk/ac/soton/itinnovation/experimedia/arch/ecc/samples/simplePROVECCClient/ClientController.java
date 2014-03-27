@@ -70,13 +70,6 @@ public class ClientController implements ClientViewListener
     
     public ClientController()
     {
-        metricGenGenerator = new MetricGenerator();
-        agentMetricGroup   = MetricHelper.createMetricGroup( "Agent group", 
-                                                             "Metrics associated with PROV agents", 
-                                                             metricGenGenerator );
-        
-        currentAgentActivities    = new HashMap<String, EDMActivity>();
-        currentAgentActivityCount = new HashMap<String, Integer>();
     }
 
     public void initialise( Properties eccProps )
@@ -370,9 +363,23 @@ public class ClientController implements ClientViewListener
         if ( connected )
         {
             connectedToECC = connected;
+				
+						// Make sure old PROV data created in factory is cleared
+						EDMProvFactory factory = EDMProvFactory.getInstance();
+						factory.clear();
+						
+						// Set up basic metric generator & group
+						metricGenGenerator = new MetricGenerator();
+						
+						agentMetricGroup   = MetricHelper.createMetricGroup( "Agent group", 
+																																 "Metrics associated with PROV agents", 
+																																 metricGenGenerator );
+        
+						// Create new agent activity state
+						currentAgentActivities    = new HashMap<String, EDMActivity>();
+						currentAgentActivityCount = new HashMap<String, Integer>();
 
             createPROVAgents();
-
             createAgentMetrics();
         }
     }

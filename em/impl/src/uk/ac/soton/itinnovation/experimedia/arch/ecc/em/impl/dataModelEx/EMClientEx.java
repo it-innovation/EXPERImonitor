@@ -125,6 +125,11 @@ public class EMClientEx extends EMClient
 		timeOutsCalled.clear();
 	}
 	
+	public void clearHistoricMetricGenerators()
+	{
+		historicMetricGenerators.clear();
+	}
+	
 	public Set<MetricGenerator> getCopyOfHistoricMetricGenerators()
 	{
 		HashSet<MetricGenerator> histMG = new HashSet<MetricGenerator>();
@@ -174,6 +179,9 @@ public class EMClientEx extends EMClient
   public void setIsPhaseAccelerating( boolean accelerate )
   { isPhaseAccelerating = accelerate; }
   
+	public void setIsReRegistering( boolean reReg )
+	{ isReRegistereing = reReg; }
+	
   // Discovery phase state -----------------------------------------------------
   public void setIsConnected( boolean connected )
   { isConnected = connected; }

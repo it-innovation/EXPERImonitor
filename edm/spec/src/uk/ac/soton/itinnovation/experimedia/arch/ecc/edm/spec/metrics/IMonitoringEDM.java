@@ -24,6 +24,7 @@
 /////////////////////////////////////////////////////////////////////////
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.client.dao.IClientDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao.IEntityDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao.IExperimentDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao.IMeasurementDAO;
@@ -108,4 +109,14 @@ public interface IMonitoringEDM
      * @throws Exception 
      */
     void clearMetricsDatabase() throws Exception;
+		
+		
+		/**
+		 * Gets the client persistence DAO that supports the recording of clients
+		 * connected to the ECC.
+		 * 
+		 * @return					 - an instance of the client DAO
+		 * @throws Exception - throws if the database is inaccessible
+		 */
+		IClientDAO getClientDAO() throws Exception;
 }

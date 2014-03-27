@@ -332,9 +332,11 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
     {
       synchronized ( acceleratorLock )
       { clientsExpectingGeneratorInfo.remove( client.getID() ); }
-      
-      phaseListener.onClientIsDisconnected( client );
     }
+		
+		// Always send disconnection message (even if the phase does not have an
+		// instance of the client); the connection manager will deal with the client
+		phaseListener.onClientIsDisconnected( client, senderID );
   }
   
   // Protected methods ---------------------------------------------------------

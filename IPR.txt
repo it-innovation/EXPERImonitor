@@ -1,31 +1,34 @@
 ------------------------------------------------------------------------------------------------------------
-This software distribution is licenced under the terms found in the file <ECC API root>/licences/LGPL_v2.1.txt
+This software distribution is licensed under the terms found in the file <ECC API root>/licences/LGPL_v2.1.txt
 The IT Innovation software is the source code and the following associated jars/war:
 ------------------------------------------------------------------------------------------------------------
 
-experimedia-arch-ecc-amqpAPI-impl-2.0-SNAPSHOT.jar
-experimedia-arch-ecc-amqpAPI-spec-2.0-SNAPSHOT.jar
-experimedia-arch-ecc-common-dataModel-experiment-2.0-SNAPSHOT.jar
-experimedia-arch-ecc-common-dataModel-metrics-2.0-SNAPSHOT.jar
-experimedia-arch-ecc-common-dataModel-monitor-2.0-SNAPSHOT.jar
-experimedia-arch-ecc-common-dataModel-provenance-2.0-SNAPSHOT.jar
-experimedia-arch-ecc-edm-factory-2.0-SNAPSHOT.jar
-experimedia-arch-ecc-edm-impl-2.0-SNAPSHOT.jar
-experimedia-arch-ecc-edm-spec-2.0-SNAPSHOT.jar
-experimedia-arch-ecc-edm-test-2.0-SNAPSHOT.jar
-experimedia-arch-ecc-em-factory-2.0-SNAPSHOT.jar
-experimedia-arch-ecc-em-impl-2.0-SNAPSHOT.jar
-experimedia-arch-ecc-em-spec-2.0-SNAPSHOT.jar
-experimedia-arch-ecc-em-test-2.0-SNAPSHOT.jar
-experimedia-arch-ecc-samples-basicECCClient-2.0-SNAPSHOT.jar
-experimedia-arch-ecc-samples-basicECCContainer-2.0-SNAPSHOT.jar
-experimedia-arch-ecc-samples-headlessECCClient-2.0-SNAPSHOT.jar
-experimedia-arch-ecc-samples-dynamicEntityDemoClient-2.0-SNAPSHOT.jar
-experimedia-arch-ecc-samples-metricGeneratorExamples-2.0-SNAPSHOT.jar
-experimedia-arch-ecc-samples-simplePROVECCClient-2.0-SNAPSHOT.jar
-experimedia-arch-ecc-samples-shared-2.0-SNAPSHOT.jar
+experimedia-arch-ecc-amqpAPI-impl-2.0.jar
+experimedia-arch-ecc-amqpAPI-spec-2.0.jar
+experimedia-arch-ecc-common-dataModel-experiment-2.0.jar
+experimedia-arch-ecc-common-dataModel-metrics-2.0.jar
+experimedia-arch-ecc-common-dataModel-monitor-2.0.jar
+experimedia-arch-ecc-common-dataModel-provenance-2.0.jar
+experimedia-arch-ecc-common-logging-impls-2.0.jar
+experimedia-arch-ecc-common-logging-spec-2.0.jar
+experimedia-arch-ecc-edc-configAPI-2.0.jar
+experimedia-arch-ecc-edm-factory-2.0.jar
+experimedia-arch-ecc-edm-impl-2.0.jar
+experimedia-arch-ecc-edm-spec-2.0.jar
+experimedia-arch-ecc-edm-test-2.0.jar
+experimedia-arch-ecc-em-factory-2.0.jar
+experimedia-arch-ecc-em-impl-2.0.jar
+experimedia-arch-ecc-em-spec-2.0.jar
+experimedia-arch-ecc-em-test-2.0.jar
+experimedia-arch-ecc-samples-basicECCClient-2.0.jar
+experimedia-arch-ecc-samples-basicECCContainer-2.0.jar
+experimedia-arch-ecc-samples-headlessECCClient-2.0.jar
+experimedia-arch-ecc-samples-dynamicEntityDemoClient-2.0.jar
+experimedia-arch-ecc-samples-metricGeneratorExamples-2.0.jar
+experimedia-arch-ecc-samples-simplePROVECCClient-2.0.jar
+experimedia-arch-ecc-samples-shared-2.0.jar
 
-robust-cat-core-components-viewEngine-spec-uif-1.3-SNAPSHOT.jar
+robust-cat-core-components-viewEngine-spec-uif-1.0-SNAPSHOT.jar
 
 OWLimProvStore-0.9-SNAPSHOT.jar
 
@@ -58,7 +61,7 @@ eccCommonDataModel_d.lib
 eccEMClient-Impl.lib
 eccEMClient-Impl_d.lib
 
-experimedia-arch-ecc-eccDash-2.0-SNAPSHOT.war
+experimedia-arch-ecc-eccDash-2.0.war
 
 ------------------------------------------------------------------------------------------------------------
 This software requires various third-party libraries to compile and/or execute.
@@ -67,51 +70,62 @@ These libraries and their associated licences are:
 
 The Apache Software License, Version 2.0
 -----------------------------------------------
+commons-codec:1.8
+commons-collections:3.2.1
+commons-dbcp:1.3
+commons-fileupload:1.2
+commons-httpclient:3.1
+commons-io-2.4.jar
+commons-lang:2.2
+commons-logging:1.1.2
+commons-pool:1.5.4
 gson-2.2.2.jar
-log4j-2.0-SNAPSHOT.17.jar
-vaadin-6.8.2.jar
 gwt-user-2.3.0.jar
-gwt-dev-2.3.0.jar
-commons-cli-1.1.jar
-commons-io-2.4-SNAPSHOT.jar
-commons-io-2.0-SNAPSHOT.jar
+httpclient:4.2.4
+httpcore:4.2.4
+invient-charts-0.8.6.jar
+icepush-0.2.1.jar
+icepush-3.0.1.jar
 javax.validation-api-1.0.0.GA.jar
-javax.validation-api-1.0.0.GA-sources.jar
+joda-time-2.1.jar
+log4j-1.2.17.jar
+log4net.dll
 org.apache.maven.surefire:common-junit3:2.12.4.jar
 org.apache.maven.surefire:common-junit4:2.12.4.jar
 org.apache.maven.surefire:surefire-junit47:2.12.4.jar
 org.apache.maven.surefire:common-junit48:2.12.4.jar
 org.apache.maven.surefire:surefire-grouper:2.12.4.jar
-joda-time-2.1.jar
-invient-charts-0.8.6.jar
-icepush-0.2.1.jar
-icepush-3.0.1.jar
 RabbitMQ.Client.dll
-log4net.dll
 sardine-5.0.1.jar
+surefire-api:2.12.4
+vaadin-6.8.12.jar
 
 CPL 1.0
 -----------------------------------------------
 junit-4.10.jar
 
-GPL v2 / MPL v1.1
+MPL v1.1
 -----------------------------------------------
 amqp-client-2.8.6.jar
-invient-charts-0.8.6.jar
 icepush-2.0.0-alpha3.jar
 icepush-gwt-2.0.0-alpha3.jar
 
-
-CDDL / GPLv2 with classpath exception
+CDDL
 -----------------------------------------------
+activation-1.1.jar
 servlet-api-2.3.jar
+jaxb-api:2.2.4
+jaxb-impl:2.2.6
+stax-api:1.0-2
 
 BSD (and variants)
 -----------------------------------------------
 postgresql-9.1-901.jdbc4.jar
 org.hamcrest:hamcrest-core:1.1.jar
-invient-charts-0.8.6.jar
 sesame-1.2.7.jar (Aduna BSD)
+antlr:2.7.7
+antlr-runtime:3.4
+stringtemplate:4.0.2
 
 Creative Commons Attribution-NonCommercial 3.0
 -----------------------------------------------
@@ -122,17 +136,22 @@ MIT Licence
 Newtonsoft.Json.dll
 rabbitmq-c-v0.3.0 (see https://github.com/alanxz/rabbitmq-c)
 SimpleAmqpClient (see https://github.com/alanxz/SimpleAmqpClient)
+prov-dot:0.3.0
+prov-json:0.3.0
+prov-model:0.3.0
+prov-n:0.3.0
+prov-xml:0.3.0
 
 BOOST Licence
--------------
+-----------------------------------------------
 Boost 1.53.0
 
 OWLIM-Lite Licence
-------------------
+-----------------------------------------------
 OWLIM-Lite_licence_v5.3
 
-University of Southampton
--------------------------
+prov Toolbox Licence
+-----------------------------------------------
 prov-dot-0.3.0.jar
 prov-model-0.3.0.jar
 prov-n-0.3.0.jar
@@ -141,3 +160,10 @@ prov-xml-0.3.0.jar
 Public domain
 -----------------------------------------------
 base64-2.3.8.jar
+
+LGPL
+-----------------------------------------------
+openrdf-model:1.2.7
+openrdf-util:1.2.7
+rio:1.0.10
+sesame:1.2.7

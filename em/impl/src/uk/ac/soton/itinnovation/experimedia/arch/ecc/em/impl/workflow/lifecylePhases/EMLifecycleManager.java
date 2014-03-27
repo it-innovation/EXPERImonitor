@@ -181,7 +181,7 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
     return false;
   }
   
-  public void startLifeCycleAt( EMPhase startPhase ) throws Exception
+  public void startLifeCycleAt( EMPhase startPhase, Set<EMClientEx> previousClients ) throws Exception
   {
     if ( startPhase == EMPhase.eEMUnknownPhase || startPhase == EMPhase.eEMProtocolComplete )
       throw new Exception( "Cannot start lifecycle at: " + startPhase.toString() );
@@ -201,6 +201,16 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
       // Move forward to next phase
       phaseStep = phaseStep.nextPhase();
     }
+		
+		// Now add already connected clients to our 'early' client list
+		if ( previousClients != null )
+			for ( EMClientEx client : previousClients )
+			{
+				UUID pcID = client.getID();
+				
+				if ( !earlyClientConnections.containsKey(pcID) )
+					earlyClientConnections.put( pcID, client );
+			}
     
     // Then start the target phase
     currentPhase      = phaseStep;
@@ -458,33 +468,12 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
     if ( client != null ) 
     {
       client.setIsConnected( true );
-      lifecycleListener.onClientConnected( client, reconnected );
-          
-      // If the experiment has not actually started, add the client to the deferred list
-      if ( currentPhase == EMPhase.eEMUnknownPhase && !reconnected )
-				earlyClientConnections.put( client.getID(), client );
-			
-      // If the experiment process has already started, flag to accelerate the client
-      // through phases already completed so it can catch up
-      else if ( currentPhase != EMPhase.eEMProtocolComplete )
-      {
-				// If this client has re-connected, make sure all states relating to phases are reset
-				if ( reconnected ) client.resetPhaseStates();
-				
-				client.setIsPhaseAccelerating( true );
-				
-				// Make sure we have a discovery interface available to set up later interfaces
-				if ( client.getDiscoveryInterface() == null )
-				{
-					AbstractEMLCPhase discovery = 
-								lifecyclePhases.get( EMPhase.eEMDiscoverMetricGenerators );
-
-					discovery.setupClientInterface( client );
-				}
-				
-        // Move client into discovery phase (even if it has reconnected, this is safest)
-				accelerateClient( client, EMPhase.eEMDiscoverMetricGenerators );
-      }
+     
+			// Notify listener we have a connected client first...
+			lifecycleListener.onClientConnected( client, reconnected );
+      
+			// ... then set about adding them to the lifecycle
+			injectClientIntoLifecycle( client, reconnected );
     }
     else lmLogger.error( "Could not register client; client is null" );
   }
@@ -538,28 +527,29 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   }
   
   @Override
-  public void onClientIsDisconnected( EMClientEx client )
+  public void onClientIsDisconnected( EMClientEx client, UUID clientID )
   {
-    // Remove client from phases
-    EMPhase phase = EMPhase.eEMDiscoverMetricGenerators;
+    // If client is valid (i.e., is still connected to an experiment life-cycle)
+		// then remove it
+		if ( client != null )
+		{
+			EMPhase phase = EMPhase.eEMDiscoverMetricGenerators;
     
-    while ( !phase.equals(EMPhase.eEMProtocolComplete) )
-    {
-      AbstractEMLCPhase deregPhase = lifecyclePhases.get( phase );
-      
-      if ( deregPhase != null ) deregPhase.onClientHasBeenDeregistered( client );
-      
-      phase = phase.nextPhase();
-    }
-    
-    // And from the deferred client list (may or may not be in there)
-    phaseDeferredClients.remove( client.getID() );
+			while ( !phase.equals(EMPhase.eEMProtocolComplete) )
+			{
+				AbstractEMLCPhase deregPhase = lifecyclePhases.get( phase );
+
+				if ( deregPhase != null ) deregPhase.onClientHasBeenDeregistered( client );
+
+				phase = phase.nextPhase();
+			}
+
+			// And from the deferred client list (may or may not be in there)
+			phaseDeferredClients.remove( client.getID() );
+		}
 		
-		// Reset this client phase state
-		client.resetPhaseStates();
-    
-    // Finally, notify listener of this disconnection
-    lifecycleListener.onClientDisconnected( client );
+    // Finally, notify listener of this disconnection (client may be null if unknown to the life cycle)
+    lifecycleListener.onClientDisconnected( clientID );
   }
   
   @Override
@@ -743,6 +733,35 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
       }
     }
   }
+	
+	private void injectClientIntoLifecycle( EMClientEx client, boolean reconnected )
+	{
+		// If the experiment has not actually started, add the client to the deferred list
+    if ( currentPhase == EMPhase.eEMUnknownPhase && !reconnected )
+			earlyClientConnections.put( client.getID(), client );
+			
+		// If the experiment process has already started, flag to accelerate the client
+		// through phases already completed so it can catch up
+		else if ( currentPhase != EMPhase.eEMProtocolComplete )
+		{
+			// If this client has re-connected, make sure all states relating to phases are reset
+			if ( reconnected ) client.resetPhaseStates();
+
+			client.setIsPhaseAccelerating( true );
+
+			// Make sure we have a discovery interface available to set up later interfaces
+			if ( client.getDiscoveryInterface() == null )
+			{
+				AbstractEMLCPhase discovery = 
+							lifecyclePhases.get( EMPhase.eEMDiscoverMetricGenerators );
+
+				discovery.setupClientInterface( client );
+			}
+
+			// Move client into discovery phase (even if it has reconnected, this is safest)
+			accelerateClient( client, EMPhase.eEMDiscoverMetricGenerators );
+		}
+	}
   
   private void accelerateClient( EMClientEx client, EMPhase nextPhase )
   {

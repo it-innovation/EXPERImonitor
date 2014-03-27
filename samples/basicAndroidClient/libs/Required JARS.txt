@@ -2,16 +2,16 @@ Libraries required for client
 -----------------------------
 ECC libraries:
 
-      * experimedia-arch-ecc-amqpAPI-impl-2.0-SNAPSHOT.jar
-      * experimedia-arch-ecc-amqpAPI-spec-2.0-SNAPSHOT.jar
-      * experimedia-arch-ecc-common-dataModel-experiment-2.0-SNAPSHOT.jar
-      * experimedia-arch-ecc-common-dataModel-metrics-2.0-SNAPSHOT.jar
-      * experimedia-arch-ecc-common-dataModel-monitor-2.0-SNAPSHOT.jar
-      * experimedia-arch-ecc-common-logging-spec-2.0-SNAPSHOT.jar
-      * experimedia-arch-ecc-em-factory-2.0-SNAPSHOT.jar
-      * experimedia-arch-ecc-em-impl-2.0-SNAPSHOT.jar
-      * experimedia-arch-ecc-em-spec-2.0-SNAPSHOT.jar
-      * experimedia-arch-ecc-samples-shared-2.0-SNAPSHOT.jar
+      * experimedia-arch-ecc-amqpAPI-impl-2.0.jar
+      * experimedia-arch-ecc-amqpAPI-spec-2.0.jar
+      * experimedia-arch-ecc-common-dataModel-experiment-2.0.jar
+      * experimedia-arch-ecc-common-dataModel-metrics-2.0.jar
+      * experimedia-arch-ecc-common-dataModel-monitor-2.0.jar
+      * experimedia-arch-ecc-common-logging-spec-2.0.jar
+      * experimedia-arch-ecc-em-factory-2.0.jar
+      * experimedia-arch-ecc-em-impl-2.0.jar
+      * experimedia-arch-ecc-em-spec-2.0.jar
+      * experimedia-arch-ecc-samples-shared-2.0.jar
       
 3rd party libraries:
 

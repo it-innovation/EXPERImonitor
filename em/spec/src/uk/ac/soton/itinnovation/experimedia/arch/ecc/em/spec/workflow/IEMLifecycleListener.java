@@ -38,7 +38,7 @@ public interface IEMLifecycleListener
 {
   void onClientConnected( EMClient client, boolean reconnected );
   
-  void onClientDisconnected( EMClient client );
+  void onClientDisconnected( UUID clientID );
   
   void onClientStartedPhase( EMClient client, EMPhase phase );
   

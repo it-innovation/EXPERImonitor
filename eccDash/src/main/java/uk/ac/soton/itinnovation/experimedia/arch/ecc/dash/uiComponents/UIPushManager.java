@@ -25,7 +25,6 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents;
 
-import com.vaadin.Application;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Window;
 import org.vaadin.artur.icepush.ICEPush;
@@ -41,6 +40,7 @@ public class UIPushManager
 	private final Object pushLock = new Object();
 	private boolean	     pushReady;
   private boolean      pushActive;
+	private boolean      pushWaiting;
   
   private Window  rootWindow;
   private ICEPush icePush;
@@ -65,8 +65,9 @@ public class UIPushManager
 		// Re-set state of push manager
 		synchronized( pushLock )
 		{
-			pushReady  = false;
-			pushActive = false;			
+			pushReady   = false;
+			pushActive  = false;
+			pushWaiting = false;
 		}
 		
 		// Re-insert ICE push (may have been removed)
@@ -81,8 +82,9 @@ public class UIPushManager
   {
 		synchronized( pushLock )
 		{
-			pushReady  = false;
-			pushActive = false;
+			pushReady   = false;
+			pushActive  = false;
+			pushWaiting = false;
 			iceTimer.cancel();
 			iceTimer.purge();
 		}
@@ -109,24 +111,12 @@ public class UIPushManager
 					pushActive = true;
 					queuePush  = true;
 				}
+				else
+					pushWaiting = true;
 			}
 			
 			// Queue the update if required
-			if ( queuePush )
-			{
-				// Synchronize around application object to reduce chances of race-conditions
-				// on Vaadin UI update background thread
-				synchronized( rootWindow.getApplication() )
-				{ 
-					icePush.push();
-					pushedOK = true;
-				}
-
-				// Control the rate at which we push updates to the web client; do not
-				// want to overload the browser
-				PushCallback pcb = new PushCallback();
-				iceTimer.schedule( pcb, 3000 ); // Update every 3 seconds max
-			}
+			if ( queuePush ) pushedOK = queuePush();
 		}
     
     return pushedOK;
@@ -146,10 +136,39 @@ public class UIPushManager
 		}
 	}
 	
+	private boolean queuePush()
+	{
+		boolean pushedOK = false;
+		
+		// Synchronize around application object to reduce chances of race-conditions
+		// on Vaadin UI update background thread
+		synchronized( rootWindow.getApplication() )
+		{ 
+			icePush.push();
+			pushedOK = true;
+		}
+
+		// Control the rate at which we push updates to the web client; do not
+		// want to overload the browser
+		PushCallback pcb = new PushCallback();
+		iceTimer.schedule( pcb, 3000 ); // Update every 3 seconds max
+		
+		return pushedOK;
+	}
+	
 	private void finishPush()
   {
 		synchronized ( pushLock )
-		{ pushActive = false; }
+		{
+			// If no pushes are waiting, then become inactive
+			if ( !pushWaiting )
+				pushActive = false;
+			else
+			{
+				pushWaiting = false;
+				queuePush();
+			}
+		}
   }
   
   private class PushCallback extends TimerTask

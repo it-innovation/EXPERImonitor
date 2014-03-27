@@ -45,7 +45,7 @@ public interface EMGeneratorDiscoveryPhaseListener
   
   void onClientEnabledMetricCollection( EMClientEx client, UUID entityID, boolean enabled );
   
-  void onClientIsDisconnected( EMClientEx client );
+  void onClientIsDisconnected( EMClientEx client, UUID clientID );
   
   void onDiscoveryPhaseCompleted( EMClientEx client );
 }

@@ -25,7 +25,6 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.IEMLifecycleListener;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecylePhases.EMLifecycleManager;
 
@@ -118,8 +117,15 @@ public class ExperimentMonitor implements IExperimentMonitor,
   {
     try
     {
+			// Tidy up experiment life-cycle first
+			if ( lifecycleManager != null )
+			{
+				lifecycleManager.endLifecycle();
+				lifecycleManager.shutdown();
+			}
+			
+			// Then tidy up the connection manager
       if ( connectionManager != null ) connectionManager.shutdown();
-      if ( lifecycleManager != null )  lifecycleManager.shutdown();
       
       amqpChannel = null;
       
@@ -176,6 +182,19 @@ public class ExperimentMonitor implements IExperimentMonitor,
     clientEx.getDiscoveryInterface().deregisteringThisClient( reason );
   }
   
+	@Override
+	public void tryReRegisterClients( Map<UUID, String> clientInfo ) throws Exception
+	{
+		// Safety first
+		if ( clientInfo == null ) throw new Exception( "Could not re-register clients: client info is null" );
+		if ( connectionManager == null || lifecycleManager == null ) throw new Exception( "Could not re-register clients: internal managers are not ready" );
+		
+		// Issue a manual register event on behalf of apparently connected clients -
+		// they should respond correctly if they are still connected
+		for ( UUID clID : clientInfo.keySet() )
+			connectionManager.reRegisterEMClient( clID, clientInfo.get(clID) );
+	}
+	
   @Override
   public void forceClientDisconnection( EMClient client ) throws Exception
   {
@@ -184,7 +203,7 @@ public class ExperimentMonitor implements IExperimentMonitor,
     if ( !client.isConnected() ) throw new Exception( "Cannot de-register client: is already disconnected" );
     
     // Don't go through registration - just remove
-    lifecycleManager.onClientIsDisconnected( (EMClientEx) client );
+    lifecycleManager.onClientIsDisconnected( (EMClientEx) client, client.getID() );
   }
   
   @Override
@@ -206,9 +225,12 @@ public class ExperimentMonitor implements IExperimentMonitor,
     if ( lifecycleManager.isLifecycleActive() )
       throw new Exception( "Lifecycle has already started" );
     
-    lifecycleManager.setExperimentInfo( expInfo );
-    
-    return lifecycleManager.iterateLifecycle();
+		// Start lifecyle at the beginning
+		EMPhase startPhase = EMPhase.eEMDiscoverMetricGenerators;
+		
+    startLifecycle( expInfo, startPhase );
+		
+		return startPhase;
   }
   
   @Override
@@ -218,11 +240,25 @@ public class ExperimentMonitor implements IExperimentMonitor,
     
     if ( monitorStatus != IExperimentMonitor.eStatus.ENTRY_POINT_OPEN )
       throw new Exception( "Cannot start life-cycle: client entry point is not open" );
+		
+		if ( lifecycleManager.isLifecycleActive() )
+      throw new Exception( "Lifecycle has already started" );
     
     try 
     {
       lifecycleManager.setExperimentInfo( expInfo );
-      lifecycleManager.startLifeCycleAt( startPhase );
+			
+			// Add currently (still) connected clients and add them in to the new lifecycle
+			Set<EMClientEx> connectedClients = connectionManager.getCopyOfConnectedClients();
+			
+			// Notify listener of existing clients already connected
+			for ( IEMLifecycleListener lcl : lifecycleListeners )
+				for ( EMClientEx client : connectedClients )
+					lcl.onClientConnected( client, true );
+			
+			// Then start experiment lifecycle
+      lifecycleManager.startLifeCycleAt( startPhase,
+																				 connectedClients );
     }
     catch ( Exception ex ) { throw ex; /* Throw this up*/ }
   }
@@ -255,8 +291,7 @@ public class ExperimentMonitor implements IExperimentMonitor,
     
     lifecycleManager.endLifecycle();
     
-    connectionManager.disconnectAllClients( "Experiment lifecycle has ended" );
-    connectionManager.clearAllAssociatedClients();
+		// Clients are no longer disconnected from the EM after an experiment lifecycle ends
     
     // Notify EM client of reset completion
     onLifecycleEnded();
@@ -269,6 +304,14 @@ public class ExperimentMonitor implements IExperimentMonitor,
     if ( lifecycleManager.isLifecycleActive() ) throw new Exception( "Lifecycle must be ended first" );
         
     lifecycleManager.resetLifecycle();
+		
+		// Reset currently known client states & metric generator history before starting experiment
+		Set<EMClientEx> connectedClients = connectionManager.getCopyOfAllKnownClients();
+		for ( EMClientEx client : connectedClients )
+		{
+			client.resetPhaseStates();
+			client.clearHistoricMetricGenerators();
+		}
   }  
   
   @Override
@@ -317,24 +360,34 @@ public class ExperimentMonitor implements IExperimentMonitor,
   }
   
   @Override
-  public void onClientDisconnected( EMClient client )
+  public void onClientDisconnected( UUID clientID )
   {
-    if ( client != null )
-    {
-      EMClientEx cx = (EMClientEx) client;
-      cx.setIsConnected( false );
-      
-      try
-      {
-        connectionManager.removeDisconnectedClient( client.getID() );
-
-        for ( IEMLifecycleListener listener : lifecycleListeners )
-          listener.onClientDisconnected( client );
-      }
-      catch ( Exception ex )
-      { emLogger.warn( "Could not properly clean up disconnected client: " + ex.getMessage() ); }
-    }
-    else emLogger.warn( "Got disconnection notice from null client!" );
+		if ( clientID != null )
+		{
+			EMClientEx client = connectionManager.getClient( clientID );
+			
+			// Update client state and notify
+			if ( client != null ) 
+			{
+				client.setIsConnected( false );
+				
+				// Notify listeners first...
+				for ( IEMLifecycleListener listener : lifecycleListeners )
+						listener.onClientDisconnected( clientID );
+				
+				client.resetPhaseStates();
+				
+				// ... before removing permenantly
+				try
+				{
+					connectionManager.removeDisconnectedClient( clientID );
+				}
+				catch ( Exception ex )
+				{ emLogger.warn( "Could not properly clean up disconnected client: " + ex.getMessage() ); }
+			}
+		}
+		else emLogger.warn( "Got disconnection notice from unknown client!" );
+	    
   }
   
   @Override
@@ -383,13 +436,21 @@ public class ExperimentMonitor implements IExperimentMonitor,
   }
   
   @Override
-  public void onFoundClientWithMetricGenerators( EMClient client, 
+  public void onFoundClientWithMetricGenerators( EMClient emClient, 
                                                  Set<MetricGenerator> newGens )
   {
-    Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
+		EMClientEx client = (EMClientEx) emClient;
+		
+		if ( client != null && newGens != null )
+		{
+			Iterator<IEMLifecycleListener> listIt = lifecycleListeners.iterator();
     
-    while ( listIt.hasNext() )
-    { listIt.next().onFoundClientWithMetricGenerators( client, newGens ); }
+			while ( listIt.hasNext() )
+			{ listIt.next().onFoundClientWithMetricGenerators( client, newGens ); }
+			
+			// Reset re-registering state if we've got metric generators (connection is good)
+			if ( client.isReRegistering() ) client.setIsReRegistering( false );
+		}
   }
   
   @Override

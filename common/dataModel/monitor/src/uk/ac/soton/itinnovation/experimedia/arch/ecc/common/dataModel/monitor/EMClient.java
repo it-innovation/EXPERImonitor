@@ -37,9 +37,10 @@ public class EMClient
   // Experiment states
   protected UUID             clientID;
   protected String           clientName;
-  protected boolean          isDisconnecting = false;
-  protected boolean          isConnected     = false;
-  protected EMPhase          currentPhase    = EMPhase.eEMUnknownPhase;
+	protected boolean          isConnected      = false;
+  protected boolean          isDisconnecting  = false;
+  protected boolean					 isReRegistereing = false;
+  protected EMPhase          currentPhase     = EMPhase.eEMUnknownPhase;
   protected boolean          isPhaseAccelerating;
   protected EnumSet<EMPhase> supportedPhases;
   
@@ -103,6 +104,9 @@ public class EMClient
    */
   public boolean isDisconnecting()
   { return isDisconnecting; }
+	
+	public boolean isReRegistering()
+	{ return isReRegistereing; }
   
   public boolean isPhaseAccelerating()
   { return isPhaseAccelerating; }

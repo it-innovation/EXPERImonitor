@@ -5,13 +5,13 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
   <artifactId>experimedia-arch-ecc-edm-factory</artifactId>
-  <version>2.0-SNAPSHOT</version>
+  <version>2.0</version>
   <packaging>jar</packaging>
   
   <parent>
     <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
     <artifactId>experimedia-arch-ecc-edm</artifactId>
-    <version>2.0-SNAPSHOT</version>
+    <version>2.0</version>
   </parent>
   
   <licenses>
@@ -53,14 +53,13 @@
     <dependency>
       <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
       <artifactId>experimedia-arch-ecc-edm-spec</artifactId>
-      <version>2.0-SNAPSHOT</version>
-      <type>jar</type>
+      <version>2.0</version>
     </dependency>
-	
-	<dependency>
+    
+    <dependency>
       <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
-      <artifactId>experimedia-arch-ecc-edm-impl</artifactId>
-      <version>2.0-SNAPSHOT</version>
+      <artifactId>experimedia-arch-ecc-edm-impl-metrics</artifactId>
+      <version>2.0</version>
     </dependency>
 	
   </dependencies>
