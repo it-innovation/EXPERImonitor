@@ -149,10 +149,10 @@
             <version>2.0</version>
         </dependency>
 		
-		<dependency>
+        <dependency>
             <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
-            <artifactId>experimedia-arch-ecc-edm-impl</artifactId>
-            <version>2.0-SNAPSHOT</version>
+            <artifactId>experimedia-arch-ecc-edm-impl-metrics</artifactId>
+            <version>2.0</version>
             <type>jar</type>
         </dependency>
     
@@ -177,7 +177,7 @@
 		<dependency>
             <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
             <artifactId>experimedia-arch-ecc-common-dataModel-provenance</artifactId>
-            <version>2.0-SNAPSHOT</version>
+            <version>2.0</version>
         </dependency>
 		
 		<dependency>

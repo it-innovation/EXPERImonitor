@@ -314,6 +314,7 @@
       <module>edm</module>
       <module>samples</module>
       <module>eccDash</module>
+      <module>OWLimProvStore/trunk</module>
   </modules>
     
 </project>
