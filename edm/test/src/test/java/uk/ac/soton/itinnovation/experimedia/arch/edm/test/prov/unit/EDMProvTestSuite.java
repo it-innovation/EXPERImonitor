@@ -107,9 +107,9 @@ public class EDMProvTestSuite {
         }
         else
         {
-            logger.debug("Using default edm.properties file");
+            logger.debug("Using default prov.properties file");
             try {
-                prop.load(EDMTestSuite.class.getClassLoader().getResourceAsStream("edm.properties"));
+                prop.load(EDMTestSuite.class.getClassLoader().getResourceAsStream("prov.properties"));
             } catch (Exception ex) {
                 logger.error("Error with loading configuration file edm.properties: " + ex.getMessage(), ex);
                 throw new RuntimeException("Error with loading configuration file edm.properties: " + ex.getMessage(), ex);
