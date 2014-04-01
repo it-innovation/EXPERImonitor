@@ -18,6 +18,7 @@
 // the software.
 //
 //      Created By :            Simon Crowle
+//								Stefanie Wiegand
 //      Created Date :          20-Mar-2013
 //      Created for Project :   EXPERIMEDIA
 //
