@@ -1,0 +1,101 @@
+<!doctype html>
+<html class="no-js" lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Sample REST Service page | Welcome</title>
+        <link rel="stylesheet" href="css/foundation.min.css" />
+        <link rel="stylesheet" href="css/app.css" />
+        <script src="js/vendor/modernizr.min.js"></script>
+    </head>
+    <body>
+
+        <div class="row">
+            <div class="small-12 columns">
+                <h1>Sample REST Service page</h1>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="small-12 columns">
+                <h3>List of experiments</h3>
+                <div class="row">
+                    <div class="medium-4 columns">
+                        <p>GET request to <strong id="url_get"></strong></p>
+                        <a href="#" class="button" id="url_get_refresh">Refresh</a>
+                    </div>
+                    <div class="medium-8 columns" id="experiments_list"></div>
+                </div>
+                <hr />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="small-12 columns">
+                <h3>Create new experiment</h3>
+                <div class="row">
+                    <div class="medium-4 columns">
+                        <p>POST request to <strong id="url_post"></strong></p>
+                        <a href="#" class="button" id="url_post_create">Create</a>
+                    </div>
+                    <div class="medium-8 columns">
+                        <form>
+                            <label>Name of the new experiment
+                                <input type="text" placeholder="Third experiment" id="new_experiment_name"/>
+                            </label>
+                        </form>
+                    </div>
+                </div>
+                <hr />
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="small-12 columns">
+                <h3>Update an experiment</h3>
+                <div class="row">
+                    <div class="medium-4 columns">
+                        <p>PATCH request to <strong id="url_update"></strong></p>
+                        <a href="#" class="button" id="url_update_update">Update</a>
+                    </div>
+                    <div class="medium-8 columns">
+                        <form>
+                            <label>Select an experiment to update
+                                <select id="list_exp_update"></select>
+                            </label>
+                            <label>Name of the new experiment
+                                <input type="text" placeholder="Updated name" id="updated_experiment_name"/>
+                            </label>
+                        </form>
+                    </div>
+                </div>
+                <hr />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="small-12 columns">
+                <h3>Delete an experiment</h3>
+                <div class="row">
+                    <div class="medium-4 columns">
+                        <p>DELETE request to <strong id="url_delete"></strong></p>
+                        <a href="#" class="button alert" id="url_delete_delete">Delete</a>
+                    </div>
+                    <div class="medium-8 columns">
+                        <form>
+                            <label>Select an experiment to delete
+                                <select id="list_exp_delete"></select>
+                            </label>
+                        </form>
+                    </div>
+                </div>
+                <hr />
+            </div>
+        </div>
+
+        <script src="js/vendor/jquery.min.js"></script>
+        <script src="js/foundation.min.js"></script>
+        <script src="js/index.js"></script>
+    </body>
+</html>
