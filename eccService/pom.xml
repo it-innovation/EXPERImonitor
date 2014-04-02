@@ -19,6 +19,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+            <version>1.0.0.RELEASE</version>
         </dependency>
 
         <!--Pretty Logback, see https://github.com/n0rad/logback-prettier-->
@@ -34,7 +35,7 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-parent</artifactId>
-                <version>1.0.1.BUILD-SNAPSHOT</version>
+                <version>1.0.0.RELEASE</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -42,6 +43,7 @@
     </dependencyManagement>
 
     <repositories>
+        <!--Spring-->
         <repository>
             <id>spring-snapshots</id>
             <url>http://repo.spring.io/snapshot</url>
@@ -55,6 +57,7 @@
         </repository>
     </repositories>
     <pluginRepositories>
+        <!--Spring-->
         <pluginRepository>
             <id>spring-snapshots</id>
             <url>http://repo.spring.io/snapshot</url>
@@ -67,6 +70,7 @@
 
     <build>
         <plugins>
+            <!--Enables mvn spring:boot run-->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
