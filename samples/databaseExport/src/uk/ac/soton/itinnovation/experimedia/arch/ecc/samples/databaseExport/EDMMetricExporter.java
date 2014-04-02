@@ -291,8 +291,17 @@ public class EDMMetricExporter
 			{
 				try
 				{
-					if ( fw != null ) fw.close();
-					if ( bw != null ) bw.close();
+					if ( bw != null )
+					{
+						bw.flush();
+						bw.close();
+					}
+					
+					if ( fw != null )
+					{
+						fw.flush();
+						fw.close();
+					}
 				}
 				catch ( IOException ioex ) {}
 			}
@@ -373,8 +382,17 @@ public class EDMMetricExporter
 		{
 			try
 			{
-				if ( fw != null ) fw.close();
-				if ( bw != null ) bw.close();
+				if ( bw != null )
+				{
+					bw.flush();
+					bw.close();
+				}
+
+				if ( fw != null )
+				{
+					fw.flush();
+					fw.close();
+				}
 			}
 			catch ( IOException ioex ) {}
 		}
