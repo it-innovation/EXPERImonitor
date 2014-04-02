@@ -53,6 +53,7 @@ $(document).ready(function() {
                 $("#activeProjectConfigurationName").html("for project <strong>" + data.projectName + "</strong>");
                 $("#projectInstructions").remove();
 
+                $("#config_projectName").val(data.projectName);
                 $("#config_monitorid").val(data.rabbitConfig.monitorId);
                 $("#config_rabbitip").val(data.rabbitConfig.ip);
                 $("#config_rabbitport").val(data.rabbitConfig.port);
@@ -75,12 +76,21 @@ $(document).ready(function() {
     $("#setActiveConfiguration").click(function(e) {
         e.preventDefault();
 
+        var newConfiguration = $("#activeProjectConfigForm").serializeJSON();
+        if (newConfiguration.rabbitConfig.useSsl === "false") {
+            newConfiguration.rabbitConfig.useSsl = false;
+        } else {
+            newConfiguration.rabbitConfig.useSsl = true;
+        }
+
+        console.log(newConfiguration);
+
         $.ajax({
             type: 'POST',
             dataType: 'json',
             contentType: 'application/json',
-            url: BASE_URL,
-            data: JSON.stringify({"name": $("#new_experiment_name").val()}),
+            url: BASE_URL + "/configuration",
+            data: JSON.stringify(newConfiguration),
             error: function(jqXHR, textStatus, errorThrown) {
                 console.log(jqXHR);
                 console.log(textStatus);

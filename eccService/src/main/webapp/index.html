@@ -25,14 +25,21 @@
         <div class="row">
             <div class="small-12 large-6 columns">
                 <form id="fetchProjectConfigByNameForm">
-                    <label>Project name</label>
-                    <div class="row collapse">
-                        <div class="small-10 columns">
+                    <label>Enter project name</label>
+                    <div class="row">
+                        <div class="small-12 columns">
                             <input type="text" placeholder="My Experimedia Project" id="projectName"/>
                         </div>
-                        <div class="small-2 columns">
-                            <a href="#" class="button postfix" id="fetchProjectConfigByNameButton">Go</a>
-                        </div>
+
+                    </div>
+                    <label>or select from the list of existing projects:</label><br>
+                    <div class="large-12 columns">
+                        <input type="radio" name="digitalSchladming" value="digitalSchladming" id="digitalSchladmingProject"><label for="digitalSchladmingProject">Digital Schladming</label><br>
+                        <input type="radio" name="icacot" value="icacot" id="icacotProject"><label for="icacotProject">iCaCot</label><br>
+                        <input type="radio" name="ssg" value="ssg" id="ssgProject"><label for="ssgProject">Smart Ski Goggles</label>
+                    </div>
+                    <div class="large-12 columns">
+                        <a href="#" class="button small" id="fetchProjectConfigByNameButton">Go</a>
                     </div>
                 </form>
             </div>
@@ -43,6 +50,7 @@
                 <form id="activeProjectConfigForm" style="display:none">
                     <div class="row">
                         <div class="small-12 columns">
+                            <input type="hidden" name="projectName" id="config_projectName"/>
                             <label>Monitor ID
                                 <input type="text" id="config_monitorid"/>
                             </label>
@@ -51,35 +59,36 @@
                     <div class="row">
                         <div class="small-8 columns">
                             <label>Rabbit IP/URL
-                                <input type="text" id="config_rabbitip"/>
+                                <input type="text" name="rabbitConfig[ip]" id="config_rabbitip"/>
                             </label>
                         </div>
                         <div class="small-4 columns">
                             <label>Rabbit port
-                                <input type="text" id="config_rabbitport"/>
+                                <input type="text" name="rabbitConfig[port]" id="config_rabbitport"/>
                             </label>
                         </div>
                     </div>
                     <div class="row">
                         <div class="small-6 columns">
                             <label>Rabbit username
-                                <input type="text" id="config_username"/>
+                                <input type="text" name="rabbitConfig[userName]" id="config_username"/>
                             </label>
                         </div>
                         <div class="small-6 columns">
                             <label>Rabbit password
-                                <input type="password" id="config_password"/>
+                                <input type="password" name="rabbitConfig[userPassword]" id="config_password"/>
                             </label>
                         </div>
                     </div>
                     <div class="row">
                         <div class="small-12 columns">
                             <label>Rabbit keystore
-                                <input type="text" id="config_keystore"/>
+                                <input type="text" name="rabbitConfig[keystore]" id="config_keystore"/>
                             </label>
                         </div>
                         <div class="small-12 columns">
-                            <input type="checkbox" id="config_userssl"><label for="config_userssl">Use Rabbit SSL</label>
+                            <input type="hidden" name="rabbitConfig[useSsl]" value="false">
+                            <input type="checkbox" name="rabbitConfig[useSsl]" id="config_userssl"><label for="config_userssl">Use Rabbit SSL</label>
                         </div>
                     </div>
                     <div class="row">
@@ -93,6 +102,7 @@
 
         <script src="js/vendor/jquery.min.js"></script>
         <script src="js/foundation.min.js"></script>
+        <script src="js/vendor/jquery.serializeJSON.min.js"></script>
         <script src="js/index.js"></script>
     </body>
 </html>

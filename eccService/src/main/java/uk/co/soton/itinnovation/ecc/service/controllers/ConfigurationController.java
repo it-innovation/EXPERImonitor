@@ -24,11 +24,12 @@
 /////////////////////////////////////////////////////////////////////////
 package uk.co.soton.itinnovation.ecc.service.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import net.sf.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -81,7 +82,7 @@ public class ConfigurationController {
     }
 
     /**
-     * Updates the confiruation of the service.
+     * Updates the configuration of the service.
      *
      * @param newEccConfiguration new configuration.
      * @return true if configuration was updated successfully and the service is
@@ -92,6 +93,9 @@ public class ConfigurationController {
     public boolean setConfiguration(@RequestBody EccConfiguration newEccConfiguration) {
         logger.debug("Setting new configuration");
         try {
+            // TODO make safe
+            ObjectMapper mapper = new ObjectMapper();
+            logger.debug(JSONObject.fromObject(mapper.writeValueAsString(newEccConfiguration)).toString(2));
             configurationService.setConfiguration(newEccConfiguration);
             return true;
         } catch (Throwable ex) {
