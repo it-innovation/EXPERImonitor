@@ -28,7 +28,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -76,6 +78,27 @@ public class ConfigurationController {
     public EccConfiguration getConfigurationForProject(@PathVariable String projectName) {
         logger.debug("Returning service configuration for project '" + projectName + "'");
         return configurationService.lookUpConfiguration(projectName);
+    }
+
+    /**
+     * Updates the confiruation of the service.
+     *
+     * @param newEccConfiguration new configuration.
+     * @return true if configuration was updated successfully and the service is
+     * now configured.
+     */
+    @RequestMapping(method = RequestMethod.POST)
+    @ResponseBody
+    public boolean setConfiguration(@RequestBody EccConfiguration newEccConfiguration) {
+        logger.debug("Setting new configuration");
+        try {
+            configurationService.setConfiguration(newEccConfiguration);
+            return true;
+        } catch (Throwable ex) {
+            // TODO improve this
+            logger.error("Failed to set service configuration", ex);
+            return false;
+        }
     }
 
 }

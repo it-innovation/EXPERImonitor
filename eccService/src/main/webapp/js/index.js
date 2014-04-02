@@ -74,7 +74,32 @@ $(document).ready(function() {
     });
     $("#setActiveConfiguration").click(function(e) {
         e.preventDefault();
-        $('#configStatus').attr('class', 'success-color');
-        $('#configStatus').text('configured');
+
+        $.ajax({
+            type: 'POST',
+            dataType: 'json',
+            contentType: 'application/json',
+            url: BASE_URL,
+            data: JSON.stringify({"name": $("#new_experiment_name").val()}),
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.log(jqXHR);
+                console.log(textStatus);
+                console.log(errorThrown);
+            },
+            success: function(data) {
+                console.log(data);
+                if (data === false) {
+                    $('#configStatus').attr('class', 'alert-color');
+                    $('#configStatus').text('not configured');
+                } else if (data === true) {
+                    $('#configStatus').attr('class', 'success-color');
+                    $('#configStatus').text('configured');
+                } else {
+                    $('#configStatus').attr('class', 'alert-color');
+                    $('#configStatus').text('unknown status');
+                }
+            }
+        });
+
     });
 });
