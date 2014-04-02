@@ -313,7 +313,7 @@
       <module>em</module>
       <module>edm</module>
       <module>samples</module>
-      <module>eccDash</module>
+      <module>eccService</module>
   </modules>
     
 </project>
