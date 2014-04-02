@@ -42,6 +42,8 @@ public class Application {
      * @throws Exception
      */
     public static void main(String[] args) throws Exception {
-        SpringApplication.run(Application.class, args);
+        SpringApplication app = new SpringApplication(Application.class);
+        app.setShowBanner(false);
+        app.run(args);
     }
 }
