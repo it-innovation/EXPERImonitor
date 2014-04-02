@@ -28,6 +28,7 @@ import java.util.UUID;
 import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.co.soton.itinnovation.ecc.service.domain.DatabaseConfiguration;
 import uk.co.soton.itinnovation.ecc.service.domain.EccConfiguration;
@@ -43,6 +44,9 @@ public class ConfigurationService {
     private final Logger logger = LoggerFactory.getLogger(getClass());
     private EccConfiguration configuration;
     private boolean serviceConfigured = false;
+
+    @Autowired
+    ExperimentService experimentService;
 
     public ConfigurationService() {
     }
@@ -65,6 +69,38 @@ public class ConfigurationService {
 
     public EccConfiguration getConfiguration() {
         return configuration;
+    }
+
+    public String getProjectName() {
+        if (configuration == null) {
+            return null;
+        } else {
+            return configuration.getProjectName();
+        }
+    }
+
+    public RabbitConfiguration getRabbitConfiguration() {
+        if (configuration == null) {
+            return null;
+        } else {
+            return configuration.getRabbitConfig();
+        }
+    }
+
+    public DatabaseConfiguration getDatabaseConfiguration() {
+        if (configuration == null) {
+            return null;
+        } else {
+            return configuration.getDatabaseConfig();
+        }
+    }
+
+    public MiscConfiguration getMiscConfiguration() {
+        if (configuration == null) {
+            return null;
+        } else {
+            return configuration.getMiscConfig();
+        }
     }
 
     public void setConfiguration(EccConfiguration configuration) {
