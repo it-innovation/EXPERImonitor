@@ -1,4 +1,11 @@
-p.list_item {
-    margin: 0;
-    padding: 0 0 2px 0;
+.alert-color {
+    color: #f04124;
+}
+
+.success-color {
+    color: #43AC6A;
+}
+
+#activeProjectConfigForm {
+    padding-top: 12px;
 }

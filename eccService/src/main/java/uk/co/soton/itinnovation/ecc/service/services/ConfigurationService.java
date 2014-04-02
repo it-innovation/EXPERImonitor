@@ -73,6 +73,8 @@ public class ConfigurationService {
     }
 
     public EccConfiguration lookUpConfiguration(String projectName) {
+
+        // TODO: fetch data from Experimedia config service.
         EccConfiguration result = new EccConfiguration();
 
         RabbitConfiguration rabbitConfig = new RabbitConfiguration(

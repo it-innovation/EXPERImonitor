@@ -1,80 +1,80 @@
-var BASE_URL = "/ECC/experiments";
+var BASE_URL = "/ECC";
 $(document).ready(function() {
     $(document).foundation();
 
-    $('#url_get').text(BASE_URL);
-    $('#url_post').text(BASE_URL);
-
-    refreshExperiments();
-
-    $('#url_get_refresh').click(function(e) {
-        e.preventDefault();
-        refreshExperiments();
+    // check if the service is configured
+    $.ajax({
+        type: 'GET',
+        url: BASE_URL + "/configuration/ifconfigured",
+        error: function(jqXHR, textStatus, errorThrown) {
+            console.log(jqXHR);
+            console.log(textStatus);
+            console.log(errorThrown);
+            $('#configStatus').attr('class', 'alert-color');
+            $('#configStatus').text("error (" + errorThrown + ")");
+        },
+        success: function(data) {
+            console.log(data);
+            if (data === false) {
+                $('#configStatus').attr('class', 'alert-color');
+                $('#configStatus').text('not configured');
+            } else if (data === true) {
+                $('#configStatus').attr('class', 'success-color');
+                $('#configStatus').text('configured');
+            } else {
+                $('#configStatus').attr('class', 'alert-color');
+                $('#configStatus').text('unknown status');
+            }
+        }
     });
 
-    $('#url_post_create').click(function(e) {
+    $("#fetchProjectConfigByNameForm").submit(function(e) {
         e.preventDefault();
+        $("#fetchProjectConfigByNameButton").trigger('click');
+    });
+    $("#fetchProjectConfigByNameButton").click(function(e) {
+        e.preventDefault();
+
+        var projectName = $("#projectName").val();
+
+        // fetch configuration for the project by name
         $.ajax({
-            type: 'POST',
-            dataType: 'json',
-            contentType: 'application/json',
-            url: BASE_URL,
-            data: JSON.stringify({"name": $("#new_experiment_name").val()}),
+            type: 'GET',
+            url: BASE_URL + "/configuration/project/" + projectName,
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.log(jqXHR);
+                console.log(textStatus);
+                console.log(errorThrown);
+            },
             success: function(data) {
                 console.log(data);
-                refreshExperiments();
+                $("#activeProjectConfigForm").css('display', 'block');
+                $("#activeProjectConfigTitle").css('display', 'block');
+                $("#activeProjectConfigurationName").html("for project <strong>" + data.projectName + "</strong>");
+                $("#projectInstructions").remove();
+
+                $("#config_monitorid").val(data.rabbitConfig.monitorId);
+                $("#config_rabbitip").val(data.rabbitConfig.ip);
+                $("#config_rabbitport").val(data.rabbitConfig.port);
+                $("#config_username").val(data.rabbitConfig.userName);
+                $("#config_password").val(data.rabbitConfig.userPassword);
+                $("#config_keystore").val(data.rabbitConfig.keystore);
+                if (data.rabbitConfig.useSsl === false) {
+                    $("#config_userssl").prop('checked', false);
+                } else {
+                    $("#config_userssl").prop('checked', true);
+                }
             }
         });
     });
 
-    $('#url_update_update').click(function(e) {
+    $("#activeProjectConfigForm").submit(function(e) {
         e.preventDefault();
-        $.ajax({
-            type: 'PATCH',
-            url: BASE_URL + "/" + $('#list_exp_update option:selected').val(),
-            data: $('#updated_experiment_name').val(),
-            success: function(data) {
-                console.log(data);
-                refreshExperiments();
-            }
-        });
+        $("#setActiveConfiguration").trigger('click');
     });
-
-    $('#url_delete_delete').click(function(e) {
+    $("#setActiveConfiguration").click(function(e) {
         e.preventDefault();
-        $.ajax({
-            type: 'DELETE',
-            url: BASE_URL + "/" + $('#list_exp_delete option:selected').val(),
-            success: function(data) {
-                console.log(data);
-                refreshExperiments();
-            }
-        });
-    });
-
-    $('#list_exp_update').change(function() {
-        var expSelected = $('#list_exp_update option:selected');
-        $('#url_update').text(BASE_URL + "/" + expSelected.val());
-    });
-
-    $('#list_exp_delete').change(function() {
-        var expSelected = $('#list_exp_delete option:selected');
-        $('#url_delete').text(BASE_URL + "/" + expSelected.val());
+        $('#configStatus').attr('class', 'success-color');
+        $('#configStatus').text('configured');
     });
 });
-
-function refreshExperiments() {
-    $('#experiments_list').empty();
-    $('#list_exp_update').empty();
-    $('#list_exp_delete').empty();
-    $.getJSON(BASE_URL, function(data) {
-        console.log(data);
-        $.each(data, function(counter, exp) {
-            $('#experiments_list').append('<p class="list_item">' + (counter + 1) + ". " + exp.name + ' [' + exp.id + ']</p>');
-            $('#list_exp_update').append('<option value="' + exp.id + '">' + exp.name + '</option>');
-            $('#list_exp_delete').append('<option value="' + exp.id + '">' + exp.name + '</option>');
-            $('#url_update').text(BASE_URL + "/" + $('#list_exp_delete option:selected').val());
-            $('#url_delete').text(BASE_URL + "/" + $('#list_exp_delete option:selected').val());
-        });
-    });
-}
