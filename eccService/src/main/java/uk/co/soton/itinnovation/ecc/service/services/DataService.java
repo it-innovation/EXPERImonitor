@@ -60,8 +60,8 @@ public class DataService {
      */
     public boolean start() {
         // Check if configured, then:
-        databaseConfig = configurationService.getDatabaseConfiguration();
         started = true;
+        
         return true;
     }
 

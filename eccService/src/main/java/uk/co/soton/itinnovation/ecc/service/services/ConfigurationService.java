@@ -18,6 +18,8 @@
 // the software.
 //
 //	Created By :			Maxim Bashevoy
+//										Simon Crowle
+//
 //	Created Date :			2014-04-01
 //	Created for Project :           EXPERIMEDIA
 //
@@ -42,75 +44,85 @@ import uk.co.soton.itinnovation.ecc.service.domain.RabbitConfiguration;
 public class ConfigurationService {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
-    private EccConfiguration configuration;
-    private boolean serviceConfigured = false;
+    
+    private boolean serviceInitialised = false;
 
     @Autowired
     ExperimentService experimentService;
-
+    
     public ConfigurationService() {
     }
 
+    /**
+     * Initialises the configuration service. This will involve attempt to connect
+     * to the EXPERIMEDIA configuration server - if this fails, this service 
+     * will only ever be able to provide a local configuration profile.
+     * 
+     * @throws - throws if the EXPERIMEDIA configuration server is inaccessible
+     */
     @PostConstruct
-    public void init() {
-        logger.debug("Initialising configuration service");
+    public void init() throws Exception {
+        
+        logger.info("Initialising configuration service");
+        serviceInitialised = false;
+  
+        // Initialisation work here
 
-        logger.debug("Finished initialising configuration service");
+        serviceInitialised = true;
+        logger.info("Successfully initialised configuration service");   
     }
 
-    public boolean isServiceConfigured() {
-        return serviceConfigured;
+    public boolean isServiceInitialised() {
+        return serviceInitialised;
     }
 
-    public void setServiceConfigured(boolean serviceConfigured) {
-        this.serviceConfigured = serviceConfigured;
-
+    /**
+     * Use this method to retrieve an ECC configuration based on a project name 
+     * (given by the user)
+     * 
+     * @param projectName - Non-null, non-empty string of the project name
+     * @return            - Configuration for project (this may be default if input params are invalid
+     *                      or configuration server is inaccessible.
+     */
+    public EccConfiguration getConfiguration(String projectName) {
+        
+        // Generate a default configuration
+        EccConfiguration config = null;
+        
+        // Try retrieving the configuration
+        if ( projectName != null && !projectName.isEmpty() )
+        {
+            
+        }
+        
+        // Otherwise fallback on default
+        if (config == null)
+            config = createDefaultConfiguration(projectName); 
+        
+        return config;
     }
 
-    public EccConfiguration getConfiguration() {
-        return configuration;
-    }
-
-    public String getProjectName() {
-        if (configuration == null) {
-            return null;
-        } else {
-            return configuration.getProjectName();
+    /**
+     * Use this method to update a project's configuration (usually after modification
+     * of some part of this configuration by the user).
+     * 
+     * @param projectName   - Non-null, non-empty string of project name
+     * @param config        - Non-null, complete configuration to update the configuration server
+     * @throws              - Throws if input parameters are invalid or the configuration server is inaccessible
+     */
+    public void updateConfiguration(String projectName, EccConfiguration config) throws Exception {
+        
+        if ( projectName != null && !projectName.isEmpty() && config != null )
+        {
+            validateConfiguration(config);
+            
+            // Update configuration on server here
         }
     }
 
-    public RabbitConfiguration getRabbitConfiguration() {
-        if (configuration == null) {
-            return null;
-        } else {
-            return configuration.getRabbitConfig();
-        }
-    }
-
-    public DatabaseConfiguration getDatabaseConfiguration() {
-        if (configuration == null) {
-            return null;
-        } else {
-            return configuration.getDatabaseConfig();
-        }
-    }
-
-    public MiscConfiguration getMiscConfiguration() {
-        if (configuration == null) {
-            return null;
-        } else {
-            return configuration.getMiscConfig();
-        }
-    }
-
-    public void setConfiguration(EccConfiguration configuration) {
-        this.configuration = configuration;
-        serviceConfigured = true;
-    }
-
-    public EccConfiguration lookUpConfiguration(String projectName) {
-
-        // TODO: fetch data from Experimedia config service.
+    // Private methods ---------------------------------------------------------
+    private EccConfiguration createDefaultConfiguration(String projectName) {
+        
         EccConfiguration result = new EccConfiguration();
 
         RabbitConfiguration rabbitConfig = new RabbitConfiguration(
@@ -140,5 +152,9 @@ public class ConfigurationService {
 
         return result;
     }
-
+    
+    private void validateConfiguration( EccConfiguration config ) throws Exception
+    {
+        
+    }
 }
