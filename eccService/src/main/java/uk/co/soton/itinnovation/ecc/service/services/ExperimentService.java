@@ -17,14 +17,17 @@
 // PURPOSE, except where stated in the Licence Agreement supplied with
 // the software.
 //
-//	Created By :			Maxim Bashevoy
+//	Created By :			Simon Crowle
+//                          Maxim Bashevoy
 //	Created Date :			2014-04-02
-//	Created for Project :           EXPERIMEDIA
+//	Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 package uk.co.soton.itinnovation.ecc.service.services;
 
+import java.util.Date;
 import java.util.HashSet;
+import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 import javax.annotation.PostConstruct;
@@ -32,9 +35,35 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Measurement;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Metric;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricHelper;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricType;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMClient;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMDataBatch;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMPhase;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMPostReportSummary;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvReport;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMInterfaceFactory;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.IMonitoringEDM;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao.IExperimentDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao.IMetricGeneratorDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao.IReportDAO;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.factory.EMInterfaceFactory;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.IEMLifecycleListener;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.IExperimentMonitor;
+import uk.co.soton.itinnovation.ecc.service.domain.DatabaseConfiguration;
 import uk.co.soton.itinnovation.ecc.service.domain.EccConfiguration;
+import uk.co.soton.itinnovation.ecc.service.domain.RabbitConfiguration;
+import uk.co.soton.itinnovation.ecc.service.process.ExperimentStateModel;
+import uk.co.soton.itinnovation.ecc.service.process.LiveMetricScheduler;
+import uk.co.soton.itinnovation.ecc.service.process.LiveMetricSchedulerListener;
+
+
+
 
 /**
  * ExperimentService provides executive control over the ECC and experiment work-flow.
@@ -44,7 +73,14 @@ public class ExperimentService {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
     
-    private boolean eccInitialised;
+    private IExperimentMonitor  expMonitor;
+    private IMonitoringEDM      expDataManager;
+    private IMetricGeneratorDAO expMetGeneratorDAO;
+    private IReportDAO          expReportAccessor;
+    
+    private ExperimentStateModel expStateModel;
+    private LiveMetricScheduler  liveMetricScheduler;
+    private boolean              serviceInitialised;
     
 
     public ExperimentService() {
@@ -61,9 +97,14 @@ public class ExperimentService {
      */
     @PostConstruct
     public void init(EccConfiguration eccConfig) throws Exception {
+        
         logger.debug("Initialising experiment service");
         
-        if ( eccInitialised ) throw new Exception( "Could not initialise ECC: ECC is already initialised" );
+        if ( serviceInitialised )    throw new Exception( "Could not initialise service: service is already initialised" );
+        if ( eccConfig == null ) throw new Exception( "Could not initalise service: ecc configuration is null" );
+        
+        // Try initialising the service
+        initialiseService( eccConfig );
 
         logger.debug("Finished initialising experiment service");
     }
@@ -74,7 +115,7 @@ public class ExperimentService {
      * @return - return true if ECC is initialised;
      */
     public boolean isServiceInitialised() {
-        return eccInitialised;
+        return serviceInitialised;
     }
     
     /**
@@ -85,6 +126,26 @@ public class ExperimentService {
      */
     public void shutdown() throws Exception {
         
+        if ( !serviceInitialised ) throw new Exception( "Could not shutdown service: not initialised" );
+        
+        // Metrics sheduling shutdown
+        if ( liveMetricScheduler != null ) {
+            
+            liveMetricScheduler.shutDown();
+            liveMetricScheduler = null;
+        }
+        
+        // Experiment monitor shutdown
+        if ( expMonitor != null ) {
+            
+            expMonitor.shutDown();
+            expMonitor =  null;
+        }
+        
+        // Experiment data manager tidy up
+        expReportAccessor  = null;
+        expMetGeneratorDAO = null;
+        expDataManager     = null;
     }
     
     /**
@@ -93,14 +154,50 @@ public class ExperimentService {
      * conditions, this method create a new experiment in the database and invite ECC 
      * clients already known to the service to join the new experiment.
      * 
-     * @param projectName    - Name of the project associated with the experiment
-     * @param experimentName - Name of this specific experiment
-     * @param expDesc        - Short description of the experiment
-     * @return               - Returns meta-data about the experiment.
+     * @param projName   - Name of the project associated with the experiment
+     * @param expName    - Name of this specific experiment
+     * @param expDesc    - Short description of the experiment
+     * @return           - Returns meta-data about the experiment.
      * @throws Exception     - Throws if parameters are invalid or there is an active experiment
      */
-    public Experiment startExperiment( String projectName, String experimentName, String expDesc ) throws Exception {
-        Experiment newExp = null;
+    public Experiment startExperiment( String projName, String expName, String expDesc ) throws Exception {
+        
+        // Safety first
+        if ( !serviceInitialised ) throw new Exception( "Cannot start experiment: service not initialised" );
+        if ( projName == null || projName.isEmpty() ) throw new Exception( "Cannot start experiment: project name is invalid" );
+        if ( expName == null || expName.isEmpty() ) throw new Exception( "Cannot start experiment: experiment name is invalid" );
+        if ( expDesc == null ) expDesc = "No experiment description available";
+        if ( expStateModel.isExperimentActive() ) throw new Exception( "Cannot start experiment: an experiment is already active" );
+        
+        // Create new experiment instance
+        Experiment newExp = new Experiment();
+        newExp.setExperimentID( projName );
+        newExp.setName( expName );
+        newExp.setDescription( expDesc );
+        newExp.setStartTime( new Date() );
+        
+        try {
+            
+          // Prepare metrics database
+          IExperimentDAO expDAO = expDataManager.getExperimentDAO();
+          expDAO.saveExperiment( newExp );
+          
+          // Saved OK, so set as the active experiment in state model
+          expStateModel.setActiveExperiment( newExp );
+
+          // Prepare PROV logging (TO DO)
+          //liveMonitorController.createPROVLog( currentExperiment.getUUID(), eccBasePath );
+
+          // Go straight into live monitoring
+          expMonitor.startLifecycle( newExp, EMPhase.eEMLiveMonitoring );
+        }
+        catch ( Exception ex )
+        {
+          String problem = "Could not start experiment because: " + ex.getMessage();
+          
+          logger.error( problem );
+          throw new Exception( problem, ex );
+        }
         
         return newExp;
     }
@@ -115,6 +212,36 @@ public class ExperimentService {
      */
     public void stopExperiment() throws Exception {
         
+        // Safety first
+        if ( !serviceInitialised ) throw new Exception( "Cannot stop experiment: service not initialised" );
+        
+        Experiment exp = expStateModel.getActiveExperiment();
+        if ( exp != null ) {
+            
+            try {
+                
+                // Finish up the experiment lifecycle
+                expMonitor.endLifecycle();
+                
+                // Finish up the experiment on the database
+                exp.setEndTime( new Date() );
+                IExperimentDAO expDAO = expDataManager.getExperimentDAO();
+                expDAO.finaliseExperiment( exp );
+                
+                expStateModel.setActiveExperiment( null );
+                
+                // TODO: Clean up PROV?
+            }
+            catch ( Exception ex ) {
+                
+                String problem = "Could not stop experiment because: " + ex.getMessage();
+                
+                logger.error( problem );
+                throw new Exception( problem, ex );
+            }
+        }
+        else
+            throw new Exception( "Could not stop experiment: no experiment currently active" );
     }
     
     /**
@@ -123,11 +250,13 @@ public class ExperimentService {
      * @return - Returns NULL if no experiment is currently active.
      */
     public Experiment getActiveExperiment() {
-        Experiment exp = null;
         
-        // TO DO
+        Experiment activeExp = null;
         
-        return exp;
+        if ( serviceInitialised )
+            activeExp = expStateModel.getActiveExperiment();
+        
+        return activeExp;
     }
     
     /**
@@ -138,20 +267,36 @@ public class ExperimentService {
      */
     public EMPhase getActiveExperimentPhase() {
         
-        // TO DO
+        EMPhase currentPhase = EMPhase.eEMUnknownPhase;
         
-        return EMPhase.eEMUnknownPhase;
+        if ( serviceInitialised && expStateModel.isExperimentActive() )
+            currentPhase = expStateModel.getCurrentPhase();
+        
+        return currentPhase;
     }
     
     /**
      * Use this method to attempt to advance the current phase of the active experiment.
      * 
-     * @return              - Returns the next phase
      * @throws Exception    - throws if there is no active experiment or there are no more phases to move on to.
      */
-    public EMPhase advanceExperimentPhase() throws Exception {
+    public void advanceExperimentPhase() throws Exception {
         
-        return EMPhase.eEMUnknownPhase;
+        // Safety first
+        if ( !serviceInitialised ) throw new Exception( "Could not advance experiment phase: service not initialised" );
+        if ( !expStateModel.isExperimentActive() ) throw new Exception( "Could not advance experiment phase: no active experiment" );
+              
+        try {
+            
+            expMonitor.goToNextPhase();
+        }
+        catch (Exception ex ) {
+            
+            String problem = "Could not advance experiment phase: " + ex.getMessage();
+            logger.error( problem );
+            
+            throw new Exception( problem, ex );
+        }
     }
     
     /**
@@ -163,22 +308,30 @@ public class ExperimentService {
      * @return - Set of clients currently connected.
      */
     public Set<EMClient> getCurrentlyConnectedClients() {
+        
         HashSet<EMClient> connectedClients = new HashSet<EMClient>();
         
+        if ( serviceInitialised ) {
+            
+            Set<EMClient> clients = expMonitor.getAllConnectedClients();
+            connectedClients.addAll( clients );            
+        }
         
         return connectedClients;        
     }
     
     /**
      * Use this method to get an instance of a client specified by an ID.
-     * @param id - UUID of the client required.
-     * @return   - Client and its state at the point of calling
+     * @param id         - UUID of the client required.
+     * @return           - Client and its state at the point of calling
+     * @throws Exception - throws if the client ID is invalid or service not ready 
      */
-    public EMClient getClientByID( UUID id ) {
-        EMClient client = null;
+    public EMClient getClientByID( UUID id ) throws Exception {
         
+        if ( !serviceInitialised ) throw new Exception( "Cannot get client - service not initialised" );
+        if ( id == null ) throw new Exception( "Cannot get client - ID is null" );
         
-        return client;
+        return expMonitor.getClientByID( id );
     }
     
     /**
@@ -191,6 +344,495 @@ public class ExperimentService {
      */
     public void deregisterClient( EMClient client ) throws Exception {
         
+        if ( !serviceInitialised ) throw new Exception( "Cannot deregister client: service not initialised" );
+        if ( client == null ) throw new Exception( "Could not deregister client:  client is null" );
+        
+        try {
+            expMonitor.deregisterClient( client, "ECC service has requested de-registration" );
+        }
+        catch ( Exception ex ) {
+            
+            String problem = "Had problems deregistering client " + client.getName() + ": " + ex.getMessage();
+            logger.error( problem );
+            
+            throw new Exception( problem, ex );            
+        }
     }
+    
+    /**
+     * Use this method to forcibly remove a client from the service. Note that the
+     * experiment service cannot actually force a client's process to close or disconnect
+     * from the RabbitMQ server. This action will only clean up references to the client
+     * on the service side.
+     * 
+     * @param client
+     * @throws Exception 
+     */
+    public void forceClientDisconnect( EMClient client ) throws Exception {
+        
+        // Safety first
+        if ( !serviceInitialised ) throw new Exception( "Cannot force client disconnection: service not initialised" );
+        if ( client == null ) throw new Exception( "Cannot forcibly disconnect client: client is null" );
+        
+        try {
+            logger.info( "Trying to forcibly remove client " + client.getName() + " from service" );
+            
+            expMonitor.forceClientDisconnection( client );
+            liveMetricScheduler.removeClient( client );
+        }
+        catch ( Exception ex ) {
+            logger.error( "Could not forcibly remove client " + client.getName() + " because: " + ex.getMessage() );            
+        }
+    }
+    
+    // Private methods ---------------------------------------------------------
+    private void initialiseService( EccConfiguration config ) throws Exception {
+        
+        serviceInitialised = false;
+        
+        logger.info( "Attempting to set up database" );
+        
+        // Try setting up the EDM ----------------------------------------------
+        DatabaseConfiguration dc = config.getDatabaseConfig();
+        if ( dc == null ) throw new Exception( "Could not initialise: Database configuration is null" );
+        
+        Properties props = new Properties();
+        props.put( "dbPassword", dc.getUserPassword() );
+        props.put( "dbName",     dc.getDatabaseName() );
+        props.put( "dbType",     dc.getDatabaseType() );
+        props.put( "dbURL",      dc.getUrl() );
+        props.put( "dbUsername", dc.getUserName() );
+        
+        expDataManager = EDMInterfaceFactory.getMonitoringEDM( props );
+        
+        if ( !expDataManager.isDatabaseSetUpAndAccessible() )
+            throw new Exception( "Could not initialise: could not access EDM database" );
+        
+        // Create data accessors
+        expMetGeneratorDAO = expDataManager.getMetricGeneratorDAO();
+        expReportAccessor  = expDataManager.getReportDAO();
+        
+        logger.info( "EDM initialisation completed OK" );
+        
+        // Try initialising the state model ------------------------------------
+        logger.info( "Attempting to initialise experiment state" );
+        
+        expStateModel = new ExperimentStateModel();
+        expStateModel.initialise( props );
+        
+        logger.info( "State model initialised" );
+        
+        // Try setting up the Experiment monitor -------------------------------
+        logger.info( "Attempting to connect to RabbitMQ server" );
+        
+        expMonitor = EMInterfaceFactory.createEM();
+        expMonitor.addLifecyleListener( new ExpLifecycleListener() );
+        
+        // Configure EM properties
+        RabbitConfiguration rc = config.getRabbitConfig();
+        if ( rc == null ) throw new Exception( "Could not initialise: Rabbit configuration is null" );
+        
+        props = new Properties();
+        props.put( "Rabbit_Port",     rc.getPort() );
+        props.put( "Rabbit_Use_SSL",  ( rc.isUseSsl() ? "true" : "false") );
+        props.put( "Rabbit_IP",       rc.getIp() );
+        props.put( "Monitor_ID",      rc.getMonitorId().toString() );
+        props.put( "Rabbit_Password", rc.getUserPassword() );
+        props.put( "Rabbit_Username", rc.getUserName() );
+        
+        // Try opening the RabbitMQ entry point for this service
+        expMonitor.openEntryPoint( props );
+      
+        logger.info( "EM initialisation completed OK" );
+        
+        liveMetricScheduler = new LiveMetricScheduler( new LiveMetricsScheduleListener() );
+        
+        serviceInitialised = true;
+    }
+    
+    private void processLiveMetricData( Report report ) throws Exception {
 
+        // Safety first
+        if ( !serviceInitialised ) throw new Exception( "Cannot process live metric data: experiment service not initialised" );
+        if ( !expStateModel.isExperimentActive() ) throw new Exception( "Cannot process live metric data: no currently active experiment" );
+        if ( report == null ) throw new Exception( "Live monitoring metric: report is null" );
+
+        // Check to see if we have anything useful store, and try store
+        if ( sanitiseMetricReport(report) ) {
+			// First get the EDM to save the measurements
+            try { 
+                expReportAccessor.saveMeasurements( report );
+            }
+            catch ( Exception ex ) { 
+                throw ex;
+            }
+        }
+    }
+    
+    private boolean sanitiseMetricReport( Report reportOUT ) {
+        
+        // Check that we apparently have data
+		Integer nom = reportOUT.getNumberOfMeasurements();
+        
+        if ( nom == null ||  nom == 0 ) {
+            logger.warn( "Did not process metric report: measurement count = 0" );
+            return false;
+        }
+
+        // Make sure we have a valid measurement set
+        MeasurementSet clientMS = reportOUT.getMeasurementSet();
+        if ( clientMS == null ) {
+          logger.warn( "Did not process metric report: Measurement set is null" );
+          return false;
+        }
+
+        Metric metric = clientMS.getMetric();
+        if ( metric == null ) {
+          logger.warn( "Did not process metric report: Metric is null" );
+          return false;
+        }
+
+        MetricType mt = metric.getMetricType();
+
+        // Sanitise data based on full semantic info
+        MeasurementSet cleanSet = new MeasurementSet( clientMS, false );
+
+        // Run through each measurement checking that it is sane
+        for ( Measurement m : clientMS.getMeasurements() ) {
+            
+          String val = m.getValue();
+
+          switch ( mt )
+          {
+            case NOMINAL:
+            case ORDINAL:
+              if ( val != null && !val.isEmpty() ) cleanSet.addMeasurement( m ); break;
+
+            case INTERVAL:
+            case RATIO: {
+                
+                if ( val != null ) {
+                    try {
+                        // Make sure we have a sensible number
+                        Double dVal = Double.parseDouble(val);
+
+                        if ( !dVal.isNaN() && !dVal.isInfinite() )
+                            cleanSet.addMeasurement( m );
+                    }
+                    catch( Exception ex ) { 
+                        logger.warn("Caught NaN value in measurement: dropping"); }
+                }
+            } break;
+          }
+        }
+
+        // Use update report with clean measurement set
+        reportOUT.setMeasurementSet( cleanSet );
+        reportOUT.setNumberOfMeasurements( cleanSet.getMeasurements().size() );
+
+        return true;
+      }
+    
+    private void processLivePROVData( EDMProvReport report ) throws Exception {
+        
+        if ( report == null ) throw new Exception( "Could not process PROV report: report is null" );
+        
+        logger.debug( "PROV data processing yet to be implemented" );
+        
+    }
+    
+    // Private classes ---------------------------------------------------------
+    private class ExpLifecycleListener implements IEMLifecycleListener {
+        
+        public ExpLifecycleListener() {}
+        
+        // IEMLifecycleListener ------------------------------------------------
+        @Override
+        public void onClientConnected( EMClient client, boolean reconnected ) {
+         
+            logger.info( "Client connected: " + client.getName() + (reconnected ? "[reconnection]" : "." ) );
+            
+            if ( !client.isReRegistering() )
+                expStateModel.setClientConnectedState( client, true );
+        }
+  
+        @Override
+        public void onClientDisconnected( UUID clientID ) {
+           
+            EMClient client = expMonitor.getClientByID( clientID );
+
+            if ( client != null ) {
+
+                logger.info( "Client " + client.getName() + " disconnected" );
+
+                // Stop scheduling metrics from this client
+                if ( liveMetricScheduler != null )
+                    try
+                    {
+                        liveMetricScheduler.removeClient(client);
+                    }
+                    catch ( Exception ex ) {
+                        logger.warn( "Client disconencted; metric scheduler says: " + ex.getMessage() );
+                    }
+            }
+            else
+                logger.warn( "Got a disconnection message from an unknown client" );
+        }
+
+        @Override
+        public void onClientStartedPhase( EMClient client, EMPhase phase ) {
+
+            logger.info( "Client " + client.getName() + " started phase " + phase.name() );
+        }
+
+        @Override
+        public void onLifecyclePhaseStarted( EMPhase phase ) {
+            
+            logger.info( "Experiment lifecycle phase " + phase.name() + " started" );
+            
+            expStateModel.setCurrentPhase( phase );
+            
+            // Perform starting actions, as required
+            switch ( phase )
+            {
+              case eEMLiveMonitoring :
+              {
+                liveMetricScheduler.start( expMonitor );
+              } break;
+
+              case eEMPostMonitoringReport :
+              {
+                liveMetricScheduler.stop();
+              } break;
+            }
+        }
+
+        @Override
+        public void onLifecyclePhaseCompleted( EMPhase phase ) {
+
+            logger.info( "Experiment lifecycle phase " + phase.name() + " completed" );
+        }
+
+        @Override
+        public void onNoFurtherLifecyclePhases() {
+
+            logger.info( "No further experiment lifecycle phases" );
+            
+            expStateModel.setCurrentPhase( EMPhase.eEMProtocolComplete );
+        }
+
+        @Override
+        public void onLifecycleEnded() {
+            
+            logger.info( "Experiment lifecycle has ended" );
+    
+            liveMetricScheduler.stop();
+            liveMetricScheduler.reset();
+
+            try {
+                expMonitor.resetLifecycle();
+            }
+            catch ( Exception ex ) {
+              logger.error( "Could not reset experiment lifecycle: " + ex.getMessage() );
+            }
+        }
+
+        @Override
+        public void onFoundClientWithMetricGenerators( EMClient client, Set<MetricGenerator> newGens ) {
+            
+            if ( client != null && newGens != null ) {
+
+                // If client is re-registering, add the client to the connected view now
+                // (we've definitely got a client that is still connected)
+                if ( client.isReRegistering() )
+                    logger.info("Known client connected: " + client.getID() + " (\"" + client.getName() + "\")");
+                
+                // Pass on metric generators to the EDM for storage
+                UUID expID = expStateModel.getActiveExperiment().getUUID();
+                
+                for ( MetricGenerator mg : newGens ) {
+                    
+                    // Check metric generator has at least one entity
+                    if ( !MetricHelper.getAllEntities( mg ).isEmpty() )
+                        try {
+                            
+                            expMetGeneratorDAO.saveMetricGenerator( mg, expID );
+                        }
+                        catch ( Exception ex ) {
+                            logger.error( "Failed to save metric generators for client " + client.getName() + ": " + ex.getMessage() );
+                        }
+                }
+            }
+            else 
+                logger.error( "Received invalid metric generator event" );
+        }
+
+        @Override
+        public void onClientEnabledMetricCollection( EMClient client, UUID entityID, boolean enabled ) {
+            
+            if ( client != null && entityID != null )
+            {
+                String msg = "Client " + client + " has " + (enabled ? "enabled" : "disabled") +
+                             " metric collection for Entity ID: " + entityID.toString();
+                
+                logger.info( msg );
+            }
+            else
+                logger.error( "Received invalid metric collection enabling message" );
+        }
+
+        @Override
+        public void onClientSetupResult( EMClient client, boolean success ) {
+
+            if ( client != null )
+                logger.info( "Client " + client.getName() + " has completed set up" );
+
+        }
+
+        @Override
+        public void onClientDeclaredCanPush( EMClient client ) {
+              
+            if ( client != null )
+                logger.info( "Client " + client.getName() + " can push" );
+              
+        }
+
+        @Override
+        public void onClientDeclaredCanBePulled( EMClient client ) {
+              
+            if ( client != null ) {
+                
+              if ( expStateModel.getCurrentPhase().equals( EMPhase.eEMLiveMonitoring) ) {
+                  
+                try { 
+                        liveMetricScheduler.addClient( client ); 
+                }
+                catch ( Exception ex ) {
+                  logger.error( "Could not add pulling client to live monitoring: " + ex.getMessage() );
+                }
+              }
+              else
+                logger.warn( "Client " + client.getName() + " trying to start pull process whilst not in Live monitoring" );
+            }
+            else
+                logger.warn( "Got pull semantics from unknown client" );
+              
+        }
+
+        @Override
+        public void onGotMetricData( EMClient client, Report report ) {
+              
+            if ( client != null && report != null ) {
+                
+                try {
+                    processLiveMetricData( report ); 
+                }
+                catch ( Exception ex ) {
+                    
+                  String problem = "Could not save measurements for client: " + 
+                                   client.getName() + " because: " + ex.getMessage();
+
+                  logger.error( problem );
+                }
+            }  
+        }
+
+        @Override
+        public void onGotPROVData( EMClient client, EDMProvReport report ) {
+            
+            if ( report != null ) {
+              try {
+                  processLivePROVData( report );
+              }
+              catch ( Exception ex ) {
+                  
+                String problem = "Could not save provenance statement for client " +
+                                 client.getName() + " because: " + ex.getMessage();
+
+                logger.error( problem );
+              }
+            }
+        }
+
+        @Override
+        public void onGotSummaryReport( EMClient client, EMPostReportSummary summary ) {
+              
+            if ( client != null && summary != null ) {
+                
+                try {
+                  
+                    expMonitor.getAllDataBatches( client );
+                    logger.info( "Requested missing metric data from " + client.getName() );
+                }
+                catch ( Exception ex )
+                {
+                  String problem = "Could not request missing metric data from " +
+                                   client + " because: " + ex.getMessage();
+
+                  logger.error( problem );
+                }
+            }
+            else
+                logger.error( "Client " + client.getName() + " provided an empty summary report" );
+        }
+
+        @Override
+        public void onGotDataBatch( EMClient client, EMDataBatch batch ) {
+              
+            if ( client != null && batch != null ) {
+    
+                try {
+                    expReportAccessor.saveReport( batch.getBatchReport(), true ); 
+                }
+                catch ( Exception e ) {
+                  logger.error( "Could not save batch data report: " + e.getMessage() );
+                }
+            } 
+        }
+
+        @Override
+        public void onDataBatchMeasurementSetCompleted( EMClient client, UUID measurementSetID ) {
+              
+            if ( client != null && measurementSetID != null )
+                logger.info( "Client " + client.getName() + " finished batching for measurement set: " + measurementSetID.toString() );
+              
+        }
+
+        @Override
+        public void onAllDataBatchesRequestComplete( EMClient client ) {
+              
+              if ( client != null )
+                  logger.info( "Client " + client.getName() + " has finished batching missing data" );
+        }
+
+        @Override
+        public void onClientTearDownResult( EMClient client, boolean success ) {
+            
+            if ( client != null )
+                logger.info( "Client " + client.getName() + " has finished tearing down" );
+        }
+    }
+    
+    private class LiveMetricsScheduleListener implements LiveMetricSchedulerListener {
+        
+        public LiveMetricsScheduleListener() {}
+            
+        // LiveMetricSchedulerListener -----------------------------------------
+        @Override
+        public void onIssuedClientMetricPull( EMClient client ) {
+            
+            if ( client != null )
+                logger.debug( "Issued metric pull on client: " + client.getName() );
+        }
+  
+        @Override
+        public void onPullMetricFailed( EMClient client, String reason ) {
+            
+            if ( client != null )
+            {
+                if ( reason == null ) reason = "Unknown reason";
+                logger.debug( "Did not pull client" + client.getName() + ": " + reason );
+            }
+        }
+    }
 }

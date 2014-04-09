@@ -78,7 +78,7 @@ public class ConfigurationService {
                 "localhost:5432",
                 "edm-metrics",
                 "postgres",
-                "postgres",
+                "password",
                 "postgresql");
 
         MiscConfiguration miscConfig = new MiscConfiguration(

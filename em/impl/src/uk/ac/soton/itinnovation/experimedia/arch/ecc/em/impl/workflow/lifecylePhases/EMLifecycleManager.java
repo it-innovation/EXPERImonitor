@@ -345,7 +345,7 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
       if ( nextMS != null )
         clientEx.getLiveMonitorInterface().pullMetric( nextMS );
       else
-        throw new Exception( "Could not find any measurements ready for pulling" ); 
+        throw new Exception( "Waiting for last pull response from client" ); 
     }
   }
   
