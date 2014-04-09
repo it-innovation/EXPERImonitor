@@ -42,6 +42,21 @@
             <version>0.5</version>
         </dependency>
 				
+				<!-- Unit testing __________________________________________________ -->
+				<dependency>
+					<groupId>junit</groupId>
+					<artifactId>junit</artifactId>
+					<version>${ecc.junit.version}</version>
+				</dependency>
+				
+				<!-- EXPERIMEDIA configuration server/Sardine dependency ___________ -->
+				<dependency>
+					<groupId>org.apache.httpcomponents</groupId>
+					<artifactId>httpclient</artifactId>
+					<version>4.3.3</version>
+				</dependency>
+            
+            
 				
 				<!-- ECC API dependencies __________________________________________ -->
 				<!-- This logging libraries will disappear soon -->
