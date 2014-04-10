@@ -24,6 +24,8 @@
 /////////////////////////////////////////////////////////////////////////
 package uk.co.soton.itinnovation.ecc.service.domain;
 
+import net.sf.json.JSONObject;
+
 /**
  * Miscellaneous configuration.
  */
@@ -56,4 +58,13 @@ public class MiscConfiguration {
         this.nagiousUrl = nagiousUrl;
     }
 
+    /**
+     * @return simple net.sf.json.JSONObject representation.
+     */
+    public JSONObject toJson() {
+        JSONObject result = new JSONObject();
+        result.put("snapshotCount", snapshotCount);
+        result.put("nagiousUrl", nagiousUrl);
+        return result;
+    }
 }

@@ -24,6 +24,8 @@
 /////////////////////////////////////////////////////////////////////////
 package uk.co.soton.itinnovation.ecc.service.domain;
 
+import net.sf.json.JSONObject;
+
 /**
  * Service configuration object.
  */
@@ -74,6 +76,31 @@ public class EccConfiguration {
 
     public void setMiscConfig(MiscConfiguration miscConfig) {
         this.miscConfig = miscConfig;
+    }
+
+    /**
+     * @return simple net.sf.json.JSONObject representation.
+     */
+    public JSONObject toJson() {
+        JSONObject result = new JSONObject();
+        result.put("projectName", projectName);
+        if (rabbitConfig == null) {
+            result.put("rabbitConfig", null);
+        } else {
+            result.put("rabbitConfig", rabbitConfig.toJson());
+        }
+        if (databaseConfig == null) {
+            result.put("databaseConfig", null);
+        } else {
+            result.put("databaseConfig", databaseConfig.toJson());
+        }
+        if (miscConfig == null) {
+            result.put("miscConfig", null);
+        } else {
+            result.put("miscConfig", miscConfig.toJson());
+        }
+
+        return result;
     }
 
 }

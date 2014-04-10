@@ -25,6 +25,7 @@
 package uk.co.soton.itinnovation.ecc.service.domain;
 
 import java.util.UUID;
+import net.sf.json.JSONObject;
 
 /**
  * Configuration of the RabbitMQ server.
@@ -102,6 +103,25 @@ public class RabbitConfiguration {
 
     public void setUseSsl(boolean useSsl) {
         this.useSsl = useSsl;
+    }
+
+    /**
+     * @return simple net.sf.json.JSONObject representation.
+     */
+    public JSONObject toJson() {
+        JSONObject result = new JSONObject();
+        if (monitorId == null) {
+            result.put("monitorId", null);
+        } else {
+            result.put("monitorId", monitorId.toString());
+        }
+        result.put("ip", ip);
+        result.put("port", port);
+        result.put("userName", userName);
+        result.put("userPassword", userPassword);
+        result.put("keystore", keystore);
+        result.put("useSsl", useSsl);
+        return result;
     }
 
 }

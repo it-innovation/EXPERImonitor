@@ -24,6 +24,8 @@
 /////////////////////////////////////////////////////////////////////////
 package uk.co.soton.itinnovation.ecc.service.domain;
 
+import net.sf.json.JSONObject;
+
 /**
  * Database server configuration.
  */
@@ -80,6 +82,19 @@ public class DatabaseConfiguration {
 
     public void setDatabaseType(String databaseType) {
         this.databaseType = databaseType;
+    }
+
+    /**
+     * @return simple net.sf.json.JSONObject representation.
+     */
+    public JSONObject toJson() {
+        JSONObject result = new JSONObject();
+        result.put("url", url);
+        result.put("databaseName", databaseName);
+        result.put("userName", userName);
+        result.put("userPassword", userPassword);
+        result.put("databaseType", databaseType);
+        return result;
     }
 
 }
