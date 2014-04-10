@@ -28,8 +28,8 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.dynamicEntityDemoC
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.loggin.impl.Log4JImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
@@ -45,7 +45,7 @@ public class ECCClientController implements EMIAdapterListener,
                                             ECCClientViewListener,
                                             ECCNewEntityViewListener
 {
-    private final IECCLogger clientLogger;
+	private final Logger clientLogger = LoggerFactory.getLogger(getClass());
 
     private AMQPBasicChannel       amqpChannel;
     private EMInterfaceAdapter     emiAdapter;
@@ -65,10 +65,6 @@ public class ECCClientController implements EMIAdapterListener,
         // Hash map to store measurement set UUID and entity UUID
         msEntitymap = new HashMap<UUID, UUID>();
         
-        // Configure logging system
-        Logger.setLoggerImpl( new Log4JImpl() );
-        clientLogger = Logger.getLogger( ECCClientController.class );
-      
         // Only one metric generator and metric group
         metricGenerator = new MetricGenerator();
         metricGenerator.setName( "Demo metric generator" );

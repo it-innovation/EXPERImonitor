@@ -43,8 +43,8 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Me
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGroup;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.IECCLogger;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.metrics.db.DBUtil;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.metrics.db.DatabaseConnector;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.metrics.db.DatabaseType;
@@ -66,7 +66,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao.IRepor
 public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMetricGeneratorDAO, IMetricGroupDAO, IMeasurementSetDAO, IMetricDAO, IMeasurementDAO, IReportDAO
 {
     private DatabaseConnector dbCon;
-    private static IECCLogger log = Logger.getLogger(ExperimentDataManagerDAO.class);
+	private static final Logger log = LoggerFactory.getLogger(ExperimentDataManagerDAO.class);
     
     /**
      * 

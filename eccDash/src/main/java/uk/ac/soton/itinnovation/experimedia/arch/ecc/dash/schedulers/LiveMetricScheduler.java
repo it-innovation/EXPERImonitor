@@ -26,7 +26,8 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.schedulers;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMClient;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.IExperimentMonitor;
 import uk.ac.soton.itinnovation.robust.cat.core.components.viewEngine.spec.uif.types.UFAbstractEventManager;
 
@@ -37,7 +38,7 @@ import java.util.*;
 
 public class LiveMetricScheduler extends UFAbstractEventManager
 {
-  private final IECCLogger metLogger  = Logger.getLogger( LiveMetricScheduler.class );
+  private final Logger metLogger = LoggerFactory.getLogger(getClass());
   private final int        pullSpeed  = 1000;
   private final Object     clientLock = new Object();
   

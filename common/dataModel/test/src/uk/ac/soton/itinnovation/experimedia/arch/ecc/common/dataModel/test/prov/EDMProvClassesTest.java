@@ -25,9 +25,8 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.test.prov;
 
-//import java.util.logging.Logger;
-
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMActivity;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMAgent;
@@ -37,7 +36,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance
 
 public class EDMProvClassesTest {
 	
-	static Logger logger = Logger.getLogger(EDMProvClassesTest.class);
+	private static final Logger logger = LoggerFactory.getLogger(EDMProvClassesTest.class);
 
 	public static void main(String[] args) {
 		
@@ -46,8 +45,8 @@ public class EDMProvClassesTest {
 		
 		factory.addOntology("foaf", "http://xmlns.com/foaf/0.1/");
 		
-		EDMProvReport report = null;
-		
+		EDMProvReport report;
+
 		try {
 			//This is Bob.
 			EDMAgent bob = factory.createAgent("facebook_154543445", "Bob");
@@ -63,7 +62,7 @@ public class EDMProvClassesTest {
 			pauseVideo.useEntity(video);
 			
 			report = factory.createProvReport();
-			System.out.println(report.toString());
+			logger.info(report.toString());
 			
 			//Bob logs in to his FB account and posts something
 			EDMActivity writePost = bob.startActivity("activity345", "WritePost");
@@ -77,7 +76,7 @@ public class EDMProvClassesTest {
 			bob.stopActivity(watchVideo);
 			
 			report = factory.createProvReport();
-			System.out.println(report.toString());
+			logger.info(report.toString());
 		
 		} catch (Exception e) {
 			logger.error("Error filling EDMProvFactory with test data", e);

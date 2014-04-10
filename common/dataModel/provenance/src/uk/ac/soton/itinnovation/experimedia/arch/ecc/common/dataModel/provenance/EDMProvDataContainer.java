@@ -27,7 +27,9 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenanc
 
 import java.util.HashMap;
 import java.util.Map.Entry;
-import java.util.logging.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class EDMProvDataContainer {
 
@@ -37,7 +39,7 @@ public class EDMProvDataContainer {
 	protected HashMap<String, EDMProvBaseElement> allProvElements;
 	protected HashMap<String, String> namespaces;
 	
-	protected Logger logger = Logger.getLogger(EDMProvDataContainer.class.getName());
+	protected Logger logger = LoggerFactory.getLogger(EDMProvDataContainer.class);
 	
 	protected EDMProvDataContainer(String prefix, String baseURI) {
 		this.setPrefix(prefix);
@@ -45,7 +47,7 @@ public class EDMProvDataContainer {
 		init();
 	}
     
-	protected void init() {
+	protected final void init() {
 		allProvElements = new HashMap<String, EDMProvBaseElement>();
 		namespaces = new HashMap<String, String>();
 	}
@@ -59,6 +61,7 @@ public class EDMProvDataContainer {
 		baseURI = null;
 	}
 	
+	@Override
 	public String toString() {
 		String contents = "EDMProvFactory contents:\n########################\n";
 		for (Entry<String, EDMProvBaseElement> e: this.allProvElements.entrySet()) {
@@ -69,11 +72,11 @@ public class EDMProvDataContainer {
 	
 	//GETTERS/SETTERS//////////////////////////////////////////////////////////////////////////////
 
-	public void setPrefix(String prefix) {
+	public final void setPrefix(String prefix) {
 		EDMProvDataContainer.prefix = prefix;
 	}
 
-	public void setBaseURI(String baseURI) {
+	public final void setBaseURI(String baseURI) {
 		EDMProvDataContainer.baseURI = baseURI;
 	}
 

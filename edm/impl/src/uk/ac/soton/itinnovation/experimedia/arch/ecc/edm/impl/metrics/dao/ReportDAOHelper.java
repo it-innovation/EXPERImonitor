@@ -35,8 +35,8 @@ import java.util.UUID;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Measurement;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.IECCLogger;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.metrics.db.DBUtil;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.NoDataException;
 
@@ -47,7 +47,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.NoDataExce
  */
 public class ReportDAOHelper
 {
-    static IECCLogger log = Logger.getLogger(ReportDAOHelper.class);
+	private static final Logger log = LoggerFactory.getLogger(ReportDAOHelper.class);
     
     public static ValidationReturnObject isObjectValidForSave(Report report, Connection connection) throws Exception
     {

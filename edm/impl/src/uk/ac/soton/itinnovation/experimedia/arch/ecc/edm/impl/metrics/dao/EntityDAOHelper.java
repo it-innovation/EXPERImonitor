@@ -32,8 +32,8 @@ import java.util.Set;
 import java.util.UUID;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Attribute;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Entity;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.IECCLogger;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.metrics.db.DBUtil;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.NoDataException;
 
@@ -44,7 +44,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.NoDataExce
  */
 public class EntityDAOHelper
 {
-    static IECCLogger log = Logger.getLogger(EntityDAOHelper.class);
+	private static final Logger log = LoggerFactory.getLogger(EntityDAOHelper.class);
     
     public static ValidationReturnObject isObjectValidForSave(Entity entity, Connection connection, boolean closeDBcon) throws Exception
     {

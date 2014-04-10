@@ -37,9 +37,8 @@ import org.junit.runners.JUnit4;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Measurement;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.loggin.impl.Log4JImpl;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.IECCLogger;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMInterfaceFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.IMonitoringEDM;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao.IReportDAO;
@@ -54,15 +53,12 @@ public class ReportTest extends TestCase
 {
     IMonitoringEDM edm = null;
     IReportDAO reportDAO = null;
-    static IECCLogger log;
-    
+    private static final Logger log = LoggerFactory.getLogger(ReportTest.class);
+
     @BeforeClass
     public static void beforeClass()
     {
-        // Configure logging system
-        Logger.setLoggerImpl( new Log4JImpl() );
-        log = Logger.getLogger(ReportTest.class);
-        
+
         log.info("Report tests executing...");
     }
     

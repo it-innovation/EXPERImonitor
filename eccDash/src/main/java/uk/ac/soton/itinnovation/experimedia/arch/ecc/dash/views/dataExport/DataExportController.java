@@ -29,7 +29,8 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMClient;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao.IReportDAO;
 
@@ -54,7 +55,7 @@ public class DataExportController extends UFAbstractEventManager
 {
   private DataExportView exportView;
   
-  private transient IECCLogger                      dataExportLogger = Logger.getLogger( DataExportController.class );
+  private transient final Logger dataExportLogger = LoggerFactory.getLogger(getClass());
   private transient IExperimentMonitor              expMonitor;
   private transient IReportDAO                      reportDAO;
   private transient HashMap<UUID, MetricExportInfo> metricExportsByMSID;

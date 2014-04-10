@@ -25,7 +25,8 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.em.test.common;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.spec.*;
 
@@ -40,7 +41,7 @@ public abstract class ECCBaseTestExecutor
 {
   private TestEventListener testListener;
   
-  protected IECCLogger exeLogger = Logger.getLogger( ECCBaseTestExecutor.class );
+  protected final Logger exeLogger = LoggerFactory.getLogger(getClass());
   
   protected EMInterfaceFactory providerFactory;
   protected EMInterfaceFactory userFactory;

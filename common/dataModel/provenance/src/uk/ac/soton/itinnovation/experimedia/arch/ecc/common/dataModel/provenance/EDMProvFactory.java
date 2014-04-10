@@ -113,7 +113,7 @@ public class EDMProvFactory {
 		} else {
 			if (!container.namespaces.get(prefix).equals(baseURI)) {
 				container.namespaces.put(prefix, baseURI);
-				container.logger.warning("Prefix " + prefix + " was already in the factory.\n\tOld URI: "
+				container.logger.warn("Prefix " + prefix + " was already in the factory.\n\tOld URI: "
 						+ container.namespaces.get(prefix) + "\n\tnew URI: " + baseURI);
 			}
 		}

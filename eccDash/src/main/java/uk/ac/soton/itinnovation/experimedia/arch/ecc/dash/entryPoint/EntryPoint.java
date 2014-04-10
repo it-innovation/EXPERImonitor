@@ -30,8 +30,6 @@ import com.vaadin.terminal.gwt.server.HttpServletRequestListener;
 import com.vaadin.ui.Window;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.loggin.impl.Log4JImpl;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.Logger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.DashMainController;
 
 
@@ -50,9 +48,7 @@ public class EntryPoint extends Application
     
     if ( dmc == null )
     {
-      // Configure logging system
-      Logger.setLoggerImpl( new Log4JImpl() );
-      
+
       dmc = new DashMainController();
       ECCDashContextListener.setDMC( dmc );
 
