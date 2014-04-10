@@ -57,22 +57,22 @@ public class ConfigurationController {
     @ResponseBody
     public EccConfiguration getConfiguration() {
         logger.debug("Returning service configuration");
-        
+
         // TO DO: Get project name from user
         String userSpecifiedProjectName = "EX_ID";
-        
-        return configurationService.getConfiguration( userSpecifiedProjectName );
+
+        return configurationService.getRemoteConfiguration(userSpecifiedProjectName);
     }
 
     /**
-     * @return true if the service is configured (i.e., is ready to retrieve 
+     * @return true if the service is configured (i.e., is ready to retrieve
      * configurations based on project names)
      */
     @RequestMapping(method = RequestMethod.GET, value = "/ifconfigured")
     @ResponseBody
     public boolean ifConfigured() {
         logger.debug("Returning service configuration status");
-        return configurationService.isServiceInitialised();
+        return configurationService.isInitialised();
     }
 
     /**
@@ -83,9 +83,9 @@ public class ConfigurationController {
     @ResponseBody
     public EccConfiguration getConfigurationForProject(@PathVariable String projectName) {
         logger.debug("Returning service configuration for project '" + projectName + "'");
-  
+
         // TODO: not sure what the intention for this is; have updated as I think fits
-        return configurationService.getConfiguration(projectName);
+        return configurationService.getRemoteConfiguration(projectName);
     }
 
     /**
@@ -103,11 +103,11 @@ public class ConfigurationController {
             // TODO make safe
             ObjectMapper mapper = new ObjectMapper();
             logger.debug(JSONObject.fromObject(mapper.writeValueAsString(newEccConfiguration)).toString(2));
-            
+
             // TODO: Need project name associated with configuration
             String userSpecifiedProjectName = "EX_ID";
-            configurationService.updateConfiguration(userSpecifiedProjectName,newEccConfiguration);
-            
+            configurationService.updateConfiguration(userSpecifiedProjectName, newEccConfiguration);
+
             return true;
         } catch (Throwable ex) {
             // TODO improve this
