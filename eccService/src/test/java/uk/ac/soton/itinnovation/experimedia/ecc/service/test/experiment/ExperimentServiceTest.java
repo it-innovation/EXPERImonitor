@@ -26,87 +26,80 @@ package uk.ac.soton.itinnovation.experimedia.ecc.service.test.experiment;
 
 import java.util.Date;
 import org.junit.*;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
+import uk.co.soton.itinnovation.ecc.service.Application;
 import uk.co.soton.itinnovation.ecc.service.domain.EccConfiguration;
 import uk.co.soton.itinnovation.ecc.service.services.ConfigurationService;
 import uk.co.soton.itinnovation.ecc.service.services.ExperimentService;
 
+@RunWith(SpringJUnit4ClassRunner.class)
+@SpringApplicationConfiguration(classes = Application.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD) // will reset everything after each test, comment this out if you want to test as singleton
 public class ExperimentServiceTest {
 
     private EccConfiguration eccConfig;
-    private ExperimentService expService;
+
+    @Autowired
+    ExperimentService expService;
+
+    @Autowired
+    ConfigurationService configurationService;
 
     public ExperimentServiceTest() {
 
     }
-    /*
 
-     @Before
-     public void setUp() {
-     // Use a statically defined, local configuration for this test
-     eccConfig = ConfigurationService.createDefaultConfiguration("DefaultTest");
+    @Before
+    public void setUp() {
+        Assert.assertTrue(configurationService.isInitialised());
 
-     // Validate
-     try {
-     Assert.assertTrue(ConfigurationService.validateConfiguration(eccConfig));
+        // Safer as doesn't depend on availability of http://config.experimedia.eu
+        // Online can be a separate test
+        eccConfig = configurationService.getLocalConfiguration();
+        Assert.assertNotNull(eccConfig);
 
-     expService = new ExperimentService();
-     } catch (Exception ex) {
-     Assert.fail(ex.getMessage());
-     }
-     }
+        configurationService.selectEccConfiguration(eccConfig);
+        Assert.assertTrue(configurationService.isConfigurationSet());
 
-     @After
-     public void tearDown() {
-     try {
-     expService.shutdown();
-     } catch (Exception ex) {
-     Assert.fail(ex.getMessage());
-     }
-     }
+        configurationService.startExperimentService();
+        Assert.assertTrue(expService.isStarted());
+    }
 
-     @Test
-     public void testServiceDefaultInitialisation() {
-     // Validate
-     try {
-     //            expService.init( eccConfig );
-     } catch (Exception ex) {
-     Assert.fail(ex.getMessage());
-     }
-     }
+    @Test
+    public void testStartStopExperiment() {
+        try {
 
-     @Test
-     public void testStartStopExperiment() {
-     try {
-     //            expService.init( eccConfig );
+            Date expDate = new Date();
+            String expName = "Test experiment " + expDate.toString();
 
-     Date expDate = new Date();
-     String expName = "Test experiment " + expDate.toString();
+            Assert.assertNull(expService.getActiveExperiment());
 
-     Assert.assertNull(expService.getActiveExperiment());
+            expService.startExperiment("DefaultTest", expName, "JUnit test");
 
-     expService.startExperiment("DefaultTest", expName, "JUnit test");
+            // Check experiment meta-data
+            Experiment activeExp = expService.getActiveExperiment();
 
-     // Check experiment meta-data
-     Experiment activeExp = expService.getActiveExperiment();
+            Assert.assertNotNull(activeExp);
+            Assert.assertNotNull(activeExp.getUUID());
+            Assert.assertNotNull(activeExp.getExperimentID());
+            Assert.assertNotNull(activeExp.getName());
+            Assert.assertNotNull(activeExp.getDescription());
+            Assert.assertNotNull(activeExp.getStartTime());
+            Assert.assertNull(activeExp.getEndTime());
 
-     Assert.assertNotNull(activeExp);
-     Assert.assertNotNull(activeExp.getUUID());
-     Assert.assertNotNull(activeExp.getExperimentID());
-     Assert.assertNotNull(activeExp.getName());
-     Assert.assertNotNull(activeExp.getDescription());
-     Assert.assertNotNull(activeExp.getStartTime());
-     Assert.assertNull(activeExp.getEndTime());
+            expService.stopExperiment();
+            Assert.assertNotNull(activeExp.getEndTime()); // Local copy
 
-     expService.stopExperiment();
-     Assert.assertNotNull(activeExp.getEndTime()); // Local copy
+            Assert.assertNull(expService.getActiveExperiment()); // Service copy
 
-     Assert.assertNull(expService.getActiveExperiment()); // Service copy
+        } catch (Exception ex) {
+            Assert.fail(ex.getMessage());
+        }
+    }
 
-     expService.shutdown();
-     } catch (Exception ex) {
-     Assert.fail(ex.getMessage());
-     }
-     }
-     */
 }

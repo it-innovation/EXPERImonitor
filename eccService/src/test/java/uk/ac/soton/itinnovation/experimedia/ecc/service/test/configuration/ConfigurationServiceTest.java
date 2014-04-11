@@ -24,86 +24,94 @@
 /////////////////////////////////////////////////////////////////////////
 package uk.ac.soton.itinnovation.experimedia.ecc.service.test.configuration;
 
-import org.junit.*;
+import javax.xml.bind.ValidationException;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import uk.co.soton.itinnovation.ecc.service.services.ConfigurationService;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import uk.co.soton.itinnovation.ecc.service.Application;
 import uk.co.soton.itinnovation.ecc.service.domain.DatabaseConfiguration;
 import uk.co.soton.itinnovation.ecc.service.domain.EccConfiguration;
 import uk.co.soton.itinnovation.ecc.service.domain.RabbitConfiguration;
-import uk.co.soton.itinnovation.ecc.service.services.ConfigurationService;
+import uk.co.soton.itinnovation.ecc.service.utils.Validate;
 
+@RunWith(SpringJUnit4ClassRunner.class)
+@SpringApplicationConfiguration(classes = Application.class)
+@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD) // will reset everything after each test, comment this out if you want to test as singleton
 public class ConfigurationServiceTest {
 
-    private ConfigurationService configService;
+    @Autowired
+    ConfigurationService configurationService;
 
     public ConfigurationServiceTest() {
     }
-    /*
-     @Before
-     public void setUp() throws Exception {
-     configService = new ConfigurationService();
-     //        configService.init( "rw", "test" );
-     }
 
-     @After
-     public void tearDown() throws Exception {
-     // No tear-down actions here
-     }
+    @Test
+    public void testGetDefaultRemoteConfiguration() {
+        Assert.assertEquals(true, configurationService.isInitialised());
+        Assert.assertEquals(false, configurationService.isConfigurationSet());
 
-     @Test
-     public void testGetDefaultConfiguration() {
-     Assert.assertEquals(true, configService.isInitialised());
+        EccConfiguration defaultRemoteEccConfiguration = configurationService.getRemoteConfiguration("Default");
+        Assert.assertNotNull(defaultRemoteEccConfiguration);
 
-     EccConfiguration ecc = configService.getRemoteConfiguration("Default");
-     Assert.assertNotNull(ecc);
+        try {
+            Validate.eccConfiguration(defaultRemoteEccConfiguration);
+        } catch (ValidationException ex) {
+            Assert.fail(ex.getMessage());
+        }
 
-     try {
-     Assert.assertTrue(ConfigurationService.validateConfiguration(ecc));
-     } catch (Exception ex) {
-     Assert.fail(ex.getMessage());
-     }
-     }
+        Assert.assertEquals(true, configurationService.selectEccConfiguration(defaultRemoteEccConfiguration));
+        Assert.assertEquals(true, configurationService.isConfigurationSet());
+    }
 
-     @Test
-     public void testUpdateConfiguration() {
-     Assert.assertEquals(true, configService.isInitialised());
+    @Test
+    public void testUpdateDefaultRemoteConfiguration() {
+        Assert.assertEquals(true, configurationService.isInitialised());
+        Assert.assertEquals(false, configurationService.isConfigurationSet());
 
-     // Create a default configuration
-     EccConfiguration ecc = configService.getRemoteConfiguration("Default");
-     Assert.assertNotNull(ecc);
+        // Fetch default remote configuration
+        EccConfiguration defaultEccConfiguration = configurationService.getRemoteConfiguration("Default");
+        Assert.assertNotNull(defaultEccConfiguration);
 
-     // Check, update and re-check the configuration
-     try {
-     // Validate
-     Assert.assertTrue(ConfigurationService.validateConfiguration(ecc));
+        // Check, update and re-check the configuration
+        try {
+            // Validate
+            Validate.eccConfiguration(defaultEccConfiguration);
 
-     // Modify the configuration
-     RabbitConfiguration rc = ecc.getRabbitConfig();
-     rc.setIp("127.0.0.1");
+            // Modify the configuration
+            RabbitConfiguration rc = defaultEccConfiguration.getRabbitConfig();
+            rc.setIp("127.0.0.1");
 
-     DatabaseConfiguration dc = ecc.getDatabaseConfig();
-     dc.setUrl("localhost:5432");
-     dc.setUserName("postgres");
-     dc.setUserPassword("password");
+            DatabaseConfiguration dc = defaultEccConfiguration.getDatabaseConfig();
+            dc.setUrl("localhost:5432");
+            dc.setUserName("postgres");
+            dc.setUserPassword("password");
 
-     // Update using a DIFFERENT project name
-     configService.updateConfiguration("DefaultTest", ecc);
+            // Update using a DIFFERENT project name
+            configurationService.updateConfiguration("DefaultTest", defaultEccConfiguration);
 
-     // Retrieve and test the modified configuration
-     EccConfiguration updatedConfig = configService.getRemoteConfiguration("DefaultTest");
+            // Retrieve and test the modified configuration
+            EccConfiguration updatedConfig = configurationService.getRemoteConfiguration("DefaultTest");
 
-     Assert.assertTrue(ConfigurationService.validateConfiguration(updatedConfig));
+            Validate.eccConfiguration(updatedConfig);
 
-     rc = updatedConfig.getRabbitConfig();
-     Assert.assertEquals("127.0.0.1", rc.getIp());
+            rc = updatedConfig.getRabbitConfig();
+            Assert.assertEquals("127.0.0.1", rc.getIp());
 
-     dc = updatedConfig.getDatabaseConfig();
-     Assert.assertEquals("localhost:5432", dc.getUrl());
-     Assert.assertEquals("postgres", dc.getUserName());
-     Assert.assertEquals("password", dc.getUserPassword());
-     } catch (Exception ex) {
-     Assert.fail(ex.getMessage());
-     }
+            dc = updatedConfig.getDatabaseConfig();
+            Assert.assertEquals("localhost:5432", dc.getUrl());
+            Assert.assertEquals("postgres", dc.getUserName());
+            Assert.assertEquals("password", dc.getUserPassword());
+        } catch (Exception ex) {
+            Assert.fail(ex.getMessage());
+        }
 
-     // Retrieve the configuration & check updates
-     }
-     */
+        // Retrieve the configuration & check updates
+    }
+
 }
