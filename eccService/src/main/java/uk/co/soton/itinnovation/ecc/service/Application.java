@@ -43,7 +43,7 @@ public class Application {
      */
     public static void main(String[] args) throws Exception {
         SpringApplication app = new SpringApplication(Application.class);
-        app.setShowBanner(false);
+//        app.setShowBanner(false); moved to application.properties as tests don't pick it up here
         app.run(args);
     }
 }
