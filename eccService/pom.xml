@@ -41,68 +41,69 @@
             <artifactId>logback-prettier</artifactId>
             <version>0.5</version>
         </dependency>
-				
-				<!-- Unit testing __________________________________________________ -->
-				<dependency>
-					<groupId>junit</groupId>
-					<artifactId>junit</artifactId>
-					<version>${ecc.junit.version}</version>
-				</dependency>
-				
-				<!-- EXPERIMEDIA configuration server/Sardine dependency ___________ -->
-				<dependency>
-					<groupId>org.apache.httpcomponents</groupId>
-					<artifactId>httpclient</artifactId>
-					<version>4.3.3</version>
-				</dependency>
-            
-            
-				
-				<!-- ECC API dependencies __________________________________________ -->
-				<!-- This logging libraries will disappear soon -->
-				<dependency>
-					<groupId>uk.ac.soton.itinnovation.experimedia</groupId>
-					<artifactId>experimedia-arch-ecc-common-logging-spec</artifactId>
-					<version>2.0</version>
-				</dependency>
 
-				<dependency>
-					<groupId>uk.ac.soton.itinnovation.experimedia</groupId>
-					<artifactId>experimedia-arch-ecc-common-logging-impls</artifactId>
-					<version>2.0</version>
-				</dependency>
-				<!-- TO GO TO GO TO GO TO GO TO GO TO GO TO GO TO GO TO GO TO GO ____-->
-				
-				<dependency>
-					<groupId>uk.ac.soton.itinnovation.experimedia</groupId>
-					<artifactId>experimedia-arch-ecc-edc-configAPI</artifactId>
-					<version>2.0</version>
-				</dependency>
+        <!--Testing-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
 
-				<dependency>
-					<groupId>uk.ac.soton.itinnovation.experimedia</groupId>
-					<artifactId>experimedia-arch-ecc-em-spec</artifactId>
-					<version>2.0</version>
-				</dependency>
 
-				<dependency>
-					<groupId>uk.ac.soton.itinnovation.experimedia</groupId>
-					<artifactId>experimedia-arch-ecc-em-factory</artifactId>
-					<version>2.0</version>
-				</dependency>
+        <!-- EXPERIMEDIA configuration server/Sardine dependency ___________ -->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.3.3</version>
+        </dependency>
 
-				<dependency>
-					<groupId>uk.ac.soton.itinnovation.experimedia</groupId>
-					<artifactId>experimedia-arch-ecc-edm-spec</artifactId>
-					<version>2.0</version>
-				</dependency>
 
-				<dependency>
-					<groupId>uk.ac.soton.itinnovation.experimedia</groupId>
-					<artifactId>experimedia-arch-ecc-edm-factory</artifactId>
-					<version>2.0</version>
-				</dependency>
-				
+
+        <!-- ECC API dependencies __________________________________________ -->
+        <!-- This logging libraries will disappear soon -->
+        <dependency>
+            <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
+            <artifactId>experimedia-arch-ecc-common-logging-spec</artifactId>
+            <version>2.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
+            <artifactId>experimedia-arch-ecc-common-logging-impls</artifactId>
+            <version>2.0</version>
+        </dependency>
+        <!-- TO GO TO GO TO GO TO GO TO GO TO GO TO GO TO GO TO GO TO GO ____-->
+
+        <dependency>
+            <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
+            <artifactId>experimedia-arch-ecc-edc-configAPI</artifactId>
+            <version>2.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
+            <artifactId>experimedia-arch-ecc-em-spec</artifactId>
+            <version>2.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
+            <artifactId>experimedia-arch-ecc-em-factory</artifactId>
+            <version>2.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
+            <artifactId>experimedia-arch-ecc-edm-spec</artifactId>
+            <version>2.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
+            <artifactId>experimedia-arch-ecc-edm-factory</artifactId>
+            <version>2.0</version>
+        </dependency>
+
     </dependencies>
     <dependencyManagement>
         <dependencies>
@@ -110,7 +111,7 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-parent</artifactId>
-                <version>1.0.0.RELEASE</version>
+                <version>1.0.1.RELEASE</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
