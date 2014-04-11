@@ -99,6 +99,10 @@ public class DataService {
             // Try getting data accessors
             try {
                 expDataManager = EDMInterfaceFactory.getMonitoringEDM( props );
+                
+                if ( !expDataManager.isDatabaseSetUpAndAccessible() )
+                    throw new Exception( "Could not access EDM: database is not accessible" );
+                
                 experimentDAO  = expDataManager.getExperimentDAO();
                 metricGenDAO   = expDataManager.getMetricGeneratorDAO();
                 entityDAO      = expDataManager.getEntityDAO();
