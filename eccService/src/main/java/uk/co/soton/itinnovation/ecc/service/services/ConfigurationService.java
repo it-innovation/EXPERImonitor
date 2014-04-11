@@ -48,7 +48,7 @@ import uk.co.soton.itinnovation.ecc.service.domain.RabbitConfiguration;
 /**
  * Deals with the configuration.
  */
-@Service
+@Service("configurationService")
 @Configuration
 @EnableConfigurationProperties(LocalConfiguration.class)
 public class ConfigurationService {

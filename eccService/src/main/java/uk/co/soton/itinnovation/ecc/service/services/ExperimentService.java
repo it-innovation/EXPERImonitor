@@ -30,7 +30,6 @@ import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
-import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -56,7 +55,6 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.factory.EMInterfaceFacto
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.IEMLifecycleListener;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.IExperimentMonitor;
 import uk.co.soton.itinnovation.ecc.service.domain.DatabaseConfiguration;
-import uk.co.soton.itinnovation.ecc.service.domain.EccConfiguration;
 import uk.co.soton.itinnovation.ecc.service.domain.RabbitConfiguration;
 import uk.co.soton.itinnovation.ecc.service.process.ExperimentStateModel;
 import uk.co.soton.itinnovation.ecc.service.process.LiveMetricScheduler;
@@ -66,7 +64,7 @@ import uk.co.soton.itinnovation.ecc.service.process.LiveMetricSchedulerListener;
  * ExperimentService provides executive control over the ECC and experiment
  * work-flow.
  */
-@Service
+@Service("experimentService")
 public class ExperimentService {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
