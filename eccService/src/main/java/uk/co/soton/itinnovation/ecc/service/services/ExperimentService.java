@@ -30,6 +30,8 @@ import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -79,6 +81,43 @@ public class ExperimentService {
     private boolean started = false;
 
     public ExperimentService() {
+    }
+
+    /**
+     * Initialises the service (empty).
+     */
+    @PostConstruct
+    public void init() {
+    }
+
+    /**
+     * Ensures the service is shut down properly.
+     */
+    @PreDestroy
+    public void shutdown() {
+
+        logger.debug("Shutting down experiment service");
+
+        if (started) {
+            // Metrics sheduling shutdown
+            if (liveMetricScheduler != null) {
+                liveMetricScheduler.shutDown();
+                liveMetricScheduler = null;
+            }
+
+            // Experiment monitor shutdown
+            if (expMonitor != null) {
+                expMonitor.shutDown();
+                expMonitor = null;
+            }
+
+            // Experiment data manager tidy up
+            expReportAccessor = null;
+            expMetGeneratorDAO = null;
+            expDataManager = null;
+        }
+
+        logger.debug("Experiment service shut down");
     }
 
     /**
@@ -183,38 +222,6 @@ public class ExperimentService {
 
     public boolean isStarted() {
         return started;
-    }
-
-    /**
-     * Use this method to shutdown the experiment service. This method will
-     * throw if the service has not been properly initialised.
-     *
-     * @throws Exception - throws if service not initialised.
-     */
-    public void shutdown() throws Exception {
-
-        if (!started) {
-            throw new Exception("Could not shutdown service: not initialised");
-        }
-
-        // Metrics sheduling shutdown
-        if (liveMetricScheduler != null) {
-
-            liveMetricScheduler.shutDown();
-            liveMetricScheduler = null;
-        }
-
-        // Experiment monitor shutdown
-        if (expMonitor != null) {
-
-            expMonitor.shutDown();
-            expMonitor = null;
-        }
-
-        // Experiment data manager tidy up
-        expReportAccessor = null;
-        expMetGeneratorDAO = null;
-        expDataManager = null;
     }
 
     /**
