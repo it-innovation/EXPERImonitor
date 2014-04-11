@@ -66,8 +66,7 @@ public class ExperimentServiceTest {
         configurationService.selectEccConfiguration(eccConfig);
         Assert.assertTrue(configurationService.isConfigurationSet());
 
-        configurationService.startExperimentService();
-        Assert.assertTrue(expService.isStarted());
+        Assert.assertTrue(configurationService.startExperimentService());
     }
 
     @Test
