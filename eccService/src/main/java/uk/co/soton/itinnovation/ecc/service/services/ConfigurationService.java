@@ -28,6 +28,7 @@ package uk.co.soton.itinnovation.ecc.service.services;
 
 import java.util.UUID;
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.slf4j.Logger;
@@ -44,6 +45,8 @@ import uk.co.soton.itinnovation.ecc.service.domain.EccConfiguration;
 import uk.co.soton.itinnovation.ecc.service.domain.MiscConfiguration;
 import uk.co.soton.itinnovation.ecc.service.domain.ProjectConfigAccessorConfiguration;
 import uk.co.soton.itinnovation.ecc.service.domain.RabbitConfiguration;
+import uk.co.soton.itinnovation.ecc.service.utils.Validate;
+import static uk.co.soton.itinnovation.ecc.service.utils.Validate.eccConfiguration;
 
 /**
  * Deals with the configuration.
@@ -80,8 +83,7 @@ public class ConfigurationService {
     }
 
     /**
-     * Initialises the configuration service: checks if default configuration is
-     * available.
+     * Initialises the service: checks if default configuration is available.
      */
     @PostConstruct
     public void init() {
@@ -95,13 +97,13 @@ public class ConfigurationService {
             if (eccConfiguration == null) {
                 logger.error("Failed to get default ECC configuration from local configuration, check 'application.properties' file contains ecc.configuration.* entries");
             } else {
-                logger.debug("Found default ECC configuration:\n" + eccConfiguration.toJson().toString(2));
+//                logger.debug("Found default ECC configuration:\n" + eccConfiguration.toJson().toString(2));
                 ProjectConfigAccessorConfiguration projectConfigAccessorConfiguration = localConfiguration.getProjectconfig();
 
                 if (projectConfigAccessorConfiguration == null) {
                     logger.error("Failed to get default ProjectConfigAccessorConfiguration from local configuration, check 'application.properties' file contains ecc.projectconfig.* entries");
                 } else {
-                    logger.debug("Found default ProjectConfigAccessorConfiguration configuration:\n" + projectConfigAccessorConfiguration.toJson().toString(2));
+//                    logger.debug("Found default ProjectConfigAccessorConfiguration configuration:\n" + projectConfigAccessorConfiguration.toJson().toString(2));
 
                     // TODO: validate eccConfiguration, projectConfigAccessorConfiguration
                     localEccConfiguration = eccConfiguration;
@@ -113,29 +115,16 @@ public class ConfigurationService {
                 }
             }
         }
+    }
 
-//        // See if it's possible to connect to the configuration service - not necessary
-//        try {
-//
-//            String defaultProjectname = localConfiguration.getProjectconfig().getProjectName();
-//            String defaultUsername = localConfiguration.getProjectconfig().getUsername();
-//            String defaultPassword = localConfiguration.getProjectconfig().getPassword();
-//
-//            logger.debug("Connecting to project '" + defaultProjectname + "' using '" + defaultUsername + "':'" + defaultPassword + "'");
-//            IECCProjectConfig pc = ECCConfigAPIFactory.getProjectConfigAccessor(defaultProjectname, defaultUsername, defaultPassword);
-//            String url = pc.getProjectUrl();
-//
-//            configUsername = defaultUsername;
-//            configPassword = defaultPassword;
-//
-//            logger.debug("Successfully retrieved default URL configuration using username and password: " + url);
-//
-//            serviceInitialised = true;
-//            logger.debug("Successfully initialised configuration service");
-//
-//        } catch (Exception ex) {
-//            logger.error("Failed to contact EXPERIMEDIA configuration service: " + ex.getMessage());
-//        }
+    /**
+     * Ensures the service is shut down properly.
+     */
+    @PreDestroy
+    public void shutdown() {
+        logger.debug("Shutting down configuration service");
+
+        logger.debug("Configuration service shut down");
     }
 
     /**
@@ -144,8 +133,21 @@ public class ConfigurationService {
      * @return true if all service started successfully.
      */
     public boolean startServices() {
+        if (startExperimentService()) {
+            return startDataService();
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Starts experiment service.
+     *
+     * @return true if the experiment service started successfully.
+     */
+    public boolean startExperimentService() {
         if (!initialised) {
-            logger.error("Failed to start services: configuration service not initialised");
+            logger.error("Failed to start experiment service: configuration service not initialised");
             return false;
         } else {
             if (!configurationSet) {
@@ -157,85 +159,37 @@ public class ConfigurationService {
                     logger.error("Failed to start experiment service");
                     return false;
                 } else {
-                    logger.debug("Starting data service");
-                    if (!dataService.start(selectedEccConfiguration.getDatabaseConfig())) {
-                        logger.error("Failed to start data service");
-                        return false;
-                    } else {
-                        logger.debug("Successfully started all services with selected configuration:\n" + selectedEccConfiguration.toJson().toString(2));
-                        return true;
-                    }
+                    logger.debug("Successfully started experiment service");
+                    return true;
                 }
             }
         }
     }
 
-    public static boolean validateConfiguration(EccConfiguration config) throws Exception {
-
-        final String err = "Cannot validate configuration: ";
-
-        if (config == null) {
-            throw new Exception(err + "config is null");
+    /**
+     * Starts the data service.
+     *
+     * @return true if the data service started successfully.
+     */
+    public boolean startDataService() {
+        if (!initialised) {
+            logger.error("Failed to start data service: configuration service not initialised");
+            return false;
+        } else {
+            if (!configurationSet) {
+                logger.error("Failed to start data service: configuration not selected");
+                return false;
+            } else {
+                logger.debug("Starting data service");
+                if (!dataService.start(selectedEccConfiguration.getDatabaseConfig())) {
+                    logger.error("Failed to start data service");
+                    return false;
+                } else {
+                    logger.debug("Successfully started data service");
+                    return true;
+                }
+            }
         }
-
-        // Test essential Rabbit config
-        RabbitConfiguration rc = config.getRabbitConfig();
-
-        if (rc == null) {
-            throw new Exception(err + "rabbit configuration is null");
-        }
-        if (rc.getMonitorId() == null) {
-            throw new Exception(err + "ECC UUID is invalid");
-        }
-        if (rc.getIp() == null) {
-            throw new Exception(err + "Rabbit server IP is null");
-        }
-        if (rc.getPort() == null) {
-            throw new Exception(err + "Rabbit port is null");
-        }
-        if (rc.getUserName() == null) {
-            throw new Exception(err + "Rabbit username is null");
-        }
-        if (rc.getUserPassword() == null) {
-            throw new Exception(err + "Rabbit password is null");
-        }
-
-        // Test essential database config
-        DatabaseConfiguration dc = config.getDatabaseConfig();
-
-        if (dc == null) {
-            throw new Exception(err + "database configuration is null");
-        }
-        if (dc.getDatabaseName() == null) {
-            throw new Exception(err + "database name is null");
-        }
-        if (dc.getDatabaseType() == null) {
-            throw new Exception(err + "database type is null");
-        }
-        if (dc.getUrl() == null) {
-            throw new Exception(err + "database url is null");
-        }
-        if (dc.getUserName() == null) {
-            throw new Exception(err + "database username is null");
-        }
-        if (dc.getUserPassword() == null) {
-            throw new Exception(err + "database password is null");
-        }
-
-        // Test essential misc config
-        MiscConfiguration mc = config.getMiscConfig();
-
-        if (mc == null) {
-            throw new Exception(err + "Misc configuration is null");
-        }
-        if (mc.getSnapshotCount() < 1) {
-            throw new Exception(err + "Snapshot count is 0 or less");
-        }
-        if (mc.getNagiousUrl() == null) {
-            throw new Exception(err + "No NAGIOS configuration found");
-        }
-
-        return true;
     }
 
     public boolean isInitialised() {
@@ -270,7 +224,7 @@ public class ConfigurationService {
         return true;
     }
 
-    private EccConfiguration createDefaultConfiguration(String projectName) {
+    public EccConfiguration createDefaultConfiguration(String projectName) {
         localEccConfiguration.setProjectName(projectName);
         return localEccConfiguration;
     }
@@ -331,7 +285,7 @@ public class ConfigurationService {
                 // Create full config & validate
                 EccConfiguration ec = new EccConfiguration(projectName, rtc, dbc, mcc);
 
-                validateConfiguration(ec);
+                Validate.eccConfiguration(ec);
                 config = ec;
             } catch (Exception ex) {
 
@@ -368,7 +322,7 @@ public class ConfigurationService {
 
         if (projectName != null && !projectName.isEmpty() && config != null) {
 
-            validateConfiguration(config);
+            eccConfiguration(config);
 
             // Update configuration on server here
             try {
