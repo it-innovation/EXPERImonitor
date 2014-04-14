@@ -55,24 +55,32 @@ public class ConfigurationController {
      */
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public EccConfiguration getConfiguration() {
-        logger.debug("Returning service configuration");
+    public EccConfiguration getSelectedConfiguration() {
+        logger.debug("Returning selected service configuration");
 
-        // TO DO: Get project name from user
-        String userSpecifiedProjectName = "EX_ID";
-
-        return configurationService.getRemoteConfiguration(userSpecifiedProjectName);
+        return configurationService.getSelectedEccConfiguration();
     }
 
     /**
-     * @return true if the service is configured (i.e., is ready to retrieve
+     * @return true if the service is initialised (i.e., is ready to retrieve
      * configurations based on project names)
+     */
+    @RequestMapping(method = RequestMethod.GET, value = "/ifinitialised")
+    @ResponseBody
+    public boolean ifInitialised() {
+        logger.debug("Returning service initialisation status");
+        return configurationService.isConfigurationSet();
+    }
+
+    /**
+     * @return true if the service is configured (i.e., configuration was
+     * selected)
      */
     @RequestMapping(method = RequestMethod.GET, value = "/ifconfigured")
     @ResponseBody
     public boolean ifConfigured() {
         logger.debug("Returning service configuration status");
-        return configurationService.isInitialised();
+        return configurationService.isConfigurationSet();
     }
 
     /**
@@ -105,8 +113,7 @@ public class ConfigurationController {
             logger.debug(JSONObject.fromObject(mapper.writeValueAsString(newEccConfiguration)).toString(2));
 
             // TODO: Need project name associated with configuration
-            String userSpecifiedProjectName = "EX_ID";
-            configurationService.updateConfiguration(userSpecifiedProjectName, newEccConfiguration);
+            configurationService.updateConfiguration(newEccConfiguration);
 
             return true;
         } catch (Throwable ex) {

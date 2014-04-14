@@ -93,7 +93,8 @@ public class ConfigurationServiceTest {
             dc.setUserPassword("password");
 
             // Update using a DIFFERENT project name
-            configurationService.updateConfiguration("DefaultTest", defaultEccConfiguration);
+            defaultEccConfiguration.setProjectName("DefaultTest");
+            configurationService.updateConfiguration(defaultEccConfiguration);
 
             // Retrieve and test the modified configuration
             EccConfiguration updatedConfig = configurationService.getRemoteConfiguration("DefaultTest");

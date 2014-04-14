@@ -29,6 +29,7 @@ package uk.co.soton.itinnovation.ecc.service.services;
 import java.util.UUID;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.xml.bind.ValidationException;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.slf4j.Logger;
@@ -308,66 +309,67 @@ public class ConfigurationService {
      * Use this method to update a project's configuration (usually after
      * modification of some part of this configuration by the user).
      *
-     * @param projectName - Non-null, non-empty string of project name
      * @param config - Non-null, complete configuration to update the
      * configuration server
-     * @throws java.lang.Exception - Throws if input parameters are invalid or
-     * the configuration server is inaccessible
+     * @throws javax.xml.bind.ValidationException if called when the service was
+     * not initialized properly.
      */
-    public void updateConfiguration(String projectName, EccConfiguration config) throws Exception {
+    public void updateConfiguration(EccConfiguration config) throws Exception {
 
         if (!initialised) {
-            throw new Exception("Could not update configuration: service not initialised");
+            throw new IllegalStateException("Failed to update configuration: service not initialised");
         }
 
-        if (projectName != null && !projectName.isEmpty() && config != null) {
+        if (config == null) {
+            throw new IllegalArgumentException("Failed to update configuration: new configuration is NULL");
+        }
 
-            eccConfiguration(config);
+        String projectName = config.getProjectName();
 
-            // Update configuration on server here
-            try {
+        if (projectName == null) {
+            throw new IllegalArgumentException("Failed to update configuration: project name is NULL");
+        }
 
-                IECCProjectConfig pc = ECCConfigAPIFactory.getProjectConfigAccessor(projectName, configUsername, configPassword);
+        if (projectName.isEmpty()) {
+            throw new IllegalArgumentException("Failed to update configuration: project name is EMPTY");
+        }
 
-                // Delete old configurations if they exist
-                logger.info("Removing old configuration for " + projectName);
+        Validate.eccConfiguration(config);
 
-                // Rabbit
-                if (pc.componentFeatureConfigExists(component, featureRt)) {
-                    pc.deleteComponentFeatureConfig(component, featureRt);
-                } else {
-                    pc.createComponentFeature(component, featureRt);
-                }
+        logger.debug("Updating configuration for project '" + projectName + "'");
 
-                // Database
-                if (pc.componentFeatureConfigExists(component, featureDb)) {
-                    pc.deleteComponentFeatureConfig(component, featureDb);
-                } else {
-                    pc.createComponentFeature(component, featureDb);
-                }
+        IECCProjectConfig pc = ECCConfigAPIFactory.getProjectConfigAccessor(projectName, configUsername, configPassword);
 
-                // Dashboard
-                if (pc.componentFeatureConfigExists(component, featureDh)) {
-                    pc.deleteComponentFeatureConfig(component, featureDh);
-                } else {
-                    pc.createComponentFeature(component, featureDh);
-                }
+        logger.debug("Removing old configuration for " + projectName);
 
-                // Write new configuration
-                logger.info("Updating new configuration for " + projectName);
-
-                pc.putComponentFeatureConfig(component, featureRt, createRabbitJSON(config.getRabbitConfig()));
-                pc.putComponentFeatureConfig(component, featureDb, createDatabaseJSON(config.getDatabaseConfig()));
-                pc.putComponentFeatureConfig(component, featureDh, createMiscJSON(config.getMiscConfig()));
-            } catch (Exception ex) {
-                String msg = "Failed to update configuration for project: " + projectName + "; " + ex.getMessage();
-                logger.error(msg);
-
-                throw new Exception(msg, ex);
-            }
+        // Rabbit
+        if (pc.componentFeatureConfigExists(component, featureRt)) {
+            pc.deleteComponentFeatureConfig(component, featureRt);
         } else {
-            throw new Exception("Could not update configuration: invalid input parameters");
+            pc.createComponentFeature(component, featureRt);
         }
+
+        // Database
+        if (pc.componentFeatureConfigExists(component, featureDb)) {
+            pc.deleteComponentFeatureConfig(component, featureDb);
+        } else {
+            pc.createComponentFeature(component, featureDb);
+        }
+
+        // Dashboard
+        if (pc.componentFeatureConfigExists(component, featureDh)) {
+            pc.deleteComponentFeatureConfig(component, featureDh);
+        } else {
+            pc.createComponentFeature(component, featureDh);
+        }
+
+        // Write new configuration
+        logger.info("Writing new configuration for " + projectName);
+
+        pc.putComponentFeatureConfig(component, featureRt, createRabbitJSON(config.getRabbitConfig()));
+        pc.putComponentFeatureConfig(component, featureDb, createDatabaseJSON(config.getDatabaseConfig()));
+        pc.putComponentFeatureConfig(component, featureDh, createMiscJSON(config.getMiscConfig()));
+
     }
 
     // Private methods ---------------------------------------------------------
