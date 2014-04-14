@@ -9,3 +9,10 @@
 #activeProjectConfigForm {
     padding-top: 12px;
 }
+
+.fullWidth {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: initial;
+}

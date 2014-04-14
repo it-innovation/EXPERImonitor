@@ -21,6 +21,13 @@
     </properties>
 
     <dependencies>
+
+        <dependency>
+            <groupId>com.github.lookfirst</groupId>
+            <artifactId>sardine</artifactId>
+            <version>5.1</version>
+        </dependency>
+
         <!--Spring Web-->
         <dependency>
             <groupId>org.springframework.boot</groupId>

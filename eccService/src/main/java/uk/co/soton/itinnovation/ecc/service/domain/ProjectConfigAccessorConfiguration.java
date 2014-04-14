@@ -24,6 +24,10 @@
 /////////////////////////////////////////////////////////////////////////
 package uk.co.soton.itinnovation.ecc.service.domain;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 /**
@@ -35,6 +39,7 @@ public class ProjectConfigAccessorConfiguration {
     private String projectName;
     private String username;
     private String password;
+    private String whitelist;
 
     public String getProjectName() {
         return projectName;
@@ -68,6 +73,41 @@ public class ProjectConfigAccessorConfiguration {
         this.endpoint = endpoint;
     }
 
+    public String getWhitelist() {
+        return whitelist;
+    }
+
+    public void setWhitelist(String whitelist) {
+        this.whitelist = whitelist;
+    }
+
+    /**
+     * @return whitelisted projects as a sorted array list.
+     */
+    public ArrayList<String> getSortedWhiteList() {
+        ArrayList<String> result = new ArrayList<String>();
+        if (whitelist != null) {
+            result.addAll(Arrays.asList(whitelist.split(",")));
+            if (result.size() > 1) {
+                Collections.sort(result);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * @return whitelisted projects as a sorted JSON array.
+     */
+    public JSONArray getSortedWhiteListAsJsonArray() {
+        JSONArray result = new JSONArray();
+
+        for (String e : getSortedWhiteList()) {
+            result.add(e);
+        }
+
+        return result;
+    }
+
     /**
      * @return simple net.sf.json.JSONObject representation.
      */
@@ -77,6 +117,9 @@ public class ProjectConfigAccessorConfiguration {
         result.put("projectName", projectName);
         result.put("username", username);
         result.put("password", password);
+        result.put("whitelist", whitelist);
+        result.put("whitelist_json", getSortedWhiteListAsJsonArray());
+
         return result;
     }
 

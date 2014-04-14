@@ -25,6 +25,7 @@
 package uk.co.soton.itinnovation.ecc.service.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
 import net.sf.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +52,7 @@ public class ConfigurationController {
     ConfigurationService configurationService;
 
     /**
-     * @return configuration of this service.
+     * @return configuration of this service, null if not yet configured.
      */
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
@@ -68,8 +69,9 @@ public class ConfigurationController {
     @RequestMapping(method = RequestMethod.GET, value = "/ifinitialised")
     @ResponseBody
     public boolean ifInitialised() {
-        logger.debug("Returning service initialisation status");
-        return configurationService.isConfigurationSet();
+        boolean result = configurationService.isInitialised();
+        logger.debug("Returning service initialisation status: " + result);
+        return result;
     }
 
     /**
@@ -79,20 +81,42 @@ public class ConfigurationController {
     @RequestMapping(method = RequestMethod.GET, value = "/ifconfigured")
     @ResponseBody
     public boolean ifConfigured() {
-        logger.debug("Returning service configuration status");
-        return configurationService.isConfigurationSet();
+        boolean result = configurationService.isConfigurationSet();
+        logger.debug("Returning service configuration status: " + result);
+        return result;
+    }
+
+    /**
+     * @return local configuration (from application.properties).
+     */
+    @RequestMapping(method = RequestMethod.GET, value = "/local")
+    @ResponseBody
+    public EccConfiguration getLocalConfiguration() {
+        logger.debug("Returning local service configuration");
+
+        return configurationService.getLocalConfiguration();
+    }
+
+    /**
+     * @return names for whitelisted online projects.
+     */
+    @RequestMapping(method = RequestMethod.GET, value = "/projects")
+    @ResponseBody
+    public ArrayList<String> getWhitelistedOnlinesConfigurations() {
+        ArrayList<String> result = configurationService.getWhiteListedOnlineProjects();
+        logger.debug("Returning names of whitelisted online projects");
+        return result;
     }
 
     /**
      * @param projectName name of the project.
      * @return configuration for that project.
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/project/{projectName}")
+    @RequestMapping(method = RequestMethod.GET, value = "/projects/{projectName}")
     @ResponseBody
     public EccConfiguration getConfigurationForProject(@PathVariable String projectName) {
         logger.debug("Returning service configuration for project '" + projectName + "'");
 
-        // TODO: not sure what the intention for this is; have updated as I think fits
         return configurationService.getRemoteConfiguration(projectName);
     }
 

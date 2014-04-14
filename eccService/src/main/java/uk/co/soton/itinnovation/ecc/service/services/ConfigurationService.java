@@ -26,10 +26,16 @@
 /////////////////////////////////////////////////////////////////////////
 package uk.co.soton.itinnovation.ecc.service.services;
 
+import com.github.sardine.DavResource;
+import com.github.sardine.Sardine;
+import com.github.sardine.SardineFactory;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.xml.bind.ValidationException;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import org.slf4j.Logger;
@@ -47,7 +53,6 @@ import uk.co.soton.itinnovation.ecc.service.domain.MiscConfiguration;
 import uk.co.soton.itinnovation.ecc.service.domain.ProjectConfigAccessorConfiguration;
 import uk.co.soton.itinnovation.ecc.service.domain.RabbitConfiguration;
 import uk.co.soton.itinnovation.ecc.service.utils.Validate;
-import static uk.co.soton.itinnovation.ecc.service.utils.Validate.eccConfiguration;
 
 /**
  * Deals with the configuration.
@@ -66,6 +71,9 @@ public class ConfigurationService {
 
     private boolean initialised = false;
     private boolean configurationSet = false;
+    private boolean webdavServiceOnline = false;
+
+    private ArrayList<String> whiteListedOnlineProjects = new ArrayList<String>();
 
     private EccConfiguration localEccConfiguration, selectedEccConfiguration;
 
@@ -104,7 +112,7 @@ public class ConfigurationService {
                 if (projectConfigAccessorConfiguration == null) {
                     logger.error("Failed to get default ProjectConfigAccessorConfiguration from local configuration, check 'application.properties' file contains ecc.projectconfig.* entries");
                 } else {
-//                    logger.debug("Found default ProjectConfigAccessorConfiguration configuration:\n" + projectConfigAccessorConfiguration.toJson().toString(2));
+                    logger.debug("Found default ProjectConfigAccessorConfiguration configuration:\n" + projectConfigAccessorConfiguration.toJson().toString(2));
 
                     // TODO: validate eccConfiguration, projectConfigAccessorConfiguration
                     localEccConfiguration = eccConfiguration;
@@ -112,7 +120,24 @@ public class ConfigurationService {
                     configPassword = projectConfigAccessorConfiguration.getPassword();
 
                     initialised = true;
-                    logger.debug("Configuration service initialised successfully");
+                    logger.debug("Configuration service initialised successfully, checking webdav service availability");
+
+                    Sardine sardine = SardineFactory.begin(projectConfigAccessorConfiguration.getUsername(), projectConfigAccessorConfiguration.getPassword());
+                    try {
+                        List<DavResource> resources = sardine.getResources(projectConfigAccessorConfiguration.getEndpoint());
+                        for (DavResource res : resources) {
+                            if (projectConfigAccessorConfiguration.getSortedWhiteList().contains(res.getName())) {
+                                logger.debug("Adding project '" + res.getName() + "' to the list of online configurations");
+                                whiteListedOnlineProjects.add(res.getName());
+                            }
+                        }
+                        if (whiteListedOnlineProjects.size() > 1) {
+                            Collections.sort(whiteListedOnlineProjects);
+                        }
+                        webdavServiceOnline = true;
+                    } catch (IOException ex) {
+                        logger.error("Failed to connect to webdav service", ex.getMessage());
+                    }
                 }
             }
         }
@@ -201,6 +226,14 @@ public class ConfigurationService {
         return configurationSet;
     }
 
+    public ArrayList<String> getWhiteListedOnlineProjects() {
+        return whiteListedOnlineProjects;
+    }
+
+    public void setWhiteListedOnlineProjects(ArrayList<String> whiteListedOnlineProjects) {
+        this.whiteListedOnlineProjects = whiteListedOnlineProjects;
+    }
+
     /**
      * @return Configuration read from application.properties if initialised,
      * null otherwise.
@@ -240,7 +273,6 @@ public class ConfigurationService {
      */
     public EccConfiguration getRemoteConfiguration(String projectName) {
 
-        // Generate a default configuration
         EccConfiguration config = null;
 
         // Try retrieving the configuration
@@ -290,7 +322,7 @@ public class ConfigurationService {
                 config = ec;
             } catch (Exception ex) {
 
-                String msg = "Could not retreive configuration data for project " + projectName + " : " + ex.getMessage();
+                String msg = "Could not retrieve configuration data for project " + projectName + " : " + ex.getMessage();
                 logger.error(msg);
             }
         } else {
