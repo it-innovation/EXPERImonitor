@@ -37,10 +37,13 @@ import uk.co.soton.itinnovation.ecc.service.domain.EccConfiguration;
 import uk.co.soton.itinnovation.ecc.service.services.ConfigurationService;
 import uk.co.soton.itinnovation.ecc.service.services.ExperimentService;
 
+/**
+ * Tests the experiment service.
+ */
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = Application.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD) // will reset everything after each test, comment this out if you want to test as singleton
-public class ExperimentServiceTest {
+public class ServiceTest {
 
     private EccConfiguration eccConfig;
 
@@ -50,7 +53,7 @@ public class ExperimentServiceTest {
     @Autowired
     ConfigurationService configurationService;
 
-    public ExperimentServiceTest() {
+    public ServiceTest() {
 
     }
 

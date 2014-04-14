@@ -43,12 +43,12 @@ import uk.co.soton.itinnovation.ecc.service.utils.Validate;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = Application.class)
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD) // will reset everything after each test, comment this out if you want to test as singleton
-public class ConfigurationServiceTest {
+public class ServiceTest {
 
     @Autowired
     ConfigurationService configurationService;
 
-    public ConfigurationServiceTest() {
+    public ServiceTest() {
     }
 
     @Test
