@@ -26,7 +26,8 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory;
 
 import java.util.Properties;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.prov.dao.EDMProvDataStoreImpl;
 
 /**
@@ -50,7 +51,7 @@ public final class EDMProvPersistenceFactory {
 	public static synchronized EDMProvPersistenceFactory getInstance(Properties props) {
 		
 		EDMProvPersistenceFactory.props = props;
-		logger = Logger.getLogger(EDMProvPersistenceFactory.class);
+		logger = LoggerFactory.getLogger(EDMProvPersistenceFactory.class);
 
 		if (factory==null) {
 			factory = new EDMProvPersistenceFactory(props);

@@ -33,8 +33,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Properties;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openrdf.query.Binding;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryEvaluationException;
@@ -52,8 +52,7 @@ public class EDMProvStoreWrapper extends RemoteSesameConnector {
 	public EDMProvStoreWrapper(Properties props) throws Exception {
 		
 		super(props.getProperty("owlim.sesameServerURL"));
-		logger = Logger.getLogger(EDMProvStoreWrapper.class);
-		logger.setLevel(Level.INFO);	//TODO: remove
+		logger = LoggerFactory.getLogger(RemoteSesameConnector.class);
 			
 		this.props = props;
 		this.prefixes = null;

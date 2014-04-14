@@ -31,7 +31,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 import junit.framework.TestCase;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -60,8 +61,8 @@ public class EDMProvStoreWrapperTest extends TestCase {
 
     @BeforeClass
     public static void beforeClass() {
-		
-        logger = Logger.getLogger(EDMProvStoreWrapperTest.class);
+
+		logger = LoggerFactory.getLogger(EDMProvStoreWrapperTest.class);
         logger.info("EDMProvStoreWrapper tests executing...");
     }
 	

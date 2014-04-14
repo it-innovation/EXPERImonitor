@@ -33,7 +33,8 @@ import java.util.LinkedList;
 import java.util.Properties;
 import java.util.UUID;
 import junit.framework.TestCase;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -67,7 +68,7 @@ public class EDMProvWriterTest extends TestCase
     @BeforeClass
     public static void beforeClass() {
         // Configure logging system
-        logger = Logger.getLogger(EDMProvWriterTest.class);
+		logger = LoggerFactory.getLogger(EDMProvWriterTest.class);
 		repoID += UUID.randomUUID().toString();
 		repoName += ", created at " + (new SimpleDateFormat("yyyy/MM/dd, HH:mm:ss").format(Calendar.getInstance().getTime()));
         

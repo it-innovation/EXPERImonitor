@@ -31,7 +31,8 @@ import java.util.Date;
 import java.util.Properties;
 import java.util.Set;
 import junit.framework.TestCase;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -60,7 +61,7 @@ public class EDMProvReaderTest extends TestCase
     @BeforeClass
     public static void beforeClass() {
         // Configure logging system
-        logger = Logger.getLogger(EDMProvReaderTest.class);
+		logger = LoggerFactory.getLogger(EDMProvReaderTest.class);
         logger.info("EDMProvElementReader tests executing...");
     }
     

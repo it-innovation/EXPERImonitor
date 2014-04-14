@@ -3,10 +3,12 @@ package uk.ac.soton.itinnovation.edmprov.owlim.test;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openrdf.model.Value;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.TupleQueryResult;
@@ -17,15 +19,15 @@ import uk.ac.soton.itinnovation.edmprov.sesame.RemoteSesameConnector;
 
 public class SesameTest 
 {
-    static String sesameServerURL = "http://localhost:8080/openrdf-sesame";
-    static String repositoryID = "owlimTest";
-	static String repositoryName = "OWLim Test Repository";
+    private static final String sesameServerURL = "http://localhost:8080/openrdf-sesame";
+    private static final String repositoryID = "owlimTest";
+	private static final String repositoryName = "OWLim Test Repository";
 	
-	static String bfprovPath = "src/main/resources/bonfire-prov.owl";
-	static String benchPath = "src/main/resources/benchmark.owl";
-    static ASesameConnector sCon;
+	private static final String bfprovPath = "src/main/resources/bonfire-prov.owl";
+	private static final String benchPath = "src/main/resources/benchmark.owl";
+    private static ASesameConnector sCon;
     
-    static Logger logger = Logger.getLogger(SesameTest.class);
+	private static final Logger logger = LoggerFactory.getLogger(SesameTest.class);
     
     public static void main( String[] args ) throws Exception
     {
@@ -73,7 +75,7 @@ public class SesameTest
 			agentQuery(repositoryID);
 			computeQuery(repositoryID);
 			
-		} catch (Throwable t) {
+		} catch (Exception t) {
 			logger.error("Exception caught: " + t, t);
 		} finally {
 			if ((sCon != null) && sCon.isConnected()) {
@@ -209,7 +211,7 @@ public class SesameTest
 				fstream = new FileWriter(f);
 				out = new BufferedWriter(fstream);
 				logger.info(" - Writing query results to: " + f.getAbsolutePath());
-			} catch (Exception ex) {
+			} catch (IOException ex) {
 				out = null;
 			}
 
@@ -233,13 +235,13 @@ public class SesameTest
 					if (out != null) {
 						try {
 							out.write(s.stringValue() + ", " + p.stringValue() + ", " + o.stringValue() + "\n");
-						} catch (Exception ex) { }
+						} catch (IOException ex) { }
 					}
 				}
 				long queryEnd = System.nanoTime();
 				logger.info(" - Got " + counter + " result(s) in " + (queryEnd - queryBegin) / 1000000 + "ms.");
 			} finally {
-				if (out != null) { try { out.close(); } catch (Exception ex) { } }
+				if (out != null) { try { out.close(); } catch (IOException ex) { } }
 			}
 		} catch (Exception ex) {
 			logger.error("Exception caught when querying repository: " + ex, ex);

@@ -27,7 +27,8 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.prov.dao;
 
 import java.util.ArrayList;
 import java.util.Properties;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.ac.soton.itinnovation.edmprov.owlim.common.RelationshipType;
 import uk.ac.soton.itinnovation.edmprov.owlim.common.SesameException;
 import uk.ac.soton.itinnovation.edmprov.owlim.common.Triple;
@@ -44,7 +45,7 @@ public class EDMProvWriterImpl implements IEDMProvWriter {
 	private EDMProvStoreWrapper edmProvStoreWrapper;
     
     public EDMProvWriterImpl(Properties props) {
-		logger = Logger.getLogger(EDMProvWriterImpl.class);
+		logger = LoggerFactory.getLogger(getClass());
 		this.props = props;
 		
 		connect();

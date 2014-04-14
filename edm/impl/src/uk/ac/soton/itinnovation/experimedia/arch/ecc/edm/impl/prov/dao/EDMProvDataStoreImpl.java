@@ -30,8 +30,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Properties;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.ac.soton.itinnovation.edmprov.owlim.common.NoSuchRepositoryException;
 import uk.ac.soton.itinnovation.edmprov.owlim.common.RepositoryExistsException;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.prov.db.EDMProvStoreWrapper;
@@ -49,9 +49,8 @@ public final class EDMProvDataStoreImpl implements IEDMProvDataStore {
     private final Logger logger;
     
     public EDMProvDataStoreImpl() {
-		
-		logger = Logger.getLogger(EDMProvDataStoreImpl.class);
-		logger.setLevel(Level.INFO);	//TODO: remove
+
+		logger = LoggerFactory.getLogger(getClass());
 		
 		try {
 			logger.debug("Loading properties file");
@@ -65,7 +64,7 @@ public final class EDMProvDataStoreImpl implements IEDMProvDataStore {
 	
 	public EDMProvDataStoreImpl(Properties props) {
 
-	    logger = Logger.getLogger(EDMProvDataStoreImpl.class);
+		logger = LoggerFactory.getLogger(getClass());
 		this.props = props;
 
 		this.init();

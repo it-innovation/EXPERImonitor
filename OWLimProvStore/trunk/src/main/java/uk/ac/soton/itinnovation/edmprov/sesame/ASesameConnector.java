@@ -28,7 +28,9 @@ import java.io.*;
 import java.util.*;
 import java.util.Map.Entry;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.openrdf.OpenRDFException;
 import org.openrdf.model.*;
 import org.openrdf.model.impl.GraphImpl;
@@ -66,8 +68,8 @@ public abstract class ASesameConnector
 	private final RDFFormat rdfFormat = RDFFormat.TURTLE;;
 	protected String repositoryConfigTemplate;
 	protected HashMap<String, HashMap<String, String>> repositoryNamespaces;
-	
-	protected static Logger logger = Logger.getLogger(ASesameConnector.class);
+
+	protected static Logger logger = LoggerFactory.getLogger(ASesameConnector.class);
 	
 	/**
 	 * Sets up the repository configuration template from a default one (pre-configured

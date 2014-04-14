@@ -30,7 +30,8 @@ import java.rmi.AlreadyBoundException;
 import java.util.Properties;
 import java.util.zip.DataFormatException;
 import javax.xml.datatype.DatatypeConfigurationException;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMActivity;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMAgent;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMEntity;
@@ -47,7 +48,7 @@ public class KnowledgeBaseTest {
 	private EDMProvDataStoreImpl store;
 	
 	private static final Properties props = new Properties();
-	private static final Logger logger = Logger.getLogger(KnowledgeBaseTest.class);
+	private static final Logger logger = LoggerFactory.getLogger(KnowledgeBaseTest.class);
 
 	private KnowledgeBaseTest() {
 

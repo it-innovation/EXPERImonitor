@@ -27,7 +27,8 @@ package uk.ac.soton.itinnovation.experimedia.arch.edm.test.prov.unit;
 import java.io.FileOutputStream;
 import java.util.Properties;
 import uk.ac.soton.itinnovation.experimedia.arch.edm.test.metric.unit.*;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.junit.BeforeClass;
 import org.junit.runner.Result;
 import org.junit.runner.RunWith;
@@ -54,7 +55,7 @@ public class EDMProvTestSuite {
     public static void beforeClass()
     {
         // Configure logging system
-        logger = Logger.getLogger(EDMTestSuite.class);        
+		logger = LoggerFactory.getLogger(EDMTestSuite.class);   
         logger.info("Starting EDM Prov Test Suite");
 		
 		String[] args = {

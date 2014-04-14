@@ -29,7 +29,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Properties;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMActivity;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMAgent;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMEntity;
@@ -47,7 +48,7 @@ public class SPARQLProvTranslator {
 	private Logger logger;
 	
 	public SPARQLProvTranslator(Properties props) {
-		logger = Logger.getLogger(SPARQLProvTranslator.class);
+		logger = LoggerFactory.getLogger(getClass());
 
 		this.props = props;
 		container = new EDMProvDataContainer(props.getProperty("ont.Prefix"), props.getProperty("ont.BaseURI"));

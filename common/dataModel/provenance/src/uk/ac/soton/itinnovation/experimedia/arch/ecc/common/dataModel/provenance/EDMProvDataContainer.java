@@ -79,7 +79,7 @@ public class EDMProvDataContainer {
 		if (element!=null && element.getIri()!=null) {
 			this.allProvElements.put(element.getIri(), element);
 		} else {
-			logger.warning("Skipping invalid EDMProvBaseElement");
+			logger.warn("Skipping invalid EDMProvBaseElement");
 		}
 	}
 	

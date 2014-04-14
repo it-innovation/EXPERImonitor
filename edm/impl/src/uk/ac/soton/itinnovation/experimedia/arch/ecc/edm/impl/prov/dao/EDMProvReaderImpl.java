@@ -32,7 +32,8 @@ import java.util.LinkedList;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TimeZone;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvBaseElement;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvDataContainer;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMTriple;
@@ -50,7 +51,7 @@ public final class EDMProvReaderImpl implements IEDMProvReader {
 	private SPARQLProvTranslator translator;
 	
 	public EDMProvReaderImpl(Properties props) {
-		logger = Logger.getLogger(EDMProvReaderImpl.class);
+		logger = LoggerFactory.getLogger(getClass());
 		this.props = props;
 		translator = new SPARQLProvTranslator(props);
 		format.setTimeZone(TimeZone.getTimeZone("UTC"));

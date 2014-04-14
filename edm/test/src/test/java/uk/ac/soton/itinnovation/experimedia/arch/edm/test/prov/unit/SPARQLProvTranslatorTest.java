@@ -27,7 +27,8 @@ package uk.ac.soton.itinnovation.experimedia.arch.edm.test.prov.unit;
 import java.io.IOException;
 import java.util.Properties;
 import junit.framework.TestCase;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -49,7 +50,7 @@ public class SPARQLProvTranslatorTest extends TestCase
     @BeforeClass
     public static void beforeClass() {
         // Configure logging system
-        logger = Logger.getLogger(SPARQLProvTranslatorTest.class);
+		logger = LoggerFactory.getLogger(SPARQLProvTranslatorTest.class);
         
         logger.info("SPARQLProvTranslator tests executing...");
     }
