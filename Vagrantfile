@@ -123,7 +123,7 @@ echo "**** Building ECC"
 
 cd experimedia-ecc
 cd thirdPartyLibs && /bin/sh ./installLibraries.sh && cd ..
-mvn install
+mvn install |& tee /tmp/build.log
 
 ## Deploy ##
 
