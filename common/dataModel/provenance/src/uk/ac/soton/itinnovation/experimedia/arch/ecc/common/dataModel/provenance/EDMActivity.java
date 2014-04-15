@@ -40,7 +40,7 @@ public class EDMActivity extends EDMProvBaseElement {
 		
 		super(prefix, uniqueIdentifier, label);
 
-		this.provType = PROV_TYPE.ePROV_ACTIVITY;
+		this.setProvType(PROV_TYPE.ePROV_ACTIVITY);
 		this.addOwlClass(EDMProvBaseElement.prov + "Activity");
 	}
 	
@@ -54,7 +54,7 @@ public class EDMActivity extends EDMProvBaseElement {
 		EDMProvFactory factory = EDMProvFactory.getInstance();
     
 		EDMEntity newEntity = (EDMEntity) factory.createEntity(uniqueIdentifier, label);	
-		newEntity.addTriple(EDMProvBaseElement.prov + "wasGeneratedBy", this.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
+		newEntity.addTriple(EDMProvBaseElement.prov + "wasGeneratedBy", this.getIri(), TRIPLE_TYPE.OBJECT_PROPERTY);
 		newEntity.addTriple(EDMProvBaseElement.prov + "generatedAtTime", format.format(new Date(Long.valueOf(timestamp)*1000)), TRIPLE_TYPE.DATA_PROPERTY);
 		factory.elementUpdated(this); // Queue to re-send in next report
     
@@ -68,7 +68,7 @@ public class EDMActivity extends EDMProvBaseElement {
 			+ String.valueOf(System.currentTimeMillis() / 1000L);
 		EDMEntity derivation = factory.getEntity(newUniqueIdentifier);
 		
-		derivation.addTriple(EDMProvBaseElement.prov + "wasDerivedFrom", this.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
+		derivation.addTriple(EDMProvBaseElement.prov + "wasDerivedFrom", this.getIri(), TRIPLE_TYPE.OBJECT_PROPERTY);
     
 		factory.elementUpdated(this); // Queue to re-send in next report
     
@@ -76,7 +76,7 @@ public class EDMActivity extends EDMProvBaseElement {
 	}
 	
 	public void invalidateEntity(EDMEntity entity, String timestamp) {
-		entity.addTriple(EDMProvBaseElement.prov + "wasInvalidatedBy", this.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
+		entity.addTriple(EDMProvBaseElement.prov + "wasInvalidatedBy", this.getIri(), TRIPLE_TYPE.OBJECT_PROPERTY);
 		entity.addTriple(EDMProvBaseElement.prov + "invalidatedAtTime", format.format(new Date(Long.valueOf(timestamp)*1000)), TRIPLE_TYPE.DATA_PROPERTY);
 	}
 	
@@ -85,13 +85,13 @@ public class EDMActivity extends EDMProvBaseElement {
 	}
 	
 	public void associateWith(EDMAgent agent) {
-		agent.addTriple(EDMProvBaseElement.prov + "wasAssociatedWith", this.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
+		agent.addTriple(EDMProvBaseElement.prov + "wasAssociatedWith", this.getIri(), TRIPLE_TYPE.OBJECT_PROPERTY);
     
 		EDMProvFactory.getInstance().elementUpdated(this); // Queue to re-send in next report
 	}
 	
 	public void useEntity(EDMEntity entity) {
-		this.useEntity(entity.iri);
+		this.useEntity(entity.getIri());
 		// Updated below in overloaded method
 	}
 	
@@ -102,14 +102,14 @@ public class EDMActivity extends EDMProvBaseElement {
 	}
 	
 	public void informActivity(EDMActivity activity) {
-		activity.addTriple(EDMProvBaseElement.prov + "wasInformedBy", this.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
+		activity.addTriple(EDMProvBaseElement.prov + "wasInformedBy", this.getIri(), TRIPLE_TYPE.OBJECT_PROPERTY);
     
 		EDMProvFactory.getInstance().elementUpdated(this); // Queue to re-send in next report
 	}
 	
 	public void influenceActivity(EDMActivity activity) {
-		activity.addTriple(EDMProvBaseElement.prov + "wasInfluencedBy", this.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
-		this.addTriple(EDMProvBaseElement.prov + "influenced", activity.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
+		activity.addTriple(EDMProvBaseElement.prov + "wasInfluencedBy", this.getIri(), TRIPLE_TYPE.OBJECT_PROPERTY);
+		this.addTriple(EDMProvBaseElement.prov + "influenced", activity.getIri(), TRIPLE_TYPE.OBJECT_PROPERTY);
 	}
 
 }

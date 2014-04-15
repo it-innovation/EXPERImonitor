@@ -25,9 +25,6 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.simplePROVECCClient;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.loggin.impl.Log4JImpl;
-
 import java.util.Properties;
 
 
@@ -37,9 +34,6 @@ public class EntryPoint
 {
     public static void main( String args[] )
     {
-        // Configure logging system
-        Logger.setLoggerImpl( new Log4JImpl() );
-
         // Create a configuration for connection to a locally hosted ECC
         Properties eccProps = new Properties();
         eccProps.put( "Rabbit_IP"  , "127.0.0.1" );

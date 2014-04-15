@@ -1,0 +1,688 @@
+<?xml version="1.0"?>
+
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY prov "http://www.w3.org/ns/prov#" >
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY swrl "http://www.w3.org/2003/11/swrl#" >
+    <!ENTITY swrlb "http://www.w3.org/2003/11/swrlb#" >
+    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY ace_lexicon "http://attempto.ifi.uzh.ch/ace_lexicon#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+    <!ENTITY bfprov "http://www.it-innovation.soton.ac.uk/ontologies/bonfire-prov#" >
+]>
+
+
+<rdf:RDF xmlns="http://www.w3.org/2002/07/owl#"
+     xml:base="http://www.w3.org/2002/07/owl"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:prov="http://www.w3.org/ns/prov#"
+     xmlns:swrl="http://www.w3.org/2003/11/swrl#"
+     xmlns:bfprov="http://www.it-innovation.soton.ac.uk/ontologies/bonfire-prov#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:swrlb="http://www.w3.org/2003/11/swrlb#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:ace_lexicon="http://attempto.ifi.uzh.ch/ace_lexicon#">
+    <Ontology rdf:about="http://www.it-innovation.soton.ac.uk/ontologies/bonfire-prov">
+        <rdfs:comment>BonFIRE Provenance ontolgy</rdfs:comment>
+        <versionInfo>1.0</versionInfo>
+        <imports rdf:resource="http://www.w3.org/ns/prov-o#"/>
+    </Ontology>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Annotation properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://attempto.ifi.uzh.ch/ace_lexicon#CN_pl -->
+
+    <AnnotationProperty rdf:about="&ace_lexicon;CN_pl"/>
+    
+
+
+    <!-- http://attempto.ifi.uzh.ch/ace_lexicon#CN_sg -->
+
+    <AnnotationProperty rdf:about="&ace_lexicon;CN_sg"/>
+    
+
+
+    <!-- http://attempto.ifi.uzh.ch/ace_lexicon#TV_pl -->
+
+    <AnnotationProperty rdf:about="&ace_lexicon;TV_pl"/>
+    
+
+
+    <!-- http://attempto.ifi.uzh.ch/ace_lexicon#TV_sg -->
+
+    <AnnotationProperty rdf:about="&ace_lexicon;TV_sg"/>
+    
+
+
+    <!-- http://attempto.ifi.uzh.ch/ace_lexicon#TV_vbg -->
+
+    <AnnotationProperty rdf:about="&ace_lexicon;TV_vbg"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.it-innovation.soton.ac.uk/ontologies/bonfire-prov#qualifiedRelation -->
+
+    <ObjectProperty rdf:about="&bfprov;qualifiedRelation">
+        <rdfs:domain rdf:resource="&prov;Entity"/>
+        <rdfs:range rdf:resource="&prov;Entity"/>
+        <rdfs:subPropertyOf rdf:resource="&prov;qualifiedInfluence"/>
+    </ObjectProperty>
+    
+
+
+    <!-- http://www.it-innovation.soton.ac.uk/ontologies/bonfire-prov#wasRelatedTo -->
+
+    <ObjectProperty rdf:about="&bfprov;wasRelatedTo">
+        <rdfs:range rdf:resource="&prov;Entity"/>
+        <rdfs:domain rdf:resource="&prov;Entity"/>
+        <rdfs:subPropertyOf rdf:resource="&prov;wasInfluencedBy"/>
+        <propertyChainAxiom rdf:parseType="Collection">
+            <rdf:Description rdf:about="&bfprov;qualifiedRelation"/>
+            <rdf:Description rdf:about="&prov;entity"/>
+        </propertyChainAxiom>
+    </ObjectProperty>
+    
+
+
+    <!-- http://www.w3.org/ns/prov#atLocation -->
+
+    <rdf:Description rdf:about="&prov;atLocation">
+        <ace_lexicon:TV_vbg>atLocationed</ace_lexicon:TV_vbg>
+        <ace_lexicon:TV_sg>atLocations</ace_lexicon:TV_sg>
+        <ace_lexicon:TV_pl>atLocation</ace_lexicon:TV_pl>
+    </rdf:Description>
+    
+
+
+    <!-- http://www.w3.org/ns/prov#influenced -->
+
+    <rdf:Description rdf:about="&prov;influenced">
+        <ace_lexicon:TV_pl>influenced</ace_lexicon:TV_pl>
+        <ace_lexicon:TV_sg>influenceds</ace_lexicon:TV_sg>
+        <ace_lexicon:TV_vbg>influenceded</ace_lexicon:TV_vbg>
+    </rdf:Description>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.it-innovation.soton.ac.uk/ontologies/bonfire-prov#name -->
+
+    <DatatypeProperty rdf:about="&bfprov;name">
+        <rdfs:range rdf:resource="&xsd;string"/>
+        <rdfs:domain rdf:resource="&prov;Entity"/>
+    </DatatypeProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.it-innovation.soton.ac.uk/ontologies/bonfire-prov#Aggregator -->
+
+    <Class rdf:about="&bfprov;Aggregator">
+        <rdfs:subClassOf rdf:resource="&bfprov;Resource"/>
+        <ace_lexicon:CN_sg>Aggregator</ace_lexicon:CN_sg>
+        <ace_lexicon:CN_pl>Aggregators</ace_lexicon:CN_pl>
+    </Class>
+    
+
+
+    <!-- http://www.it-innovation.soton.ac.uk/ontologies/bonfire-prov#BonfireAgent -->
+
+    <Class rdf:about="&bfprov;BonfireAgent">
+        <rdfs:subClassOf rdf:resource="&prov;SoftwareAgent"/>
+        <ace_lexicon:CN_pl>BonfireAgents</ace_lexicon:CN_pl>
+        <ace_lexicon:CN_sg>BonfireAgent</ace_lexicon:CN_sg>
+    </Class>
+    
+
+
+    <!-- http://www.it-innovation.soton.ac.uk/ontologies/bonfire-prov#CocomaAgent -->
+
+    <Class rdf:about="&bfprov;CocomaAgent">
+        <rdfs:subClassOf rdf:resource="&prov;SoftwareAgent"/>
+        <ace_lexicon:CN_pl>CocomaAgents</ace_lexicon:CN_pl>
+        <ace_lexicon:CN_sg>CocomaAgent</ace_lexicon:CN_sg>
+    </Class>
+    
+
+
+    <!-- http://www.it-innovation.soton.ac.uk/ontologies/bonfire-prov#CocomaEmulation -->
+
+    <Class rdf:about="&bfprov;CocomaEmulation">
+        <rdfs:subClassOf rdf:resource="&prov;Entity"/>
+    </Class>
+    
+
+
+    <!-- http://www.it-innovation.soton.ac.uk/ontologies/bonfire-prov#Compute -->
+
+    <Class rdf:about="&bfprov;Compute">
+        <rdfs:subClassOf rdf:resource="&bfprov;Resource"/>
+        <ace_lexicon:CN_pl>Computes</ace_lexicon:CN_pl>
+        <ace_lexicon:CN_sg>Compute</ace_lexicon:CN_sg>
+    </Class>
+    
+
+
+    <!-- http://www.it-innovation.soton.ac.uk/ontologies/bonfire-prov#Disk -->
+
+    <Class rdf:about="&bfprov;Disk">
+        <equivalentClass rdf:resource="&bfprov;Storage"/>
+        <rdfs:subClassOf rdf:resource="&bfprov;Resource"/>
+    </Class>
+    
+
+
+    <!-- http://www.it-innovation.soton.ac.uk/ontologies/bonfire-prov#Experiment -->
+
+    <Class rdf:about="&bfprov;Experiment">
+        <rdfs:subClassOf rdf:resource="&prov;Entity"/>
+    </Class>
+    
+
+
+    <!-- http://www.it-innovation.soton.ac.uk/ontologies/bonfire-prov#Experimenter -->
+
+    <Class rdf:about="&bfprov;Experimenter">
+        <rdfs:subClassOf rdf:resource="&prov;Person"/>
+        <ace_lexicon:CN_sg>Experimenter</ace_lexicon:CN_sg>
+        <ace_lexicon:CN_pl>Experimenters</ace_lexicon:CN_pl>
+    </Class>
+    
+
+
+    <!-- http://www.it-innovation.soton.ac.uk/ontologies/bonfire-prov#Image -->
+
+    <Class rdf:about="&bfprov;Image">
+        <rdfs:subClassOf rdf:resource="&bfprov;Compute"/>
+        <ace_lexicon:CN_sg>Image</ace_lexicon:CN_sg>
+        <ace_lexicon:CN_pl>Images</ace_lexicon:CN_pl>
+    </Class>
+    
+
+
+    <!-- http://www.it-innovation.soton.ac.uk/ontologies/bonfire-prov#Interface -->
+
+    <Class rdf:about="&bfprov;Interface">
+        <rdfs:subClassOf rdf:resource="&bfprov;Resource"/>
+        <ace_lexicon:CN_sg>Interface</ace_lexicon:CN_sg>
+        <ace_lexicon:CN_pl>Interfaces</ace_lexicon:CN_pl>
+    </Class>
+    
+
+
+    <!-- http://www.it-innovation.soton.ac.uk/ontologies/bonfire-prov#Network -->
+
+    <Class rdf:about="&bfprov;Network">
+        <rdfs:subClassOf rdf:resource="&bfprov;Resource"/>
+    </Class>
+    
+
+
+    <!-- http://www.it-innovation.soton.ac.uk/ontologies/bonfire-prov#NetworkLink -->
+
+    <Class rdf:about="&bfprov;NetworkLink">
+        <equivalentClass rdf:resource="&bfprov;Site_link"/>
+        <rdfs:subClassOf rdf:resource="&bfprov;Resource"/>
+        <ace_lexicon:CN_pl>NetworkLinks</ace_lexicon:CN_pl>
+        <ace_lexicon:CN_sg>NetworkLink</ace_lexicon:CN_sg>
+    </Class>
+    
+
+
+    <!-- http://www.it-innovation.soton.ac.uk/ontologies/bonfire-prov#PublicNetwork -->
+
+    <Class rdf:about="&bfprov;PublicNetwork">
+        <rdfs:subClassOf rdf:resource="&bfprov;Network"/>
+        <ace_lexicon:CN_pl>PublicNetworks</ace_lexicon:CN_pl>
+        <ace_lexicon:CN_sg>PublicNetwork</ace_lexicon:CN_sg>
+    </Class>
+    
+
+
+    <!-- http://www.it-innovation.soton.ac.uk/ontologies/bonfire-prov#Resource -->
+
+    <Class rdf:about="&bfprov;Resource">
+        <rdfs:subClassOf rdf:resource="&prov;Entity"/>
+        <ace_lexicon:CN_sg>Resource</ace_lexicon:CN_sg>
+        <ace_lexicon:CN_pl>Resources</ace_lexicon:CN_pl>
+    </Class>
+    
+
+
+    <!-- http://www.it-innovation.soton.ac.uk/ontologies/bonfire-prov#Site -->
+
+    <Class rdf:about="&bfprov;Site">
+        <rdfs:subClassOf rdf:resource="&bfprov;Resource"/>
+        <ace_lexicon:CN_pl>Sites</ace_lexicon:CN_pl>
+        <ace_lexicon:CN_sg>Site</ace_lexicon:CN_sg>
+    </Class>
+    
+
+
+    <!-- http://www.it-innovation.soton.ac.uk/ontologies/bonfire-prov#Site_link -->
+
+    <Class rdf:about="&bfprov;Site_link">
+        <rdfs:subClassOf rdf:resource="&bfprov;Resource"/>
+        <ace_lexicon:CN_sg>Site_link</ace_lexicon:CN_sg>
+        <ace_lexicon:CN_pl>Site_links</ace_lexicon:CN_pl>
+    </Class>
+    
+
+
+    <!-- http://www.it-innovation.soton.ac.uk/ontologies/bonfire-prov#Storage -->
+
+    <Class rdf:about="&bfprov;Storage">
+        <rdfs:subClassOf rdf:resource="&bfprov;Resource"/>
+        <ace_lexicon:CN_sg>Storage</ace_lexicon:CN_sg>
+        <ace_lexicon:CN_pl>Storages</ace_lexicon:CN_pl>
+    </Class>
+    
+
+
+    <!-- http://www.it-innovation.soton.ac.uk/ontologies/bonfire-prov#WideAreaNetwork -->
+
+    <Class rdf:about="&bfprov;WideAreaNetwork">
+        <rdfs:subClassOf rdf:resource="&bfprov;Network"/>
+        <ace_lexicon:CN_pl>WideAreaNetworks</ace_lexicon:CN_pl>
+        <ace_lexicon:CN_sg>WideAreaNetwork</ace_lexicon:CN_sg>
+    </Class>
+    
+
+
+    <!-- http://www.w3.org/ns/prov#Entity -->
+
+    <rdf:Description rdf:about="&prov;Entity">
+        <ace_lexicon:CN_sg>Entity</ace_lexicon:CN_sg>
+        <ace_lexicon:CN_pl>Entities</ace_lexicon:CN_pl>
+    </rdf:Description>
+    
+
+
+    <!-- http://www.w3.org/ns/prov#Location -->
+
+    <rdf:Description rdf:about="&prov;Location">
+        <ace_lexicon:CN_sg>Location</ace_lexicon:CN_sg>
+        <ace_lexicon:CN_pl>Locations</ace_lexicon:CN_pl>
+    </rdf:Description>
+    
+
+
+    <!-- http://www.w3.org/ns/prov#Person -->
+
+    <rdf:Description rdf:about="&prov;Person">
+        <ace_lexicon:CN_sg>Person</ace_lexicon:CN_sg>
+        <ace_lexicon:CN_pl>Persons</ace_lexicon:CN_pl>
+    </rdf:Description>
+    
+
+
+    <!-- http://www.w3.org/ns/prov#SoftwareAgent -->
+
+    <rdf:Description rdf:about="&prov;SoftwareAgent">
+        <ace_lexicon:CN_sg>SoftwareAgent</ace_lexicon:CN_sg>
+        <ace_lexicon:CN_pl>SoftwareAgents</ace_lexicon:CN_pl>
+    </rdf:Description>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Rules
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    <rdf:Description rdf:about="urn:swrl#e">
+        <rdf:type rdf:resource="&swrl;Variable"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="urn:swrl#a">
+        <rdf:type rdf:resource="&swrl;Variable"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="urn:swrl#vm">
+        <rdf:type rdf:resource="&swrl;Variable"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="urn:swrl#del">
+        <rdf:type rdf:resource="&swrl;Variable"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="urn:swrl#gen">
+        <rdf:type rdf:resource="&swrl;Variable"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="urn:swrl#x">
+        <rdf:type rdf:resource="&swrl;Variable"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="urn:swrl#y">
+        <rdf:type rdf:resource="&swrl;Variable"/>
+    </rdf:Description>
+    <rdf:Description rdf:about="urn:swrl#l">
+        <rdf:type rdf:resource="&swrl;Variable"/>
+    </rdf:Description>
+    <rdf:Description>
+        <rdf:type rdf:resource="&swrl;Imp"/>
+        <swrl:head>
+            <rdf:Description>
+                <rdf:type rdf:resource="&swrl;AtomList"/>
+                <rdf:rest rdf:resource="&rdf;nil"/>
+                <rdf:first>
+                    <rdf:Description>
+                        <rdf:type rdf:resource="&swrl;IndividualPropertyAtom"/>
+                        <swrl:propertyPredicate rdf:resource="&prov;hadActivity"/>
+                        <swrl:argument2 rdf:resource="urn:swrl#del"/>
+                        <swrl:argument1 rdf:resource="urn:swrl#e"/>
+                    </rdf:Description>
+                </rdf:first>
+            </rdf:Description>
+        </swrl:head>
+        <swrl:body>
+            <rdf:Description>
+                <rdf:type rdf:resource="&swrl;AtomList"/>
+                <rdf:first>
+                    <rdf:Description>
+                        <rdf:type rdf:resource="&swrl;ClassAtom"/>
+                        <swrl:classPredicate rdf:resource="&bfprov;Experiment"/>
+                        <swrl:argument1 rdf:resource="urn:swrl#e"/>
+                    </rdf:Description>
+                </rdf:first>
+                <rdf:rest>
+                    <rdf:Description>
+                        <rdf:type rdf:resource="&swrl;AtomList"/>
+                        <rdf:rest>
+                            <rdf:Description>
+                                <rdf:type rdf:resource="&swrl;AtomList"/>
+                                <rdf:first>
+                                    <rdf:Description>
+                                        <rdf:type rdf:resource="&swrl;ClassAtom"/>
+                                        <swrl:classPredicate rdf:resource="&prov;Activity"/>
+                                        <swrl:argument1 rdf:resource="urn:swrl#gen"/>
+                                    </rdf:Description>
+                                </rdf:first>
+                                <rdf:rest>
+                                    <rdf:Description>
+                                        <rdf:type rdf:resource="&swrl;AtomList"/>
+                                        <rdf:first>
+                                            <rdf:Description>
+                                                <rdf:type rdf:resource="&swrl;ClassAtom"/>
+                                                <swrl:classPredicate rdf:resource="&prov;Entity"/>
+                                                <swrl:argument1 rdf:resource="urn:swrl#x"/>
+                                            </rdf:Description>
+                                        </rdf:first>
+                                        <rdf:rest>
+                                            <rdf:Description>
+                                                <rdf:type rdf:resource="&swrl;AtomList"/>
+                                                <rdf:first>
+                                                    <rdf:Description>
+                                                        <rdf:type rdf:resource="&swrl;IndividualPropertyAtom"/>
+                                                        <swrl:propertyPredicate rdf:resource="&prov;hadActivity"/>
+                                                        <swrl:argument1 rdf:resource="urn:swrl#e"/>
+                                                        <swrl:argument2 rdf:resource="urn:swrl#gen"/>
+                                                    </rdf:Description>
+                                                </rdf:first>
+                                                <rdf:rest>
+                                                    <rdf:Description>
+                                                        <rdf:type rdf:resource="&swrl;AtomList"/>
+                                                        <rdf:rest>
+                                                            <rdf:Description>
+                                                                <rdf:type rdf:resource="&swrl;AtomList"/>
+                                                                <rdf:rest rdf:resource="&rdf;nil"/>
+                                                                <rdf:first>
+                                                                    <rdf:Description>
+                                                                        <rdf:type rdf:resource="&swrl;IndividualPropertyAtom"/>
+                                                                        <swrl:propertyPredicate rdf:resource="&prov;wasInvalidatedBy"/>
+                                                                        <swrl:argument2 rdf:resource="urn:swrl#del"/>
+                                                                        <swrl:argument1 rdf:resource="urn:swrl#x"/>
+                                                                    </rdf:Description>
+                                                                </rdf:first>
+                                                            </rdf:Description>
+                                                        </rdf:rest>
+                                                        <rdf:first>
+                                                            <rdf:Description>
+                                                                <rdf:type rdf:resource="&swrl;IndividualPropertyAtom"/>
+                                                                <swrl:propertyPredicate rdf:resource="&prov;wasGeneratedBy"/>
+                                                                <swrl:argument2 rdf:resource="urn:swrl#gen"/>
+                                                                <swrl:argument1 rdf:resource="urn:swrl#x"/>
+                                                            </rdf:Description>
+                                                        </rdf:first>
+                                                    </rdf:Description>
+                                                </rdf:rest>
+                                            </rdf:Description>
+                                        </rdf:rest>
+                                    </rdf:Description>
+                                </rdf:rest>
+                            </rdf:Description>
+                        </rdf:rest>
+                        <rdf:first>
+                            <rdf:Description>
+                                <rdf:type rdf:resource="&swrl;ClassAtom"/>
+                                <swrl:classPredicate rdf:resource="&prov;Activity"/>
+                                <swrl:argument1 rdf:resource="urn:swrl#del"/>
+                            </rdf:Description>
+                        </rdf:first>
+                    </rdf:Description>
+                </rdf:rest>
+            </rdf:Description>
+        </swrl:body>
+    </rdf:Description>
+    <rdf:Description>
+        <rdf:type rdf:resource="&swrl;Imp"/>
+        <swrl:head>
+            <rdf:Description>
+                <rdf:type rdf:resource="&swrl;AtomList"/>
+                <rdf:rest rdf:resource="&rdf;nil"/>
+                <rdf:first>
+                    <rdf:Description>
+                        <rdf:type rdf:resource="&swrl;IndividualPropertyAtom"/>
+                        <swrl:propertyPredicate rdf:resource="&bfprov;wasRelatedTo"/>
+                        <swrl:argument2 rdf:resource="urn:swrl#e"/>
+                        <swrl:argument1 rdf:resource="urn:swrl#vm"/>
+                    </rdf:Description>
+                </rdf:first>
+            </rdf:Description>
+        </swrl:head>
+        <swrl:body>
+            <rdf:Description>
+                <rdf:type rdf:resource="&swrl;AtomList"/>
+                <rdf:first>
+                    <rdf:Description>
+                        <rdf:type rdf:resource="&swrl;ClassAtom"/>
+                        <swrl:classPredicate rdf:resource="&bfprov;Experiment"/>
+                        <swrl:argument1 rdf:resource="urn:swrl#e"/>
+                    </rdf:Description>
+                </rdf:first>
+                <rdf:rest>
+                    <rdf:Description>
+                        <rdf:type rdf:resource="&swrl;AtomList"/>
+                        <rdf:rest>
+                            <rdf:Description>
+                                <rdf:type rdf:resource="&swrl;AtomList"/>
+                                <rdf:rest>
+                                    <rdf:Description>
+                                        <rdf:type rdf:resource="&swrl;AtomList"/>
+                                        <rdf:rest>
+                                            <rdf:Description>
+                                                <rdf:type rdf:resource="&swrl;AtomList"/>
+                                                <rdf:rest rdf:resource="&rdf;nil"/>
+                                                <rdf:first>
+                                                    <rdf:Description>
+                                                        <rdf:type rdf:resource="&swrl;IndividualPropertyAtom"/>
+                                                        <swrl:propertyPredicate rdf:resource="&prov;wasGeneratedBy"/>
+                                                        <swrl:argument2 rdf:resource="urn:swrl#a"/>
+                                                        <swrl:argument1 rdf:resource="urn:swrl#vm"/>
+                                                    </rdf:Description>
+                                                </rdf:first>
+                                            </rdf:Description>
+                                        </rdf:rest>
+                                        <rdf:first>
+                                            <rdf:Description>
+                                                <rdf:type rdf:resource="&swrl;IndividualPropertyAtom"/>
+                                                <swrl:propertyPredicate rdf:resource="&prov;hadActivity"/>
+                                                <swrl:argument2 rdf:resource="urn:swrl#a"/>
+                                                <swrl:argument1 rdf:resource="urn:swrl#e"/>
+                                            </rdf:Description>
+                                        </rdf:first>
+                                    </rdf:Description>
+                                </rdf:rest>
+                                <rdf:first>
+                                    <rdf:Description>
+                                        <rdf:type rdf:resource="&swrl;ClassAtom"/>
+                                        <swrl:classPredicate rdf:resource="&prov;Entity"/>
+                                        <swrl:argument1 rdf:resource="urn:swrl#vm"/>
+                                    </rdf:Description>
+                                </rdf:first>
+                            </rdf:Description>
+                        </rdf:rest>
+                        <rdf:first>
+                            <rdf:Description>
+                                <rdf:type rdf:resource="&swrl;ClassAtom"/>
+                                <swrl:classPredicate rdf:resource="&prov;Activity"/>
+                                <swrl:argument1 rdf:resource="urn:swrl#a"/>
+                            </rdf:Description>
+                        </rdf:first>
+                    </rdf:Description>
+                </rdf:rest>
+            </rdf:Description>
+        </swrl:body>
+    </rdf:Description>
+    <rdf:Description>
+        <rdf:type rdf:resource="&swrl;Imp"/>
+        <swrl:body>
+            <rdf:Description>
+                <rdf:type rdf:resource="&swrl;AtomList"/>
+                <rdf:first>
+                    <rdf:Description>
+                        <rdf:type rdf:resource="&swrl;ClassAtom"/>
+                        <swrl:classPredicate rdf:resource="&prov;Entity"/>
+                        <swrl:argument1 rdf:resource="urn:swrl#x"/>
+                    </rdf:Description>
+                </rdf:first>
+                <rdf:rest>
+                    <rdf:Description>
+                        <rdf:type rdf:resource="&swrl;AtomList"/>
+                        <rdf:rest>
+                            <rdf:Description>
+                                <rdf:type rdf:resource="&swrl;AtomList"/>
+                                <rdf:first>
+                                    <rdf:Description>
+                                        <rdf:type rdf:resource="&swrl;ClassAtom"/>
+                                        <swrl:classPredicate rdf:resource="&prov;Location"/>
+                                        <swrl:argument1 rdf:resource="urn:swrl#l"/>
+                                    </rdf:Description>
+                                </rdf:first>
+                                <rdf:rest>
+                                    <rdf:Description>
+                                        <rdf:type rdf:resource="&swrl;AtomList"/>
+                                        <rdf:first>
+                                            <rdf:Description>
+                                                <rdf:type rdf:resource="&swrl;IndividualPropertyAtom"/>
+                                                <swrl:propertyPredicate rdf:resource="&prov;atLocation"/>
+                                                <swrl:argument2 rdf:resource="urn:swrl#l"/>
+                                                <swrl:argument1 rdf:resource="urn:swrl#x"/>
+                                            </rdf:Description>
+                                        </rdf:first>
+                                        <rdf:rest>
+                                            <rdf:Description>
+                                                <rdf:type rdf:resource="&swrl;AtomList"/>
+                                                <rdf:rest rdf:resource="&rdf;nil"/>
+                                                <rdf:first>
+                                                    <rdf:Description>
+                                                        <rdf:type rdf:resource="&swrl;IndividualPropertyAtom"/>
+                                                        <swrl:propertyPredicate rdf:resource="&prov;atLocation"/>
+                                                        <swrl:argument2 rdf:resource="urn:swrl#l"/>
+                                                        <swrl:argument1 rdf:resource="urn:swrl#y"/>
+                                                    </rdf:Description>
+                                                </rdf:first>
+                                            </rdf:Description>
+                                        </rdf:rest>
+                                    </rdf:Description>
+                                </rdf:rest>
+                            </rdf:Description>
+                        </rdf:rest>
+                        <rdf:first>
+                            <rdf:Description>
+                                <rdf:type rdf:resource="&swrl;ClassAtom"/>
+                                <swrl:classPredicate rdf:resource="&prov;Entity"/>
+                                <swrl:argument1 rdf:resource="urn:swrl#y"/>
+                            </rdf:Description>
+                        </rdf:first>
+                    </rdf:Description>
+                </rdf:rest>
+            </rdf:Description>
+        </swrl:body>
+        <swrl:head>
+            <rdf:Description>
+                <rdf:type rdf:resource="&swrl;AtomList"/>
+                <rdf:rest>
+                    <rdf:Description>
+                        <rdf:type rdf:resource="&swrl;AtomList"/>
+                        <rdf:rest rdf:resource="&rdf;nil"/>
+                        <rdf:first>
+                            <rdf:Description>
+                                <rdf:type rdf:resource="&swrl;IndividualPropertyAtom"/>
+                                <swrl:propertyPredicate rdf:resource="&prov;influenced"/>
+                                <swrl:argument2 rdf:resource="urn:swrl#x"/>
+                                <swrl:argument1 rdf:resource="urn:swrl#y"/>
+                            </rdf:Description>
+                        </rdf:first>
+                    </rdf:Description>
+                </rdf:rest>
+                <rdf:first>
+                    <rdf:Description>
+                        <rdf:type rdf:resource="&swrl;IndividualPropertyAtom"/>
+                        <swrl:propertyPredicate rdf:resource="&prov;influenced"/>
+                        <swrl:argument1 rdf:resource="urn:swrl#x"/>
+                        <swrl:argument2 rdf:resource="urn:swrl#y"/>
+                    </rdf:Description>
+                </rdf:first>
+            </rdf:Description>
+        </swrl:head>
+    </rdf:Description>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 3.4.2) http://owlapi.sourceforge.net -->
+

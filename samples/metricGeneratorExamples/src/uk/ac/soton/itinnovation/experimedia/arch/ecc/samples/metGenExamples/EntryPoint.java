@@ -25,18 +25,12 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.metGenExamples;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.Logger;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.loggin.impl.Log4JImpl;
-
-
 
 public class EntryPoint
 {
   public static void main( String args [] )
   {
-    // Configure logging system
-    Logger.setLoggerImpl( new Log4JImpl() );
-        
+ 
     ExampleMetrics em = new ExampleMetrics();
     em.runDemo();
     

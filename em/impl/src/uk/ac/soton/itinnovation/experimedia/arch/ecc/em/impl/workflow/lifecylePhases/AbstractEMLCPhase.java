@@ -25,7 +25,8 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecylePhases;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.spec.IAMQPMessageDispatchPump;
 
@@ -45,7 +46,7 @@ public abstract class AbstractEMLCPhase
   private HashMap<UUID, EMClientEx> phaseClients;
   private final Object              clientLock = new Object();
   
-  protected final IECCLogger phaseLogger = Logger.getLogger( AbstractEMLCPhase.class );
+  protected final Logger phaseLogger = LoggerFactory.getLogger(getClass());
   protected EMPhase          phaseType;
   protected String           phaseState;
   protected boolean          phaseSupportsTimeOuts = true;

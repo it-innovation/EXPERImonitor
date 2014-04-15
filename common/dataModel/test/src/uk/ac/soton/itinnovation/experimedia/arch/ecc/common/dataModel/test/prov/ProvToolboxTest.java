@@ -49,10 +49,15 @@ import org.openprovenance.prov.xml.NamespacePrefixMapper;
 import org.openprovenance.prov.xml.ProvFactory;
 import org.openprovenance.prov.xml.ProvSerialiser;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class ProvToolboxTest {
 	
 	public static final String PC1_NS = "http://our.address.org/experimedia/";
-  public static final String PC1_PREFIX = "exp";
+	public static final String PC1_PREFIX = "exp";
+  
+	private static final Logger logger = LoggerFactory.getLogger(ProvToolboxTest.class);
 
 	public static void main(String[] args) {
 
@@ -77,7 +82,7 @@ public class ProvToolboxTest {
 			posted.setStartTime(calendar);
 			posted.setEndTime(calendar);
 		} catch (DatatypeConfigurationException e) {
-			System.out.println("Error getting date");
+			logger.error("Error getting date", e);
 		}
 		
 		Document graph = factory.newDocument(
@@ -95,22 +100,24 @@ public class ProvToolboxTest {
 		if (graph==null) System.out.println("doToDot with null ");
 		try {
 			toDot.convert(graph, outPath + "/pc1-full.dot", outPath + "pc1-full.pdf", "PC1 Full");
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (IOException e) {
+			logger.error("Error converting to DOT", e);
 		}
 		
 		try {
 			ProvSerialiser ps = new ProvSerialiser();
 			StringWriter sw = new StringWriter();
 			ps.serialiseDocument(sw, graph);
-			System.out.println(sw.toString());
+			logger.debug(sw.toString());
 		} catch (JAXBException e) {}
 		
 		//To JSON:
 		Converter convert=new Converter();
 		try {
 			convert.writeDocument(graph, outPath + "json.js");
-		} catch (IOException e) {}
+		} catch (IOException e) {
+			logger.error("Error converting to JSON", e);
+		}
 	}
 
 }

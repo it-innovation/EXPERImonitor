@@ -26,7 +26,7 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.test.prov;
 
 import java.io.File;
-import java.io.InputStream;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -35,7 +35,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map.Entry;
 import java.util.Properties;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.openrdf.query.Binding;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryEvaluationException;
@@ -64,18 +65,18 @@ public class KnowledgeBaseTest {
 	private EDMProvReport report;
 	private ASesameConnector sCon;
 	
-	private static Properties props = new Properties();
+	private static final Properties props = new Properties();
 	
 	//ontology config
-	private static String ontPrefix = "experimedia";
-	private static String ontBaseURI = "http://it-innovation.soton.ac.uk/ontologies/experimedia#";
+	private static final String ontPrefix = "experimedia";
+	private static final String ontBaseURI = "http://it-innovation.soton.ac.uk/ontologies/experimedia#";
 	
 	//triple store config
-	private static String sesameServerURL = "http://localhost:8080/openrdf-sesame";
-	private static String repositoryID = "experimedia";
-	private static String repositoryName = "EXPERIMEDIA provenance store";
-	
-	private static Logger logger = Logger.getLogger(KnowledgeBaseTest.class);
+	private static final String sesameServerURL = "http://localhost:8080/openrdf-sesame";
+	private static final String repositoryID = "experimedia";
+	private static final String repositoryName = "EXPERIMEDIA provenance store";
+
+	private final Logger logger = LoggerFactory.getLogger(getClass());
 
 	private KnowledgeBaseTest() {
 		
@@ -84,7 +85,7 @@ public class KnowledgeBaseTest {
 		logger.info("Loading properties file");
 		try {
 			props.load(KnowledgeBaseTest.class.getClassLoader().getResourceAsStream("config.properties"));
-		} catch (Exception e) {
+		} catch (IOException e) {
 			logger.error("Error loading properties file", e);
 		}
 		
@@ -149,7 +150,7 @@ public class KnowledgeBaseTest {
 			logger.info("Recreating EDMProvFactory from results");
 			recreateProv(result);
 		
-		} catch (Throwable t) {
+		} catch (Exception t) {
 			logger.error("Exception caught: " + t, t);
 		} finally {
 			if ((sCon != null) && sCon.isConnected()) {
@@ -272,7 +273,7 @@ public class KnowledgeBaseTest {
 					URL remoteOntology = new URL(ontologypath);
 					od.setURL(remoteOntology);
 					        
-				} catch (Exception e) {
+				} catch (MalformedURLException e) {
 					logger.error("Error loading ontology from URL " + ontologypath, e);
 				}
 			//try file from classpath
