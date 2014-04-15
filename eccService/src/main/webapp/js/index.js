@@ -59,6 +59,8 @@ $(document).ready(function() {
                                             displayFetchedConfiguration($(this).data("link"));
                                         });
                                     }
+//                                    var customSearchRadioInput = $('<input type="radio" name="configurationSet" value="rp' +
+//                                            counter + '" id="rp' + counter + '"><input type="text" name="searchForWebDavProjectName" id="searchForWebDavProjectName"><br>').appendTo("#listofRemoteConfigurations");
                                 }
 
                             });
@@ -124,6 +126,9 @@ $(document).ready(function() {
                 } else if (data === true) {
                     $('#configStatus').attr('class', 'right success-color');
                     $('#configStatus').text('configured');
+
+                    // TODO: add services launch check
+                    window.location.replace(BASE_URL + "/experiment.html");
                 } else {
                     $('#configStatus').attr('class', 'right alert-color');
                     $('#configStatus').text('unknown status');
@@ -135,6 +140,8 @@ $(document).ready(function() {
 
 function displayFetchedConfiguration(URL) {
     $("#activeProjectConfigForm").addClass('hide');
+    $("#setActiveConfigurationRow").addClass('hide');
+    $("#fetchConfigurationRow").removeClass('hide');
     $.ajax({
         type: 'GET',
         url: URL,
@@ -146,6 +153,8 @@ function displayFetchedConfiguration(URL) {
         success: function(data) {
             console.log(data);
             $("#activeProjectConfigForm").removeClass('hide');
+            $("#setActiveConfigurationRow").removeClass('hide');
+            $("#fetchConfigurationRow").addClass('hide');
             $("#projectInstructions").remove();
 
             $("#config_projectName").val(data.projectName);

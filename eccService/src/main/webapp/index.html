@@ -118,12 +118,17 @@
                         <input type="hidden" name="miscConfig[nagiousUrl]" id="config_miscsnapnagiousUrl"/>
                     </fieldset>
                     <input type="hidden" name="remote" value="false">
-                    <input type="checkbox" name="remote" id="config_isremote"><label for="config_isremote">Save or update this configuration on WeDAV server</label>
+                    <input type="checkbox" name="remote" id="config_isremote"><label for="config_isremote">Save or update this configuration on WebDAV server</label>
                 </form>
 
-                <div class="row">
+                <div class="row hide" id="setActiveConfigurationRow">
                     <div class="small-12 columns">
                         <a href="#" class="button small" id="setActiveConfiguration">Use this configuration</a>
+                    </div>
+                </div>
+                <div class="row hide" id="fetchConfigurationRow">
+                    <div class="small-12 columns text-center">
+                        <p>Fetching requested configuration, please wait</p>
                     </div>
                 </div>
             </div>
