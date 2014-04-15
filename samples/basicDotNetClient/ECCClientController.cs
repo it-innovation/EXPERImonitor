@@ -23,11 +23,9 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-using uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec;
 using uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared;
 using uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp;
 using uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics;
-using uk.ac.soton.itinnovation.experimedia.arch.ecc.common.loggin.impl;
 using uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment;
 using uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor;
 
@@ -42,7 +40,7 @@ namespace uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.basicDotNetClien
 
 public class ECCClientController : EMIAdapterListener
 {
-    private IECCLogger clientLogger;
+    private log4net.ILog clientLogger;
 
     private AMQPBasicChannel   amqpChannel;
     private EMInterfaceAdapter emiAdapter;
@@ -54,7 +52,7 @@ public class ECCClientController : EMIAdapterListener
     public ECCClientController()
     {
         // Configure logging system
-        clientLogger = Logger.getLogger( typeof(ECCClientController) );
+        clientLogger = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
     }
     
     public void start( string rabbitServerIP,
@@ -67,7 +65,7 @@ public class ECCClientController : EMIAdapterListener
              expMonitorID   != null &&
              clientID       != null )
         {
-            clientLogger.info( "Trying to connect to Rabbit server on " + rabbitServerIP );
+            clientLogger.Info( "Trying to connect to Rabbit server on " + rabbitServerIP );
 
             // Create connection to Rabbit server -------------------------------
             AMQPConnectionFactory amqpFactory = new AMQPConnectionFactory();
@@ -82,7 +80,7 @@ public class ECCClientController : EMIAdapterListener
             }
             catch (System.Exception e ) 
             {
-                clientLogger.error( "Could not connect to Rabbit server" );
+                clientLogger.Error( "Could not connect to Rabbit server" );
                 throw e; 
             }
 
@@ -99,7 +97,7 @@ public class ECCClientController : EMIAdapterListener
                                              expMonitorID, clientID ); }
             catch ( System.Exception e ) 
             {
-                clientLogger.error( "Could not attempt registration with ECC" );
+                clientLogger.Error( "Could not attempt registration with ECC" );
                 throw e; 
             }
         }
@@ -115,24 +113,24 @@ public class ECCClientController : EMIAdapterListener
     {
         if ( connected )
         {
-          clientLogger.info( "Connected to EM" );
-          clientLogger.info( "Linked to experiment: " + expInfo.name );
+          clientLogger.Info( "Connected to EM" );
+          clientLogger.Info( "Linked to experiment: " + expInfo.name );
         }
         else
-          clientLogger.info( "Refused connection to EM" );
+          clientLogger.Info( "Refused connection to EM" );
     }
 
     public void onEMDeregistration( string reason )
     {
-        clientLogger.info( "Got disconnected from EM: " + reason );
+        clientLogger.Info( "Got disconnected from EM: " + reason );
         
         try
         { emiAdapter.disconnectFromEM(); }
         catch ( System.Exception e )
-        { clientLogger.error( "Had problems disconnecting from EM: " + e.Message ); }
+        { clientLogger.Error( "Had problems disconnecting from EM: " + e.Message ); }
         
         // Apologise to the user
-        clientLogger.info( "ECC disconnected this client: " + reason );
+        clientLogger.Info( "ECC disconnected this client: " + reason );
 
         System.Environment.Exit(0);
     }
@@ -142,14 +140,14 @@ public class ECCClientController : EMIAdapterListener
         // We are going to just support live monitoring
         // ... we MUST support the discovery phase by default, but don't need to include
 
-        clientLogger.info("Specifying phase compatibility (Live monitoring only)");
+        clientLogger.Info("Specifying phase compatibility (Live monitoring only)");
         phasesREF.Add( EMPhase.eEMLiveMonitoring );
     }
     
     public void onDescribePushPullBehaviours( ref bool[] pushPullREF )
     {
         // We're going to support both push and pull
-        clientLogger.info("Specifying only pull behaviour");
+        clientLogger.Info("Specifying only pull behaviour");
 
         pushPullREF[0] = false;  // In this demo we are just going to be pull
         pushPullREF[1] = true;   // ECC will pull metrics from this client
@@ -157,7 +155,7 @@ public class ECCClientController : EMIAdapterListener
     
     public void onPopulateMetricGeneratorInfo()
     {
-        clientLogger.info("Creating metric generator info...");
+        clientLogger.Info("Creating metric generator info...");
 
         // Describe what we are going measure
         Entity app = new Entity( System.Guid.NewGuid(),
@@ -203,7 +201,7 @@ public class ECCClientController : EMIAdapterListener
         samplers.Add(virtualMem_ID, new ITakeMeasurement(sampleVirtualMEM));
 
         // Describe what we have created on the console
-        clientLogger.info(MetricHelper.describeGenerator(mGen));
+        clientLogger.Info(MetricHelper.describeGenerator(mGen));
 
         // Wrap up metric generators and send to the ECC
         HashSet<MetricGenerator> mgSet = new HashSet<MetricGenerator>();
@@ -213,7 +211,7 @@ public class ECCClientController : EMIAdapterListener
     }
 
     public void onDiscoveryTimeOut()
-    { clientLogger.info( "Got discovery time-out message" ); }
+    { clientLogger.Info( "Got discovery time-out message" ); }
     
     public void onSetupMetricGenerator( System.Guid genID, ref bool[] resultREF )
     { /*Not implemented in this demo */ }
@@ -223,13 +221,13 @@ public class ECCClientController : EMIAdapterListener
     
     public void onLiveMonitoringStarted()
     {
-        clientLogger.info( "ECC has started Live Monitoring process" );
+        clientLogger.Info( "ECC has started Live Monitoring process" );
     }
 
     public void onStartPushingMetricData()
     {
         // Allow the human user to manually push some data
-        clientLogger.info( "Enabling metric push" );
+        clientLogger.Info( "Enabling metric push" );
     }
 
     public void onPushReportReceived( System.Guid reportID )
@@ -240,11 +238,11 @@ public class ECCClientController : EMIAdapterListener
     }
 
     public void onPullMetricTimeOut( System.Guid measurementSetID )
-    { clientLogger.info( "Got live pull time-out message" ); }
+    { clientLogger.Info( "Got live pull time-out message" ); }
 
     public void onStopPushingMetricData()
     {
-        clientLogger.info( "Disabling metric push" );
+        clientLogger.Info( "Disabling metric push" );
     }
 
     /*
@@ -262,16 +260,16 @@ public class ECCClientController : EMIAdapterListener
                 reportREF.measurementSet.addMeasurement(m);
                 reportREF.numberOfMeasurements = 1;
 
-                clientLogger.info("Send pull measurement for " + measurementSetID.ToString());
+                clientLogger.Info("Send pull measurement for " + measurementSetID.ToString());
             }
-            else clientLogger.info("Got a pull, but could not find sampler for measurement requested");
+            else clientLogger.Info("Got a pull, but could not find sampler for measurement requested");
         }
-        else clientLogger.info("Got a pull without a valid guid.");
+        else clientLogger.Info("Got a pull without a valid guid.");
     }
 
     public void onPullingStopped()
     {
-        clientLogger.info( "ECC has stopped pulling" );
+        clientLogger.Info( "ECC has stopped pulling" );
     }
     
     /*
