@@ -294,14 +294,7 @@
       <name>maven repository for PROV toolbox</name>
       <url>http://openprovenance.org/java/maven-releases/</url>
     </repository>
-
-<!--
-    <repository>
-        <id>aduna</id>
-        <name>Aduna Software - Sesame</name>
-        <url>http://repo.aduna-software.org/maven2/releases/</url>
-    </repository>
--->    
+    
 		<!-- Do not include ALTANO -->
 		
   </repositories>

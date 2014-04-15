@@ -9,8 +9,6 @@ experimedia-arch-ecc-common-dataModel-experiment-2.0.jar
 experimedia-arch-ecc-common-dataModel-metrics-2.0.jar
 experimedia-arch-ecc-common-dataModel-monitor-2.0.jar
 experimedia-arch-ecc-common-dataModel-provenance-2.0.jar
-experimedia-arch-ecc-common-logging-impls-2.0.jar
-experimedia-arch-ecc-common-logging-spec-2.0.jar
 experimedia-arch-ecc-edc-configAPI-2.0.jar
 experimedia-arch-ecc-edm-factory-2.0.jar
 experimedia-arch-ecc-edm-impl-2.0.jar
@@ -40,8 +38,6 @@ amqpAPI-Spec.dll
 eccCommonDataModel-Experiment.dll
 eccCommonDataModel-Metrics.dll
 eccCommonDataModel-Monitor.dll
-eccCommonLogging-Impl.dll
-eccCommonLogging-Spec.dll
 ECCCommsAPI-Impl.dll
 eccEMClient-Impl.dll
 eccEMFactory.dll
@@ -167,3 +163,8 @@ openrdf-model:1.2.7
 openrdf-util:1.2.7
 rio:1.0.10
 sesame:1.2.7
+
+ADUNA Licence (BSD variant)
+-----------------------------------------------
+openrdf-sesame.war
+openrdf-workbench.war

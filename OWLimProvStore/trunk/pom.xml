@@ -102,14 +102,6 @@
 			<url>http://www.gnu.org/licenses/lgpl.html</url>
 		</license>
 	</licenses>
-	
-    <repositories>
-        <repository>
-            <id>mvn.aduna.sesame</id>
-            <name>Maven repository for Sesame</name>
-            <url>http://repo.aduna-software.org/maven2/releases/</url>
-        </repository>
-    </repositories>
 
 </project>
 
