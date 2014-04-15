@@ -19,7 +19,7 @@
 
         <div class="row">
             <div class="small-12 large-6 columns">
-                <p>Select one of the available configurations or create a new one:</p>
+                <p>Select one of the available configurations below:</p>
                 <form id="fetchProjectConfigByNameForm">
                     <fieldset>
                         <legend>Local configuration</legend>
@@ -27,82 +27,105 @@
                         <label for="localConfigurationRadioInput">Default (application.properties)</label>
                     </fieldset>
                     <fieldset id="listofRemoteConfigurations">
-                        <legend>Remote configurations</legend>
-                        <!--                        <input type="radio" name="configurationSet" value="digitalSchladming" id="digitalSchladmingProject">
-                                                <label for="digitalSchladmingProject">Digital Schladming</label><br>
-                                                <input type="radio" name="configurationSet" value="icacot" id="icacotProject"><label for="icacotProject">iCaCot</label><br>
-                                                <input type="radio" name="configurationSet" value="ssg" id="ssgProject"><label for="ssgProject">Smart Ski Goggles</label>-->
+                        <legend>Remote configurations (WebDAV)</legend>
                     </fieldset>
-
-                    <fieldset>
-                        <legend>Create new remote configuration</legend>
-                        <label>Enter project name</label>
-                        <div class="row">
-                            <div class="small-12 columns">
-                                <input type="text" placeholder="My Experimedia Project" id="projectName"/>
-                            </div>
-
-                        </div>
-                    </fieldset>
-
-                    <div class="large-12 columns">
-                        <a href="#" class="button small" id="fetchProjectConfigByNameButton">Go</a>
-                    </div>
                 </form>
             </div>
             <div class="small-12 large-6 columns">
                 <p>Selected configuration:</p>
 
                 <form id="activeProjectConfigForm" class="hide">
-                    <div class="row">
-                        <div class="small-12 columns">
-                            <input type="hidden" name="projectName" id="config_projectName"/>
-                            <label>Monitor ID
-                                <input type="text" id="config_monitorid"/>
-                            </label>
+                    <fieldset>
+                        <legend>Project name</legend>
+                        <input type="text" name="projectName" id="config_projectName">
+                    </fieldset>
+                    <fieldset>
+                        <legend>Rabbit MQ server</legend>
+                        <div class="row">
+                            <div class="small-12 columns">
+                                <label>Monitor ID
+                                    <input type="text"  name="rabbitConfig[monitorId]" id="config_monitorid"/>
+                                </label>
+                            </div>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="small-8 columns">
-                            <label>Rabbit IP/URL
-                                <input type="text" name="rabbitConfig[ip]" id="config_rabbitip"/>
-                            </label>
+                        <div class="row">
+                            <div class="small-8 columns">
+                                <label>Rabbit IP/URL
+                                    <input type="text" name="rabbitConfig[ip]" id="config_rabbitip"/>
+                                </label>
+                            </div>
+                            <div class="small-4 columns">
+                                <label>Rabbit port
+                                    <input type="text" name="rabbitConfig[port]" id="config_rabbitport"/>
+                                </label>
+                            </div>
                         </div>
-                        <div class="small-4 columns">
-                            <label>Rabbit port
-                                <input type="text" name="rabbitConfig[port]" id="config_rabbitport"/>
-                            </label>
+                        <div class="row">
+                            <div class="small-6 columns">
+                                <label>Rabbit username
+                                    <input type="text" name="rabbitConfig[userName]" id="config_username"/>
+                                </label>
+                            </div>
+                            <div class="small-6 columns">
+                                <label>Rabbit password
+                                    <input type="password" name="rabbitConfig[userPassword]" id="config_password"/>
+                                </label>
+                            </div>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="small-6 columns">
-                            <label>Rabbit username
-                                <input type="text" name="rabbitConfig[userName]" id="config_username"/>
-                            </label>
+                        <div class="row hide">
+                            <div class="small-12 columns">
+                                <label>Rabbit keystore
+                                    <input type="hidden" name="rabbitConfig[keystore]" id="config_keystore"/>
+                                </label>
+                            </div>
+                            <div class="small-12 columns">
+                                <input type="hidden" name="rabbitConfig[useSsl]" value="false">
+                                <input type="checkbox" name="rabbitConfig[useSsl]" id="config_userssl"><label for="config_userssl">Use Rabbit SSL</label>
+                            </div>
                         </div>
-                        <div class="small-6 columns">
-                            <label>Rabbit password
-                                <input type="password" name="rabbitConfig[userPassword]" id="config_password"/>
-                            </label>
+                    </fieldset>
+                    <fieldset>
+                        <legend>Database server</legend>
+                        <div class="row">
+                            <div class="small-6 columns">
+                                <label>Database URL
+                                    <input type="text" name="databaseConfig[url]" id="config_databaseurl"/>
+                                </label>
+                            </div>
+                            <div class="small-6 columns">
+                                <label>Database name
+                                    <input type="text" name="databaseConfig[databaseName]" id="config_databasename"/>
+                                </label>
+                            </div>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="small-12 columns">
-                            <label>Rabbit keystore
-                                <input type="text" name="rabbitConfig[keystore]" id="config_keystore"/>
-                            </label>
+                        <div class="row">
+                            <div class="small-6 columns">
+                                <label>Database username
+                                    <input type="text" name="databaseConfig[userName]" id="config_databaseusername"/>
+                                </label>
+                            </div>
+                            <div class="small-6 columns">
+                                <label>Database password
+                                    <input type="password" name="databaseConfig[userPassword]" id="config_databasepassword"/>
+                                </label>
+                                <input type="hidden" name="databaseConfig[databaseType]" id="config_databasetype"/>
+                            </div>
                         </div>
-                        <div class="small-12 columns">
-                            <input type="hidden" name="rabbitConfig[useSsl]" value="false">
-                            <input type="checkbox" name="rabbitConfig[useSsl]" id="config_userssl"><label for="config_userssl">Use Rabbit SSL</label>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="small-12 columns">
-                            <a href="#" class="button small" id="setActiveConfiguration">Use this configuration</a>
-                        </div>
-                    </div>
+                    </fieldset>
+                    <fieldset class="hide">
+                        <legend>Misc</legend>
+                        <input type="hidden" name="miscConfig[snapshotCount]" id="config_miscsnapshotCount"/>
+                        <input type="hidden" name="miscConfig[nagiousUrl]" id="config_miscsnapnagiousUrl"/>
+                    </fieldset>
+                    <input type="hidden" name="remote" value="false">
+                    <input type="checkbox" name="remote" id="config_isremote"><label for="config_isremote">Save or update this configuration on WeDAV server</label>
                 </form>
+
+                <div class="row">
+                    <div class="small-12 columns">
+                        <a href="#" class="button small" id="setActiveConfiguration">Use this configuration</a>
+                    </div>
+                </div>
             </div>
         </div>
 

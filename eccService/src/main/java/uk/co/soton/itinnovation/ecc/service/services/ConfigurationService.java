@@ -346,7 +346,7 @@ public class ConfigurationService {
      * @throws javax.xml.bind.ValidationException if called when the service was
      * not initialized properly.
      */
-    public void updateConfiguration(EccConfiguration config) throws Exception {
+    public void updateRemoteConfiguration(EccConfiguration config) throws Exception {
 
         if (!initialised) {
             throw new IllegalStateException("Failed to update configuration: service not initialised");

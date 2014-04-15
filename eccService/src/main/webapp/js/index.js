@@ -82,62 +82,59 @@ $(document).ready(function() {
             }
         }
     });
-    /*
 
-     $("#fetchProjectConfigByNameForm").submit(function(e) {
-     e.preventDefault();
-     $("#fetchProjectConfigByNameButton").trigger('click');
-     });
+    $("#activeProjectConfigForm").submit(function(e) {
+        e.preventDefault();
+        $("#setActiveConfiguration").trigger('click');
+    });
 
+    $("#setActiveConfiguration").click(function(e) {
+        e.preventDefault();
 
-     $("#activeProjectConfigForm").submit(function(e) {
-     e.preventDefault();
-     $("#setActiveConfiguration").trigger('click');
-     });
-     $("#setActiveConfiguration").click(function(e) {
-     e.preventDefault();
+        var newConfiguration = $("#activeProjectConfigForm").serializeJSON();
+        if (newConfiguration.rabbitConfig.useSsl === "false") {
+            newConfiguration.rabbitConfig.useSsl = false;
+        } else {
+            newConfiguration.rabbitConfig.useSsl = true;
+        }
+        if (newConfiguration.remote === "false") {
+            newConfiguration.remote = false;
+        } else {
+            newConfiguration.remote = true;
+        }
 
-     var newConfiguration = $("#activeProjectConfigForm").serializeJSON();
-     if (newConfiguration.rabbitConfig.useSsl === "false") {
-     newConfiguration.rabbitConfig.useSsl = false;
-     } else {
-     newConfiguration.rabbitConfig.useSsl = true;
-     }
+        console.log(newConfiguration);
 
-     console.log(newConfiguration);
-
-     $.ajax({
-     type: 'POST',
-     dataType: 'json',
-     contentType: 'application/json',
-     url: BASE_URL + "/configuration",
-     data: JSON.stringify(newConfiguration),
-     error: function(jqXHR, textStatus, errorThrown) {
-     console.log(jqXHR);
-     console.log(textStatus);
-     console.log(errorThrown);
-     },
-     success: function(data) {
-     console.log(data);
-     if (data === false) {
-     $('#configStatus').attr('class', 'alert-color');
-     $('#configStatus').text('not configured');
-     } else if (data === true) {
-     $('#configStatus').attr('class', 'success-color');
-     $('#configStatus').text('configured');
-     } else {
-     $('#configStatus').attr('class', 'alert-color');
-     $('#configStatus').text('unknown status');
-     }
-     }
-     });
-
-     });
-
-     */
+        $.ajax({
+            type: 'POST',
+            dataType: 'json',
+            contentType: 'application/json',
+            url: BASE_URL + "/configuration",
+            data: JSON.stringify(newConfiguration),
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.log(jqXHR);
+                console.log(textStatus);
+                console.log(errorThrown);
+            },
+            success: function(data) {
+                console.log(data);
+                if (data === false) {
+                    $('#configStatus').attr('class', 'right alert-color');
+                    $('#configStatus').text('not configured');
+                } else if (data === true) {
+                    $('#configStatus').attr('class', 'right success-color');
+                    $('#configStatus').text('configured');
+                } else {
+                    $('#configStatus').attr('class', 'right alert-color');
+                    $('#configStatus').text('unknown status');
+                }
+            }
+        });
+    });
 });
 
 function displayFetchedConfiguration(URL) {
+    $("#activeProjectConfigForm").addClass('hide');
     $.ajax({
         type: 'GET',
         url: URL,
@@ -158,11 +155,20 @@ function displayFetchedConfiguration(URL) {
             $("#config_username").val(data.rabbitConfig.userName);
             $("#config_password").val(data.rabbitConfig.userPassword);
             $("#config_keystore").val(data.rabbitConfig.keystore);
+
             if (data.rabbitConfig.useSsl === false) {
                 $("#config_userssl").prop('checked', false);
             } else {
                 $("#config_userssl").prop('checked', true);
             }
+
+            $("#config_databaseurl").val(data.databaseConfig.url);
+            $("#config_databasename").val(data.databaseConfig.databaseName);
+            $("#config_databasetype").val(data.databaseConfig.databaseType);
+            $("#config_databaseusername").val(data.databaseConfig.userName);
+            $("#config_databasepassword").val(data.databaseConfig.userPassword);
+            $("#config_miscsnapshotCount").val(data.miscConfig.snapshotCount);
+            $("#config_miscsnapnagiousUrl").val(data.miscConfig.nagiousUrl);
         }
     });
 }

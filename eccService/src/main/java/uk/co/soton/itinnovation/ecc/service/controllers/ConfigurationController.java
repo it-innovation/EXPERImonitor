@@ -132,14 +132,21 @@ public class ConfigurationController {
     public boolean setConfiguration(@RequestBody EccConfiguration newEccConfiguration) {
         logger.debug("Setting new configuration");
         try {
-            // TODO make safe
+
+            // TODO: make safe
             ObjectMapper mapper = new ObjectMapper();
             logger.debug(JSONObject.fromObject(mapper.writeValueAsString(newEccConfiguration)).toString(2));
 
-            // TODO: Need project name associated with configuration
-            configurationService.updateConfiguration(newEccConfiguration);
+            // TODO: make safe
+            configurationService.selectEccConfiguration(newEccConfiguration);
+            if (newEccConfiguration.isRemote()) {
+                logger.debug("Set and save new configuration on WebDAV");
+                configurationService.updateRemoteConfiguration(newEccConfiguration);
+            } else {
+                logger.debug("Just set new configuration");
+            }
 
-            return true;
+            return configurationService.isConfigurationSet();
         } catch (Throwable ex) {
             // TODO improve this
             logger.error("Failed to set service configuration", ex);

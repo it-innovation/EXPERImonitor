@@ -94,7 +94,7 @@ public class ServiceTest {
 
             // Update using a DIFFERENT project name
             defaultEccConfiguration.setProjectName("DefaultTest");
-            configurationService.updateConfiguration(defaultEccConfiguration);
+            configurationService.updateRemoteConfiguration(defaultEccConfiguration);
 
             // Retrieve and test the modified configuration
             EccConfiguration updatedConfig = configurationService.getRemoteConfiguration("DefaultTest");

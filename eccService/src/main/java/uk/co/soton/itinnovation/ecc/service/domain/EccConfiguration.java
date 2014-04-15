@@ -35,6 +35,7 @@ public class EccConfiguration {
     private RabbitConfiguration rabbitConfig;
     private DatabaseConfiguration databaseConfig;
     private MiscConfiguration miscConfig;
+    private boolean remote;
 
     public EccConfiguration() {
     }
@@ -44,6 +45,7 @@ public class EccConfiguration {
         this.rabbitConfig = rabbitConfig;
         this.databaseConfig = databaseConfig;
         this.miscConfig = miscConfig;
+        this.remote = false;
     }
 
     public String getProjectName() {
@@ -78,12 +80,21 @@ public class EccConfiguration {
         this.miscConfig = miscConfig;
     }
 
+    public boolean isRemote() {
+        return remote;
+    }
+
+    public void setRemote(boolean remote) {
+        this.remote = remote;
+    }
+
     /**
      * @return simple net.sf.json.JSONObject representation.
      */
     public JSONObject toJson() {
         JSONObject result = new JSONObject();
         result.put("projectName", projectName);
+        result.put("remote", remote);
         if (rabbitConfig == null) {
             result.put("rabbitConfig", null);
         } else {
