@@ -30,10 +30,12 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Properties;
+import java.util.logging.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.ac.soton.itinnovation.edmprov.owlim.common.NoSuchRepositoryException;
 import uk.ac.soton.itinnovation.edmprov.owlim.common.RepositoryExistsException;
+import uk.ac.soton.itinnovation.edmprov.owlim.common.SesameException;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.prov.db.EDMProvStoreWrapper;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.prov.dao.IEDMProvDataStore;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.prov.dao.IEDMProvReader;
@@ -51,14 +53,13 @@ public final class EDMProvDataStoreImpl implements IEDMProvDataStore {
     public EDMProvDataStoreImpl() {
 
 		logger = LoggerFactory.getLogger(getClass());
-		
 		try {
 			logger.debug("Loading properties file");
 			this.props.load(EDMProvDataStoreImpl.class.getClassLoader().getResourceAsStream("config.properties"));
 		} catch (IOException e) {
 			logger.error("Error loading properties file", e);
 		}
-		
+
 		init();
     }
 	
@@ -66,17 +67,28 @@ public final class EDMProvDataStoreImpl implements IEDMProvDataStore {
 
 		logger = LoggerFactory.getLogger(getClass());
 		this.props = props;
+		
+		logger.info("initing");
 
 		this.init();
 	}
     
     private void init() {
 
+		logger.info("1");
+		
         provWriter = new EDMProvWriterImpl(props);
         provReader = new EDMProvReaderImpl(props);
 		
-        connect();
+		logger.info("2");
 		
+        connect();
+		System.out.println("EXISTENCE CHECK");
+		try {
+			logger.info("repo exists? " + edmProvStoreWrapper.repositoryExists(props.getProperty("owlim.repositoryID")));
+		} catch (SesameException e) {
+			logger.error("Error checking for existing repository", e);
+		}
 		createRepository(props.getProperty("owlim.repositoryID"), props.getProperty("owlim.repositoryName"));
     }
 

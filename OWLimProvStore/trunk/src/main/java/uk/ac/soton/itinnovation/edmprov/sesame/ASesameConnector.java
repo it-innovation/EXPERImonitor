@@ -127,6 +127,18 @@ public abstract class ASesameConnector
 		{
 			if (props.getProperty("owlim.repoTemplate.path") != null)
 			{
+				
+				File repoConfigFile = new File(props.getProperty("owlim.repoTemplate.path"));
+				//if repo config file doesn't exist
+				if (!repoConfigFile.exists()) {
+					//try loading it from classpath
+					String resourcePath = this.getClass().getClassLoader().getResource(props.getProperty("owlim.repoTemplate.path")).getPath();
+					File resourceFile = new File(resourcePath);
+					if (!resourceFile.exists()) {
+						throw new RuntimeException("Could not load repository config file");
+					}
+				}
+
 				try {
 					String tmpRepoTemplate = readRepositoryConfigTemplate(props.getProperty("owlim.repoTemplate.path"));
 					if (!tmpRepoTemplate.contains("TEMPLATE_REPO_ID") || !tmpRepoTemplate.contains("TEMPLATE_REPO_NAME")) {

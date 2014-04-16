@@ -33,7 +33,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Properties;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.openrdf.query.Binding;
 import org.openrdf.query.BindingSet;
@@ -56,6 +55,11 @@ public class EDMProvStoreWrapper extends RemoteSesameConnector {
 			
 		this.props = props;
 		this.prefixes = null;
+		
+		if (!repositoryExists(props.getProperty("owlim.repositoryID"))) {
+			logger.warn("Repository \"" + props.getProperty("owlim.repositoryID")
+				+ "\" doesn't exist and needs to be created programmatically");
+		}
 	}
 
 	public void loadPrefixes() {
@@ -73,7 +77,7 @@ public class EDMProvStoreWrapper extends RemoteSesameConnector {
 		}
 	}
 	
-	public boolean repositoryExists(String repositoryID) throws SesameException {
+	public final boolean repositoryExists(String repositoryID) throws SesameException {
 		try {
 			getRepository(repositoryID);
 			return true;

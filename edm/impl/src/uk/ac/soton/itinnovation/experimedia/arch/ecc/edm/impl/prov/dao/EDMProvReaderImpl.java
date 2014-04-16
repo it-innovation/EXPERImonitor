@@ -354,6 +354,8 @@ public final class EDMProvReaderImpl implements IEDMProvReader {
 					tripletype = EDMTriple.TRIPLE_TYPE.OBJECT_PROPERTY;
 				} else if (type.equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#Property")) {
 					tripletype = EDMTriple.TRIPLE_TYPE.CLASS_ASSERTION;
+				} else if (type.equals("http://www.w3.org/2002/07/owl#AnnotationProperty")) {
+					tripletype = EDMTriple.TRIPLE_TYPE.ANNOTATION_PROPERTY;
 				} else {
 					logger.warn("Unknown triple type: " + type);
 				}
