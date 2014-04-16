@@ -30,13 +30,23 @@ package uk.co.soton.itinnovation.ecc.service.domain;
 public class EccClient {
 
     private String uuid, name;
+    private boolean connected;
 
     public EccClient() {
     }
 
-    public EccClient(String uuid, String name) {
+    public EccClient(String uuid, String name, boolean connected) {
         this.uuid = uuid;
         this.name = name;
+        this.connected = connected;
+    }
+
+    public boolean isConnected() {
+        return connected;
+    }
+
+    public void setConnected(boolean connected) {
+        this.connected = connected;
     }
 
     public String getUuid() {
