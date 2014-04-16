@@ -24,18 +24,28 @@
 /////////////////////////////////////////////////////////////////////////
 package uk.co.soton.itinnovation.ecc.service.controllers;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Entity;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMClient;
+import uk.co.soton.itinnovation.ecc.service.domain.EccClient;
 import uk.co.soton.itinnovation.ecc.service.domain.ExperimentNameDescription;
 import uk.co.soton.itinnovation.ecc.service.services.ConfigurationService;
 import uk.co.soton.itinnovation.ecc.service.services.ExperimentService;
+import uk.co.soton.itinnovation.ecc.service.utils.EccClientComparator;
 
 /**
  * Exposes ECC experiment service endpoints.
@@ -76,6 +86,53 @@ public class ExperimentController {
     }
 
     /**
+     * @return list of connected clients.
+     */
+    @RequestMapping(method = RequestMethod.GET, value = "/clients")
+    @ResponseBody
+    public ArrayList<EccClient> getClients() {
+        ArrayList<EccClient> result = new ArrayList<EccClient>();
+        for (EMClient c : experimentService.getCurrentlyConnectedClients()) {
+            result.add(new EccClient(c.getID().toString(), c.getName()));
+        }
+        logger.debug("Returning currently connected clients (" + result.size() + ")");
+        if (result.size() > 0) {
+            Collections.sort(result, new EccClientComparator());
+        }
+        return result;
+    }
+
+    /**
+     * @param clientUuid client UUID.
+     * @return list of entities for the client.
+     */
+    @RequestMapping(method = RequestMethod.GET, value = "/entities/{clientUuid}")
+    @ResponseBody
+    public ArrayList<Entity> getEntitiesForClient(@PathVariable String clientUuid) {
+
+        logger.debug("Returning the list of entities for client [" + clientUuid + "]");
+        ArrayList<Entity> result = new ArrayList<Entity>();
+
+        // TODO: make safe
+        try {
+            EMClient theClient = experimentService.getClientByID(UUID.fromString(clientUuid));
+            Iterator<MetricGenerator> it = theClient.getCopyOfMetricGenerators().iterator();
+            MetricGenerator mg;
+            while (it.hasNext()) {
+                mg = it.next();
+                result.addAll(mg.getEntities());
+            }
+
+            logger.debug("Found " + result.size() + " for client [" + clientUuid + "]");
+
+        } catch (Exception e) {
+            logger.error("Failed to return the list of entities for client [" + clientUuid + "]", e);
+        }
+        return result;
+
+    }
+
+    /**
      * Starts new experiment.
      *
      * @param experimentNameDescription new experiment name and description.
@@ -83,7 +140,8 @@ public class ExperimentController {
      */
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
-    public Experiment startExperiment(@RequestBody ExperimentNameDescription experimentNameDescription) {
+    public Experiment startExperiment(@RequestBody ExperimentNameDescription experimentNameDescription
+    ) {
         logger.debug("Starting new experiment: '" + experimentNameDescription.getName() + "'" + experimentNameDescription.getDescription());
 
         if (!experimentService.isStarted()) {

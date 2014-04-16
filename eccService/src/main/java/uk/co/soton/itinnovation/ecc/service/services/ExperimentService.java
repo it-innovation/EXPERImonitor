@@ -259,7 +259,7 @@ public class ExperimentService {
         if (expName == null || expName.isEmpty()) {
             name = DEFAULT_EXPERIMENT_NAME;
         }
-        if (expDesc == null) {
+        if (expDesc == null || expDesc.isEmpty()) {
             description = DEFAULT_EXPERIMENT_DESCRIPTION;
         }
         if (expStateModel.isExperimentActive()) {

@@ -53,7 +53,7 @@ $(document).ready(function() {
                                             // show details
                                             $.getJSON(BASE_URL + "/experiments", function(aedata) {
                                                 console.log(aedata);
-                                                showActiveExperimentDetails(aedata);
+                                                startMainMonitor(aedata);
                                             });
                                         }
                                     });
@@ -103,7 +103,7 @@ $(document).ready(function() {
                 if (data.hasOwnProperty('uuid')) {
                     $('#configStatus').attr('class', 'right success-color');
                     $('#configStatus').text('experiment in progress');
-                    showActiveExperimentDetails(data);
+                    startMainMonitor(data);
                 } else {
                     $('#configStatus').attr('class', 'right alert-color');
                     $('#configStatus').text('failed to create experiment');
@@ -113,14 +113,54 @@ $(document).ready(function() {
     });
 });
 
+// handles the display of all data
+function startMainMonitor(experimentData) {
+    // refresh experiment details
+    showActiveExperimentDetails(experimentData);
+
+    // show list of clients
+    $.getJSON(BASE_URL + "/experiments/clients", function(data) {
+        console.log(data);
+        showListOfClients(data);
+    });
+}
+
 // shows active experiment details
-function showActiveExperimentDetails(data) {
-    console.log("Disaplying the details...");
+function showActiveExperimentDetails(experimentMetadata) {
     $("#experiment_details").empty();
-    $("#experiment_details").append("<p class='details'>Project: " + data.experimentID + "</p>");
-    $("#experiment_details").append("<p class='details'>Experiment name: " + data.name + "</p>");
-    $("#experiment_details").append("<p class='details'>Experiment description: " + data.description + "</p>");
-    $("#experiment_details").append("<p class='details'>Experiment started: " + new Date(data.startTime) + "</p>");
+    $("#experiment_details").append("<p class='details'>Project: " + experimentMetadata.experimentID + "</p>");
+    $("#experiment_details").append("<p class='details'>Experiment name: " + experimentMetadata.name + "</p>");
+    $("#experiment_details").append("<p class='details'>Experiment description: " + experimentMetadata.description + "</p>");
+    $("#experiment_details").append("<p class='details'>Experiment started: " + new Date(experimentMetadata.startTime) + "</p>");
+}
+
+// show list of clients
+function showListOfClients(clientMetadataArray) {
+    $("#clients_details").empty();
+    $("#entities_details").empty();
+    $("#attribute_details").empty();
+    $.each(clientMetadataArray, function(key, client) {
+        $("#clients_details").append("<p class='details'><strong>" + client.name + "</strong></p>");
+        $("#clients_details").append("<p class='sub_details'>" + client.uuid + "</p>");
+        appendEntitiesFromClient(client.uuid);
+    });
+}
+
+// append entities from client
+function appendEntitiesFromClient(uuid) {
+    $.getJSON(BASE_URL + "/experiments/entities/" + uuid, function(data) {
+        console.log(data);
+        $.each(data, function(ekey, entity) {
+            $("#entities_details").append("<p class='details'><strong>" + entity.name + "</strong></p>");
+            $("#entities_details").append("<p class='sub_details_mid'>" + entity.description + "</p>");
+            $("#entities_details").append("<p class='sub_details'>" + entity.uuid + "</p>");
+            $.each(entity.attributes, function(akey, attribute) {
+                $("#attribute_details").append("<p class='details'><strong>" + attribute.name + "</strong></p>");
+                $("#attribute_details").append("<p class='sub_details_mid'>" + attribute.description + "</p>");
+                $("#attribute_details").append("<p class='sub_details'>" + attribute.uuid + "</p>");
+            });
+        });
+    });
 }
 
 // displays status in the top right corner
