@@ -130,9 +130,11 @@ public class EDMProvWriterTest extends TestCase
 			writer.disconnect();
 			writer = null;
 		}
-
-		factory.clear();
-		factory = null;
+        
+        if (factory != null)
+            factory.clear();
+		
+        factory = null;
 	}
 
 	
