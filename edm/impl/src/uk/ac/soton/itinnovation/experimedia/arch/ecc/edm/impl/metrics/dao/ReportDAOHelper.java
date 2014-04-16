@@ -519,6 +519,60 @@ public class ReportDAOHelper
         return report;
     }
     
+    public static Report getReportForTailMeasurements(UUID mSetUUID, Date tailDate, int count, boolean withMeasurements, Connection connection) throws Exception
+    {
+        if (mSetUUID == null)
+        {
+            log.error("Cannot generate a Report object for the MeasurementSet with the given UUID because it is NULL!");
+            throw new IllegalArgumentException("Cannot generate a Report object for the MeasurementSet with the given UUID because it is NULL!");
+        }
+        
+        if (tailDate == null)
+        {
+            log.error("Cannot generate a Report object for the MeasurementSet from the given date because it is NULL!");
+            throw new IllegalArgumentException("Cannot generate a Report object for the MeasurementSet from the given date because it is NULL!");
+        }
+        
+        if (count < 1)
+        {
+            log.error("Cannot generate a Report object for the MeasurementSet because the number of measurements requested is less than 1");
+            throw new IllegalArgumentException("Cannot generate a Report object for the MeasurementSet from the given date because it is NULL!");
+        }
+        
+        if (DBUtil.isClosed(connection))
+        {
+            log.error("Cannot get the Report because the connection to the DB is closed");
+            throw new RuntimeException("Cannot get the Report because the connection to the DB is closed");
+        }
+        
+        Report report = null;
+        try
+        {
+            String query = "SELECT * FROM Measurement WHERE mSetUUID = ?"
+                         + " AND timeStamp <= ? ORDER BY timeStamp ASC LIMIT ?";
+            
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setObject(1, mSetUUID, java.sql.Types.OTHER);
+            pstmt.setLong(2, tailDate.getTime());
+            pstmt.setInt(3, count);
+            
+            ResultSet rs = pstmt.executeQuery();
+            report = getReportFromMeasurementResultSet(mSetUUID, rs, withMeasurements);
+        }
+        catch (NoDataException nde)
+        {
+            throw nde;
+        }
+        catch (Exception ex)
+        {
+            String msg = "Error while querying the database:" + ex.getMessage();
+            log.error(msg, ex);
+            throw new RuntimeException(msg, ex);
+        }
+        
+        return report;
+    }
+    
     public static Report getReportForMeasurementsAfterDate(UUID mSetUUID, Date fromDate, boolean withMeasurements, Connection connection) throws Exception
     {
         if (mSetUUID == null)
@@ -853,92 +907,4 @@ public class ReportDAOHelper
             throw new RuntimeException("Unable to delete report: " + ex.getMessage(), ex);
         }
     }
-    
-    /**
-     * Generates a report for the measurements, which is saved.
-     * @param measurements The measurements.
-     * @param mSetUUID The UUID of the measurement set for the measurements.
-     * @param validateMeasurements A flag to say whether to validate the measurements or not.
-     * @param saveMeasurements A flag to say whether the measurements should be saved or not.
-     * @param connection A database connection object.
-     * @param closeDBcon A flag to say whether the database connection should be closed or not.
-     * @throws Exception 
-     *
-    public static void saveReportForMeasurements(Set<Measurement> measurements, UUID mSetUUID, boolean validateMeasurements, boolean saveMeasurements, Connection connection, boolean closeDBcon) throws Exception
-    {
-        log.debug("Generating and saving a report for measurements.");
-        if (validateMeasurements && saveMeasurements)
-        {
-            ValidationReturnObject returnObj = MeasurementDAOHelper.areObjectsValidForSave(measurements, mSetUUID, false, connection, false);
-            if (!returnObj.valid)
-            {
-                log.error("Unable to save report for measurements: " + returnObj.exception.getMessage(), returnObj.exception);
-                throw returnObj.exception;
-            }
-        }
-        else
-        {
-            if ((measurements == null) || measurements.isEmpty())
-            {
-                log.error("Cannot save report for measurements, because the set of measurements is NULL (or empty)");
-                throw new RuntimeException("Cannot save report for measurements, because the set of measurements is NULL (or empty)");
-            }
-
-            if (mSetUUID == null)
-            {
-                log.error("Cannot save report for measurements, because the measurement set UUID is NULL");
-                throw new RuntimeException("Cannot save report for measurements, because the measurement set UUID is NULL");
-            }
-        }
-        
-        if (DBUtil.isClosed(connection))
-        {
-            log.error("Cannot save the Report because the connection to the DB is closed");
-            throw new RuntimeException("Cannot save the Report because the connection to the DB is closed");
-        }
-        
-        // need to get the from/to dates from the measurements
-        Long timeStampFrom = null;
-        Long timeStampTo = null;
-        
-        try {
-            for (Measurement measurement : measurements)
-            {
-                long timeStamp = measurement.getTimeStamp().getTime();
-                if (timeStampFrom == null)
-                {
-                    timeStampFrom = timeStamp;
-                    timeStampTo = timeStamp;
-                }
-                else
-                {
-                    if (timeStamp > timeStampTo)
-                        timeStampTo = timeStamp;
-                    else if (timeStamp < timeStampFrom)
-                        timeStampFrom = timeStamp;
-                }
-            }
-        } catch (Exception ex) {
-            log.error("Unable to save report for measurements because it was not possible to get the time stamp from one or more measurements (was NULL)", ex);
-            throw new RuntimeException("Unable to save report for measurements because it was not possible to get the time stamp from one or more measurements (was NULL)", ex);
-        }
-        Report report = null;
-        
-        try {
-            report = new Report(UUID.randomUUID(), new MeasurementSet(mSetUUID), new Date(), new Date(timeStampFrom), new Date(timeStampTo), measurements.size());
-        } catch (Exception ex) {
-            log.error("Unable to create and save a report for the given measurements: " + ex.getMessage(), ex);
-            throw new RuntimeException("Unable to create and save a report for the given measurements: " + ex.getMessage(), ex);
-        }
-        
-        if (saveMeasurements)
-        {
-            report.getMeasurementSet().setMeasurements(measurements);
-            saveReport(report, connection, closeDBcon);
-        }
-        else
-        {
-            saveReportWithoutMeasurements(report, connection, closeDBcon);
-        }
-    }*/
 }

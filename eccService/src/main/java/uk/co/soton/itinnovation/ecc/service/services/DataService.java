@@ -102,7 +102,7 @@ public class DataService {
      * @param databaseConfiguration
      * @return
      */
-    boolean start(DatabaseConfiguration databaseConfiguration) {
+    public boolean start(DatabaseConfiguration databaseConfiguration) {
         started = false;
 
         if (databaseConfiguration != null) {
@@ -154,7 +154,7 @@ public class DataService {
      *
      * @return - Returns a set of experiment instances (high-level data only)
      */
-    Set<Experiment> getAllKnownExperiments() {
+    public Set<Experiment> getAllKnownExperiments() {
 
         HashSet<Experiment> result = new HashSet<Experiment>();
 
@@ -181,7 +181,7 @@ public class DataService {
      * @throws Exception - throws if the service is not initialised or there was
      * a problem with the database
      */
-    Experiment getExperimentWithMetricModels(UUID expID) throws Exception {
+    public Experiment getExperimentWithMetricModels(UUID expID) throws Exception {
 
         // Safety first
         if (!started) {
@@ -214,7 +214,7 @@ public class DataService {
      * @throws Exception - throws if the experiment ID is invalid or there is no
      * experiment that ID
      */
-    Set<Entity> getEntitiesForExperiment(UUID expID) throws Exception {
+    public Set<Entity> getEntitiesForExperiment(UUID expID) throws Exception {
 
         // Safety
         if (!started) {
@@ -247,7 +247,7 @@ public class DataService {
      * @return - Returns (a possibly empty) set of measurement sets
      * @throws Exception - throws if the input parameters are null or invalid
      */
-    Set<MeasurementSet> getAllEmptyMeasurementSetsForAttribute(UUID expID, Attribute attr) throws Exception {
+    public Set<MeasurementSet> getAllEmptyMeasurementSetsForAttribute(UUID expID, Attribute attr) throws Exception {
 
         // Safety first
         if (!started) {
@@ -291,7 +291,7 @@ public class DataService {
      * @throws Exception - throws if the parameters are invalid or the
      * MetricGenerator/Attribute could not be found
      */
-    Set<MeasurementSet> getEmptyMeasurementSetsForAttribute(MetricGenerator mgen, Attribute attr) throws Exception {
+    public Set<MeasurementSet> getEmptyMeasurementSetsForAttribute(MetricGenerator mgen, Attribute attr) throws Exception {
 
         // Safety first
         if (!started) {
@@ -355,7 +355,7 @@ public class DataService {
      * @return - Returns a (possibly empty) set of measurement sets
      * @throws Exception - throws if the input parameters are null or invalid
      */
-    Set<MeasurementSet> getMeasurementSetsForAttribute(UUID expID, Attribute attr, Date start, Date end) throws Exception {
+    public Set<MeasurementSet> getMeasurementSetsForAttribute(UUID expID, Attribute attr, Date start, Date end) throws Exception {
 
         // Safety first
         if (!started) {
@@ -381,7 +381,11 @@ public class DataService {
                 if (ms != null) {
 
                     Report report = expReportDAO.getReportForMeasurementsForTimePeriod(expID, start, end, true);
-                    resultSet.add(report.getMeasurementSet());
+                    
+                    // Only add non-empty measurement sets
+                    if ( report.getNumberOfMeasurements()> 0 )
+                        resultSet.add(report.getMeasurementSet());
+                    
                 } else {
                     String msg = "Had problems retrieving a measurement set: MS ID is null";
                     logger.warn(msg);
@@ -396,5 +400,66 @@ public class DataService {
         }
 
         return resultSet;
+    }
+    
+    /**
+     * Use this method to retrieve historical measurements (if they exist) from a specific point in time. Use the count parameter
+     * to specific the maximum number of measurements you want returned for any Measurement Set discovered.
+     * 
+     * @param expID      - Non-null ID of the experiment
+     * @param attr       - Non-null Attribute of interest
+     * @param tail       - Non-null time stamp from which to work backwards from
+     * @param count      - Greater than zero maximum number of measurements per measurement set
+     * @return           - Returns a collection of Measurement Sets 
+     * @throws Exception - Throws if parameters are invalid or there were problems retrieving data from the database
+     */
+    public Set<MeasurementSet> getTailMeasurementSetsForAttribute(UUID expID, Attribute attr, Date tail, int count) throws Exception {
+        
+        // Safety first
+        if (!started) {
+            throw new Exception("Cannot get experiments: service not started");
+        }
+        if (expID == null) {
+            throw new Exception("Could not get tail Measurement Sets for Attribute: experiment ID is null");
+        }
+        if (attr == null) {
+            throw new Exception("Could not get tail Measurement Sets for Attribute: Attribute is null");
+        }
+        if (tail == null) {
+            throw new Exception("Could not get tail Measurement Sets for Attribute: Date is null");
+        }
+        if (count < 1) {
+            throw new Exception("Could not get tail Measurement Sets for Attribute: date(s) is null");
+        }
+        
+        HashSet<MeasurementSet> resultSet = new HashSet<MeasurementSet>();
+        
+        try {
+            // Get the MeasurementSet model first
+            Set<MeasurementSet> msetInfo = getAllEmptyMeasurementSetsForAttribute(expID, attr);
+            for (MeasurementSet ms : msetInfo) {
+                // Then populate with data
+                if (ms != null) {
+
+                    Report report = expReportDAO.getReportForTailMeasurements(expID, tail, count, true);
+                    
+                    // Only add non-empty measurement sets
+                    if (report.getNumberOfMeasurements() > 0)
+                        resultSet.add(report.getMeasurementSet());
+                } else {
+                    String msg = "Had problems retrieving a measurement set: MS ID is null";
+                    logger.warn(msg);
+                    throw new Exception(msg);
+                }
+            }
+        }
+        catch (Exception ex) {
+            String msg = "Had problems retrieving tail measurement set data for Attribute " + attr.getName() + ": " + ex.getMessage();
+            logger.warn(msg);
+
+            throw new Exception(msg, ex);
+        }
+        
+        return resultSet;        
     }
 }

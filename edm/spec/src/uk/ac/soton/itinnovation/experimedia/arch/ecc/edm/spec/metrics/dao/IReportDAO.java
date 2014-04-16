@@ -109,6 +109,20 @@ public interface IReportDAO
     Report getReportForAllMeasurements(UUID measurementSetUUID, boolean withMeasurements) throws IllegalArgumentException, NoDataException, Exception;
     
     /**
+     * Use this method to retrieve measurement sets up to a given date. 
+     * 
+     * @param measurementSetID
+     * @param tailDate
+     * @param count
+     * @param withMeasurements
+     * @return
+     * @throws IllegalArgumentException
+     * @throws NoDataException
+     * @throws Exception 
+     */
+    Report getReportForTailMeasurements(UUID measurementSetID, Date tailDate, int count, boolean withMeasurements) throws IllegalArgumentException, NoDataException, Exception;
+    
+    /**
      * Get a report for all measurements for a particular measurement set from
      * a given date. This is inclusive the given date.
      * This does not return any existing Report saved in the database, but will create

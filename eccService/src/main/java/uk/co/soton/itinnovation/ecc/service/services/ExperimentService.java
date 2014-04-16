@@ -27,6 +27,7 @@ package uk.co.soton.itinnovation.ecc.service.services;
 
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
@@ -274,7 +275,6 @@ public class ExperimentService {
         newExp.setStartTime(new Date());
 
         try {
-
             // Prepare metrics database
             IExperimentDAO expDAO = expDataManager.getExperimentDAO();
             expDAO.saveExperiment(newExp);
@@ -283,12 +283,19 @@ public class ExperimentService {
             expStateModel.setActiveExperiment(newExp);
 
             // Prepare PROV logging (TO DO)
-            //liveMonitorController.createPROVLog( currentExperiment.getUUID(), eccBasePath );
             // Go straight into live monitoring
             expMonitor.startLifecycle(newExp, EMPhase.eEMLiveMonitoring);
 
+            // If we have noted any previously connected clients, get their
+            // identities and try re-connecting them
+            Map<UUID, String> clientInfo = expStateModel.getConnectedClientInfo();
+
+            if (!clientInfo.isEmpty()) {
+                expMonitor.tryReRegisterClients(clientInfo);
+            }
             experimentInProgress = true;
             return newExp;
+
         } catch (Exception ex) {
             String problem = "Could not start experiment because: " + ex.getMessage();
             logger.error(problem);
@@ -628,6 +635,8 @@ public class ExperimentService {
             EMClient client = expMonitor.getClientByID(clientID);
 
             if (client != null) {
+
+                expStateModel.setClientConnectedState(client, false);
 
                 logger.info("Client " + client.getName() + " disconnected");
 
