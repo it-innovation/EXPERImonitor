@@ -75,15 +75,11 @@ public final class EDMProvDataStoreImpl implements IEDMProvDataStore {
     
     private void init() {
 
-		logger.info("1");
-		
         provWriter = new EDMProvWriterImpl(props);
         provReader = new EDMProvReaderImpl(props);
-		
-		logger.info("2");
-		
+
         connect();
-		System.out.println("EXISTENCE CHECK");
+
 		try {
 			logger.info("repo exists? " + edmProvStoreWrapper.repositoryExists(props.getProperty("owlim.repositoryID")));
 		} catch (SesameException e) {

@@ -117,8 +117,10 @@ public class EDMProvStoreWrapperTest extends TestCase {
 				logger.error("Error deleting repository", ex);
 			}
 
-			store.disconnect();
-			store = null;
+			if (store !=null) {
+				store.disconnect();
+				store = null;
+			}
 		}
 	}
 

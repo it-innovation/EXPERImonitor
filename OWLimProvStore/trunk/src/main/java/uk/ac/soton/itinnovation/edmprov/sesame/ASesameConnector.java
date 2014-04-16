@@ -123,33 +123,9 @@ public abstract class ASesameConnector
 	{
 		this();
 		
-		if (props != null)
+		if (props != null && props.getProperty("owlim.repoTemplate")!=null && props.getProperty("owlim.repoTemplate").trim().isEmpty())
 		{
-			if (props.getProperty("owlim.repoTemplate.path") != null)
-			{
-				
-				File repoConfigFile = new File(props.getProperty("owlim.repoTemplate.path"));
-				//if repo config file doesn't exist
-				if (!repoConfigFile.exists()) {
-					//try loading it from classpath
-					String resourcePath = this.getClass().getClassLoader().getResource(props.getProperty("owlim.repoTemplate.path")).getPath();
-					File resourceFile = new File(resourcePath);
-					if (!resourceFile.exists()) {
-						throw new RuntimeException("Could not load repository config file");
-					}
-				}
-
-				try {
-					String tmpRepoTemplate = readRepositoryConfigTemplate(props.getProperty("owlim.repoTemplate.path"));
-					if (!tmpRepoTemplate.contains("TEMPLATE_REPO_ID") || !tmpRepoTemplate.contains("TEMPLATE_REPO_NAME")) {
-						throw new RuntimeException("The provided repository template does not have placeholders for 'TEMPLATE_REPO_ID' or 'TEMPLATE_REPO_NAME'");
-					}
-					
-					this.repositoryConfigTemplate = tmpRepoTemplate;
-				} catch (Exception ex) {
-					throw new RuntimeException("Unable to initialise the Sesame Connector because of an error with setting up the template for new repositories: " + ex, ex);
-				}
-			}
+			this.repositoryConfigTemplate = props.getProperty("owlim.repoTemplate");
 		}
 	}
 	

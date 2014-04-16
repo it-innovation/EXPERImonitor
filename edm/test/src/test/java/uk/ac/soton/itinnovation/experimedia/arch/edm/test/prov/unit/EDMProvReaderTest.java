@@ -93,7 +93,10 @@ public class EDMProvReaderTest extends TestCase
 	@After
 	public void afterEachTest() {
 		try {
-			reader.disconnect();
+			if (reader !=null) {
+				reader.disconnect();
+				reader = null;
+			}
 		} catch (Exception e) {
 			logger.error("Error disconnecting from store", e);
 		}

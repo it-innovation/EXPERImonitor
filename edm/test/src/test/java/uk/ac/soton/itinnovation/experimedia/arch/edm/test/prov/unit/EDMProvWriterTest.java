@@ -127,14 +127,16 @@ public class EDMProvWriterTest extends TestCase
 				logger.error("Error deleting repository", ex);
 			}
 
-			writer.disconnect();
-			writer = null;
+			if (writer!=null) {
+				writer.disconnect();
+				writer = null;
+			}
 		}
         
-        if (factory != null)
+        if (factory != null) {
             factory.clear();
-		
-        factory = null;
+			factory = null;
+		}
 	}
 
 	
