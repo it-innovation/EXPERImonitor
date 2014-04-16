@@ -93,7 +93,7 @@ public class ExperimentController {
     public ArrayList<EccClient> getClients() {
         ArrayList<EccClient> result = new ArrayList<EccClient>();
         for (EMClient c : experimentService.getCurrentlyConnectedClients()) {
-            result.add(new EccClient(c.getID().toString(), c.getName()));
+            result.add(new EccClient(c.getID().toString(), c.getName(), c.isConnected()));
         }
         logger.debug("Returning currently connected clients (" + result.size() + ")");
         if (result.size() > 0) {
@@ -123,7 +123,7 @@ public class ExperimentController {
                 result.addAll(mg.getEntities());
             }
 
-            logger.debug("Found " + result.size() + " for client [" + clientUuid + "]");
+            logger.debug("Found " + result.size() + " entity for client [" + clientUuid + "]");
 
         } catch (Exception e) {
             logger.error("Failed to return the list of entities for client [" + clientUuid + "]", e);

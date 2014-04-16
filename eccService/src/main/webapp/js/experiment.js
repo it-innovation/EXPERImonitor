@@ -139,25 +139,57 @@ function showListOfClients(clientMetadataArray) {
     $("#clients_details").empty();
     $("#entities_details").empty();
     $("#attribute_details").empty();
+
+    var clientsDropdownLabel = $("<label>Filter by client status</label>").appendTo("#clients_details");
+    var clientsDropdownList = $("<select></select>").appendTo(clientsDropdownLabel);
+    clientsDropdownList.append("<option value='all'>All</option>");
+    clientsDropdownList.append("<option value='connected'>Connected</option>");
+    clientsDropdownList.append("<option value='disconnected'>Disconnected</option>");
+
+    var entitiesDropdownLabel = $("<label>Filter by client</label>").appendTo("#entities_details");
+    var entitiesDropdownList = $("<select></select>").appendTo(entitiesDropdownLabel);
+    entitiesDropdownList.append("<option value='all'>All</option>");
+
+    entitiesDropdownList.change(function(e) {
+        // TODO: use $this
+        var sel = $("#entities_details option:selected").val();
+        if (sel === 'all') {
+            // show all
+        } else {
+            // hide the ones with client.uuid not sel
+        }
+    });
+
+    var attrDropdownLabel = $("<label>Filter by entity</label>").appendTo("#attribute_details");
+    var attrDropdownList = $("<select></select>").appendTo(attrDropdownLabel);
+    attrDropdownList.append("<option value='all'>All</option>");
+
     $.each(clientMetadataArray, function(key, client) {
         $("#clients_details").append("<p class='details'><strong>" + client.name + "</strong></p>");
-        $("#clients_details").append("<p class='sub_details'>" + client.uuid + "</p>");
-        appendEntitiesFromClient(client.uuid);
+        $("#clients_details").append("<p class='sub_details_mid'>Connected: " + client.connected + "</p>");
+        $("#clients_details").append("<p class='sub_details'>UUID: " + client.uuid + "</p>");
+        entitiesDropdownList.append("<option value='" + client.uuid + "'>" + client.name + "</option>");
+        appendEntitiesFromClient(client.uuid, client.name, attrDropdownList);
     });
 }
 
 // append entities from client
-function appendEntitiesFromClient(uuid) {
+function appendEntitiesFromClient(uuid, clientName, attrDropdownList) {
     $.getJSON(BASE_URL + "/experiments/entities/" + uuid, function(data) {
         console.log(data);
         $.each(data, function(ekey, entity) {
             $("#entities_details").append("<p class='details'><strong>" + entity.name + "</strong></p>");
-            $("#entities_details").append("<p class='sub_details_mid'>" + entity.description + "</p>");
-            $("#entities_details").append("<p class='sub_details'>" + entity.uuid + "</p>");
+            $("#entities_details").append("<p class='sub_details_mid'>Client: " + clientName + "</p>");
+            $("#entities_details").append("<p class='sub_details_mid'>Desc: " + entity.description + "</p>");
+            $("#entities_details").append("<p class='sub_details'>UUID: " + entity.uuid + "</p>");
+            attrDropdownList.append("<option value='" + entity.uuid + "'>" + entity.name + " (" + entity.uuid + ")" + "</option>");
             $.each(entity.attributes, function(akey, attribute) {
                 $("#attribute_details").append("<p class='details'><strong>" + attribute.name + "</strong></p>");
-                $("#attribute_details").append("<p class='sub_details_mid'>" + attribute.description + "</p>");
-                $("#attribute_details").append("<p class='sub_details'>" + attribute.uuid + "</p>");
+                $("#attribute_details").append("<p class='sub_details_mid'>Client: " + clientName + "</p>");
+                $("#attribute_details").append("<p class='sub_details_mid'>Entity: " + entity.name + "</p>");
+                $("#attribute_details").append("<p class='sub_details_mid'>Desc: " + attribute.description + "</p>");
+                $("#attribute_details").append("<p class='sub_details'>UUID: " + attribute.uuid + "</p>");
+
             });
         });
     });
