@@ -12,3 +12,8 @@
     margin-right: auto;
     max-width: initial;
 }
+
+p.details {
+    margin: 0;
+    padding: 0 0 3px 12px;
+}

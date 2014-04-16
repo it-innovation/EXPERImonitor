@@ -87,6 +87,18 @@ public class ConfigurationController {
     }
 
     /**
+     * @return true if the service is configured (i.e., configuration was
+     * selected)
+     */
+    @RequestMapping(method = RequestMethod.GET, value = "/ifservicesstarted")
+    @ResponseBody
+    public boolean ifServicesStarted() {
+        boolean result = configurationService.isServicesStarted();
+        logger.debug("Returning services started status: " + result);
+        return result;
+    }
+
+    /**
      * @return local configuration (from application.properties).
      */
     @RequestMapping(method = RequestMethod.GET, value = "/local")
@@ -146,7 +158,7 @@ public class ConfigurationController {
                 logger.debug("Just set new configuration");
             }
 
-            return configurationService.isConfigurationSet();
+            return configurationService.startServices();
         } catch (Throwable ex) {
             // TODO improve this
             logger.error("Failed to set service configuration", ex);

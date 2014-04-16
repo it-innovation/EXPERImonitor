@@ -71,7 +71,8 @@ public class ConfigurationService {
 
     private boolean initialised = false;
     private boolean configurationSet = false;
-    private boolean webdavServiceOnline = false;
+    private boolean webdavServiceOnline = false; // TODO
+    private boolean servicesStarted = false;
 
     private ArrayList<String> whiteListedOnlineProjects = new ArrayList<String>();
 
@@ -160,7 +161,12 @@ public class ConfigurationService {
      */
     public boolean startServices() {
         if (startExperimentService()) {
-            return startDataService();
+            if (startDataService()) {
+                servicesStarted = true;
+                return true;
+            } else {
+                return false;
+            }
         } else {
             return false;
         }
@@ -224,6 +230,10 @@ public class ConfigurationService {
 
     public boolean isConfigurationSet() {
         return configurationSet;
+    }
+
+    public boolean isServicesStarted() {
+        return servicesStarted;
     }
 
     public ArrayList<String> getWhiteListedOnlineProjects() {

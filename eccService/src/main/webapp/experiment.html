@@ -10,26 +10,45 @@
     </head>
     <body>
 
-        <div class="row fullWidth">
+        <div class="row">
             <div class="small-12 columns clearfix">
                 <p class="left">EXPERIMEDIA ECC Dashboard: Experiment monitor</p>
                 <p class="right" id="configStatus"></p>
             </div>
             <div class="small-12 columns">
                 <h4>Experiment info</h4>
+                <div class="row">
+                    <div class="small-12 columns" id="experiment_details">
+
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="row fullWidth">
-            <div class="small-12 columns clearfix">
+        <div class="row">
+            <div class="small-12 columns">
                 <h4>Client list and metrics selection</h4>
             </div>
         </div>
 
-        <div class="row fullWidth">
-            <div class="small-12 columns clearfix">
+        <div class="row">
+            <div class="small-12 columns">
                 <h4>Live Metrics</h4>
             </div>
+        </div>
+
+        <!-- -- -->
+        <div id="nameExperimentModal" class="reveal-modal" data-reveal>
+            <h2>Name and describe your new EXPERIMEDIA experiment</h2>
+            <p class="lead">Type name/description below or close this dialog to use defaults</p>
+            <label>New project name
+                <input type="text" name="newProject[name]" id="newProjectName"/>
+            </label>
+            <label>New project description
+                <input type="text" name="newProject[description]" id="newProjectDescription"/>
+            </label>
+            <a href="#" class="button text-center" id="setProjectNameAndDescription">Let's Go</a>
+            <a class="close-reveal-modal">&#215;</a>
         </div>
 
         <script src="js/vendor/jquery.min.js"></script>

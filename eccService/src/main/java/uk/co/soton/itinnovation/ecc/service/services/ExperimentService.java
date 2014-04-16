@@ -71,6 +71,9 @@ public class ExperimentService {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
+    private final static String DEFAULT_EXPERIMENT_NAME = "EXPERIMEDIA Experiment";
+    private final static String DEFAULT_EXPERIMENT_DESCRIPTION = "Sample experiment description";
+
     private IExperimentMonitor expMonitor;
     private IMonitoringEDM expDataManager;
     private IMetricGeneratorDAO expMetGeneratorDAO;
@@ -79,6 +82,7 @@ public class ExperimentService {
     private ExperimentStateModel expStateModel;
     private LiveMetricScheduler liveMetricScheduler;
     private boolean started = false;
+    private boolean experimentInProgress = false;
 
     public ExperimentService() {
     }
@@ -224,6 +228,10 @@ public class ExperimentService {
         return started;
     }
 
+    public boolean isExperimentInProgress() {
+        return experimentInProgress;
+    }
+
     /**
      * Use this method to try to start a new experiment. If the input parameters
      * are null or there is already an active experiment, this method will
@@ -234,34 +242,35 @@ public class ExperimentService {
      * @param projName - Name of the project associated with the experiment
      * @param expName - Name of this specific experiment
      * @param expDesc - Short description of the experiment
-     * @return - Returns meta-data about the experiment.
-     * @throws Exception - Throws if parameters are invalid or there is an
-     * active experiment
+     * @return - Returns meta-data about the experiment, null if failed to
+     * create.
      */
-    public Experiment startExperiment(String projName, String expName, String expDesc) throws Exception {
+    public Experiment startExperiment(String projName, String expName, String expDesc) {
 
+        String name = expName;
+        String description = expDesc;
         // Safety first
         if (!started) {
-            throw new Exception("Cannot start experiment: service not initialised");
+            throw new IllegalStateException("Cannot start experiment: service not initialised");
         }
         if (projName == null || projName.isEmpty()) {
-            throw new Exception("Cannot start experiment: project name is invalid");
+            throw new IllegalArgumentException("Cannot start experiment: project name is NULL or empty");
         }
         if (expName == null || expName.isEmpty()) {
-            throw new Exception("Cannot start experiment: experiment name is invalid");
+            name = DEFAULT_EXPERIMENT_NAME;
         }
         if (expDesc == null) {
-            expDesc = "No experiment description available";
+            description = DEFAULT_EXPERIMENT_DESCRIPTION;
         }
         if (expStateModel.isExperimentActive()) {
-            throw new Exception("Cannot start experiment: an experiment is already active");
+            throw new IllegalStateException("Cannot start experiment: an experiment is already active");
         }
 
         // Create new experiment instance
         Experiment newExp = new Experiment();
         newExp.setExperimentID(projName);
-        newExp.setName(expName);
-        newExp.setDescription(expDesc);
+        newExp.setName(name);
+        newExp.setDescription(description);
         newExp.setStartTime(new Date());
 
         try {
@@ -277,14 +286,14 @@ public class ExperimentService {
             //liveMonitorController.createPROVLog( currentExperiment.getUUID(), eccBasePath );
             // Go straight into live monitoring
             expMonitor.startLifecycle(newExp, EMPhase.eEMLiveMonitoring);
+
+            experimentInProgress = true;
+            return newExp;
         } catch (Exception ex) {
             String problem = "Could not start experiment because: " + ex.getMessage();
-
             logger.error(problem);
-            throw new Exception(problem, ex);
+            return null;
         }
-
-        return newExp;
     }
 
     /**
@@ -316,6 +325,8 @@ public class ExperimentService {
                 expDAO.finaliseExperiment(exp);
 
                 expStateModel.setActiveExperiment(null);
+
+                experimentInProgress = false;
 
                 // TODO: Clean up PROV?
             } catch (Exception ex) {
