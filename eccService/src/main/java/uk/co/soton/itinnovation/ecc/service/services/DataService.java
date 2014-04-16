@@ -381,7 +381,11 @@ public class DataService {
                 if (ms != null) {
 
                     Report report = expReportDAO.getReportForMeasurementsForTimePeriod(expID, start, end, true);
-                    resultSet.add(report.getMeasurementSet());
+                    
+                    // Only add non-empty measurement sets
+                    if ( report.getNumberOfMeasurements()> 0 )
+                        resultSet.add(report.getMeasurementSet());
+                    
                 } else {
                     String msg = "Had problems retrieving a measurement set: MS ID is null";
                     logger.warn(msg);
@@ -398,6 +402,17 @@ public class DataService {
         return resultSet;
     }
     
+    /**
+     * Use this method to retrieve historical measurements (if they exist) from a specific point in time. Use the count parameter
+     * to specific the maximum number of measurements you want returned for any Measurement Set discovered.
+     * 
+     * @param expID      - Non-null ID of the experiment
+     * @param attr       - Non-null Attribute of interest
+     * @param tail       - Non-null time stamp from which to work backwards from
+     * @param count      - Greater than zero maximum number of measurements per measurement set
+     * @return           - Returns a collection of Measurement Sets 
+     * @throws Exception - Throws if parameters are invalid or there were problems retrieving data from the database
+     */
     public Set<MeasurementSet> getTailMeasurementSetsForAttribute(UUID expID, Attribute attr, Date tail, int count) throws Exception {
         
         // Safety first
@@ -427,7 +442,10 @@ public class DataService {
                 if (ms != null) {
 
                     Report report = expReportDAO.getReportForTailMeasurements(expID, tail, count, true);
-                    resultSet.add(report.getMeasurementSet());
+                    
+                    // Only add non-empty measurement sets
+                    if (report.getNumberOfMeasurements() > 0)
+                        resultSet.add(report.getMeasurementSet());
                 } else {
                     String msg = "Had problems retrieving a measurement set: MS ID is null";
                     logger.warn(msg);
