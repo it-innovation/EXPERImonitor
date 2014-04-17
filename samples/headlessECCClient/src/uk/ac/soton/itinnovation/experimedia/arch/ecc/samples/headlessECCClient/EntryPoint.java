@@ -25,8 +25,8 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.headlessECCClient;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.loggin.impl.Log4JImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMInterfaceFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.IMonitoringEDMAgent;
@@ -39,15 +39,12 @@ import java.util.*;
 
 public class EntryPoint
 {
-    public static IECCLogger clientLogger;
+	public static final Logger clientLogger = LoggerFactory.getLogger(EntryPoint.class);
 
     // Main entry point
     public static void main( String args[] )
     {
-        // Configure logging system
-        Logger.setLoggerImpl( new Log4JImpl() );
-        clientLogger = Logger.getLogger( EntryPoint.class );
-      
+
         // If have an argument to clear the EDMAgent database, do so, then exit
         if ( args.length == 1 && args[0].equals( "deleteLocalData") )
         {

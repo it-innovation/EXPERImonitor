@@ -35,9 +35,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Attribute;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Entity;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.loggin.impl.Log4JImpl;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.IECCLogger;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMInterfaceFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.IMonitoringEDM;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao.IEntityDAO;
@@ -52,15 +51,12 @@ public class EntityTest extends TestCase
 {
     IMonitoringEDM edm = null;
     IEntityDAO entityDAO = null;
-    static IECCLogger log;
+    private static final Logger log = LoggerFactory.getLogger(EntityTest.class);
     
     @BeforeClass
     public static void beforeClass()
     {
-        // Configure logging system
-        Logger.setLoggerImpl( new Log4JImpl() );
-        log = Logger.getLogger(EntityTest.class);
-        
+
         log.info("Entity tests executing...");
     }
     

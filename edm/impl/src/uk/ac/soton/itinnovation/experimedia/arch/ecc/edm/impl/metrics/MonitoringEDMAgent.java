@@ -25,8 +25,8 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.metrics;
 
 import java.util.Properties;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.IECCLogger;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.metrics.dao.ExperimentDataManagerDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.IMonitoringEDMAgent;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao.IEntityDAO;
@@ -48,7 +48,7 @@ public class MonitoringEDMAgent implements IMonitoringEDMAgent
     private ExperimentDataManagerDAO edmDAO;
     private Properties configParams;
     
-    static IECCLogger log = Logger.getLogger(MonitoringEDMAgent.class);
+	private static final Logger log = LoggerFactory.getLogger(MonitoringEDMAgent.class);
     
     /**
      * Monitoring Experiment Data Manager Agent constructor, which reads the

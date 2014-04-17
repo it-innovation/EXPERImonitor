@@ -23,8 +23,6 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-using uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec;
-
 using RabbitMQ.Client;
 
 using System.Net;
@@ -39,7 +37,7 @@ namespace uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp
 
 public class AMQPConnectionFactory
 {
-    private IECCLogger factoryLog = Logger.getLogger( typeof(AMQPConnectionFactory) );
+    private static readonly log4net.ILog factoryLog = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
     private IPAddress   amqpHostIP;
     private int         amqpPortNumber = 5672;
@@ -74,7 +72,7 @@ public class AMQPConnectionFactory
                 amqpConnection = null;
             }
             catch (Exception) 
-            { factoryLog.error("Could not close down connection"); }
+            { factoryLog.Error("Could not close down connection"); }
     }
 
     public bool setAMQPHostPort( int port )
@@ -124,14 +122,14 @@ public class AMQPConnectionFactory
 
         if (userName != null && userPass != null)
         {
-            factoryLog.info("Will try to login as \'" + userName + "\'");
+            factoryLog.Info("Will try to login as \'" + userName + "\'");
             
             amqpFactory.UserName = userName;
             amqpFactory.Password = userPass;
         }
         else
         {
-            factoryLog.info("Will try to login as guest");
+            factoryLog.Info("Will try to login as guest");
             amqpFactory.UserName = "guest";
             amqpFactory.Password = "guest";
         }

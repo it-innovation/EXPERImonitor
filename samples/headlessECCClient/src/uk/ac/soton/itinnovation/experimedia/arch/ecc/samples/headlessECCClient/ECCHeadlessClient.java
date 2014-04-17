@@ -34,8 +34,8 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMInterfaceFactory;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.loggin.impl.Log4JImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
@@ -50,7 +50,7 @@ import java.util.*;
 
 public class ECCHeadlessClient implements EMIAdapterListener
 {
-    private final IECCLogger clientLogger;
+	private final Logger clientLogger = LoggerFactory.getLogger(getClass());
     private final String clientName;
     
     // Connection to the ECC
@@ -76,10 +76,6 @@ public class ECCHeadlessClient implements EMIAdapterListener
     
     public ECCHeadlessClient( String name )
     {
-        // Configure logging system
-        Logger.setLoggerImpl( new Log4JImpl() );
-        clientLogger = Logger.getLogger( ECCHeadlessClient.class );
-      
         clientName = name;
         
         // Add a shut-down hook for clean terminations

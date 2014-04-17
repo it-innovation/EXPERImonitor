@@ -7,7 +7,6 @@ ECC libraries:
       * experimedia-arch-ecc-common-dataModel-experiment-2.0.jar
       * experimedia-arch-ecc-common-dataModel-metrics-2.0.jar
       * experimedia-arch-ecc-common-dataModel-monitor-2.0.jar
-      * experimedia-arch-ecc-common-logging-spec-2.0.jar
       * experimedia-arch-ecc-em-factory-2.0.jar
       * experimedia-arch-ecc-em-impl-2.0.jar
       * experimedia-arch-ecc-em-spec-2.0.jar
@@ -20,4 +19,6 @@ ECC libraries:
       * commons-cli-1.1.jar
       * commons-io-1.2.jar
       * gson-2.2.2.jar
+      * slf4j-api-1.7.6.jar
+      * slf4j-android-1.7.6.jar
   

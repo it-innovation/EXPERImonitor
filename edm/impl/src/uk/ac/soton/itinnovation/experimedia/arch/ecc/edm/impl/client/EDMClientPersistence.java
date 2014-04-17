@@ -25,7 +25,8 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.client;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.client.IEDMClientPersistence;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.client.dao.IClientDAO;
@@ -40,7 +41,7 @@ import java.util.Properties;
 
 public class EDMClientPersistence implements IEDMClientPersistence
 {
-	static IECCLogger persistLog = Logger.getLogger( EDMClientPersistence.class );
+	private static final Logger persistLog = LoggerFactory.getLogger(EDMClientPersistence.class);
 	
 	private DatabaseConnector dbConnector;
 	

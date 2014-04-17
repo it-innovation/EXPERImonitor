@@ -28,8 +28,8 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.basicECCClient;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.loggin.impl.Log4JImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
@@ -44,7 +44,7 @@ import javax.swing.JOptionPane;
 public class ECCClientController implements EMIAdapterListener,
                                             ECCClientViewListener
 {
-    private final IECCLogger clientLogger;
+	private final Logger clientLogger = LoggerFactory.getLogger(getClass());
 
     private AMQPBasicChannel   amqpChannel;
     private EMInterfaceAdapter emiAdapter;
@@ -65,10 +65,7 @@ public class ECCClientController implements EMIAdapterListener,
 
     public ECCClientController()
     {
-        // Configure logging system
-        Logger.setLoggerImpl( new Log4JImpl() );
-        clientLogger = Logger.getLogger( ECCClientController.class );
-      
+
         metricGenerators   = new HashMap<UUID,MetricGenerator>();
         pendingPushReports = new HashMap<UUID, Report>();
         pendingPullReports = new HashMap<UUID, Report>();

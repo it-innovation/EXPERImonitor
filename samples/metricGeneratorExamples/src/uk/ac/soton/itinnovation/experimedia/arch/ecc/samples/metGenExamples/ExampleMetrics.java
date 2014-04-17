@@ -25,11 +25,12 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.metGenExamples;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.IECCLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 
 import java.util.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.Logger;
 
 
 
@@ -37,16 +38,14 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.Logger;
 
 public class ExampleMetrics
 {
-  private IECCLogger               logger;
+  private final Logger logger = LoggerFactory.getLogger(getClass());
   private Entity                   applicationEntity;
   private Entity                   userEntity;
   private HashSet<MetricGenerator> metricGenerators;
   
   
   public ExampleMetrics()
-  {
-    logger = Logger.getLogger( ExampleMetrics.class );
-  }
+  {}
   
   public void runDemo()
   {

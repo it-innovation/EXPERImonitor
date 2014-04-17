@@ -32,6 +32,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="log4net">
+      <HintPath>..\..\sharedLibs\log4net.dll</HintPath>
+    </Reference>
     <Reference Include="RabbitMQ.Client">
       <HintPath>libs\RabbitMQ.Client.dll</HintPath>
     </Reference>
@@ -51,10 +54,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\eccCommonLogging-Spec\eccCommonLogging-Spec.csproj">
-      <Project>{39EAA610-E91A-46F8-9D22-D4CFA478F258}</Project>
-      <Name>eccCommonLogging-Spec</Name>
-    </ProjectReference>
     <ProjectReference Include="..\spec\amqpAPI-Spec.csproj">
       <Project>{C3E16087-EE9E-4EF0-9FEC-22345C286352}</Project>
       <Name>amqpAPI-Spec</Name>

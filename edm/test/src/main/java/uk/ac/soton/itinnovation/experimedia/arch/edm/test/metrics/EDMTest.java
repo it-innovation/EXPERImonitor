@@ -42,9 +42,8 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Me
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricType;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Unit;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.loggin.impl.Log4JImpl;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.IECCLogger;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMInterfaceFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.IMonitoringEDM;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.NoDataException;
@@ -62,14 +61,10 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao.IRepor
  */
 public class EDMTest
 {
-    static IECCLogger log;
-    
+	private static final Logger log = LoggerFactory.getLogger(EDMTest.class);
+
     public static void main(String[] args) throws Exception
     {
-        // Configure logging system
-        Logger.setLoggerImpl( new Log4JImpl() );
-        log = Logger.getLogger(EDMTest.class);
-      
         UUID expUUID = UUID.fromString("bfe4c710-61ba-46f8-a519-be2f7808192e");
         UUID entityUUID = UUID.fromString("5718cd67-4310-4b2c-aeb9-9b72314630ca");
         UUID attributeUUID = UUID.fromString("4f2817b5-603a-4d02-a032-62cfca314962");

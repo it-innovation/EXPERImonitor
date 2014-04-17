@@ -28,10 +28,8 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenanc
 import java.util.UUID;
 
 /**
- * 
  * A class to handle RDF triples which use the long form, e.g.
  * http://www.w3.org/1999/02/22-rdf-syntax-ns#type instead of rdf:type
- *
  */
 public class EDMTriple {
 	
@@ -92,7 +90,20 @@ public class EDMTriple {
 		
 	}
 	
+	/**
+	 * Splits a URI into the prefex and local name. This works for both, short and long prefixes.
+	 * 
+	 * 
+	 * @param URI the URI to be split
+	 * @param part which part of the URI to return: 0 = prefix, 1 = local name
+	 * @return 
+	 */
 	public static String splitURI(String URI, int part) {
+
+		if (URI==null || URI.isEmpty()) {
+			return null;
+		}
+
 		String result = null;
 		int splitIndex = -1;
 		
@@ -116,6 +127,7 @@ public class EDMTriple {
 		return result;
 	}
 
+	@Override
 	public String toString() {
 		return "[" + getType() + "] " + getSubject() + " " + getPredicate() + " " + getObject();
 	}
@@ -128,7 +140,6 @@ public class EDMTriple {
 	 */
 	public boolean equals(EDMTriple t) {
 		//TODO: special cases: full prefix is case insensitive but individual name is case sensitive.
-		// not sure about predicate.
 		if (this.subject.equals(t.getSubject())
 			&& this.predicate.equals(t.getPredicate())
 			&& this.object.equals(t.getObject())) {
@@ -148,9 +159,10 @@ public class EDMTriple {
 		if (pred == null || predicate == null) 
 			return false;
     
-		if (predicate.equals(pred))
+		if (predicate.equals(pred)) {
 			return true;
-    
+		}
+		
 		return false;
 	}
 

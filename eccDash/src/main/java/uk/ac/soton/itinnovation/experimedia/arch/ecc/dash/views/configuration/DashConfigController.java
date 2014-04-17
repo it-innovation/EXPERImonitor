@@ -27,7 +27,8 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.views.configuration;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.configRegistry.api.*;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.dash.uiComponents.SimpleView;
 
@@ -43,7 +44,7 @@ import java.util.*;
 
 public class DashConfigController implements DashConfigViewListener
 {
-  private final transient IECCLogger configLogger = Logger.getLogger( DashConfigController.class );
+  private final transient Logger configLogger = LoggerFactory.getLogger(getClass());
   
   private DashConfigView configView;
   
@@ -168,7 +169,7 @@ public class DashConfigController implements DashConfigViewListener
     {
       String error = "Could not initialise project configuration - parameters invalid";
 
-      configLogger.fatal( error );
+      configLogger.error(error );
       throw new Exception( error );
     }
 
@@ -533,7 +534,7 @@ public class DashConfigController implements DashConfigViewListener
                         targetRabbitConfigData = pcf.getDefaultConfigData( component , featureRb );
                 }
                 catch ( Exception e )
-                { configLogger.fatal( "Could not find remote dashboard config data: " + e.getMessage() ); }
+                { configLogger.error("Could not find remote dashboard config data: " + e.getMessage() ); }
                 
                 // Database
                 try
@@ -544,7 +545,7 @@ public class DashConfigController implements DashConfigViewListener
                         targetDatabaseConfigData = pcf.getDefaultConfigData( component , featureDB );
                 }
                 catch ( Exception e )
-                { configLogger.fatal( "Could not find remote database config data: " + e.getMessage() ); }
+                { configLogger.error( "Could not find remote database config data: " + e.getMessage() ); }
                 
                 // Dashboard
                 try
@@ -555,7 +556,7 @@ public class DashConfigController implements DashConfigViewListener
                         targetDashboardConfigData = pcf.getDefaultConfigData( component , featureDash );
                 }
                 catch ( Exception e )
-                { configLogger.fatal( "Could not find remote database config data: " + e.getMessage() ); }
+                { configLogger.error( "Could not find remote database config data: " + e.getMessage() ); }
             }
             
             // Check for indications of poor configuration data
@@ -583,7 +584,7 @@ public class DashConfigController implements DashConfigViewListener
             else
             {
                 String error = "Could not get sufficient configuration data to start ECC";
-                configLogger.fatal( error );
+                configLogger.error( error );
                 
                 error = "Falling back on to local machine configuration as last resort";
                 configLogger.info( error );

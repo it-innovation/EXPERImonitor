@@ -27,8 +27,14 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenanc
 
 import java.util.HashMap;
 import java.util.Map.Entry;
-import java.util.logging.Logger;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * This class is a container for EDM prov elements. It has a default prefix and BaseURI and
+ * contains a list of all the namespaces used in its contained elements.
+ */
 public class EDMProvDataContainer {
 
 	protected static String prefix = null;
@@ -37,15 +43,15 @@ public class EDMProvDataContainer {
 	protected HashMap<String, EDMProvBaseElement> allProvElements;
 	protected HashMap<String, String> namespaces;
 	
-	protected Logger logger = Logger.getLogger(EDMProvDataContainer.class.getName());
+	protected Logger logger = LoggerFactory.getLogger(EDMProvDataContainer.class);
 	
-	protected EDMProvDataContainer(String prefix, String baseURI) {
+	public EDMProvDataContainer(String prefix, String baseURI) {
 		this.setPrefix(prefix);
 		this.setBaseURI(baseURI);
 		init();
 	}
     
-	protected void init() {
+	protected final void init() {
 		allProvElements = new HashMap<String, EDMProvBaseElement>();
 		namespaces = new HashMap<String, String>();
 	}
@@ -55,25 +61,66 @@ public class EDMProvDataContainer {
 	 */
 	public void clear() {
 		this.allProvElements.clear();
+		namespaces.clear();
 		prefix = null;
 		baseURI = null;
 	}
 	
+	@Override
 	public String toString() {
-		String contents = "EDMProvFactory contents:\n########################\n";
+		String contents = "EDMProvDataContainer contents:\n########################\n";
 		for (Entry<String, EDMProvBaseElement> e: this.allProvElements.entrySet()) {
 			contents += e.getValue().toString();
 		}
 		return contents;
 	}
 	
+	public void addElement(EDMProvBaseElement element) {
+		if (element!=null && element.getIri()!=null) {
+			this.allProvElements.put(element.getIri(), element);
+		} else {
+			logger.warn("Skipping invalid EDMProvBaseElement");
+		}
+	}
+	
+	/**
+	 * This method adds namespaces to the containers list. It needs to be used by classes that are
+	 * using it to keep the list up to date as it is unaware of the short prefixes of contained elements.
+	 * 
+	 * @param namespaces 
+	 */
+	public void addNamespaces(HashMap<String, String> namespaces) {
+		for (Entry<String, String> e: namespaces.entrySet()) {
+			if (!this.namespaces.containsKey(e.getKey())) {
+				this.namespaces.put(e.getKey(), e.getValue());
+			}
+		}
+	}
+	
+	/**
+	 * Merges two EDMProvDataContainers. The contents of the argument are written to the object
+	 * calling this method. The namespace and baseURI remain unchanged.
+	 * 
+	 * @param c the EDMProvDataContainer to merge with
+	 */
+	public void mergeWith(EDMProvDataContainer c) {
+		//add namespaces
+		for (Entry<String, String> ns: c.getNamespaces().entrySet()) {
+			this.namespaces.put(ns.getKey(), ns.getValue());
+		}
+		//add elements
+		for (EDMProvBaseElement e: c.getAllElements().values()) {
+			this.addElement(e);
+		}
+	}
+	
 	//GETTERS/SETTERS//////////////////////////////////////////////////////////////////////////////
 
-	public void setPrefix(String prefix) {
+	public final void setPrefix(String prefix) {
 		EDMProvDataContainer.prefix = prefix;
 	}
 
-	public void setBaseURI(String baseURI) {
+	public final void setBaseURI(String baseURI) {
 		EDMProvDataContainer.baseURI = baseURI;
 	}
 
@@ -84,13 +131,4 @@ public class EDMProvDataContainer {
 	public HashMap<String, String> getNamespaces() {
 		return namespaces;
 	}
-	
-	public void addNamespaces(HashMap<String, String> namespaces) {
-		for (Entry<String, String> e: namespaces.entrySet()) {
-			if (!this.namespaces.containsKey(e.getKey())) {
-				this.namespaces.put(e.getKey(), e.getValue());
-			}
-		}
-	}
-
 }

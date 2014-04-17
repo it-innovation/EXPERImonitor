@@ -36,6 +36,9 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.*;
 
 
@@ -67,6 +70,8 @@ public class ClientController implements EMIAdapterListener,
     private final int UI_ENABLE_PUSH  = 1;
     private final int UI_CONNECTED    = 2;
     private final int UI_DISCONNECTED = 3;
+	
+	private static Logger logger = LoggerFactory.getLogger(ClientController.class);
 
     /**
      * Constructor for the Android controller
@@ -354,9 +359,9 @@ public class ClientController implements EMIAdapterListener,
                     sentReportID = newReport.getUUID();
                     
                     queueLogMessage( "Pushed report: " + sentReportID.toString() );
-              }
-            }  
-        }
+                } else { logger.error("Report is null"); }
+            } else { logger.error("ReportID is not null"); }
+        } else { logger.error("Not connected or pushing not allowed"); }
     }
 
     /**
@@ -391,7 +396,7 @@ public class ClientController implements EMIAdapterListener,
         catch (Exception e )
         {
             // Error message here
-            queueLogMessage( "Could not create connection: " + e.getMessage() );
+            queueLogMessage( "Could not create connection " + e.getMessage() );
             return false;
         }    
 
@@ -436,7 +441,7 @@ public class ClientController implements EMIAdapterListener,
             queueConnectionChangeOnView( UI_DISCONNECTED );
         }
         catch ( Exception e )
-        { queueLogMessage( "Could not send disconnection message" ); }
+        { queueLogMessage( "Error: Could not send disconnection message" ); }
 
         // Tidy up after if not connected
         if ( amqpChannel != null ) amqpChannel.close();
@@ -493,6 +498,14 @@ public class ClientController implements EMIAdapterListener,
     {
         Message newMessage = uiMessenger.obtainMessage( UI_LOGMESSAGE, msg );
         newMessage.sendToTarget();
+		
+		if (msg.toLowerCase().contains("error") || msg.toLowerCase().contains("exception")) {
+			logger.error(msg);
+		} else if (msg.toLowerCase().contains("warning")) {
+			logger.warn(msg);
+		} else {
+			logger.info(msg);
+		}
     }
 
     private void queueEnablePushOnView()

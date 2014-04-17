@@ -39,7 +39,7 @@ public class EDMAgent extends EDMProvBaseElement {
 	public EDMAgent(String prefix, String uniqueIdentifier, String label) {
 		super(prefix, uniqueIdentifier, label);
     
-		this.provType = PROV_TYPE.ePROV_AGENT;
+		this.setProvType(PROV_TYPE.ePROV_AGENT);
 		this.addOwlClass(EDMProvBaseElement.prov + "Agent");
 	}
 	
@@ -51,7 +51,7 @@ public class EDMAgent extends EDMProvBaseElement {
 
 		EDMActivity newActivity = (EDMActivity) factory.createActivity(uniqueIdentifier, label);
 		newActivity.addTriple(EDMProvBaseElement.prov + "startedAtTime", format.format(new Date(Long.valueOf(timestamp)*1000)), TRIPLE_TYPE.DATA_PROPERTY);
-		newActivity.addTriple(EDMProvBaseElement.prov + "wasStartedBy", this.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
+		newActivity.addTriple(EDMProvBaseElement.prov + "wasStartedBy", this.getIri(), TRIPLE_TYPE.OBJECT_PROPERTY);
     
 		factory.elementUpdated(this); // Queue to re-send in next report
     
@@ -64,7 +64,7 @@ public class EDMAgent extends EDMProvBaseElement {
 	
 	public void stopActivity(EDMActivity activity, String timestamp) throws DataFormatException {
 		activity.addTriple(EDMProvBaseElement.prov + "endedAtTime", format.format(new Date(Long.valueOf(timestamp)*1000)), TRIPLE_TYPE.DATA_PROPERTY);
-		activity.addTriple(EDMProvBaseElement.prov + "wasEndedBy", this.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
+		activity.addTriple(EDMProvBaseElement.prov + "wasEndedBy", this.getIri(), TRIPLE_TYPE.OBJECT_PROPERTY);
     
 		EDMProvFactory.getInstance().elementUpdated(this); // Queue to re-send in next report
 	}
@@ -87,7 +87,7 @@ public class EDMAgent extends EDMProvBaseElement {
 	}
 	
 	public void actOnBehalfOf(EDMAgent agent) {
-		this.addTriple(EDMProvBaseElement.prov + "actedOnBehalfOf", agent.iri, TRIPLE_TYPE.OBJECT_PROPERTY);
+		this.addTriple(EDMProvBaseElement.prov + "actedOnBehalfOf", agent.getIri(), TRIPLE_TYPE.OBJECT_PROPERTY);
     
 		EDMProvFactory.getInstance().elementUpdated(this); // Queue to re-send in next report
 	}

@@ -9,8 +9,6 @@ experimedia-arch-ecc-common-dataModel-experiment-2.0.jar
 experimedia-arch-ecc-common-dataModel-metrics-2.0.jar
 experimedia-arch-ecc-common-dataModel-monitor-2.0.jar
 experimedia-arch-ecc-common-dataModel-provenance-2.0.jar
-experimedia-arch-ecc-common-logging-impls-2.0.jar
-experimedia-arch-ecc-common-logging-spec-2.0.jar
 experimedia-arch-ecc-edc-configAPI-2.0.jar
 experimedia-arch-ecc-edm-factory-2.0.jar
 experimedia-arch-ecc-edm-impl-2.0.jar
@@ -30,7 +28,7 @@ experimedia-arch-ecc-samples-shared-2.0.jar
 
 robust-cat-core-components-viewEngine-spec-uif-1.0-SNAPSHOT.jar
 
-OWLimProvStore-0.9-SNAPSHOT.jar
+OWLimProvStore-1.1-SNAPSHOT.jar
 
 BasicAndroidClient-debug.apk
 BasicAndroidClient-debug-unaligned.apk
@@ -40,8 +38,6 @@ amqpAPI-Spec.dll
 eccCommonDataModel-Experiment.dll
 eccCommonDataModel-Metrics.dll
 eccCommonDataModel-Monitor.dll
-eccCommonLogging-Impl.dll
-eccCommonLogging-Spec.dll
 ECCCommsAPI-Impl.dll
 eccEMClient-Impl.dll
 eccEMFactory.dll
@@ -136,6 +132,7 @@ MIT Licence
 Newtonsoft.Json.dll
 rabbitmq-c-v0.3.0 (see https://github.com/alanxz/rabbitmq-c)
 SimpleAmqpClient (see https://github.com/alanxz/SimpleAmqpClient)
+org.slf4j:slf4j-api:1.7.6.jar
 prov-dot:0.3.0
 prov-json:0.3.0
 prov-model:0.3.0
@@ -167,3 +164,10 @@ openrdf-model:1.2.7
 openrdf-util:1.2.7
 rio:1.0.10
 sesame:1.2.7
+ch.qos.logback:logback-classic:1.1.1.jar
+ch.qos.logback:slf4j-android:1.7.6.jar
+
+ADUNA Licence (BSD variant)
+-----------------------------------------------
+openrdf-sesame.war
+openrdf-workbench.war

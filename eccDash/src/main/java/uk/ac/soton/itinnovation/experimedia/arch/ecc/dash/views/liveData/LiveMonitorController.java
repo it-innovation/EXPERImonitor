@@ -29,7 +29,8 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMClient;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.*;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.soton.itinnovation.robust.cat.core.components.viewEngine.spec.uif.mvc.IUFView;
 import uk.ac.soton.itinnovation.robust.cat.core.components.viewEngine.spec.uif.types.UFAbstractEventManager;
@@ -51,7 +52,7 @@ import java.util.*;
 public class LiveMonitorController extends UFAbstractEventManager
                                    implements LiveMetricViewListener
 {
-  private final IECCLogger liveMonLogger        = Logger.getLogger( LiveMonitorController.class );
+  private final Logger liveMonLogger = LoggerFactory.getLogger(getClass());
   private final Object     metricViewUpdateLock = new Object();
   private final Object     provViewUpdateLock   = new Object();
   private final int        liveUpdateRate       = 2500;

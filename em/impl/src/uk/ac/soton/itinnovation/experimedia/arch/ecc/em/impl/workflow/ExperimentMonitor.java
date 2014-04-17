@@ -30,7 +30,9 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.lifecylePh
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
@@ -47,7 +49,7 @@ import java.util.*;
 public class ExperimentMonitor implements IExperimentMonitor,
                                           IEMLifecycleListener
 {
-  private final IECCLogger emLogger = Logger.getLogger( ExperimentMonitor.class );
+  private final Logger emLogger = LoggerFactory.getLogger(getClass());
   
   private AMQPConnectionFactory amqpConnectionFactory;
   private AMQPBasicChannel      amqpChannel;

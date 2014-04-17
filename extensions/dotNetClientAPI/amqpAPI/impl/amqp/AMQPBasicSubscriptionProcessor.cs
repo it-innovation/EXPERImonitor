@@ -23,8 +23,6 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-using uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec;
-
 using RabbitMQ.Client;
 using System;
 
@@ -36,7 +34,8 @@ namespace uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp
 
 public class AMQPBasicSubscriptionProcessor : QueueingBasicConsumer
 {
-  private readonly IECCLogger subProcLogger = Logger.getLogger( typeof(AMQPBasicSubscriptionProcessor) );
+  //private readonly IECCLogger subProcLogger = Logger.getLogger( typeof(AMQPBasicSubscriptionProcessor) );
+    private readonly log4net.ILog subProcLogger = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
   
   private string              queueName;
   private AMQPMessageDispatch messageDispatch;
@@ -64,7 +63,7 @@ public class AMQPBasicSubscriptionProcessor : QueueingBasicConsumer
           Model.BasicAck( deliveryTag, false );
       }
       catch (Exception)
-      { subProcLogger.error( "Could not send AMQP acknowledgement" ); }
+      { subProcLogger.Error( "Could not send AMQP acknowledgement" ); }
   }
 }
 

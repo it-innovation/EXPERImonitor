@@ -32,7 +32,9 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.workflow.EMConnectionManagerListener;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.*;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
@@ -50,7 +52,7 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
                                            EMPostReportPhaseListener,
                                            EMTearDownPhaseListener
 {
-  private final IECCLogger lmLogger         = Logger.getLogger( EMLifecycleManager.class );
+  private final Logger lmLogger = LoggerFactory.getLogger(getClass());
   private final Object     clientLock       = new Object();
   private final int        batchRequestSize = 50;
   

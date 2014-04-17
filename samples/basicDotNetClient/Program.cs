@@ -23,8 +23,6 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-using uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec;
-using uk.ac.soton.itinnovation.experimedia.arch.ecc.common.loggin.impl;
 using uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.basicDotNetClient;
 
 using System;
@@ -40,16 +38,15 @@ namespace SimpleHeadlessECCClient
 {
     class Program
     {
-        private static IECCLogger          clientLogger;
+        private static log4net.ILog clientLogger;
         private static ECCClientController eccController;
 
         // Entry point
         static void Main(string[] args)
         {
             // Set up loggin for this application
-            Logger.setLoggerImpl(new Log4NetImpl());
-            clientLogger = Logger.getLogger(typeof(Program));
-            clientLogger.info("Starting Simple Headless ECC Client");
+            clientLogger = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+            clientLogger.Info("Starting Simple Headless ECC Client");
 
             // Set up exit handler for this application (would rather not do this - not always reliable)
             SetConsoleCtrlHandler(new CtrlHandlerRoutine(CtrlHandler), true);
@@ -67,20 +64,20 @@ namespace SimpleHeadlessECCClient
                                      Guid.NewGuid());                                  // ID of this client (random)
 
                 // Wait for a key press and then shut down cleanly
-                clientLogger.info("Press any key to quit");
+                clientLogger.Info("Press any key to quit");
                 ConsoleKeyInfo cki = Console.ReadKey();
                 shutdown();
 
                 Environment.Exit(0);
             }
             catch (Exception e)
-            { clientLogger.error("Had a problem connecting to the EM:\n" + e.Message); }
+            { clientLogger.Error("Had a problem connecting to the EM:\n" + e.Message); }
         }
 
         private static void shutdown()
         {
             // Issue good-bye notification (if possible)
-            if (clientLogger != null) clientLogger.info("Closing down client");
+            if (clientLogger != null) clientLogger.Info("Closing down client");
             if (eccController != null) eccController.stop();
 
             clientLogger = null;

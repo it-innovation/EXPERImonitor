@@ -28,6 +28,10 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenanc
 import java.util.*;
 import java.util.Map.Entry;
 
+/**
+ * This class describes a prov report, which is a collection of triples that is sent from the EDM client
+ * to EDM, where they are stored in the triple store.
+ */
 public class EDMProvReport
 {
   private UUID statementID;

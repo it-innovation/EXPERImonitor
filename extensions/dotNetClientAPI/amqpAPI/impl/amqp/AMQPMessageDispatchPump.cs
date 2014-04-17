@@ -23,7 +23,6 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-using uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec;
 using uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.spec;
 
 using System;
@@ -41,7 +40,7 @@ namespace uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp
 public class AMQPMessageDispatchPump : IAMQPMessageDispatchPump
                                                 
 {
-  private readonly IECCLogger pumpLogger  = Logger.getLogger( typeof(AMQPMessageDispatchPump) );
+  private static readonly log4net.ILog pumpLogger = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
   private readonly Object     pumpingLock = new Object();
   private readonly Object     listLock    = new Object();
   private readonly Object     waitingLock = new Object();
@@ -159,7 +158,7 @@ public class AMQPMessageDispatchPump : IAMQPMessageDispatchPump
           }
       }
       
-      pumpLogger.info( "Pump: " + pumpName + " has stopped" );
+      pumpLogger.Info( "Pump: " + pumpName + " has stopped" );
   }
   
   public void notifyDispatchWaiting()
@@ -196,7 +195,7 @@ public class AMQPMessageDispatchPump : IAMQPMessageDispatchPump
       
       pumpThread.Start();
       
-      pumpLogger.info( "Pump: " + pumpName + " has started" );
+      pumpLogger.Info( "Pump: " + pumpName + " has started" );
   }
 }
 

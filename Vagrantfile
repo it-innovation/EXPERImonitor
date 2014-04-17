@@ -32,6 +32,7 @@ info = "
 ECC service is deployed on VM with IP #{ecc_ip}
 ECC service is mapped to http://localhost:#{ecc_port}/ECC on host machine.
 Tomcat manager is mapped to http://localhost:#{ecc_port}/manager/html with username manager, password manager
+OpenRDF workbench is mapped to http://localhost:#{ecc_port}/openrdf-workbench on host machine
 Using RabbitMQ deployed on #{rabbit_ip}
 RabbitMQ AMQP bus mapped to http://localhost:#{rabbit_port} on host machine.
 RabbitMQ management interface is mapped to http://localhost:#{rabbit_mgt_port} on host machine (username: guest / password: guest).
@@ -123,9 +124,14 @@ echo "**** Building ECC"
 
 cd experimedia-ecc
 cd thirdPartyLibs && /bin/sh ./installLibraries.sh && cd ..
-mvn install
+mvn install |& tee /tmp/build.log
 
 ## Deploy ##
+
+#depoly OpenRDF services into Tomcat
+cp thirdPartyLibs/openrdf-sesame.war /var/lib/tomcat7/webapps/openrdf-sesame.war
+cp thirdPartyLibs/openrdf-workbench.war /var/lib/tomcat7/webapps/openrdf-workbench.war
+echo "**** Deploying OpenRDF sesame & workbench into Tomcat"
 
 # deploy the ECC into Tomcat
 cp eccDash/target/*.war /var/lib/tomcat7/webapps/ECC.war
