@@ -29,7 +29,8 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared.*;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
@@ -44,7 +45,7 @@ import javax.swing.JOptionPane;
 public class ClientController implements ClientViewListener
 {
     // Logger
-    private static IECCLogger ctrLogger = Logger.getLogger( ClientController.class );
+	private static final Logger ctrLogger = LoggerFactory.getLogger(ClientController.class);
 
     // ECC connection gear
     private AMQPConnectionFactory amqpFactory;

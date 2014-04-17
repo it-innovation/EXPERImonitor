@@ -27,8 +27,8 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.metrics;
 
 import java.util.Properties;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.IECCLogger;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.client.EDMClientPersistence;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.metrics.dao.ExperimentDataManagerDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.client.dao.IClientDAO;
@@ -56,7 +56,7 @@ public class MonitoringEDM implements IMonitoringEDM
 		private EDMClientPersistence     edmClientPersist;
     private Properties configParams;
     
-    static IECCLogger log = Logger.getLogger(MonitoringEDM.class);
+	private static final Logger log = LoggerFactory.getLogger(MonitoringEDM.class);
     
     /**
      * Monitoring Experiment Data Manager constructor, which reads the

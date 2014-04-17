@@ -25,7 +25,8 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.dash;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.client.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.client.dao.IClientDAO;
 
@@ -39,7 +40,7 @@ import java.util.*;
 
 public class DashStateModel
 {
-	private final transient IECCLogger stateModelLog = Logger.getLogger( DashStateModel.class );
+	private final transient Logger stateModelLog = LoggerFactory.getLogger(getClass());
 	
 	private IEDMClientPersistence clientPersistence;
 	private IClientDAO            clientDAO;

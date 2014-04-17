@@ -1,0 +1,12 @@
+In order to run the prov unit tests, an OWLIM test repository needs to be created and filled manually. This is due to the fact that the unit tests also test the creation of repositories. The necessary steps are:
+
+1)	Make sure Tomcat is running and the sesame-workbench *.war file is deployed.
+2)	Go to http://localhost:8080/openrdf-workbench/repositories
+3)	Create a new repository (id: experimedia-junit, description: Experimedia-JUnit Testrepository)
+4)	Go to http://localhost:8080/openrdf-workbench/repositories/experimedia-junit/add
+	and choose the RDF file using the "Browse..." button. The file is called testrepo.rdf and is
+	located in the resources folder of the test package.
+	
+After doing this, the testrepository should be running and you can start the unit tests:
+
+	mvn clean install -P prov-test

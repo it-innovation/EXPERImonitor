@@ -25,7 +25,8 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.spec.IAMQPMessageDispatchListener;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.faces.*;
@@ -43,7 +44,7 @@ import java.util.*;
 
 public abstract class EMBaseInterface implements IAMQPMessageDispatchListener
 {
-  protected final static IECCLogger faceLogger = Logger.getLogger( EMBaseInterface.class );
+  protected static final Logger faceLogger = LoggerFactory.getLogger(EMBaseInterface.class);
   
   protected String     interfaceName;
   protected String     interfaceVersion;

@@ -39,9 +39,8 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Me
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricType;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Unit;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.loggin.impl.Log4JImpl;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.IECCLogger;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMInterfaceFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.IMonitoringEDM;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao.IEntityDAO;
@@ -90,8 +89,7 @@ public class PopulateDB
     public static UUID mGrp3mSet2UUID = UUID.fromString("9b915932-41b1-45d7-b4f6-2de4f30020b7");
     
     
-    
-    static IECCLogger log;
+    private static final Logger log = LoggerFactory.getLogger(PopulateDB.class);
     
     /**
      * Main method that makes a call to the populateWithTestData() method.
@@ -100,9 +98,6 @@ public class PopulateDB
      */
     public static void main(String[] args) throws Exception
     {
-        // Configure logging system
-        Logger.setLoggerImpl( new Log4JImpl() );
-        log = Logger.getLogger(PopulateDB.class);
       
         log.info("Populating the EDM metrics database with test data");
         Properties prop = new Properties();;

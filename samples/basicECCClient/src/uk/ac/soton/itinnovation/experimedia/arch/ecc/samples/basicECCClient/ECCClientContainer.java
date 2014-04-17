@@ -25,8 +25,8 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.basicECCClient;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.loggin.impl.Log4JImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 
@@ -35,21 +35,17 @@ import java.util.UUID;
 
 public class ECCClientContainer
 {
-    public static IECCLogger clientLogger;
+	public static final Logger clientLogger = LoggerFactory.getLogger(ECCClientContainer.class);
 
     public static void main( String args[] )
     {
-        // Configure logging system
-        Logger.setLoggerImpl( new Log4JImpl() );
-      
+
         ECCClientController ctrl = new ECCClientController();
 
         try
         {
             String rabbitServerIP = "127.0.0.1";
             if ( args.length == 1 ) rabbitServerIP = args[0];     
-
-            clientLogger = Logger.getLogger( ECCClientContainer.class );
 
             ctrl.start( rabbitServerIP,
                         UUID.fromString("00000000-0000-0000-0000-000000000000"), // EM ID

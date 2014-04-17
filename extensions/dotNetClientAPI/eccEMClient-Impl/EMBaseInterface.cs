@@ -24,7 +24,6 @@
 /////////////////////////////////////////////////////////////////////////
 
 using uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.spec;
-using uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec;
 using uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp;
 using uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.faces;
 
@@ -35,14 +34,12 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Converters;
 
 
-
-
 namespace uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.faces
 {
 
 public abstract class EMBaseInterface : IAMQPMessageDispatchListener
 {
-  protected static IECCLogger faceLogger = Logger.getLogger( typeof(EMBaseInterface) );
+  protected static readonly log4net.ILog faceLogger = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
   protected static JsonSerializerSettings dateSerialSettings = new JsonSerializerSettings { DateFormatHandling = DateFormatHandling.IsoDateFormat };
 
   protected string  interfaceName;
@@ -94,7 +91,7 @@ public abstract class EMBaseInterface : IAMQPMessageDispatchListener
           onInterpretMessage( methodID, jsonItems );
       }
       catch (Exception e) 
-      { faceLogger.error( "Could not re-encode Rabbit data" + e.Message); }
+      { faceLogger.Error( "Could not re-encode Rabbit data" + e.Message); }
     }
   }
   
@@ -142,7 +139,7 @@ public abstract class EMBaseInterface : IAMQPMessageDispatchListener
             string payloadData = JsonConvert.SerializeObject(methodList);
 
             if (!amqpInterface.sendBasicMessage(payloadData))
-                faceLogger.error("Could not execute method " + methodID);
+                faceLogger.Error("Could not execute method " + methodID);
             else
                 result = true;
         }

@@ -26,7 +26,8 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.spec.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.Map.*;
@@ -38,7 +39,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class AMQPMessageDispatch implements IAMQPMessageDispatch
 {
-  private final IECCLogger dispatchLogger = Logger.getLogger( AMQPMessageDispatch.class );  
+  private final Logger dispatchLogger = LoggerFactory.getLogger(getClass());
   private final Object dispatchLock = new Object();
   
   private AMQPMessageDispatchPump                   dispatchPump;

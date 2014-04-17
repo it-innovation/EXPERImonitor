@@ -25,12 +25,12 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.em.test.common;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 
 import java.util.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.loggin.impl.Log4JImpl;
 
 
 
@@ -49,15 +49,11 @@ public class ECCAMQPUtility
   public static final String EMExperimentDesc    = "This isn't really an experiment";
   public static final Date   EMStartDate         = new Date();
   
-  public final IECCLogger utilLogger;
+  public final Logger utilLogger = LoggerFactory.getLogger(getClass());
   
   
   public ECCAMQPUtility()
-  {
-    // Configure logging system
-    Logger.setLoggerImpl( new Log4JImpl() );  
-    utilLogger = Logger.getLogger( ECCAMQPUtility.class );
-  }
+  {}
   
   public void setUpAMQP() throws Exception
   {

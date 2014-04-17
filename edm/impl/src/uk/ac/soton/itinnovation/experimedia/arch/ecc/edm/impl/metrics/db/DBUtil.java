@@ -29,8 +29,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.IECCLogger;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A utility class for database operations, such as checking if a connection
@@ -40,7 +40,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.Logger;
  */
 public class DBUtil
 {
-    static IECCLogger log = Logger.getLogger(DBUtil.class);
+	private static final Logger log = LoggerFactory.getLogger(DBUtil.class);
     
     /**
      * Check if the connection with the database is closed.

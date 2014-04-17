@@ -25,8 +25,6 @@
 
 using uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp;
 
-using uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec;
-
 using RabbitMQ.Client;
 using System;
 using System.Text;
@@ -39,7 +37,7 @@ namespace uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.faces
 
 public abstract class AbstractAMQPInterface
 {
-  private readonly IECCLogger amqpIntLogger = Logger.getLogger(typeof(AbstractAMQPInterface));
+  private static readonly log4net.ILog amqpIntLogger = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
   private readonly Object sendMessageLock   = new Object();
 
   private UTF8Encoding utf8Encode = new UTF8Encoding();
@@ -70,7 +68,7 @@ public abstract class AbstractAMQPInterface
                   msgDispatch  = null;
               }
               catch (Exception e)
-              { amqpIntLogger.error( "Could not delete AMQP queue: " + e.Message ); }
+              { amqpIntLogger.Error( "Could not delete AMQP queue: " + e.Message ); }
       }
       
       // Tidy up (channel is managed elsewhere)     
@@ -155,7 +153,7 @@ public abstract class AbstractAMQPInterface
                              targetRouteKey ); // Args
       }
       catch (Exception ioe)
-      { amqpIntLogger.error( "Could not create AMQP queue: " + ioe.Message ); }
+      { amqpIntLogger.Error( "Could not create AMQP queue: " + ioe.Message ); }
     
   }
   

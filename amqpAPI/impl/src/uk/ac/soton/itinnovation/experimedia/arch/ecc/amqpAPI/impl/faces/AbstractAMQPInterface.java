@@ -31,15 +31,13 @@ import com.rabbitmq.client.*;
 
 import java.io.*;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.IECCLogger;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.Logger;
-
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public abstract class AbstractAMQPInterface
 {
-  private final IECCLogger amqpIntLogger = Logger.getLogger( AbstractAMQPInterface.class );
+  private final Logger amqpIntLogger = LoggerFactory.getLogger(getClass());
   
   private AMQPBasicSubscriptionProcessor subProcessor;
   

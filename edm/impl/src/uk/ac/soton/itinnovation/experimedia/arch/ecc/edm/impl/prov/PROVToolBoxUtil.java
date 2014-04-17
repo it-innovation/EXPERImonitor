@@ -25,7 +25,8 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.prov;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.*;
 
 import org.openprovenance.prov.model.*;
@@ -39,7 +40,7 @@ import java.io.File;
 
 public class PROVToolBoxUtil
 {
-    private static IECCLogger ptuLogger = Logger.getLogger( PROVToolBoxUtil.class );
+	private static final Logger ptuLogger = LoggerFactory.getLogger(PROVToolBoxUtil.class);
     
     /**
      * Creates a PROV ToolBox Document using the ECC PROV Model classes

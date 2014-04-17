@@ -25,7 +25,8 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.IMonitoringEDMAgent;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao.IReportDAO;
@@ -47,7 +48,7 @@ import java.util.*;
  */
 public class MeasurementScheduler
 {
-    private final IECCLogger schedulerLogger = Logger.getLogger( MeasurementScheduler.class );
+	private final Logger schedulerLogger = LoggerFactory.getLogger(getClass());
     private final Object taskLock            = new Object();
     private final Object edmLock             = new Object();
   

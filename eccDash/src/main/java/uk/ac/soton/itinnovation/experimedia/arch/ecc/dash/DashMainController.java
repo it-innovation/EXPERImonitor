@@ -37,7 +37,8 @@ import uk.ac.soton.itinnovation.robust.cat.core.components.viewEngine.spec.uif.t
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMInterfaceFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.factory.EMInterfaceFactory;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
@@ -72,7 +73,7 @@ public class DashMainController extends UFAbstractEventManager
                                            ClientInfoViewListener,
                                            LiveMetricSchedulerListener
 {
-  private final transient IECCLogger dashMainLog  = Logger.getLogger( DashMainController.class );
+  private final transient Logger dashMainLog = LoggerFactory.getLogger(getClass());
   private final transient UIResource viewResource = new UIResource();
   
   private Window                rootWindow;

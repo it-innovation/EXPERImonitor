@@ -23,7 +23,6 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-using uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec;
 using uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.spec;
 
 using System;
@@ -37,7 +36,7 @@ namespace uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp
 
 public class AMQPMessageDispatch : IAMQPMessageDispatch
 {
-  private readonly IECCLogger dispatchLogger = Logger.getLogger( typeof(AMQPMessageDispatch) );  
+  private static readonly log4net.ILog dispatchLogger = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
   private readonly Object     dispatchLock   = new Object();
   
   private AMQPMessageDispatchPump            dispatchPump;

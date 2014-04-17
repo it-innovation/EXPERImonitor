@@ -33,8 +33,8 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.factory.EMInterfaceFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMInterfaceFactory;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.loggin.impl.Log4JImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
@@ -50,7 +50,7 @@ import java.util.*;
 
 public class EMController implements IEMLifecycleListener
 {
-  private final IECCLogger emCtrlLogger;
+  private final Logger emCtrlLogger = LoggerFactory.getLogger(getClass());
   
   private IExperimentMonitor expMonitor;
   private EMLoginView        loginView;
@@ -67,10 +67,7 @@ public class EMController implements IEMLifecycleListener
   
   public EMController()
   {
-    // Configure logging system
-    Logger.setLoggerImpl( new Log4JImpl() );
-    emCtrlLogger = Logger.getLogger( EMController.class );
-    
+
     expMonitor = EMInterfaceFactory.createEM();
     expMonitor.addLifecyleListener( this );
     

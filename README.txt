@@ -48,6 +48,7 @@ You will need to install the following 3rd party software:
 	- Rabbit MQ server
 	- PostgreSQL server 9.0+
 	- Apache Tomcat 7.x
+	- Ontotext OWLIM lite 5.3
   
   Setting up Java and Maven
   -------------------------
@@ -101,8 +102,21 @@ You will need to install the following 3rd party software:
     4. (Optional) - you may wish to modify the Tomcat user credentials to suit use
     
       - See <Tomcat root>\conf\tomcat-users.xml
-
       
+      
+  Setting up OWLIM lite 5.3
+  -------------------------
+	1.	Register at http://www.ontotext.com/owlim/owlim-lite-registration for a copy.
+		A zip file will be send to you by email after your registration.
+
+	2.	Copy the file owlim-lite-5.3.jar from the /lib directory in the zip file into
+		the /thirdPartyLibs directory.
+
+	3.	Extract openrdf-workbench.war and openrdf-sesame.war from the /sesame_owlim
+		directory in the zip file and deploy them on your tomcat server.
+
+
+    
 Building and running the ECC
 ============================
 The ECC dashboard can be quickly built to run on your local development machine by following these steps:
