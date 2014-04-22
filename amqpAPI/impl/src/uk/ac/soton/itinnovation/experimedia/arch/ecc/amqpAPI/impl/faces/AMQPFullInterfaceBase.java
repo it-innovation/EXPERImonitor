@@ -58,11 +58,9 @@ public class AMQPFullInterfaceBase extends AbstractAMQPInterface
 
     try
     {      
-      // Declare the appropriate exchange
-      if ( actingAsProvider )
-        channelImpl.exchangeDeclare( providerExchangeName, "direct" );
-      else
-        channelImpl.exchangeDeclare( userExchangeName, "direct" );
+      // Declare the appropriate exchanges
+      channelImpl.exchangeDeclare( providerExchangeName, "direct" );
+      channelImpl.exchangeDeclare( userExchangeName, "direct" );
       
       // Create queue and subscription
       createQueue();
