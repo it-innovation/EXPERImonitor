@@ -60,13 +60,9 @@ namespace ecc_amqpAPI_impl
     AmqpClient::Channel::ptr_t channelImpl = amqpChannel->getChannelImpl();
     if ( channelImpl )
     {      
-      // Declare the appropriate exchange
-      if ( actingAsProvider )
-        // Exchange type: direct, non-auto delete, non durable
-        channelImpl->DeclareExchange( toNarrow(providerExchangeName) );
-      else
-        // Exchange type: direct, non-auto delete, non durable
-        channelImpl->DeclareExchange( toNarrow(userExchangeName) );
+      // Declare the appropriate exchanges (direct, non-auto delete, non-durable)
+      channelImpl->DeclareExchange( toNarrow(providerExchangeName) );
+      channelImpl->DeclareExchange( toNarrow(userExchangeName) );
       
       // Create queue and subscription
       createQueue();

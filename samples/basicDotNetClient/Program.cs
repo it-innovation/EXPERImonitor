@@ -31,6 +31,9 @@ using System.Linq;
 using System.Text;
 using System.Runtime.InteropServices;
 
+// Add log4net assembly directive
+[assembly: log4net.Config.XmlConfigurator(ConfigFile = "log4net.config", Watch = true)]
+
 
 
 
