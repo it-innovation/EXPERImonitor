@@ -1,4 +1,5 @@
-var BASE_URL = "/ECC";
+var BASE_URL = "/" + window.location.href.split('/')[3];
+
 $(document).ready(function() {
     $(document).foundation();
 
