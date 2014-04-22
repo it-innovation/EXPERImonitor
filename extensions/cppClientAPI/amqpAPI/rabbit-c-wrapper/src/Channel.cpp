@@ -600,4 +600,20 @@ bool Channel::BasicConsumeMessage(const std::string& consumer_tag, Envelope::ptr
   return true;
 }
 
+bool Channel::isChannelOpen()
+{
+  bool result = false;
+
+  // Use impl to determine with channel is open
+  if ( m_impl )
+  {
+    amqp_channel_t amqpChannel = m_impl->GetChannel();
+
+    if ( amqpChannel )
+      result = m_impl->IsChannelOpen( amqpChannel );
+  }
+
+  return result;
+}
+
 } // namespace AmqpClient
