@@ -38,14 +38,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Attribute;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Entity;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricHelper;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMClient;
+import uk.co.soton.itinnovation.ecc.service.domain.EccAttribute;
 import uk.co.soton.itinnovation.ecc.service.domain.EccClient;
+import uk.co.soton.itinnovation.ecc.service.domain.EccEntity;
 import uk.co.soton.itinnovation.ecc.service.domain.ExperimentNameDescription;
 import uk.co.soton.itinnovation.ecc.service.services.ConfigurationService;
 import uk.co.soton.itinnovation.ecc.service.services.ExperimentService;
+import uk.co.soton.itinnovation.ecc.service.utils.EccAttributeComparator;
 import uk.co.soton.itinnovation.ecc.service.utils.EccClientComparator;
+import uk.co.soton.itinnovation.ecc.service.utils.EccEntityComparator;
 
 /**
  * Exposes ECC experiment service endpoints.
@@ -108,19 +115,39 @@ public class ExperimentController {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/entities/{clientUuid}")
     @ResponseBody
-    public ArrayList<Entity> getEntitiesForClient(@PathVariable String clientUuid) {
+    public ArrayList<EccEntity> getEntitiesForClient(@PathVariable String clientUuid) {
 
         logger.debug("Returning the list of entities for client [" + clientUuid + "]");
-        ArrayList<Entity> result = new ArrayList<Entity>();
+        ArrayList<EccEntity> result = new ArrayList<EccEntity>();
 
         // TODO: make safe
         try {
             EMClient theClient = experimentService.getClientByID(UUID.fromString(clientUuid));
             Iterator<MetricGenerator> it = theClient.getCopyOfMetricGenerators().iterator();
             MetricGenerator mg;
+            EccEntity tempEntity;
+            ArrayList<EccAttribute> attributes;
+            MeasurementSet ms;
             while (it.hasNext()) {
                 mg = it.next();
-                result.addAll(mg.getEntities());
+                for (Entity e : mg.getEntities()) {
+                    tempEntity = new EccEntity();
+                    attributes = new ArrayList<EccAttribute>();
+                    tempEntity.setName(e.getName());
+                    tempEntity.setDescription(e.getDescription());
+                    tempEntity.setUuid(e.getUUID());
+                    for (Attribute a : e.getAttributes()) {
+                        ms = MetricHelper.getMeasurementSetForAttribute(a, mg);
+                        attributes.add(new EccAttribute(a.getName(), a.getDescription(), a.getUUID(), a.getEntityUUID(), ms.getMetric().getMetricType().name(), ms.getMetric().getUnit().getName()));
+                    }
+                    Collections.sort(attributes, new EccAttributeComparator());
+                    tempEntity.setAttributes(attributes);
+                    result.add(tempEntity);
+                }
+            }
+
+            if (result.size() > 1) {
+                Collections.sort(result, new EccEntityComparator());
             }
 
             logger.debug("Found " + result.size() + " entities for client [" + clientUuid + "]");
