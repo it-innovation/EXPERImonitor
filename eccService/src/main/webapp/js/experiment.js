@@ -1,6 +1,8 @@
 var BASE_URL = "/" + window.location.href.split('/')[3];
 var clientsDropdownList, entitiesDropdownList, attrDropdownList;
 var CLIENT_MODELS_AJAX = [];
+var CHART_POLLING_INTERVAL = 3000;
+var CHART_SHIFT_DATA_THRESHOLD = 10;
 
 
 $(document).ready(function() {
@@ -257,7 +259,9 @@ function appendEntitiesFromClient(uuid, client, attrDropdownList) {
                 attributeContainer.append("<p class='sub_details_mid'>Client: " + client.name + "</p>");
                 attributeContainer.append("<p class='sub_details_mid'>Entity: " + entity.name + "</p>");
                 attributeContainer.append("<p class='sub_details_mid'>Desc: " + attribute.description + "</p>");
-                attributeContainer.append("<p class='sub_details'>UUID: " + attribute.uuid + "</p>");
+                attributeContainer.append("<p class='sub_details_mid'>UUID: " + attribute.uuid + "</p>");
+                attributeContainer.append("<p class='sub_details_mid'>Type: " + attribute.type + "</p>");
+                attributeContainer.append("<p class='sub_details'>Unit: " + attribute.unit + "</p>");
                 attributeContainerWrapper.data("entityId", entity.uuid);
 
                 attributeCheckbox.change(function() {
@@ -276,7 +280,7 @@ function appendEntitiesFromClient(uuid, client, attrDropdownList) {
 
 // adds attribute's graph to display
 function addAttributeGraph(attribute) {
-    console.log("Displaying graph for attribute " + attribute.uuid);
+    console.log("Adding graph for attribute " + attribute.uuid);
 
     // remove end class
     $("#live_metrics .attributeGraphDiv").each(function() {
@@ -284,86 +288,162 @@ function addAttributeGraph(attribute) {
     });
 
     var attributeGraphContainer = $("<div class='small-4 columns end attributeGraphDiv' id='a_" + attribute.uuid + "_graph'></div>").appendTo("#live_metrics");
-    attributeGraphContainer.append("<p><strong>" + attribute.name + "</strong></p>");
+    var graphContainer = $("<div id='agraph_" + attribute.uuid + "'></div>").appendTo(attributeGraphContainer);
 
+    var chart;
+    if (attribute.type === 'NOMINAL') {
+        console.log("Adding pie chart");
+        chart = createEmptyPieChart(graphContainer, attribute);
+    } else {
+        console.log("Adding line chart");
+        chart = createEmptyLineChart(graphContainer, attribute);
+    }
+
+    var lastTimestamp, shift;
     $.getJSON(BASE_URL + "/data/attribute/" + attribute.uuid, function(data) {
         console.log(data);
+        if (data.data.length > 0) {
+            lastTimestamp = data.data[data.data.length - 1].timestamp;
+            var pieData = {}, pieArray;
+            $.each(data.data, function(key, datapoint) {
+                console.log(datapoint);
+                if (attribute.type === 'NOMINAL') {
+                    if (pieData.hasOwnProperty(datapoint.value)) {
+                        console.log("Old property: " + datapoint.value);
+                        pieData[datapoint.value] = pieData[datapoint.value] + 1;
+                    } else {
+                        console.log("New property: " + datapoint.value);
+                        pieData[datapoint.value] = 1;
+                    }
+                    pieArray = new Array();
+                    $.each(pieData, function(key, value) {
+                        pieArray.push({name: key, y: value});
+                    });
+                    chart.series[0].setData(pieArray);
+                } else {
+                    shift = chart.series[0].data.length > CHART_SHIFT_DATA_THRESHOLD;
+                    chart.series[0].addPoint([datapoint.timestamp, parseFloat(datapoint.value)], true, shift);
+                }
+            });
+        } else {
+            lastTimestamp = 0;
+        }
+
+        // set polling
+        var series = chart.series[0];
+        $("#a_" + attribute.uuid + "_input").data("interval", setInterval(function() {
+            $.getJSON(BASE_URL + "/data/attribute/" + attribute.uuid + "/since/" + lastTimestamp, function(dataSince) {
+                console.log(dataSince);
+                if (dataSince.data.length > 0) {
+                    lastTimestamp = dataSince.data[dataSince.data.length - 1].timestamp;
+                    console.log("Updated timestamp: " + lastTimestamp);
+                    var pieArray, shift;
+                    $.each(dataSince.data, function(key, datapoint) {
+                        console.log(datapoint);
+                        if (attribute.type === 'NOMINAL') {
+                            if (pieData.hasOwnProperty(datapoint.value)) {
+                                pieData[datapoint.value] = pieData[datapoint.value] + 1;
+                            } else {
+                                pieData[datapoint.value] = 1;
+                            }
+                            pieArray = new Array();
+                            $.each(pieData, function(key, value) {
+                                pieArray.push({name: key, y: value});
+                            });
+                            series.setData(pieArray);
+                        } else {
+                            shift = chart.series[0].data.length > CHART_SHIFT_DATA_THRESHOLD;
+                            series.addPoint([datapoint.timestamp, parseFloat(datapoint.value)], true, shift);
+                        }
+                    });
+                }
+            });
+        }, CHART_POLLING_INTERVAL));
     });
-    /*
-     var graphContainer = $("<div id='agraph_" + attribute.uuid + "'></div>").appendTo(attributeGraphContainer);
+}
 
-     graphContainer.highcharts({
-     chart: {
-     type: 'spline',
-     animation: Highcharts.svg, // don't animate in old IE
-     marginRight: 10,
-     events: {
-     load: function() {
+// adds empty pie chart
+function createEmptyPieChart(container, attribute) {
+    return new Highcharts.Chart({
+        chart: {
+            renderTo: container.attr('id'),
+            plotBackgroundColor: null,
+            plotBorderWidth: null,
+            plotShadow: false
+        },
+        title: {
+            text: attribute.name
+        },
+        tooltip: {
+            pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b> ({point.y})'
+        },
+        credits: {
+            enabled: false
+        },
+        plotOptions: {
+            pie: {
+                allowPointSelect: true,
+                cursor: 'pointer',
+                dataLabels: {
+                    enabled: true,
+                    format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                    style: {
+                        color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                    }
+                }
+            }
+        },
+        series: [{
+                type: 'pie',
+                name: 'NOMINAL data',
+                data: []
+            }]
+    });
+}
 
-     // set up the updating of the chart each second
-     var series = this.series[0];
-     setInterval(function() {
-     var x = (new Date()).getTime(), // current time
-     y = Math.random();
-     series.addPoint([x, y], true, true);
-     }, 1000);
-     }
-     }
-     },
-     title: {
-     text: 'Live random data'
-     },
-     xAxis: {
-     type: 'datetime',
-     tickPixelInterval: 150
-     },
-     yAxis: {
-     title: {
-     text: 'Value'
-     },
-     plotLines: [{
-     value: 0,
-     width: 1,
-     color: '#808080'
-     }]
-     },
-     tooltip: {
-     formatter: function() {
-     return '<b>' + this.series.name + '</b><br/>' +
-     Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x) + '<br/>' +
-     Highcharts.numberFormat(this.y, 2);
-     }
-     },
-     legend: {
-     enabled: false
-     },
-     exporting: {
-     enabled: false
-     },
-     series: [{
-     name: 'Random data',
-     data: (function() {
-     // generate an array of random data
-     var data = [],
-     time = (new Date()).getTime(),
-     i;
-
-     for (i = -19; i <= 0; i++) {
-     data.push({
-     x: time + i * 1000,
-     y: Math.random()
-     });
-     }
-     return data;
-     })()
-     }]
-     }); */
+// adds empty line chart
+function createEmptyLineChart(container, attribute) {
+    return new Highcharts.Chart({
+        chart: {
+            renderTo: container.attr('id'),
+            type: 'spline',
+            animation: Highcharts.svg
+        },
+        title: {
+            text: attribute.name
+        },
+        xAxis: {
+            type: 'datetime',
+            title: {
+                text: 'Time'
+            }
+        },
+        yAxis: {
+            title: {
+                text: attribute.unit
+            }
+        },
+        legend: {
+            enabled: false
+        },
+        credits: {
+            enabled: false
+        },
+        exporting: {
+            enabled: false
+        },
+        series: [{
+                name: 'Measurement data',
+                data: []
+            }]
+    });
 }
 
 // hides attribute's graph to display
 function hideAttributeGraph(attribute) {
     console.log("Removing graph for attribute " + attribute.uuid);
     $("#a_" + attribute.uuid + "_graph").remove();
+    clearInterval($("#a_" + attribute.uuid + "_input").data("interval"));
 }
 
 // displays status in the top right corner
