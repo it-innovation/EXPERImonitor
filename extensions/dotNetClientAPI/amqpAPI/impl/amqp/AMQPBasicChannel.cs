@@ -37,6 +37,42 @@ namespace uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp
     {
         private IModel amqpChannel;
 
+        public static bool amqpQueueExists(AMQPConnectionFactory conFactory, String queueName)
+        {
+            // Safety first
+            if (conFactory == null) throw new Exception("Could not test amqp queue: amqp connection factory is null");
+            if (queueName == null) throw new Exception("Could not test amqp queue: queue name is null");
+            if (!conFactory.isConnectionValid()) throw new Exception("Could not test amqp queue: factory connection is invalid");
+
+            // Need to create an independent connection & channel to test for a queue -
+            // a negative result automatically closes a channel.
+            AMQPBasicChannel bc = conFactory.createNewChannel();
+            IModel channelImpl = (IModel)bc.getChannelImpl();
+
+            bool result = false;
+            String resultInfo = "AMQP queue ( " + queueName + ") existence result: ";
+
+            if (channelImpl != null && channelImpl.IsOpen)
+            {
+                // Try passively declaring the queue to see if it exists
+                try
+                {
+                    channelImpl.QueueDeclarePassive(queueName);
+                    result = true;
+                    resultInfo += "exists";
+                    channelImpl.Close();
+                }
+                catch (Exception)
+                {
+                    resultInfo += "does not exist";
+                    // Channel will be automatically closed in this case
+                }
+            }
+            else resultInfo += " could not test: channel is null or closed";
+
+            return result;
+        }
+
         public AMQPBasicChannel(IModel channel)
         { amqpChannel = channel; }
 

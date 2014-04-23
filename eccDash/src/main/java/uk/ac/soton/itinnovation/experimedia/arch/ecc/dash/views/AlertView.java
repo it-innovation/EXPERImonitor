@@ -149,7 +149,9 @@ public class AlertView
       alertListener.onAlertResponse( option );
     
     Window par = alertWindow.getParent();
-    par.removeWindow( alertWindow );
+		
+		// Remove window from parent, if it still exist
+		if ( par != null ) par.removeWindow( alertWindow );
     
     alertWindow = null;
   }

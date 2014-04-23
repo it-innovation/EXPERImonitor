@@ -23,6 +23,7 @@
     <module>metricGeneratorExamples</module>
 	  <module>dynamicEntityDemoClient</module>
 		<module>simplePROVECCClient</module>
+		<module>databaseExport</module>
   </modules>
     
 </project>

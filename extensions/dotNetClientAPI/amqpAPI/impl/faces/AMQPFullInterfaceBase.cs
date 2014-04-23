@@ -56,11 +56,9 @@ public class AMQPFullInterfaceBase : AbstractAMQPInterface
       
       try
       {      
-          // Declare the appropriate exchange
-          if ( actingAsProvider )
-              channelImpl.ExchangeDeclare( providerExchangeName, "direct" );
-          else
-            channelImpl.ExchangeDeclare( userExchangeName, "direct" );
+          // Declare the appropriate exchanges
+          channelImpl.ExchangeDeclare( providerExchangeName, "direct" );
+          channelImpl.ExchangeDeclare( userExchangeName, "direct" );
       
           // Create queue and subscription
           createQueue();
