@@ -25,20 +25,20 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.logging.spec.*;
-
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.spec.IAMQPChannelListener;
 
 import com.rabbitmq.client.*;
 
 import java.io.IOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 
 
 public class AMQPBasicChannel
 {
-	private final static IECCLogger channelLogger = Logger.getLogger( AMQPBasicChannel.class );
+  private final Logger channelLogger = LoggerFactory.getLogger(getClass());
 	
   private Channel                 amqpChannel;
   private ChannelShutdownListener rabbitListener;
@@ -81,8 +81,8 @@ public class AMQPBasicChannel
 
 		}
 		else resultInfo += " could not test: channel is null or closed";
-		
-		channelLogger.info( resultInfo ); 
+        
+        LoggerFactory.getLogger(AMQPBasicChannel.class).info( resultInfo );
 		
 		return result;
 	}
