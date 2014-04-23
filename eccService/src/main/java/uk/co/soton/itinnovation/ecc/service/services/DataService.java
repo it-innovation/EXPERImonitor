@@ -287,7 +287,7 @@ public class DataService {
         }
 
         for (MeasurementSet mSet : mSets) {
-            logger.debug("Adding measurement set [" + mSet.getID().toString() + "] to attribute " + attr.getUUID().toString());
+//            logger.debug("Adding measurement set [" + mSet.getID().toString() + "] to attribute " + attr.getUUID().toString());
             if (mSet.getMetric() == null) {
                 logger.warn("Metric for measurement set [" + mSet.getID().toString() + "] is NULL");
             } else {
@@ -434,10 +434,20 @@ public class DataService {
 
     /**
      *
-     * @param attributeId the attribute.
-     * @return last 10 measurements for the attribute.
+     * @param attributeId
+     * @return
      */
     public EccMeasurementSet getLatestMeasurementsForAttribute(String attributeId) {
+        return getTailMeasurementsForAttribute(attributeId, (new Date().getTime()));
+    }
+
+    /**
+     *
+     * @param attributeId the attribute.
+     * @param since
+     * @return last 10 measurements for the attribute.
+     */
+    public EccMeasurementSet getTailMeasurementsForAttribute(String attributeId, Long since) {
         EccMeasurementSet result = new EccMeasurementSet();
         ArrayList<EccMeasurement> data = new ArrayList<EccMeasurement>();
         result.setData(data);
@@ -447,7 +457,66 @@ public class DataService {
         if (currentExperiment != null) {
             try {
                 Attribute attr = MetricHelper.getAttributeFromID(UUID.fromString(attributeId), metricGenDAO.getMetricGeneratorsForExperiment(currentExperiment.getUUID(), true));
-                Set<MeasurementSet> measurementSets = getTailMeasurementSetsForAttribute(currentExperiment.getUUID(), attr, new Date(), 10);
+                Set<MeasurementSet> measurementSets = getTailMeasurementSetsForAttribute(currentExperiment.getUUID(), attr, new Date(since), 10);
+                Iterator<MeasurementSet> it = measurementSets.iterator();
+                MeasurementSet ms;
+                while (it.hasNext()) {
+                    ms = it.next();
+                    logger.debug("Processing measurement set [" + ms.getID().toString() + "] to attribute " + attr.getUUID().toString());
+                    if (ms.getMetric() == null) {
+                        logger.warn("Metric for measurement set [" + ms.getID().toString() + "] is NULL");
+                    } else {
+                        if (ms.getMetric().getMetricType() == null) {
+                            logger.warn("Metric type for measurement set [" + ms.getID().toString() + "] is NULL");
+                        } else {
+                            if (ms.getMetric().getUnit() == null) {
+                                logger.warn("Metric unit for measurement set [" + ms.getID().toString() + "] is NULL");
+                            } else {
+                                logger.debug("Adding [" + ms.getID().toString() + "] type: " + ms.getMetric().getMetricType().name() + ", unit: " + ms.getMetric().getUnit().getName());
+                                result.setType(ms.getMetric().getMetricType().name());
+                                result.setUnit(ms.getMetric().getUnit().getName());
+                                for (Measurement m : ms.getMeasurements()) {
+                                    data.add(new EccMeasurement(m.getTimeStamp(), m.getValue()));
+                                }
+                            }
+                        }
+
+                    }
+
+                }
+            } catch (Exception e) {
+                logger.error("Failed to retrieve data for attribute [" + attributeId + "]", e);
+            }
+
+        } else {
+            logger.warn("Data requested on current experiment which is NULL");
+        }
+
+        // Sort by time stamps
+        if (result.getData().size() > 1) {
+            Collections.sort(result.getData(), new EccMeasurementsComparator());
+        }
+
+        return result;
+    }
+
+    /**
+     *
+     * @param attributeId the attribute.
+     * @param since
+     * @return last 10 measurements for the attribute.
+     */
+    public EccMeasurementSet getSinceMeasurementsForAttribute(String attributeId, Long since) {
+        EccMeasurementSet result = new EccMeasurementSet();
+        ArrayList<EccMeasurement> data = new ArrayList<EccMeasurement>();
+        result.setData(data);
+
+        Experiment currentExperiment = experimentService.getActiveExperiment();
+
+        if (currentExperiment != null) {
+            try {
+                Attribute attr = MetricHelper.getAttributeFromID(UUID.fromString(attributeId), metricGenDAO.getMetricGeneratorsForExperiment(currentExperiment.getUUID(), true));
+                Set<MeasurementSet> measurementSets = getSinceMeasurementSetsForAttribute(currentExperiment.getUUID(), attr, new Date(since), 10);
                 Iterator<MeasurementSet> it = measurementSets.iterator();
                 MeasurementSet ms;
                 while (it.hasNext()) {
@@ -524,7 +593,7 @@ public class DataService {
             throw new IllegalArgumentException("Could not get tail Measurement Sets for Attribute: date(s) is null");
         }
 
-        logger.debug("Returning " + count + " data points since '" + tail.toString() + "' for attribute [" + attr.getUUID().toString() + "] of experiment [" + expID.toString() + "]");
+        logger.debug("Returning " + count + " data points BACK since '" + tail.toString() + "' for attribute [" + attr.getUUID().toString() + "] of experiment [" + expID.toString() + "]");
 
         HashSet<MeasurementSet> resultSet = new HashSet<MeasurementSet>();
 
@@ -543,6 +612,98 @@ public class DataService {
             if (ms != null) {
                 try {
                     Report report = expReportDAO.getReportForTailMeasurements(ms.getID(), tail, count, true);
+                    // Only add non-empty measurement sets
+                    MeasurementSet tempMs;
+                    if (report.getNumberOfMeasurements() > 0) {
+                        tempMs = report.getMeasurementSet();
+                        if (ms.getMetric() == null) {
+                            logger.warn("Metric for measurement set [" + ms.getID().toString() + "] is NULL");
+                        } else {
+                            if (ms.getMetric().getMetricType() == null) {
+                                logger.warn("Metric type for measurement set [" + ms.getID().toString() + "] is NULL");
+                            } else {
+                                if (ms.getMetric().getUnit() == null) {
+                                    logger.warn("Metric unit for measurement set [" + ms.getID().toString() + "] is NULL");
+                                } else {
+                                    logger.debug("Adding INITIAL MS [" + ms.getID().toString() + "] type: " + ms.getMetric().getMetricType().name() + ", unit: " + ms.getMetric().getUnit().getName());
+
+                                }
+                            }
+
+                        }
+                        if (tempMs.getMetric() == null) {
+                            logger.warn("Metric for measurement set [" + tempMs.getID().toString() + "] is NULL");
+                            tempMs.setMetric(ms.getMetric());
+                        } else {
+                            if (tempMs.getMetric().getMetricType() == null) {
+                                logger.warn("Metric type for measurement set [" + tempMs.getID().toString() + "] is NULL");
+                            } else {
+                                if (tempMs.getMetric().getUnit() == null) {
+                                    logger.warn("Metric unit for measurement set [" + tempMs.getID().toString() + "] is NULL");
+                                } else {
+                                    logger.debug("Adding REPORTED MS [" + tempMs.getID().toString() + "] type: " + tempMs.getMetric().getMetricType().name() + ", unit: " + tempMs.getMetric().getUnit().getName());
+
+                                }
+                            }
+
+                        }
+
+                        resultSet.add(tempMs);
+                    }
+                } catch (Exception ex) {
+                    logger.error("Failed to get report for tail measurements", ex);
+                    break;
+                }
+            } else {
+                logger.warn("Failed to retrieve measurement set: MS ID is NULL");
+            }
+        }
+//        } catch (Exception ex) {
+//            String msg = "Failed to retrieve tail measurement set data for attribute " + attr.getName() + ": " + ex.getMessage();
+//            logger.warn(msg);
+//        }
+
+        return resultSet;
+    }
+
+    public Set<MeasurementSet> getSinceMeasurementSetsForAttribute(UUID expID, Attribute attr, Date since, int count) {
+
+        // Safety first
+        if (!started) {
+            throw new IllegalStateException("Cannot get experiments: service not started");
+        }
+        if (expID == null) {
+            throw new IllegalArgumentException("Could not get since Measurement Sets for Attribute: experiment ID is null");
+        }
+        if (attr == null) {
+            throw new IllegalArgumentException("Could not get since Measurement Sets for Attribute: Attribute is null");
+        }
+        if (since == null) {
+            throw new IllegalArgumentException("Could not get since Measurement Sets for Attribute: Date is null");
+        }
+        if (count < 1) {
+            throw new IllegalArgumentException("Could not get since Measurement Sets for Attribute: date(s) is null");
+        }
+
+        logger.debug("Returning " + count + " data points FORWARD since '" + since.toString() + "' for attribute [" + attr.getUUID().toString() + "] of experiment [" + expID.toString() + "]");
+
+        HashSet<MeasurementSet> resultSet = new HashSet<MeasurementSet>();
+
+        // Get the MeasurementSet model first
+        Set<MeasurementSet> msetInfo;
+        try {
+            msetInfo = getAllEmptyMeasurementSetsForAttribute(expID, attr);
+        } catch (Exception e) {
+            logger.error("Failed to return All Empty MeasurementSets For Attribute [" + attr.getUUID().toString() + "]", e);
+            return resultSet;
+        }
+
+//        try {
+        for (MeasurementSet ms : msetInfo) {
+            // Then populate with data
+            if (ms != null) {
+                try {
+                    Report report = expReportDAO.getReportForMeasurementsFromDate(ms.getID(), since, true);
                     // Only add non-empty measurement sets
                     MeasurementSet tempMs;
                     if (report.getNumberOfMeasurements() > 0) {

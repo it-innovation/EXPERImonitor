@@ -24,6 +24,8 @@
 /////////////////////////////////////////////////////////////////////////
 package uk.co.soton.itinnovation.ecc.service.controllers;
 
+import java.util.ArrayList;
+import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +34,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import uk.co.soton.itinnovation.ecc.service.domain.EccMeasurement;
 import uk.co.soton.itinnovation.ecc.service.domain.EccMeasurementSet;
 import uk.co.soton.itinnovation.ecc.service.services.ConfigurationService;
 import uk.co.soton.itinnovation.ecc.service.services.DataService;
@@ -66,7 +69,41 @@ public class DataController {
     public EccMeasurementSet getLatestDataForAttribute(@PathVariable String attributeId) {
         logger.debug("Returning data for attribute '" + attributeId + "'");
 
-        return dataService.getLatestMeasurementsForAttribute(attributeId);
+        EccMeasurementSet result = dataService.getLatestMeasurementsForAttribute(attributeId);
+        for (EccMeasurement em : result.getData()) {
+            logger.debug("Reporting: " + em.getTimestamp().getTime() + ": " + em.getValue());
+        }
+        return result;
+    }
+
+    /**
+     * Returns 10 latest data points for an attribute since time.
+     *
+     * @param attributeId attribute to return data for.
+     * @param timestampMsec
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.GET, value = "/attribute/{attributeId}/since/{timestampMsec}")
+    @ResponseBody
+    public EccMeasurementSet getLatestDataForAttributeSince(@PathVariable String attributeId, @PathVariable Long timestampMsec) {
+        logger.debug("Returning data for attribute '" + attributeId + "' since '" + timestampMsec + "' (" + new Date(timestampMsec) + ")");
+        EccMeasurementSet result = new EccMeasurementSet();
+        EccMeasurementSet tempResult = dataService.getSinceMeasurementsForAttribute(attributeId, timestampMsec);
+        result.setType(tempResult.getType());
+        result.setUnit(tempResult.getUnit());
+
+        ArrayList<EccMeasurement> measurements = new ArrayList<EccMeasurement>();
+        for (EccMeasurement em : tempResult.getData()) {
+            if (em.getTimestamp().after(new Date(timestampMsec))) {
+                measurements.add(em);
+                logger.debug("Added: " + em.getTimestamp().getTime() + ": " + em.getValue());
+            } else {
+                logger.debug("Ignored: " + em.getTimestamp().getTime() + ": " + em.getValue());
+            }
+        }
+        result.setData(measurements);
+
+        return result;
     }
 
 }
