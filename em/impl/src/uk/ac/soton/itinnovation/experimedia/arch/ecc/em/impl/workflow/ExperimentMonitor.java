@@ -89,13 +89,6 @@ public class ExperimentMonitor implements IExperimentMonitor,
     try
     { 
       basicInitialise( rabbitServerIP );
-			
-			// Only initialise if entry point does not exist
-			if ( !entryPointExists() )
-				initialiseManagers();
-			else
-				throw new Exception( "Could not open entry point: ECC dashboard with ID " +
-															entryPointID.toString() + " may already be running" );
     }
     catch( Exception e ) { throw e; }
   }
