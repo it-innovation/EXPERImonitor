@@ -58,10 +58,12 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.factory.EMInterfaceFacto
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.IEMLifecycleListener;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.IExperimentMonitor;
 import uk.co.soton.itinnovation.ecc.service.domain.DatabaseConfiguration;
+import uk.co.soton.itinnovation.ecc.service.domain.PROVDatabaseConfiguration;
 import uk.co.soton.itinnovation.ecc.service.domain.RabbitConfiguration;
 import uk.co.soton.itinnovation.ecc.service.process.ExperimentStateModel;
 import uk.co.soton.itinnovation.ecc.service.process.LiveMetricScheduler;
 import uk.co.soton.itinnovation.ecc.service.process.LiveMetricSchedulerListener;
+import uk.co.soton.itinnovation.ecc.service.process.LivePROVConsumer;
 
 /**
  * ExperimentService provides executive control over the ECC and experiment
@@ -81,9 +83,9 @@ public class ExperimentService {
     private IReportDAO expReportAccessor;
 
     private ExperimentStateModel expStateModel;
-    private LiveMetricScheduler liveMetricScheduler;
+    private LiveMetricScheduler  liveMetricScheduler;
+    private LivePROVConsumer     livePROVConsumer;
     private boolean started = false;
-    private boolean experimentInProgress = false;
 
     public ExperimentService() {
     }
@@ -138,7 +140,7 @@ public class ExperimentService {
         started = false;
         logger.debug("Starting experiment service");
 
-        // Try setting up the EDM ----------------------------------------------
+        // Try setting up the metrics data management --------------------------
         if (databaseConfiguration == null) {
             logger.error("Failed to start experiment service: database configuration is NULL");
             return false;
@@ -171,9 +173,9 @@ public class ExperimentService {
                     return false;
                 }
 
-                logger.info("EDM initialisation completed OK");
+                logger.info("EDM initialisation completed OK");                
 
-                // Try initialising the state model ------------------------------------
+                // Try initialising the state model ----------------------------
                 logger.info("Attempting to initialise experiment state");
 
                 expStateModel = new ExperimentStateModel();
@@ -186,7 +188,7 @@ public class ExperimentService {
 
                 logger.info("State model initialised");
 
-                // Try setting up the Experiment monitor -------------------------------
+                // Try setting up the Experiment monitor -----------------------
                 logger.info("Attempting to connect to RabbitMQ server");
 
                 expMonitor = EMInterfaceFactory.createEM();
@@ -230,7 +232,7 @@ public class ExperimentService {
     }
 
     public boolean isExperimentInProgress() {
-        return experimentInProgress;
+        return expStateModel.isExperimentActive();
     }
 
     /**
@@ -247,9 +249,7 @@ public class ExperimentService {
      * create.
      */
     public Experiment startExperiment(String projName, String expName, String expDesc) {
-
-        String name = expName;
-        String description = expDesc;
+        
         // Safety first
         if (!started) {
             throw new IllegalStateException("Cannot start experiment: service not initialised");
@@ -258,10 +258,10 @@ public class ExperimentService {
             throw new IllegalArgumentException("Cannot start experiment: project name is NULL or empty");
         }
         if (expName == null || expName.isEmpty()) {
-            name = DEFAULT_EXPERIMENT_NAME;
+            expName = DEFAULT_EXPERIMENT_NAME;
         }
         if (expDesc == null || expDesc.isEmpty()) {
-            description = DEFAULT_EXPERIMENT_DESCRIPTION;
+            expDesc = DEFAULT_EXPERIMENT_DESCRIPTION;
         }
         if (expStateModel.isExperimentActive()) {
             throw new IllegalStateException("Cannot start experiment: an experiment is already active");
@@ -270,8 +270,8 @@ public class ExperimentService {
         // Create new experiment instance
         Experiment newExp = new Experiment();
         newExp.setExperimentID(projName);
-        newExp.setName(name);
-        newExp.setDescription(description);
+        newExp.setName(expName);
+        newExp.setDescription(expDesc);
         newExp.setStartTime(new Date());
 
         try {
@@ -279,12 +279,20 @@ public class ExperimentService {
             IExperimentDAO expDAO = expDataManager.getExperimentDAO();
             expDAO.saveExperiment(newExp);
 
-            // Saved OK, so set as the active experiment in state model
-            expStateModel.setActiveExperiment(newExp);
-
-            // Prepare PROV logging (TO DO)
+            // Try initialising the access to the PROVenance data store for experiment
+            // TO DO: get the PROV configuration during start up
+            PROVDatabaseConfiguration pdc = new PROVDatabaseConfiguration();
+            livePROVConsumer = new LivePROVConsumer();
+            
+            livePROVConsumer.createExperimentRepository( newExp.getUUID(),
+                                                         newExp.getName(),
+                                                         pdc.getPROVRepoProperties() );
+            
             // Go straight into live monitoring
             expMonitor.startLifecycle(newExp, EMPhase.eEMLiveMonitoring);
+            
+            // All persistence & process is OK, so make experiment active
+            expStateModel.setActiveExperiment(newExp);
 
             // If we have noted any previously connected clients, get their
             // identities and try re-connecting them
@@ -293,7 +301,7 @@ public class ExperimentService {
             if (!clientInfo.isEmpty()) {
                 expMonitor.tryReRegisterClients(clientInfo);
             }
-            experimentInProgress = true;
+            
             return newExp;
 
         } catch (Exception ex) {
@@ -330,12 +338,13 @@ public class ExperimentService {
                 exp.setEndTime(new Date());
                 IExperimentDAO expDAO = expDataManager.getExperimentDAO();
                 expDAO.finaliseExperiment(exp);
+                
+                // Tidy up PROV
+                livePROVConsumer.closeCurrentExperimentRepository();
 
+                // Set no experiment active
                 expStateModel.setActiveExperiment(null);
-
-                experimentInProgress = false;
-
-                // TODO: Clean up PROV?
+                
             } catch (Exception ex) {
 
                 String problem = "Could not stop experiment because: " + ex.getMessage();
@@ -603,13 +612,23 @@ public class ExperimentService {
     }
 
     private void processLivePROVData(EDMProvReport report) throws Exception {
-
+        
+        if (livePROVConsumer == null) 
+            throw new Exception("Could not process PROV report: PROV consumer is null");
+        
         if (report == null) {
-            throw new Exception("Could not process PROV report: report is null");
+            throw new Exception("Could not process PROV report: report is null");    
         }
-
-        logger.debug("PROV data processing yet to be implemented");
-
+        
+        try {
+            livePROVConsumer.addPROVReport(report);
+        }
+        catch(Exception ex) {
+            String msg = "Could not store PROV report: " + ex.getMessage();
+            logger.error( msg );
+            
+            throw new Exception( msg );
+        }
     }
 
     // Private classes ---------------------------------------------------------
