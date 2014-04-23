@@ -1,4 +1,8 @@
-var BASE_URL = "/ECC";
+var BASE_URL = "/" + window.location.href.split('/')[3];
+var clientsDropdownList, entitiesDropdownList, attrDropdownList;
+var CLIENT_MODELS_AJAX = [];
+
+
 $(document).ready(function() {
     $(document).foundation();
 
@@ -140,59 +144,226 @@ function showListOfClients(clientMetadataArray) {
     $("#entities_details").empty();
     $("#attribute_details").empty();
 
-    var clientsDropdownLabel = $("<label>Filter by client status</label>").appendTo("#clients_details");
-    var clientsDropdownList = $("<select></select>").appendTo(clientsDropdownLabel);
+    var clientsDropdownLabel = $("<label>Filter by client connection status or show all</label>").appendTo("#clients_details");
+    clientsDropdownList = $("<select></select>").appendTo(clientsDropdownLabel);
     clientsDropdownList.append("<option value='all'>All</option>");
     clientsDropdownList.append("<option value='connected'>Connected</option>");
     clientsDropdownList.append("<option value='disconnected'>Disconnected</option>");
 
-    var entitiesDropdownLabel = $("<label>Filter by client</label>").appendTo("#entities_details");
-    var entitiesDropdownList = $("<select></select>").appendTo(entitiesDropdownLabel);
-    entitiesDropdownList.append("<option value='all'>All</option>");
-
-    entitiesDropdownList.change(function(e) {
-        // TODO: use $this
-        var sel = $("#entities_details option:selected").val();
+    clientsDropdownList.change(function(e) {
+        var sel = $("#clients_details option:selected").val();
         if (sel === 'all') {
-            // show all
+            $("#clients_details div.clientContainer").each(function(key) {
+                $(this).removeClass('hide');
+            });
         } else {
-            // hide the ones with client.uuid not sel
+            console.log(sel);
+            $("#clients_details div.clientContainer").each(function(key) {
+                if ($(this).data('status') === sel) {
+                    $(this).removeClass('hide');
+                } else {
+                    $(this).addClass('hide');
+                }
+            });
         }
     });
 
-    var attrDropdownLabel = $("<label>Filter by entity</label>").appendTo("#attribute_details");
-    var attrDropdownList = $("<select></select>").appendTo(attrDropdownLabel);
+    var entitiesDropdownLabel = $("<label>Filter by client or show all</label>").appendTo("#entities_details");
+    entitiesDropdownList = $("<select></select>").appendTo(entitiesDropdownLabel);
+    entitiesDropdownList.append("<option value='all'>All</option>");
+
+    entitiesDropdownList.change(function(e) {
+        var sel = $("#entities_details option:selected").val();
+        if (sel === 'all') {
+            $("#entities_details div.entityContainer").each(function(key) {
+                $(this).removeClass('hide');
+            });
+        } else {
+            console.log(sel);
+            $("#entities_details div.entityContainer").each(function(key) {
+                if ($(this).data('clientId') === sel) {
+                    $(this).removeClass('hide');
+                } else {
+                    $(this).addClass('hide');
+                }
+            });
+        }
+    });
+
+    var attrDropdownLabel = $("<label>Filter by entity or show all</label>").appendTo("#attribute_details");
+    attrDropdownList = $("<select></select>").appendTo(attrDropdownLabel);
     attrDropdownList.append("<option value='all'>All</option>");
 
+    attrDropdownList.change(function(e) {
+        var sel = $("#attribute_details option:selected").val();
+        if (sel === 'all') {
+            $("#attribute_details div.attributeContainer").each(function(key) {
+                $(this).removeClass('hide');
+            });
+        } else {
+            console.log(sel);
+            $("#attribute_details div.attributeContainer").each(function(key) {
+                if ($(this).data('entityId') === sel) {
+                    $(this).removeClass('hide');
+                } else {
+                    $(this).addClass('hide');
+                }
+            });
+        }
+    });
+
     $.each(clientMetadataArray, function(key, client) {
-        $("#clients_details").append("<p class='details'><strong>" + client.name + "</strong></p>");
-        $("#clients_details").append("<p class='sub_details_mid'>Connected: " + client.connected + "</p>");
-        $("#clients_details").append("<p class='sub_details'>UUID: " + client.uuid + "</p>");
-        entitiesDropdownList.append("<option value='" + client.uuid + "'>" + client.name + "</option>");
-        appendEntitiesFromClient(client.uuid, client.name, attrDropdownList);
+        var clientContainer = $("<div class='clientContainer'></div>").appendTo("#clients_details");
+        clientContainer.append("<p class='details'><strong>" + client.name + "</strong></p>");
+        clientContainer.append("<p class='sub_details_mid'>Connected: " + client.connected + "</p>");
+        clientContainer.append("<p class='sub_details'>UUID: " + client.uuid + "</p>");
+        var clientStatus = client.connected === true ? 'connected' : 'disconnected';
+        clientContainer.data("status", clientStatus);
+        entitiesDropdownList.append("<option value='" + client.uuid + "'>" + client.name + " (" + clientStatus + ")</option>");
+        CLIENT_MODELS_AJAX.push(appendEntitiesFromClient(client.uuid, client, attrDropdownList));
+    });
+
+    // trigger first entries when all metrics fetched
+    $.when.apply($, CLIENT_MODELS_AJAX).done(function() {
+        clientsDropdownList.prop('selectedIndex', 1);
+        clientsDropdownList.change();
+        entitiesDropdownList.prop('selectedIndex', 1);
+        entitiesDropdownList.change();
+        attrDropdownList.prop('selectedIndex', 1);
+        attrDropdownList.change();
     });
 }
 
 // append entities from client
-function appendEntitiesFromClient(uuid, clientName, attrDropdownList) {
-    $.getJSON(BASE_URL + "/experiments/entities/" + uuid, function(data) {
+function appendEntitiesFromClient(uuid, client, attrDropdownList) {
+    return $.getJSON(BASE_URL + "/experiments/entities/" + uuid, function(data) {
         console.log(data);
         $.each(data, function(ekey, entity) {
-            $("#entities_details").append("<p class='details'><strong>" + entity.name + "</strong></p>");
-            $("#entities_details").append("<p class='sub_details_mid'>Client: " + clientName + "</p>");
-            $("#entities_details").append("<p class='sub_details_mid'>Desc: " + entity.description + "</p>");
-            $("#entities_details").append("<p class='sub_details'>UUID: " + entity.uuid + "</p>");
-            attrDropdownList.append("<option value='" + entity.uuid + "'>" + entity.name + " (" + entity.uuid + ")" + "</option>");
+            var entityContainer = $("<div class='entityContainer'></div>").appendTo("#entities_details");
+            entityContainer.append("<p class='details'><strong>" + entity.name + "</strong></p>");
+            entityContainer.append("<p class='sub_details_mid'>Client: " + client.name + "</p>");
+            entityContainer.append("<p class='sub_details_mid'>Desc: " + entity.description + "</p>");
+            entityContainer.append("<p class='sub_details'>UUID: " + entity.uuid + "</p>");
+            entityContainer.data("clientId", uuid);
+
+            attrDropdownList.append("<option value='" + entity.uuid + "'>" + entity.name + " (" + client.name + " client)" + "</option>");
             $.each(entity.attributes, function(akey, attribute) {
-                $("#attribute_details").append("<p class='details'><strong>" + attribute.name + "</strong></p>");
-                $("#attribute_details").append("<p class='sub_details_mid'>Client: " + clientName + "</p>");
-                $("#attribute_details").append("<p class='sub_details_mid'>Entity: " + entity.name + "</p>");
-                $("#attribute_details").append("<p class='sub_details_mid'>Desc: " + attribute.description + "</p>");
-                $("#attribute_details").append("<p class='sub_details'>UUID: " + attribute.uuid + "</p>");
+                var attributeContainerWrapper = $("<div class='attributeContainer row fullWidth collapse'></div>").appendTo("#attribute_details");
+                var attributeCheckboxContainer = $("<div class='small-1 columns text-right'></div>").appendTo(attributeContainerWrapper);
+                var attributeCheckbox = $("<input type='checkbox' name='attributeCheckboxes' id='a_" + attribute.uuid + "_input'/>").appendTo(attributeCheckboxContainer);
+                attributeCheckbox.data("attribute", attribute);
+                var attributeContainer = $("<div class='small-11 columns'></div>").appendTo(attributeContainerWrapper);
+                attributeContainer.append("<p class='details'><strong>" + attribute.name + "</strong></p>");
+                attributeContainer.append("<p class='sub_details_mid'>Client: " + client.name + "</p>");
+                attributeContainer.append("<p class='sub_details_mid'>Entity: " + entity.name + "</p>");
+                attributeContainer.append("<p class='sub_details_mid'>Desc: " + attribute.description + "</p>");
+                attributeContainer.append("<p class='sub_details'>UUID: " + attribute.uuid + "</p>");
+                attributeContainerWrapper.data("entityId", entity.uuid);
+
+                attributeCheckbox.change(function() {
+                    var attribute = $(this).data("attribute");
+                    if (this.checked) {
+                        addAttributeGraph(attribute);
+                    } else {
+                        hideAttributeGraph(attribute);
+                    }
+                });
 
             });
         });
     });
+}
+
+// adds attribute's graph to display
+function addAttributeGraph(attribute) {
+    console.log("Displaying graph for attribute " + attribute.uuid);
+
+    // remove end class
+    $("#live_metrics .attributeGraphDiv").each(function() {
+        $(this).removeClass('end');
+    });
+
+    var attributeGraphContainer = $("<div class='small-4 columns end attributeGraphDiv' id='a_" + attribute.uuid + "_graph'></div>").appendTo("#live_metrics");
+    attributeGraphContainer.append("<p><strong>" + attribute.name + "</strong></p>");
+
+    $.getJSON(BASE_URL + "/data/attribute/" + attribute.uuid, function(data) {
+        console.log(data);
+    });
+    /*
+     var graphContainer = $("<div id='agraph_" + attribute.uuid + "'></div>").appendTo(attributeGraphContainer);
+
+     graphContainer.highcharts({
+     chart: {
+     type: 'spline',
+     animation: Highcharts.svg, // don't animate in old IE
+     marginRight: 10,
+     events: {
+     load: function() {
+
+     // set up the updating of the chart each second
+     var series = this.series[0];
+     setInterval(function() {
+     var x = (new Date()).getTime(), // current time
+     y = Math.random();
+     series.addPoint([x, y], true, true);
+     }, 1000);
+     }
+     }
+     },
+     title: {
+     text: 'Live random data'
+     },
+     xAxis: {
+     type: 'datetime',
+     tickPixelInterval: 150
+     },
+     yAxis: {
+     title: {
+     text: 'Value'
+     },
+     plotLines: [{
+     value: 0,
+     width: 1,
+     color: '#808080'
+     }]
+     },
+     tooltip: {
+     formatter: function() {
+     return '<b>' + this.series.name + '</b><br/>' +
+     Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x) + '<br/>' +
+     Highcharts.numberFormat(this.y, 2);
+     }
+     },
+     legend: {
+     enabled: false
+     },
+     exporting: {
+     enabled: false
+     },
+     series: [{
+     name: 'Random data',
+     data: (function() {
+     // generate an array of random data
+     var data = [],
+     time = (new Date()).getTime(),
+     i;
+
+     for (i = -19; i <= 0; i++) {
+     data.push({
+     x: time + i * 1000,
+     y: Math.random()
+     });
+     }
+     return data;
+     })()
+     }]
+     }); */
+}
+
+// hides attribute's graph to display
+function hideAttributeGraph(attribute) {
+    console.log("Removing graph for attribute " + attribute.uuid);
+    $("#a_" + attribute.uuid + "_graph").remove();
 }
 
 // displays status in the top right corner

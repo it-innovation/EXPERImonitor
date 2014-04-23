@@ -1,4 +1,5 @@
-var BASE_URL = "/ECC";
+var BASE_URL = "/" + window.location.href.split('/')[3];
+
 $(document).ready(function() {
     $(document).foundation();
 
@@ -69,8 +70,8 @@ $(document).ready(function() {
                             $('#configStatus').attr('class', 'right success-color');
                             $('#configStatus').text('configured');
 
-                            // go to experiment
-
+                            // go to experiment if no flag
+                            window.location.replace(BASE_URL + "/experiment.html");
 
                         } else {
                             $('#configStatus').attr('class', 'right alert-color');

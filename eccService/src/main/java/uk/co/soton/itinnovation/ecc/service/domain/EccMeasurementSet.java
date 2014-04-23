@@ -18,22 +18,53 @@
 // the software.
 //
 //	Created By :			Maxim Bashevoy
-//	Created Date :			2014-04-16
+//	Created Date :			2014-04-22
 //	Created for Project :           EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
-package uk.co.soton.itinnovation.ecc.service.utils;
+package uk.co.soton.itinnovation.ecc.service.domain;
 
-import java.util.Comparator;
-import uk.co.soton.itinnovation.ecc.service.domain.EccClient;
+import java.util.ArrayList;
 
 /**
- * Sorts ECC clients alphabetically.
+ * Represents a simple set of data points.
  */
-public class EccClientComparator implements Comparator<EccClient> {
+public class EccMeasurementSet {
 
-    @Override
-    public int compare(EccClient c1, EccClient c2) {
-        return c1.getName().compareTo(c2.getName());
+    private String unit, type;
+    private ArrayList<EccMeasurement> data;
+
+    public EccMeasurementSet() {
     }
+
+    public EccMeasurementSet(String unit, String type, ArrayList<EccMeasurement> data) {
+        this.unit = unit;
+        this.type = type;
+        this.data = data;
+    }
+
+    public String getUnit() {
+        return unit;
+    }
+
+    public void setUnit(String unit) {
+        this.unit = unit;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public ArrayList<EccMeasurement> getData() {
+        return data;
+    }
+
+    public void setData(ArrayList<EccMeasurement> data) {
+        this.data = data;
+    }
+
 }

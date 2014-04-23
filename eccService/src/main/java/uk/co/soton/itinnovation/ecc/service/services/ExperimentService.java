@@ -27,6 +27,7 @@ package uk.co.soton.itinnovation.ecc.service.services;
 
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -274,6 +275,8 @@ public class ExperimentService {
         newExp.setDescription(expDesc);
         newExp.setStartTime(new Date());
 
+        logger.debug("Creating new experiment [" + newExp.getExperimentID() + "] '" + newExp.getName() + "' (" + newExp.getDescription() + ") started at: " + newExp.getStartTime().toString());
+
         try {
             // Prepare metrics database
             IExperimentDAO expDAO = expDataManager.getExperimentDAO();
@@ -299,7 +302,18 @@ public class ExperimentService {
             Map<UUID, String> clientInfo = expStateModel.getConnectedClientInfo();
 
             if (!clientInfo.isEmpty()) {
-                expMonitor.tryReRegisterClients(clientInfo);
+                logger.debug("Reconnecting previously connected clients:");
+
+                Iterator<UUID> it = clientInfo.keySet().iterator();
+                UUID id;
+                String info;
+                while (it.hasNext()) {
+                    id = it.next();
+                    info = clientInfo.get(id);
+                    logger.debug("[" + id.toString() + "] " + info);
+                }
+
+//                expMonitor.tryReRegisterClients(clientInfo);
             }
             
             return newExp;

@@ -123,7 +123,7 @@ public class ExperimentController {
                 result.addAll(mg.getEntities());
             }
 
-            logger.debug("Found " + result.size() + " entity for client [" + clientUuid + "]");
+            logger.debug("Found " + result.size() + " entities for client [" + clientUuid + "]");
 
         } catch (Exception e) {
             logger.error("Failed to return the list of entities for client [" + clientUuid + "]", e);
@@ -140,9 +140,8 @@ public class ExperimentController {
      */
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
-    public Experiment startExperiment(@RequestBody ExperimentNameDescription experimentNameDescription
-    ) {
-        logger.debug("Starting new experiment: '" + experimentNameDescription.getName() + "'" + experimentNameDescription.getDescription());
+    public Experiment startExperiment(@RequestBody ExperimentNameDescription experimentNameDescription) {
+        logger.debug("Starting new experiment: '" + experimentNameDescription.getName() + "' with description '" + experimentNameDescription.getDescription() + "'");
 
         if (!experimentService.isStarted()) {
             logger.error("Failed to create new expiment: the service is not yet started");

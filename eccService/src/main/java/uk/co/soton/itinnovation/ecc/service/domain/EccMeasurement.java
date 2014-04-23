@@ -18,22 +18,44 @@
 // the software.
 //
 //	Created By :			Maxim Bashevoy
-//	Created Date :			2014-04-16
+//	Created Date :			2014-04-22
 //	Created for Project :           EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
-package uk.co.soton.itinnovation.ecc.service.utils;
+package uk.co.soton.itinnovation.ecc.service.domain;
 
-import java.util.Comparator;
-import uk.co.soton.itinnovation.ecc.service.domain.EccClient;
+import java.util.Date;
 
 /**
- * Sorts ECC clients alphabetically.
+ * Represents simple data entry.
  */
-public class EccClientComparator implements Comparator<EccClient> {
+public class EccMeasurement {
 
-    @Override
-    public int compare(EccClient c1, EccClient c2) {
-        return c1.getName().compareTo(c2.getName());
+    private Date timestamp;
+    private String value;
+
+    public EccMeasurement() {
     }
+
+    public EccMeasurement(Date timestamp, String value) {
+        this.timestamp = timestamp;
+        this.value = value;
+    }
+
+    public Date getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
+
 }
