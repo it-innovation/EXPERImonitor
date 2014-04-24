@@ -319,7 +319,8 @@ public class ExperimentService {
                     logger.debug("[" + id.toString() + "] " + info);
                 }
 
-//                expMonitor.tryReRegisterClients(clientInfo);
+                // Need to reconnect previous clients, if any still exist
+                expMonitor.tryReRegisterClients(clientInfo);
             }
             
             return newExp;
@@ -449,15 +450,20 @@ public class ExperimentService {
      */
     public Set<EMClient> getCurrentlyConnectedClients() {
 
-        HashSet<EMClient> connectedClients = new HashSet<EMClient>();
+        HashSet<EMClient> actuallyConnectedClients = new HashSet<EMClient>();
 
         if (started) {
 
+            // Get the all clients that the monitor expects to be connected
             Set<EMClient> clients = expMonitor.getAllConnectedClients();
-            connectedClients.addAll(clients);
+            
+            // Only return those that are not re-registering
+            for (EMClient client : clients)
+                if ( !client.isReRegistering() )
+                    actuallyConnectedClients.add( client );
         }
 
-        return connectedClients;
+        return actuallyConnectedClients;
     }
 
     /**
@@ -663,9 +669,11 @@ public class ExperimentService {
 
             logger.info("Client connected: " + client.getName() + (reconnected ? "[reconnection]" : "."));
 
-            if (!client.isReRegistering()) {
-                expStateModel.setClientConnectedState(client, true);
-            }
+            // If the client is re-registering, do not mark them as connected
+            // just yet; they need to respond in Discovery phase before we know
+            // they are really there
+            if (!client.isReRegistering())
+                expStateModel.setClientConnectedState(client, true);    
         }
 
         @Override
@@ -753,8 +761,6 @@ public class ExperimentService {
 
             if (client != null && newGens != null) {
 
-                // If client is re-registering, add the client to the connected view now
-                // (we've definitely got a client that is still connected)
                 if (client.isReRegistering()) {
                     logger.info("Known client connected: " + client.getID() + " (\"" + client.getName() + "\")");
                 }
