@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -50,6 +51,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Me
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMInterfaceFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.IMonitoringEDM;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.NoDataException;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao.IEntityDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao.IExperimentDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao.IMetricGeneratorDAO;
@@ -485,7 +487,11 @@ public class DataService {
 
                 }
             } catch (Exception e) {
-                logger.error("Failed to retrieve data for attribute [" + attributeId + "]", e);
+                if (e instanceof NoDataException) {
+                    logger.debug("No measurements for attribute [" + attributeId + "] before " + since);
+                } else {
+                    logger.error("Failed to retrieve data for attribute [" + attributeId + "]", e);
+                }
             }
 
         } else {
@@ -504,9 +510,10 @@ public class DataService {
      *
      * @param attributeId the attribute.
      * @param since
-     * @return last 10 measurements for the attribute.
+     * @param limit
+     * @return latest 10 measurements for the attribute since a moment in time.
      */
-    public EccMeasurementSet getSinceMeasurementsForAttribute(String attributeId, Long since) {
+    public EccMeasurementSet getLatestSinceMeasurementsForAttribute(String attributeId, Long since, int limit) {
         EccMeasurementSet result = new EccMeasurementSet();
         ArrayList<EccMeasurement> data = new ArrayList<EccMeasurement>();
         result.setData(data);
@@ -551,9 +558,21 @@ public class DataService {
             logger.warn("Data requested on current experiment which is NULL");
         }
 
+        // TODO: make this a database operation!
         // Sort by time stamps
-        if (result.getData().size() > 1) {
-            Collections.sort(result.getData(), new EccMeasurementsComparator());
+        int resultSize = result.getData().size();
+        if (resultSize > 1) {
+            // reverse sort
+            Collections.sort(result.getData(), Collections.reverseOrder(new EccMeasurementsComparator()));
+
+            // select latest 'limit' measurements
+            ArrayList<EccMeasurement> tempData = new ArrayList<EccMeasurement>(result.getData().subList(0, limit > resultSize ? resultSize : limit));
+
+            // sort again
+            Collections.sort(tempData, new EccMeasurementsComparator());
+
+            // reset to new data
+            result.setData(tempData);
         }
 
         return result;
@@ -567,14 +586,15 @@ public class DataService {
      *
      * @param expID - Non-null ID of the experiment
      * @param attr - Non-null Attribute of interest
-     * @param tail - Non-null time stamp from which to work backwards from
+     * @param beforeThisDate - Non-null time stamp from which to work backwards
+     * from
      * @param count - Greater than zero maximum number of measurements per
      * measurement set
      * @return - Returns a collection of Measurement Sets
      * @throws Exception - Throws if parameters are invalid or there were
      * problems retrieving data from the database
      */
-    public Set<MeasurementSet> getTailMeasurementSetsForAttribute(UUID expID, Attribute attr, Date tail, int count) {
+    public Set<MeasurementSet> getTailMeasurementSetsForAttribute(UUID expID, Attribute attr, Date beforeThisDate, int count) {
 
         // Safety first
         if (!started) {
@@ -586,14 +606,14 @@ public class DataService {
         if (attr == null) {
             throw new IllegalArgumentException("Could not get tail Measurement Sets for Attribute: Attribute is null");
         }
-        if (tail == null) {
+        if (beforeThisDate == null) {
             throw new IllegalArgumentException("Could not get tail Measurement Sets for Attribute: Date is null");
         }
         if (count < 1) {
             throw new IllegalArgumentException("Could not get tail Measurement Sets for Attribute: date(s) is null");
         }
 
-        logger.debug("Returning " + count + " data points BACK since '" + tail.toString() + "' for attribute [" + attr.getUUID().toString() + "] of experiment [" + expID.toString() + "]");
+        logger.debug("Returning " + count + " data points BACK since '" + beforeThisDate.toString() + "' for attribute [" + attr.getUUID().toString() + "] of experiment [" + expID.toString() + "]");
 
         HashSet<MeasurementSet> resultSet = new HashSet<MeasurementSet>();
 
@@ -606,12 +626,11 @@ public class DataService {
             return resultSet;
         }
 
-//        try {
         for (MeasurementSet ms : msetInfo) {
             // Then populate with data
             if (ms != null) {
                 try {
-                    Report report = expReportDAO.getReportForTailMeasurements(ms.getID(), tail, count, true);
+                    Report report = expReportDAO.getReportForTailMeasurements(ms.getID(), beforeThisDate, count, true);
                     // Only add non-empty measurement sets
                     MeasurementSet tempMs;
                     if (report.getNumberOfMeasurements() > 0) {
@@ -650,23 +669,22 @@ public class DataService {
 
                         resultSet.add(tempMs);
                     }
-                } catch (Exception ex) {
-                    logger.error("Failed to get report for tail measurements", ex);
+                } catch (Exception e) {
+                    if (e instanceof NoDataException) {
+                        logger.debug("No measurements for attribute [" + attr.getUUID().toString() + "] before " + beforeThisDate);
+                    } else {
+                        logger.error("Failed to retrieve data for attribute [" + attr.getUUID().toString() + "]", e);
+                    }
                     break;
                 }
             } else {
                 logger.warn("Failed to retrieve measurement set: MS ID is NULL");
             }
         }
-//        } catch (Exception ex) {
-//            String msg = "Failed to retrieve tail measurement set data for attribute " + attr.getName() + ": " + ex.getMessage();
-//            logger.warn(msg);
-//        }
-
         return resultSet;
     }
 
-    public Set<MeasurementSet> getSinceMeasurementSetsForAttribute(UUID expID, Attribute attr, Date since, int count) {
+    public Set<MeasurementSet> getSinceMeasurementSetsForAttribute(UUID expID, Attribute attr, Date sinceThisDate, int count) {
 
         // Safety first
         if (!started) {
@@ -678,14 +696,14 @@ public class DataService {
         if (attr == null) {
             throw new IllegalArgumentException("Could not get since Measurement Sets for Attribute: Attribute is null");
         }
-        if (since == null) {
+        if (sinceThisDate == null) {
             throw new IllegalArgumentException("Could not get since Measurement Sets for Attribute: Date is null");
         }
         if (count < 1) {
             throw new IllegalArgumentException("Could not get since Measurement Sets for Attribute: date(s) is null");
         }
 
-        logger.debug("Returning " + count + " data points FORWARD since '" + since.toString() + "' for attribute [" + attr.getUUID().toString() + "] of experiment [" + expID.toString() + "]");
+        logger.debug("Returning " + count + " data points FORWARD since '" + sinceThisDate.toString() + "' for attribute [" + attr.getUUID().toString() + "] of experiment [" + expID.toString() + "]");
 
         HashSet<MeasurementSet> resultSet = new HashSet<MeasurementSet>();
 
@@ -698,12 +716,11 @@ public class DataService {
             return resultSet;
         }
 
-//        try {
         for (MeasurementSet ms : msetInfo) {
             // Then populate with data
             if (ms != null) {
                 try {
-                    Report report = expReportDAO.getReportForMeasurementsFromDate(ms.getID(), since, true);
+                    Report report = expReportDAO.getReportForMeasurementsFromDate(ms.getID(), sinceThisDate, true);
                     // Only add non-empty measurement sets
                     MeasurementSet tempMs;
                     if (report.getNumberOfMeasurements() > 0) {
@@ -742,19 +759,18 @@ public class DataService {
 
                         resultSet.add(tempMs);
                     }
-                } catch (Exception ex) {
-                    logger.error("Failed to get report for tail measurements", ex);
+                } catch (Exception e) {
+                    if (e instanceof NoDataException) {
+                        logger.debug("No measurements for attribute [" + attr.getUUID().toString() + "] since " + sinceThisDate);
+                    } else {
+                        logger.error("Failed to retrieve data for attribute [" + attr.getUUID().toString() + "]", e);
+                    }
                     break;
                 }
             } else {
                 logger.warn("Failed to retrieve measurement set: MS ID is NULL");
             }
         }
-//        } catch (Exception ex) {
-//            String msg = "Failed to retrieve tail measurement set data for attribute " + attr.getName() + ": " + ex.getMessage();
-//            logger.warn(msg);
-//        }
-
         return resultSet;
     }
 }

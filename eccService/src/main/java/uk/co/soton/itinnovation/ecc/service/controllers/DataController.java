@@ -86,12 +86,13 @@ public class DataController {
     @RequestMapping(method = RequestMethod.GET, value = "/attribute/{attributeId}/since/{timestampMsec}")
     @ResponseBody
     public EccMeasurementSet getLatestDataForAttributeSince(@PathVariable String attributeId, @PathVariable Long timestampMsec) {
-        logger.debug("Returning data for attribute '" + attributeId + "' since '" + timestampMsec + "' (" + new Date(timestampMsec) + ")");
+        logger.debug("Returning 10 latest data items for attribute '" + attributeId + "' since '" + timestampMsec + "' (" + new Date(timestampMsec) + ")");
         EccMeasurementSet result = new EccMeasurementSet();
-        EccMeasurementSet tempResult = dataService.getSinceMeasurementsForAttribute(attributeId, timestampMsec);
+        EccMeasurementSet tempResult = dataService.getLatestSinceMeasurementsForAttribute(attributeId, timestampMsec, 10);
         result.setType(tempResult.getType());
         result.setUnit(tempResult.getUnit());
 
+        // TODO: this does not work when there is no data to start with
         ArrayList<EccMeasurement> measurements = new ArrayList<EccMeasurement>();
         for (EccMeasurement em : tempResult.getData()) {
             if (em.getTimestamp().after(new Date(timestampMsec))) {
