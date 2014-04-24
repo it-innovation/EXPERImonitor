@@ -312,7 +312,8 @@ function appendEntitiesFromClient(uuid, client, attrDropdownList) {
                 attributeContainer.append("<p class='sub_details_mid'>Desc: " + attribute.description + "</p>");
                 attributeContainer.append("<p class='sub_details_mid'>UUID: " + attribute.uuid + "</p>");
                 attributeContainer.append("<p class='sub_details_mid'>Type: " + attribute.type + "</p>");
-                attributeContainer.append("<p class='sub_details'>Unit: " + attribute.unit + "</p>");
+                attributeContainer.append("<p class='sub_details_mid'>Unit: " + attribute.unit + "</p>");
+                attributeContainer.append("<p class='sub_details'><a href='" + BASE_URL + "/data/export/attribute/" + attribute.uuid + "'>Download CSV data</a></p>");
                 attributeContainerWrapper.data("entityId", entity.uuid);
 
                 attributeCheckbox.change(function() {

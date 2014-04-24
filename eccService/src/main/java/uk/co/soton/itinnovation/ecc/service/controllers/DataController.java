@@ -24,8 +24,13 @@
 /////////////////////////////////////////////////////////////////////////
 package uk.co.soton.itinnovation.ecc.service.controllers;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Date;
+import javax.servlet.http.HttpServletResponse;
+import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +39,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Attribute;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Entity;
 import uk.co.soton.itinnovation.ecc.service.domain.EccMeasurement;
 import uk.co.soton.itinnovation.ecc.service.domain.EccMeasurementSet;
 import uk.co.soton.itinnovation.ecc.service.services.ConfigurationService;
@@ -105,6 +112,52 @@ public class DataController {
         result.setData(measurements);
 
         return result;
+    }
+
+    /**
+     * Returns attribute data as a download file.
+     *
+     * @param attributeId attribute to return data for.
+     * @param response
+     */
+    @RequestMapping(method = RequestMethod.GET, value = "/export/attribute/{attributeId}")
+    @ResponseBody
+    public void exportDataForAttribute(@PathVariable String attributeId, HttpServletResponse response) {
+        logger.debug("Exporting data for attribute '" + attributeId + "'");
+
+        // TODO: add error reporting
+        Attribute attribute = dataService.getAttribute(attributeId);
+
+        if (attribute == null) {
+            logger.error("Failed to create file for attribute [" + "]: data service returned NULL value");
+        } else {
+
+            Entity entity = dataService.getEntity(attribute.getEntityUUID().toString());
+
+            if (entity == null) {
+                logger.error("Failed to create file for attribute [" + "]: data service returned NULL entity");
+            } else {
+                String fileName = attribute.getName() + " - " + entity.getName() + ".csv";
+                response.setContentType("text/csv");
+                response.setHeader("Content-disposition", "attachment; filename=\"" + fileName + "\"");
+
+                try {
+                    BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(response.getOutputStream()));
+                    writer.write("Timestamp, Value");
+
+                    for (EccMeasurement m : dataService.getAllMeasurementsForAttribute(attributeId).getData()) {
+                        writer.newLine();
+                        writer.write(ISODateTimeFormat.dateTime().print(m.getTimestamp().getTime()) + ", " + m.getValue());
+                    }
+
+                    writer.flush();
+                    writer.close();
+                    response.flushBuffer();
+                } catch (IOException e) {
+                    logger.error("Failed to write data to output response stream", e);
+                }
+            }
+        }
     }
 
 }
