@@ -169,6 +169,7 @@ function showListOfClients(clientMetadataArray) {
             });
         }
     });
+    $("#clients_details").append("<label>Select a client to display its data for all entities in Live Metrics</label>");
 
     var entitiesDropdownLabel = $("<label>Filter by client or show all</label>").appendTo("#entities_details");
     entitiesDropdownList = $("<select></select>").appendTo(entitiesDropdownLabel);
@@ -191,6 +192,7 @@ function showListOfClients(clientMetadataArray) {
             });
         }
     });
+    $("#entities_details").append("<label>Select an entity to display its data for all attributes in Live Metrics</label>");
 
     var attrDropdownLabel = $("<label>Filter by entity or show all</label>").appendTo("#attribute_details");
     attrDropdownList = $("<select></select>").appendTo(attrDropdownLabel);
@@ -213,19 +215,47 @@ function showListOfClients(clientMetadataArray) {
             });
         }
     });
+    $("#attribute_details").append("<label>Select an attribute to display its data in Live Metrics</label>");
 
     $.each(clientMetadataArray, function(key, client) {
-        var clientContainer = $("<div class='clientContainer'></div>").appendTo("#clients_details");
+        var clientContainerWrapper = $("<div class='clientContainer row fullWidth collapse'></div>").appendTo("#clients_details");
+        var clientCheckboxContainer = $("<div class='small-1 columns text-right'></div>").appendTo(clientContainerWrapper);
+        var clientCheckbox = $("<input type='checkbox' name='clientCheckboxes' id='c_" + client.uuid + "_input'/>").appendTo(clientCheckboxContainer);
+        clientCheckbox.data("client", client);
+        var clientContainer = $("<div class='small-11 columns'></div>").appendTo(clientContainerWrapper);
         clientContainer.append("<p class='details'><strong>" + client.name + "</strong></p>");
         clientContainer.append("<p class='sub_details_mid'>Connected: " + client.connected + "</p>");
         clientContainer.append("<p class='sub_details'>UUID: " + client.uuid + "</p>");
         var clientStatus = client.connected === true ? 'connected' : 'disconnected';
-        clientContainer.data("status", clientStatus);
+        clientContainerWrapper.data("status", clientStatus);
         entitiesDropdownList.append("<option value='" + client.uuid + "'>" + client.name + " (" + clientStatus + ")</option>");
         CLIENT_MODELS_AJAX.push(appendEntitiesFromClient(client.uuid, client, attrDropdownList));
+
+        clientCheckbox.change(function() {
+            var client = $(this).data("client");
+            if (this.checked) {
+                $("input.entityCheckbox").each(function() {
+                    if ($(this).data("clientId") === client.uuid) {
+                        $(this).prop('checked', true);
+                        $(this).trigger("change");
+                    }
+                });
+//                $.each(entity.attributes, function(akey, attribute) {
+//                    $("#a_" + attribute.uuid + "_input").prop('checked', true);
+//                    $("#a_" + attribute.uuid + "_input").trigger("change");
+//                });
+            } else {
+                $("input.entityCheckbox").each(function() {
+                    if ($(this).data("clientId") === client.uuid) {
+                        $(this).prop('checked', false);
+                        $(this).trigger("change");
+                    }
+                });
+            }
+        });
     });
 
-    // trigger first entries when all metrics fetched
+// trigger first entries when all metrics fetched
     $.when.apply($, CLIENT_MODELS_AJAX).done(function() {
         clientsDropdownList.prop('selectedIndex', 1);
         clientsDropdownList.change();
@@ -241,12 +271,32 @@ function appendEntitiesFromClient(uuid, client, attrDropdownList) {
     return $.getJSON(BASE_URL + "/experiments/entities/" + uuid, function(data) {
         console.log(data);
         $.each(data, function(ekey, entity) {
-            var entityContainer = $("<div class='entityContainer'></div>").appendTo("#entities_details");
+            var entityContainerWrapper = $("<div class='entityContainer row fullWidth collapse'></div>").appendTo("#entities_details");
+            var entityCheckboxContainer = $("<div class='small-1 columns text-right'></div>").appendTo(entityContainerWrapper);
+            var entityCheckbox = $("<input type='checkbox' name='entityCheckboxes' class='entityCheckbox' id='e_" + entity.uuid + "_input'/>").appendTo(entityCheckboxContainer);
+            entityCheckbox.data("entity", entity);
+            entityCheckbox.data("clientId", uuid);
+            var entityContainer = $("<div class='small-11 columns'></div>").appendTo(entityContainerWrapper);
             entityContainer.append("<p class='details'><strong>" + entity.name + "</strong></p>");
             entityContainer.append("<p class='sub_details_mid'>Client: " + client.name + "</p>");
             entityContainer.append("<p class='sub_details_mid'>Desc: " + entity.description + "</p>");
             entityContainer.append("<p class='sub_details'>UUID: " + entity.uuid + "</p>");
-            entityContainer.data("clientId", uuid);
+            entityContainerWrapper.data("clientId", uuid);
+            entityCheckbox.change(function() {
+                var entity = $(this).data("entity");
+                if (this.checked) {
+                    $.each(entity.attributes, function(akey, attribute) {
+                        $("#a_" + attribute.uuid + "_input").prop('checked', true);
+                        $("#a_" + attribute.uuid + "_input").trigger("change");
+                    });
+                } else {
+                    $.each(entity.attributes, function(akey, attribute) {
+                        $("#a_" + attribute.uuid + "_input").prop('checked', false);
+                        $("#a_" + attribute.uuid + "_input").trigger("change");
+                    });
+                    ;
+                }
+            });
 
             attrDropdownList.append("<option value='" + entity.uuid + "'>" + entity.name + " (" + client.name + " client)" + "</option>");
             $.each(entity.attributes, function(akey, attribute) {
@@ -254,6 +304,7 @@ function appendEntitiesFromClient(uuid, client, attrDropdownList) {
                 var attributeCheckboxContainer = $("<div class='small-1 columns text-right'></div>").appendTo(attributeContainerWrapper);
                 var attributeCheckbox = $("<input type='checkbox' name='attributeCheckboxes' id='a_" + attribute.uuid + "_input'/>").appendTo(attributeCheckboxContainer);
                 attributeCheckbox.data("attribute", attribute);
+                attributeCheckbox.data("entityName", entity.name);
                 var attributeContainer = $("<div class='small-11 columns'></div>").appendTo(attributeContainerWrapper);
                 attributeContainer.append("<p class='details'><strong>" + attribute.name + "</strong></p>");
                 attributeContainer.append("<p class='sub_details_mid'>Client: " + client.name + "</p>");
@@ -266,20 +317,20 @@ function appendEntitiesFromClient(uuid, client, attrDropdownList) {
 
                 attributeCheckbox.change(function() {
                     var attribute = $(this).data("attribute");
+                    var entityName = $(this).data("entityName");
                     if (this.checked) {
-                        addAttributeGraph(attribute);
+                        addAttributeGraph(attribute, entityName);
                     } else {
                         hideAttributeGraph(attribute);
                     }
                 });
-
             });
         });
     });
 }
 
 // adds attribute's graph to display
-function addAttributeGraph(attribute) {
+function addAttributeGraph(attribute, entityName) {
     console.log("Adding graph for attribute " + attribute.uuid);
 
     // remove end class
@@ -293,10 +344,10 @@ function addAttributeGraph(attribute) {
     var chart;
     if (attribute.type === 'NOMINAL') {
         console.log("Adding pie chart");
-        chart = createEmptyPieChart(graphContainer, attribute);
+        chart = createEmptyPieChart(graphContainer, attribute, entityName);
     } else {
         console.log("Adding line chart");
-        chart = createEmptyLineChart(graphContainer, attribute);
+        chart = createEmptyLineChart(graphContainer, attribute, entityName);
     }
 
     var lastTimestamp, shift;
@@ -332,6 +383,7 @@ function addAttributeGraph(attribute) {
         // set polling
         var series = chart.series[0];
         $("#a_" + attribute.uuid + "_input").data("interval", setInterval(function() {
+            // TODO: stop polling on error
             $.getJSON(BASE_URL + "/data/attribute/" + attribute.uuid + "/since/" + lastTimestamp, function(dataSince) {
                 console.log(dataSince);
                 if (dataSince.data.length > 0) {
@@ -363,7 +415,7 @@ function addAttributeGraph(attribute) {
 }
 
 // adds empty pie chart
-function createEmptyPieChart(container, attribute) {
+function createEmptyPieChart(container, attribute, entityName) {
     return new Highcharts.Chart({
         chart: {
             renderTo: container.attr('id'),
@@ -372,7 +424,7 @@ function createEmptyPieChart(container, attribute) {
             plotShadow: false
         },
         title: {
-            text: attribute.name
+            text: entityName + ': ' + attribute.name
         },
         tooltip: {
             pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b> ({point.y})'
@@ -402,15 +454,15 @@ function createEmptyPieChart(container, attribute) {
 }
 
 // adds empty line chart
-function createEmptyLineChart(container, attribute) {
+function createEmptyLineChart(container, attribute, entityName) {
     return new Highcharts.Chart({
         chart: {
             renderTo: container.attr('id'),
-            type: 'spline',
+//            type: 'spline',
             animation: Highcharts.svg
         },
         title: {
-            text: attribute.name
+            text: entityName + ': ' + attribute.name
         },
         xAxis: {
             type: 'datetime',
@@ -444,6 +496,12 @@ function hideAttributeGraph(attribute) {
     console.log("Removing graph for attribute " + attribute.uuid);
     $("#a_" + attribute.uuid + "_graph").remove();
     clearInterval($("#a_" + attribute.uuid + "_input").data("interval"));
+
+    // set last container class to end
+    $("#live_metrics .attributeGraphDiv").each(function() {
+        $(this).removeClass('end');
+    });
+    $("#live_metrics .attributeGraphDiv:last-child").addClass('end');
 }
 
 // displays status in the top right corner
