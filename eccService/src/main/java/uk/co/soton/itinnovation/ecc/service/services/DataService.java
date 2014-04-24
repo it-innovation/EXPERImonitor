@@ -249,6 +249,64 @@ public class DataService {
     }
 
     /**
+     *
+     * @param uuid
+     * @return attribute by UUID.
+     */
+    public Attribute getAttribute(String uuid) {
+        if (uuid == null) {
+            logger.error("Failed to return attribute, requested id is NULL");
+            return null;
+        }
+
+        if (!started) {
+            logger.error("Failed to return attribute with id [" + uuid + "]: data service not yet started");
+            return null;
+        } else {
+            if (experimentService.getActiveExperiment() == null) {
+                logger.error("Failed to return attribute with id [" + uuid + "]: no active experiment");
+                return null;
+            } else {
+                try {
+                    return entityDAO.getAttribute(UUID.fromString(uuid));
+                } catch (Exception e) {
+                    logger.error("Failed to return attribute with id [" + uuid + "]", e);
+                    return null;
+                }
+            }
+        }
+    }
+
+    /**
+     *
+     * @param uuid
+     * @return attribute by UUID.
+     */
+    public Entity getEntity(String uuid) {
+        if (uuid == null) {
+            logger.error("Failed to return entity, requested id is NULL");
+            return null;
+        }
+
+        if (!started) {
+            logger.error("Failed to return entity with id [" + uuid + "]: data service not yet started");
+            return null;
+        } else {
+            if (experimentService.getActiveExperiment() == null) {
+                logger.error("Failed to return entity with id [" + uuid + "]: no active experiment");
+                return null;
+            } else {
+                try {
+                    return entityDAO.getEntity(UUID.fromString(uuid), false);
+                } catch (Exception e) {
+                    logger.error("Failed to return entity with id [" + uuid + "]", e);
+                    return null;
+                }
+            }
+        }
+    }
+
+    /**
      * Use this method to retrieve ALL MeasurementSets (WITHOUT measurement
      * data) related to a specific attribute in an experiment. This method is
      * useful if you want to retrieve all measurement data (irrespective of
@@ -432,6 +490,42 @@ public class DataService {
         }
 
         return resultSet;
+    }
+
+    /**
+     *
+     * @param attributeId
+     * @return
+     */
+    public EccMeasurementSet getAllMeasurementsForAttribute(String attributeId) {
+
+        // TODO: make safe + convert to stream
+        Attribute a = getAttribute(attributeId);
+        EccMeasurementSet result = new EccMeasurementSet();
+        ArrayList<EccMeasurement> data = new ArrayList<EccMeasurement>();
+        result.setData(data);
+
+        try {
+            Set<MeasurementSet> msetInfo = getAllEmptyMeasurementSetsForAttribute(experimentService.getActiveExperiment().getUUID(), a);
+            MeasurementSet ms = msetInfo.iterator().next();
+//            result.setType(ms.getMetric().getMetricType().name());
+//            result.setUnit(ms.getMetric().getUnit().getName());
+            for (Measurement m : expReportDAO.getReportForAllMeasurements(ms.getID(), true).getMeasurementSet().getMeasurements()) {
+                data.add(new EccMeasurement(m.getTimeStamp(), m.getValue()));
+            }
+        } catch (Exception e) {
+            if (e instanceof NoDataException) {
+                logger.error("No data found for attribute [" + attributeId + "]");
+            } else {
+                logger.error("Failed to get data for attribute [" + attributeId + "]", e);
+            }
+        }
+
+        if (data.size() > 1) {
+            Collections.sort(data, new EccMeasurementsComparator());
+        }
+
+        return result;
     }
 
     /**
