@@ -233,7 +233,13 @@ public class ExperimentService {
     }
 
     public boolean isExperimentInProgress() {
-        return expStateModel.isExperimentActive();
+        
+        boolean result = false;
+        
+        if (started)
+            result = expStateModel.isExperimentActive();
+        
+        return result;
     }
 
     /**
