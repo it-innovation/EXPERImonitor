@@ -15,6 +15,18 @@
 
 ## Configuration for this script (this part is Ruby) ##
 
+# check for existence of required war files
+
+if ( !File.file?('./thirdPartyLibs/openrdf-sesame.war') )
+	abort("Could not find openrdf-sesame.war in thirdPartyLibs directory")
+end
+
+if ( !File.file?('./thirdPartyLibs/openrdf-sesame.war') )
+	abort("Could not find openrdf-workbench.war in thirdPartyLibs directory")
+end
+
+puts "*.war files found, starting installation..."
+
 hostname = "ECC-20"
 ram = "512"
 
