@@ -169,7 +169,6 @@ function showListOfClients(clientMetadataArray) {
             });
         }
     });
-    $("#clients_details").append("<label>Select a client to display its data for all entities in Live Metrics</label>");
 
     var entitiesDropdownLabel = $("<label>Filter by client or show all</label>").appendTo("#entities_details");
     entitiesDropdownList = $("<select></select>").appendTo(entitiesDropdownLabel);
@@ -192,7 +191,6 @@ function showListOfClients(clientMetadataArray) {
             });
         }
     });
-    $("#entities_details").append("<label>Select an entity to display its data for all attributes in Live Metrics</label>");
 
     var attrDropdownLabel = $("<label>Filter by entity or show all</label>").appendTo("#attribute_details");
     attrDropdownList = $("<select></select>").appendTo(attrDropdownLabel);
@@ -215,43 +213,41 @@ function showListOfClients(clientMetadataArray) {
             });
         }
     });
-    $("#attribute_details").append("<label>Select an attribute to display its data in Live Metrics</label>");
 
     $.each(clientMetadataArray, function(key, client) {
         var clientContainerWrapper = $("<div class='clientContainer row fullWidth collapse'></div>").appendTo("#clients_details");
-        var clientCheckboxContainer = $("<div class='small-1 columns text-right'></div>").appendTo(clientContainerWrapper);
-        var clientCheckbox = $("<input type='checkbox' name='clientCheckboxes' id='c_" + client.uuid + "_input'/>").appendTo(clientCheckboxContainer);
-        clientCheckbox.data("client", client);
-        var clientContainer = $("<div class='small-11 columns'></div>").appendTo(clientContainerWrapper);
+
+        var clientContainer = $("<div class='small-12 columns'></div>").appendTo(clientContainerWrapper);
         clientContainer.append("<p class='details'><strong>" + client.name + "</strong></p>");
         clientContainer.append("<p class='sub_details_mid'>Connected: " + client.connected + "</p>");
         clientContainer.append("<p class='sub_details'>UUID: " + client.uuid + "</p>");
         var clientStatus = client.connected === true ? 'connected' : 'disconnected';
         clientContainerWrapper.data("status", clientStatus);
+
+        var actionsParagraph = $("<p class='sub_details'></p>").appendTo(clientContainer);
+        var clientAddToLiveMetricsLink = $("<a class='clientCheckbox' id='c_" + client.uuid + "_input' href='#'>Add to Live metrics</a>").appendTo(actionsParagraph);
+        clientAddToLiveMetricsLink.data("client", client);
+        actionsParagraph.append("<a class='downloadLink' href='" + BASE_URL + "/data/export/client/" + client.uuid + "'>Download CSV data</a>");
+
         entitiesDropdownList.append("<option value='" + client.uuid + "'>" + client.name + " (" + clientStatus + ")</option>");
         CLIENT_MODELS_AJAX.push(appendEntitiesFromClient(client.uuid, client, attrDropdownList));
 
-        clientCheckbox.change(function() {
+        clientAddToLiveMetricsLink.click(function(e) {
+            e.preventDefault();
             var client = $(this).data("client");
-            if (this.checked) {
-                $("input.entityCheckbox").each(function() {
-                    if ($(this).data("clientId") === client.uuid) {
-                        $(this).prop('checked', true);
-                        $(this).trigger("change");
-                    }
-                });
-//                $.each(entity.attributes, function(akey, attribute) {
-//                    $("#a_" + attribute.uuid + "_input").prop('checked', true);
-//                    $("#a_" + attribute.uuid + "_input").trigger("change");
-//                });
+            if (!$(this).hasClass('actionSelected')) {
+                $(this).text("Remove from Live Metrics");
+                $(this).addClass('actionSelected');
             } else {
-                $("input.entityCheckbox").each(function() {
-                    if ($(this).data("clientId") === client.uuid) {
-                        $(this).prop('checked', false);
-                        $(this).trigger("change");
-                    }
-                });
+                $(this).text("Add to Live Metrics");
+                $(this).removeClass('actionSelected');
+
             }
+            $("a.entityCheckbox").each(function() {
+                if ($(this).data("clientId") === client.uuid) {
+                    $(this).trigger("click");
+                }
+            });
         });
     });
 
@@ -259,6 +255,7 @@ function showListOfClients(clientMetadataArray) {
     $.when.apply($, CLIENT_MODELS_AJAX).done(function() {
         clientsDropdownList.prop('selectedIndex', 1);
         clientsDropdownList.change();
+        // TODO: sort entities list alphabetically
         entitiesDropdownList.prop('selectedIndex', 1);
         entitiesDropdownList.change();
         attrDropdownList.prop('selectedIndex', 1);
@@ -272,40 +269,40 @@ function appendEntitiesFromClient(uuid, client, attrDropdownList) {
         console.log(data);
         $.each(data, function(ekey, entity) {
             var entityContainerWrapper = $("<div class='entityContainer row fullWidth collapse'></div>").appendTo("#entities_details");
-            var entityCheckboxContainer = $("<div class='small-1 columns text-right'></div>").appendTo(entityContainerWrapper);
-            var entityCheckbox = $("<input type='checkbox' name='entityCheckboxes' class='entityCheckbox' id='e_" + entity.uuid + "_input'/>").appendTo(entityCheckboxContainer);
-            entityCheckbox.data("entity", entity);
-            entityCheckbox.data("clientId", uuid);
-            var entityContainer = $("<div class='small-11 columns'></div>").appendTo(entityContainerWrapper);
+
+            var entityContainer = $("<div class='small-12 columns'></div>").appendTo(entityContainerWrapper);
             entityContainer.append("<p class='details'><strong>" + entity.name + "</strong></p>");
             entityContainer.append("<p class='sub_details_mid'>Client: " + client.name + "</p>");
             entityContainer.append("<p class='sub_details_mid'>Desc: " + entity.description + "</p>");
             entityContainer.append("<p class='sub_details'>UUID: " + entity.uuid + "</p>");
+
+            var actionsParagraph = $("<p class='sub_details'></p>").appendTo(entityContainer);
+            var entityAddToLiveMetricsLink = $("<a class='entityCheckbox' id='e_" + entity.uuid + "_input' href='#'>Add to Live metrics</a>").appendTo(actionsParagraph);
+            entityAddToLiveMetricsLink.data("entity", entity);
+            entityAddToLiveMetricsLink.data("clientId", uuid);
+            actionsParagraph.append("<a class='downloadLink' href='" + BASE_URL + "/data/export/entity/" + entity.uuid + "'>Download CSV data</a>");
+
             entityContainerWrapper.data("clientId", uuid);
-            entityCheckbox.change(function() {
+            entityAddToLiveMetricsLink.click(function(e) {
+                e.preventDefault();
                 var entity = $(this).data("entity");
-                if (this.checked) {
-                    $.each(entity.attributes, function(akey, attribute) {
-                        $("#a_" + attribute.uuid + "_input").prop('checked', true);
-                        $("#a_" + attribute.uuid + "_input").trigger("change");
-                    });
+                if (!$(this).hasClass('actionSelected')) {
+                    $(this).text("Remove from Live Metrics");
+                    $(this).addClass('actionSelected');
                 } else {
-                    $.each(entity.attributes, function(akey, attribute) {
-                        $("#a_" + attribute.uuid + "_input").prop('checked', false);
-                        $("#a_" + attribute.uuid + "_input").trigger("change");
-                    });
-                    ;
+                    $(this).text("Add to Live Metrics");
+                    $(this).removeClass('actionSelected');
+
                 }
+                $.each(entity.attributes, function(akey, attribute) {
+                    $("#a_" + attribute.uuid + "_input").trigger("click");
+                });
             });
 
             attrDropdownList.append("<option value='" + entity.uuid + "'>" + entity.name + " (" + client.name + " client)" + "</option>");
             $.each(entity.attributes, function(akey, attribute) {
                 var attributeContainerWrapper = $("<div class='attributeContainer row fullWidth collapse'></div>").appendTo("#attribute_details");
-                var attributeCheckboxContainer = $("<div class='small-1 columns text-right'></div>").appendTo(attributeContainerWrapper);
-                var attributeCheckbox = $("<input type='checkbox' name='attributeCheckboxes' id='a_" + attribute.uuid + "_input'/>").appendTo(attributeCheckboxContainer);
-                attributeCheckbox.data("attribute", attribute);
-                attributeCheckbox.data("entityName", entity.name);
-                var attributeContainer = $("<div class='small-11 columns'></div>").appendTo(attributeContainerWrapper);
+                var attributeContainer = $("<div class='small-12 columns'></div>").appendTo(attributeContainerWrapper);
                 attributeContainer.append("<p class='details'><strong>" + attribute.name + "</strong></p>");
                 attributeContainer.append("<p class='sub_details_mid'>Client: " + client.name + "</p>");
                 attributeContainer.append("<p class='sub_details_mid'>Entity: " + entity.name + "</p>");
@@ -313,15 +310,24 @@ function appendEntitiesFromClient(uuid, client, attrDropdownList) {
                 attributeContainer.append("<p class='sub_details_mid'>UUID: " + attribute.uuid + "</p>");
                 attributeContainer.append("<p class='sub_details_mid'>Type: " + attribute.type + "</p>");
                 attributeContainer.append("<p class='sub_details_mid'>Unit: " + attribute.unit + "</p>");
-                attributeContainer.append("<p class='sub_details'><a href='" + BASE_URL + "/data/export/attribute/" + attribute.uuid + "'>Download CSV data</a></p>");
+                var actionsParagraph = $("<p class='sub_details'></p>").appendTo(attributeContainer);
+                var attributeAddToLiveMetricsLink = $("<a id='a_" + attribute.uuid + "_input' href='#'>Add to Live metrics</a>").appendTo(actionsParagraph);
+                attributeAddToLiveMetricsLink.data("attribute", attribute);
+                attributeAddToLiveMetricsLink.data("entityName", entity.name);
+                actionsParagraph.append("<a class='downloadLink' href='" + BASE_URL + "/data/export/attribute/" + attribute.uuid + "'>Download CSV data</a>");
                 attributeContainerWrapper.data("entityId", entity.uuid);
 
-                attributeCheckbox.change(function() {
+                attributeAddToLiveMetricsLink.click(function(e) {
+                    e.preventDefault();
                     var attribute = $(this).data("attribute");
                     var entityName = $(this).data("entityName");
-                    if (this.checked) {
+                    if (!$(this).hasClass('actionSelected')) {
+                        $(this).text("Remove from Live Metrics");
+                        $(this).addClass('actionSelected');
                         addAttributeGraph(attribute, entityName);
                     } else {
+                        $(this).text("Add to Live Metrics");
+                        $(this).removeClass('actionSelected');
                         hideAttributeGraph(attribute);
                     }
                 });

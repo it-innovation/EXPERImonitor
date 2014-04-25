@@ -29,3 +29,12 @@ p.sub_details_mid {
     padding: 0 0 0 16px;
     font-size: small;
 }
+
+a.downloadLink {
+    padding-left: 15px;
+}
+
+a.actionSelected {
+    background-color: #0078a0;
+    color: #f2f2f2;
+}
