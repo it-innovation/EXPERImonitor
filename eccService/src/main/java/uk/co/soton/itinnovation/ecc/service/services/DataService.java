@@ -280,9 +280,10 @@ public class DataService {
     /**
      *
      * @param uuid
+     * @param withAttributes
      * @return attribute by UUID.
      */
-    public Entity getEntity(String uuid) {
+    public Entity getEntity(String uuid, boolean withAttributes) {
         if (uuid == null) {
             logger.error("Failed to return entity, requested id is NULL");
             return null;
@@ -297,7 +298,7 @@ public class DataService {
                 return null;
             } else {
                 try {
-                    return entityDAO.getEntity(UUID.fromString(uuid), false);
+                    return entityDAO.getEntity(UUID.fromString(uuid), withAttributes);
                 } catch (Exception e) {
                     logger.error("Failed to return entity with id [" + uuid + "]", e);
                     return null;
@@ -515,7 +516,7 @@ public class DataService {
             }
         } catch (Exception e) {
             if (e instanceof NoDataException) {
-                logger.error("No data found for attribute [" + attributeId + "]");
+                logger.debug("No data found for attribute [" + attributeId + "]");
             } else {
                 logger.error("Failed to get data for attribute [" + attributeId + "]", e);
             }
