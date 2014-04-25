@@ -466,18 +466,20 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   @Override
   public void onClientRegistered( EMClientEx client, boolean reconnected )
   {
-    // Check client and phases are ok
-    if ( client != null ) 
-    {
-      client.setIsConnected( true );
+        // If client is good, notify and insert into the experiment lifecycle
+        // (auto re-registering clients are made visible to clients of the EM
+        // at a slightly later stage (after they come back with a metric model)
+        if ( client != null ) 
+        {
+            client.setIsConnected( true );
      
 			// Notify listener we have a connected client first...
 			lifecycleListener.onClientConnected( client, reconnected );
       
 			// ... then set about adding them to the lifecycle
 			injectClientIntoLifecycle( client, reconnected );
-    }
-    else lmLogger.error( "Could not register client; client is null" );
+        }
+        else lmLogger.error( "Could not register client; client is null" );
   }
   
   // GeneratorDiscoveryPhaseListener -------------------------------------------

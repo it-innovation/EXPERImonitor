@@ -206,21 +206,21 @@ public class EMConnectionManager implements IEMMonitorEntryPoint_ProviderListene
     return knownClients;
   }
 	
-	public void reRegisterEMClient( UUID userID, String userName )
-	{
-		if ( userID != null && userName != null )
+    public void reRegisterEMClient( UUID userID, String userName )
     {
-			boolean clientKnown				= historicClients.containsKey( userID );
-			EMClientEx incomingClient = createRegisteredClient( userID, userName );
-      
-      // Notify listener of new connection
-      if ( incomingClient != null )
-      {
-        incomingClient.setIsReRegistering( true );
-        connectionListener.onClientRegistered( incomingClient, clientKnown );
-      }
+        if ( userID != null && userName != null )
+        {
+            boolean clientKnown				= historicClients.containsKey( userID );
+            EMClientEx incomingClient = createRegisteredClient( userID, userName );
+
+            // Notify listener of new connection
+            if ( incomingClient != null )
+            {
+                incomingClient.setIsReRegistering( true );
+                connectionListener.onClientRegistered( incomingClient, clientKnown );
+            }
+        }
     }
-	}
   
   // IEMMonitorEntryPoint_ProviderListener -------------------------------------
   @Override
