@@ -191,17 +191,17 @@ public class DataService {
      *
      * @param expID - UUID of the experiment required
      * @return - Experiment instance with all currently known metric generators
-     * @throws Exception - throws if the service is not initialised or there was
-     * a problem with the database
      */
-    public Experiment getExperimentWithMetricModels(UUID expID) throws Exception {
+    public Experiment getExperimentWithMetricModels(UUID expID) {
 
         // Safety first
         if (!started) {
-            throw new Exception("Cannot get experiment: service not started");
+            logger.error("Failed to get experiment: service not started");
+            return null;
         }
         if (expID == null) {
-            throw new Exception("Could not get experiment: ID is null");
+            logger.error("Failed to get experiment: ID is null");
+            return null;
         }
 
         Experiment experiment = null;
@@ -209,10 +209,7 @@ public class DataService {
         try {
             experiment = experimentDAO.getExperiment(expID, true);
         } catch (Exception ex) {
-            String msg = "Could not retrieve experiment: " + ex.getMessage();
-            logger.warn(msg);
-
-            throw new Exception(msg);
+            logger.error("Could not retrieve experiment: " + ex.getMessage());
         }
 
         return experiment;
