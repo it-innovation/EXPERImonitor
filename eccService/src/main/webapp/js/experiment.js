@@ -135,9 +135,10 @@ function startMainMonitor(experimentData) {
 function showActiveExperimentDetails(experimentMetadata) {
     $("#experiment_details").empty();
     $("#experiment_details").append("<p class='details'>Project: " + experimentMetadata.experimentID + "</p>");
-    $("#experiment_details").append("<p class='details'>Experiment name: " + experimentMetadata.name + "</p>");
-    $("#experiment_details").append("<p class='details'>Experiment description: " + experimentMetadata.description + "</p>");
-    $("#experiment_details").append("<p class='details'>Experiment started: " + new Date(experimentMetadata.startTime) + "</p>");
+    $("#experiment_details").append("<p class='details'>Name: " + experimentMetadata.name + "</p>");
+    $("#experiment_details").append("<p class='details'>Description: " + experimentMetadata.description + "</p>");
+    $("#experiment_details").append("<p class='details'>Started: " + new Date(experimentMetadata.startTime) + "</p>");
+    $("#download_experiment_data").attr('href', BASE_URL + "/data/export/experiment/" + experimentMetadata.uuid);
 }
 
 // show list of clients
