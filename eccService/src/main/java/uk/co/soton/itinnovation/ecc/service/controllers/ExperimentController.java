@@ -26,6 +26,7 @@ package uk.co.soton.itinnovation.ecc.service.controllers;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.UUID;
 import org.slf4j.Logger;
@@ -47,12 +48,16 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EM
 import uk.co.soton.itinnovation.ecc.service.domain.EccAttribute;
 import uk.co.soton.itinnovation.ecc.service.domain.EccClient;
 import uk.co.soton.itinnovation.ecc.service.domain.EccEntity;
+import uk.co.soton.itinnovation.ecc.service.domain.EccExperiment;
 import uk.co.soton.itinnovation.ecc.service.domain.ExperimentNameDescription;
 import uk.co.soton.itinnovation.ecc.service.services.ConfigurationService;
+import uk.co.soton.itinnovation.ecc.service.services.DataService;
 import uk.co.soton.itinnovation.ecc.service.services.ExperimentService;
-import uk.co.soton.itinnovation.ecc.service.utils.EccAttributeComparator;
-import uk.co.soton.itinnovation.ecc.service.utils.EccClientComparator;
-import uk.co.soton.itinnovation.ecc.service.utils.EccEntityComparator;
+import uk.co.soton.itinnovation.ecc.service.utils.Convert;
+import uk.co.soton.itinnovation.ecc.service.utils.EccAttributesComparator;
+import uk.co.soton.itinnovation.ecc.service.utils.EccClientsComparator;
+import uk.co.soton.itinnovation.ecc.service.utils.EccEntitiesComparator;
+import uk.co.soton.itinnovation.ecc.service.utils.EccExperimentsComparator;
 
 /**
  * Exposes ECC experiment service endpoints.
@@ -69,15 +74,122 @@ public class ExperimentController {
     @Autowired
     ExperimentService experimentService;
 
+    @Autowired
+    DataService dataService;
+
     /**
-     * @return configuration of this service, null if not yet configured.
+     * @return list of all known experiments.
      */
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public Experiment getActiveExperiment() {
+    public ArrayList<EccExperiment> getAllExperiments() {
+        logger.debug("Returning details of all known experiments");
+
+        ArrayList<EccExperiment> result = new ArrayList<EccExperiment>();
+
+        for (Experiment e : dataService.getAllKnownExperiments()) {
+            result.add(Convert.experimentToEccExperiment(e));
+        }
+
+        if (result.size() > 1) {
+            Collections.sort(result, new EccExperimentsComparator());
+        }
+
+        return result;
+    }
+
+    /**
+     * @return list of latest 10 experiments.
+     */
+    @RequestMapping(method = RequestMethod.GET, value = "/latest")
+    @ResponseBody
+    public ArrayList<EccExperiment> getLatestExperiments() {
+        logger.debug("Returning details of latest 10 experiments");
+
+        ArrayList<EccExperiment> result = new ArrayList<EccExperiment>();
+
+        // check for current experiment
+        UUID currentExperimentUuid = null;
+        if (experimentService.isExperimentInProgress()) {
+            currentExperimentUuid = experimentService.getActiveExperiment().getUUID();
+        }
+
+        for (Experiment e : dataService.getAllKnownExperiments()) {
+            // TODO: tidy this up
+            if (currentExperimentUuid == null) {
+                result.add(Convert.experimentToEccExperiment(e));
+            } else {
+                if (!e.getUUID().equals(currentExperimentUuid)) {
+                    result.add(Convert.experimentToEccExperiment(e));
+                }
+            }
+        }
+
+        if (result.size() > 1) {
+            Collections.sort(result, new EccExperimentsComparator());
+        }
+
+        // TODO: move to database
+        if (result.size() > 10) {
+            return new ArrayList<EccExperiment>(result.subList(0, 9));
+        } else {
+            return result;
+        }
+    }
+
+    /**
+     * @return current experiment.
+     */
+    @RequestMapping(method = RequestMethod.GET, value = "/current")
+    @ResponseBody
+    public EccExperiment getCurrentExperiment() {
         logger.debug("Returning current experiment details");
 
-        return experimentService.getActiveExperiment();
+        return Convert.experimentToEccExperiment(experimentService.getActiveExperiment());
+    }
+
+    /**
+     * @param experimentUuid
+     * @return list of entities for the client.
+     */
+    @RequestMapping(method = RequestMethod.GET, value = "/id/{experimentUuid}")
+    @ResponseBody
+    public EccExperiment getExperimentByUuid(@PathVariable String experimentUuid) {
+
+        logger.debug("Returning experiment with UUID [" + experimentUuid + "]");
+        if (!experimentService.isStarted()) {
+            logger.error("Failed to fetch experiment [" + experimentUuid + "] the service is not yet started");
+            return null;
+        } else {
+            try {
+                return Convert.experimentToEccExperiment(experimentService.getExperiment(experimentUuid));
+            } catch (Exception e) {
+                logger.error("Failed to fetch experiment [" + experimentUuid + "]", e);
+                return null;
+            }
+        }
+    }
+
+    /**
+     * @param experimentUuid
+     * @return list of entities for the client.
+     */
+    @RequestMapping(method = RequestMethod.POST, value = "/id/{experimentUuid}")
+    @ResponseBody
+    public EccExperiment relaunchExperimentByUuid(@PathVariable String experimentUuid) {
+
+        logger.debug("Restarting experiment with UUID [" + experimentUuid + "]");
+        if (!experimentService.isStarted()) {
+            logger.error("Failed to restart experiment [" + experimentUuid + "] the service is not yet started");
+            return null;
+        } else {
+            try {
+                return Convert.experimentToEccExperiment(experimentService.reStartExperiment(experimentUuid));
+            } catch (Exception e) {
+                logger.error("Failed to restart experiment [" + experimentUuid + "]", e);
+                return null;
+            }
+        }
     }
 
     /**
@@ -104,7 +216,7 @@ public class ExperimentController {
         }
         logger.debug("Returning currently connected clients (" + result.size() + ")");
         if (result.size() > 0) {
-            Collections.sort(result, new EccClientComparator());
+            Collections.sort(result, new EccClientsComparator());
         }
         return result;
     }
@@ -140,14 +252,14 @@ public class ExperimentController {
                         ms = MetricHelper.getMeasurementSetForAttribute(a, mg);
                         attributes.add(new EccAttribute(a.getName(), a.getDescription(), a.getUUID(), a.getEntityUUID(), ms.getMetric().getMetricType().name(), ms.getMetric().getUnit().getName()));
                     }
-                    Collections.sort(attributes, new EccAttributeComparator());
+                    Collections.sort(attributes, new EccAttributesComparator());
                     tempEntity.setAttributes(attributes);
                     result.add(tempEntity);
                 }
             }
 
             if (result.size() > 1) {
-                Collections.sort(result, new EccEntityComparator());
+                Collections.sort(result, new EccEntitiesComparator());
             }
 
             logger.debug("Found " + result.size() + " entities for client [" + clientUuid + "]");
@@ -156,7 +268,6 @@ public class ExperimentController {
             logger.error("Failed to return the list of entities for client [" + clientUuid + "]", e);
         }
         return result;
-
     }
 
     /**
@@ -167,22 +278,33 @@ public class ExperimentController {
      */
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
-    public Experiment startExperiment(@RequestBody ExperimentNameDescription experimentNameDescription) {
+    public EccExperiment startExperiment(@RequestBody ExperimentNameDescription experimentNameDescription) {
         logger.debug("Starting new experiment: '" + experimentNameDescription.getName() + "' with description '" + experimentNameDescription.getDescription() + "'");
 
         if (!experimentService.isStarted()) {
-            logger.error("Failed to create new expiment: the service is not yet started");
+            logger.error("Failed to create new experiment: the service is not yet started");
             return null;
         } else {
             try {
                 Experiment result = experimentService.startExperiment(
                         configurationService.getSelectedEccConfiguration().getProjectName(),
                         experimentNameDescription.getName(), experimentNameDescription.getDescription());
-                return result;
+                return Convert.experimentToEccExperiment(result);
             } catch (Exception e) {
                 logger.error("Failed to create new experiment", e);
                 return null;
             }
         }
+    }
+
+    /**
+     * @return current experiment.
+     */
+    @RequestMapping(method = RequestMethod.GET, value = "/current/stop")
+    @ResponseBody
+    public boolean stopCurrentExperiment() {
+        logger.debug("Stopping current experiment");
+
+        return experimentService.stopExperiment();
     }
 }
