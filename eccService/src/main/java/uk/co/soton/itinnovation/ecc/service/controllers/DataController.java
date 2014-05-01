@@ -56,9 +56,9 @@ import uk.co.soton.itinnovation.ecc.service.domain.EccMeasurementSet;
 import uk.co.soton.itinnovation.ecc.service.services.ConfigurationService;
 import uk.co.soton.itinnovation.ecc.service.services.DataService;
 import uk.co.soton.itinnovation.ecc.service.services.ExperimentService;
-import uk.co.soton.itinnovation.ecc.service.utils.AttributeComparator;
-import uk.co.soton.itinnovation.ecc.service.utils.EccAttributeComparator;
-import uk.co.soton.itinnovation.ecc.service.utils.EccEntityComparator;
+import uk.co.soton.itinnovation.ecc.service.utils.AttributesComparator;
+import uk.co.soton.itinnovation.ecc.service.utils.EccAttributesComparator;
+import uk.co.soton.itinnovation.ecc.service.utils.EccEntitiesComparator;
 
 /**
  * Exposes experimental data.
@@ -77,6 +77,38 @@ public class DataController {
 
     @Autowired
     DataService dataService;
+
+    @RequestMapping(method = RequestMethod.GET, value = "/entities/{experimentUuid}")
+    @ResponseBody
+    public ArrayList<EccEntity> getEntitiesForExperiment(@PathVariable String experimentUuid) {
+        logger.debug("Returning entities for experiment [" + experimentUuid + "]");
+        ArrayList<EccEntity> result = new ArrayList<EccEntity>();
+        EccEntity tempEntity;
+        ArrayList<EccAttribute> attributes;
+        MeasurementSet ms;
+        try {
+            for (Entity e : dataService.getEntitiesForExperiment(UUID.fromString(experimentUuid))) {
+                tempEntity = new EccEntity();
+                attributes = new ArrayList<EccAttribute>();
+                tempEntity.setName(e.getName());
+                tempEntity.setDescription(e.getDescription());
+                tempEntity.setUuid(e.getUUID());
+
+                for (Attribute a : e.getAttributes()) {
+                    // TODO: tidy up
+                    ms = dataService.getAllEmptyMeasurementSetsForAttribute(UUID.fromString(experimentUuid), a).iterator().next();
+//                    ms = MetricHelper.getMeasurementSetForAttribute(a, mg);
+                    attributes.add(new EccAttribute(a.getName(), a.getDescription(), a.getUUID(), a.getEntityUUID(), ms.getMetric().getMetricType().name(), ms.getMetric().getUnit().getName()));
+                }
+                Collections.sort(attributes, new EccAttributesComparator());
+                tempEntity.setAttributes(attributes);
+                result.add(tempEntity);
+            }
+        } catch (Exception ex) {
+            logger.error("Failed to return entities for experiment [" + experimentUuid + "]", ex);
+        }
+        return result;
+    }
 
     /**
      * Returns 10 latest data points for an attribute.
@@ -193,7 +225,7 @@ public class DataController {
             // get attributes and sort alphabetically
             ArrayList<Attribute> attributes = new ArrayList<Attribute>(entity.getAttributes());
             logger.debug("Entity [" + entityId + "] has " + attributes.size() + " attributes");
-            Collections.sort(attributes, new AttributeComparator());
+            Collections.sort(attributes, new AttributesComparator());
             String fileName = entity.getName() + ".csv";
             response.setContentType("text/csv");
             response.setHeader("Content-disposition", "attachment; filename=\"" + fileName + "\"");
@@ -253,14 +285,14 @@ public class DataController {
                         ms = MetricHelper.getMeasurementSetForAttribute(a, mg);
                         attributes.add(new EccAttribute(a.getName(), a.getDescription(), a.getUUID(), a.getEntityUUID(), ms.getMetric().getMetricType().name(), ms.getMetric().getUnit().getName()));
                     }
-                    Collections.sort(attributes, new EccAttributeComparator());
+                    Collections.sort(attributes, new EccAttributesComparator());
                     tempEntity.setAttributes(attributes);
                     entities.add(tempEntity);
                 }
             }
 
             if (entities.size() > 1) {
-                Collections.sort(entities, new EccEntityComparator());
+                Collections.sort(entities, new EccEntitiesComparator());
             }
 
             String fileName = theClient.getName() + ".csv";
@@ -271,7 +303,7 @@ public class DataController {
             writer.write("Entity Name, Entity UUID, Attribute Name, Attribute UUID, Timestamp, Value");
             for (EccEntity e : entities) {
                 attributes = e.getAttributes();
-                Collections.sort(attributes, new EccAttributeComparator());
+                Collections.sort(attributes, new EccAttributesComparator());
 
                 for (EccAttribute a : attributes) {
                     logger.debug("Writing attribute [" + a.getUuid().toString() + "] " + a.getName());
@@ -329,14 +361,14 @@ public class DataController {
                         ms = MetricHelper.getMeasurementSetForAttribute(a, mg);
                         attributes.add(new EccAttribute(a.getName(), a.getDescription(), a.getUUID(), a.getEntityUUID(), ms.getMetric().getMetricType().name(), ms.getMetric().getUnit().getName()));
                     }
-                    Collections.sort(attributes, new EccAttributeComparator());
+                    Collections.sort(attributes, new EccAttributesComparator());
                     tempEntity.setAttributes(attributes);
                     entities.add(tempEntity);
                 }
             }
 
             if (entities.size() > 1) {
-                Collections.sort(entities, new EccEntityComparator());
+                Collections.sort(entities, new EccEntitiesComparator());
             }
 
             try {
@@ -349,7 +381,7 @@ public class DataController {
                 writer.write("Entity Name, Entity UUID, Attribute Name, Attribute UUID, Timestamp, Value");
                 for (EccEntity e : entities) {
                     attributes = e.getAttributes();
-                    Collections.sort(attributes, new EccAttributeComparator());
+                    Collections.sort(attributes, new EccAttributesComparator());
 
                     for (EccAttribute a : attributes) {
                         logger.debug("Writing attribute [" + a.getUuid().toString() + "] " + a.getName());
