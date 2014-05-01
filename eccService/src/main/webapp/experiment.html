@@ -22,8 +22,8 @@
 
                     </div>
                     <div class="large-5 columns text-right" id="experiment_controls">
-                        <p class='details'>Live monitoring phase > <a href="#">Go to Tear down phase</a></p>
-                        <p class='details'><a href="#">Stop experiment</a></p>
+                        <!--<p class='details'>Live monitoring phase > <a href="#">Go to Tear down phase</a></p>-->
+                        <p class='details'><a href="#" id="stop_experiment">Stop experiment</a></p>
                         <p class='details'><a href="#" id="download_experiment_data">Download CSV data</a></p>
                     </div>
                 </div>
@@ -54,31 +54,59 @@
             <div class="small-12 columns">
                 <h4>Live Metrics</h4>
                 <div class="row"  id="live_metrics">
-                    <!--                    <div class="small-12 columns" id="live_metrics">
 
-                                        </div>-->
                 </div>
             </div>
         </div>
 
         <!-- ***** -->
-        <div id="nameExperimentModal" class="reveal-modal" data-reveal>
-            <h2>Name and describe your new EXPERIMEDIA experiment</h2>
-            <p class="lead">Type name/description below or close this dialog to use defaults</p>
-            <label>New project name
-                <input type="text" name="newProject[name]" id="newProjectName"/>
-            </label>
-            <label>New project description
-                <input type="text" name="newProject[description]" id="newProjectDescription"/>
-            </label>
-            <a href="#" class="button text-center" id="setProjectNameAndDescription">Let's Go</a>
-            <a class="close-reveal-modal">&#215;</a>
+        <div id="nameExperimentModal" class="reveal-modal medium" data-reveal>
+            <div class="row fullWidth">
+                <h3>Select an existing experiment or start a new one</h3>
+                <form id="newOldExperimentsForm">
+                    <div class="currentProjectContainer hide">
+                        <input type="radio" name="projectSelectionSet" value="old" id="currentProjectRadio">
+                        <label for="currentProjectRadio">Current experiment</label>
+
+                        <div id="currentProjectDetails" class="experimentsSelectionDetails">
+                        </div>
+                    </div>
+
+                    <input type="radio" name="projectSelectionSet" value="old" id="oldProjectRadio">
+                    <label for="oldProjectRadio">Use one of the latest experiments:</label>
+
+                    <div id="oldProjects" class="experimentsSelection">
+                    </div>
+                    <div id="oldProjectDetails" class="experimentsSelectionDetails">
+                    </div>
+
+                    <input type="radio" name="projectSelectionSet" value="new" id="newProjectRadio">
+                    <label for="newProjectRadio">Start new experiment</label>
+
+                    <div id="createNewProject" class="experimentsSelection">
+                        <label>New experiment name
+                            <input type="text" name="newProject[name]" id="newProjectName"/>
+                        </label>
+                        <label>New experiment description
+                            <input type="text" name="newProject[description]" id="newProjectDescription"/>
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="row fullWidth">
+                <div class="small-12 columns text-center">
+                    <a href="#" class="button" id="setProjectNameAndDescription">Let's Go</a>
+                </div>
+            </div>
+            <!--<a class="close-reveal-modal">&#215;</a>-->
+
         </div>
 
         <script src="js/vendor/jquery.min.js"></script>
         <script src="js/foundation.min.js"></script>
         <script src="js/vendor/jquery.serializeJSON.min.js"></script>
         <script src="js/vendor/highcharts.js"></script>
+        <script src="js/vendor/moment.min.js"></script>
         <script src="js/experiment.js"></script>
     </body>
 </html>

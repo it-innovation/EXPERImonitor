@@ -7,8 +7,155 @@ var CHART_SHIFT_DATA_THRESHOLD = 10;
 
 $(document).ready(function() {
     $(document).foundation();
+    $(document).on('open', '#nameExperimentModal', function() {
 
-    // check if the service is initialised successfully.
+// check for current experiment
+        $.getJSON(BASE_URL + "/experiments/ifinprogress", function(edata) {
+
+            if (edata !== false) { // current experiment in progress, load details
+                $(".currentProjectContainer").removeClass("hide");
+                $("#currentProjectRadio").prop('checked', true);
+                $.getJSON(BASE_URL + "/experiments/current", function(currentExperimentData) {
+                    console.log(currentExperimentData);
+                    fillWithExperimentMetadata($("#currentProjectDetails"), currentExperimentData);
+                    $("#currentProjectDetails").data("currentExperimentData", currentExperimentData);
+                });
+            }
+
+            $.ajax({
+                type: 'GET',
+                dataType: 'json',
+                contentType: 'application/json',
+                url: BASE_URL + "/experiments/latest",
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.log(jqXHR);
+                    console.log(textStatus);
+                    console.log(errorThrown);
+                },
+                success: function(data) {
+                    console.log(data);
+                    if (data.length > 0) {
+                        if ($(".currentProjectContainer").hasClass("hide")) {
+                            $("#oldProjectRadio").prop('checked', true);
+                        }
+                        var experimentsDropdownList = $("<select></select>").appendTo("#oldProjects");
+                        $.each(data, function(key, experiment) {
+                            var formattedDate;
+                            if (experiment.status === 'started') {
+                                formattedDate = moment(new Date(experiment.startTime)).format("ddd, MMM Do, HH:mm");
+                            } else {
+                                formattedDate = moment(new Date(experiment.endTime)).format("ddd, MMM Do, HH:mm");
+                            }
+
+                            var experimentEntry = $("<option value='" + experiment.uuid + "'>" + experiment.name + " (" + experiment.status + " at " + formattedDate + ")</option>").appendTo(experimentsDropdownList);
+                            experimentEntry.data("experiment", experiment);
+                            if (key === 0) {
+                                fillWithExperimentMetadata($("#oldProjectDetails"), experiment);
+                            }
+                        });
+                        experimentsDropdownList.change(function(e) {
+                            var sel = $("#oldProjects option:selected"); //.val();
+                            var experiment = sel.data("experiment");
+                            fillWithExperimentMetadata($("#oldProjectDetails"), experiment);
+                        });
+                    } else {
+                        $("#newProjectRadio").prop('checked', true);
+                    }
+                }
+            });
+        });
+    });
+    // modal let's go button
+    $("#setProjectNameAndDescription").click(function(e) {
+        e.preventDefault();
+        $('#nameExperimentModal').foundation('reveal', 'close');
+    });
+    // stop current experiment
+    $("#stop_experiment").click(function(e) {
+        e.preventDefault();
+        // stop experiment, update metadata
+        $.getJSON(BASE_URL + "/experiments/current/stop", function(data) {
+            if (data === true) {
+                $('#configStatus').attr('class', 'right success-color');
+                $('#configStatus').text('experiment stopped');
+            } else {
+                $('#configStatus').attr('class', 'right alert-color');
+                $('#configStatus').text('failed to stop current experiment');
+            }
+        });
+
+    });
+
+    // new name/description for an experiment
+    $(document).on('close', '#nameExperimentModal', function() {
+
+        if ($('#oldProjectRadio').is(':checked')) {
+            // show data page for an old experiment
+            var oldProjectUuid = $("#oldProjects option:selected").val();
+            console.log("Loading existing experiment with UUID: '" + oldProjectUuid + "'");
+            $.ajax({
+                type: 'GET',
+                dataType: 'json',
+                contentType: 'application/json',
+                url: BASE_URL + "/experiments/id/" + oldProjectUuid,
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.log(jqXHR);
+                    console.log(textStatus);
+                    console.log(errorThrown);
+                },
+                success: function(data) {
+                    console.log(data);
+                    if (data.hasOwnProperty('uuid')) {
+                        window.location.replace(BASE_URL + "/data.html?experimentId=" + data.uuid);
+                    } else {
+                        $('#configStatus').attr('class', 'right alert-color');
+                        $('#configStatus').text('failed to load experiment [' + oldProjectUuid + ']');
+                    }
+                }
+            });
+        } else if ($('#newProjectRadio').is(':checked')) {
+// force start new experiment
+            var newProjectName = $("#newProjectName").val();
+            var newProjectDescription = $("#newProjectDescription").val();
+            console.log("Starting new experiment: '" + newProjectName + "' (" + newProjectDescription + ")");
+            var newConfiguration = new Object();
+            newConfiguration.name = newProjectName;
+            newConfiguration.description = newProjectDescription;
+            console.log(newConfiguration);
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                url: BASE_URL + "/experiments",
+                data: JSON.stringify(newConfiguration),
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.log(jqXHR);
+                    console.log(textStatus);
+                    console.log(errorThrown);
+                },
+                success: function(data) {
+                    console.log(data);
+                    if (data.hasOwnProperty('uuid')) {
+                        $('#configStatus').attr('class', 'right success-color');
+                        $('#configStatus').text('experiment in progress');
+                        startMainMonitor(data);
+                    } else {
+                        $('#configStatus').attr('class', 'right alert-color');
+                        $('#configStatus').text('failed to create experiment');
+                    }
+                }
+            });
+        } else {
+// reconnect to current
+            console.log("Loading current experiment with uuid " + $("#currentProjectDetails").data("currentExperimentData").uuid);
+            startMainMonitor($("#currentProjectDetails").data("currentExperimentData"));
+        }
+
+    });
+//    $('#nameExperimentModal').foundation('reveal', 'open');
+//    return;
+
+// check if the service is initialised successfully.
     $.ajax({
         type: 'GET',
         url: BASE_URL + "/configuration/ifinitialised",
@@ -41,89 +188,38 @@ $(document).ready(function() {
                             // go back to main page to select configuration
                             // TODO: show what is wrong with the configuration
                             window.location.replace(BASE_URL + "/index.html");
-
                         } else if (cdata === true) {
                             // check if services started
                             $.getJSON(BASE_URL + "/configuration/ifservicesstarted", function(sdata) {
                                 showStatus(sdata, 'services started', 'services failed', 'unknown status');
-
                                 if (sdata === true) {
-                                    // check experiment status
-                                    $.getJSON(BASE_URL + "/experiments/ifinprogress", function(edata) {
-                                        showStatus(edata, 'experiment in progress', 'no experiment', 'unknown experiment status');
-
-                                        if (edata === false) {
-                                            // create new experiment
-                                            $('#nameExperimentModal').foundation('reveal', 'open');
-                                        } else {
-                                            // show details
-                                            $.getJSON(BASE_URL + "/experiments", function(aedata) {
-                                                console.log(aedata);
-                                                startMainMonitor(aedata);
-                                            });
-                                        }
-                                    });
-
+                                    $('#nameExperimentModal').foundation('reveal', 'open');
                                 }
                             });
-
                         } else {
                         }
                     }});
-
             } else {
             }
         }
     });
-
-    // modal let's go button
-    $("#setProjectNameAndDescription").click(function(e) {
-        e.preventDefault();
-        $('#nameExperimentModal').foundation('reveal', 'close');
-    });
-
-    // new name/description for a project
-    $(document).on('close', '#nameExperimentModal', function() {
-        var newProjectName = $("#newProjectName").val();
-        var newProjectDescription = $("#newProjectDescription").val();
-        console.log("Starting project: '" + newProjectName + "'/'" + newProjectDescription + "'");
-
-        var newConfiguration = new Object();
-        newConfiguration.name = newProjectName;
-        newConfiguration.description = newProjectDescription;
-        console.log(newConfiguration);
-
-        $.ajax({
-            type: 'POST',
-            dataType: 'json',
-            contentType: 'application/json',
-            url: BASE_URL + "/experiments",
-            data: JSON.stringify(newConfiguration),
-            error: function(jqXHR, textStatus, errorThrown) {
-                console.log(jqXHR);
-                console.log(textStatus);
-                console.log(errorThrown);
-            },
-            success: function(data) {
-                console.log(data);
-                if (data.hasOwnProperty('uuid')) {
-                    $('#configStatus').attr('class', 'right success-color');
-                    $('#configStatus').text('experiment in progress');
-                    startMainMonitor(data);
-                } else {
-                    $('#configStatus').attr('class', 'right alert-color');
-                    $('#configStatus').text('failed to create experiment');
-                }
-            }
-        });
-    });
 });
+// puts experiment metadata into a container
+function fillWithExperimentMetadata(container, experiment) {
+    container.empty();
+    var startTime = experiment.startTime === null ? 'n/a' : moment(new Date(experiment.startTime)).format("ddd, MMM Do, HH:mm");
+    var endTime = experiment.endTime === null ? 'n/a' : moment(new Date(experiment.endTime)).format("ddd, MMM Do, HH:mm");
+    container.append("<p class='sub_details_mid'>Name: " + experiment.name + "</p>");
+    container.append("<p class='sub_details_mid'>Desc: " + experiment.description + "</p>");
+    container.append("<p class='sub_details_mid'>Status: " + experiment.status + "</p>");
+    container.append("<p class='sub_details_mid'>UUID: " + experiment.uuid + "</p>");
+    container.append("<p class='sub_details_mid'>Start - end: " + startTime + " - " + endTime + "</p>");
+}
 
 // handles the display of all data
 function startMainMonitor(experimentData) {
-    // refresh experiment details
+// refresh experiment details
     showActiveExperimentDetails(experimentData);
-
     // show list of clients
     $.getJSON(BASE_URL + "/experiments/clients", function(data) {
         console.log(data);
@@ -133,8 +229,9 @@ function startMainMonitor(experimentData) {
 
 // shows active experiment details
 function showActiveExperimentDetails(experimentMetadata) {
+    console.log(experimentMetadata);
     $("#experiment_details").empty();
-    $("#experiment_details").append("<p class='details'>Project: " + experimentMetadata.experimentID + "</p>");
+    $("#experiment_details").append("<p class='details'>Project: " + experimentMetadata.projectName + "</p>");
     $("#experiment_details").append("<p class='details'>Name: " + experimentMetadata.name + "</p>");
     $("#experiment_details").append("<p class='details'>Description: " + experimentMetadata.description + "</p>");
     $("#experiment_details").append("<p class='details'>Started: " + new Date(experimentMetadata.startTime) + "</p>");
@@ -146,13 +243,11 @@ function showListOfClients(clientMetadataArray) {
     $("#clients_details").empty();
     $("#entities_details").empty();
     $("#attribute_details").empty();
-
     var clientsDropdownLabel = $("<label>Filter by client connection status or show all</label>").appendTo("#clients_details");
     clientsDropdownList = $("<select></select>").appendTo(clientsDropdownLabel);
     clientsDropdownList.append("<option value='all'>All</option>");
     clientsDropdownList.append("<option value='connected'>Connected</option>");
     clientsDropdownList.append("<option value='disconnected'>Disconnected</option>");
-
     clientsDropdownList.change(function(e) {
         var sel = $("#clients_details option:selected").val();
         if (sel === 'all') {
@@ -170,11 +265,9 @@ function showListOfClients(clientMetadataArray) {
             });
         }
     });
-
     var entitiesDropdownLabel = $("<label>Filter by client or show all</label>").appendTo("#entities_details");
     entitiesDropdownList = $("<select></select>").appendTo(entitiesDropdownLabel);
     entitiesDropdownList.append("<option value='all'>All</option>");
-
     entitiesDropdownList.change(function(e) {
         var sel = $("#entities_details option:selected").val();
         if (sel === 'all') {
@@ -192,11 +285,9 @@ function showListOfClients(clientMetadataArray) {
             });
         }
     });
-
     var attrDropdownLabel = $("<label>Filter by entity or show all</label>").appendTo("#attribute_details");
     attrDropdownList = $("<select></select>").appendTo(attrDropdownLabel);
     attrDropdownList.append("<option value='all'>All</option>");
-
     attrDropdownList.change(function(e) {
         var sel = $("#attribute_details option:selected").val();
         if (sel === 'all') {
@@ -214,25 +305,20 @@ function showListOfClients(clientMetadataArray) {
             });
         }
     });
-
     $.each(clientMetadataArray, function(key, client) {
         var clientContainerWrapper = $("<div class='clientContainer row fullWidth collapse'></div>").appendTo("#clients_details");
-
         var clientContainer = $("<div class='small-12 columns'></div>").appendTo(clientContainerWrapper);
         clientContainer.append("<p class='details'><strong>" + client.name + "</strong></p>");
         clientContainer.append("<p class='sub_details_mid'>Connected: " + client.connected + "</p>");
         clientContainer.append("<p class='sub_details'>UUID: " + client.uuid + "</p>");
         var clientStatus = client.connected === true ? 'connected' : 'disconnected';
         clientContainerWrapper.data("status", clientStatus);
-
         var actionsParagraph = $("<p class='sub_details'></p>").appendTo(clientContainer);
         var clientAddToLiveMetricsLink = $("<a class='clientCheckbox' id='c_" + client.uuid + "_input' href='#'>Add to Live metrics</a>").appendTo(actionsParagraph);
         clientAddToLiveMetricsLink.data("client", client);
         actionsParagraph.append("<a class='downloadLink' href='" + BASE_URL + "/data/export/client/" + client.uuid + "'>Download CSV data</a>");
-
         entitiesDropdownList.append("<option value='" + client.uuid + "'>" + client.name + " (" + clientStatus + ")</option>");
         CLIENT_MODELS_AJAX.push(appendEntitiesFromClient(client.uuid, client, attrDropdownList));
-
         clientAddToLiveMetricsLink.click(function(e) {
             e.preventDefault();
             var client = $(this).data("client");
@@ -242,7 +328,6 @@ function showListOfClients(clientMetadataArray) {
             } else {
                 $(this).text("Add to Live Metrics");
                 $(this).removeClass('actionSelected');
-
             }
             $("a.entityCheckbox").each(function() {
                 if ($(this).data("clientId") === client.uuid) {
@@ -251,7 +336,6 @@ function showListOfClients(clientMetadataArray) {
             });
         });
     });
-
 // trigger first entries when all metrics fetched
     $.when.apply($, CLIENT_MODELS_AJAX).done(function() {
         clientsDropdownList.prop('selectedIndex', 1);
@@ -270,19 +354,16 @@ function appendEntitiesFromClient(uuid, client, attrDropdownList) {
         console.log(data);
         $.each(data, function(ekey, entity) {
             var entityContainerWrapper = $("<div class='entityContainer row fullWidth collapse'></div>").appendTo("#entities_details");
-
             var entityContainer = $("<div class='small-12 columns'></div>").appendTo(entityContainerWrapper);
             entityContainer.append("<p class='details'><strong>" + entity.name + "</strong></p>");
             entityContainer.append("<p class='sub_details_mid'>Client: " + client.name + "</p>");
             entityContainer.append("<p class='sub_details_mid'>Desc: " + entity.description + "</p>");
             entityContainer.append("<p class='sub_details'>UUID: " + entity.uuid + "</p>");
-
             var actionsParagraph = $("<p class='sub_details'></p>").appendTo(entityContainer);
             var entityAddToLiveMetricsLink = $("<a class='entityCheckbox' id='e_" + entity.uuid + "_input' href='#'>Add to Live metrics</a>").appendTo(actionsParagraph);
             entityAddToLiveMetricsLink.data("entity", entity);
             entityAddToLiveMetricsLink.data("clientId", uuid);
             actionsParagraph.append("<a class='downloadLink' href='" + BASE_URL + "/data/export/entity/" + entity.uuid + "'>Download CSV data</a>");
-
             entityContainerWrapper.data("clientId", uuid);
             entityAddToLiveMetricsLink.click(function(e) {
                 e.preventDefault();
@@ -293,13 +374,11 @@ function appendEntitiesFromClient(uuid, client, attrDropdownList) {
                 } else {
                     $(this).text("Add to Live Metrics");
                     $(this).removeClass('actionSelected');
-
                 }
                 $.each(entity.attributes, function(akey, attribute) {
                     $("#a_" + attribute.uuid + "_input").trigger("click");
                 });
             });
-
             attrDropdownList.append("<option value='" + entity.uuid + "'>" + entity.name + " (" + client.name + " client)" + "</option>");
             $.each(entity.attributes, function(akey, attribute) {
                 var attributeContainerWrapper = $("<div class='attributeContainer row fullWidth collapse'></div>").appendTo("#attribute_details");
@@ -317,7 +396,6 @@ function appendEntitiesFromClient(uuid, client, attrDropdownList) {
                 attributeAddToLiveMetricsLink.data("entityName", entity.name);
                 actionsParagraph.append("<a class='downloadLink' href='" + BASE_URL + "/data/export/attribute/" + attribute.uuid + "'>Download CSV data</a>");
                 attributeContainerWrapper.data("entityId", entity.uuid);
-
                 attributeAddToLiveMetricsLink.click(function(e) {
                     e.preventDefault();
                     var attribute = $(this).data("attribute");
@@ -340,15 +418,12 @@ function appendEntitiesFromClient(uuid, client, attrDropdownList) {
 // adds attribute's graph to display
 function addAttributeGraph(attribute, entityName) {
     console.log("Adding graph for attribute " + attribute.uuid);
-
     // remove end class
     $("#live_metrics .attributeGraphDiv").each(function() {
         $(this).removeClass('end');
     });
-
     var attributeGraphContainer = $("<div class='small-4 columns end attributeGraphDiv' id='a_" + attribute.uuid + "_graph'></div>").appendTo("#live_metrics");
     var graphContainer = $("<div id='agraph_" + attribute.uuid + "'></div>").appendTo(attributeGraphContainer);
-
     var chart;
     if (attribute.type === 'NOMINAL') {
         console.log("Adding pie chart");
@@ -504,7 +579,6 @@ function hideAttributeGraph(attribute) {
     console.log("Removing graph for attribute " + attribute.uuid);
     $("#a_" + attribute.uuid + "_graph").remove();
     clearInterval($("#a_" + attribute.uuid + "_input").data("interval"));
-
     // set last container class to end
     $("#live_metrics .attributeGraphDiv").each(function() {
         $(this).removeClass('end');
@@ -517,11 +591,9 @@ function showStatus(data, ifTrue, ifFalse, ifUnknown) {
     if (data === false) {
         $('#configStatus').attr('class', 'right alert-color');
         $('#configStatus').text(ifFalse);
-
     } else if (data === true) {
         $('#configStatus').attr('class', 'right success-color');
         $('#configStatus').text(ifTrue);
-
     } else {
         $('#configStatus').attr('class', 'right alert-color');
         $('#configStatus').text(ifUnknown);
