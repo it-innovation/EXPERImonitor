@@ -30,7 +30,7 @@ import uk.co.soton.itinnovation.ecc.service.domain.EccClient;
 /**
  * Sorts ECC clients alphabetically.
  */
-public class EccClientComparator implements Comparator<EccClient> {
+public class EccClientsComparator implements Comparator<EccClient> {
 
     @Override
     public int compare(EccClient c1, EccClient c2) {

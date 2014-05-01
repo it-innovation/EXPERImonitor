@@ -31,7 +31,7 @@ import uk.co.soton.itinnovation.ecc.service.domain.EccEntity;
 /**
  *
  */
-public class EccEntityComparator implements Comparator<EccEntity> {
+public class EccEntitiesComparator implements Comparator<EccEntity> {
 
     @Override
     public int compare(EccEntity e1, EccEntity e2) {

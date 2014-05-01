@@ -30,7 +30,7 @@ import uk.co.soton.itinnovation.ecc.service.domain.EccAttribute;
 /**
  *
  */
-public class EccAttributeComparator implements Comparator<EccAttribute> {
+public class EccAttributesComparator implements Comparator<EccAttribute> {
 
     @Override
     public int compare(EccAttribute a1, EccAttribute a2) {
