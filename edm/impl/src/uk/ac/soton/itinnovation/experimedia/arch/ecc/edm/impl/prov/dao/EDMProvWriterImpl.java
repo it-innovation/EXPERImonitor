@@ -44,30 +44,20 @@ public class EDMProvWriterImpl implements IEDMProvWriter {
 	
 	private EDMProvStoreWrapper edmProvStoreWrapper;
     
-    public EDMProvWriterImpl(Properties props) {
+    public EDMProvWriterImpl(Properties props) throws SesameException {
 		logger = LoggerFactory.getLogger(getClass());
 		this.props = props;
 		
 		connect();
     }
 	
-	private void connect() {
+	private void connect() throws SesameException {
 		try {
             edmProvStoreWrapper = new EDMProvStoreWrapper(props);
         } catch (Exception e) {
 			logger.error("Error connecting to sesame server at " + props.getProperty("owlim.sesameServerURL"), e);
+			throw new SesameException("Error connecting to store", e);
         }
-		try {
-			if (!edmProvStoreWrapper.repositoryExists(props.getProperty("owlim.repositoryID"))) {
-				try {
-					edmProvStoreWrapper.createNewRepository(props.getProperty("owlim.repositoryID"), props.getProperty("owlim.repositoryName"));
-				} catch (Exception ex) {
-					logger.error("It seems a repository has been created in the last few milliseconds - this is REALLY bas luck!", ex);
-				}
-			}
-		} catch (SesameException ex) {
-			java.util.logging.Logger.getLogger(EDMProvWriterImpl.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-		}
 	}
 	
 	@Override

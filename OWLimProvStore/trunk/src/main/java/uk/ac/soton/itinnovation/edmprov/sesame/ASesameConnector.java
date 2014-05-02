@@ -119,7 +119,7 @@ public abstract class ASesameConnector
 	 *        if a repository configuration template is provided
 	 * @throws Exception 
 	 */
-	protected ASesameConnector(Properties props) throws Exception
+	protected ASesameConnector(Properties props)
 	{
 		this();
 		
@@ -143,7 +143,7 @@ public abstract class ASesameConnector
 	 * @throws Exception Thrown for any errors not covered by the other checked
 	 * exceptions
 	 */
-	public void createNewRepository(String repositoryID, String repositoryName) throws IllegalArgumentException, RepositoryExistsException, SesameException, Exception
+	public void createNewRepository(String repositoryID, String repositoryName) throws IllegalArgumentException, RepositoryExistsException, SesameException
 	{
 		logger.debug("Creating new repository");
 
@@ -191,10 +191,11 @@ public abstract class ASesameConnector
 	 * @param triples The triples to add.
 	 * @throws SesameException Thrown for any exceptions with interacting with
 	 * Sesame
+	 * @throws org.openrdf.repository.RepositoryException
 	 * @throws Exception Thrown for any errors not covered by the other checked
 	 * exceptions
 	 */
-	public void addTriples(String repositoryID, List<Triple> triples) throws SesameException, Exception
+	public void addTriples(String repositoryID, List<Triple> triples) throws SesameException, RepositoryException
 	{
 		if (!isConnected()) {
 			throw new SesameException("Repository Manager not connected, so cannot add triples");
@@ -241,7 +242,7 @@ public abstract class ASesameConnector
 			if (con == null) {
 				throw new NullPointerException("Could not get a connection to the repository with ID " + repositoryID);
 			}
-		} catch (Exception ex) {
+		} catch (Throwable ex) {
 			if (con != null) { try { con.close(); con = null; } catch (RepositoryException exx){} }
 			if (repo != null) { try { repo.shutDown(); } catch (RepositoryException exx){} }
 
@@ -309,7 +310,7 @@ public abstract class ASesameConnector
 	 * @return
 	 * @throws Exception 
 	 */
-	private Literal getLiteral(String str) throws Exception
+	private Literal getLiteral(String str) throws RuntimeException
 	{
 		if (!str.startsWith("\"")) {
 			throw new RuntimeException("The literal is malformed; does not start with \": " + str);
@@ -356,10 +357,12 @@ public abstract class ASesameConnector
 	 * the URL)
 	 * @throws SesameException Thrown for any exceptions with interacting with
 	 * Sesame
+	 * @throws java.io.IOException
+	 * @throws org.openrdf.repository.RepositoryException
 	 * @throws Exception Thrown for any errors not covered by the other checked
 	 * exceptions
 	 */
-	public void addOntology(String repositoryID, OntologyDetails ontology) throws SesameException, Exception
+	public void addOntology(String repositoryID, OntologyDetails ontology) throws SesameException, IOException, RepositoryException
 	{
 		if (!isConnected()) {
 			throw new SesameException("Repository Manager not connected, so cannot add ontology");
@@ -413,10 +416,11 @@ public abstract class ASesameConnector
 	 * @param query The query (SPARQL)
 	 * @return A TupleQueryResult object - MUST BE CLOSED AFTER USE.
 	 * @throws SesameException Thrown for any exceptions with interacting with Sesame
+	 * @throws org.openrdf.repository.RepositoryException
 	 * @throws Exception Thrown for any errors not covered by the other checked
 	 * exceptions
 	 */
-	public TupleQueryResult query(String repositoryID, String query) throws SesameException, Exception
+	public TupleQueryResult query(String repositoryID, String query) throws SesameException, RepositoryException
 	{
 		if (!isConnected()) {
 			throw new SesameException("Repository Manager not connected, so cannot query the repository");
@@ -488,9 +492,11 @@ public abstract class ASesameConnector
 	 * @param repositoryID ID of the repository to be deleted
 	 * @throws NoSuchRepositoryException if no repository with the given ID was found on the server
 	 * @throws SesameException Thrown for any exceptions with interacting with Sesame
+	 * @throws org.openrdf.repository.RepositoryException
+	 * @throws java.lang.InterruptedException
 	 * @throws Exception Thrown for any errors not covered by the other checked
 	 */
-	public void deleteRepository(String repositoryID) throws NoSuchRepositoryException, SesameException, Exception
+	public void deleteRepository(String repositoryID) throws NoSuchRepositoryException, SesameException, RepositoryException, InterruptedException
 	{
 		if (repositoryID == null) {
 			throw new NullPointerException("Cannot delete repository because the repository ID given was NULL");
@@ -656,7 +662,7 @@ public abstract class ASesameConnector
 	 * @return A string with the content of the file.
 	 * @throws Exception For any errors, such as file not found or issues with processing the content.
 	 */
-	private String readRepositoryConfigTemplate(String filepath) throws Exception
+	private String readRepositoryConfigTemplate(String filepath) throws IOException
 	{
 		String config = "";
 		

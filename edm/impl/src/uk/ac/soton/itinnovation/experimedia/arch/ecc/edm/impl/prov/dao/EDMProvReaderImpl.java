@@ -34,6 +34,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.ac.soton.itinnovation.edmprov.owlim.common.SesameException;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvBaseElement;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvDataContainer;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMTriple;
@@ -50,7 +51,7 @@ public final class EDMProvReaderImpl implements IEDMProvReader {
 	private EDMProvStoreWrapper edmProvStoreWrapper;
 	private SPARQLProvTranslator translator;
 	
-	public EDMProvReaderImpl(Properties props) {
+	public EDMProvReaderImpl(Properties props) throws SesameException {
 		logger = LoggerFactory.getLogger(getClass());
 		this.props = props;
 		translator = new SPARQLProvTranslator(props);
@@ -60,12 +61,13 @@ public final class EDMProvReaderImpl implements IEDMProvReader {
 	}
 
 	
-	private void connect() {
+	private void connect() throws SesameException {
 		try {
             edmProvStoreWrapper = new EDMProvStoreWrapper(props);
 			edmProvStoreWrapper.loadPrefixes();
         } catch (Exception e) {
 			logger.error("Error connecting to sesame server at " + props.getProperty("owlim.sesameServerURL"), e);
+			throw new SesameException("Could not connect to EDM Prov store", e);
         }
 	}
 	

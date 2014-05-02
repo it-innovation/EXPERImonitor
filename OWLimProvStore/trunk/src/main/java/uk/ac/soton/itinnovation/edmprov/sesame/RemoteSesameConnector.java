@@ -38,9 +38,9 @@ public class RemoteSesameConnector extends ASesameConnector
      * Connect to a remote Sesame repository service.
      * Code from org.openrdf.console.Console
      * @param url
-     * @return 
+	 * @throws uk.ac.soton.itinnovation.edmprov.owlim.common.SesameException 
      */
-    public RemoteSesameConnector(String url) throws Exception
+    public RemoteSesameConnector(String url) throws SesameException 
     {
 		super();
         connect(url, null, null);
@@ -51,9 +51,9 @@ public class RemoteSesameConnector extends ASesameConnector
      * Code from org.openrdf.console.Console
 	 * @param props
      * @param url
-     * @return 
+	 * @throws uk.ac.soton.itinnovation.edmprov.owlim.common.SesameException 
      */
-    public RemoteSesameConnector(Properties props, String url) throws Exception
+    public RemoteSesameConnector(Properties props, String url) throws SesameException 
     {
 		super(props);
         connect(url, null, null);
@@ -65,9 +65,9 @@ public class RemoteSesameConnector extends ASesameConnector
      * @param url
      * @param user
      * @param pass
-     * @return 
+	 * @throws uk.ac.soton.itinnovation.edmprov.owlim.common.SesameException 
      */
-    public RemoteSesameConnector(final String url, final String user, String pass) throws Exception
+    public RemoteSesameConnector(final String url, final String user, String pass) throws SesameException 
     {
 		super();
 		connect(url, user, pass);
@@ -80,9 +80,9 @@ public class RemoteSesameConnector extends ASesameConnector
      * @param url
      * @param user
      * @param pass
-     * @return 
+	 * @throws uk.ac.soton.itinnovation.edmprov.owlim.common.SesameException 
      */
-    public RemoteSesameConnector(Properties props, final String url, final String user, String pass) throws Exception
+    public RemoteSesameConnector(Properties props, final String url, final String user, String pass) throws SesameException 
     {
 		super(props);
 		connect(url, user, pass);
