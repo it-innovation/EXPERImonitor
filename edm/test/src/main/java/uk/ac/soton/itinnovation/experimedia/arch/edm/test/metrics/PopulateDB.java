@@ -56,6 +56,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao.IRepor
 public class PopulateDB
 {
     public static UUID expUUID = UUID.fromString("bfe4c710-61ba-46f8-a519-be2f7808192e");
+    public static UUID exp2UUID = UUID.fromString("a21d7360-d1e2-11e3-9c1a-0800200c9a66");
     
     public static UUID entity1UUID = UUID.fromString("5718cd67-4310-4b2c-aeb9-9b72314630ca");
     public static UUID entity1attribute1UUID = UUID.fromString("4f2817b5-603a-4d02-a032-62cfca314962");
@@ -336,13 +337,13 @@ public class PopulateDB
      * @param expUUID The Experiment UUID.
      * @param entityUUID The Entity UUID.
      * @param attrib1UUID The UUID of the 1st attribute of the entity.
-     * @param attrib2UUID The UUID of the 2nd attribute of the entity.
-     * @param attrib3UUID The UUID of the 3rd attribute of the entity.
+     * @param attrib2UUID The UUID of the 2nd attribute of the entity (can be null - will not be created)
+     * @param attrib3UUID The UUID of the 3rd attribute of the entity (can be null - will not be created)
      * @param mGenUUID The UUID of the metric generator
      * @param mGrpUUID The UUID of the metric group.
      * @param mSet1UUID The UUID of the 1st measurement set.
-     * @param mSet2UUID The UUID of the 2nd measurement set.
-     * @param mSet3UUID The UUID of the 3rd measurement set.
+     * @param mSet2UUID The UUID of the 2nd measurement set (will use attribute 1 if attribute 2 does not exist)
+     * @param mSet3UUID The UUID of the 3rd measurement set (will use attribute 1 if attribute 3 does not exist)
      * @throws Exception 
      */
     public static void saveMetricGenerator1(IMonitoringEDM edm, UUID expUUID, UUID entityUUID, UUID attrib1UUID, UUID attrib2UUID, UUID attrib3UUID, UUID mGenUUID, UUID mGrpUUID, UUID mSet1UUID, UUID mSet2UUID, UUID mSet3UUID) throws Exception
@@ -356,36 +357,33 @@ public class PopulateDB
             throw ex;
         }
         
+        // Re-use attribute 1 if needed
+        if ( attrib2UUID == null ) attrib2UUID = attrib1UUID;
+        if ( attrib3UUID == null ) attrib3UUID = attrib1UUID;
+        
 //----- METRIC GENERATOR
-        //log.info("Creating VM MetricGenerator");
         MetricGenerator metricGenerator = new MetricGenerator(mGenUUID, "VM MetricGenerator", "A metric generator");
         metricGenerator.addEntity(new Entity(entityUUID));
         
 //----- METRIC GROUP
-        //log.info("Creating QoS MetricGroup");
         MetricGroup metricGroup = new MetricGroup(mGrpUUID, mGenUUID, "Quality of Service", "A group of QoS metrics");
         metricGenerator.addMetricGroup(metricGroup);
         
 //----- MEASUREMENT SETS
-        //log.info("Creating 1st QoS Measurement set");
         Metric metric1 = new Metric(UUID.randomUUID(), MetricType.RATIO, new Unit("ms"));
         MeasurementSet mSet1 = new MeasurementSet(mSet1UUID, attrib1UUID, mGrpUUID, metric1);
         metricGroup.addMeasurementSets(mSet1);
         
-        //log.info("Creating 2nd QoS Measurement set");
         Metric metric2 = new Metric(UUID.randomUUID(), MetricType.RATIO, new Unit("bits per second"));
         MeasurementSet mSet2 = new MeasurementSet(mSet2UUID, attrib2UUID, mGrpUUID, metric2);
         metricGroup.addMeasurementSets(mSet2);
         
-        //log.info("Creating 3rd QoS Measurement set");
         Metric metric3 = new Metric(UUID.randomUUID(), MetricType.RATIO, new Unit("ms"));
         MeasurementSet mSet3 = new MeasurementSet(mSet3UUID, attrib3UUID, mGrpUUID, metric3);
         metricGroup.addMeasurementSets(mSet3);
         
-        //log.info("Saving metric generator (with all sub-classes)");
         try {
             mGenDAO.saveMetricGenerator(metricGenerator, expUUID);
-            //log.info("MetricGenerator '" + metricGenerator.getName() + "' saved successfully!");
         } catch (Exception ex) {
             log.error("Unable to save MetricGenerator: " + ex.getMessage());
         }
@@ -398,13 +396,13 @@ public class PopulateDB
      * @param expUUID The Experiment UUID.
      * @param entityUUID The Entity UUID.
      * @param attrib1UUID The UUID of the 1st attribute of the entity.
-     * @param attrib2UUID The UUID of the 2nd attribute of the entity.
-     * @param attrib3UUID The UUID of the 3rd attribute of the entity.
+     * @param attrib2UUID The UUID of the 2nd attribute of the entity. (can be null - will not be created)
+     * @param attrib3UUID The UUID of the 3rd attribute of the entity. (can be null - will not be created)
      * @param mGenUUID The UUID of the metric generator
      * @param mGrpUUID The UUID of the metric group.
      * @param mSet1UUID The UUID of the 1st measurement set.
-     * @param mSet2UUID The UUID of the 2nd measurement set.
-     * @param mSet3UUID The UUID of the 3rd measurement set.
+     * @param mSet2UUID The UUID of the 2nd measurement set. (will use attribute 1 if attribute 2 does not exist)
+     * @param mSet3UUID The UUID of the 3rd measurement set. (will use attribute 1 if attribute 3 does not exist)
      * @throws Exception 
      */
     public static void saveMetricGenerator2(IMonitoringEDM edm, UUID expUUID, UUID entityUUID, UUID attrib1UUID, UUID attrib2UUID, UUID attrib3UUID, UUID mGenUUID, UUID mGrpUUID, UUID mSet1UUID, UUID mSet2UUID, UUID mSet3UUID) throws Exception
@@ -418,36 +416,34 @@ public class PopulateDB
             throw ex;
         }
         
+        // Re-use attribute 1 if needed
+        if ( attrib2UUID == null ) attrib2UUID = attrib1UUID;
+        if ( attrib3UUID == null ) attrib3UUID = attrib1UUID;
+        
 //----- METRIC GENERATOR
-        //log.info("Creating AVC MetricGenerator");
         MetricGenerator metricGenerator = new MetricGenerator(mGenUUID, "AVC MetricGenerator", "A metric generator");
         metricGenerator.addEntity(new Entity(entityUUID));
         
 //----- METRIC GROUP
-        //log.info("Creating QoS MetricGroup");
         MetricGroup metricGroup = new MetricGroup(mGrpUUID, mGenUUID, "Quality of Service", "A group of QoS metrics");
         metricGenerator.addMetricGroup(metricGroup);
         
 //----- MEASUREMENT SETS
-        //log.info("Creating 1st QoS Measurement set");
         Metric metric1 = new Metric(UUID.randomUUID(), MetricType.RATIO, new Unit("Files ingested per minute"));
         MeasurementSet mSet1 = new MeasurementSet(mSet1UUID, attrib1UUID, mGrpUUID, metric1);
         metricGroup.addMeasurementSets(mSet1);
         
-        //log.info("Creating 2nd QoS Measurement set");
+
         Metric metric2 = new Metric(UUID.randomUUID(), MetricType.RATIO, new Unit("AV streams out per minute"));
         MeasurementSet mSet2 = new MeasurementSet(mSet2UUID, attrib2UUID, mGrpUUID, metric2);
         metricGroup.addMeasurementSets(mSet2);
         
-        //log.info("Creating 3rd QoS Measurement set");
         Metric metric3 = new Metric(UUID.randomUUID(), MetricType.RATIO, new Unit("Average frame rate per second"));
         MeasurementSet mSet3 = new MeasurementSet(mSet3UUID, attrib3UUID, mGrpUUID, metric3);
         metricGroup.addMeasurementSets(mSet3);
         
-        //log.info("Saving metric generator (with all sub-classes)");
         try {
             mGenDAO.saveMetricGenerator(metricGenerator, expUUID);
-            //log.info("MetricGenerator '" + metricGenerator.getName() + "' saved successfully!");
         } catch (Exception ex) {
             log.error("Unable to save MetricGenerator: " + ex.getMessage());
         }
@@ -460,11 +456,11 @@ public class PopulateDB
      * @param expUUID The Experiment UUID.
      * @param entityUUID The Entity UUID.
      * @param attrib1UUID The UUID of the 1st attribute of the entity.
-     * @param attrib2UUID The UUID of the 2nd attribute of the entity.
+     * @param attrib2UUID The UUID of the 2nd attribute of the entity. (can be null - will not be created)
      * @param mGenUUID The UUID of the metric generator
      * @param mGrpUUID The UUID of the metric group.
      * @param mSet1UUID The UUID of the 1st measurement set.
-     * @param mSet2UUID The UUID of the 2nd measurement set.
+     * @param mSet2UUID The UUID of the 2nd measurement set. (will use attribute 1 if attribute 2 does not exist)
      * @throws Exception 
      */
     public static void saveMetricGenerator3(IMonitoringEDM edm, UUID expUUID, UUID entityUUID, UUID attrib1UUID, UUID attrib2UUID, UUID mGenUUID, UUID mGrpUUID, UUID mSet1UUID, UUID mSet2UUID) throws Exception
@@ -478,31 +474,28 @@ public class PopulateDB
             throw ex;
         }
         
+        // Re-use attribute 1 if needed
+        if ( attrib2UUID == null ) attrib2UUID = attrib1UUID;
+        
 //----- METRIC GENERATOR
-        //log.info("Creating POI Service MetricGenerator");
         MetricGenerator metricGenerator = new MetricGenerator(mGenUUID, "POI Service MetricGenerator", "A metric generator");
         metricGenerator.addEntity(new Entity(entityUUID));
         
 //----- METRIC GROUP
-        //log.info("Creating QoS MetricGroup");
         MetricGroup metricGroup = new MetricGroup(mGrpUUID, mGenUUID, "Quality of Service", "A group of QoS metrics");
         metricGenerator.addMetricGroup(metricGroup);
         
 //----- MEASUREMENT SETS
-        //log.info("Creating 1st QoS Measurement set");
         Metric metric1 = new Metric(UUID.randomUUID(), MetricType.RATIO, new Unit("POI requests per minute"));
         MeasurementSet mSet1 = new MeasurementSet(mSet1UUID, attrib1UUID, mGrpUUID, metric1);
         metricGroup.addMeasurementSets(mSet1);
         
-        //log.info("Creating 2nd QoS Measurement set");
         Metric metric2 = new Metric(UUID.randomUUID(), MetricType.RATIO, new Unit("ms"));
         MeasurementSet mSet2 = new MeasurementSet(mSet2UUID, attrib2UUID, mGrpUUID, metric2);
         metricGroup.addMeasurementSets(mSet2);
         
-        //log.info("Saving metric generator (with all sub-classes)");
         try {
             mGenDAO.saveMetricGenerator(metricGenerator, expUUID);
-            //log.info("MetricGenerator '" + metricGenerator.getName() + "' saved successfully!");
         } catch (Exception ex) {
             log.error("Unable to save MetricGenerator: " + ex.getMessage());
         }
