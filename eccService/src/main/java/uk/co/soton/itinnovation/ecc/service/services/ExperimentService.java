@@ -76,7 +76,7 @@ public class ExperimentService {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private final static String DEFAULT_EXPERIMENT_NAME = "EXPERIMEDIA Experiment";
-    private final static String DEFAULT_EXPERIMENT_DESCRIPTION = "Sample experiment description";
+    private final static String DEFAULT_EXPERIMENT_DESCRIPTION = "New EXPERIMEDIA experiment";
 
     private IExperimentMonitor expMonitor;
     private IMonitoringEDM expDataManager;
@@ -84,8 +84,8 @@ public class ExperimentService {
     private IReportDAO expReportAccessor;
 
     private ExperimentStateModel expStateModel;
-    private LiveMetricScheduler  liveMetricScheduler;
-    private LivePROVConsumer     livePROVConsumer;
+    private LiveMetricScheduler liveMetricScheduler;
+    private LivePROVConsumer livePROVConsumer;
     private boolean started = false;
 
     public ExperimentService() {
@@ -174,7 +174,7 @@ public class ExperimentService {
                     return false;
                 }
 
-                logger.info("EDM initialisation completed OK");                
+                logger.info("EDM initialisation completed OK");
 
                 // Try initialising the state model ----------------------------
                 logger.info("Attempting to initialise experiment state");
@@ -233,13 +233,54 @@ public class ExperimentService {
     }
 
     public boolean isExperimentInProgress() {
-        
+
         boolean result = false;
-        
-        if (started)
+
+        if (started) {
             result = expStateModel.isExperimentActive();
-        
+        }
+
         return result;
+    }
+
+    public Experiment reStartExperiment(String uuid) {
+        // Safety first
+        if (!started) {
+            throw new IllegalStateException("Cannot restart experiment: service not initialised");
+        }
+        Experiment newExp = getExperiment(uuid);
+        try {
+            // Go straight into live monitoring
+            expMonitor.startLifecycle(newExp, EMPhase.eEMLiveMonitoring);
+
+            // All persistence & process is OK, so make experiment active
+            expStateModel.setActiveExperiment(newExp);
+
+            // If we have noted any previously connected clients, get their
+            // identities and try re-connecting them
+            Map<UUID, String> clientInfo = expStateModel.getConnectedClientInfo();
+
+            if (!clientInfo.isEmpty()) {
+                logger.debug("Reconnecting previously connected clients:");
+
+                Iterator<UUID> it = clientInfo.keySet().iterator();
+                UUID id;
+                String info;
+                while (it.hasNext()) {
+                    id = it.next();
+                    info = clientInfo.get(id);
+                    logger.debug("[" + id.toString() + "] " + info);
+                }
+
+                // Need to reconnect previous clients, if any still exist
+//                expMonitor.tryReRegisterClients(clientInfo);
+            }
+            return newExp;
+        } catch (Exception e) {
+            logger.error("Failed to restart experiment [" + uuid + "]");
+            return null;
+        }
+
     }
 
     /**
@@ -256,7 +297,7 @@ public class ExperimentService {
      * create.
      */
     public Experiment startExperiment(String projName, String expName, String expDesc) {
-        
+
         // Safety first
         if (!started) {
             throw new IllegalStateException("Cannot start experiment: service not initialised");
@@ -271,6 +312,7 @@ public class ExperimentService {
             expDesc = DEFAULT_EXPERIMENT_DESCRIPTION;
         }
         if (expStateModel.isExperimentActive()) {
+            // TODO: force restart instead
             throw new IllegalStateException("Cannot start experiment: an experiment is already active");
         }
 
@@ -292,14 +334,14 @@ public class ExperimentService {
             // TO DO: get the PROV configuration during start up
             PROVDatabaseConfiguration pdc = new PROVDatabaseConfiguration();
             livePROVConsumer = new LivePROVConsumer();
-            
-            livePROVConsumer.createExperimentRepository( newExp.getUUID(),
-                                                         newExp.getName(),
-                                                         pdc.getPROVRepoProperties() );
-            
+
+            livePROVConsumer.createExperimentRepository(newExp.getUUID(),
+                    newExp.getName(),
+                    pdc.getPROVRepoProperties());
+
             // Go straight into live monitoring
             expMonitor.startLifecycle(newExp, EMPhase.eEMLiveMonitoring);
-            
+
             // All persistence & process is OK, so make experiment active
             expStateModel.setActiveExperiment(newExp);
 
@@ -320,9 +362,9 @@ public class ExperimentService {
                 }
 
                 // Need to reconnect previous clients, if any still exist
-                expMonitor.tryReRegisterClients(clientInfo);
+//                expMonitor.tryReRegisterClients(clientInfo);
             }
-            
+
             return newExp;
 
         } catch (Exception ex) {
@@ -337,19 +379,17 @@ public class ExperimentService {
      * save the finish time of the experiment to the database before then
      * issuing 'stop' messages to attached clients, where appropriate.
      *
-     * @throws Exception - throws if it was not possible to finalise the
-     * experiment or there is not an active experiment running.
+     * @return true if current experiment was stopped successfully.
      */
-    public void stopExperiment() throws Exception {
+    public boolean stopExperiment() {
 
-        // Safety first
         if (!started) {
-            throw new Exception("Cannot stop experiment: service not initialised");
+            logger.error("Cannot stop experiment: service not initialised");
+            return false;
         }
 
         Experiment exp = expStateModel.getActiveExperiment();
         if (exp != null) {
-
             try {
 
                 // Finish up the experiment lifecycle
@@ -359,22 +399,20 @@ public class ExperimentService {
                 exp.setEndTime(new Date());
                 IExperimentDAO expDAO = expDataManager.getExperimentDAO();
                 expDAO.finaliseExperiment(exp);
-                
+
                 // Tidy up PROV
                 livePROVConsumer.closeCurrentExperimentRepository();
-
                 // Set no experiment active
                 expStateModel.setActiveExperiment(null);
-                
+                return true;
             } catch (Exception ex) {
 
-                String problem = "Could not stop experiment because: " + ex.getMessage();
-
-                logger.error(problem);
-                throw new Exception(problem, ex);
+                logger.error("Failed to stop current experiment", ex);
+                return false;
             }
         } else {
-            throw new Exception("Could not stop experiment: no experiment currently active");
+            logger.error("Could not stop experiment: no experiment currently active");
+            return false;
         }
     }
 
@@ -392,6 +430,16 @@ public class ExperimentService {
         }
 
         return activeExp;
+    }
+
+    public Experiment getExperiment(String uuid) {
+
+        try {
+            return expDataManager.getExperimentDAO().getExperiment(UUID.fromString(uuid), true);
+        } catch (Exception e) {
+            logger.error("Failed to return experiment [" + uuid + "]", e);
+            return null;
+        }
     }
 
     /**
@@ -456,11 +504,13 @@ public class ExperimentService {
 
             // Get the all clients that the monitor expects to be connected
             Set<EMClient> clients = expMonitor.getAllConnectedClients();
-            
+
             // Only return those that are not re-registering
-            for (EMClient client : clients)
-                if ( !client.isReRegistering() )
-                    actuallyConnectedClients.add( client );
+            for (EMClient client : clients) {
+                if (!client.isReRegistering()) {
+                    actuallyConnectedClients.add(client);
+                }
+            }
         }
 
         return actuallyConnectedClients;
@@ -638,22 +688,22 @@ public class ExperimentService {
     }
 
     private void processLivePROVData(EDMProvReport report) throws Exception {
-        
-        if (livePROVConsumer == null) 
+
+        if (livePROVConsumer == null) {
             throw new Exception("Could not process PROV report: PROV consumer is null");
-        
-        if (report == null) {
-            throw new Exception("Could not process PROV report: report is null");    
         }
-        
+
+        if (report == null) {
+            throw new Exception("Could not process PROV report: report is null");
+        }
+
         try {
             livePROVConsumer.addPROVReport(report);
-        }
-        catch(Exception ex) {
+        } catch (Exception ex) {
             String msg = "Could not store PROV report: " + ex.getMessage();
-            logger.error( msg );
-            
-            throw new Exception( msg );
+            logger.error(msg);
+
+            throw new Exception(msg);
         }
     }
 
@@ -672,8 +722,9 @@ public class ExperimentService {
             // If the client is re-registering, do not mark them as connected
             // just yet; they need to respond in Discovery phase before we know
             // they are really there
-            if (!client.isReRegistering())
-                expStateModel.setClientConnectedState(client, true);    
+            if (!client.isReRegistering()) {
+                expStateModel.setClientConnectedState(client, true);
+            }
         }
 
         @Override

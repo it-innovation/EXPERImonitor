@@ -30,7 +30,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.At
 /**
  *
  */
-public class AttributeComparator implements Comparator<Attribute> {
+public class AttributesComparator implements Comparator<Attribute> {
 
     @Override
     public int compare(Attribute a1, Attribute a2) {
