@@ -493,17 +493,103 @@ public class MetricHelper
       
       if ( measurements != null )
       {
-        Iterator<Measurement> mIt = measurements.iterator();
-        while ( mIt.hasNext() )
+        for ( Measurement m : measurements )
         {
-          Measurement m = mIt.next();
-          Date stamp = m.getTimeStamp();
-          
-          if ( stamp != null ) sortedM.put( stamp, m );
+            Date stamp = m.getTimeStamp();
+            
+            if ( stamp != null ) sortedM.put( stamp, m );
         }
       }
       
       return sortedM;
+    }
+    
+    public static List<Measurement> sortMeasurementsByDateLinear( Set<Measurement> measurements )
+    {
+        ArrayList<Measurement> resultMeasurementList = new ArrayList<Measurement>();
+        
+        if ( measurements != null )
+        {
+            // ..sort them
+            TreeMap <Date, Measurement> sortedMeasures = sortMeasurementsByDate(measurements);
+            
+            // Push into linear list (newest first)
+            for ( Date d : sortedMeasures.descendingKeySet() ) 
+                resultMeasurementList.add( sortedMeasures.get(d) );   
+        }
+        
+        return resultMeasurementList;        
+    }
+    
+    public static List<Measurement> truncateMeasurements( List<Measurement> measures,
+                                                          int count,
+                                                          boolean tail )        
+    {
+        List<Measurement> truncMeasures = null; // Assigned as a sub-list...
+        
+        if ( count > 0 )
+        {
+            if ( tail )
+            {
+                int maxIndex   = measures.size();
+                int startIndex = maxIndex - count;
+                
+                if ( startIndex < 0 )
+                    startIndex = 0;
+                
+                truncMeasures = measures.subList( startIndex, maxIndex );
+            }
+            else 
+            {
+                if ( count > measures.size() ) count = measures.size();
+                
+                truncMeasures = measures.subList( 0, count );
+            }
+        }
+        else
+            truncMeasures = measures; //... or just reassigned as the input
+        
+        return truncMeasures;
+    }
+    
+    public static Set<Measurement> stripMeasurementsInRange( Set<Measurement> measures,
+                                                             Date start,
+                                                             Date end )
+    {
+        HashSet<Measurement> strippedMeasures = new HashSet<Measurement>();
+        
+        if ( measures != null && start != null && end != null )
+        {
+            // Make sure we're operating in a sensible range
+            if ( end.after(start) || end.equals(start) )
+            {
+                for ( Measurement m : measures )
+                {
+                    Date mDate = m.getTimeStamp();
+                    
+                    if ( mDate.equals(start) || mDate.after(start) )
+                        if ( mDate.before(end) || mDate.equals(end) )
+                            strippedMeasures.add( m );
+                }
+            }
+        }
+        
+        return strippedMeasures;
+    }
+    
+    public static Measurement getMiddleMeasurement( List<Measurement> measurements )
+    {
+        Measurement target = null;
+        
+        if ( measurements != null && !measurements.isEmpty() )
+        {
+            if ( measurements.size() < 2 )
+                target = measurements.get(0);
+            else
+                target = measurements.get( (measurements.size() / 2) -1 );
+        }
+        
+        return target;
     }
     
     /**
@@ -563,6 +649,22 @@ public class MetricHelper
       
       return targAttr;      
     }
+    
+    public static Attribute getAttributeByID( UUID id, Entity entity )
+    {
+        Attribute targAttr = null;
+        
+        if ( id != null && entity != null )
+            for ( Attribute attr : entity.getAttributes() )
+                if ( attr.getUUID().equals(id) )
+                {
+                    targAttr = attr;
+                    break;
+                }
+        
+        return targAttr;
+    }
+    
     
     /**
      * Creates a metric group with the given name and description. Will automatically
@@ -704,6 +806,30 @@ public class MetricHelper
       }
       
       return targetReport;      
+    }
+    
+    public static Report createMeasurementReport( MeasurementSet setWithMeasurements,
+                                                  Date fromDate, Date toDate )
+    {
+        Report targetReport = null;
+        
+        if ( setWithMeasurements != null && fromDate != null && toDate != null )
+        {
+            int mCount = setWithMeasurements.getMeasurements().size();
+            
+            if ( mCount>  0 )
+            {
+               Date now = new Date();
+               targetReport = new Report( UUID.randomUUID(), 
+                                          setWithMeasurements, 
+                                          now, fromDate, toDate );
+               
+               
+               targetReport.setNumberOfMeasurements( mCount );
+            }
+        }
+        
+        return targetReport;
     }
     
     public static Report createMeasurementReport( MeasurementSet sourceMS,
