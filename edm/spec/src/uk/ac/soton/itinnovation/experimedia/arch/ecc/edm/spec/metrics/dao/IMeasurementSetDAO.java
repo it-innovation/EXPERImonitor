@@ -84,4 +84,27 @@ public interface IMeasurementSetDAO
      * @throws Exception If there's a technical issue.
      */
     Set<MeasurementSet> getMeasurementSetForMetricGroup(UUID metricGroupUUID, boolean withMetric) throws IllegalArgumentException, NoDataException, Exception;
+    
+    /**
+     * Use this method to return all known measurement sets associated with the required Attribute
+     * 
+     * @param attributeID - ID of the Attribute
+     * @param withMetric  - Option to include metric meta-data as well
+     * @return            - Returns a (possibly empty) set of MeasurementSets related to this attribute
+     * 
+     * @throws Exception  - Throws if the input parameter is invalid or there was a problem with the database
+     */
+    Set<MeasurementSet> getMeasurementSetsForAttribute(UUID attributeID, boolean withMetric) throws Exception;
+    
+    /**
+     * Use this method to return all known measurement sets associated with the required Attribute for a 
+     * given experiment.
+     * 
+     * @param attributeID   - ID of the Attribute
+     * @param experimentID  - ID of the Experiment
+     * @param withMetric    - Option to include metric meta-data as well
+     * @return              - Returns a (possibly empty) set of MeasurementSets related to this attribute
+     * @throws Exception    - Throws if the input parameters are invalid or there was a problem with the database
+     */
+    Set<MeasurementSet> getMeasurementSetsForAttribute(UUID attributeID, UUID experimentID, boolean withMetric) throws Exception;
 }

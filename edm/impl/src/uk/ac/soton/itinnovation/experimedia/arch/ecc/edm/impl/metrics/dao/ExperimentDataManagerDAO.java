@@ -557,6 +557,43 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
         }
     }
     
+    @Override
+    public Set<MeasurementSet> getMeasurementSetsForAttribute(UUID attributeID, boolean withMetric) throws Exception
+    {
+        Connection connection = null;
+           
+        try {
+            connection = dbCon.getConnection();
+            return MeasurementSetDAOHelper.getMeasurementSetsForAttribute(attributeID, withMetric, connection, true);
+        }
+        catch ( Exception ex ) {
+            String msg = "Could not get measurement sets for attribute " + attributeID.toString() + " :" + ex.getMessage();
+            throw new Exception( msg, ex );
+        }
+        finally {
+            if ( connection != null && DBUtil.isConnected(connection) )
+                connection.close();
+        }
+    }
+    
+    @Override
+    public Set<MeasurementSet> getMeasurementSetsForAttribute(UUID attributeID, UUID experimentID, boolean withMetric) throws Exception
+    {
+        Connection connection = null;
+           
+        try {
+            connection = dbCon.getConnection();
+            return MeasurementSetDAOHelper.getMeasurementSetsForAttribute(attributeID, experimentID, withMetric, connection, true);
+        }
+        catch ( Exception ex ) {
+            String msg = "Could not get measurement sets for attribute " + attributeID.toString() + " :" + ex.getMessage();
+            throw new Exception( msg, ex );
+        }
+        finally {
+            if ( connection != null && DBUtil.isConnected(connection) )
+                connection.close();
+        }   
+    }
     
     //---------------------------- METRIC ------------------------------------//
     
