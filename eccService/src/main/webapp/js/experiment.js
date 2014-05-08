@@ -1,8 +1,9 @@
 var BASE_URL = "/" + window.location.href.split('/')[3];
 var clientsDropdownList, entitiesDropdownList, attrDropdownList;
 var CLIENT_MODELS_AJAX = [];
-var CHART_POLLING_INTERVAL = 3000;
-var CHART_SHIFT_DATA_THRESHOLD = 10;
+var CHART_POLLING_INTERVAL = 3000; // polling delay
+var CHART_SHIFT_DATA_THRESHOLD = 10; // how many points to return per graph
+var intervals = new Array(); // polling intervals
 
 
 $(document).ready(function() {
@@ -97,6 +98,25 @@ $(document).ready(function() {
             }
         });
 
+    });
+
+    // reload everything button
+    $("#reloadClientsEntitiesAttributes").click(function(e) {
+        e.preventDefault();
+
+        // stop all current polling
+        for (var i = 0; i < intervals.length; i++) {
+            clearInterval(intervals[i]);
+        }
+
+        // clear graphs
+        $("#live_metrics").empty();
+
+        // clean reload of clients, entities, attributes
+        $.getJSON(BASE_URL + "/experiments/clients", function(data) {
+            console.log(data);
+            showListOfClients(data);
+        });
     });
 
     // new name/description for an experiment
@@ -256,6 +276,10 @@ function showListOfClients(clientMetadataArray) {
     $("#clients_details").empty();
     $("#entities_details").empty();
     $("#attribute_details").empty();
+    $("#clients_details").append("<h4>Clients</h4>");
+    $("#entities_details").append("<h4>Entities</h4>");
+    $("#attribute_details").append("<h4>Attributes</h4>");
+
     var clientsDropdownLabel = $("<label>Filter by client connection status or show all</label>").appendTo("#clients_details");
     clientsDropdownList = $("<select></select>").appendTo(clientsDropdownLabel);
     clientsDropdownList.append("<option value='all'>All</option>");
@@ -478,7 +502,7 @@ function addAttributeGraph(attribute, entityName) {
 
         // set polling
         var series = chart.series[0];
-        $("#a_" + attribute.uuid + "_input").data("interval", setInterval(function() {
+        var theInterval = setInterval(function() {
             // TODO: stop polling on error
             $.getJSON(BASE_URL + "/data/attribute/" + attribute.uuid + "/since/" + lastTimestamp, function(dataSince) {
                 console.log(dataSince);
@@ -506,8 +530,19 @@ function addAttributeGraph(attribute, entityName) {
                     });
                 }
             });
-        }, CHART_POLLING_INTERVAL));
+        }, CHART_POLLING_INTERVAL);
+        $("#a_" + attribute.uuid + "_input").data("interval", theInterval);
+        intervals.push(theInterval);
     });
+}
+
+// removes interval from intervals - more reliable, removes duplicates
+function removeInterval(interval) {
+    for (var i = 0; i < intervals.length; i++) {
+        if (intervals[i] === interval)
+            intervals.splice(i, 1);
+    }
+
 }
 
 // adds empty pie chart
@@ -589,9 +624,12 @@ function createEmptyLineChart(container, attribute, entityName) {
 
 // hides attribute's graph to display
 function hideAttributeGraph(attribute) {
-    console.log("Removing graph for attribute " + attribute.uuid);
+
     $("#a_" + attribute.uuid + "_graph").remove();
-    clearInterval($("#a_" + attribute.uuid + "_input").data("interval"));
+    var theInterval = $("#a_" + attribute.uuid + "_input").data("interval");
+    console.log("Removing graph for attribute " + attribute.uuid + ", interval " + theInterval);
+    clearInterval(theInterval);
+    removeInterval(theInterval);
     // set last container class to end
     $("#live_metrics .attributeGraphDiv").each(function() {
         $(this).removeClass('end');
