@@ -47,6 +47,14 @@ div.experimentsSelectionDetails {
     margin: 0 0 14px 12px;
 }
 
+div.removeSelfGraphButtonWrapper {
+    margin-bottom: 16px;
+}
+
+a.removeSelfGraphButton {
+    font-size: smaller;
+}
+
 #currentProjectRadio {
     margin-bottom: 2px;
 }

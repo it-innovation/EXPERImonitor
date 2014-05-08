@@ -461,6 +461,12 @@ function addAttributeGraph(attribute, entityName) {
     });
     var attributeGraphContainer = $("<div class='small-4 columns end attributeGraphDiv' id='a_" + attribute.uuid + "_graph'></div>").appendTo("#live_metrics");
     var graphContainer = $("<div id='agraph_" + attribute.uuid + "'></div>").appendTo(attributeGraphContainer);
+    var removeButton = $("<a href='#' class='removeSelfGraphButton' id='removeButton_" + attribute.uuid + "'>Remove</a>").appendTo($("<div class='removeSelfGraphButtonWrapper text-center'></div>").appendTo(attributeGraphContainer));
+    removeButton.data("attributeiuud", attribute.uuid);
+    removeButton.click(function(e) {
+        e.preventDefault();
+        $("#a_" + $(this).data("attributeiuud") + "_input").trigger("click");
+    });
     var chart;
     if (attribute.type === 'NOMINAL') {
         console.log("Adding pie chart");
