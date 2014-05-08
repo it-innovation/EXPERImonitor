@@ -367,7 +367,7 @@ public class ExperimentService {
                 }
 
                 // Need to reconnect previous clients, if any still exist
-//                expMonitor.tryReRegisterClients(clientInfo);
+                expMonitor.tryReRegisterClients(clientInfo);
             }
 
             return newExp;
