@@ -8,7 +8,7 @@ var CHART_SHIFT_DATA_THRESHOLD = 10;
 $(document).ready(function() {
     $(document).foundation();
     $(document).on('open', '#nameExperimentModal', function() {
-
+        $("#newExperimentHeader").text('Select an existing experiment or start a new one');
 // check for current experiment
         $.getJSON(BASE_URL + "/experiments/ifinprogress", function(edata) {
 
@@ -35,6 +35,9 @@ $(document).ready(function() {
                 success: function(data) {
                     console.log(data);
                     if (data.length > 0) {
+                        // no current experiment, existing projects
+                        $(".oldProjectsContainer").removeClass("hide");
+
                         if ($(".currentProjectContainer").hasClass("hide")) {
                             $("#oldProjectRadio").prop('checked', true);
                         }
@@ -59,7 +62,17 @@ $(document).ready(function() {
                             fillWithExperimentMetadata($("#oldProjectDetails"), experiment);
                         });
                     } else {
-                        $("#newProjectRadio").prop('checked', true);
+                        if ($(".currentProjectContainer").hasClass("hide")) {
+                            // no existing experiments, no current experiments
+                            $("#newExperimentHeader").text('Start new experiment');
+                            $("#newProjectRadio").prop('checked', true);
+
+                        } else {
+                            // no existing experiments, but current experiment
+                            $("#newExperimentHeader").text('Start new experiment or connect to current');
+                            $("#currentProjectRadio").prop('checked', true);
+                        }
+
                     }
                 }
             });
