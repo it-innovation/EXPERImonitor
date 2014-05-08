@@ -63,7 +63,11 @@ $(document).ready(function() {
 
                             // fetch data
                             $.getJSON(BASE_URL + "/data/entities/" + experimentId, function(data) {
-                                console.log(data);
+//                                console.log(data);
+                                $("#entities_details").empty();
+                                $("#entities_details").append("<h4>Entities</h4>");
+                                $("#attribute_details").empty();
+                                $("#attribute_details").append("<h4>Attributes</h4>");
                                 $.each(data, function(ekey, entity) {
                                     var entityContainerWrapper = $("<div class='entityContainer row fullWidth collapse'></div>").appendTo("#entities_details");
 
