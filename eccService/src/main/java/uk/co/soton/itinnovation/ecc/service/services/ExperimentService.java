@@ -302,18 +302,24 @@ public class ExperimentService {
         if (!started) {
             throw new IllegalStateException("Cannot start experiment: service not initialised");
         }
+
         if (projName == null || projName.isEmpty()) {
             throw new IllegalArgumentException("Cannot start experiment: project name is NULL or empty");
         }
+
         if (expName == null || expName.isEmpty()) {
             expName = DEFAULT_EXPERIMENT_NAME;
         }
+
         if (expDesc == null || expDesc.isEmpty()) {
             expDesc = DEFAULT_EXPERIMENT_DESCRIPTION;
         }
+
         if (expStateModel.isExperimentActive()) {
             // TODO: force restart instead
-            throw new IllegalStateException("Cannot start experiment: an experiment is already active");
+            logger.warn("Stopping current experiment");
+            boolean currentExperimentStopped = stopExperiment();
+            logger.debug("Current experiment stopped: " + currentExperimentStopped);
         }
 
         // Create new experiment instance
