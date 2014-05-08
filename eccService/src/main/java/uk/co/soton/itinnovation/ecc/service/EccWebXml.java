@@ -18,32 +18,23 @@
 // the software.
 //
 //	Created By :			Maxim Bashevoy
-//	Created Date :			2014-04-01
+//	Created Date :			2014-05-08
 //	Created for Project :           EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 package uk.co.soton.itinnovation.ecc.service;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.context.web.SpringBootServletInitializer;
 
 /**
- * ECC service starting class.
+ * This replaces web.xml for Tomcat and similar.
  */
-@Configuration
-@EnableAutoConfiguration
-@ComponentScan
-public class Application {
+public class EccWebXml extends SpringBootServletInitializer {
 
-    /**
-     * Starts the service.
-     *
-     * @param args command line arguments.
-     * @throws Exception
-     */
-    public static void main(String[] args) throws Exception {
-        SpringApplication.run(Application.class, args);
+    @Override
+    protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
+        return application.sources(Application.class);
     }
+
 }
