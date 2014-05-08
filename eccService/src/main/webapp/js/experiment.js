@@ -210,7 +210,7 @@ function fillWithExperimentMetadata(container, experiment) {
     var startTime = experiment.startTime === null ? 'n/a' : moment(new Date(experiment.startTime)).format("ddd, MMM Do, HH:mm");
     var endTime = experiment.endTime === null ? 'n/a' : moment(new Date(experiment.endTime)).format("ddd, MMM Do, HH:mm");
     container.append("<p class='sub_details_mid'>Name: " + experiment.name + "</p>");
-    container.append("<p class='sub_details_mid'>Desc: " + experiment.description + "</p>");
+    container.append("<p class='sub_details_mid'>Description: " + experiment.description + "</p>");
     container.append("<p class='sub_details_mid'>Status: " + experiment.status + "</p>");
     container.append("<p class='sub_details_mid'>UUID: " + experiment.uuid + "</p>");
     container.append("<p class='sub_details_mid'>Start - end: " + startTime + " - " + endTime + "</p>");
@@ -357,7 +357,7 @@ function appendEntitiesFromClient(uuid, client, attrDropdownList) {
             var entityContainer = $("<div class='small-12 columns'></div>").appendTo(entityContainerWrapper);
             entityContainer.append("<p class='details'><strong>" + entity.name + "</strong></p>");
             entityContainer.append("<p class='sub_details_mid'>Client: " + client.name + "</p>");
-            entityContainer.append("<p class='sub_details_mid'>Desc: " + entity.description + "</p>");
+            entityContainer.append("<p class='sub_details_mid'>Description: " + entity.description + "</p>");
             entityContainer.append("<p class='sub_details'>UUID: " + entity.uuid + "</p>");
             var actionsParagraph = $("<p class='sub_details'></p>").appendTo(entityContainer);
             var entityAddToLiveMetricsLink = $("<a class='entityCheckbox' id='e_" + entity.uuid + "_input' href='#'>Add to Live metrics</a>").appendTo(actionsParagraph);
@@ -386,7 +386,7 @@ function appendEntitiesFromClient(uuid, client, attrDropdownList) {
                 attributeContainer.append("<p class='details'><strong>" + attribute.name + "</strong></p>");
                 attributeContainer.append("<p class='sub_details_mid'>Client: " + client.name + "</p>");
                 attributeContainer.append("<p class='sub_details_mid'>Entity: " + entity.name + "</p>");
-                attributeContainer.append("<p class='sub_details_mid'>Desc: " + attribute.description + "</p>");
+                attributeContainer.append("<p class='sub_details_mid'>Description: " + attribute.description + "</p>");
                 attributeContainer.append("<p class='sub_details_mid'>UUID: " + attribute.uuid + "</p>");
                 attributeContainer.append("<p class='sub_details_mid'>Type: " + attribute.type + "</p>");
                 attributeContainer.append("<p class='sub_details_mid'>Unit: " + attribute.unit + "</p>");
