@@ -162,45 +162,46 @@ public class DataController {
     /**
      * Returns attribute data as a download file.
      *
+     * @param experimentId
      * @param attributeId attribute to return data for.
      * @param response
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/export/attribute/{attributeId}")
+    @RequestMapping(method = RequestMethod.GET, value = "/export/experiment/{experimentId}/attribute/{attributeId}")
     @ResponseBody
-    public void exportDataForAttribute(@PathVariable String attributeId, HttpServletResponse response) {
-        logger.debug("Exporting data for attribute '" + attributeId + "'");
+    public void exportDataForAttribute(@PathVariable String experimentId, @PathVariable String attributeId, HttpServletResponse response) {
+        logger.debug("Exporting data for attribute [" + attributeId + "], experiment [" + experimentId + "]");
 
-        // TODO: add error reporting
-        Attribute attribute = dataService.getAttribute(attributeId);
+        // TODO: should be a database-level query
+        EccAttribute attribute = null;
+        for (EccAttribute eccAttribute : dataService.getAttributesForExperiment(experimentId)) {
+            if (eccAttribute.getUuid().equals(UUID.fromString(attributeId))) {
+                attribute = eccAttribute;
+                break;
+            }
+        }
 
         if (attribute == null) {
-            logger.error("Failed to create file for attribute [" + "]: data service returned NULL value");
+            logger.error("Attribute [" + attributeId + "] was not found in experiment [" + experimentId + "]");
         } else {
 
-            Entity entity = dataService.getEntity(attribute.getEntityUUID().toString(), false);
+            String fileName = attribute.getName() + " (attribute) - experiment " + experimentId + ".csv";
+            response.setContentType("text/csv");
+            response.setHeader("Content-disposition", "attachment; filename=\"" + fileName + "\"");
 
-            if (entity == null) {
-                logger.error("Failed to create file for attribute [" + "]: data service returned NULL entity");
-            } else {
-                String fileName = attribute.getName() + " - " + entity.getName() + ".csv";
-                response.setContentType("text/csv");
-                response.setHeader("Content-disposition", "attachment; filename=\"" + fileName + "\"");
+            try {
+                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(response.getOutputStream()));
+                writer.write("Timestamp, Value");
 
-                try {
-                    BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(response.getOutputStream()));
-                    writer.write("Timestamp, Value");
-
-                    for (EccMeasurement m : dataService.getAllMeasurementsForAttribute(attributeId).getData()) {
-                        writer.newLine();
-                        writer.write(ISODateTimeFormat.dateTime().print(m.getTimestamp().getTime()) + ", " + m.getValue());
-                    }
-
-                    writer.flush();
-                    writer.close();
-                    response.flushBuffer();
-                } catch (IOException e) {
-                    logger.error("Failed to write data to output response stream for attribute [" + attributeId + "]", e);
+                for (EccMeasurement m : dataService.getAllMeasurementsForAttribute(experimentId, attributeId).getData()) {
+                    writer.newLine();
+                    writer.write(ISODateTimeFormat.dateTime().print(m.getTimestamp().getTime()) + ", " + m.getValue());
                 }
+
+                writer.flush();
+                writer.close();
+                response.flushBuffer();
+            } catch (IOException e) {
+                logger.error("Failed to write data to output response stream for attribute [" + attributeId + "], experiment [" + experimentId + "]", e);
             }
         }
     }
@@ -208,39 +209,43 @@ public class DataController {
     /**
      * Returns entity data as a download file.
      *
+     * @param experimentId
      * @param entityId
      * @param response
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/export/entity/{entityId}")
+    @RequestMapping(method = RequestMethod.GET, value = "/export/experiment/{experimentId}/entity/{entityId}")
     @ResponseBody
-    public void exportDataForEntity(@PathVariable String entityId, HttpServletResponse response) {
-        logger.debug("Exporting data for entity '" + entityId + "'");
+    public void exportDataForEntity(@PathVariable String experimentId, @PathVariable String entityId, HttpServletResponse response) {
+        logger.debug("Exporting data for entity [" + entityId + "], experiment [" + experimentId + "]");
 
         // TODO: add error reporting
-        Entity entity = dataService.getEntity(entityId, true);
+        EccEntity entity = null;
+
+        for (EccEntity tempEntity : dataService.getEntitiesForExperiment(experimentId, true)) {
+            if (tempEntity.getUuid().equals(UUID.fromString(entityId))) {
+                entity = tempEntity;
+                break;
+            }
+        }
 
         if (entity == null) {
-            logger.error("Failed to create file for entity [" + "]: data service returned NULL value");
+            logger.error("Entity [" + entityId + "] was not found in experiment [" + experimentId + "]");
         } else {
-            // get attributes and sort alphabetically
-            ArrayList<Attribute> attributes = new ArrayList<Attribute>(entity.getAttributes());
-            logger.debug("Entity [" + entityId + "] has " + attributes.size() + " attributes");
-            Collections.sort(attributes, new AttributesComparator());
-            String fileName = entity.getName() + ".csv";
+            ArrayList<EccAttribute> attributes = entity.getAttributes();
+            String fileName = entity.getName() + " (entity) - experiment " + experimentId + ".csv";
             response.setContentType("text/csv");
             response.setHeader("Content-disposition", "attachment; filename=\"" + fileName + "\"");
 
             try {
                 BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(response.getOutputStream()));
-//                writer.write("Attribute UUID, Attribute Name, Timestamp, Value, Metric type, Metric unit");
-                writer.write("Attribute Name, Attribute UUID, Timestamp, Value");
-                for (Attribute a : attributes) {
-                    logger.debug("Writing attribute [" + a.getUUID().toString() + "] " + a.getName());
-                    for (EccMeasurement m : dataService.getAllMeasurementsForAttribute(a.getUUID().toString()).getData()) {
+                writer.write("Attribute UUID, Attribute Name, Timestamp, Value, Metric type, Metric unit");
+                for (EccAttribute a : attributes) {
+                    logger.debug("Writing attribute [" + a.getUuid().toString() + "] " + a.getName());
+                    for (EccMeasurement m : dataService.getAllMeasurementsForAttribute(experimentId, a.getUuid().toString()).getData()) {
                         writer.newLine();
-                        writer.write(a.getName() + ", " + a.getUUID().toString() + ", ");
-                        writer.write(ISODateTimeFormat.dateTime().print(m.getTimestamp().getTime()) + ", " + m.getValue());
-                        // TODO: add metric type and unit as difficult
+                        writer.write(a.getName() + ", " + a.getUuid().toString() + ", ");
+                        writer.write(ISODateTimeFormat.dateTime().print(m.getTimestamp().getTime()) + ", " + m.getValue() + ", ");
+                        writer.write(a.getType() + ", " + a.getUnit());
                     }
                 }
 
@@ -248,7 +253,7 @@ public class DataController {
                 writer.close();
                 response.flushBuffer();
             } catch (IOException e) {
-                logger.error("Failed to write data to output response stream for entity [" + entityId + "]", e);
+                logger.error("Failed to write data to output response stream for entity [" + entityId + "], experiment [" + experimentId + "]", e);
             }
         }
     }
@@ -262,57 +267,41 @@ public class DataController {
     @RequestMapping(method = RequestMethod.GET, value = "/export/client/{clientId}")
     @ResponseBody
     public void exportDataForClient(@PathVariable String clientId, HttpServletResponse response) {
-        logger.debug("Exporting data for client '" + clientId + "'");
+        logger.debug("Exporting data for client [" + clientId + "]");
 
         // TODO: add error reporting
         try {
             EMClient theClient = experimentService.getClientByID(UUID.fromString(clientId));
-            Iterator<MetricGenerator> it = theClient.getCopyOfMetricGenerators().iterator();
-            ArrayList<EccEntity> entities = new ArrayList<EccEntity>();
-            MetricGenerator mg;
-            EccEntity tempEntity;
+            Experiment currentExperiment = experimentService.getActiveExperiment();
+
+            String experimentUuid;
+            if (currentExperiment == null) {
+                // should never happen
+                experimentUuid = "unknown";
+            } else {
+                experimentUuid = currentExperiment.getUUID().toString();
+            }
+
+            ArrayList<EccEntity> entities = dataService.getEntitiesForClient(clientId, true);
             ArrayList<EccAttribute> attributes;
-            MeasurementSet ms;
-            while (it.hasNext()) {
-                mg = it.next();
-                for (Entity e : mg.getEntities()) {
-                    tempEntity = new EccEntity();
-                    attributes = new ArrayList<EccAttribute>();
-                    tempEntity.setName(e.getName());
-                    tempEntity.setDescription(e.getDescription());
-                    tempEntity.setUuid(e.getUUID());
-                    for (Attribute a : e.getAttributes()) {
-                        ms = MetricHelper.getMeasurementSetForAttribute(a, mg);
-                        attributes.add(new EccAttribute(a.getName(), a.getDescription(), a.getUUID(), a.getEntityUUID(), ms.getMetric().getMetricType().name(), ms.getMetric().getUnit().getName()));
-                    }
-                    Collections.sort(attributes, new EccAttributesComparator());
-                    tempEntity.setAttributes(attributes);
-                    entities.add(tempEntity);
-                }
-            }
 
-            if (entities.size() > 1) {
-                Collections.sort(entities, new EccEntitiesComparator());
-            }
-
-            String fileName = theClient.getName() + ".csv";
+            String fileName = theClient.getName() + " (client) - experiment " + experimentUuid + ".csv";
             response.setHeader("Content-disposition", "attachment; filename=\"" + fileName + "\"");
             response.setContentType("text/csv");
 
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(response.getOutputStream()));
-            writer.write("Entity Name, Entity UUID, Attribute Name, Attribute UUID, Timestamp, Value");
+            writer.write("Entity Name, Entity UUID, Attribute Name, Attribute UUID, Timestamp, Value, Metric type, Metric unit");
             for (EccEntity e : entities) {
                 attributes = e.getAttributes();
-                Collections.sort(attributes, new EccAttributesComparator());
 
                 for (EccAttribute a : attributes) {
-                    logger.debug("Writing attribute [" + a.getUuid().toString() + "] " + a.getName());
                     for (EccMeasurement m : dataService.getAllMeasurementsForAttribute(a.getUuid().toString()).getData()) {
                         writer.newLine();
                         writer.write(e.getName() + ", " + e.getUuid().toString() + ", ");
                         writer.write(a.getName() + ", " + a.getUuid().toString() + ", ");
-                        writer.write(ISODateTimeFormat.dateTime().print(m.getTimestamp().getTime()) + ", " + m.getValue());
-                        // TODO: add metric type and unit as difficult
+                        writer.write(ISODateTimeFormat.dateTime().print(m.getTimestamp().getTime()) + ", " + m.getValue() + ", ");
+                        writer.write(a.getType() + ", " + a.getUnit());
+
                     }
                 }
             }
@@ -336,61 +325,32 @@ public class DataController {
     public void exportDataForTheExperiment(@PathVariable String experimentId, HttpServletResponse response) {
         logger.debug("Exporting data for experiment '" + experimentId + "'");
 
-        Experiment experiment = dataService.getExperimentWithMetricModels(UUID.fromString(experimentId));
+        Experiment experiment = dataService.getExperiment(experimentId, false);
 
         // TODO: add error reporting
         if (experiment == null) {
             logger.error("Failed to get data for experiment [" + experimentId + "], data service returned NULL experiment for that ID");
         } else {
-            Iterator<MetricGenerator> it = experiment.getMetricGenerators().iterator();
-            MetricGenerator mg;
-            MeasurementSet ms;
-            ArrayList<EccEntity> entities = new ArrayList<EccEntity>();
-            EccEntity tempEntity;
-            ArrayList<EccAttribute> attributes;
-            while (it.hasNext()) {
-                mg = it.next();
-                for (Entity e : mg.getEntities()) {
-                    tempEntity = new EccEntity();
-                    attributes = new ArrayList<EccAttribute>();
-                    tempEntity.setName(e.getName());
-                    tempEntity.setDescription(e.getDescription());
-                    tempEntity.setUuid(e.getUUID());
-
-                    for (Attribute a : e.getAttributes()) {
-                        ms = MetricHelper.getMeasurementSetForAttribute(a, mg);
-                        attributes.add(new EccAttribute(a.getName(), a.getDescription(), a.getUUID(), a.getEntityUUID(), ms.getMetric().getMetricType().name(), ms.getMetric().getUnit().getName()));
-                    }
-                    Collections.sort(attributes, new EccAttributesComparator());
-                    tempEntity.setAttributes(attributes);
-                    entities.add(tempEntity);
-                }
-            }
-
-            if (entities.size() > 1) {
-                Collections.sort(entities, new EccEntitiesComparator());
-            }
-
             try {
-
-                String fileName = experiment.getName() + ".csv";
+                String fileName = experiment.getName() + " - UUID " + experimentId + ".csv";
                 response.setHeader("Content-disposition", "attachment; filename=\"" + fileName + "\"");
                 response.setContentType("text/csv");
 
+                ArrayList<EccEntity> entities = dataService.getEntitiesForExperiment(experimentId, true);
+
                 BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(response.getOutputStream()));
-                writer.write("Entity Name, Entity UUID, Attribute Name, Attribute UUID, Timestamp, Value");
+                writer.write("Entity Name, Entity UUID, Attribute Name, Attribute UUID, Timestamp, Value, Metric type, Metric unit");
+                ArrayList<EccAttribute> attributes;
                 for (EccEntity e : entities) {
                     attributes = e.getAttributes();
-                    Collections.sort(attributes, new EccAttributesComparator());
 
                     for (EccAttribute a : attributes) {
-                        logger.debug("Writing attribute [" + a.getUuid().toString() + "] " + a.getName());
-                        for (EccMeasurement m : dataService.getAllMeasurementsForAttribute(a.getUuid().toString()).getData()) {
+                        for (EccMeasurement m : dataService.getAllMeasurementsForAttribute(experimentId, a.getUuid().toString()).getData()) {
                             writer.newLine();
                             writer.write(e.getName() + ", " + e.getUuid().toString() + ", ");
                             writer.write(a.getName() + ", " + a.getUuid().toString() + ", ");
-                            writer.write(ISODateTimeFormat.dateTime().print(m.getTimestamp().getTime()) + ", " + m.getValue());
-                            // TODO: add metric type and unit as difficult
+                            writer.write(ISODateTimeFormat.dateTime().print(m.getTimestamp().getTime()) + ", " + m.getValue() + ", ");
+                            writer.write(a.getType() + ", " + a.getUnit());
                         }
                     }
                 }

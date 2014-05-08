@@ -5,12 +5,13 @@ var CHART_POLLING_INTERVAL = 3000; // polling delay
 var CHART_SHIFT_DATA_THRESHOLD = 10; // how many points to return per graph
 var intervals = new Array(); // polling intervals
 var DISPLAY_TIME_FORMAT = "ddd, MMM Do, HH:mm [(]Z[)]";
+var current_experiment_id;
 
 $(document).ready(function() {
     $(document).foundation();
     $(document).on('open', '#nameExperimentModal', function() {
         $("#newExperimentHeader").text('Select an existing experiment or start a new one');
-// check for current experiment
+        // check for current experiment
         $.getJSON(BASE_URL + "/experiments/ifinprogress", function(edata) {
 
             if (edata !== false) { // current experiment in progress, load details
@@ -251,7 +252,8 @@ function fillWithExperimentMetadata(container, experiment) {
 
 // handles the display of all data
 function startMainMonitor(experimentData) {
-// refresh experiment details
+    // refresh experiment details
+    current_experiment_id = experimentData.uuid;
     showActiveExperimentDetails(experimentData);
     // show list of clients
     $.getJSON(BASE_URL + "/experiments/clients", function(data) {
@@ -400,7 +402,7 @@ function appendEntitiesFromClient(uuid, client, attrDropdownList) {
             var entityAddToLiveMetricsLink = $("<a class='entityCheckbox' id='e_" + entity.uuid + "_input' href='#'>Add to Live metrics</a>").appendTo(actionsParagraph);
             entityAddToLiveMetricsLink.data("entity", entity);
             entityAddToLiveMetricsLink.data("clientId", uuid);
-            actionsParagraph.append("<a class='downloadLink' href='" + BASE_URL + "/data/export/entity/" + entity.uuid + "'>Download CSV data</a>");
+            actionsParagraph.append("<a class='downloadLink' href='" + BASE_URL + "/data/export/experiment/" + current_experiment_id + "/entity/" + entity.uuid + "'>Download CSV data</a>");
             entityContainerWrapper.data("clientId", uuid);
             entityAddToLiveMetricsLink.click(function(e) {
                 e.preventDefault();
@@ -431,7 +433,7 @@ function appendEntitiesFromClient(uuid, client, attrDropdownList) {
                 var attributeAddToLiveMetricsLink = $("<a id='a_" + attribute.uuid + "_input' href='#'>Add to Live metrics</a>").appendTo(actionsParagraph);
                 attributeAddToLiveMetricsLink.data("attribute", attribute);
                 attributeAddToLiveMetricsLink.data("entityName", entity.name);
-                actionsParagraph.append("<a class='downloadLink' href='" + BASE_URL + "/data/export/attribute/" + attribute.uuid + "'>Download CSV data</a>");
+                actionsParagraph.append("<a class='downloadLink' href='" + BASE_URL + "/data/export/experiment/" + current_experiment_id + "/attribute/" + attribute.uuid + "'>Download CSV data</a>");
                 attributeContainerWrapper.data("entityId", entity.uuid);
                 attributeAddToLiveMetricsLink.click(function(e) {
                     e.preventDefault();
