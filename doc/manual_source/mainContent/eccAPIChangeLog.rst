@@ -1,6 +1,14 @@
 ECC API change log
 ==================
 
+Summary of V2.1 changes
+-----------------------
+
+Change to EDM database schema
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+We have slightly modified the EDM database schema to provide greater flexibility in metric modelling (by allowing measurement sets from any group to point to the same attribute instance). This means that if you work with a manually deployed ECC you will need to delete your existing ECC database and create a new one (using the updated script in this version of the API). ECC V2.1 systems deployed with Vagrant will automatically create the updated database. This change has no effect on the client API you use to connect to the ECC or the structure of the data stored in the PostreSQL database.
+
+
 Summary of V2.0 changes
 -----------------------
 This version of the ECC now offers:
