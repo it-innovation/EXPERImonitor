@@ -4,7 +4,7 @@ var CLIENT_MODELS_AJAX = [];
 var CHART_POLLING_INTERVAL = 3000; // polling delay
 var CHART_SHIFT_DATA_THRESHOLD = 10; // how many points to return per graph
 var intervals = new Array(); // polling intervals
-
+var DISPLAY_TIME_FORMAT = "ddd, MMM Do, HH:mm [(]Z[)]";
 
 $(document).ready(function() {
     $(document).foundation();
@@ -46,9 +46,9 @@ $(document).ready(function() {
                         $.each(data, function(key, experiment) {
                             var formattedDate;
                             if (experiment.status === 'started') {
-                                formattedDate = moment(new Date(experiment.startTime)).format("ddd, MMM Do, HH:mm");
+                                formattedDate = moment(new Date(experiment.startTime)).format(DISPLAY_TIME_FORMAT);
                             } else {
-                                formattedDate = moment(new Date(experiment.endTime)).format("ddd, MMM Do, HH:mm");
+                                formattedDate = moment(new Date(experiment.endTime)).format(DISPLAY_TIME_FORMAT);
                             }
 
                             var experimentEntry = $("<option value='" + experiment.uuid + "'>" + experiment.name + " (" + experiment.status + " at " + formattedDate + ")</option>").appendTo(experimentsDropdownList);
@@ -240,8 +240,8 @@ $(document).ready(function() {
 // puts experiment metadata into a container
 function fillWithExperimentMetadata(container, experiment) {
     container.empty();
-    var startTime = experiment.startTime === null ? 'n/a' : moment(new Date(experiment.startTime)).format("ddd, MMM Do, HH:mm");
-    var endTime = experiment.endTime === null ? 'n/a' : moment(new Date(experiment.endTime)).format("ddd, MMM Do, HH:mm");
+    var startTime = experiment.startTime === null ? 'n/a' : moment(new Date(experiment.startTime)).format(DISPLAY_TIME_FORMAT);
+    var endTime = experiment.endTime === null ? 'n/a' : moment(new Date(experiment.endTime)).format(DISPLAY_TIME_FORMAT);
     container.append("<p class='sub_details_mid'>Name: " + experiment.name + "</p>");
     container.append("<p class='sub_details_mid'>Description: " + experiment.description + "</p>");
     container.append("<p class='sub_details_mid'>Status: " + experiment.status + "</p>");
@@ -267,7 +267,7 @@ function showActiveExperimentDetails(experimentMetadata) {
     $("#experiment_details").append("<p class='details'>Project: " + experimentMetadata.projectName + "</p>");
     $("#experiment_details").append("<p class='details'>Name: " + experimentMetadata.name + "</p>");
     $("#experiment_details").append("<p class='details'>Description: " + experimentMetadata.description + "</p>");
-    $("#experiment_details").append("<p class='details'>Started: " + new Date(experimentMetadata.startTime) + "</p>");
+    $("#experiment_details").append("<p class='details'>Started: " + moment(new Date(experimentMetadata.startTime)).format(DISPLAY_TIME_FORMAT) + "</p>");
     $("#download_experiment_data").attr('href', BASE_URL + "/data/export/experiment/" + experimentMetadata.uuid);
 }
 
