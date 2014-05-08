@@ -1,4 +1,5 @@
 var BASE_URL = "/" + window.location.href.split('/')[3];
+var DISPLAY_TIME_FORMAT = "ddd, MMM Do, HH:mm [(]Z[)]";
 
 $(document).ready(function() {
     $(document).foundation();
@@ -62,13 +63,17 @@ $(document).ready(function() {
 
                             // fetch data
                             $.getJSON(BASE_URL + "/data/entities/" + experimentId, function(data) {
-                                console.log(data);
+//                                console.log(data);
+                                $("#entities_details").empty();
+                                $("#entities_details").append("<h4>Entities</h4>");
+                                $("#attribute_details").empty();
+                                $("#attribute_details").append("<h4>Attributes</h4>");
                                 $.each(data, function(ekey, entity) {
                                     var entityContainerWrapper = $("<div class='entityContainer row fullWidth collapse'></div>").appendTo("#entities_details");
 
                                     var entityContainer = $("<div class='small-12 columns'></div>").appendTo(entityContainerWrapper);
                                     entityContainer.append("<p class='details'><strong>" + entity.name + "</strong></p>");
-                                    entityContainer.append("<p class='sub_details_mid'>Desc: " + entity.description + "</p>");
+                                    entityContainer.append("<p class='sub_details_mid'>Description: " + entity.description + "</p>");
                                     entityContainer.append("<p class='sub_details'>UUID: " + entity.uuid + "</p>");
 
                                     var actionsParagraph = $("<p class='sub_details'></p>").appendTo(entityContainer);
@@ -81,7 +86,7 @@ $(document).ready(function() {
                                         var attributeContainer = $("<div class='small-12 columns'></div>").appendTo(attributeContainerWrapper);
                                         attributeContainer.append("<p class='details'><strong>" + attribute.name + "</strong></p>");
                                         attributeContainer.append("<p class='sub_details_mid'>Entity: " + entity.name + "</p>");
-                                        attributeContainer.append("<p class='sub_details_mid'>Desc: " + attribute.description + "</p>");
+                                        attributeContainer.append("<p class='sub_details_mid'>Description: " + attribute.description + "</p>");
                                         attributeContainer.append("<p class='sub_details_mid'>UUID: " + attribute.uuid + "</p>");
                                         attributeContainer.append("<p class='sub_details_mid'>Type: " + attribute.type + "</p>");
                                         attributeContainer.append("<p class='sub_details_mid'>Unit: " + attribute.unit + "</p>");
@@ -127,9 +132,9 @@ $(document).ready(function() {
                     $.each(data, function(key, experiment) {
                         var formattedDate;
                         if (experiment.status === 'started') {
-                            formattedDate = moment(new Date(experiment.startTime)).format("ddd, MMM Do, HH:mm");
+                            formattedDate = moment(new Date(experiment.startTime)).format(DISPLAY_TIME_FORMAT);
                         } else {
-                            formattedDate = moment(new Date(experiment.endTime)).format("ddd, MMM Do, HH:mm");
+                            formattedDate = moment(new Date(experiment.endTime)).format(DISPLAY_TIME_FORMAT);
                         }
 
                         var experimentEntry = $("<option value='" + experiment.uuid + "'>" + experiment.name + " (" + experiment.status + " at " + formattedDate + ")</option>").appendTo(experimentsDropdownList);
@@ -202,17 +207,17 @@ function showActiveExperimentDetails(experimentMetadata) {
     $("#experiment_details").append("<p class='details'>Project: " + experimentMetadata.projectName + "</p>");
     $("#experiment_details").append("<p class='details'>Name: " + experimentMetadata.name + "</p>");
     $("#experiment_details").append("<p class='details'>Description: " + experimentMetadata.description + "</p>");
-    $("#experiment_details").append("<p class='details'>Started: " + new Date(experimentMetadata.startTime) + "</p>");
+    $("#experiment_details").append("<p class='details'>Started: " + moment(new Date(experimentMetadata.startTime)).format(DISPLAY_TIME_FORMAT) + "</p>");
     $("#download_experiment_data").attr('href', BASE_URL + "/data/export/experiment/" + experimentMetadata.uuid);
 }
 
 // puts experiment metadata into a container
 function fillWithExperimentMetadata(container, experiment) {
     container.empty();
-    var startTime = experiment.startTime === null ? 'n/a' : moment(new Date(experiment.startTime)).format("ddd, MMM Do, HH:mm");
-    var endTime = experiment.endTime === null ? 'n/a' : moment(new Date(experiment.endTime)).format("ddd, MMM Do, HH:mm");
+    var startTime = experiment.startTime === null ? 'n/a' : moment(new Date(experiment.startTime)).format(DISPLAY_TIME_FORMAT);
+    var endTime = experiment.endTime === null ? 'n/a' : moment(new Date(experiment.endTime)).format(DISPLAY_TIME_FORMAT);
     container.append("<p class='sub_details_mid'>Name: " + experiment.name + "</p>");
-    container.append("<p class='sub_details_mid'>Desc: " + experiment.description + "</p>");
+    container.append("<p class='sub_details_mid'>Description: " + experiment.description + "</p>");
     container.append("<p class='sub_details_mid'>Status: " + experiment.status + "</p>");
     container.append("<p class='sub_details_mid'>UUID: " + experiment.uuid + "</p>");
     container.append("<p class='sub_details_mid'>Start - end: " + startTime + " - " + endTime + "</p>");

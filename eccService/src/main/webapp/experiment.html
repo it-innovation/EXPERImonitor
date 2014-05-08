@@ -28,13 +28,15 @@
                     </div>
                 </div>
             </div>
+            <div class="small-12 columns text-center">
+                <a href="#" class="button medium" id="reloadClientsEntitiesAttributes">Refresh Clients, Entities and Attributes below</a>
+            </div>
 
         </div>
 
         <div class="row fullWidth">
             <hr>
             <div class="small-12 columns">
-                <h4>Clients, entities, attributes</h4>
                 <div class="row">
                     <div class="small-4 columns" id="clients_details">
 
@@ -53,7 +55,7 @@
             <hr>
             <div class="small-12 columns">
                 <h4>Live Metrics</h4>
-                <div class="row"  id="live_metrics">
+                <div class="row" id="live_metrics">
 
                 </div>
             </div>
@@ -62,7 +64,7 @@
         <!-- ***** -->
         <div id="nameExperimentModal" class="reveal-modal medium" data-reveal>
             <div class="row fullWidth">
-                <h3>Select an existing experiment or start a new one</h3>
+                <h3 id="newExperimentHeader"></h3>
                 <form id="newOldExperimentsForm">
                     <div class="currentProjectContainer hide">
                         <input type="radio" name="projectSelectionSet" value="old" id="currentProjectRadio">
@@ -72,22 +74,25 @@
                         </div>
                     </div>
 
-                    <input type="radio" name="projectSelectionSet" value="old" id="oldProjectRadio">
-                    <label for="oldProjectRadio">Use one of the latest experiments:</label>
+                    <div class="oldProjectsContainer hide">
+                        <input type="radio" name="projectSelectionSet" value="old" id="oldProjectRadio">
+                        <label for="oldProjectRadio">Use one of the latest experiments:</label>
 
-                    <div id="oldProjects" class="experimentsSelection">
-                    </div>
-                    <div id="oldProjectDetails" class="experimentsSelectionDetails">
+                        <div id="oldProjects" class="experimentsSelection">
+                        </div>
+                        <div id="oldProjectDetails" class="experimentsSelectionDetails">
+                        </div>
                     </div>
 
                     <input type="radio" name="projectSelectionSet" value="new" id="newProjectRadio">
-                    <label for="newProjectRadio">Start new experiment</label>
+                    <label for="newProjectRadio" id="startNewExperimentLabel">Start new experiment</label>
+
 
                     <div id="createNewProject" class="experimentsSelection">
-                        <label>New experiment name
+                        <label>New experiment name (optional)
                             <input type="text" name="newProject[name]" id="newProjectName"/>
                         </label>
-                        <label>New experiment description
+                        <label>New experiment description (optional)
                             <input type="text" name="newProject[description]" id="newProjectDescription"/>
                         </label>
                     </div>

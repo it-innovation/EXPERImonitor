@@ -1,14 +1,15 @@
 var BASE_URL = "/" + window.location.href.split('/')[3];
 var clientsDropdownList, entitiesDropdownList, attrDropdownList;
 var CLIENT_MODELS_AJAX = [];
-var CHART_POLLING_INTERVAL = 3000;
-var CHART_SHIFT_DATA_THRESHOLD = 10;
-
+var CHART_POLLING_INTERVAL = 3000; // polling delay
+var CHART_SHIFT_DATA_THRESHOLD = 10; // how many points to return per graph
+var intervals = new Array(); // polling intervals
+var DISPLAY_TIME_FORMAT = "ddd, MMM Do, HH:mm [(]Z[)]";
 
 $(document).ready(function() {
     $(document).foundation();
     $(document).on('open', '#nameExperimentModal', function() {
-
+        $("#newExperimentHeader").text('Select an existing experiment or start a new one');
 // check for current experiment
         $.getJSON(BASE_URL + "/experiments/ifinprogress", function(edata) {
 
@@ -35,6 +36,9 @@ $(document).ready(function() {
                 success: function(data) {
                     console.log(data);
                     if (data.length > 0) {
+                        // no current experiment, existing projects
+                        $(".oldProjectsContainer").removeClass("hide");
+
                         if ($(".currentProjectContainer").hasClass("hide")) {
                             $("#oldProjectRadio").prop('checked', true);
                         }
@@ -42,9 +46,9 @@ $(document).ready(function() {
                         $.each(data, function(key, experiment) {
                             var formattedDate;
                             if (experiment.status === 'started') {
-                                formattedDate = moment(new Date(experiment.startTime)).format("ddd, MMM Do, HH:mm");
+                                formattedDate = moment(new Date(experiment.startTime)).format(DISPLAY_TIME_FORMAT);
                             } else {
-                                formattedDate = moment(new Date(experiment.endTime)).format("ddd, MMM Do, HH:mm");
+                                formattedDate = moment(new Date(experiment.endTime)).format(DISPLAY_TIME_FORMAT);
                             }
 
                             var experimentEntry = $("<option value='" + experiment.uuid + "'>" + experiment.name + " (" + experiment.status + " at " + formattedDate + ")</option>").appendTo(experimentsDropdownList);
@@ -59,7 +63,17 @@ $(document).ready(function() {
                             fillWithExperimentMetadata($("#oldProjectDetails"), experiment);
                         });
                     } else {
-                        $("#newProjectRadio").prop('checked', true);
+                        if ($(".currentProjectContainer").hasClass("hide")) {
+                            // no existing experiments, no current experiments
+                            $("#newExperimentHeader").text('Start new experiment');
+                            $("#newProjectRadio").prop('checked', true);
+
+                        } else {
+                            // no existing experiments, but current experiment
+                            $("#newExperimentHeader").text('Start new experiment or connect to current');
+                            $("#currentProjectRadio").prop('checked', true);
+                        }
+
                     }
                 }
             });
@@ -84,6 +98,25 @@ $(document).ready(function() {
             }
         });
 
+    });
+
+    // reload everything button
+    $("#reloadClientsEntitiesAttributes").click(function(e) {
+        e.preventDefault();
+
+        // stop all current polling
+        for (var i = 0; i < intervals.length; i++) {
+            clearInterval(intervals[i]);
+        }
+
+        // clear graphs
+        $("#live_metrics").empty();
+
+        // clean reload of clients, entities, attributes
+        $.getJSON(BASE_URL + "/experiments/clients", function(data) {
+            console.log(data);
+            showListOfClients(data);
+        });
     });
 
     // new name/description for an experiment
@@ -207,10 +240,10 @@ $(document).ready(function() {
 // puts experiment metadata into a container
 function fillWithExperimentMetadata(container, experiment) {
     container.empty();
-    var startTime = experiment.startTime === null ? 'n/a' : moment(new Date(experiment.startTime)).format("ddd, MMM Do, HH:mm");
-    var endTime = experiment.endTime === null ? 'n/a' : moment(new Date(experiment.endTime)).format("ddd, MMM Do, HH:mm");
+    var startTime = experiment.startTime === null ? 'n/a' : moment(new Date(experiment.startTime)).format(DISPLAY_TIME_FORMAT);
+    var endTime = experiment.endTime === null ? 'n/a' : moment(new Date(experiment.endTime)).format(DISPLAY_TIME_FORMAT);
     container.append("<p class='sub_details_mid'>Name: " + experiment.name + "</p>");
-    container.append("<p class='sub_details_mid'>Desc: " + experiment.description + "</p>");
+    container.append("<p class='sub_details_mid'>Description: " + experiment.description + "</p>");
     container.append("<p class='sub_details_mid'>Status: " + experiment.status + "</p>");
     container.append("<p class='sub_details_mid'>UUID: " + experiment.uuid + "</p>");
     container.append("<p class='sub_details_mid'>Start - end: " + startTime + " - " + endTime + "</p>");
@@ -234,7 +267,7 @@ function showActiveExperimentDetails(experimentMetadata) {
     $("#experiment_details").append("<p class='details'>Project: " + experimentMetadata.projectName + "</p>");
     $("#experiment_details").append("<p class='details'>Name: " + experimentMetadata.name + "</p>");
     $("#experiment_details").append("<p class='details'>Description: " + experimentMetadata.description + "</p>");
-    $("#experiment_details").append("<p class='details'>Started: " + new Date(experimentMetadata.startTime) + "</p>");
+    $("#experiment_details").append("<p class='details'>Started: " + moment(new Date(experimentMetadata.startTime)).format(DISPLAY_TIME_FORMAT) + "</p>");
     $("#download_experiment_data").attr('href', BASE_URL + "/data/export/experiment/" + experimentMetadata.uuid);
 }
 
@@ -243,6 +276,10 @@ function showListOfClients(clientMetadataArray) {
     $("#clients_details").empty();
     $("#entities_details").empty();
     $("#attribute_details").empty();
+    $("#clients_details").append("<h4>Clients</h4>");
+    $("#entities_details").append("<h4>Entities</h4>");
+    $("#attribute_details").append("<h4>Attributes</h4>");
+
     var clientsDropdownLabel = $("<label>Filter by client connection status or show all</label>").appendTo("#clients_details");
     clientsDropdownList = $("<select></select>").appendTo(clientsDropdownLabel);
     clientsDropdownList.append("<option value='all'>All</option>");
@@ -357,7 +394,7 @@ function appendEntitiesFromClient(uuid, client, attrDropdownList) {
             var entityContainer = $("<div class='small-12 columns'></div>").appendTo(entityContainerWrapper);
             entityContainer.append("<p class='details'><strong>" + entity.name + "</strong></p>");
             entityContainer.append("<p class='sub_details_mid'>Client: " + client.name + "</p>");
-            entityContainer.append("<p class='sub_details_mid'>Desc: " + entity.description + "</p>");
+            entityContainer.append("<p class='sub_details_mid'>Description: " + entity.description + "</p>");
             entityContainer.append("<p class='sub_details'>UUID: " + entity.uuid + "</p>");
             var actionsParagraph = $("<p class='sub_details'></p>").appendTo(entityContainer);
             var entityAddToLiveMetricsLink = $("<a class='entityCheckbox' id='e_" + entity.uuid + "_input' href='#'>Add to Live metrics</a>").appendTo(actionsParagraph);
@@ -386,7 +423,7 @@ function appendEntitiesFromClient(uuid, client, attrDropdownList) {
                 attributeContainer.append("<p class='details'><strong>" + attribute.name + "</strong></p>");
                 attributeContainer.append("<p class='sub_details_mid'>Client: " + client.name + "</p>");
                 attributeContainer.append("<p class='sub_details_mid'>Entity: " + entity.name + "</p>");
-                attributeContainer.append("<p class='sub_details_mid'>Desc: " + attribute.description + "</p>");
+                attributeContainer.append("<p class='sub_details_mid'>Description: " + attribute.description + "</p>");
                 attributeContainer.append("<p class='sub_details_mid'>UUID: " + attribute.uuid + "</p>");
                 attributeContainer.append("<p class='sub_details_mid'>Type: " + attribute.type + "</p>");
                 attributeContainer.append("<p class='sub_details_mid'>Unit: " + attribute.unit + "</p>");
@@ -424,6 +461,12 @@ function addAttributeGraph(attribute, entityName) {
     });
     var attributeGraphContainer = $("<div class='small-4 columns end attributeGraphDiv' id='a_" + attribute.uuid + "_graph'></div>").appendTo("#live_metrics");
     var graphContainer = $("<div id='agraph_" + attribute.uuid + "'></div>").appendTo(attributeGraphContainer);
+    var removeButton = $("<a href='#' class='removeSelfGraphButton' id='removeButton_" + attribute.uuid + "'>Remove</a>").appendTo($("<div class='removeSelfGraphButtonWrapper text-center'></div>").appendTo(attributeGraphContainer));
+    removeButton.data("attributeiuud", attribute.uuid);
+    removeButton.click(function(e) {
+        e.preventDefault();
+        $("#a_" + $(this).data("attributeiuud") + "_input").trigger("click");
+    });
     var chart;
     if (attribute.type === 'NOMINAL') {
         console.log("Adding pie chart");
@@ -465,7 +508,7 @@ function addAttributeGraph(attribute, entityName) {
 
         // set polling
         var series = chart.series[0];
-        $("#a_" + attribute.uuid + "_input").data("interval", setInterval(function() {
+        var theInterval = setInterval(function() {
             // TODO: stop polling on error
             $.getJSON(BASE_URL + "/data/attribute/" + attribute.uuid + "/since/" + lastTimestamp, function(dataSince) {
                 console.log(dataSince);
@@ -493,8 +536,19 @@ function addAttributeGraph(attribute, entityName) {
                     });
                 }
             });
-        }, CHART_POLLING_INTERVAL));
+        }, CHART_POLLING_INTERVAL);
+        $("#a_" + attribute.uuid + "_input").data("interval", theInterval);
+        intervals.push(theInterval);
     });
+}
+
+// removes interval from intervals - more reliable, removes duplicates
+function removeInterval(interval) {
+    for (var i = 0; i < intervals.length; i++) {
+        if (intervals[i] === interval)
+            intervals.splice(i, 1);
+    }
+
 }
 
 // adds empty pie chart
@@ -576,9 +630,12 @@ function createEmptyLineChart(container, attribute, entityName) {
 
 // hides attribute's graph to display
 function hideAttributeGraph(attribute) {
-    console.log("Removing graph for attribute " + attribute.uuid);
+
     $("#a_" + attribute.uuid + "_graph").remove();
-    clearInterval($("#a_" + attribute.uuid + "_input").data("interval"));
+    var theInterval = $("#a_" + attribute.uuid + "_input").data("interval");
+    console.log("Removing graph for attribute " + attribute.uuid + ", interval " + theInterval);
+    clearInterval(theInterval);
+    removeInterval(theInterval);
     // set last container class to end
     $("#live_metrics .attributeGraphDiv").each(function() {
         $(this).removeClass('end');
