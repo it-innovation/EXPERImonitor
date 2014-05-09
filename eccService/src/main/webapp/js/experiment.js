@@ -325,8 +325,8 @@ function showListOfClients(clientMetadataArray) {
         }
     });
     var attrDropdownLabel = $("<label>Filter by entity or show all</label>").appendTo("#attribute_details");
-    attrDropdownList = $("<select></select>").appendTo(attrDropdownLabel);
-    attrDropdownList.append("<option value='all'>All</option>");
+    attrDropdownList = $("<select id='attrDropdownList'></select>").appendTo(attrDropdownLabel);
+    attrDropdownList.prepend("<option value='all'>All</option>");
     attrDropdownList.change(function(e) {
         var sel = $("#attribute_details option:selected").val();
         if (sel === 'all') {
@@ -334,7 +334,7 @@ function showListOfClients(clientMetadataArray) {
                 $(this).removeClass('hide');
             });
         } else {
-            console.log(sel);
+//            console.log(sel);
             $("#attribute_details div.attributeContainer").each(function(key) {
                 if ($(this).data('entityId') === sel) {
                     $(this).removeClass('hide');
@@ -379,18 +379,30 @@ function showListOfClients(clientMetadataArray) {
     $.when.apply($, CLIENT_MODELS_AJAX).done(function() {
         clientsDropdownList.prop('selectedIndex', 1);
         clientsDropdownList.change();
-        // TODO: sort entities list alphabetically
         entitiesDropdownList.prop('selectedIndex', 1);
         entitiesDropdownList.change();
+
+        // sort attribute dropdown alphabetically
+        sortDropDownListByText(attrDropdownList.attr('id'));
+
         attrDropdownList.prop('selectedIndex', 1);
         attrDropdownList.change();
     });
 }
 
+// sort dropdown
+function sortDropDownListByText(selectId) {
+    var foption = $('#' + selectId + ' option:first');
+    var soptions = $('#' + selectId + ' option:not(:first)').sort(function(a, b) {
+        return a.text === b.text ? 0 : a.text < b.text ? -1 : 1;
+    });
+    $('#' + selectId).html(soptions).prepend(foption);
+}
+
 // append entities from client
 function appendEntitiesFromClient(uuid, client, attrDropdownList) {
     return $.getJSON(BASE_URL + "/experiments/entities/" + uuid, function(data) {
-        console.log(data);
+//        console.log(data);
         $.each(data, function(ekey, entity) {
             var entityContainerWrapper = $("<div class='entityContainer row fullWidth collapse'></div>").appendTo("#entities_details");
             var entityContainer = $("<div class='small-12 columns'></div>").appendTo(entityContainerWrapper);
