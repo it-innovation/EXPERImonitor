@@ -39,6 +39,7 @@ import java.util.TreeMap;
 import java.util.UUID;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -584,6 +585,7 @@ public class DataService {
     /**
      *
      * @param attributeId
+     * @param limit
      * @return
      */
     public EccMeasurementSet getLatestMeasurementsForAttribute(String attributeId, int limit) {
@@ -645,9 +647,14 @@ public class DataService {
             logger.warn("Data requested on current experiment which is NULL");
         }
 
-        // Sort by time stamps
+        // Sort by time stamps, add timestamp
         if (result.getData().size() > 1) {
             Collections.sort(result.getData(), new EccMeasurementsComparator());
+
+        }
+
+        if (result.getData().size() > 0) {
+            result.setTimestamp(ISODateTimeFormat.dateTime().print(result.getData().get(result.getData().size() - 1).getTimestamp().getTime()));
         }
 
         return result;
@@ -670,7 +677,7 @@ public class DataService {
         if (currentExperiment != null) {
             try {
                 Attribute attr = MetricHelper.getAttributeFromID(UUID.fromString(attributeId), metricGenDAO.getMetricGeneratorsForExperiment(currentExperiment.getUUID(), true));
-                Set<MeasurementSet> measurementSets = getSinceMeasurementSetsForAttribute(currentExperiment.getUUID(), attr, new Date(since), 10);
+                Set<MeasurementSet> measurementSets = getSinceMeasurementSetsForAttribute(currentExperiment.getUUID(), attr, new Date(since), limit);
                 Iterator<MeasurementSet> it = measurementSets.iterator();
                 MeasurementSet ms;
                 while (it.hasNext()) {
@@ -689,7 +696,9 @@ public class DataService {
                                 result.setType(ms.getMetric().getMetricType().name());
                                 result.setUnit(ms.getMetric().getUnit().getName());
                                 for (Measurement m : ms.getMeasurements()) {
-                                    data.add(new EccMeasurement(m.getTimeStamp(), m.getValue()));
+                                    if (!m.getTimeStamp().equals(new Date(since))) {
+                                        data.add(new EccMeasurement(m.getTimeStamp(), m.getValue()));
+                                    }
                                 }
                             }
                         }
@@ -720,6 +729,11 @@ public class DataService {
 
             // reset to new data
             result.setData(tempData);
+        }
+
+        if (resultSize > 0) {
+            // set timestamp
+            result.setTimestamp(ISODateTimeFormat.dateTime().print(result.getData().get(result.getData().size() - 1).getTimestamp().getTime()));
         }
 
         return result;
@@ -1309,6 +1323,8 @@ public class DataService {
         UUID expID = UUID.fromString(experimentUuid);
         UUID attrID = UUID.fromString(attributeUuid);
         EccCounterMeasurementSet result = new EccCounterMeasurementSet();
+        ArrayList<EccCounterMeasurement> data = new ArrayList<EccCounterMeasurement>();
+        result.setData(data);
 
         // TODO: get from measurement sets below (not sure if Metric is NULL below)
         result.setType("NOMINAL");
@@ -1330,12 +1346,23 @@ public class DataService {
             }
 
             if (!allMeasurements.isEmpty()) {
+
+                // find most recent
+                Date mostRecent = allMeasurements.iterator().next().getTimeStamp(), temp;
+                for (Measurement m : allMeasurements) {
+                    temp = m.getTimeStamp();
+                    if (temp.after(mostRecent)) {
+                        mostRecent = temp;
+                    }
+                }
+                result.setTimestamp(ISODateTimeFormat.dateTime().print(mostRecent.getTime()));
+
                 Map<String, Integer> freqMap = MetricCalculator.countValueFrequencies(allMeasurements);
-                ArrayList<EccCounterMeasurement> data = new ArrayList<EccCounterMeasurement>();
+
                 for (String key : freqMap.keySet()) {
                     data.add(new EccCounterMeasurement(key, freqMap.get(key)));
                 }
-                result.setData(data);
+
             }
         } catch (Exception ex) {
             logger.error("Could not retrieve measurements for Attribute after date: " + ex.getMessage());
@@ -1345,7 +1372,7 @@ public class DataService {
     }
 
     // Returns 'limit' measurements starting from now until 'dateInMsec' in the past in <value, number of times the value has occurred> excluding dateInMsec
-    public Set<EccCounterMeasurementSet> getCounterMeasurementsForAttributeBeforeAndExcluding(String experimentUuid, String attributeUuid, long dateInMsec, int limit) {
+    public EccCounterMeasurementSet getCounterMeasurementsForAttributeBeforeAndExcluding(String experimentUuid, String attributeUuid, long dateInMsec, int limit) {
 
         // Safety
         if (experimentUuid == null || attributeUuid == null || dateInMsec < 0 || limit < 1) {
@@ -1355,41 +1382,61 @@ public class DataService {
 
         UUID expID = UUID.fromString(experimentUuid);
         UUID attrID = UUID.fromString(attributeUuid);
-        HashSet<EccCounterMeasurementSet> resultSet = null;
+        EccCounterMeasurementSet result = new EccCounterMeasurementSet();
+        Date start = new Date(dateInMsec);
+        Date end = new Date();
 
         try {
             Set<MeasurementSet> mSets = msetDAO.getMeasurementSetsForAttribute(attrID, expID, true);
 
-            resultSet = new HashSet<EccCounterMeasurementSet>();
+            Set<Measurement> allMeasurements = new HashSet<Measurement>();
+            ArrayList<EccCounterMeasurement> data = new ArrayList<EccCounterMeasurement>();
+            result.setData(data);
+
+            // TODO: get from measurement sets below (not sure if Metric is NULL below)
+            result.setType("NOMINAL");
+            result.setUnit("");
 
             for (MeasurementSet ms : mSets) {
-
                 // Get measurements within time frame
-                Date start = new Date(dateInMsec);
-                Date end = new Date();
                 Report report = expReportDAO.getReportForMeasurementsForTimePeriod(ms.getID(),
                         start,
                         end,
                         true);
 
-                Set<Measurement> mSet = report.getMeasurementSet().getMeasurements();
-
-                // Remove any measurements that are time-stamped with 'dateInMSec'
-                mSet = MetricHelper.stripMeasurementsInRange(mSet, start, end);
-
-                if (!mSet.isEmpty()) {
-
-                    // Count frequency of specific values
-                    Map<String, Integer> freqMap = MetricCalculator.countValueFrequencies(mSet);
-
-                    resultSet.add(createCounterMSDomainObject(ms, freqMap));
+                // TODO: optimise
+                for (Measurement m : report.getMeasurementSet().getMeasurements()) {
+                    if (!m.getTimeStamp().equals(start)) {
+                        allMeasurements.add(m);
+                    }
                 }
             }
+
+            if (!allMeasurements.isEmpty()) {
+
+                // find most recent
+                Date mostRecent = allMeasurements.iterator().next().getTimeStamp(), temp;
+                for (Measurement m : allMeasurements) {
+                    temp = m.getTimeStamp();
+                    if (temp.after(mostRecent)) {
+                        mostRecent = temp;
+                    }
+                }
+                result.setTimestamp(ISODateTimeFormat.dateTime().print(mostRecent.getTime()));
+
+                Map<String, Integer> freqMap = MetricCalculator.countValueFrequencies(allMeasurements);
+
+                for (String key : freqMap.keySet()) {
+                    data.add(new EccCounterMeasurement(key, freqMap.get(key)));
+                }
+
+            }
+
         } catch (Exception ex) {
             logger.error("Could not retrieve measurements for Attribute after date: " + ex.getMessage());
         }
 
-        return resultSet;
+        return result;
     }
 
     // Private methods ---------------------------------------------------------

@@ -77,6 +77,7 @@ public class Convert {
             EccGenericMeasurementSet result = new EccGenericMeasurementSet();
             result.setType(ms.getType());
             result.setUnit(ms.getUnit());
+            result.setTimestamp(ms.getTimestamp());
             ArrayList<EccGenericMeasurement> data = new ArrayList<EccGenericMeasurement>();
 
             for (EccMeasurement e : ms.getData()) {
@@ -96,6 +97,7 @@ public class Convert {
             EccGenericMeasurementSet result = new EccGenericMeasurementSet();
             result.setType(ms.getType());
             result.setUnit(ms.getUnit());
+            result.setTimestamp(ms.getTimestamp());
             ArrayList<EccGenericMeasurement> data = new ArrayList<EccGenericMeasurement>();
 
             for (EccCounterMeasurement e : ms.getData()) {
@@ -107,4 +109,5 @@ public class Convert {
             return result;
         }
     }
+
 }

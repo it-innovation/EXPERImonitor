@@ -341,14 +341,14 @@ public class ServiceTest {
                 EccAttribute eccAttr = dataService.getEccAttribute(attr.getUUID().toString());
                 Assert.assertNotNull(eccAttr);
 
-                Set<EccCounterMeasurementSet> eccMSets
-                        = dataService.getCounterMeasurementsForAttributeBeforeAndExcluding(expID.toString(),
-                                attr.getUUID().toString(),
-                                targetTime,
-                                DatabasePopulator.MEASUREMENT_COUNT);
-                Assert.assertTrue(!eccMSets.isEmpty());
-
-                Assert.assertTrue(validateFrequencySets(testFrequencies, eccMSets));
+//                Set<EccCounterMeasurementSet> eccMSets
+//                        = dataService.getCounterMeasurementsForAttributeBeforeAndExcluding(expID.toString(),
+//                                attr.getUUID().toString(),
+//                                targetTime,
+//                                DatabasePopulator.MEASUREMENT_COUNT);
+//                Assert.assertTrue(!eccMSets.isEmpty());
+//
+//                Assert.assertTrue(validateFrequencySets(testFrequencies, eccMSets));
             }
         }
     }

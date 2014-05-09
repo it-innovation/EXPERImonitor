@@ -155,39 +155,59 @@ public class DataController {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/attribute/{attributeId}/since/{timestampMsec}")
     @ResponseBody
-    public EccMeasurementSet getLatestDataForAttributeSince(@PathVariable String attributeId, @PathVariable Long timestampMsec) {
+    public EccGenericMeasurementSet getLatestDataForAttributeSince(@PathVariable String attributeId, @PathVariable Long timestampMsec) {
         logger.debug("Returning 10 latest data items for attribute '" + attributeId + "' since '" + timestampMsec + "' (" + new Date(timestampMsec) + ")");
 
         EccAttribute theAttribute = dataService.getEccAttribute(attributeId);
-        EccMeasurementSet result = new EccMeasurementSet();
+        EccGenericMeasurementSet result = new EccGenericMeasurementSet();
 
-//        if (theAttribute != null) {
-//
-//            if (theAttribute.getType().equals("NOMINAL")) {
-//
-//            } else {
-//
-//            }
-//
-//        } else {
-//            logger.error("Failed to find attribute [" + "] in current experiment");
-//        }
-        EccMeasurementSet tempResult = dataService.getLatestSinceMeasurementsForAttribute(attributeId, timestampMsec, 10);
-        result.setType(tempResult.getType());
-        result.setUnit(tempResult.getUnit());
+        if (theAttribute != null) {
+            String theType = theAttribute.getType();
+            logger.debug("Attribute [" + theAttribute.getUuid().toString() + "] is of type '" + theType + "'");
 
-        // TODO: this does not work when there is no data to start with
-        ArrayList<EccMeasurement> measurements = new ArrayList<EccMeasurement>();
-        for (EccMeasurement em : tempResult.getData()) {
-            if (em.getTimestamp().after(new Date(timestampMsec))) {
-                measurements.add(em);
-                logger.debug("Added: " + em.getTimestamp().getTime() + ": " + em.getValue());
+            if (theAttribute.getType().equals("NOMINAL")) {
+                // TODO: this is bad, but no time to fix:
+                if (dataService.getCounterMeasurementsForAttributeBeforeAndExcluding(
+                        experimentService.getActiveExperiment().getUUID().toString(),
+                        attributeId,
+                        timestampMsec,
+                        10).getData().size() > 0) { // only return 10 latest if there is new stuff
+                    result = Convert.eccCounterMeasurementSetToEccGenericMeasurementSet(dataService.getCounterMeasurementsForAttributeAfter(
+                            experimentService.getActiveExperiment().getUUID().toString(),
+                            attributeId,
+                            (new Date()).getTime(),
+                            10));
+                } else {
+                    result.setData(new ArrayList<EccGenericMeasurement>());
+                    result.setType(theType);
+                    result.setUnit(theAttribute.getUnit());
+                }
             } else {
-                logger.debug("Ignored: " + em.getTimestamp().getTime() + ": " + em.getValue());
+                result = Convert.eccMeasurementSetToEccGenericMeasurementSet(dataService.getLatestSinceMeasurementsForAttribute(
+                        attributeId,
+                        timestampMsec,
+                        10));
             }
-        }
-        result.setData(measurements);
 
+        } else {
+            logger.error("Failed to find attribute [" + "] in current experiment");
+        }
+
+//        EccMeasurementSet tempResult = dataService.getLatestSinceMeasurementsForAttribute(attributeId, timestampMsec, 10);
+//        result.setType(tempResult.getType());
+//        result.setUnit(tempResult.getUnit());
+//
+//        // TODO: this does not work when there is no data to start with
+//        ArrayList<EccMeasurement> measurements = new ArrayList<EccMeasurement>();
+//        for (EccMeasurement em : tempResult.getData()) {
+//            if (em.getTimestamp().after(new Date(timestampMsec))) {
+//                measurements.add(em);
+//                logger.debug("Added: " + em.getTimestamp().getTime() + ": " + em.getValue());
+//            } else {
+//                logger.debug("Ignored: " + em.getTimestamp().getTime() + ": " + em.getValue());
+//            }
+//        }
+//        result.setData(measurements);
         return result;
     }
 

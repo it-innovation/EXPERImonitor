@@ -502,60 +502,57 @@ function addAttributeGraph(attribute, entityName) {
     $.getJSON(BASE_URL + "/data/attribute/" + attribute.uuid, function(data) {
         console.log(data);
         if (data.data.length > 0) {
-            if (attribute.type !== 'NOMINAL') {
-                lastTimestamp = parseInt(data.data[data.data.length - 1].key);
-            }
+            lastTimestamp = parseInt(data.data[data.data.length - 1].key);
+
             $.each(data.data, function(key, datapoint) {
                 console.log(datapoint);
+                shift = chart.series[0].data.length > CHART_SHIFT_DATA_THRESHOLD;
                 if (attribute.type === 'NOMINAL') {
-                    chart.series[0].addPoint([datapoint.key, parseInt(datapoint.value)]);
+                    chart.series[0].addPoint([datapoint.key, parseInt(datapoint.value)], true, shift);
                 } else {
-                    shift = chart.series[0].data.length > CHART_SHIFT_DATA_THRESHOLD;
                     console.log(datapoint.key);
                     console.log(moment(datapoint.key, ISO_TIME_FORMAT, true).isValid());
                     console.log(moment(datapoint.key, ISO_TIME_FORMAT).valueOf());
                     chart.series[0].addPoint([moment(datapoint.key, ISO_TIME_FORMAT).valueOf(), parseFloat(datapoint.value)], true, shift);
                 }
             });
-        } else {
-            lastTimestamp = 0;
         }
 
-        /*
-         // set polling
-         var series = chart.series[0];
-         var theInterval = setInterval(function() {
-         // TODO: stop polling on error
-         $.getJSON(BASE_URL + "/data/attribute/" + attribute.uuid + "/since/" + lastTimestamp, function(dataSince) {
-         console.log(dataSince);
-         if (dataSince.data.length > 0) {
-         lastTimestamp = dataSince.data[dataSince.data.length - 1].timestamp;
-         console.log("Updated timestamp: " + lastTimestamp);
-         var pieArray, shift;
-         $.each(dataSince.data, function(key, datapoint) {
-         console.log(datapoint);
-         if (attribute.type === 'NOMINAL') {
-         if (pieData.hasOwnProperty(datapoint.value)) {
-         pieData[datapoint.value] = pieData[datapoint.value] + 1;
-         } else {
-         pieData[datapoint.value] = 1;
-         }
-         pieArray = new Array();
-         $.each(pieData, function(key, value) {
-         pieArray.push({name: key, y: value});
-         });
-         series.setData(pieArray);
-         } else {
-         shift = chart.series[0].data.length > CHART_SHIFT_DATA_THRESHOLD;
-         series.addPoint([datapoint.timestamp, parseFloat(datapoint.value)], true, shift);
-         }
-         });
-         }
-         });
-         }, CHART_POLLING_INTERVAL);
-         $("#a_" + attribute.uuid + "_input").data("interval", theInterval);
-         intervals.push(theInterval);
-         */
+        lastTimestamp = data.timestamp === "" ? 0 : moment(data.timestamp, ISO_TIME_FORMAT).valueOf();
+
+        console.log("Last timestamp: " + lastTimestamp);
+
+
+        // set polling
+        var theInterval = setInterval(function() {
+            // TODO: stop polling on error
+            $.getJSON(BASE_URL + "/data/attribute/" + attribute.uuid + "/since/" + lastTimestamp, function(dataSince) {
+                console.log(dataSince);
+                lastTimestamp = dataSince.timestamp === "" ? lastTimestamp : moment(dataSince.timestamp, ISO_TIME_FORMAT).valueOf();
+                console.log("Updated timestamp: " + lastTimestamp);
+                if (dataSince.data.length > 0) {
+                    if (attribute.type === 'NOMINAL') { // clear data for nominal as full replacement set is coming
+                        chart.series[0].setData([]);
+                    }
+
+                    $.each(dataSince.data, function(key, datapoint) {
+                        console.log(datapoint);
+                        shift = chart.series[0].data.length > CHART_SHIFT_DATA_THRESHOLD;
+                        if (attribute.type === 'NOMINAL') {
+                            chart.series[0].addPoint([datapoint.key, parseInt(datapoint.value)], true, shift);
+                        } else {
+                            console.log(datapoint.key);
+                            console.log(moment(datapoint.key, ISO_TIME_FORMAT, true).isValid());
+                            console.log(moment(datapoint.key, ISO_TIME_FORMAT).valueOf());
+                            chart.series[0].addPoint([moment(datapoint.key, ISO_TIME_FORMAT).valueOf(), parseFloat(datapoint.value)], true, shift);
+                        }
+                    });
+                }
+            });
+        }, CHART_POLLING_INTERVAL);
+        $("#a_" + attribute.uuid + "_input").data("interval", theInterval);
+        intervals.push(theInterval);
+
     });
 }
 

@@ -31,7 +31,7 @@ import java.util.ArrayList;
  */
 public class EccGenericMeasurementSet {
 
-    private String unit, type;
+    private String unit, type, timestamp = "";
     private ArrayList<EccGenericMeasurement> data;
 
     public EccGenericMeasurementSet() {
@@ -65,6 +65,14 @@ public class EccGenericMeasurementSet {
 
     public void setData(ArrayList<EccGenericMeasurement> data) {
         this.data = data;
+    }
+
+    public String getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
     }
 
 }
