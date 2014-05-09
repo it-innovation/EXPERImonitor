@@ -18,61 +18,41 @@
 // the software.
 //
 //	Created By :			Maxim Bashevoy
-//	Created Date :			2014-04-22
+//	Created Date :			2014-05-09
 //	Created for Project :           EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 package uk.co.soton.itinnovation.ecc.service.domain;
 
-import java.util.ArrayList;
-
 /**
- * Represents a simple set of data points.
+ *
  */
-public class EccCounterMeasurementSet {
+public class EccGenericMeasurement {
 
-    private String unit, type, timestamp = "";
-    private ArrayList<EccCounterMeasurement> data;
+    private String key, value;
 
-    public EccCounterMeasurementSet() {
+    public EccGenericMeasurement() {
     }
 
-    public EccCounterMeasurementSet(String unit, String type, ArrayList<EccCounterMeasurement> data) {
-        this.unit = unit;
-        this.type = type;
-        this.data = data;
+    public EccGenericMeasurement(String key, String value) {
+        this.key = key;
+        this.value = value;
     }
 
-    public String getUnit() {
-        return unit;
+    public String getKey() {
+        return key;
     }
 
-    public void setUnit(String unit) {
-        this.unit = unit;
+    public void setKey(String key) {
+        this.key = key;
     }
 
-    public String getType() {
-        return type;
+    public String getValue() {
+        return value;
     }
 
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public ArrayList<EccCounterMeasurement> getData() {
-        return data;
-    }
-
-    public void setData(ArrayList<EccCounterMeasurement> data) {
-        this.data = data;
-    }
-
-    public String getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(String timestamp) {
-        this.timestamp = timestamp;
+    public void setValue(String value) {
+        this.value = value;
     }
 
 }

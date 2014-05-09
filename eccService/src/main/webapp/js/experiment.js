@@ -5,12 +5,21 @@ var CHART_POLLING_INTERVAL = 3000; // polling delay
 var CHART_SHIFT_DATA_THRESHOLD = 10; // how many points to return per graph
 var intervals = new Array(); // polling intervals
 var DISPLAY_TIME_FORMAT = "ddd, MMM Do, HH:mm [(]Z[)]";
+var current_experiment_id;
+var ISO_TIME_FORMAT = "YYYY-MM-DD[T]HH:mm:ss.SSSZ";
 
 $(document).ready(function() {
     $(document).foundation();
+
+    Highcharts.setOptions({
+        global: {
+            useUTC: false
+        }
+    });
+
     $(document).on('open', '#nameExperimentModal', function() {
         $("#newExperimentHeader").text('Select an existing experiment or start a new one');
-// check for current experiment
+        // check for current experiment
         $.getJSON(BASE_URL + "/experiments/ifinprogress", function(edata) {
 
             if (edata !== false) { // current experiment in progress, load details
@@ -251,7 +260,8 @@ function fillWithExperimentMetadata(container, experiment) {
 
 // handles the display of all data
 function startMainMonitor(experimentData) {
-// refresh experiment details
+    // refresh experiment details
+    current_experiment_id = experimentData.uuid;
     showActiveExperimentDetails(experimentData);
     // show list of clients
     $.getJSON(BASE_URL + "/experiments/clients", function(data) {
@@ -323,8 +333,8 @@ function showListOfClients(clientMetadataArray) {
         }
     });
     var attrDropdownLabel = $("<label>Filter by entity or show all</label>").appendTo("#attribute_details");
-    attrDropdownList = $("<select></select>").appendTo(attrDropdownLabel);
-    attrDropdownList.append("<option value='all'>All</option>");
+    attrDropdownList = $("<select id='attrDropdownList'></select>").appendTo(attrDropdownLabel);
+    attrDropdownList.prepend("<option value='all'>All</option>");
     attrDropdownList.change(function(e) {
         var sel = $("#attribute_details option:selected").val();
         if (sel === 'all') {
@@ -332,7 +342,7 @@ function showListOfClients(clientMetadataArray) {
                 $(this).removeClass('hide');
             });
         } else {
-            console.log(sel);
+//            console.log(sel);
             $("#attribute_details div.attributeContainer").each(function(key) {
                 if ($(this).data('entityId') === sel) {
                     $(this).removeClass('hide');
@@ -377,18 +387,30 @@ function showListOfClients(clientMetadataArray) {
     $.when.apply($, CLIENT_MODELS_AJAX).done(function() {
         clientsDropdownList.prop('selectedIndex', 1);
         clientsDropdownList.change();
-        // TODO: sort entities list alphabetically
         entitiesDropdownList.prop('selectedIndex', 1);
         entitiesDropdownList.change();
+
+        // sort attribute dropdown alphabetically
+        sortDropDownListByText(attrDropdownList.attr('id'));
+
         attrDropdownList.prop('selectedIndex', 1);
         attrDropdownList.change();
     });
 }
 
+// sort dropdown
+function sortDropDownListByText(selectId) {
+    var foption = $('#' + selectId + ' option:first');
+    var soptions = $('#' + selectId + ' option:not(:first)').sort(function(a, b) {
+        return a.text === b.text ? 0 : a.text < b.text ? -1 : 1;
+    });
+    $('#' + selectId).html(soptions).prepend(foption);
+}
+
 // append entities from client
 function appendEntitiesFromClient(uuid, client, attrDropdownList) {
     return $.getJSON(BASE_URL + "/experiments/entities/" + uuid, function(data) {
-        console.log(data);
+//        console.log(data);
         $.each(data, function(ekey, entity) {
             var entityContainerWrapper = $("<div class='entityContainer row fullWidth collapse'></div>").appendTo("#entities_details");
             var entityContainer = $("<div class='small-12 columns'></div>").appendTo(entityContainerWrapper);
@@ -400,7 +422,7 @@ function appendEntitiesFromClient(uuid, client, attrDropdownList) {
             var entityAddToLiveMetricsLink = $("<a class='entityCheckbox' id='e_" + entity.uuid + "_input' href='#'>Add to Live metrics</a>").appendTo(actionsParagraph);
             entityAddToLiveMetricsLink.data("entity", entity);
             entityAddToLiveMetricsLink.data("clientId", uuid);
-            actionsParagraph.append("<a class='downloadLink' href='" + BASE_URL + "/data/export/entity/" + entity.uuid + "'>Download CSV data</a>");
+            actionsParagraph.append("<a class='downloadLink' href='" + BASE_URL + "/data/export/experiment/" + current_experiment_id + "/entity/" + entity.uuid + "'>Download CSV data</a>");
             entityContainerWrapper.data("clientId", uuid);
             entityAddToLiveMetricsLink.click(function(e) {
                 e.preventDefault();
@@ -431,7 +453,7 @@ function appendEntitiesFromClient(uuid, client, attrDropdownList) {
                 var attributeAddToLiveMetricsLink = $("<a id='a_" + attribute.uuid + "_input' href='#'>Add to Live metrics</a>").appendTo(actionsParagraph);
                 attributeAddToLiveMetricsLink.data("attribute", attribute);
                 attributeAddToLiveMetricsLink.data("entityName", entity.name);
-                actionsParagraph.append("<a class='downloadLink' href='" + BASE_URL + "/data/export/attribute/" + attribute.uuid + "'>Download CSV data</a>");
+                actionsParagraph.append("<a class='downloadLink' href='" + BASE_URL + "/data/export/experiment/" + current_experiment_id + "/attribute/" + attribute.uuid + "'>Download CSV data</a>");
                 attributeContainerWrapper.data("entityId", entity.uuid);
                 attributeAddToLiveMetricsLink.click(function(e) {
                     e.preventDefault();
@@ -480,58 +502,49 @@ function addAttributeGraph(attribute, entityName) {
     $.getJSON(BASE_URL + "/data/attribute/" + attribute.uuid, function(data) {
         console.log(data);
         if (data.data.length > 0) {
-            lastTimestamp = data.data[data.data.length - 1].timestamp;
-            var pieData = {}, pieArray;
+            lastTimestamp = parseInt(data.data[data.data.length - 1].key);
+
             $.each(data.data, function(key, datapoint) {
                 console.log(datapoint);
+                shift = chart.series[0].data.length > CHART_SHIFT_DATA_THRESHOLD;
                 if (attribute.type === 'NOMINAL') {
-                    if (pieData.hasOwnProperty(datapoint.value)) {
-                        console.log("Old property: " + datapoint.value);
-                        pieData[datapoint.value] = pieData[datapoint.value] + 1;
-                    } else {
-                        console.log("New property: " + datapoint.value);
-                        pieData[datapoint.value] = 1;
-                    }
-                    pieArray = new Array();
-                    $.each(pieData, function(key, value) {
-                        pieArray.push({name: key, y: value});
-                    });
-                    chart.series[0].setData(pieArray);
+                    chart.series[0].addPoint([datapoint.key, parseInt(datapoint.value)], true, shift);
                 } else {
-                    shift = chart.series[0].data.length > CHART_SHIFT_DATA_THRESHOLD;
-                    chart.series[0].addPoint([datapoint.timestamp, parseFloat(datapoint.value)], true, shift);
+                    console.log(datapoint.key);
+                    console.log(moment(datapoint.key, ISO_TIME_FORMAT, true).isValid());
+                    console.log(moment(datapoint.key, ISO_TIME_FORMAT).valueOf());
+                    chart.series[0].addPoint([moment(datapoint.key, ISO_TIME_FORMAT).valueOf(), parseFloat(datapoint.value)], true, shift);
                 }
             });
-        } else {
-            lastTimestamp = 0;
         }
 
+        lastTimestamp = data.timestamp === "" ? 0 : moment(data.timestamp, ISO_TIME_FORMAT).valueOf();
+
+        console.log("Last timestamp: " + lastTimestamp);
+
+
         // set polling
-        var series = chart.series[0];
         var theInterval = setInterval(function() {
             // TODO: stop polling on error
             $.getJSON(BASE_URL + "/data/attribute/" + attribute.uuid + "/since/" + lastTimestamp, function(dataSince) {
                 console.log(dataSince);
+                lastTimestamp = dataSince.timestamp === "" ? lastTimestamp : moment(dataSince.timestamp, ISO_TIME_FORMAT).valueOf();
+                console.log("Updated timestamp: " + lastTimestamp);
                 if (dataSince.data.length > 0) {
-                    lastTimestamp = dataSince.data[dataSince.data.length - 1].timestamp;
-                    console.log("Updated timestamp: " + lastTimestamp);
-                    var pieArray, shift;
+                    if (attribute.type === 'NOMINAL') { // clear data for nominal as full replacement set is coming
+                        chart.series[0].setData([]);
+                    }
+
                     $.each(dataSince.data, function(key, datapoint) {
                         console.log(datapoint);
+                        shift = chart.series[0].data.length > CHART_SHIFT_DATA_THRESHOLD;
                         if (attribute.type === 'NOMINAL') {
-                            if (pieData.hasOwnProperty(datapoint.value)) {
-                                pieData[datapoint.value] = pieData[datapoint.value] + 1;
-                            } else {
-                                pieData[datapoint.value] = 1;
-                            }
-                            pieArray = new Array();
-                            $.each(pieData, function(key, value) {
-                                pieArray.push({name: key, y: value});
-                            });
-                            series.setData(pieArray);
+                            chart.series[0].addPoint([datapoint.key, parseInt(datapoint.value)], true, shift);
                         } else {
-                            shift = chart.series[0].data.length > CHART_SHIFT_DATA_THRESHOLD;
-                            series.addPoint([datapoint.timestamp, parseFloat(datapoint.value)], true, shift);
+                            console.log(datapoint.key);
+                            console.log(moment(datapoint.key, ISO_TIME_FORMAT, true).isValid());
+                            console.log(moment(datapoint.key, ISO_TIME_FORMAT).valueOf());
+                            chart.series[0].addPoint([moment(datapoint.key, ISO_TIME_FORMAT).valueOf(), parseFloat(datapoint.value)], true, shift);
                         }
                     });
                 }
@@ -539,6 +552,7 @@ function addAttributeGraph(attribute, entityName) {
         }, CHART_POLLING_INTERVAL);
         $("#a_" + attribute.uuid + "_input").data("interval", theInterval);
         intervals.push(theInterval);
+
     });
 }
 
