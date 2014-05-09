@@ -24,9 +24,17 @@
 /////////////////////////////////////////////////////////////////////////
 package uk.co.soton.itinnovation.ecc.service.utils;
 
+import java.util.ArrayList;
 import java.util.Date;
+import org.joda.time.format.ISODateTimeFormat;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
+import uk.co.soton.itinnovation.ecc.service.domain.EccCounterMeasurement;
+import uk.co.soton.itinnovation.ecc.service.domain.EccCounterMeasurementSet;
 import uk.co.soton.itinnovation.ecc.service.domain.EccExperiment;
+import uk.co.soton.itinnovation.ecc.service.domain.EccGenericMeasurement;
+import uk.co.soton.itinnovation.ecc.service.domain.EccGenericMeasurementSet;
+import uk.co.soton.itinnovation.ecc.service.domain.EccMeasurement;
+import uk.co.soton.itinnovation.ecc.service.domain.EccMeasurementSet;
 
 /**
  *
@@ -60,5 +68,43 @@ public class Convert {
 
         return result;
 
+    }
+
+    public static EccGenericMeasurementSet eccMeasurementSetToEccGenericMeasurementSet(EccMeasurementSet ms) {
+        if (ms == null) {
+            return null;
+        } else {
+            EccGenericMeasurementSet result = new EccGenericMeasurementSet();
+            result.setType(ms.getType());
+            result.setUnit(ms.getUnit());
+            ArrayList<EccGenericMeasurement> data = new ArrayList<EccGenericMeasurement>();
+
+            for (EccMeasurement e : ms.getData()) {
+                data.add(new EccGenericMeasurement(ISODateTimeFormat.dateTime().print(e.getTimestamp().getTime()), e.getValue()));
+            }
+
+            result.setData(data);
+
+            return result;
+        }
+    }
+
+    public static EccGenericMeasurementSet eccCounterMeasurementSetToEccGenericMeasurementSet(EccCounterMeasurementSet ms) {
+        if (ms == null) {
+            return null;
+        } else {
+            EccGenericMeasurementSet result = new EccGenericMeasurementSet();
+            result.setType(ms.getType());
+            result.setUnit(ms.getUnit());
+            ArrayList<EccGenericMeasurement> data = new ArrayList<EccGenericMeasurement>();
+
+            for (EccCounterMeasurement e : ms.getData()) {
+                data.add(new EccGenericMeasurement(e.getName(), Integer.toString(e.getCounter())));
+            }
+
+            result.setData(data);
+
+            return result;
+        }
     }
 }

@@ -6,9 +6,17 @@ var CHART_SHIFT_DATA_THRESHOLD = 10; // how many points to return per graph
 var intervals = new Array(); // polling intervals
 var DISPLAY_TIME_FORMAT = "ddd, MMM Do, HH:mm [(]Z[)]";
 var current_experiment_id;
+var ISO_TIME_FORMAT = "YYYY-MM-DD[T]HH:mm:ss.SSSZ";
 
 $(document).ready(function() {
     $(document).foundation();
+
+    Highcharts.setOptions({
+        global: {
+            useUTC: false
+        }
+    });
+
     $(document).on('open', '#nameExperimentModal', function() {
         $("#newExperimentHeader").text('Select an existing experiment or start a new one');
         // check for current experiment
@@ -494,65 +502,60 @@ function addAttributeGraph(attribute, entityName) {
     $.getJSON(BASE_URL + "/data/attribute/" + attribute.uuid, function(data) {
         console.log(data);
         if (data.data.length > 0) {
-            lastTimestamp = data.data[data.data.length - 1].timestamp;
-            var pieData = {}, pieArray;
+            if (attribute.type !== 'NOMINAL') {
+                lastTimestamp = parseInt(data.data[data.data.length - 1].key);
+            }
             $.each(data.data, function(key, datapoint) {
                 console.log(datapoint);
                 if (attribute.type === 'NOMINAL') {
-                    if (pieData.hasOwnProperty(datapoint.value)) {
-                        console.log("Old property: " + datapoint.value);
-                        pieData[datapoint.value] = pieData[datapoint.value] + 1;
-                    } else {
-                        console.log("New property: " + datapoint.value);
-                        pieData[datapoint.value] = 1;
-                    }
-                    pieArray = new Array();
-                    $.each(pieData, function(key, value) {
-                        pieArray.push({name: key, y: value});
-                    });
-                    chart.series[0].setData(pieArray);
+                    chart.series[0].addPoint([datapoint.key, parseInt(datapoint.value)]);
                 } else {
                     shift = chart.series[0].data.length > CHART_SHIFT_DATA_THRESHOLD;
-                    chart.series[0].addPoint([datapoint.timestamp, parseFloat(datapoint.value)], true, shift);
+                    console.log(datapoint.key);
+                    console.log(moment(datapoint.key, ISO_TIME_FORMAT, true).isValid());
+                    console.log(moment(datapoint.key, ISO_TIME_FORMAT).valueOf());
+                    chart.series[0].addPoint([moment(datapoint.key, ISO_TIME_FORMAT).valueOf(), parseFloat(datapoint.value)], true, shift);
                 }
             });
         } else {
             lastTimestamp = 0;
         }
 
-        // set polling
-        var series = chart.series[0];
-        var theInterval = setInterval(function() {
-            // TODO: stop polling on error
-            $.getJSON(BASE_URL + "/data/attribute/" + attribute.uuid + "/since/" + lastTimestamp, function(dataSince) {
-                console.log(dataSince);
-                if (dataSince.data.length > 0) {
-                    lastTimestamp = dataSince.data[dataSince.data.length - 1].timestamp;
-                    console.log("Updated timestamp: " + lastTimestamp);
-                    var pieArray, shift;
-                    $.each(dataSince.data, function(key, datapoint) {
-                        console.log(datapoint);
-                        if (attribute.type === 'NOMINAL') {
-                            if (pieData.hasOwnProperty(datapoint.value)) {
-                                pieData[datapoint.value] = pieData[datapoint.value] + 1;
-                            } else {
-                                pieData[datapoint.value] = 1;
-                            }
-                            pieArray = new Array();
-                            $.each(pieData, function(key, value) {
-                                pieArray.push({name: key, y: value});
-                            });
-                            series.setData(pieArray);
-                        } else {
-                            shift = chart.series[0].data.length > CHART_SHIFT_DATA_THRESHOLD;
-                            series.addPoint([datapoint.timestamp, parseFloat(datapoint.value)], true, shift);
-                        }
-                    });
-                }
-            });
-        }, CHART_POLLING_INTERVAL);
-        $("#a_" + attribute.uuid + "_input").data("interval", theInterval);
-        intervals.push(theInterval);
+        /*
+         // set polling
+         var series = chart.series[0];
+         var theInterval = setInterval(function() {
+         // TODO: stop polling on error
+         $.getJSON(BASE_URL + "/data/attribute/" + attribute.uuid + "/since/" + lastTimestamp, function(dataSince) {
+         console.log(dataSince);
+         if (dataSince.data.length > 0) {
+         lastTimestamp = dataSince.data[dataSince.data.length - 1].timestamp;
+         console.log("Updated timestamp: " + lastTimestamp);
+         var pieArray, shift;
+         $.each(dataSince.data, function(key, datapoint) {
+         console.log(datapoint);
+         if (attribute.type === 'NOMINAL') {
+         if (pieData.hasOwnProperty(datapoint.value)) {
+         pieData[datapoint.value] = pieData[datapoint.value] + 1;
+         } else {
+         pieData[datapoint.value] = 1;
+         }
+         pieArray = new Array();
+         $.each(pieData, function(key, value) {
+         pieArray.push({name: key, y: value});
+         });
+         series.setData(pieArray);
+         } else {
+         shift = chart.series[0].data.length > CHART_SHIFT_DATA_THRESHOLD;
+         series.addPoint([datapoint.timestamp, parseFloat(datapoint.value)], true, shift);
+         }
+         });
+         }
+         });
+         }, CHART_POLLING_INTERVAL);
+         $("#a_" + attribute.uuid + "_input").data("interval", theInterval);
+         intervals.push(theInterval);
+         */
     });
 }
 

@@ -586,8 +586,8 @@ public class DataService {
      * @param attributeId
      * @return
      */
-    public EccMeasurementSet getLatestMeasurementsForAttribute(String attributeId) {
-        return getTailMeasurementsForAttribute(attributeId, (new Date().getTime()));
+    public EccMeasurementSet getLatestMeasurementsForAttribute(String attributeId, int limit) {
+        return getTailMeasurementsForAttribute(attributeId, (new Date().getTime()), limit);
     }
 
     /**
@@ -596,7 +596,7 @@ public class DataService {
      * @param since
      * @return last 10 measurements for the attribute.
      */
-    public EccMeasurementSet getTailMeasurementsForAttribute(String attributeId, Long since) {
+    public EccMeasurementSet getTailMeasurementsForAttribute(String attributeId, Long since, int limit) {
         EccMeasurementSet result = new EccMeasurementSet();
         ArrayList<EccMeasurement> data = new ArrayList<EccMeasurement>();
         result.setData(data);
@@ -606,7 +606,7 @@ public class DataService {
         if (currentExperiment != null) {
             try {
                 Attribute attr = MetricHelper.getAttributeFromID(UUID.fromString(attributeId), metricGenDAO.getMetricGeneratorsForExperiment(currentExperiment.getUUID(), true));
-                Set<MeasurementSet> measurementSets = getTailMeasurementSetsForAttribute(currentExperiment.getUUID(), attr, new Date(since), 10);
+                Set<MeasurementSet> measurementSets = getTailMeasurementSetsForAttribute(currentExperiment.getUUID(), attr, new Date(since), limit);
                 Iterator<MeasurementSet> it = measurementSets.iterator();
                 MeasurementSet ms;
                 while (it.hasNext()) {
@@ -1259,7 +1259,7 @@ public class DataService {
     public Set<EccMeasurementSet> getMeasurementsForAttributeBefore(String experimentUuid, String attributeUuid, long dateInMsec, int limit) {
 
         // Safety
-        if (experimentUuid == null || attributeUuid == null || dateInMsec < 1 || limit < 1) {
+        if (experimentUuid == null || attributeUuid == null || dateInMsec < 0 || limit < 1) {
             logger.error("Could not get measurements for attribute before date: input parameter(s) invalid");
             return null;
         }
@@ -1298,53 +1298,57 @@ public class DataService {
     }
 
     // Returns 'limit' measurements starting from the 'dateInMsec' into the past in <value, number of times the value has occurred>
-    public Set<EccCounterMeasurementSet> getCounterMeasurementsForAttributeAfter(String experimentUuid, String attributeUuid, long dateInMsec, int limit) {
+    public EccCounterMeasurementSet getCounterMeasurementsForAttributeAfter(String experimentUuid, String attributeUuid, long dateInMsec, int limit) {
 
         // Safety
-        if (experimentUuid == null || attributeUuid == null || dateInMsec < 1 || limit < 1) {
+        if (experimentUuid == null || attributeUuid == null || dateInMsec < 0 || limit < 1) {
             logger.error("Could not get measurements for attribute before date: input parameter(s) invalid");
             return null;
         }
 
         UUID expID = UUID.fromString(experimentUuid);
         UUID attrID = UUID.fromString(attributeUuid);
-        HashSet<EccCounterMeasurementSet> resultSet = null;
+        EccCounterMeasurementSet result = new EccCounterMeasurementSet();
+
+        // TODO: get from measurement sets below (not sure if Metric is NULL below)
+        result.setType("NOMINAL");
+        result.setUnit("");
 
         try {
             Set<MeasurementSet> mSets = msetDAO.getMeasurementSetsForAttribute(attrID, expID, true);
 
-            resultSet = new HashSet<EccCounterMeasurementSet>();
-
+            Set<Measurement> allMeasurements = new HashSet<Measurement>();
             for (MeasurementSet ms : mSets) {
 
-                // Get measurements...
+                // Get measurements from 0 to dateInMsec
                 Report report = expReportDAO.getReportForMeasurementsForTimePeriod(ms.getID(),
+                        new Date(0),
                         new Date(dateInMsec),
-                        new Date(),
                         true);
 
-                Set<Measurement> mSet = report.getMeasurementSet().getMeasurements();
+                allMeasurements.addAll(report.getMeasurementSet().getMeasurements());
+            }
 
-                if (!mSet.isEmpty()) {
-
-                    // Count frequency of specific values
-                    Map<String, Integer> freqMap = MetricCalculator.countValueFrequencies(mSet);
-
-                    resultSet.add(createCounterMSDomainObject(ms, freqMap));
+            if (!allMeasurements.isEmpty()) {
+                Map<String, Integer> freqMap = MetricCalculator.countValueFrequencies(allMeasurements);
+                ArrayList<EccCounterMeasurement> data = new ArrayList<EccCounterMeasurement>();
+                for (String key : freqMap.keySet()) {
+                    data.add(new EccCounterMeasurement(key, freqMap.get(key)));
                 }
+                result.setData(data);
             }
         } catch (Exception ex) {
             logger.error("Could not retrieve measurements for Attribute after date: " + ex.getMessage());
         }
 
-        return resultSet;
+        return result;
     }
 
     // Returns 'limit' measurements starting from now until 'dateInMsec' in the past in <value, number of times the value has occurred> excluding dateInMsec
-    public Set<EccCounterMeasurementSet> getCounterMeasurementsForAttributeUntilAfter(String experimentUuid, String attributeUuid, long dateInMsec, int limit) {
+    public Set<EccCounterMeasurementSet> getCounterMeasurementsForAttributeBeforeAndExcluding(String experimentUuid, String attributeUuid, long dateInMsec, int limit) {
 
         // Safety
-        if (experimentUuid == null || attributeUuid == null || dateInMsec < 1 || limit < 1) {
+        if (experimentUuid == null || attributeUuid == null || dateInMsec < 0 || limit < 1) {
             logger.error("Could not get counter measurements for attribute after date: input parameter(s) invalid");
             return null;
         }

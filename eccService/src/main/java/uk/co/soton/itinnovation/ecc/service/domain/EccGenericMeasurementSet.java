@@ -29,15 +29,15 @@ import java.util.ArrayList;
 /**
  * Represents a simple set of data points.
  */
-public class EccMeasurementSet {
+public class EccGenericMeasurementSet {
 
     private String unit, type;
-    private ArrayList<EccMeasurement> data;
+    private ArrayList<EccGenericMeasurement> data;
 
-    public EccMeasurementSet() {
+    public EccGenericMeasurementSet() {
     }
 
-    public EccMeasurementSet(String unit, String type, ArrayList<EccMeasurement> data) {
+    public EccGenericMeasurementSet(String unit, String type, ArrayList<EccGenericMeasurement> data) {
         this.unit = unit;
         this.type = type;
         this.data = data;
@@ -59,11 +59,11 @@ public class EccMeasurementSet {
         this.type = type;
     }
 
-    public ArrayList<EccMeasurement> getData() {
+    public ArrayList<EccGenericMeasurement> getData() {
         return data;
     }
 
-    public void setData(ArrayList<EccMeasurement> data) {
+    public void setData(ArrayList<EccGenericMeasurement> data) {
         this.data = data;
     }
 

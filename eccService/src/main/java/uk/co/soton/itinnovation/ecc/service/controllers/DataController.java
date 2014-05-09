@@ -30,7 +30,6 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.UUID;
 import javax.servlet.http.HttpServletResponse;
 import org.joda.time.format.ISODateTimeFormat;
@@ -46,19 +45,18 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Attribute;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Entity;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricHelper;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.EMClient;
 import uk.co.soton.itinnovation.ecc.service.domain.EccAttribute;
 import uk.co.soton.itinnovation.ecc.service.domain.EccEntity;
+import uk.co.soton.itinnovation.ecc.service.domain.EccGenericMeasurement;
+import uk.co.soton.itinnovation.ecc.service.domain.EccGenericMeasurementSet;
 import uk.co.soton.itinnovation.ecc.service.domain.EccMeasurement;
 import uk.co.soton.itinnovation.ecc.service.domain.EccMeasurementSet;
 import uk.co.soton.itinnovation.ecc.service.services.ConfigurationService;
 import uk.co.soton.itinnovation.ecc.service.services.DataService;
 import uk.co.soton.itinnovation.ecc.service.services.ExperimentService;
-import uk.co.soton.itinnovation.ecc.service.utils.AttributesComparator;
+import uk.co.soton.itinnovation.ecc.service.utils.Convert;
 import uk.co.soton.itinnovation.ecc.service.utils.EccAttributesComparator;
-import uk.co.soton.itinnovation.ecc.service.utils.EccEntitiesComparator;
 
 /**
  * Exposes experimental data.
@@ -111,19 +109,39 @@ public class DataController {
     }
 
     /**
-     * Returns 10 latest data points for an attribute.
+     * Returns 10 latest data points for an attribute from now.
      *
      * @param attributeId attribute to return data for.
      * @return
      */
     @RequestMapping(method = RequestMethod.GET, value = "/attribute/{attributeId}")
     @ResponseBody
-    public EccMeasurementSet getLatestDataForAttribute(@PathVariable String attributeId) {
-        logger.debug("Returning data for attribute '" + attributeId + "'");
+    public EccGenericMeasurementSet getLatestDataForAttribute(@PathVariable String attributeId) {
+        logger.debug("Returning 10 latest data entries for attribute [" + attributeId + "]");
 
-        EccMeasurementSet result = dataService.getLatestMeasurementsForAttribute(attributeId);
-        for (EccMeasurement em : result.getData()) {
-            logger.debug("Reporting: " + em.getTimestamp().getTime() + ": " + em.getValue());
+        EccAttribute theAttribute = dataService.getEccAttribute(attributeId);
+        EccGenericMeasurementSet result = new EccGenericMeasurementSet();
+
+        if (theAttribute != null) {
+            String theType = theAttribute.getType();
+            logger.debug("Attribute [" + theAttribute.getUuid().toString() + "] is of type '" + theType + "'");
+
+            if (theType.equals("NOMINAL")) {
+                result = Convert.eccCounterMeasurementSetToEccGenericMeasurementSet(dataService.getCounterMeasurementsForAttributeAfter(
+                        experimentService.getActiveExperiment().getUUID().toString(),
+                        attributeId,
+                        (new Date()).getTime(),
+                        10));
+            } else {
+                result = Convert.eccMeasurementSetToEccGenericMeasurementSet(dataService.getLatestMeasurementsForAttribute(
+                        attributeId,
+                        10));
+            }
+
+            for (EccGenericMeasurement em : result.getData()) {
+                logger.debug("Reporting: " + em.getKey() + ": " + em.getValue());
+            }
+
         }
         return result;
     }
@@ -139,7 +157,21 @@ public class DataController {
     @ResponseBody
     public EccMeasurementSet getLatestDataForAttributeSince(@PathVariable String attributeId, @PathVariable Long timestampMsec) {
         logger.debug("Returning 10 latest data items for attribute '" + attributeId + "' since '" + timestampMsec + "' (" + new Date(timestampMsec) + ")");
+
+        EccAttribute theAttribute = dataService.getEccAttribute(attributeId);
         EccMeasurementSet result = new EccMeasurementSet();
+
+//        if (theAttribute != null) {
+//
+//            if (theAttribute.getType().equals("NOMINAL")) {
+//
+//            } else {
+//
+//            }
+//
+//        } else {
+//            logger.error("Failed to find attribute [" + "] in current experiment");
+//        }
         EccMeasurementSet tempResult = dataService.getLatestSinceMeasurementsForAttribute(attributeId, timestampMsec, 10);
         result.setType(tempResult.getType());
         result.setUnit(tempResult.getUnit());
