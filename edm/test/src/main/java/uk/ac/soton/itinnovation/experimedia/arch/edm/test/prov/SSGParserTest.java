@@ -31,6 +31,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -44,9 +45,7 @@ import org.slf4j.LoggerFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMActivity;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMAgent;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMEntity;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvDataContainer;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvFactory;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvReport;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMProvPersistenceFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.prov.dao.EDMProvDataStoreImpl;
 
@@ -83,7 +82,7 @@ public final class SSGParserTest {
 			logger.error("Error parsing logfiles", e);
 		}
 		
-		//analyseFiles();
+		analyseFiles();
 		
 		createProvenance();
 	}
@@ -147,6 +146,7 @@ public final class SSGParserTest {
 	public void analyseFiles() {
 		
 		LinkedList<String> unknownTypes = new LinkedList<String>();
+		HashSet<String> skilifts = new HashSet<String>();
 		
 		for (String type: types) {
 			//Speed of the user	speed in km/h
@@ -211,7 +211,10 @@ public final class SSGParserTest {
 				logger.info(lines.get(type).size() + " avgtrackspeed logs found");		
 			//last lift used	name of lift
 			} else if (type.equals("usedlift") || type.equals("used-lift")) {
-				logger.info(lines.get(type).size() + " usedlift logs found");		
+				logger.info(lines.get(type).size() + " usedlift logs found");
+				for (Log log: lines.get(type)) {
+					skilifts.add(log.csv[7]);
+				}
 			//time taken until user read notification	milliseconds between receiving and reading
 			} else if (type.equals("userreactiontime")) {
 				logger.info(lines.get(type).size() + " userreactiontime logs found");		
@@ -252,6 +255,11 @@ public final class SSGParserTest {
 		//	logger.info(u);
 		//}
 		
+		logger.info(skilifts.size() + " skilifts found");
+		for (String s: skilifts) {
+			logger.info(s);
+		}
+		
 	}
 	
 	public void createProvenance() {
@@ -263,15 +271,18 @@ public final class SSGParserTest {
 			factory.addOntology("sioc", "http://rdfs.org/sioc/ns#");
 			factory.addOntology("ski", "http://www.semanticweb.org/sw/ontologies/skiing#");
 			
+			//data container for long term applicationUseActivities
+			ArrayList<ActivityCollection> applicationUseActivities = new ArrayList<ActivityCollection>();
+			
 			//add all agents (i.e. SSG devices in this case)
 			for (String device: logs.keySet()) {
-				EDMAgent agent = factory.createAgent("agent_" + UUID.randomUUID(), device);
+				EDMAgent agent = factory.createAgent("agent_" + device, device);
 				
 				logger.info("logs: " + logs.get(device).size());
 				//process logs by device
-				Iterator it = logs.get(device).iterator();
+				Iterator<Log> it = logs.get(device).iterator();
 				while (it.hasNext()) {
-					Log log = (Log) it.next();
+					Log log = it.next();
 					//lift use
 					if (log.type.equals("used-lift")) {
 						logger.debug("Used lift: " + log.csv[7] + " (" + log.csv[8] + ") at " + log.timestamp);
@@ -285,9 +296,47 @@ public final class SSGParserTest {
 						EDMActivity usedlift = agent.doDiscreteActivity("activity_" + UUID.randomUUID(), "Used skilift", log.timestamp);
 						usedlift.addOwlClass(factory.getNamespaceForPrefix("ski") + "UsingSkiliftActivity");
 						usedlift.useEntity(skilift);
+					//tweet read
 					} else if (log.type.equals("tweet-read")) {
 						//logger.info("Tweet: " + log.line);
-						agent.startActivity("activity_" + UUID.randomUUID(), "Read tweet", log.timestamp);
+						agent.startActivity("activity_" + UUID.randomUUID(), "Tweet read", log.timestamp);
+					//tweet received
+					} else if (log.type.equals("tweet-received")) {
+						agent.startActivity("activity_" + UUID.randomUUID(), "Tweet received", log.timestamp);
+					//message received
+					} else if (log.type.equals("message-received")) {
+						agent.startActivity("activity_" + UUID.randomUUID(), "Message received", log.timestamp);
+					//message read
+					} else if (log.type.equals("message-read")) {
+						//logger.info("Message: " + log.line);
+						agent.startActivity("activity_" + UUID.randomUUID(), "Message read", log.timestamp);
+					//start using SSG
+					} else if (log.type.equals("application-startup")) {
+						EDMActivity applicationStartup = agent.startActivity("activity_" + UUID.randomUUID(), "Use SSG " + log.device, log.timestamp);
+						//logger.info("Started activity " + applicationStartup.getFriendlyName() + " at " + log.date + ", " + log.time);
+						applicationUseActivities.add(new ActivityCollection(applicationStartup, log));
+					//stop using SSG
+					} else if (log.type.equals("application-shutdown")) {
+						//look for previously started applicationUseActivities
+						Iterator<ActivityCollection> iter = applicationUseActivities.iterator();
+						while (iter.hasNext()) {
+							ActivityCollection ac = iter.next();
+							if (ac.log.device.equals(log.device)) {
+								//check timestamps
+								int oldTime = new Integer(ac.log.timestamp);
+								int newTime = new Integer(log.timestamp);
+								if (oldTime<newTime) {
+									agent.stopActivity(ac.activity);
+									iter.remove();
+									//logger.info("Stopped activity " + ac.activity.getFriendlyName() + " at " + log.date + ", " + log.time);
+									break;
+								}
+							}
+						}
+					} else if (log.type.equals("poi-reached")) {
+						//logger.info("Reached POI: "  + log.csv[7] + " (" + log.csv[8] + ")");
+						//agent.doDiscreteActivity("activity_" + UUID.randomUUID(),
+						//		"Reached POI " + log.csv[7] + " (" + log.csv[8] + ") at " + log.date + ", " + log.time, log.timestamp);
 					}
 				}
 			}
@@ -315,11 +364,21 @@ public final class SSGParserTest {
 			
 			store.getProvWriter().storeReport(factory.createProvReport());
 			
-			EDMProvDataContainer result = store.getProvElementReader().getElements(null, null);
-			logger.info(result.toString());
+			//EDMProvBaseElement result = store.getProvElementReader().getElement("http://it-innovation.soton.ac.uk/ontologies/experimedia#agent_EVO-OA-07");
+			//logger.info(result.toString());
 		
 		} catch (Throwable e) {
 			logger.error("Error filling EDMProvFactory with test data", e);
+		}
+	}
+	
+	private class ActivityCollection {
+		public EDMActivity activity;
+		public Log log;
+
+		ActivityCollection(EDMActivity activity, Log log) {
+			this.activity = activity;
+			this.log = log;
 		}
 	}
 	
@@ -336,7 +395,7 @@ public final class SSGParserTest {
 		
 		public String[] csv;
 		
-		public Log(String filename, String line) throws ParseException {
+		Log(String filename, String line) throws ParseException {
 			this.line = line.trim();
 		
 			//log is mostly separated by ;
@@ -482,8 +541,6 @@ public final class SSGParserTest {
 				} else if (lowerline.contains("message-received")) {
 					type = "message-received";
 					line = line.replace("\"\"", "\"");
-
-
 				} else if (lowerline.contains("run")) {
 					type = "run";
 				} else if (lowerline.contains("temperature")) {
