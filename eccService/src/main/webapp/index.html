@@ -1,0 +1,142 @@
+<!doctype html>
+<html class="no-js" lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>EXPERIMEDIA ECC Dashboard | Configure</title>
+        <link rel="stylesheet" href="css/foundation.min.css" />
+        <link rel="stylesheet" href="css/app.css" />
+        <script src="js/vendor/modernizr.min.js"></script>
+    </head>
+    <body>
+
+        <div class="row">
+            <div class="small-12 columns clearfix">
+                <p class="left">EXPERIMEDIA ECC Configuration</p>
+                <p class="right" id="configStatus"></p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="small-12 large-6 columns">
+                <p>Select one of the available configurations below:</p>
+                <form id="fetchProjectConfigByNameForm">
+                    <fieldset>
+                        <legend>Local configuration</legend>
+                        <input type="radio" name="configurationSet" value="local" id="localConfigurationRadioInput" checked>
+                        <label for="localConfigurationRadioInput">Default (application.properties)</label>
+                    </fieldset>
+                    <fieldset id="listofRemoteConfigurations">
+                        <legend>Remote configurations (WebDAV)</legend>
+                    </fieldset>
+                </form>
+            </div>
+            <div class="small-12 large-6 columns">
+                <p>Selected configuration:</p>
+
+                <form id="activeProjectConfigForm" class="hide">
+                    <fieldset>
+                        <legend>Project name</legend>
+                        <input type="text" name="projectName" id="config_projectName">
+                    </fieldset>
+                    <fieldset>
+                        <legend>Rabbit MQ server</legend>
+                        <div class="row">
+                            <div class="small-12 columns">
+                                <label>Monitor ID
+                                    <input type="text"  name="rabbitConfig[monitorId]" id="config_monitorid"/>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="small-8 columns">
+                                <label>Rabbit IP/URL
+                                    <input type="text" name="rabbitConfig[ip]" id="config_rabbitip"/>
+                                </label>
+                            </div>
+                            <div class="small-4 columns">
+                                <label>Rabbit port
+                                    <input type="text" name="rabbitConfig[port]" id="config_rabbitport"/>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="small-6 columns">
+                                <label>Rabbit username
+                                    <input type="text" name="rabbitConfig[userName]" id="config_username"/>
+                                </label>
+                            </div>
+                            <div class="small-6 columns">
+                                <label>Rabbit password
+                                    <input type="password" name="rabbitConfig[userPassword]" id="config_password"/>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="row hide">
+                            <div class="small-12 columns">
+                                <label>Rabbit keystore
+                                    <input type="hidden" name="rabbitConfig[keystore]" id="config_keystore"/>
+                                </label>
+                            </div>
+                            <div class="small-12 columns">
+                                <input type="hidden" name="rabbitConfig[useSsl]" value="false">
+                                <input type="checkbox" name="rabbitConfig[useSsl]" id="config_userssl"><label for="config_userssl">Use Rabbit SSL</label>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <fieldset>
+                        <legend>Database server</legend>
+                        <div class="row">
+                            <div class="small-6 columns">
+                                <label>Database URL
+                                    <input type="text" name="databaseConfig[url]" id="config_databaseurl"/>
+                                </label>
+                            </div>
+                            <div class="small-6 columns">
+                                <label>Database name
+                                    <input type="text" name="databaseConfig[databaseName]" id="config_databasename"/>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="small-6 columns">
+                                <label>Database username
+                                    <input type="text" name="databaseConfig[userName]" id="config_databaseusername"/>
+                                </label>
+                            </div>
+                            <div class="small-6 columns">
+                                <label>Database password
+                                    <input type="password" name="databaseConfig[userPassword]" id="config_databasepassword"/>
+                                </label>
+                                <input type="hidden" name="databaseConfig[databaseType]" id="config_databasetype"/>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <fieldset class="hide">
+                        <legend>Misc</legend>
+                        <input type="hidden" name="miscConfig[snapshotCount]" id="config_miscsnapshotCount"/>
+                        <input type="hidden" name="miscConfig[nagiousUrl]" id="config_miscsnapnagiousUrl"/>
+                    </fieldset>
+                    <input type="hidden" name="remote" value="false">
+                    <input type="checkbox" name="remote" id="config_isremote"><label for="config_isremote">Save or update this configuration on WebDAV server</label>
+                </form>
+
+                <div class="row hide" id="setActiveConfigurationRow">
+                    <div class="small-12 columns">
+                        <a href="#" class="button small" id="setActiveConfiguration">Use this configuration</a>
+                    </div>
+                </div>
+                <div class="row hide" id="fetchConfigurationRow">
+                    <div class="small-12 columns text-center">
+                        <p>Fetching requested configuration, please wait</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="js/vendor/jquery.min.js"></script>
+        <script src="js/foundation.min.js"></script>
+        <script src="js/vendor/jquery.serializeJSON.min.js"></script>
+        <script src="js/index.js"></script>
+    </body>
+</html>

@@ -47,17 +47,20 @@ void AbstractAMQPInterface::shutdown()
 
   if ( amqpChannel )
   {
-    // Clear up queue, if it exists
-    if ( !subListenQueue.empty() )
+    if ( amqpChannel->isOpen() )
     {
-      AmqpClient::Channel::ptr_t channelImpl = amqpChannel->getChannelImpl();
-      if ( channelImpl )
+       // Clear up queue, if it exists
+      if ( !subListenQueue.empty() )
       {
-        channelImpl->DeleteQueue( toNarrow(subListenQueue) );
+        AmqpClient::Channel::ptr_t channelImpl = amqpChannel->getChannelImpl();
+        if ( channelImpl )
+        {
+          channelImpl->DeleteQueue( toNarrow(subListenQueue) );
                   
-        subProcessor     = NULL;
-        subscriptService = NULL;
-        msgDispatch      = NULL;
+          subProcessor     = NULL;
+          subscriptService = NULL;
+          msgDispatch      = NULL;
+        }
       }
     }
 
@@ -90,21 +93,23 @@ bool AbstractAMQPInterface::sendBasicMessage( const String& message )
     // Make sure producer sends to user (or other way around) - targets are reversed
     wstring& targetExchange = actingAsProvider ? userExchangeName : providerExchangeName;
     wstring& targetRouteKey = actingAsProvider ? userRoutingKey   : providerRoutingKey;
-          
-
-    AmqpClient::Channel::ptr_t channelImpl = amqpChannel->getChannelImpl();
-    if ( channelImpl )
+    
+    if ( amqpChannel->isOpen() )
     {
-      BasicMessage::ptr_t bMsg = BasicMessage::Create( toNarrow(message) );
+      AmqpClient::Channel::ptr_t channelImpl = amqpChannel->getChannelImpl();
+      if ( channelImpl )
+      {
+        BasicMessage::ptr_t bMsg = BasicMessage::Create( toNarrow(message) );
 
-      channelImpl->BasicPublish( toNarrow(targetExchange),
-                                  toNarrow(targetRouteKey),
-                                  bMsg,
-                                  false,
-                                  false );
-      result = true;
+        channelImpl->BasicPublish( toNarrow(targetExchange),
+                                   toNarrow(targetRouteKey),
+                                   bMsg,
+                                   false,
+                                   false );
+        result = true;
+      }
     }
-}
+  }
 
   return result;
 }

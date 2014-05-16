@@ -288,14 +288,6 @@
       <id>central</id>
       <url>http://repo1.maven.org/maven2/</url>
     </repository>
-    
-    <repository>
-      <id>mvn.prov.toolbox</id>
-      <name>maven repository for PROV toolbox</name>
-      <url>http://openprovenance.org/java/maven-releases/</url>
-    </repository>
-    
-		<!-- Do not include ALTANO -->
 		
   </repositories>
 
@@ -307,7 +299,7 @@
       <module>em</module>
       <module>edm</module>
       <module>samples</module>
-      <module>eccDash</module>
+      <module>eccService</module>
       <module>OWLimProvStore/trunk</module>
   </modules>
 

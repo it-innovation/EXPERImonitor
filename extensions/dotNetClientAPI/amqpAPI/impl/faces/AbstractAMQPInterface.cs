@@ -62,10 +62,15 @@ public abstract class AbstractAMQPInterface
           if ( subListenQueue != null )
               try 
               {
-                  IModel channel = (IModel) amqpChannel.getChannelImpl();
-                  channel.QueueDelete( subListenQueue );
-                  subProcessor = null;
-                  msgDispatch  = null;
+                  if (amqpChannel.isOpen())
+                  {
+                      IModel channel = (IModel)amqpChannel.getChannelImpl();
+                      channel.QueueDelete(subListenQueue);
+                      subProcessor = null;
+                      msgDispatch = null;
+                  }
+                  else amqpIntLogger.Warn("Could not delete AMQP queue: channel no longer open");
+
               }
               catch (Exception e)
               { amqpIntLogger.Error( "Could not delete AMQP queue: " + e.Message ); }
@@ -101,13 +106,17 @@ public abstract class AbstractAMQPInterface
           
           try
           {
-              IModel channelImpl = (IModel) amqpChannel.getChannelImpl();
-                            
-              channelImpl.BasicPublish( targetExchange,
-                                        targetRouteKey,
-                                        null, // Properties
-                                        utf8Encode.GetBytes(message));
-              result = true;
+              if (amqpChannel.isOpen())
+              {
+                  IModel channelImpl = (IModel)amqpChannel.getChannelImpl();
+
+                  channelImpl.BasicPublish(targetExchange,
+                                            targetRouteKey,
+                                            null, // Properties
+                                            utf8Encode.GetBytes(message));
+                  result = true;
+              }
+              else amqpIntLogger.Error("Could not send AMQP message: channel no longer open");
           }
           catch(Exception) {}
       }

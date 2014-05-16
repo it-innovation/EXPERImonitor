@@ -557,6 +557,43 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
         }
     }
     
+    @Override
+    public Set<MeasurementSet> getMeasurementSetsForAttribute(UUID attributeID, boolean withMetric) throws Exception
+    {
+        Connection connection = null;
+           
+        try {
+            connection = dbCon.getConnection();
+            return MeasurementSetDAOHelper.getMeasurementSetsForAttribute(attributeID, withMetric, connection, true);
+        }
+        catch ( Exception ex ) {
+            String msg = "Could not get measurement sets for attribute " + attributeID.toString() + " :" + ex.getMessage();
+            throw new Exception( msg, ex );
+        }
+        finally {
+            if ( connection != null && DBUtil.isConnected(connection) )
+                connection.close();
+        }
+    }
+    
+    @Override
+    public Set<MeasurementSet> getMeasurementSetsForAttribute(UUID attributeID, UUID experimentID, boolean withMetric) throws Exception
+    {
+        Connection connection = null;
+           
+        try {
+            connection = dbCon.getConnection();
+            return MeasurementSetDAOHelper.getMeasurementSetsForAttribute(attributeID, experimentID, withMetric, connection, true);
+        }
+        catch ( Exception ex ) {
+            String msg = "Could not get measurement sets for attribute " + attributeID.toString() + " :" + ex.getMessage();
+            throw new Exception( msg, ex );
+        }
+        finally {
+            if ( connection != null && DBUtil.isConnected(connection) )
+                connection.close();
+        }   
+    }
     
     //---------------------------- METRIC ------------------------------------//
     
@@ -927,6 +964,25 @@ public class ExperimentDataManagerDAO implements IExperimentDAO, IEntityDAO, IMe
         }
         try {
             return ReportDAOHelper.getReportForAllMeasurements(measurementSetUUID, withMeasurements, connection);
+        } catch (Exception ex) {
+            throw ex;
+        } finally {
+            try { connection.close(); } catch (Exception ex) { log.error("Failed to close db connection: ", ex);  }
+        }
+    }
+    
+    @Override
+    public Report getReportForTailMeasurements(UUID measurementSetID, Date tailDate, int count, boolean withMeasurements) throws Exception
+    {
+        Connection connection = null;
+        try {
+            connection = dbCon.getConnection();
+        } catch (Exception ex) {
+            log.error("Unable to get report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
+            throw new RuntimeException("Unable to get report, because a connection to the database cannot be made: " + ex.getMessage(), ex);
+        }
+        try {
+            return ReportDAOHelper.getReportForTailMeasurements(measurementSetID, tailDate, count, withMeasurements, connection);
         } catch (Exception ex) {
             throw ex;
         } finally {

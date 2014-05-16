@@ -68,7 +68,7 @@ public class AMQPConnectionFactory
         if ( amqpConnection != null )
             try 
             {
-                amqpConnection.Close();
+                if (amqpConnection.IsOpen) amqpConnection.Close();
                 amqpConnection = null;
             }
             catch (Exception) 

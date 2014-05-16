@@ -53,8 +53,6 @@ namespace ecc_amqpAPI_impl
 
   private:
      AmqpClient::Channel::ptr_t amqpChannel;
-
-     bool channelOpen;
   };
 
 }

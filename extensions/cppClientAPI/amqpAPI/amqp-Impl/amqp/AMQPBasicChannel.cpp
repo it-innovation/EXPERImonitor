@@ -36,7 +36,6 @@ namespace ecc_amqpAPI_impl
 {
  
   AMQPBasicChannel::AMQPBasicChannel( Channel::ptr_t channel  )
-    : channelOpen( false )
   { 
     amqpChannel = channel;
   }
@@ -47,15 +46,10 @@ namespace ecc_amqpAPI_impl
   Channel::ptr_t AMQPBasicChannel::getChannelImpl()
   { return amqpChannel; }
 
-  void AMQPBasicChannel::setOpen( bool open )
-  {
-    if ( amqpChannel != NULL ) channelOpen = open;
-  }
-
   bool AMQPBasicChannel::isOpen()
   {
     if ( amqpChannel != NULL )
-        return channelOpen;
+      return amqpChannel->isChannelOpen();
 
     return false;
   }
@@ -63,11 +57,7 @@ namespace ecc_amqpAPI_impl
   void AMQPBasicChannel::close()
   {
     if ( amqpChannel != NULL )
-      if ( channelOpen )
-      {
-        // Release the reference to this channel
-        amqpChannel.reset();
-      }
+      amqpChannel.reset(); // Release the reference to this channel
   }
 
 } // namespace

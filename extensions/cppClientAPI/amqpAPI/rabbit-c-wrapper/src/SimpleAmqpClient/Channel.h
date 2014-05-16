@@ -476,6 +476,11 @@ public:
 	  */
 	bool BasicConsumeMessage(const std::string& consumer_tag, Envelope::ptr_t& envelope, int timeout = -1);
 
+  /**
+    * EXPERIMEDIA modification: added check for channel open
+    */
+  bool isChannelOpen();
+
 protected:
     boost::scoped_ptr<Detail::ChannelImpl> m_impl;
 };
