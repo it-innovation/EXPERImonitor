@@ -43,6 +43,7 @@ int _tmain( int argc, _TCHAR* argv[] )
 
   // Default IP or use command line supplied
   String rabbitServerIP = L"127.0.0.1";
+
   if ( argc == 2 ) 
     rabbitServerIP = String( argv[1] );
 
@@ -52,8 +53,7 @@ int _tmain( int argc, _TCHAR* argv[] )
                              createUUID( L"00000000-0000-0000-0000-000000000000" ), // ECC instance ID
                              createRandomUUID() );                                  // ID of this client (random)
 
-    wcout << L"Press any key to quit" << endl;
-                            
+    wcout << L"Press any key to quit" << endl;                       
   }
   catch( const String e )
   { wcout << "Had problems starting client: " << e << endl; }

@@ -53,20 +53,23 @@ EMInterfaceAdapter::~EMInterfaceAdapter()
 }
 
 void EMInterfaceAdapter::registerWithEM( const String& name,
-                                         AMQPBasicChannel::ptr_t channel,
+                                         AMQPBasicChannel::ptr_t inChannel,
+                                         AMQPBasicChannel::ptr_t outChannel,
                                          const UUID& eccID,
                                          const UUID& thisAppID )
 {
     // Safety first
-    if ( !channel ) throw L"AMQP Channel is null";
+    if ( !inChannel || !outChannel ) throw L"AMQP Channel is null";
   
-    amqpChannel     = channel;
+    inAMQPChannel   = inChannel;
+    outAMQPChannel  = outChannel;
     clientName      = name;
     expMonitorID    = eccID;
     clientID        = thisAppID;
 
     // Create interface factory to support interfaces required by the EM
-    interfaceFactory = EMInterfaceFactory::ptr_t( new EMInterfaceFactory( amqpChannel, 
+    interfaceFactory = EMInterfaceFactory::ptr_t( new EMInterfaceFactory( inAMQPChannel,
+                                                                          outAMQPChannel,
                                                                           false ) );
 
     // Create dispatch pump (only need to do this once)
@@ -140,7 +143,8 @@ void EMInterfaceAdapter::disconnectFromEM()
       tearDownFace = NULL;
     }
         
-    amqpChannel = NULL;
+    inAMQPChannel = NULL;
+    outAMQPChannel = NULL;
 }
 
 Experiment::ptr_t EMInterfaceAdapter::getExperimentInfo()

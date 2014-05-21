@@ -59,7 +59,8 @@ public:
     virtual ~EMInterfaceAdapter();
 
     void registerWithEM( const String& name,
-                         ecc_amqpAPI_impl::AMQPBasicChannel::ptr_t channel,
+                         ecc_amqpAPI_impl::AMQPBasicChannel::ptr_t inChannel,
+                         ecc_amqpAPI_impl::AMQPBasicChannel::ptr_t outChannel,
                          const UUID& eccID,
                          const UUID& clientID );
 
@@ -138,7 +139,10 @@ private:
     EMIAdapterListener::ptr_t emiListener;
     
     String                                    clientName;
-    ecc_amqpAPI_impl::AMQPBasicChannel::ptr_t amqpChannel;
+    
+    ecc_amqpAPI_impl::AMQPBasicChannel::ptr_t inAMQPChannel;
+    ecc_amqpAPI_impl::AMQPBasicChannel::ptr_t outAMQPChannel;
+
     UUID                                      expMonitorID;
     UUID                                      clientID;
     ecc_commonDataModel::Experiment::ptr_t    currentExperiment;

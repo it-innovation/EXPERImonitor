@@ -50,11 +50,13 @@ namespace ecc_emClient_impl
 {
 
 EMBaseInterface::EMBaseInterface( AMQPBasicSubscriptionService::ptr_t sService,
-                                  AMQPBasicChannel::ptr_t             channel, 
+                                  AMQPBasicChannel::ptr_t             inChannel,
+                                  AMQPBasicChannel::ptr_t             outChannel, 
                                   const bool                          asProvider )
 {
   amqpSubscriptService = sService;
-  amqpChannel          = channel;
+  inAMQPChannel        = inChannel;
+  outAMQPChannel       = outChannel;
   isProvider           = asProvider;
 }
 
@@ -93,7 +95,8 @@ void EMBaseInterface::shutdown()
     amqpInterface->shutdown();
 
     amqpSubscriptService = NULL;
-    amqpChannel          = NULL;
+    inAMQPChannel        = NULL;
+    outAMQPChannel       = NULL;
     amqpInterface        = NULL;
   }
 }
@@ -160,12 +163,10 @@ bool EMBaseInterface::executeMethod( const int methodID, const EXEParamList& par
     }
     
     payloadData.append( L"]" );
-
-    // Send data
+    
+    // Send the message (amqp interface enters critical section here)
     if ( amqpInterface->sendBasicMessage(payloadData) )
       result = true;
-
-    // else faceLogger.error("Could not execute method " + methodID);
   }
     
   return result;

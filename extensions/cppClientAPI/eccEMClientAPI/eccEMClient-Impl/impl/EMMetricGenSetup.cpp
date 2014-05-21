@@ -45,12 +45,13 @@ namespace ecc_emClient_impl
 {
 
 EMMetricGenSetup::EMMetricGenSetup( AMQPBasicSubscriptionService::ptr_t sService,
-                                    AMQPBasicChannel::ptr_t             channel,
+                                    AMQPBasicChannel::ptr_t             inChannel,
+                                    AMQPBasicChannel::ptr_t             outChannel,
                                     AMQPMessageDispatch::ptr_t          dispatch,
                                     const UUID&                         providerID,
                                     const UUID&                         userID,
                                     bool                                isProvider )
-: EMBaseInterface( sService, channel, isProvider )
+: EMBaseInterface( sService, inChannel, outChannel, isProvider )
 {
   interfaceName    = L"IEMMetricGenSetup";
   interfaceVersion = L"0.1";
@@ -59,7 +60,7 @@ EMMetricGenSetup::EMMetricGenSetup( AMQPBasicSubscriptionService::ptr_t sService
   interfaceUserID     = userID;
     
   AMQPFullInterfaceBase::ptr_t fullFace = 
-      AMQPFullInterfaceBase::ptr_t( new AMQPFullInterfaceBase( sService, channel ) );
+      AMQPFullInterfaceBase::ptr_t( new AMQPFullInterfaceBase( sService, inChannel, outChannel ) );
   
   setAMQPFaceAndDispatch( dynamic_pointer_cast<AbstractAMQPInterface>(fullFace), dispatch );
 }

@@ -43,10 +43,12 @@ using namespace std;
 namespace ecc_emClient_impl
 {
 
-EMInterfaceFactory::EMInterfaceFactory( AMQPBasicChannel::ptr_t channel, 
+EMInterfaceFactory::EMInterfaceFactory( AMQPBasicChannel::ptr_t inChannel,
+                                        AMQPBasicChannel::ptr_t outChannel, 
                                         bool                    createProviders )
 {
-  amqpChannel       = channel;
+  inAMQPChannel     = inChannel;
+  outAMQPChannel    = outChannel;
   generateProviders = createProviders;
 
   amqpSubscriptService = AMQPBasicSubscriptionService::ptr_t( new AMQPBasicSubscriptionService() );
@@ -73,7 +75,7 @@ IEMMonitorEntryPoint::ptr_t EMInterfaceFactory::createEntryPoint( const UUID& pr
                                                                   IAMQPMessageDispatch::ptr_t dispatch )
 {
   EMMonitorEntryPoint::ptr_t ep( new EMMonitorEntryPoint( amqpSubscriptService, 
-                                                          amqpChannel,
+                                                          inAMQPChannel, outAMQPChannel,
                                                           dynamic_pointer_cast<AMQPMessageDispatch>( dispatch ),
                                                           providerID,
                                                           generateProviders ) );
@@ -87,7 +89,7 @@ IEMDiscovery::ptr_t EMInterfaceFactory::createDiscovery( const UUID& providerID,
                                                          IAMQPMessageDispatch::ptr_t dispatch )
 {
   EMDiscovery::ptr_t disc ( new EMDiscovery( amqpSubscriptService,
-                                             amqpChannel,
+                                             inAMQPChannel, outAMQPChannel,
                                              dynamic_pointer_cast<AMQPMessageDispatch>( dispatch ),
                                              providerID,
                                              userID,
@@ -102,7 +104,7 @@ IEMMetricGenSetup::ptr_t EMInterfaceFactory::createSetup( const UUID& providerID
                                                           IAMQPMessageDispatch::ptr_t dispatch )
 {
   EMMetricGenSetup::ptr_t mgs( new EMMetricGenSetup( amqpSubscriptService, 
-                                                     amqpChannel,
+                                                     inAMQPChannel, outAMQPChannel,
                                                      dynamic_pointer_cast<AMQPMessageDispatch>( dispatch ),
                                                      providerID,
                                                      userID,
@@ -117,7 +119,7 @@ IEMLiveMonitor::ptr_t EMInterfaceFactory::createLiveMonitor( const UUID& provide
                                                              IAMQPMessageDispatch::ptr_t dispatch )
 {
   EMLiveMonitor::ptr_t lm( new EMLiveMonitor( amqpSubscriptService, 
-                                              amqpChannel,
+                                              inAMQPChannel, outAMQPChannel,
                                               dynamic_pointer_cast<AMQPMessageDispatch>( dispatch ),
                                               providerID,
                                               userID,
@@ -132,7 +134,7 @@ IEMPostReport::ptr_t EMInterfaceFactory::createPostReport( const UUID& providerI
                                                            IAMQPMessageDispatch::ptr_t dispatch )
 {
   EMPostReport::ptr_t pr( new EMPostReport( amqpSubscriptService, 
-                                            amqpChannel,
+                                            inAMQPChannel, outAMQPChannel,
                                             dynamic_pointer_cast<AMQPMessageDispatch>( dispatch ),
                                             providerID,
                                             userID,
@@ -147,7 +149,7 @@ IEMTearDown::ptr_t EMInterfaceFactory::createTearDown( const UUID& providerID,
                                                        IAMQPMessageDispatch::ptr_t dispatch )
 {
   EMTearDown::ptr_t td( new EMTearDown( amqpSubscriptService, 
-                                        amqpChannel,
+                                        inAMQPChannel, outAMQPChannel,
                                         dynamic_pointer_cast<AMQPMessageDispatch>( dispatch ),
                                         providerID,
                                         userID,

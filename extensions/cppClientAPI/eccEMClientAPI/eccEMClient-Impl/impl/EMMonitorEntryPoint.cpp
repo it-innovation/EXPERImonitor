@@ -42,11 +42,12 @@ namespace ecc_emClient_impl
 {
 
 EMMonitorEntryPoint::EMMonitorEntryPoint( AMQPBasicSubscriptionService::ptr_t sService,
-                                          AMQPBasicChannel::ptr_t             channel,
+                                          AMQPBasicChannel::ptr_t             inChannel,
+                                          AMQPBasicChannel::ptr_t             outChannel,
                                           AMQPMessageDispatch::ptr_t          dispatch,
                                           const UUID&                         providerID,
                                           bool                                isProvider ) 
-: EMBaseInterface( sService, channel, isProvider )
+: EMBaseInterface( sService, inChannel, outChannel, isProvider )
 {
     
   interfaceName    = L"IECCMonitorEntryPoint";
@@ -55,7 +56,7 @@ EMMonitorEntryPoint::EMMonitorEntryPoint( AMQPBasicSubscriptionService::ptr_t sS
   interfaceProviderID = providerID;
 
   AMQPHalfInterfaceBase::ptr_t halfFace = 
-      AMQPHalfInterfaceBase::ptr_t( new AMQPHalfInterfaceBase( sService, channel ) );
+      AMQPHalfInterfaceBase::ptr_t( new AMQPHalfInterfaceBase( sService, inChannel, outChannel ) );
   
   setAMQPFaceAndDispatch( dynamic_pointer_cast<AbstractAMQPInterface>(halfFace), dispatch );
 }
@@ -68,8 +69,8 @@ void EMMonitorEntryPoint::shutdown()
 {
   // Do not attempt to remove the entry point (it belongs to the ECC)
   amqpSubscriptService = NULL;
-  amqpChannel          = NULL;
-  amqpInterface        = NULL;
+
+  amqpInterface = NULL;
 }
   
 // IECCMonitorEntryPoint -----------------------------------------------------

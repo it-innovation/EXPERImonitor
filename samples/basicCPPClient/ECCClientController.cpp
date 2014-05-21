@@ -47,7 +47,9 @@ ECCClientController::ECCClientController()
 ECCClientController::~ECCClientController()
 {
     emiAdapter = NULL;
-    amqpChannel = NULL;
+    
+    inAMQPChannel = NULL;
+    outAMQPChannel = NULL;
 }
 
 void ECCClientController::start( const String& rabbitServerIP,
@@ -65,7 +67,8 @@ void ECCClientController::start( const String& rabbitServerIP,
       // Set up AMQP factory to connect to the RabbitMQ server
       amqpFactory->setAMQPHostIPAddress( rabbitServerIP );
       amqpFactory->connectToAMQPHost();
-      amqpChannel = amqpFactory->createNewChannel();
+      inAMQPChannel  = amqpFactory->createNewChannel();
+      outAMQPChannel = amqpFactory->createNewChannel();
 
       cout << "Connected and channel created." << endl;
 
@@ -79,7 +82,7 @@ void ECCClientController::start( const String& rabbitServerIP,
 
       // Try registering with the ECC (see onEMConnectionResult(..) for result)
       emiAdapter->registerWithEM( clientName,
-                                  amqpChannel,
+                                  inAMQPChannel, outAMQPChannel,
                                   expMonitorID,
                                   clientID );
     }
@@ -98,7 +101,9 @@ void ECCClientController::stop()
     {
         amqpFactory->closeDownConnection();
         amqpFactory = NULL;
-        amqpChannel = NULL;
+
+        inAMQPChannel = NULL;
+        outAMQPChannel = NULL;
     }    
 }
 

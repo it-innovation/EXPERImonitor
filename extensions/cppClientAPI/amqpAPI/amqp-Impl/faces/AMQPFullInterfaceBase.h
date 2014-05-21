@@ -40,7 +40,8 @@ public:
   typedef boost::shared_ptr<AMQPFullInterfaceBase> ptr_t;
 
   AMQPFullInterfaceBase( AMQPBasicSubscriptionService::ptr_t sService,
-                         AMQPBasicChannel::ptr_t             channel );
+                         AMQPBasicChannel::ptr_t             inChannel,
+                         AMQPBasicChannel::ptr_t             outChannel );
 
   virtual ~AMQPFullInterfaceBase();
 

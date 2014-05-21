@@ -106,7 +106,8 @@ private:
 
     // AMQP/ECC--------------------------------------------------------------------
     ecc_amqpAPI_impl::AMQPConnectionFactory::ptr_t amqpFactory;
-    ecc_amqpAPI_impl::AMQPBasicChannel::ptr_t      amqpChannel;
+    ecc_amqpAPI_impl::AMQPBasicChannel::ptr_t      inAMQPChannel;
+    ecc_amqpAPI_impl::AMQPBasicChannel::ptr_t      outAMQPChannel;
     EMInterfaceAdapter::ptr_t                      emiAdapter;
     bool                                           connectedToECC;
   

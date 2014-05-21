@@ -37,8 +37,9 @@ namespace ecc_amqpAPI_impl
 {
 
   AMQPHalfInterfaceBase::AMQPHalfInterfaceBase( AMQPBasicSubscriptionService::ptr_t sService,
-                                                AMQPBasicChannel::ptr_t             channel )
-    : AbstractAMQPInterface( sService, channel )
+                                                AMQPBasicChannel::ptr_t             inChannel,
+                                                AMQPBasicChannel::ptr_t             outChannel )
+    : AbstractAMQPInterface( sService, inChannel, outChannel )
   {
   }
 
@@ -57,16 +58,17 @@ namespace ecc_amqpAPI_impl
         return false;
       
     // Get RabbitMQ channel
-    AmqpClient::Channel::ptr_t channelImpl = amqpChannel->getChannelImpl();
+    AmqpClient::Channel::ptr_t channelImpl = outAMQPChannel->getChannelImpl();
+
     if ( channelImpl )
     {
       // Exchange type: direct, non-auto delete, non durable
       channelImpl->DeclareExchange( toNarrow(providerExchangeName) );
 
-      createQueue();
+      createQueue( false ); // Use out-going channel for sending messages
 
       // If we're a provider, then listen to messages sent
-      if ( actingAsProvider ) createSubscriptionComponent();
+      if ( actingAsProvider ) createSubscriptionComponent( inAMQPChannel ); // In channel for subscription
 
       // Finished
       interfaceReady = true;
@@ -96,7 +98,7 @@ namespace ecc_amqpAPI_impl
   bool AMQPHalfInterfaceBase::setInitParams( const String& iName, const UUID& targetID, const bool asProvider )
   {
     // Safety first
-    if ( iName.empty() || !amqpChannel ) return false;
+    if ( iName.empty() || !inAMQPChannel || !outAMQPChannel ) return false;
       
     createInterfaceExchangeNames( iName );
       

@@ -5,12 +5,12 @@ Prerequisites
 -------------
 The ECC C++ API is has been developed with a view to providing as much cross-platform compatibility as possible. There are three main 3rd party libraries you will be required to build for your system platform before compiling the ECC API itself. These 3rd party libraries are:
 
-  * rabbitmq-c-v0.3.0 (MIT licence)
+  * rabbitmq-c-v0.5.0 (MIT licence)
     - C based protocol client for AMQP
     - Source can be found here: https://github.com/alanxz/rabbitmq-c
     
-  * SimpleAmqpClient (MIT licence)
-    - C++ wrapper for rabbitmq-c-v0.3.0
+  * SimpleAmqpClient v2.4 (MIT licence)
+    - C++ wrapper for rabbitmq-c-v0.5.0
     - Source can be found here: https://github.com/alanxz/SimpleAmqpClient
     
   * Boost 1.53.0 (Boost licence)
@@ -21,8 +21,8 @@ The ECC C++ API is has been developed with a view to providing as much cross-pla
     - Not included in the ECC distribution
     - Download from: http://www.cmake.org/
     - Required to build:
-        > rabbitmq-c-v0.3.0
-        > SimpleAmqpClient
+        > rabbitmq-c-v0.5.0
+        > SimpleAmqpClient V2.4
 
 IMPORTANT NOTE: If you are building using Microsoft Windows and Microsoft Visual Studio 2010, you only need to follow steps:
 
@@ -40,15 +40,15 @@ Almost all of the C++ libraries constructed in this API require Boost. Once you 
     2. Make sure you define your BOOST root directory path variable (see BOOST instruction set)
           
           
-Building rabbitmq-c-v0.3.0
+Building rabbitmq-c-v0.5.0
 --------------------------
 Dependencies: NONE.
 
-A copy of the rabbitmq-c-v0.3.0 source can be found in the following directory:
+A copy of the rabbitmq-c-v0.5.0 source can be found in the following directory:
 
-  <ECC API root>/extensions/cppClientAPI/amqpAPI/rabbitmq-c-v0.3.0
+  <ECC API root>/extensions/cppClientAPI/amqpAPI/rabbitmq
     
-Instructions on how to use cmake in conjunction with your platform compiler is provided in the README files within this folder. Having successfully compiled rabbitmq-c-v0.3.0 you should have release/debug version of the following binaries:
+Instructions on how to use cmake in conjunction with your platform compiler is provided in the README files within this folder. Having successfully compiled rabbitmq-c-v0.5.0 you should have release/debug version of the following binaries:
 
   * rabbitmq.lib (or equivalent library file)
   * rabbitmq.exp (or equivalent library export definition file)
@@ -59,17 +59,17 @@ SimpleAmqpClient
 ----------------
 Dependencies:
   * BOOST
-  * rabbitmq-c-v0.3.0
+  * rabbitmq-c-v0.5.0
   
 A copy of the SimpleAmqpClient source can be found in the following directory:
 
-  <ECC API root>/extensions/cppClientAPI/amqpAPI/rabbit-c-wrapper
+  <ECC API root>/extensions/cppClientAPI/amqpAPI/simpleamqpclient
     
 Instructions on how to use cmake in conjunction with your platform compiler is provided in the README files within this folder. Having successfully compiled SimpleAmqpClient you should have release/debug version of the following binaries:
 
-  * SimpleAmqpClient.lib (or equivalent library file)
-  * SimpleAmqpClient.exp (or equivalent library export definition file)
-  * SimpleAmqpClient.dll (or equivalent dynamic library executable)
+  * simpleamqpclient.lib (or equivalent library file)
+  * simpleamqpclient.exp (or equivalent library export definition file)
+  * simpleamqpclient.dll (or equivalent dynamic library executable)
 
   
 C++ ECC API libraries
@@ -102,7 +102,7 @@ ECC library: amqp-Impl
 ----------------------
 Dependencies:
     * BOOST
-    * rabbitmq-c-v0.3.0
+    * rabbitmq-c-v0.5.0
     * SimpleAmqpClient
     * eccCodeUtils
     

@@ -67,7 +67,8 @@ public:
         * @param channel         - A properly configured AMQP channel
         * @param createProviders - Set a 'false' to act as a user
         */
-      EMInterfaceFactory( ecc_amqpAPI_impl::AMQPBasicChannel::ptr_t channel, 
+      EMInterfaceFactory( ecc_amqpAPI_impl::AMQPBasicChannel::ptr_t inChannel,
+                          ecc_amqpAPI_impl::AMQPBasicChannel::ptr_t outChannel,
                           bool                                      createProviders );
 
       virtual ~EMInterfaceFactory();
@@ -175,7 +176,8 @@ public:
 private:
 
     ecc_amqpAPI_impl::AMQPBasicSubscriptionService::ptr_t amqpSubscriptService;
-    ecc_amqpAPI_impl::AMQPBasicChannel::ptr_t             amqpChannel;
+    ecc_amqpAPI_impl::AMQPBasicChannel::ptr_t             inAMQPChannel;
+    ecc_amqpAPI_impl::AMQPBasicChannel::ptr_t             outAMQPChannel;
     bool                                                  generateProviders;
 };
 
