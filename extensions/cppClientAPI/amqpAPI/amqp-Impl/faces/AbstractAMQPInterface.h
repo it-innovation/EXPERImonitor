@@ -53,19 +53,21 @@ namespace ecc_amqpAPI_impl
   protected:
 
     AbstractAMQPInterface( AMQPBasicSubscriptionService::ptr_t sService,
-                           AMQPBasicChannel::ptr_t             channel );
+                           AMQPBasicChannel::ptr_t             inChannel,
+                           AMQPBasicChannel::ptr_t             outChannel );
 
     virtual ~AbstractAMQPInterface();
 
     virtual void createInterfaceExchangeNames( const String& iName );
 
-    virtual void createQueue();
+    virtual void createQueue( const bool& inChannel );
   
-    virtual void createSubscriptionComponent();
+    virtual void createSubscriptionComponent( const bool& inChannel );
 
     virtual void assignBindings();
 
-    AMQPBasicChannel::ptr_t    amqpChannel;
+    AMQPBasicChannel::ptr_t    inAMQPChannel;
+    AMQPBasicChannel::ptr_t    outAMQPChannel;
     AMQPMessageDispatch::ptr_t msgDispatch;
 
     String interfaceName;

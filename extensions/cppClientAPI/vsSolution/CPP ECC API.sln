@@ -4,6 +4,7 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "amqp-Impl", "..\amqpAPI\amqp-Impl\amqp-Impl.vcxproj", "{1D6A315E-6BA5-4953-8C2B-50584E592CD4}"
 	ProjectSection(ProjectDependencies) = postProject
 		{B11CDE60-E353-49C9-BFD9-A2E1FBABE77A} = {B11CDE60-E353-49C9-BFD9-A2E1FBABE77A}
+		{383DC863-4396-485F-8AD7-401C3A60643D} = {383DC863-4396-485F-8AD7-401C3A60643D}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "eccCodeUtils", "..\eccCodeUtils\eccCodeUtils.vcxproj", "{B11CDE60-E353-49C9-BFD9-A2E1FBABE77A}"
@@ -20,17 +21,12 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "eccEMClient-Impl", "..\eccE
 		{CC4FDC88-4273-4477-B895-A943D974BC27} = {CC4FDC88-4273-4477-B895-A943D974BC27}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rabbitmq", "..\amqpAPI\rabbitmq-VS2010\rabbitmq\rabbitmq.vcxproj", "{F63F0630-9DAA-40FA-95AF-54F04CE55B94}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rabbitmqLibraryTest", "..\amqpAPI\rabbitmq-VS2010\rabbitmqLibraryTest\rabbitmqLibraryTest.vcxproj", "{D563FE5C-B922-497F-9600-26D2444787EC}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SimpleAmqpClient", "..\amqpAPI\simpleamqpclient\SimpleAmqpClient.vcxproj", "{383DC863-4396-485F-8AD7-401C3A60643D}"
 	ProjectSection(ProjectDependencies) = postProject
-		{E4B8BC96-AB6C-4E2A-9863-848D2E9EF2A1} = {E4B8BC96-AB6C-4E2A-9863-848D2E9EF2A1}
+		{05048E6B-74F9-4AAB-8D3F-E319F88580A9} = {05048E6B-74F9-4AAB-8D3F-E319F88580A9}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SimpleAmqpClient", "..\amqpAPI\rabbitmq-VS2010\simpleAmqpClient\SimpleAmqpClient.vcxproj", "{E4B8BC96-AB6C-4E2A-9863-848D2E9EF2A1}"
-	ProjectSection(ProjectDependencies) = postProject
-		{F63F0630-9DAA-40FA-95AF-54F04CE55B94} = {F63F0630-9DAA-40FA-95AF-54F04CE55B94}
-	EndProjectSection
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rabbitmq", "..\amqpAPI\rabbitmq\rabbitmq.vcxproj", "{05048E6B-74F9-4AAB-8D3F-E319F88580A9}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BasicCPPClient", "..\..\..\samples\basicCPPClient\BasicCPPClient.vcxproj", "{81CA79C8-9B24-4E0A-B735-F3C37872D203}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -72,24 +68,22 @@ Global
 		{F1989404-6D1A-4105-B882-30DC481BBF2A}.Release|Win32.ActiveCfg = Release|Win32
 		{F1989404-6D1A-4105-B882-30DC481BBF2A}.Release|Win32.Build.0 = Release|Win32
 		{F1989404-6D1A-4105-B882-30DC481BBF2A}.RelWithDebInfo|Win32.ActiveCfg = Release|Win32
-		{F63F0630-9DAA-40FA-95AF-54F04CE55B94}.Debug|Win32.ActiveCfg = Debug|Win32
-		{F63F0630-9DAA-40FA-95AF-54F04CE55B94}.Debug|Win32.Build.0 = Debug|Win32
-		{F63F0630-9DAA-40FA-95AF-54F04CE55B94}.MinSizeRel|Win32.ActiveCfg = MinSizeRel|Win32
-		{F63F0630-9DAA-40FA-95AF-54F04CE55B94}.Release|Win32.ActiveCfg = Release|Win32
-		{F63F0630-9DAA-40FA-95AF-54F04CE55B94}.Release|Win32.Build.0 = Release|Win32
-		{F63F0630-9DAA-40FA-95AF-54F04CE55B94}.RelWithDebInfo|Win32.ActiveCfg = RelWithDebInfo|Win32
-		{D563FE5C-B922-497F-9600-26D2444787EC}.Debug|Win32.ActiveCfg = Debug|Win32
-		{D563FE5C-B922-497F-9600-26D2444787EC}.Debug|Win32.Build.0 = Debug|Win32
-		{D563FE5C-B922-497F-9600-26D2444787EC}.MinSizeRel|Win32.ActiveCfg = Release|Win32
-		{D563FE5C-B922-497F-9600-26D2444787EC}.Release|Win32.ActiveCfg = Release|Win32
-		{D563FE5C-B922-497F-9600-26D2444787EC}.Release|Win32.Build.0 = Release|Win32
-		{D563FE5C-B922-497F-9600-26D2444787EC}.RelWithDebInfo|Win32.ActiveCfg = Release|Win32
-		{E4B8BC96-AB6C-4E2A-9863-848D2E9EF2A1}.Debug|Win32.ActiveCfg = Debug|Win32
-		{E4B8BC96-AB6C-4E2A-9863-848D2E9EF2A1}.Debug|Win32.Build.0 = Debug|Win32
-		{E4B8BC96-AB6C-4E2A-9863-848D2E9EF2A1}.MinSizeRel|Win32.ActiveCfg = MinSizeRel|Win32
-		{E4B8BC96-AB6C-4E2A-9863-848D2E9EF2A1}.Release|Win32.ActiveCfg = Release|Win32
-		{E4B8BC96-AB6C-4E2A-9863-848D2E9EF2A1}.Release|Win32.Build.0 = Release|Win32
-		{E4B8BC96-AB6C-4E2A-9863-848D2E9EF2A1}.RelWithDebInfo|Win32.ActiveCfg = RelWithDebInfo|Win32
+		{383DC863-4396-485F-8AD7-401C3A60643D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{383DC863-4396-485F-8AD7-401C3A60643D}.Debug|Win32.Build.0 = Debug|Win32
+		{383DC863-4396-485F-8AD7-401C3A60643D}.MinSizeRel|Win32.ActiveCfg = MinSizeRel|Win32
+		{383DC863-4396-485F-8AD7-401C3A60643D}.MinSizeRel|Win32.Build.0 = MinSizeRel|Win32
+		{383DC863-4396-485F-8AD7-401C3A60643D}.Release|Win32.ActiveCfg = Release|Win32
+		{383DC863-4396-485F-8AD7-401C3A60643D}.Release|Win32.Build.0 = Release|Win32
+		{383DC863-4396-485F-8AD7-401C3A60643D}.RelWithDebInfo|Win32.ActiveCfg = RelWithDebInfo|Win32
+		{383DC863-4396-485F-8AD7-401C3A60643D}.RelWithDebInfo|Win32.Build.0 = RelWithDebInfo|Win32
+		{05048E6B-74F9-4AAB-8D3F-E319F88580A9}.Debug|Win32.ActiveCfg = Debug|Win32
+		{05048E6B-74F9-4AAB-8D3F-E319F88580A9}.Debug|Win32.Build.0 = Debug|Win32
+		{05048E6B-74F9-4AAB-8D3F-E319F88580A9}.MinSizeRel|Win32.ActiveCfg = MinSizeRel|Win32
+		{05048E6B-74F9-4AAB-8D3F-E319F88580A9}.MinSizeRel|Win32.Build.0 = MinSizeRel|Win32
+		{05048E6B-74F9-4AAB-8D3F-E319F88580A9}.Release|Win32.ActiveCfg = Release|Win32
+		{05048E6B-74F9-4AAB-8D3F-E319F88580A9}.Release|Win32.Build.0 = Release|Win32
+		{05048E6B-74F9-4AAB-8D3F-E319F88580A9}.RelWithDebInfo|Win32.ActiveCfg = RelWithDebInfo|Win32
+		{05048E6B-74F9-4AAB-8D3F-E319F88580A9}.RelWithDebInfo|Win32.Build.0 = RelWithDebInfo|Win32
 		{81CA79C8-9B24-4E0A-B735-F3C37872D203}.Debug|Win32.ActiveCfg = Debug|Win32
 		{81CA79C8-9B24-4E0A-B735-F3C37872D203}.Debug|Win32.Build.0 = Debug|Win32
 		{81CA79C8-9B24-4E0A-B735-F3C37872D203}.MinSizeRel|Win32.ActiveCfg = Release|Win32

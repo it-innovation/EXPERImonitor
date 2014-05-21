@@ -45,33 +45,42 @@ void AbstractAMQPInterface::shutdown()
   if ( subscriptService && subProcessor ) 
     subscriptService->unsubscribe( subProcessor->getProcessorID() );
 
-  if ( amqpChannel )
+  // Clear up subscription queue, if it exists
+  if ( inAMQPChannel )
   {
-    // Clear up queue, if it exists
     if ( !subListenQueue.empty() )
     {
-      AmqpClient::Channel::ptr_t channelImpl = amqpChannel->getChannelImpl();
+      AmqpClient::Channel::ptr_t channelImpl = inAMQPChannel->getChannelImpl();
       if ( channelImpl )
       {
-        channelImpl->DeleteQueue( toNarrow(subListenQueue) );
-                  
+        // Do not delete queue here; it will be automatically deleted when the channel is released
         subProcessor     = NULL;
         subscriptService = NULL;
         msgDispatch      = NULL;
       }
     }
-
-    // Tidy up (channel is managed elsewhere)
-    interfaceName.clear();
-    providerExchangeName.clear();
-    userExchangeName.clear();
-    providerQueueName.clear();
-    userQueueName.clear();
-    providerRoutingKey.clear();
-    userRoutingKey.clear();
-    subListenQueue.clear();
-    interfaceReady = false;
   }
+
+  // Clear up out-going queue, if it exists
+  if ( outAMQPChannel )
+  {
+    AmqpClient::Channel::ptr_t channelImpl = outAMQPChannel->getChannelImpl();
+    
+    if ( channelImpl )
+        channelImpl->DeleteQueue( toNarrow(subListenQueue) );
+  }
+
+  // Tidy up (channels are managed elsewhere)
+  interfaceName.clear();
+  providerExchangeName.clear();
+  userExchangeName.clear();
+  providerQueueName.clear();
+  userQueueName.clear();
+  providerRoutingKey.clear();
+  userRoutingKey.clear();
+  subListenQueue.clear();
+
+  interfaceReady = false;
 }
   
 bool AbstractAMQPInterface::sendBasicMessage( const String& message )
@@ -92,7 +101,7 @@ bool AbstractAMQPInterface::sendBasicMessage( const String& message )
     wstring& targetRouteKey = actingAsProvider ? userRoutingKey   : providerRoutingKey;
           
 
-    AmqpClient::Channel::ptr_t channelImpl = amqpChannel->getChannelImpl();
+    AmqpClient::Channel::ptr_t channelImpl = outAMQPChannel->getChannelImpl();
     if ( channelImpl )
     {
       BasicMessage::ptr_t bMsg = BasicMessage::Create( toNarrow(message) );
@@ -119,11 +128,13 @@ AMQPMessageDispatch::ptr_t AbstractAMQPInterface::getMessageDispatch()
 
 // Protected methods ---------------------------------------------------------
 AbstractAMQPInterface::AbstractAMQPInterface( AMQPBasicSubscriptionService::ptr_t sService,
-                                              AMQPBasicChannel::ptr_t             channel )
+                                              AMQPBasicChannel::ptr_t             inChannel,
+                                              AMQPBasicChannel::ptr_t             outChannel )
 : interfaceReady(false), actingAsProvider(false)
 {
   subscriptService = sService;
-  amqpChannel      = channel;
+  inAMQPChannel    = inChannel;
+  outAMQPChannel   = outChannel;
 }
 
 AbstractAMQPInterface::~AbstractAMQPInterface()
@@ -137,14 +148,15 @@ void AbstractAMQPInterface::createInterfaceExchangeNames( const String& iName )
   userExchangeName     = iName + L" [U]";
 }
 
-void AbstractAMQPInterface::createQueue()
+void AbstractAMQPInterface::createQueue( const bool& inChannel )
 {
   assignBindings();
 
   wstring targetExchange = actingAsProvider ? providerExchangeName : userExchangeName;
   wstring targetRouteKey = actingAsProvider ? providerRoutingKey   : userRoutingKey;
 
-  AmqpClient::Channel::ptr_t channelImpl = amqpChannel->getChannelImpl();
+  AmqpClient::Channel::ptr_t channelImpl = inChannel ? inAMQPChannel->getChannelImpl() :
+                                                       outAMQPChannel->getChannelImpl();
   if ( channelImpl )
     try
     {
@@ -160,14 +172,14 @@ void AbstractAMQPInterface::createQueue()
                  
     }
     catch ( AmqpException& ae )
-    {
-      // amqpIntLogger.error( "Could not create AMQP queue: " + ae.what );
-    }
+    { throw ae.what(); }
 }
   
-void AbstractAMQPInterface::createSubscriptionComponent()
+void AbstractAMQPInterface::createSubscriptionComponent( const bool& inChannel )
 {
-  AmqpClient::Channel::ptr_t channelImpl = amqpChannel->getChannelImpl();
+  AmqpClient::Channel::ptr_t channelImpl = inChannel ? inAMQPChannel->getChannelImpl() :
+                                                       outAMQPChannel->getChannelImpl();
+
   if ( channelImpl )
   {
     subProcessor = AMQPBasicSubscriptionProcessor::ptr_t(
@@ -178,7 +190,6 @@ void AbstractAMQPInterface::createSubscriptionComponent()
 
     subProcessor->initialiseSubscription();
   }
-  //else amqpIntLogger.error( "Could not create subscription component: AMQP channel is NULL" );
 }
 
 void AbstractAMQPInterface::assignBindings()

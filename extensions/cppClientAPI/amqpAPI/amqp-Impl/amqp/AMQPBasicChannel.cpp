@@ -34,43 +34,6 @@ using namespace AmqpClient;
 
 namespace ecc_amqpAPI_impl
 {
-
-  bool AMQPBasicChannel::amqpQueueExists( AMQPConnectionFactory::ptr_t conFactory, const String& queueName )
-  {
-    // Safety first
-		if ( !conFactory ) throw L"Could not test amqp queue: amqp connection factory is null";
-    if ( queueName.length() == 0 ) throw L"Could not test amqp queue: queue name is empty";
-		if ( !conFactory->isConnectionValid() ) throw L"Could not test amqp queue: factory connection is invalid";
-		
-		// Need to create an independent connection & channel to test for a queue -
-		// a negative result automatically closes a channel.
-    AMQPBasicChannel::ptr_t bc = conFactory->createNewChannel();
-		Channel::ptr_t channelImpl = bc->getChannelImpl();
-		
-		bool result = false;
-		String resultInfo = L"AMQP queue ( " + queueName + L") existence result: ";
-		
-		if ( channelImpl )
-		{
-			// Try passively declaring the queue to see if it exists
-			try
-			{
-        channelImpl->DeclareQueue( toNarrow(queueName), true, false, false, true ); 
-				result = true;
-				resultInfo += L"exists";
-			}
-			catch ( AmqpException& ae )
-			{ 
-				resultInfo += L"does not exist";
-				// Channel will be automatically closed in this case
-			}
-
-      channelImpl.reset();
-		}
-		else resultInfo += L" could not test: channel is null or closed";
-		
-		return result;
-  }
  
   AMQPBasicChannel::AMQPBasicChannel( Channel::ptr_t channel  )
     : channelOpen( false )

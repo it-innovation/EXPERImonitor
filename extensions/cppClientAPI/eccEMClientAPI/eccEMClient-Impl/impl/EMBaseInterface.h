@@ -46,7 +46,8 @@ public:
   typedef boost::shared_ptr<EMBaseInterface> ptr_t;
 
   EMBaseInterface( ecc_amqpAPI_impl::AMQPBasicSubscriptionService::ptr_t service,
-                   ecc_amqpAPI_impl::AMQPBasicChannel::ptr_t             channel, 
+                   ecc_amqpAPI_impl::AMQPBasicChannel::ptr_t             inChannel,
+                   ecc_amqpAPI_impl::AMQPBasicChannel::ptr_t             outChannel,
                    const bool                                            asProvider );
 
   virtual ~EMBaseInterface();
@@ -77,7 +78,8 @@ protected:
   bool   isProvider;
   
   ecc_amqpAPI_impl::AMQPBasicSubscriptionService::ptr_t amqpSubscriptService;
-  ecc_amqpAPI_impl::AMQPBasicChannel::ptr_t             amqpChannel;
+  ecc_amqpAPI_impl::AMQPBasicChannel::ptr_t             inAMQPChannel;
+  ecc_amqpAPI_impl::AMQPBasicChannel::ptr_t             outAMQPChannel;
   ecc_amqpAPI_impl::AbstractAMQPInterface::ptr_t        amqpInterface;
   UUID                                                  interfaceUserID;
   UUID                                                  interfaceProviderID;

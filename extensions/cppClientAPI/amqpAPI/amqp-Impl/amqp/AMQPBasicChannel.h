@@ -27,23 +27,17 @@
 
 #include <SimpleAmqpClient/SimpleAmqpClient.h>
 
-#include "AMQPConnectionFactory.h"
 
 
 
 namespace ecc_amqpAPI_impl
 {
-  // Forward declarations
-  class AMQPConnectionFactory;
-
 
   class AMQPBasicChannel
   {
   public:
 
     typedef boost::shared_ptr<AMQPBasicChannel> ptr_t;
-
-    static bool amqpQueueExists( boost::shared_ptr<AMQPConnectionFactory> conFactory, const String& queueName );
 
     AMQPBasicChannel( AmqpClient::Channel::ptr_t channel );
 

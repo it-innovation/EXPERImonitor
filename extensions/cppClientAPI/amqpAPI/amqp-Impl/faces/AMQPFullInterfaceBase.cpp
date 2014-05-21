@@ -36,8 +36,9 @@ namespace ecc_amqpAPI_impl
 {
 
   AMQPFullInterfaceBase::AMQPFullInterfaceBase( AMQPBasicSubscriptionService::ptr_t sService,
-                                                AMQPBasicChannel::ptr_t             channel )
-    : AbstractAMQPInterface( sService, channel )
+                                                AMQPBasicChannel::ptr_t             inChannel,
+                                                AMQPBasicChannel::ptr_t             outChannel )
+    : AbstractAMQPInterface( sService, inChannel, outChannel )
   {
   }
 
@@ -57,16 +58,21 @@ namespace ecc_amqpAPI_impl
         return false;
       
     // Get RabbitMQ channel
-    AmqpClient::Channel::ptr_t channelImpl = amqpChannel->getChannelImpl();
+    AmqpClient::Channel::ptr_t channelImpl = outAMQPChannel->getChannelImpl();
+
     if ( channelImpl )
     {      
-      // Declare the appropriate exchanges (direct, non-auto delete, non-durable)
-      channelImpl->DeclareExchange( toNarrow(providerExchangeName) );
-      channelImpl->DeclareExchange( toNarrow(userExchangeName) );
+      // Declare the appropriate exchange
+      if ( actingAsProvider )
+        // Exchange type: direct, non-auto delete, non durable
+        channelImpl->DeclareExchange( toNarrow(providerExchangeName) );
+      else
+        // Exchange type: direct, non-auto delete, non durable
+        channelImpl->DeclareExchange( toNarrow(userExchangeName) );
       
       // Create queue and subscription
-      createQueue();
-      createSubscriptionComponent();
+      createQueue( false );                 // Out channel for out-going
+      createSubscriptionComponent( true );  // In channel for subscription
 
       // Finished
       interfaceReady = true;
@@ -82,7 +88,7 @@ namespace ecc_amqpAPI_impl
                                              const bool     asProvider )
   {
     // Safety first
-    if ( iName.empty() || !amqpChannel ) return false;
+    if ( iName.empty() || !inAMQPChannel || !outAMQPChannel ) return false;
       
     createInterfaceExchangeNames( iName );
       

@@ -45,7 +45,8 @@ public:
   typedef boost::shared_ptr<EMDiscovery> ptr_t;
   
   EMDiscovery( ecc_amqpAPI_impl::AMQPBasicSubscriptionService::ptr_t sService,
-               ecc_amqpAPI_impl::AMQPBasicChannel::ptr_t             channel,
+               ecc_amqpAPI_impl::AMQPBasicChannel::ptr_t             inChannel,
+               ecc_amqpAPI_impl::AMQPBasicChannel::ptr_t             outChannel,
                ecc_amqpAPI_impl::AMQPMessageDispatch::ptr_t          dispatch,
                const UUID&                                           providerID,
                const UUID&                                           userID,
