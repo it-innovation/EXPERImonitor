@@ -23,6 +23,7 @@
         <ecc.slf4j.version>1.7.6</ecc.slf4j.version>
         <ecc.gson.version>2.2.2</ecc.gson.version>
         <ecc.surefire.version>2.12.4</ecc.surefire.version>
+		<ecc.owlimstore.version>1.1-SNAPSHOT</ecc.owlimstore.version>
     </properties>
 
   
@@ -288,6 +289,11 @@
       <id>central</id>
       <url>http://repo1.maven.org/maven2/</url>
     </repository>
+	
+	<repository>
+		<id>uk.ac.soton.itinnovation</id>
+		<url>http://repo.it-innovation.soton.ac.uk/maven2/release/</url>
+	</repository>
 		
   </repositories>
 
@@ -300,7 +306,6 @@
       <module>edm</module>
       <module>samples</module>
       <module>eccService</module>
-      <module>OWLimProvStore/trunk</module>
   </modules>
 
 

@@ -1,291 +1,102 @@
 <?xml version="1.0"?>
-
-
-<!DOCTYPE rdf:RDF [
-    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
-    <!ENTITY swrl "http://www.w3.org/2003/11/swrl#" >
-    <!ENTITY swrlb "http://www.w3.org/2003/11/swrlb#" >
-    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
-    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
-    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
-    <!ENTITY experimedia "http://it-innovation.soton.ac.uk/ontologies/experimedia#" >
-]>
-
-
-<rdf:RDF xmlns="http://it-innovation.soton.ac.uk/ontologies/experimedia#"
-     xml:base="http://it-innovation.soton.ac.uk/ontologies/experimedia"
-     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
-     xmlns:swrl="http://www.w3.org/2003/11/swrl#"
-     xmlns:owl="http://www.w3.org/2002/07/owl#"
-     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
-     xmlns:swrlb="http://www.w3.org/2003/11/swrlb#"
-     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-     xmlns:experimedia="http://it-innovation.soton.ac.uk/ontologies/experimedia#">
-    <owl:Ontology rdf:about="http://it-innovation.soton.ac.uk/ontologies/experimedia#">
-        <rdfs:comment>The EXPERIMEDIA ontology</rdfs:comment>
-    </owl:Ontology>
-    
-
-
-    <!-- 
-    ///////////////////////////////////////////////////////////////////////////////////////
-    //
-    // Object Properties
-    //
-    ///////////////////////////////////////////////////////////////////////////////////////
-     -->
-
-    
-
-
-    <!-- http://it-innovation.soton.ac.uk/ontologies/experimedia#executes -->
-
-    <owl:ObjectProperty rdf:about="&experimedia;executes">
-        <rdf:type rdf:resource="&owl;InverseFunctionalProperty"/>
-        <rdfs:range rdf:resource="&experimedia;Plugin"/>
-        <rdfs:domain rdf:resource="&experimedia;Service"/>
-    </owl:ObjectProperty>
-    
-
-
-    <!-- http://it-innovation.soton.ac.uk/ontologies/experimedia#hasMetric -->
-
-    <owl:ObjectProperty rdf:about="&experimedia;hasMetric">
-        <rdfs:domain rdf:resource="&experimedia;ECCMonitoringMessage"/>
-        <rdfs:range rdf:resource="&experimedia;Metric"/>
-    </owl:ObjectProperty>
-    
-
-
-    <!-- http://it-innovation.soton.ac.uk/ontologies/experimedia#hasType -->
-
-    <owl:ObjectProperty rdf:about="&experimedia;hasType">
-        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:domain rdf:resource="&experimedia;Metric"/>
-        <rdfs:range rdf:resource="&experimedia;MetricType"/>
-    </owl:ObjectProperty>
-    
-
-
-    <!-- http://it-innovation.soton.ac.uk/ontologies/experimedia#hasUnit -->
-
-    <owl:ObjectProperty rdf:about="&experimedia;hasUnit">
-        <rdf:type rdf:resource="&owl;FunctionalProperty"/>
-        <rdfs:domain rdf:resource="&experimedia;Metric"/>
-        <rdfs:range rdf:resource="&experimedia;Unit"/>
-    </owl:ObjectProperty>
-    
-
-
-    <!-- http://it-innovation.soton.ac.uk/ontologies/experimedia#sends -->
-
-    <owl:ObjectProperty rdf:about="&experimedia;sends">
-        <rdf:type rdf:resource="&owl;InverseFunctionalProperty"/>
-        <rdfs:range rdf:resource="&experimedia;ECCMonitoringMessage"/>
-        <rdfs:domain rdf:resource="&experimedia;Plugin"/>
-    </owl:ObjectProperty>
-    
-
-
-    <!-- 
-    ///////////////////////////////////////////////////////////////////////////////////////
-    //
-    // Data properties
-    //
-    ///////////////////////////////////////////////////////////////////////////////////////
-     -->
-
-    
-
-
-    <!-- http://it-innovation.soton.ac.uk/ontologies/experimedia#hasUUID -->
-
-    <owl:DatatypeProperty rdf:about="&experimedia;hasUUID">
-        <rdfs:domain rdf:resource="&experimedia;Entity"/>
-    </owl:DatatypeProperty>
-    
-
-
-    <!-- http://it-innovation.soton.ac.uk/ontologies/experimedia#hasValue -->
-
-    <owl:DatatypeProperty rdf:about="&experimedia;hasValue"/>
-    
-
-
-    <!-- 
-    ///////////////////////////////////////////////////////////////////////////////////////
-    //
-    // Classes
-    //
-    ///////////////////////////////////////////////////////////////////////////////////////
-     -->
-
-    
-
-
-    <!-- http://it-innovation.soton.ac.uk/ontologies/experimedia#Device -->
-
-    <owl:Class rdf:about="&experimedia;Device"/>
-    
-
-
-    <!-- http://it-innovation.soton.ac.uk/ontologies/experimedia#ECCMonitoringMessage -->
-
-    <owl:Class rdf:about="&experimedia;ECCMonitoringMessage"/>
-    
-
-
-    <!-- http://it-innovation.soton.ac.uk/ontologies/experimedia#Entity -->
-
-    <owl:Class rdf:about="&experimedia;Entity">
-        <owl:disjointWith rdf:resource="&experimedia;ValuePartition"/>
-    </owl:Class>
-    
-
-
-    <!-- http://it-innovation.soton.ac.uk/ontologies/experimedia#Experiment -->
-
-    <owl:Class rdf:about="&experimedia;Experiment"/>
-    
-
-
-    <!-- http://it-innovation.soton.ac.uk/ontologies/experimedia#Metric -->
-
-    <owl:Class rdf:about="&experimedia;Metric"/>
-    
-
-
-    <!-- http://it-innovation.soton.ac.uk/ontologies/experimedia#MetricType -->
-
-    <owl:Class rdf:about="&experimedia;MetricType">
-        <rdfs:subClassOf rdf:resource="&experimedia;ValuePartition"/>
-    </owl:Class>
-    
-
-
-    <!-- http://it-innovation.soton.ac.uk/ontologies/experimedia#Plugin -->
-
-    <owl:Class rdf:about="&experimedia;Plugin"/>
-    
-
-
-    <!-- http://it-innovation.soton.ac.uk/ontologies/experimedia#Service -->
-
-    <owl:Class rdf:about="&experimedia;Service"/>
-    
-
-
-    <!-- http://it-innovation.soton.ac.uk/ontologies/experimedia#Unit -->
-
-    <owl:Class rdf:about="&experimedia;Unit">
-        <rdfs:subClassOf rdf:resource="&experimedia;ValuePartition"/>
-    </owl:Class>
-    
-
-
-    <!-- http://it-innovation.soton.ac.uk/ontologies/experimedia#UnitMetric -->
-
-    <owl:Class rdf:about="&experimedia;UnitMetric">
-        <owl:equivalentClass>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="&experimedia;hasUnit"/>
-                <owl:onClass rdf:resource="&experimedia;Unit"/>
-                <owl:minQualifiedCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minQualifiedCardinality>
-            </owl:Restriction>
-        </owl:equivalentClass>
-    </owl:Class>
-    
-
-
-    <!-- http://it-innovation.soton.ac.uk/ontologies/experimedia#User -->
-
-    <owl:Class rdf:about="&experimedia;User"/>
-    
-
-
-    <!-- http://it-innovation.soton.ac.uk/ontologies/experimedia#ValuePartition -->
-
-    <owl:Class rdf:about="&experimedia;ValuePartition"/>
-    
-
-
-    <!-- 
-    ///////////////////////////////////////////////////////////////////////////////////////
-    //
-    // Individuals
-    //
-    ///////////////////////////////////////////////////////////////////////////////////////
-     -->
-
-    
-
-
-    <!-- http://it-innovation.soton.ac.uk/ontologies/experimedia#MetricWithUnit -->
-
-    <owl:NamedIndividual rdf:about="&experimedia;MetricWithUnit">
-        <rdf:type rdf:resource="&experimedia;Metric"/>
-        <hasValue>1</hasValue>
-        <hasUnit rdf:resource="&experimedia;kg"/>
-    </owl:NamedIndividual>
-    
-
-
-    <!-- http://it-innovation.soton.ac.uk/ontologies/experimedia#MetricWithoutUnit -->
-
-    <owl:NamedIndividual rdf:about="&experimedia;MetricWithoutUnit">
-        <rdf:type rdf:resource="&experimedia;Metric"/>
-    </owl:NamedIndividual>
-    
-
-
-    <!-- http://it-innovation.soton.ac.uk/ontologies/experimedia#kg -->
-
-    <owl:NamedIndividual rdf:about="&experimedia;kg">
-        <rdf:type rdf:resource="&experimedia;Unit"/>
-    </owl:NamedIndividual>
-    
-
-
-    <!-- http://it-innovation.soton.ac.uk/ontologies/experimedia#m -->
-
-    <owl:NamedIndividual rdf:about="&experimedia;m">
-        <rdf:type rdf:resource="&experimedia;Unit"/>
-    </owl:NamedIndividual>
-    
-
-
-    <!-- http://it-innovation.soton.ac.uk/ontologies/experimedia#s -->
-
-    <owl:NamedIndividual rdf:about="&experimedia;s">
-        <rdf:type rdf:resource="&experimedia;Unit"/>
-    </owl:NamedIndividual>
-    
-
-
-    <!-- 
-    ///////////////////////////////////////////////////////////////////////////////////////
-    //
-    // General axioms
-    //
-    ///////////////////////////////////////////////////////////////////////////////////////
-     -->
-
-    <rdf:Description>
-        <rdf:type rdf:resource="&owl;AllDisjointClasses"/>
-        <owl:members rdf:parseType="Collection">
-            <rdf:Description rdf:about="&experimedia;Device"/>
-            <rdf:Description rdf:about="&experimedia;ECCMonitoringMessage"/>
-            <rdf:Description rdf:about="&experimedia;Experiment"/>
-            <rdf:Description rdf:about="&experimedia;Metric"/>
-            <rdf:Description rdf:about="&experimedia;Plugin"/>
-            <rdf:Description rdf:about="&experimedia;Service"/>
-            <rdf:Description rdf:about="&experimedia;User"/>
-            <rdf:Description rdf:about="&experimedia;ValuePartition"/>
-        </owl:members>
-    </rdf:Description>
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+    xmlns:experimedia="http://it-innovation.soton.ac.uk/ontologies/experimedia#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://it-innovation.soton.ac.uk/ontologies/experimedia">
+  <owl:Ontology rdf:about=""/>
+  <owl:Class rdf:ID="Experiment"/>
+  <owl:Class rdf:ID="Entity">
+    <owl:disjointWith>
+      <owl:Class rdf:ID="ValuePartition"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:ID="ECCMonitoringMessage"/>
+  <owl:Class rdf:ID="Device"/>
+  <owl:Class rdf:ID="Plugin"/>
+  <owl:Class rdf:ID="User"/>
+  <owl:Class rdf:ID="UnitMetric">
+    <owl:equivalentClass>
+      <owl:Restriction>
+        <owl:minQualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger"
+        >1</owl:minQualifiedCardinality>
+        <owl:onClass>
+          <owl:Class rdf:ID="Unit"/>
+        </owl:onClass>
+        <owl:onProperty>
+          <owl:FunctionalProperty rdf:ID="hasUnit"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:about="#Unit">
+    <rdfs:subClassOf rdf:resource="#ValuePartition"/>
+  </owl:Class>
+  <owl:Class rdf:ID="MetricType">
+    <rdfs:subClassOf rdf:resource="#ValuePartition"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Metric"/>
+  <owl:Class rdf:ID="Service"/>
+  <owl:ObjectProperty rdf:ID="hasMetric">
+    <rdfs:range rdf:resource="#Metric"/>
+    <rdfs:domain rdf:resource="#ECCMonitoringMessage"/>
+  </owl:ObjectProperty>
+  <owl:DatatypeProperty rdf:ID="hasUUID">
+    <rdfs:domain rdf:resource="#Entity"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="hasValue"/>
+  <owl:FunctionalProperty rdf:ID="hasType">
+    <rdfs:range rdf:resource="#MetricType"/>
+    <rdfs:domain rdf:resource="#Metric"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+  </owl:FunctionalProperty>
+  <owl:FunctionalProperty rdf:about="#hasUnit">
+    <rdfs:range rdf:resource="#Unit"/>
+    <rdfs:domain rdf:resource="#Metric"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+  </owl:FunctionalProperty>
+  <owl:InverseFunctionalProperty rdf:ID="executes">
+    <rdfs:domain rdf:resource="#Service"/>
+    <rdfs:range rdf:resource="#Plugin"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+  </owl:InverseFunctionalProperty>
+  <owl:InverseFunctionalProperty rdf:ID="sends">
+    <rdfs:domain rdf:resource="#Plugin"/>
+    <rdfs:range rdf:resource="#ECCMonitoringMessage"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+  </owl:InverseFunctionalProperty>
+  <experimedia:Unit rdf:ID="m">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#NamedIndividual"/>
+  </experimedia:Unit>
+  <experimedia:Unit rdf:ID="s">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#NamedIndividual"/>
+  </experimedia:Unit>
+  <experimedia:Metric rdf:ID="MetricWithUnit">
+    <experimedia:hasUnit>
+      <experimedia:Unit rdf:ID="kg">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#NamedIndividual"/>
+      </experimedia:Unit>
+    </experimedia:hasUnit>
+    <experimedia:hasValue>1</experimedia:hasValue>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#NamedIndividual"/>
+  </experimedia:Metric>
+  <experimedia:Metric rdf:ID="MetricWithoutUnit">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#NamedIndividual"/>
+  </experimedia:Metric>
+  <owl:AllDisjointClasses>
+    <owl:members rdf:parseType="Collection">
+      <owl:Class rdf:about="#Device"/>
+      <owl:Class rdf:about="#ECCMonitoringMessage"/>
+      <owl:Class rdf:about="#Experiment"/>
+      <owl:Class rdf:about="#Metric"/>
+      <owl:Class rdf:about="#Plugin"/>
+      <owl:Class rdf:about="#Service"/>
+      <owl:Class rdf:about="#User"/>
+      <owl:Class rdf:about="#ValuePartition"/>
+    </owl:members>
+  </owl:AllDisjointClasses>
 </rdf:RDF>
 
-
-
-<!-- Generated by the OWL API (version 3.4.2) http://owlapi.sourceforge.net -->
-
+<!-- Created with TopBraid -->

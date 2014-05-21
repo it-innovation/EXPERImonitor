@@ -1,265 +1,272 @@
 <?xml version="1.0"?>
-
-
-<!DOCTYPE rdf:RDF [
-    <!ENTITY prov "http://www.w3.org/ns/prov#" >
-    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
-    <!ENTITY swrl "http://www.w3.org/2003/11/swrl#" >
-    <!ENTITY swrlb "http://www.w3.org/2003/11/swrlb#" >
-    <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
-    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
-    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
-]>
-
-
-<rdf:RDF xmlns="http://www.semanticweb.org/sw/ontologies/skiing#"
-     xml:base="http://www.semanticweb.org/sw/ontologies/skiing"
-     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
-     xmlns:prov="http://www.w3.org/ns/prov#"
-     xmlns:swrl="http://www.w3.org/2003/11/swrl#"
-     xmlns:owl="http://www.w3.org/2002/07/owl#"
-     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
-     xmlns:swrlb="http://www.w3.org/2003/11/swrlb#"
-     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-    <owl:Ontology rdf:about="http://www.semanticweb.org/sw/ontologies/skiing"/>
-    
-
-
-    <!-- 
-    ///////////////////////////////////////////////////////////////////////////////////////
-    //
-    // Data properties
-    //
-    ///////////////////////////////////////////////////////////////////////////////////////
-     -->
-
-    
-
-
-    <!-- http://www.w3.org/ns/prov#endedAtTime -->
-
-    <owl:DatatypeProperty rdf:about="&prov;endedAtTime"/>
-    
-
-
-    <!-- http://www.w3.org/ns/prov#startedAtTime -->
-
-    <owl:DatatypeProperty rdf:about="&prov;startedAtTime"/>
-    
-
-
-    <!-- 
-    ///////////////////////////////////////////////////////////////////////////////////////
-    //
-    // Classes
-    //
-    ///////////////////////////////////////////////////////////////////////////////////////
-     -->
-
-    
-
-
-    <!-- http://www.semanticweb.org/sw/ontologies/skiing#FinishActivity -->
-
-    <owl:Class rdf:about="http://www.semanticweb.org/sw/ontologies/skiing#FinishActivity"/>
-    
-
-
-    <!-- http://www.semanticweb.org/sw/ontologies/skiing#SkiingActivity -->
-
-    <owl:Class rdf:about="http://www.semanticweb.org/sw/ontologies/skiing#SkiingActivity"/>
-    
-
-
-    <!-- http://www.semanticweb.org/sw/ontologies/skiing#Skilift -->
-
-    <owl:Class rdf:about="http://www.semanticweb.org/sw/ontologies/skiing#Skilift"/>
-    
-
-
-    <!-- http://www.semanticweb.org/sw/ontologies/skiing#UsingSkiliftActivity -->
-
-    <owl:Class rdf:about="http://www.semanticweb.org/sw/ontologies/skiing#UsingSkiliftActivity"/>
-    
-
-
-    <!-- 
-    ///////////////////////////////////////////////////////////////////////////////////////
-    //
-    // Individuals
-    //
-    ///////////////////////////////////////////////////////////////////////////////////////
-     -->
-
-    
-
-
-    <!-- http://www.semanticweb.org/sw/ontologies/skiing#Finish -->
-
-    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/sw/ontologies/skiing#Finish">
-        <prov:endedAtTime rdf:datatype="&xsd;dateTime">2014-01-09T10:00:00</prov:endedAtTime>
-        <prov:startedAtTime rdf:datatype="&xsd;dateTime">2014-01-09T10:00:00</prov:startedAtTime>
-    </owl:NamedIndividual>
-    
-
-
-    <!-- http://www.semanticweb.org/sw/ontologies/skiing#Skiing1 -->
-
-    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/sw/ontologies/skiing#Skiing1">
-        <prov:startedAtTime rdf:datatype="&xsd;dateTime">2014-01-09T09:10:00</prov:startedAtTime>
-    </owl:NamedIndividual>
-    
-
-
-    <!-- http://www.semanticweb.org/sw/ontologies/skiing#Skiing2 -->
-
-    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/sw/ontologies/skiing#Skiing2">
-        <prov:startedAtTime rdf:datatype="&xsd;dateTime">2014-01-09T09:30:00</prov:startedAtTime>
-    </owl:NamedIndividual>
-    
-
-
-    <!-- http://www.semanticweb.org/sw/ontologies/skiing#UsingSkilift1 -->
-
-    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/sw/ontologies/skiing#UsingSkilift1">
-        <prov:startedAtTime rdf:datatype="&xsd;dateTime">2014-01-09T09:00:00</prov:startedAtTime>
-        <prov:endedAtTime rdf:datatype="&xsd;dateTime">2014-01-09T09:10:00</prov:endedAtTime>
-    </owl:NamedIndividual>
-    
-
-
-    <!-- http://www.semanticweb.org/sw/ontologies/skiing#UsingSkilift2 -->
-
-    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/sw/ontologies/skiing#UsingSkilift2">
-        <prov:startedAtTime rdf:datatype="&xsd;dateTime">2014-01-09T09:30:00</prov:startedAtTime>
-        <prov:endedAtTime rdf:datatype="&xsd;dateTime">2014-01-09T09:40:00</prov:endedAtTime>
-    </owl:NamedIndividual>
-    
-
-
-    <!-- 
-    ///////////////////////////////////////////////////////////////////////////////////////
-    //
-    // Rules
-    //
-    ///////////////////////////////////////////////////////////////////////////////////////
-     -->
-
-    <rdf:Description rdf:about="urn:swrl#sa1">
-        <rdf:type rdf:resource="&swrl;Variable"/>
-    </rdf:Description>
-    <rdf:Description rdf:about="urn:swrl#sla1">
-        <rdf:type rdf:resource="&swrl;Variable"/>
-    </rdf:Description>
-    <rdf:Description rdf:about="urn:swrl#sas1">
-        <rdf:type rdf:resource="&swrl;Variable"/>
-    </rdf:Description>
-    <rdf:Description rdf:about="urn:swrl#s">
-        <rdf:type rdf:resource="&swrl;Variable"/>
-    </rdf:Description>
-    <rdf:Description rdf:about="urn:swrl#f">
-        <rdf:type rdf:resource="&swrl;Variable"/>
-    </rdf:Description>
-    <rdf:Description>
-        <rdf:type rdf:resource="&swrl;Imp"/>
-        <swrl:head>
-            <rdf:Description>
-                <rdf:type rdf:resource="&swrl;AtomList"/>
-                <rdf:rest rdf:resource="&rdf;nil"/>
-                <rdf:first>
-                    <rdf:Description>
-                        <rdf:type rdf:resource="&swrl;DatavaluedPropertyAtom"/>
-                        <swrl:propertyPredicate rdf:resource="&prov;endedAtTime"/>
-                        <swrl:argument1 rdf:resource="urn:swrl#sa1"/>
-                        <swrl:argument2 rdf:resource="urn:swrl#sas1"/>
-                    </rdf:Description>
-                </rdf:first>
-            </rdf:Description>
-        </swrl:head>
-        <swrl:body>
-            <rdf:Description>
-                <rdf:type rdf:resource="&swrl;AtomList"/>
-                <rdf:rest>
-                    <rdf:Description>
-                        <rdf:type rdf:resource="&swrl;AtomList"/>
-                        <rdf:first>
-                            <rdf:Description>
-                                <rdf:type rdf:resource="&swrl;ClassAtom"/>
-                                <swrl:classPredicate rdf:resource="http://www.semanticweb.org/sw/ontologies/skiing#UsingSkiliftActivity"/>
-                                <swrl:argument1 rdf:resource="urn:swrl#sla1"/>
-                            </rdf:Description>
-                        </rdf:first>
-                        <rdf:rest>
-                            <rdf:Description>
-                                <rdf:type rdf:resource="&swrl;AtomList"/>
-                                <rdf:rest>
-                                    <rdf:Description>
-                                        <rdf:type rdf:resource="&swrl;AtomList"/>
-                                        <rdf:rest rdf:resource="&rdf;nil"/>
-                                        <rdf:first>
-                                            <rdf:Description>
-                                                <rdf:type rdf:resource="&swrl;DatavaluedPropertyAtom"/>
-                                                <swrl:propertyPredicate rdf:resource="&prov;startedAtTime"/>
-                                                <swrl:argument1 rdf:resource="urn:swrl#sa1"/>
-                                                <swrl:argument2 rdf:resource="urn:swrl#sas1"/>
-                                            </rdf:Description>
-                                        </rdf:first>
-                                    </rdf:Description>
-                                </rdf:rest>
-                                <rdf:first>
-                                    <rdf:Description>
-                                        <rdf:type rdf:resource="&swrl;DatavaluedPropertyAtom"/>
-                                        <swrl:propertyPredicate rdf:resource="&prov;endedAtTime"/>
-                                        <swrl:argument2 rdf:resource="urn:swrl#sas1"/>
-                                        <swrl:argument1 rdf:resource="urn:swrl#sla1"/>
-                                    </rdf:Description>
-                                </rdf:first>
-                            </rdf:Description>
-                        </rdf:rest>
-                    </rdf:Description>
-                </rdf:rest>
-                <rdf:first>
-                    <rdf:Description>
-                        <rdf:type rdf:resource="&swrl;ClassAtom"/>
-                        <swrl:classPredicate rdf:resource="http://www.semanticweb.org/sw/ontologies/skiing#SkiingActivity"/>
-                        <swrl:argument1 rdf:resource="urn:swrl#sa1"/>
-                    </rdf:Description>
-                </rdf:first>
-            </rdf:Description>
-        </swrl:body>
-    </rdf:Description>
-    <rdf:Description>
-        <rdf:type rdf:resource="&swrl;Imp"/>
-        <swrl:body>
-            <rdf:Description>
-                <rdf:type rdf:resource="&swrl;AtomList"/>
-                <rdf:rest rdf:resource="&rdf;nil"/>
-                <rdf:first>
-                    <rdf:Description>
-                        <rdf:type rdf:resource="&swrl;ClassAtom"/>
-                        <swrl:classPredicate rdf:resource="http://www.semanticweb.org/sw/ontologies/skiing#SkiingActivity"/>
-                        <swrl:argument1 rdf:resource="urn:swrl#s"/>
-                    </rdf:Description>
-                </rdf:first>
-            </rdf:Description>
-        </swrl:body>
-        <swrl:head>
-            <rdf:Description>
-                <rdf:type rdf:resource="&swrl;AtomList"/>
-                <rdf:rest rdf:resource="&rdf;nil"/>
-                <rdf:first>
-                    <rdf:Description>
-                        <rdf:type rdf:resource="&swrl;ClassAtom"/>
-                        <swrl:classPredicate rdf:resource="http://www.semanticweb.org/sw/ontologies/skiing#FinishActivity"/>
-                        <swrl:argument1 rdf:resource="urn:swrl#f"/>
-                    </rdf:Description>
-                </rdf:first>
-            </rdf:Description>
-        </swrl:head>
-    </rdf:Description>
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:spin="http://spinrdf.org/spin#"
+    xmlns:fn="http://www.w3.org/2005/xpath-functions#"
+    xmlns:sp="http://spinrdf.org/sp#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:prov="http://www.w3.org/ns/prov#"
+    xmlns="http://www.semanticweb.org/sw/ontologies/skiing#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xml:base="http://www.semanticweb.org/sw/ontologies/skiing">
+  <owl:Ontology rdf:about="">
+    <owl:imports rdf:resource="http://www.w3.org/ns/prov"/>
+    <owl:imports rdf:resource="http://spinrdf.org/spin"/>
+  </owl:Ontology>
+  <owl:Class rdf:ID="UsingSkiliftActivity">
+    <rdfs:subClassOf rdf:resource="http://www.w3.org/ns/prov#Activity"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Skilift">
+    <rdfs:subClassOf rdf:resource="http://www.w3.org/ns/prov#Entity"/>
+  </owl:Class>
+  <owl:Class rdf:ID="SkiingActivity">
+    <rdfs:subClassOf rdf:resource="http://www.w3.org/ns/prov#Activity"/>
+  </owl:Class>
+  <owl:Class rdf:ID="FinishActivity">
+    <rdfs:subClassOf rdf:resource="http://www.w3.org/ns/prov#Activity"/>
+  </owl:Class>
+  <owl:DatatypeProperty rdf:about="http://www.w3.org/ns/prov#endedAtTime"/>
+  <owl:DatatypeProperty rdf:about="http://www.w3.org/ns/prov#startedAtTime"/>
+  <spin:ConstructTemplate rdf:ID="SkiingExample">
+    <spin:body>
+      <sp:Construct>
+        <sp:templates rdf:parseType="Collection">
+          <rdf:Description>
+            <sp:object rdf:resource="#SkiingActivity"/>
+            <sp:predicate rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"/>
+            <sp:subject rdf:parseType="Resource">
+              <sp:varName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+              >uri</sp:varName>
+            </sp:subject>
+          </rdf:Description>
+          <rdf:Description>
+            <sp:object rdf:parseType="Resource">
+              <sp:varName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+              >t2</sp:varName>
+            </sp:object>
+            <sp:predicate rdf:resource="http://www.w3.org/ns/prov#startedAtTime"/>
+            <sp:subject rdf:parseType="Resource">
+              <sp:varName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+              >uri</sp:varName>
+            </sp:subject>
+          </rdf:Description>
+        </sp:templates>
+        <sp:where rdf:parseType="Collection">
+          <rdf:Description>
+            <sp:object rdf:resource="#Skilift"/>
+            <sp:predicate rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"/>
+            <sp:subject rdf:parseType="Resource">
+              <sp:varName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+              >skilift</sp:varName>
+            </sp:subject>
+          </rdf:Description>
+          <rdf:Description>
+            <sp:object rdf:resource="#UsingSkiliftActivity"/>
+            <sp:predicate rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"/>
+            <sp:subject rdf:parseType="Resource">
+              <sp:varName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+              >activity</sp:varName>
+            </sp:subject>
+          </rdf:Description>
+          <rdf:Description>
+            <sp:object rdf:parseType="Resource">
+              <sp:varName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+              >skilift</sp:varName>
+            </sp:object>
+            <sp:predicate rdf:resource="http://www.w3.org/ns/prov#used"/>
+            <sp:subject rdf:parseType="Resource">
+              <sp:varName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+              >activity</sp:varName>
+            </sp:subject>
+          </rdf:Description>
+          <rdf:Description>
+            <sp:object rdf:resource="http://www.w3.org/ns/prov#Agent"/>
+            <sp:predicate rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"/>
+            <sp:subject rdf:parseType="Resource">
+              <sp:varName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+              >agent</sp:varName>
+            </sp:subject>
+          </rdf:Description>
+          <rdf:Description>
+            <sp:object rdf:parseType="Resource">
+              <sp:varName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+              >agent</sp:varName>
+            </sp:object>
+            <sp:predicate rdf:resource="http://www.w3.org/ns/prov#wasStartedBy"/>
+            <sp:subject rdf:parseType="Resource">
+              <sp:varName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+              >activity</sp:varName>
+            </sp:subject>
+          </rdf:Description>
+          <rdf:Description>
+            <sp:object rdf:parseType="Resource">
+              <sp:varName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+              >t1</sp:varName>
+            </sp:object>
+            <sp:predicate rdf:resource="http://www.w3.org/ns/prov#startedAtTime"/>
+            <sp:subject rdf:parseType="Resource">
+              <sp:varName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+              >activity</sp:varName>
+            </sp:subject>
+          </rdf:Description>
+          <rdf:Description>
+            <sp:object rdf:parseType="Resource">
+              <sp:varName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+              >t2</sp:varName>
+            </sp:object>
+            <sp:predicate rdf:resource="http://www.w3.org/ns/prov#endedAtTime"/>
+            <sp:subject rdf:parseType="Resource">
+              <sp:varName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+              >activity</sp:varName>
+            </sp:subject>
+          </rdf:Description>
+          <sp:Filter>
+            <sp:expression>
+              <sp:notExists>
+                <sp:elements rdf:parseType="Collection">
+                  <rdf:Description>
+                    <sp:object rdf:resource="#SkiingActivity"/>
+                    <sp:predicate rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"/>
+                    <sp:subject rdf:parseType="Resource">
+                      <sp:varName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+                      >x</sp:varName>
+                    </sp:subject>
+                  </rdf:Description>
+                  <rdf:Description>
+                    <sp:object rdf:parseType="Resource">
+                      <sp:varName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+                      >agent</sp:varName>
+                    </sp:object>
+                    <sp:predicate rdf:resource="http://www.w3.org/ns/prov#wasStartedBy"/>
+                    <sp:subject rdf:parseType="Resource">
+                      <sp:varName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+                      >x</sp:varName>
+                    </sp:subject>
+                  </rdf:Description>
+                  <rdf:Description>
+                    <sp:object rdf:parseType="Resource">
+                      <sp:varName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+                      >t2</sp:varName>
+                    </sp:object>
+                    <sp:predicate rdf:resource="http://www.w3.org/ns/prov#startedAtTime"/>
+                    <sp:subject rdf:parseType="Resource">
+                      <sp:varName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+                      >x</sp:varName>
+                    </sp:subject>
+                  </rdf:Description>
+                </sp:elements>
+              </sp:notExists>
+            </sp:expression>
+          </sp:Filter>
+          <sp:Bind>
+            <sp:expression>
+              <fn:concat>
+                <sp:arg1>
+                  <fn:concat>
+                    <sp:arg2>
+                      <sp:rand/>
+                    </sp:arg2>
+                    <sp:arg1>
+                      <fn:concat>
+                        <sp:arg3>-</sp:arg3>
+                        <sp:arg2>
+                          <sp:strafter>
+                            <sp:arg2>#</sp:arg2>
+                            <sp:arg1>
+                              <sp:str>
+                                <sp:arg1 rdf:parseType="Resource">
+                                  <sp:varName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+                                  >skilift</sp:varName>
+                                </sp:arg1>
+                              </sp:str>
+                            </sp:arg1>
+                          </sp:strafter>
+                        </sp:arg2>
+                        <sp:arg1>
+                          <fn:concat>
+                            <sp:arg1>
+                              <fn:concat>
+                                <sp:arg3>-</sp:arg3>
+                                <sp:arg2>
+                                  <sp:strafter>
+                                    <sp:arg2>#</sp:arg2>
+                                    <sp:arg1>
+                                      <sp:str>
+                                        <sp:arg1 rdf:parseType="Resource">
+                                          <sp:varName rdf:datatype=
+                                          "http://www.w3.org/2001/XMLSchema#string"
+                                          >agent</sp:varName>
+                                        </sp:arg1>
+                                      </sp:str>
+                                    </sp:arg1>
+                                  </sp:strafter>
+                                </sp:arg2>
+                                <sp:arg1>skiing-</sp:arg1>
+                              </fn:concat>
+                            </sp:arg1>
+                          </fn:concat>
+                        </sp:arg1>
+                      </fn:concat>
+                    </sp:arg1>
+                  </fn:concat>
+                </sp:arg1>
+              </fn:concat>
+            </sp:expression>
+            <sp:variable rdf:parseType="Resource">
+              <sp:varName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+              >newobject</sp:varName>
+            </sp:variable>
+          </sp:Bind>
+          <sp:Bind>
+            <sp:expression>
+              <sp:uri>
+                <sp:arg1>
+                  <fn:concat>
+                    <sp:arg2 rdf:parseType="Resource">
+                      <sp:varName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+                      >newobject</sp:varName>
+                    </sp:arg2>
+                    <sp:arg1>
+                      <fn:concat>
+                        <sp:arg2>#</sp:arg2>
+                        <sp:arg1>
+                          <sp:strbefore>
+                            <sp:arg2>#</sp:arg2>
+                            <sp:arg1>
+                              <sp:str>
+                                <sp:arg1 rdf:parseType="Resource">
+                                  <sp:varName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+                                  >agent</sp:varName>
+                                </sp:arg1>
+                              </sp:str>
+                            </sp:arg1>
+                          </sp:strbefore>
+                        </sp:arg1>
+                      </fn:concat>
+                    </sp:arg1>
+                  </fn:concat>
+                </sp:arg1>
+              </sp:uri>
+            </sp:expression>
+            <sp:variable rdf:parseType="Resource">
+              <sp:varName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+              >uri</sp:varName>
+            </sp:variable>
+          </sp:Bind>
+        </sp:where>
+      </sp:Construct>
+    </spin:body>
+    <spin:labelTemplate rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >SkiingExampleRule</spin:labelTemplate>
+    <rdfs:subClassOf>
+      <spin:ConstructTemplate rdf:ID="Examples">
+        <rdfs:subClassOf rdf:resource="http://spinrdf.org/spin#ConstructTemplates"/>
+      </spin:ConstructTemplate>
+    </rdfs:subClassOf>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >This rule creates a skiing activity after performing a using skilift activity.</rdfs:comment>
+  </spin:ConstructTemplate>
 </rdf:RDF>
 
-
-
-<!-- Generated by the OWL API (version 3.4.2) http://owlapi.sourceforge.net -->
-
+<!-- Created with TopBraid -->
