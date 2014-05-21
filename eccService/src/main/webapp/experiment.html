@@ -1,0 +1,117 @@
+<!doctype html>
+<html class="no-js" lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>EXPERIMEDIA ECC Dashboard | Experiment monitor</title>
+        <link rel="stylesheet" href="css/foundation.min.css" />
+        <link rel="stylesheet" href="css/app.css" />
+        <script src="js/vendor/modernizr.min.js"></script>
+    </head>
+    <body>
+
+        <div class="row">
+            <div class="small-12 columns clearfix">
+                <p class="left">ECC Experiment monitor</p>
+                <p class="right" id="configStatus"></p>
+            </div>
+            <div class="small-12 columns">
+                <h4>Experiment info</h4>
+                <div class="row">
+                    <div class="large-7 columns" id="experiment_details">
+
+                    </div>
+                    <div class="large-5 columns text-right" id="experiment_controls">
+                        <!--<p class='details'>Live monitoring phase > <a href="#">Go to Tear down phase</a></p>-->
+                        <p class='details'><a href="#" id="stop_experiment">Stop experiment</a><br><br></p>
+                        <p class='details'><a href="#" id="download_experiment_data">Download CSV data</a></p>
+                    </div>
+                </div>
+            </div>
+            <div class="small-12 columns text-center">
+                <a href="#" class="button medium" id="reloadClientsEntitiesAttributes">Refresh Clients, Entities and Attributes below</a>
+            </div>
+
+        </div>
+
+        <div class="row fullWidth">
+            <hr>
+            <div class="small-12 columns">
+                <div class="row">
+                    <div class="large-4 columns" id="clients_details">
+
+                    </div>
+                    <div class="large-4 columns" id="entities_details">
+
+                    </div>
+                    <div class="large-4 columns" id="attribute_details">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row fullWidth">
+            <hr>
+            <div class="small-12 columns">
+                <h4>Live Metrics: up to 10 latest measurements</h4>
+                <div class="row" id="live_metrics">
+
+                </div>
+            </div>
+        </div>
+
+        <!-- ***** -->
+        <div id="nameExperimentModal" class="reveal-modal medium" data-reveal>
+            <div class="row fullWidth">
+                <h3 id="newExperimentHeader"></h3>
+                <form id="newOldExperimentsForm">
+                    <div class="currentProjectContainer hide">
+                        <input type="radio" name="projectSelectionSet" value="old" id="currentProjectRadio">
+                        <label for="currentProjectRadio">Current experiment</label>
+
+                        <div id="currentProjectDetails" class="experimentsSelectionDetails">
+                        </div>
+                    </div>
+
+                    <div class="oldProjectsContainer hide">
+                        <input type="radio" name="projectSelectionSet" value="old" id="oldProjectRadio">
+                        <label for="oldProjectRadio">Browse data for one of the latest experiments:</label>
+
+                        <div id="oldProjects" class="experimentsSelection">
+                        </div>
+                        <div id="oldProjectDetails" class="experimentsSelectionDetails">
+                        </div>
+                    </div>
+
+                    <input type="radio" name="projectSelectionSet" value="new" id="newProjectRadio">
+                    <label for="newProjectRadio" id="startNewExperimentLabel">Start new experiment</label>
+
+
+                    <div id="createNewProject" class="experimentsSelection">
+                        <label>New experiment name (optional)
+                            <input type="text" name="newProject[name]" id="newProjectName"/>
+                        </label>
+                        <label>New experiment description (optional)
+                            <input type="text" name="newProject[description]" id="newProjectDescription"/>
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="row fullWidth">
+                <div class="small-12 columns text-center">
+                    <a href="#" class="button" id="setProjectNameAndDescription">Let's Go</a>
+                </div>
+            </div>
+            <!--<a class="close-reveal-modal">&#215;</a>-->
+
+        </div>
+
+        <script src="js/vendor/jquery.min.js"></script>
+        <script src="js/foundation.min.js"></script>
+        <script src="js/vendor/jquery.serializeJSON.min.js"></script>
+        <script src="js/vendor/highcharts.js"></script>
+        <script src="js/vendor/moment.min.js"></script>
+        <script src="js/experiment.js"></script>
+    </body>
+</html>

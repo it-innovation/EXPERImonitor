@@ -46,7 +46,8 @@ import org.slf4j.LoggerFactory;
     ExperimentTest.class,
     EntityTest.class,
     MetricGeneratorTest.class,
-    ReportTest.class
+    ReportTest.class,
+    MeasurementSetTest.class
 })
 public class EDMTestSuite
 {
@@ -78,7 +79,8 @@ public class EDMTestSuite
             ExperimentTest.class,
             EntityTest.class,
             MetricGeneratorTest.class,
-            ReportTest.class);
+            ReportTest.class,
+            MeasurementSetTest.class);
 
         if (processResults(result)) {
             System.exit(0);

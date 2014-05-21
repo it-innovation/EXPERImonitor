@@ -60,10 +60,16 @@ public abstract class AbstractAMQPInterface
       if ( subListenQueue != null )
         try 
         {
-          Channel channel = (Channel) amqpChannel.getChannelImpl();
-          channel.queueDelete( subListenQueue );
-          subProcessor = null;
-          msgDispatch  = null;
+          if ( amqpChannel.isOpen() )
+          {
+            Channel channel = (Channel) amqpChannel.getChannelImpl();
+            channel.queueDelete( subListenQueue );
+            subProcessor = null;
+            msgDispatch  = null;
+          }
+          else 
+              amqpIntLogger.warn( "Could not close AMQP channel: already closed" );
+              
         }
         catch (IOException ioe)
         { amqpIntLogger.error( "Could not delete AMQP queue: " + ioe.getMessage() ); }
@@ -97,16 +103,22 @@ public abstract class AbstractAMQPInterface
     
     try
     {
-      Channel channelImpl = (Channel) amqpChannel.getChannelImpl();
+      if ( amqpChannel.isOpen() )
+      {
+        Channel channelImpl = (Channel) amqpChannel.getChannelImpl();
+        
+        byte[] messageBody = message.getBytes( "UTF-8" );
+        
+        channelImpl.basicPublish( targetExchange,
+                                  targetRouteKey,
+                                  null, // Properties
+                                  messageBody );
       
-      byte[] messageBody = message.getBytes( "UTF-8" );
-      
-      channelImpl.basicPublish( targetExchange,
-                                targetRouteKey,
-                                null, // Properties
-                                messageBody );
-      
-      result = true;
+        result = true;
+      }
+      else
+          amqpIntLogger.error( "Could not send AMQP message: channel closed" );
+              
     }
     catch (IOException ioe) 
     { amqpIntLogger.error( "Could not send AMQP message: " + ioe.getMessage() ); }

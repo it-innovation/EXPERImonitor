@@ -108,15 +108,16 @@ public class ExperimentMonitor implements IExperimentMonitor,
     try
     {
       configInitialise( emProps );
-			
-			// Only initialise if entry point does not exist
-			if ( !entryPointExists() )
-				initialiseManagers();
-			else
-				throw new Exception( "Could not open entry point: ECC dashboard with ID " +
-															entryPointID.toString() + " may already be running" );
+      
+      initialiseManagers();
     }
-    catch ( Exception e ) { throw e; }
+    catch ( Exception ex )
+    {
+      String msg = "Had problems opening EM entry point: " + ex.getMessage();
+      emLogger.error( msg );
+      
+      throw new Exception( msg, ex ); 
+    }
   }
   
   @Override
@@ -589,7 +590,8 @@ public class ExperimentMonitor implements IExperimentMonitor,
       amqpChannel = amqpConnectionFactory.createNewChannel();
       if ( amqpChannel == null ) throw new Exception( "Could not create AMQP channel" );
     }
-    catch ( Exception e ) { throw e; }
+    catch ( Exception e )
+    { throw e; }
   }
   
   private void initialiseManagers() throws Exception

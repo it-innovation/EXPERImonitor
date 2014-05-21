@@ -35,6 +35,10 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Me
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Metric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Attribute;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Entity;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricHelper;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.metrics.db.DBUtil;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.NoDataException;
 
@@ -323,5 +327,90 @@ public class MeasurementSetDAOHelper
         }
         
         return measurementSets;
+    }
+    
+    public static Set<MeasurementSet> getMeasurementSetsForAttribute(UUID attrID, boolean withMetric, Connection dbCon, boolean closeDBCon) throws Exception
+    {
+        // Safety
+        if (dbCon == null || DBUtil.isClosed(dbCon)) throw new RuntimeException( "Could not retrieve measurement sets for attribute: database connection is null or closed" );
+        if (attrID == null) throw new IllegalArgumentException( "Could not retrieve measurements set for attribute: ID is null" );
+        
+        HashSet<MeasurementSet> resultSet = new HashSet<MeasurementSet>();
+        
+        try
+        {
+            // Pull all MeasurementSet IDs that point to the attribute ID
+            String query = "SELECT mSetUUID FROM MeasurementSet WHERE attribuuid = ?";
+            PreparedStatement pstmt = dbCon.prepareStatement( query );
+            pstmt.setObject( 1, attrID, java.sql.Types.OTHER );
+            ResultSet rs = pstmt.executeQuery();
+            
+            // Retrieve appropriate measurement sets (with metric data as required)
+            while ( rs.next() )
+            {
+                String msIDVal = rs.getString( "mSetUUID" );
+                UUID msID = UUID.fromString( msIDVal );
+                
+                resultSet.add( getMeasurementSet(msID, withMetric, dbCon, false) );
+            }
+        }
+        catch (Exception ex)
+        {
+            String msg = "Could not retrieve MeasurementSets for Attribute: " + ex.getMessage();
+            log.error( msg );
+            
+            throw new RuntimeException( msg, ex );
+        }
+        finally
+        {
+            if (closeDBCon)
+                dbCon.close();
+        }
+        
+        return resultSet;
+    }
+    
+    public static Set<MeasurementSet> getMeasurementSetsForAttribute(UUID attrID, UUID expID, boolean withMetric, Connection dbCon, boolean closeDBCon) throws Exception
+    {
+        // Safety
+        if ( dbCon == null || DBUtil.isClosed(dbCon)) throw new RuntimeException( "Could not retrieve measurement sets for attribute: database connection is null or closed" );
+        if ( attrID == null ) throw new IllegalArgumentException( "Could not retrieve measurements set for attribute: ID is null" );
+        
+        Set<MeasurementSet> resultSet = new HashSet<MeasurementSet>();
+        
+        try
+        {
+            // Find all entities for the experiment
+            Set<Entity> expEntities = EntityDAOHelper.getEntitiesForExperiment(expID, true, dbCon, false);
+            
+            // Check see if attribute exists in scope of experiment
+            Attribute targAttr = null;
+            
+            for ( Entity entity : expEntities )
+            {
+                targAttr = MetricHelper.getAttributeByID( attrID, entity );
+                if ( targAttr != null ) break;
+            }
+            
+            // Attribute exists for this experiment, so find measurement sets linked to the attribute
+            if ( targAttr != null )
+                resultSet = getMeasurementSetsForAttribute(attrID, withMetric, dbCon, false);
+            else
+                log.warn( "Could not find attribute in experiment (" + expID.toString() +")" );
+        }
+        catch (Exception ex)
+        {
+            String msg = "Could not retrieve MeasurementSets for Attribute: " + ex.getMessage();
+            log.error( msg );
+            
+            throw new RuntimeException( msg, ex );
+        }
+        finally
+        {
+            if (closeDBCon)
+                dbCon.close();
+        }
+        
+        return resultSet;
     }
 }

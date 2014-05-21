@@ -7,10 +7,7 @@ They can be obtained directly from Ontotext:
 1.	Register at http://www.ontotext.com/owlim/owlim-lite-registration for a copy.
 	A zip file will be send to you by email after your registration.
 
-2.	Copy the file owlim-lite-5.4.jar from the /lib directory in the zip file into
-	the /thirdPartyLibs directory.
+2.	Extract the file owlim-lite-5.4.jar from the /lib directory and 
+	openrdf-workbench.war and openrdf-sesame.war from the /sesame_owlim
+	directory in the zip file into the /thirdPartyLibs directory.
 
-3.	Extract openrdf-workbench.war and openrdf-sesame.war from the /sesame_owlim
-	directory in the zip file and deploy them on your tomcat server.
-	
-	

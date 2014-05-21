@@ -74,9 +74,16 @@ public final class EDMProvDataStoreImpl implements IEDMProvDataStore {
 	}
     
     private void init() {
-
-        provWriter = new EDMProvWriterImpl(props);
-        provReader = new EDMProvReaderImpl(props);
+		try {
+			provWriter = new EDMProvWriterImpl(props);
+		} catch (SesameException e) {
+			logger.warn("EDMProvWriter could not connect to repository " + props.getProperty("owlim.repositoryID"), e);
+		}
+		try {
+			provReader = new EDMProvReaderImpl(props);
+		} catch (SesameException e) {
+			logger.warn("EDMProvReader could not connect to repository " + props.getProperty("owlim.repositoryID"), e);
+		}
 
         connect();
 

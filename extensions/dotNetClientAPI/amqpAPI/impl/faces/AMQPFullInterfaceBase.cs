@@ -55,7 +55,7 @@ public class AMQPFullInterfaceBase : AbstractAMQPInterface
       IModel channelImpl = (IModel) amqpChannel.getChannelImpl();
       
       try
-      {      
+      {
           // Declare the appropriate exchanges
           channelImpl.ExchangeDeclare( providerExchangeName, "direct" );
           channelImpl.ExchangeDeclare( userExchangeName, "direct" );

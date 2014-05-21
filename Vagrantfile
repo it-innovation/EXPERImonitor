@@ -15,8 +15,20 @@
 
 ## Configuration for this script (this part is Ruby) ##
 
+# check for existence of required war files
+
+if ( !File.file?('./thirdPartyLibs/openrdf-sesame.war') )
+	abort("Could not find openrdf-sesame.war in thirdPartyLibs directory")
+end
+
+if ( !File.file?('./thirdPartyLibs/openrdf-sesame.war') )
+	abort("Could not find openrdf-workbench.war in thirdPartyLibs directory")
+end
+
+puts "*.war files found, starting installation..."
+
 hostname = "ECC-20"
-ram = "512"
+ram = "1536"
 
 ecc_ip = (ENV['ECC_IP'] ? ENV['ECC_IP'] : '10.0.0.10')
 ecc_uuid = (ENV['ECC_UUID'] ? ENV['ECC_UUID'] : '00000000-0000-0000-0000-000000000000')
@@ -48,13 +60,24 @@ apt-get update
 
 ## Install dependencies ##
 
+# sort out switching to Java 7 before installing Tomcat 
+apt-get install -y openjdk-7-jdk
+update-alternatives --set java /usr/lib/jvm/java-7-openjdk-i386/jre/bin/java
+rm /usr/lib/jvm/default-java
+ln -s /usr/lib/jvm/java-1.7.0-openjdk-i386 /usr/lib/jvm/default-java
+
 apt-get install -y git
 apt-get install -y maven2
 apt-get install -y tomcat7
 apt-get install -y tomcat7-admin
-apt-get install -y openjdk-6-jdk
 apt-get install -y postgresql-9.1
 apt-get install -y rabbitmq-server
+
+## Use the Java 7 JDK ##
+#export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-i386/
+#export JDK_HOME=/usr/lib/jvm/java-7-openjdk-i386/
+#export JRE_HOME=/usr/lib/jvm/java-7-openjdk-i386/jre
+#export PATH=$JAVA_HOME/bin:$PATH
 
 ## Get the ECC code ##
 
@@ -105,10 +128,8 @@ service rabbitmq-server restart
 # enable the tomcat manager webapp with username manager, password manager
 echo "<?xml version='1.0' encoding='utf-8'?><tomcat-users><user rolename='manager-gui'/><user username='manager' password='manager' roles='manager-gui'/></tomcat-users>" > /etc/tomcat7/tomcat-users.xml
 
-# Uncomment these lines to turn on Java debugger on guest port 8000
-# TODO: doesn't work from vagrant file but works from shell
-#sed -e 's/^#\(.*-Xdebug.*\)/\1/' /etc/default/tomcat7 > /tmp/tomcat7
-#cp /tmp/tomcat7 /etc/default/
+# Copy Tomcat configuration into default space
+cp /vagrant/vagrantConf/tomcat7 /etc/default
 
 service tomcat7 restart
 
@@ -134,7 +155,7 @@ cp thirdPartyLibs/openrdf-workbench.war /var/lib/tomcat7/webapps/openrdf-workben
 echo "**** Deploying OpenRDF sesame & workbench into Tomcat"
 
 # deploy the ECC into Tomcat
-cp eccDash/target/*.war /var/lib/tomcat7/webapps/ECC.war
+cp eccService/target/*.war /var/lib/tomcat7/webapps/ECC.war
 echo "**** Deploying ECC into Tomcat"
 
 if [ '#{ecc_git}' != "" ]; then

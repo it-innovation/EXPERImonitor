@@ -336,7 +336,8 @@ public class EntityDAOHelper
             log.error("Error while quering the database: " + ex.getMessage(), ex);
             throw new RuntimeException("Error while quering the database: " + ex.getMessage(), ex);
         } finally {
-            connection.close();
+            if (closeDBcon)
+                connection.close();
         }
         
         return entities;

@@ -73,7 +73,8 @@ public class AMQPConnectionFactory
       if ( amqpConnection != null )
         try 
         {
-          amqpConnection.close();
+          if ( amqpConnection.isOpen() ) amqpConnection.close();
+          
           amqpConnection = null;
         }
         catch (Exception ex) 

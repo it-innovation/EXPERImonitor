@@ -1,0 +1,88 @@
+<!doctype html>
+<html class="no-js" lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>EXPERIMEDIA ECC Dashboard | Experiment data</title>
+        <link rel="stylesheet" href="css/foundation.min.css" />
+        <link rel="stylesheet" href="css/app.css" />
+        <script src="js/vendor/modernizr.min.js"></script>
+    </head>
+    <body>
+
+        <div class="row">
+            <div class="small-12 columns clearfix">
+                <p class="left">ECC Experiment data</p>
+                <p class="right" id="configStatus"></p>
+            </div>
+            <div class="small-12 columns">
+                <h4>Configuration</h4>
+                <div class="row">
+                    <div class="large-7 columns" id="configuration_details">
+
+                    </div>
+                    <div class="large-5 columns text-right" id="configuration_controls">
+                        <p class='details'><a href="#" id="to_monitor">Back to experiment monitor</a></p>
+                        <p class='details'><a href="#" id="change_experiment">Select different experiment</a></p>
+                    </div>
+                </div>
+            </div>
+            <div class="small-12 columns">
+                <hr>
+                <h4>Experiment info</h4>
+                <div class="row">
+                    <div class="large-7 columns" id="experiment_details">
+
+                    </div>
+                    <div class="large-5 columns text-right" id="experiment_controls">
+                        <p class='details'><a href="#" id="download_experiment_data">Download CSV data</a></p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="row">
+            <hr>
+            <div class="small-12 columns">
+                <div class="row">
+                    <div class="small-6 columns" id="entities_details">
+
+                    </div>
+                    <div class="small-6 columns" id="attribute_details">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ***** -->
+        <div id="nameExperimentModal" class="reveal-modal medium" data-reveal>
+            <div class="row fullWidth">
+                <h3>Select an experiment</h3>
+                <form id="newOldExperimentsForm">
+
+                    <div id="oldProjects" class="experimentsSelection">
+                    </div>
+                    <div id="oldProjectDetails" class="experimentsSelectionDetails">
+                    </div>
+
+                </form>
+            </div>
+            <div class="row fullWidth">
+                <div class="small-12 columns text-center">
+                    <a href="#" class="button" id="setProjectNameAndDescription">Let's Go</a>
+                </div>
+            </div>
+            <a class="close-reveal-modal">&#215;</a>
+
+        </div>
+
+        <script src="js/vendor/jquery.min.js"></script>
+        <script src="js/foundation.min.js"></script>
+        <script src="js/vendor/jquery.serializeJSON.min.js"></script>
+        <script src="js/vendor/highcharts.js"></script>
+        <script src="js/vendor/moment.min.js"></script>
+        <script src="js/data.js"></script>
+    </body>
+</html>

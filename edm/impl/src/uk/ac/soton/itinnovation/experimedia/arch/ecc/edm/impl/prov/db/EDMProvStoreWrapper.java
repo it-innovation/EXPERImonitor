@@ -48,7 +48,7 @@ public class EDMProvStoreWrapper extends RemoteSesameConnector {
 	private final Properties props;
 	private String prefixes;
 	
-	public EDMProvStoreWrapper(Properties props) throws Exception {
+	public EDMProvStoreWrapper(Properties props) throws NoSuchRepositoryException, SesameException {
 		
 		super(props, props.getProperty("owlim.sesameServerURL"));
 		logger = LoggerFactory.getLogger(RemoteSesameConnector.class);
@@ -57,8 +57,8 @@ public class EDMProvStoreWrapper extends RemoteSesameConnector {
 		this.prefixes = null;
 		
 		if (!repositoryExists(props.getProperty("owlim.repositoryID"))) {
-			logger.debug("Repository \"" + props.getProperty("owlim.repositoryID")
-				+ "\" doesn't exist and needs to be created programmatically");
+			logger.warn("Repository \"" + props.getProperty("owlim.repositoryID")
+				+ "\" doesn't exist and needs to be created");
 		}
 	}
 
