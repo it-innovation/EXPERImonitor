@@ -227,6 +227,7 @@ public class ECCClientView extends javax.swing.JFrame {
             }
         });
 
+        disabledEntitiesList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         disabledEntitiesList.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
             public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
                 disabledEntitiesListValueChanged(evt);
@@ -250,6 +251,7 @@ public class ECCClientView extends javax.swing.JFrame {
         clientNameLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         clientNameLabel2.setText("Enabled Client Entities ");
 
+        clientEntitiesList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         clientEntitiesList.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
             public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
                 clientEntitiesListValueChanged(evt);
@@ -355,18 +357,22 @@ public class ECCClientView extends javax.swing.JFrame {
         //Then sends the data to another method: onEntityStatusChanged
         int e =clientEntitiesList.getSelectedIndex();
         
-        //find entity here save to a variable
-        EntityInfo entityToDisable = ( EntityInfo ) clientEntitiesList.getModel().getElementAt( e );
-        
-        //Remove entity from the list
-        clientEntitiesList.clearSelection();
-        UUID entityToDisableID = entityToDisable.entityID;
-        String entityToDisableName = entityToDisable.getName();
-        viewListener.onEntityStatusChanged(entityToDisableID, entityToDisableName, false);
-        
-        // Show notification of entity disabling 
-        String disableWarning = "Entity " + entityToDisable + " has been disabled";
-        JOptionPane.showMessageDialog( null, disableWarning );
+        // Check something has been selected before trying to disable it
+        if ( e > -1  )
+        {
+           //find entity here save to a variable
+            EntityInfo entityToDisable = ( EntityInfo ) clientEntitiesList.getModel().getElementAt( e );
+
+            //Remove entity from the list
+            clientEntitiesList.clearSelection();
+            UUID entityToDisableID = entityToDisable.entityID;
+            String entityToDisableName = entityToDisable.getName();
+            viewListener.onEntityStatusChanged(entityToDisableID, entityToDisableName, false);
+
+            // Show notification of entity disabling 
+            String disableWarning = "Entity " + entityToDisable + " has been disabled";
+            JOptionPane.showMessageDialog( null, disableWarning ); 
+        }
     }//GEN-LAST:event_disableEntityButtonActionPerformed
 
     private void clientEntitiesListValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_clientEntitiesListValueChanged
@@ -378,18 +384,22 @@ public class ECCClientView extends javax.swing.JFrame {
         //Then sends the data to another method: onEntityStatusChanged
         int e =disabledEntitiesList.getSelectedIndex();
         
-        //find entity here save to variable code here
-        EntityInfo entityToEnable = ( EntityInfo ) disabledEntitiesList.getModel().getElementAt( e );
-        
-        //Remove entity from the list
-        disabledEntitiesList.clearSelection();
-        UUID entityToEnableID = entityToEnable.entityID;
-        String entityToEnableName = entityToEnable.getName();
-        viewListener.onEntityStatusChanged( entityToEnableID, entityToEnableName, true );
-        
-        // Show notification of entity disabling 
-        String enableWarning = "Entity " + entityToEnable + " has been enabled";
-        JOptionPane.showMessageDialog( null, enableWarning );
+        // Check something is actually selected before trying to re-enabled it
+        if ( e > -1 )
+        {
+            //find entity here save to variable code here
+            EntityInfo entityToEnable = ( EntityInfo ) disabledEntitiesList.getModel().getElementAt( e );
+
+            //Remove entity from the list
+            disabledEntitiesList.clearSelection();
+            UUID entityToEnableID = entityToEnable.entityID;
+            String entityToEnableName = entityToEnable.getName();
+            viewListener.onEntityStatusChanged( entityToEnableID, entityToEnableName, true );
+
+            // Show notification of entity disabling 
+            String enableWarning = "Entity " + entityToEnable + " has been enabled";
+            JOptionPane.showMessageDialog( null, enableWarning );
+        }
     }//GEN-LAST:event_enableEntityButtonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
