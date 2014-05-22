@@ -33,13 +33,14 @@ import java.util.Properties;
 import java.util.logging.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.ac.soton.itinnovation.edmprov.owlim.common.NoSuchRepositoryException;
-import uk.ac.soton.itinnovation.edmprov.owlim.common.RepositoryExistsException;
-import uk.ac.soton.itinnovation.edmprov.owlim.common.SesameException;
+import uk.ac.soton.itinnovation.owlimstore.common.NoSuchRepositoryException;
+import uk.ac.soton.itinnovation.owlimstore.common.RepositoryExistsException;
+import uk.ac.soton.itinnovation.owlimstore.common.SesameException;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.prov.db.EDMProvStoreWrapper;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.prov.dao.IEDMProvDataStore;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.prov.dao.IEDMProvReader;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.prov.dao.IEDMProvWriter;
+
 
 public final class EDMProvDataStoreImpl implements IEDMProvDataStore {
     

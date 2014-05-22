@@ -190,8 +190,8 @@
         </dependency>
 		
 		<dependency>
-            <groupId>uk.ac.soton.itinnovation.edmprov</groupId>
-            <artifactId>OWLimProvStore</artifactId>
+            <groupId>uk.ac.soton.itinnovation.owlimstore</groupId>
+            <artifactId>owlimstore</artifactId>
             <version>${ecc.owlimstore.version}</version>
             <type>jar</type>
         </dependency>

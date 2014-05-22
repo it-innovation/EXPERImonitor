@@ -106,9 +106,9 @@
         </dependency>
     
 		<dependency>
-            <groupId>uk.ac.soton.itinnovation.edmprov</groupId>
-            <artifactId>OWLimProvStore</artifactId>
-            <version>${ecc.owlimstore.version}</version>
+            <groupId>uk.ac.soton.itinnovation.owlimstore</groupId>
+            <artifactId>owlimstore</artifactId>
+            <version>1.1-SNAPSHOT</version>
             <type>jar</type>
         </dependency>
         
@@ -152,6 +152,11 @@
 		
 		<!-- 3rd party repositories ___________________________________________  -->
 		<repositories>
+			
+			<repository>
+				<id>uk.ac.soton.itinnovation</id>
+				<url>http://repo.it-innovation.soton.ac.uk/maven2/release/</url>
+			</repository>
 			
 			<repository>
 				<id>mvn.prov.toolbox</id>

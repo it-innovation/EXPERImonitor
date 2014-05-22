@@ -34,12 +34,13 @@ import java.util.Set;
 import java.util.TimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.ac.soton.itinnovation.edmprov.owlim.common.SesameException;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvBaseElement;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvDataContainer;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMTriple;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.prov.db.EDMProvStoreWrapper;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.prov.dao.IEDMProvReader;
+import uk.ac.soton.itinnovation.owlimstore.common.SesameException;
+
 
 public final class EDMProvReaderImpl implements IEDMProvReader {
 
@@ -51,7 +52,7 @@ public final class EDMProvReaderImpl implements IEDMProvReader {
 	private EDMProvStoreWrapper edmProvStoreWrapper;
 	private SPARQLProvTranslator translator;
 	
-	public EDMProvReaderImpl(Properties props) throws SesameException {
+	public EDMProvReaderImpl(Properties props) throws SesameException  {
 		logger = LoggerFactory.getLogger(getClass());
 		this.props = props;
 		translator = new SPARQLProvTranslator(props);

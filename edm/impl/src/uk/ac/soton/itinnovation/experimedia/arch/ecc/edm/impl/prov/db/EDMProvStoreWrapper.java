@@ -38,17 +38,17 @@ import org.openrdf.query.Binding;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.TupleQueryResult;
-import uk.ac.soton.itinnovation.edmprov.owlim.common.NoSuchRepositoryException;
-import uk.ac.soton.itinnovation.edmprov.owlim.common.OntologyDetails;
-import uk.ac.soton.itinnovation.edmprov.owlim.common.SesameException;
-import uk.ac.soton.itinnovation.edmprov.sesame.RemoteSesameConnector;
+import uk.ac.soton.itinnovation.owlimstore.common.NoSuchRepositoryException;
+import uk.ac.soton.itinnovation.owlimstore.common.OntologyDetails;
+import uk.ac.soton.itinnovation.owlimstore.common.SesameException;
+import uk.ac.soton.itinnovation.owlimstore.sesame.RemoteSesameConnector;
 
 public class EDMProvStoreWrapper extends RemoteSesameConnector {
 	
 	private final Properties props;
 	private String prefixes;
 	
-	public EDMProvStoreWrapper(Properties props) throws NoSuchRepositoryException, SesameException {
+	public EDMProvStoreWrapper(Properties props) throws NoSuchRepositoryException, SesameException, Exception {
 		
 		super(props, props.getProperty("owlim.sesameServerURL"));
 		logger = LoggerFactory.getLogger(RemoteSesameConnector.class);

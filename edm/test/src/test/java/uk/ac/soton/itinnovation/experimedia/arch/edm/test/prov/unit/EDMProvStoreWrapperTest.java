@@ -39,10 +39,10 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import uk.ac.soton.itinnovation.edmprov.owlim.common.RelationshipType;
-import uk.ac.soton.itinnovation.edmprov.owlim.common.RepositoryExistsException;
-import uk.ac.soton.itinnovation.edmprov.owlim.common.SesameException;
-import uk.ac.soton.itinnovation.edmprov.owlim.common.Triple;
+import uk.ac.soton.itinnovation.owlimstore.common.RelationshipType;
+import uk.ac.soton.itinnovation.owlimstore.common.RepositoryExistsException;
+import uk.ac.soton.itinnovation.owlimstore.common.SesameException;
+import uk.ac.soton.itinnovation.owlimstore.common.Triple;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.prov.db.EDMProvStoreWrapper;
 
 /**
