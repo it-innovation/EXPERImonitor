@@ -17,3 +17,5 @@ obj/
 doc/javaDoc/
 doc/manual/
 .vagrant/
+thirdPartyLibs/*.war
+thirdPartyLibs/*.jar
