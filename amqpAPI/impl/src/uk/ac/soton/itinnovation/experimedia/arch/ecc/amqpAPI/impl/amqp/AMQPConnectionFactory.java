@@ -234,6 +234,8 @@ public class AMQPConnectionFactory
         if ( rabbitServerIP != null && rabbitServerPort != null )
         {
             int portNumber = Integer.parseInt( rabbitServerPort );
+			
+			factoryLog.debug("Rabbit IP: " + rabbitServerIP + ", Rabbit port: " + rabbitServerPort);
             
             setAMQPHostIPAddress( rabbitServerIP );
             setAMQPHostPort( portNumber );
