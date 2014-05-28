@@ -1,0 +1,223 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# To use, install vagrant and VirtualBox and type "vagrant up"
+
+# The following environment variables can be used to control the behaviour:
+# ECC_IP: the IP address for the ECC VM to use (default 10.0.0.10)
+# ECC_UUID: the UUID for the dashboard to use (default 00000000-0000-0000-0000-000000000000)
+# ECC_PORT: the port to map the ECC to on the host machine (default 8090)
+# RABBIT_IP: the IP address to use for RabbitMQ (default 10.0.0.10)
+# RABBIT_PORT: the port to map RabbitMQ to on the host machine (default 5682)
+# RABBIT_MGT_PORT: the port to map RabbitMQ management interface to on the host machine (default 55682)
+# ECC_GIT: if defined then ECC source is checked out from git and this branch used, otherwise uses source from host machine
+# DEBUGGER_PORT: the port to map Java debugger to on the host machine (default 8000)
+
+## Configuration for this script (this part is Ruby) ##
+
+# check for existence of required war files
+
+if ( !File.file?('./thirdPartyLibs/openrdf-sesame.war') )
+	abort("Could not find openrdf-sesame.war in thirdPartyLibs directory")
+end
+
+if ( !File.file?('./thirdPartyLibs/openrdf-workbench.war') )
+	abort("Could not find openrdf-workbench.war in thirdPartyLibs directory")
+end
+
+if ( !File.file?('./thirdPartyLibs/owlim-lite-5.4.jar') )
+	abort("Could not find owlim-lite-5.4.jar in thirdPartyLibs directory")
+end
+
+puts "Third party files found. Starting installation..."
+
+hostname = "ECC-21"
+ram = "1536"
+
+ecc_ip = (ENV['ECC_IP'] ? ENV['ECC_IP'] : '10.0.0.10')
+ecc_uuid = (ENV['ECC_UUID'] ? ENV['ECC_UUID'] : '00000000-0000-0000-0000-000000000000')
+ecc_port = (ENV['ECC_PORT'] ? ENV['ECC_PORT'] : '8090')
+rabbit_ip = (ENV['RABBIT_IP'] ? ENV['RABBIT_IP'] : '10.0.0.10')
+#rabbit_ip = "rabbitmq.experimedia.eu"
+rabbit_port = (ENV['RABBIT_PORT'] ? ENV['RABBIT_PORT'] : '5682')
+rabbit_mgt_port = (ENV['RABBIT_MGT_PORT'] ? ENV['RABBIT_MGT_PORT'] : '55682')
+ecc_git = (ENV['ECC_GIT'] ? ENV['ECC_GIT'] : '')
+debugger_port = (ENV['DEBUGGER_PORT'] ? ENV['DEBUGGER_PORT'] : '8000')
+glassfish_port = (ENV['GLASSFISH_PORT'] ? ENV['GLASSFISH_PORT'] : '4848')
+
+info = "
+ECC service is deployed on VM with IP #{ecc_ip}
+ECC service is mapped to http://localhost:#{ecc_port}/ECC on host machine.
+Tomcat manager is mapped to http://localhost:#{ecc_port}/manager/html with username manager, password manager
+OpenRDF workbench is mapped to http://localhost:#{ecc_port}/openrdf-workbench on host machine
+Using RabbitMQ deployed on #{rabbit_ip}
+RabbitMQ AMQP bus mapped to http://localhost:#{rabbit_port} on host machine.
+RabbitMQ management interface is mapped to http://localhost:#{rabbit_mgt_port} on host machine (username: guest / password: guest).
+Java debugger is mapped to port #{debugger_port} on host machine.
+
+Tail the log file with: vagrant ssh -c 'tail -f /var/log/tomcat7/catalina.out'"
+
+## The following shell script is run once the VM is built (this part is bash) ##
+
+$script = <<SCRIPT
+echo "Updating package index..."
+apt-get -qq update
+#apt-get upgrade -y  # could upgrade base OS packages if you want
+
+## Install dependencies ##
+
+echo "Installing dependencies..."
+# sort out switching to Java 7 before installing Tomcat 
+apt-get install -y openjdk-7-jdk
+update-alternatives --set java /usr/lib/jvm/java-7-openjdk-i386/jre/bin/java
+rm /usr/lib/jvm/default-java
+ln -s /usr/lib/jvm/java-1.7.0-openjdk-i386 /usr/lib/jvm/default-java
+
+apt-get install -y git
+apt-get install -y maven2
+apt-get install -y postgresql-9.1
+apt-get install -y rabbitmq-server
+
+## Get the ECC code ##
+
+# remove old code to get a clean(ish) build in case we are re-provisioning
+rm -rf experimedia-ecc
+
+# get ECC code (need to do this before PostgreSQL config)
+if [ '#{ecc_git}' != "" ]; then
+	# set up deploy key to enable access to gitlab
+	cp -a /vagrant/vagrantConf/gitLab/.ssh ~
+	# get the latest ECC code from Git
+	git clone git@glab-i1.it-innovation.soton.ac.uk:experimedia/ecc.git experimedia-ecc
+	cd experimedia-ecc
+	# need -f to force it, otherwise it prints a warning and nothing happens
+	git checkout -f #{ecc_git}
+	# copy thirdPartyLibs from host machine
+	cp /vagrant/thirdPartyLibs/* thirdPartyLibs
+	cd ..
+else
+	# or copy ECC code from guest machine to host machine
+	mkdir experimedia-ecc
+	rsync -a /vagrant/ experimedia-ecc --exclude '.git' --exclude 'target'
+fi
+
+## Set up PostgreSQL ##
+
+# drop then create the database
+sudo -u postgres dropdb edm-metrics
+sudo -u postgres createdb -T template0 edm-metrics --encoding=UTF8 --locale=en_US.utf8
+sudo -u postgres psql -d edm-metrics -f experimedia-ecc/edm/resources/edm-metrics-postgres.sql
+
+# set postgres user's password to "password"
+sudo -u postgres psql --command="ALTER USER postgres WITH PASSWORD 'password';"
+
+# set connection made by postgres user from command line to not need password
+# set postgres user to need password for connections made via socket from localhost
+# reload postgresql
+echo "local all postgres trust" > /tmp/pg_hba.conf
+echo "host all postgres 127.0.0.1/0 password" >> /tmp/pg_hba.conf
+sudo -u postgres cp /tmp/pg_hba.conf /etc/postgresql/9.1/main
+service postgresql reload
+
+## Set up RabbitMQ ##
+
+# enable rabbitmq management plugin so we can see what's happening
+/usr/lib/rabbitmq/lib/rabbitmq_server-2.7.1/sbin/rabbitmq-plugins enable rabbitmq_management
+service rabbitmq-server restart
+
+## Set up Glassfish ##
+
+# Install and start service
+wget http://download.java.net/glassfish/3.1.2.2/release/glassfish-3.1.2.2.zip
+unzip glassfish-3.1.2.2.zip
+rm glassfish-3.1.2.2.zip
+mv glassfish3 /opt/glassfish3
+cp /vagrant/vagrantConf/glassfish /etc/init.d/glassfish
+chmod +x /etc/init.d/glassfish
+update-rc.d glassfish defaults
+/etc/init.d/glassfish start
+
+# Grant Java permission on socket
+cp /vagrant/vagrantConf/java.policy /usr/lib/jvm/java-7-openjdk-i386/jre/lib/security/java.policy
+
+# Start glassfish database
+/opt/glassfish3/bin/asadmin start-database --dbhome opt/glassfish3/javadb
+
+## Configure ECC Service ##
+
+# configure location of Rabbit
+# configure uuid
+# can't do this at the moment, it is got from config.experimedia.eu or falls back on hard-coded values
+# can alter it by hand in the GUI at start-up
+
+## Build ##
+echo "**** Building ECC"
+
+cd experimedia-ecc
+cd thirdPartyLibs && /bin/sh ./installLibraries.sh && cd ..
+mvn install |& tee /tmp/build.log
+
+## Deploy ##
+
+# Deploy OpenRDF services into Glassfish
+echo "**** Deploying OpenRDF sesame & workbench into Glassfish"
+/opt/glassfish3/bin/asadmin deploy ./thirdPartyLibs/openrdf-sesame.war
+/opt/glassfish3/bin/asadmin deploy ./thirdPartyLibs/openrdf-workbench.war
+
+# deploy the ECC into Tomcat
+#echo "**** Deploying ECC into Glassfish"
+#/opt/glassfish3/bin/asadmin deploy eccService/target/EccService-2.0.war
+
+if [ '#{ecc_git}' != "" ]; then
+	echo 'ECC built from git branch #{ecc_git}'
+else
+	echo 'ECC code copied from host machine'
+fi
+
+echo "Maven build log is in /tmp/build.log on guest machine"
+echo "Vagrant shell script completed."
+echo "#{info}"
+
+SCRIPT
+
+## Back to Ruby again ##
+
+Vagrant.configure("2") do |config|
+
+    # build off ubuntu 12.04 LTS (32 bit)
+	config.vm.box = "precise32"
+    config.vm.box_url = "http://files.vagrantup.com/precise32.box"
+    config.vm.hostname = hostname
+	
+	# Forward host port to guest port 8080 for Tomcat
+	config.vm.network :forwarded_port, host: Integer(ecc_port), guest: 8080
+	# Forward host port to guest port 5672 for RabbitMQ messages
+	config.vm.network :forwarded_port, host: Integer(rabbit_port), guest: 5672
+	# Forward host port to guest port 55672 for RabbitMQ management page
+	config.vm.network :forwarded_port, host: Integer(rabbit_mgt_port), guest: 55672
+	# Forward host port to guest port 8000 for Java debugger
+	config.vm.network :forwarded_port, host: Integer(debugger_port), guest: 8000
+  # Forward host port to guest port 4848 for Glassfish management
+	config.vm.network :forwarded_port, host: Integer(glassfish_port), guest: 4848
+
+	# Set static private network address.
+	# Deploying with a static IP like this means that VirtualBox will set up a virtual network 
+	# card that listens on e.g. 10.0.0.0/48
+	# If you have other machines on that subnet then change the IP or you will have to delete 
+	# the virtual card from the VirtualBox GUI afterwards.  The purpose of using a static IP 
+	# is so that other services deployed in the same way can communicate.
+	config.vm.network "private_network", ip: ecc_ip
+	
+    # configure virtualbox
+    config.vm.provider :virtualbox do |vb|
+        vb.customize [
+            'modifyvm', :id,
+            '--name', hostname,
+            '--memory', ram
+        ]
+	end
+
+	# Provision using shell script embedded above
+	config.vm.provision :shell, :inline => $script
+
+end
