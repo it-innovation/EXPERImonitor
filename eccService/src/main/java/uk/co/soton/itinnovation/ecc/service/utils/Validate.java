@@ -44,64 +44,75 @@ public class Validate {
     public static void eccConfiguration(EccConfiguration config) throws ValidationException {
 
         if (config == null) {
-            throw new ValidationException("Provided configuration is NULL");
+            throw new ValidationException("ECC configuration error: provided configuration is NULL");
+        }
+        
+        // Project name tests
+        String projectName = config.getProjectName();
+
+        if (projectName == null) {
+            throw new IllegalArgumentException("ECC configuration error: project name is NULL");
+        }
+
+        if (projectName.isEmpty()) {
+            throw new IllegalArgumentException("ECC configuration error: project name is EMPTY");
         }
 
         // Test essential Rabbit config
         RabbitConfiguration rc = config.getRabbitConfig();
 
         if (rc == null) {
-            throw new ValidationException("Rabbit configuration is null");
+            throw new ValidationException("ECC configuration error: Rabbit configuration is null");
         }
         if (rc.getMonitorId() == null) {
-            throw new ValidationException("ECC UUID is invalid");
+            throw new ValidationException("ECC configuration error: ECC UUID is invalid");
         }
         if (rc.getIp() == null) {
-            throw new ValidationException("Rabbit server IP is null");
+            throw new ValidationException("ECC configuration error: Rabbit server IP is null");
         }
         if (rc.getPort() == null) {
-            throw new ValidationException("Rabbit port is null");
+            throw new ValidationException("ECC configuration error: Rabbit port is null");
         }
         if (rc.getUserName() == null) {
-            throw new ValidationException("Rabbit username is null");
+            throw new ValidationException("ECC configuration error: Rabbit username is null");
         }
         if (rc.getUserPassword() == null) {
-            throw new ValidationException("Rabbit password is null");
+            throw new ValidationException("ECC configuration error: Rabbit password is null");
         }
 
         // Test essential database config
         DatabaseConfiguration dc = config.getDatabaseConfig();
 
         if (dc == null) {
-            throw new ValidationException("Database configuration is null");
+            throw new ValidationException("ECC configuration error: Database configuration is null");
         }
         if (dc.getDatabaseName() == null) {
-            throw new ValidationException("Database name is null");
+            throw new ValidationException("ECC configuration error: Database name is null");
         }
         if (dc.getDatabaseType() == null) {
-            throw new ValidationException("Database type is null");
+            throw new ValidationException("ECC configuration error: Database type is null");
         }
         if (dc.getUrl() == null) {
-            throw new ValidationException("Database url is null");
+            throw new ValidationException("ECC configuration error: Database url is null");
         }
         if (dc.getUserName() == null) {
-            throw new ValidationException("Database username is null");
+            throw new ValidationException("ECC configuration error: Database username is null");
         }
         if (dc.getUserPassword() == null) {
-            throw new ValidationException("Database password is null");
+            throw new ValidationException("ECC configuration error: Database password is null");
         }
 
         // Test essential misc config
         MiscConfiguration mc = config.getMiscConfig();
 
         if (mc == null) {
-            throw new ValidationException("Misc configuration is null");
+            throw new ValidationException("ECC configuration error: Misc configuration is null");
         }
         if (mc.getSnapshotCount() < 1) {
-            throw new ValidationException("Snapshot count is 0 or less");
+            throw new ValidationException("ECC configuration error: Snapshot count is 0 or less");
         }
         if (mc.getNagiousUrl() == null) {
-            throw new ValidationException("No NAGIOS configuration found");
+            throw new ValidationException("ECC configuration error: No NAGIOS configuration found");
         }
     }
 }

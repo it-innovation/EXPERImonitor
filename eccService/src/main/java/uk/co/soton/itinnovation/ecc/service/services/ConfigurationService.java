@@ -261,11 +261,25 @@ public class ConfigurationService {
     }
 
     public boolean selectEccConfiguration(EccConfiguration newConfiguration) {
-        selectedEccConfiguration = newConfiguration;
-        configurationSet = true;
+        
+        configurationSet = false;
+        
+        if (initialised) {
+            try {
+                // Validate configuration before setting
+                Validate.eccConfiguration(newConfiguration);
+                selectedEccConfiguration = newConfiguration;
 
-        // TODO: check if it's OK to change the configuration;
-        return true;
+                configurationSet = true;
+            }
+            catch (Exception ex) {
+                logger.error("Could not select configuration: errors found", ex);
+            }
+        }
+        else
+            logger.error("Could not select configuration: configuration service not initialised");
+        
+        return configurationSet;
     }
 
     public EccConfiguration createDefaultConfiguration(String projectName) {
@@ -362,22 +376,11 @@ public class ConfigurationService {
             throw new IllegalStateException("Failed to update configuration: service not initialised");
         }
 
-        if (config == null) {
-            throw new IllegalArgumentException("Failed to update configuration: new configuration is NULL");
-        }
-
-        String projectName = config.getProjectName();
-
-        if (projectName == null) {
-            throw new IllegalArgumentException("Failed to update configuration: project name is NULL");
-        }
-
-        if (projectName.isEmpty()) {
-            throw new IllegalArgumentException("Failed to update configuration: project name is EMPTY");
-        }
-
+        // Try validating the configuration first (throws up if there's a problem)
         Validate.eccConfiguration(config);
 
+        String projectName = config.getProjectName();
+        
         logger.debug("Updating configuration for project '" + projectName + "'");
 
         IECCProjectConfig pc = ECCConfigAPIFactory.getProjectConfigAccessor(projectName, configUsername, configPassword);
@@ -411,7 +414,6 @@ public class ConfigurationService {
         pc.putComponentFeatureConfig(component, featureRt, createRabbitJSON(config.getRabbitConfig()));
         pc.putComponentFeatureConfig(component, featureDb, createDatabaseJSON(config.getDatabaseConfig()));
         pc.putComponentFeatureConfig(component, featureDh, createMiscJSON(config.getMiscConfig()));
-
     }
 
     // Private methods ---------------------------------------------------------
