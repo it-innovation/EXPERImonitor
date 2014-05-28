@@ -21,13 +21,17 @@ if ( !File.file?('./thirdPartyLibs/openrdf-sesame.war') )
 	abort("Could not find openrdf-sesame.war in thirdPartyLibs directory")
 end
 
-if ( !File.file?('./thirdPartyLibs/openrdf-sesame.war') )
+if ( !File.file?('./thirdPartyLibs/openrdf-workbench.war') )
 	abort("Could not find openrdf-workbench.war in thirdPartyLibs directory")
 end
 
-puts "*.war files found, starting installation..."
+if ( !File.file?('./thirdPartyLibs/owlim-lite-5.4.jar') )
+	abort("Could not find owlim-lite-5.4.jar in thirdPartyLibs directory")
+end
 
-hostname = "ECC-20"
+puts "Third party files found. Starting installation..."
+
+hostname = "ECC-21"
 ram = "1536"
 
 ecc_ip = (ENV['ECC_IP'] ? ENV['ECC_IP'] : '10.0.0.10')
@@ -55,11 +59,13 @@ Tail the log file with: vagrant ssh -c 'tail -f /var/log/tomcat7/catalina.out'"
 ## The following shell script is run once the VM is built (this part is bash) ##
 
 $script = <<SCRIPT
-apt-get update
+echo "Updating package index..."
+apt-get -qq update
 #apt-get upgrade -y  # could upgrade base OS packages if you want
 
 ## Install dependencies ##
 
+echo "Installing dependencies..."
 # sort out switching to Java 7 before installing Tomcat 
 apt-get install -y openjdk-7-jdk
 update-alternatives --set java /usr/lib/jvm/java-7-openjdk-i386/jre/bin/java
@@ -73,24 +79,22 @@ apt-get install -y tomcat7-admin
 apt-get install -y postgresql-9.1
 apt-get install -y rabbitmq-server
 
-## Use the Java 7 JDK ##
-#export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-i386/
-#export JDK_HOME=/usr/lib/jvm/java-7-openjdk-i386/
-#export JRE_HOME=/usr/lib/jvm/java-7-openjdk-i386/jre
-#export PATH=$JAVA_HOME/bin:$PATH
-
 ## Get the ECC code ##
 
-# remove old code to get a clean build in case we are re-provisioning
+# remove old code to get a clean(ish) build in case we are re-provisioning
 rm -rf experimedia-ecc
 
 # get ECC code (need to do this before PostgreSQL config)
 if [ '#{ecc_git}' != "" ]; then
+	# set up deploy key to enable access to gitlab
+	cp -a /vagrant/vagrantConf/gitLab/.ssh ~
 	# get the latest ECC code from Git
-	git clone git://soave.it-innovation.soton.ac.uk/git/experimedia-ecc
+	git clone git@glab-i1.it-innovation.soton.ac.uk:experimedia/ecc.git experimedia-ecc
 	cd experimedia-ecc
 	# need -f to force it, otherwise it prints a warning and nothing happens
-	git checkout -f #{ecc_git}  
+	git checkout -f #{ecc_git}
+	# copy thirdPartyLibs from host machine
+	cp /vagrant/thirdPartyLibs/* thirdPartyLibs
 	cd ..
 else
 	# or copy ECC code from guest machine to host machine
@@ -100,9 +104,8 @@ fi
 
 ## Set up PostgreSQL ##
 
-# TODO: need to delete the DB first so this can work with re-provisioning
-
-# create the database
+# drop then create the database
+sudo -u postgres dropdb edm-metrics
 sudo -u postgres createdb -T template0 edm-metrics --encoding=UTF8 --locale=en_US.utf8
 sudo -u postgres psql -d edm-metrics -f experimedia-ecc/edm/resources/edm-metrics-postgres.sql
 
@@ -128,8 +131,8 @@ service rabbitmq-server restart
 # enable the tomcat manager webapp with username manager, password manager
 echo "<?xml version='1.0' encoding='utf-8'?><tomcat-users><user rolename='manager-gui'/><user username='manager' password='manager' roles='manager-gui'/></tomcat-users>" > /etc/tomcat7/tomcat-users.xml
 
-# Copy Tomcat configuration into default space
-cp /vagrant/vagrantConf/tomcat7 /etc/default
+# Copy Tomcat configuration into default folder
+cp /vagrant/vagrantConf/tomcat/tomcat7 /etc/default
 
 service tomcat7 restart
 
@@ -149,14 +152,14 @@ mvn install |& tee /tmp/build.log
 
 ## Deploy ##
 
-#depoly OpenRDF services into Tomcat
-cp thirdPartyLibs/openrdf-sesame.war /var/lib/tomcat7/webapps/openrdf-sesame.war
-cp thirdPartyLibs/openrdf-workbench.war /var/lib/tomcat7/webapps/openrdf-workbench.war
+# Deploy OpenRDF services into Tomcat
 echo "**** Deploying OpenRDF sesame & workbench into Tomcat"
+cp ./thirdPartyLibs/openrdf-sesame.war /var/lib/tomcat7/webapps/openrdf-sesame.war
+cp ./thirdPartyLibs/openrdf-workbench.war /var/lib/tomcat7/webapps/openrdf-workbench.war
 
 # deploy the ECC into Tomcat
-cp eccService/target/*.war /var/lib/tomcat7/webapps/ECC.war
 echo "**** Deploying ECC into Tomcat"
+cp eccService/target/*.war /var/lib/tomcat7/webapps/ECC.war
 
 if [ '#{ecc_git}' != "" ]; then
 	echo 'ECC built from git branch #{ecc_git}'
@@ -164,6 +167,7 @@ else
 	echo 'ECC code copied from host machine'
 fi
 
+echo "Maven build log is in /tmp/build.log on guest machine"
 echo "Vagrant shell script completed."
 echo "#{info}"
 
