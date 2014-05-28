@@ -1,0 +1,15 @@
+GLASSFISH_HOME=${GLASSFISH_HOME:-"/opt/glassfish3"}
+
+case "$1" in
+start)
+$GLASSFISH_HOME/bin/asadmin start-domain >/dev/null
+    ;;
+stop)
+     $GLASSFISH_HOME/bin/asadmin stop-domain >/dev/null
+    ;;
+restart)
+     $GLASSFISH_HOME/bin/asadmin restart-domain >/dev/null
+    ;;
+\*)
+   echo "usage: $0 (start|stop|restart|help)"
+esac

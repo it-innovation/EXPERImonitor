@@ -1,0 +1,13 @@
+<configuration debug="true" scan="true">
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>/tmp/gf_server.log</file>
+        <append>true</append>
+        <encoder>
+            <Pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{52} - %msg%n</Pattern>
+        </encoder>
+    </appender>
+    <root>
+        <level value="INFO"/>
+        <appender-ref ref="FILE"/>
+    </root>
+</configuration>
