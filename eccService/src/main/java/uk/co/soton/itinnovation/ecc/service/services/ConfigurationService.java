@@ -165,9 +165,11 @@ public class ConfigurationService {
                 servicesStarted = true;
                 return true;
             } else {
+                servicesStarted = false;
                 return false;
             }
         } else {
+            servicesStarted = false;
             return false;
         }
     }
@@ -261,24 +263,27 @@ public class ConfigurationService {
     }
 
     public boolean selectEccConfiguration(EccConfiguration newConfiguration) {
-        
+
         configurationSet = false;
-        
+        selectedEccConfiguration = null;
+
         if (initialised) {
             try {
                 // Validate configuration before setting
-                Validate.eccConfiguration(newConfiguration);
-                selectedEccConfiguration = newConfiguration;
+                // TODO: get reason back, throwing exceptions didn't work for some reason
+                configurationSet = (new Validate()).eccConfiguration(newConfiguration);
+                if (configurationSet) {
+                    selectedEccConfiguration = newConfiguration;
+                }
 
-                configurationSet = true;
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 logger.error("Could not select configuration: errors found", ex);
+                configurationSet = false;
             }
-        }
-        else
+        } else {
             logger.error("Could not select configuration: configuration service not initialised");
-        
+        }
+
         return configurationSet;
     }
 
@@ -342,8 +347,11 @@ public class ConfigurationService {
                 // Create full config & validate
                 EccConfiguration ec = new EccConfiguration(projectName, rtc, dbc, mcc);
 
-                Validate.eccConfiguration(ec);
-                config = ec;
+                if ((new Validate()).eccConfiguration(ec)) {
+                    config = ec;
+                } else {
+                    logger.error("Configuration validation failed");
+                }
             } catch (Exception ex) {
 
                 String msg = "Could not retrieve configuration data for project " + projectName + " : " + ex.getMessage();
@@ -353,11 +361,10 @@ public class ConfigurationService {
             logger.warn("Request for configuration that was null or empty;");
         }
 
-        // Otherwise fallback on default
-        if (config == null) {
-            config = createDefaultConfiguration(projectName);
-        }
-
+//        // Otherwise fallback on default - no!
+//        if (config == null) {
+//            config = createDefaultConfiguration(projectName);
+//        }
         return config;
     }
 
@@ -377,43 +384,46 @@ public class ConfigurationService {
         }
 
         // Try validating the configuration first (throws up if there's a problem)
-        Validate.eccConfiguration(config);
+        if ((new Validate()).eccConfiguration(config)) {
 
-        String projectName = config.getProjectName();
-        
-        logger.debug("Updating configuration for project '" + projectName + "'");
+            String projectName = config.getProjectName();
 
-        IECCProjectConfig pc = ECCConfigAPIFactory.getProjectConfigAccessor(projectName, configUsername, configPassword);
+            logger.debug("Updating configuration for project '" + projectName + "'");
 
-        logger.debug("Removing old configuration for " + projectName);
+            IECCProjectConfig pc = ECCConfigAPIFactory.getProjectConfigAccessor(projectName, configUsername, configPassword);
 
-        // Rabbit
-        if (pc.componentFeatureConfigExists(component, featureRt)) {
-            pc.deleteComponentFeatureConfig(component, featureRt);
+            logger.debug("Removing old configuration for " + projectName);
+
+            // Rabbit
+            if (pc.componentFeatureConfigExists(component, featureRt)) {
+                pc.deleteComponentFeatureConfig(component, featureRt);
+            } else {
+                pc.createComponentFeature(component, featureRt);
+            }
+
+            // Database
+            if (pc.componentFeatureConfigExists(component, featureDb)) {
+                pc.deleteComponentFeatureConfig(component, featureDb);
+            } else {
+                pc.createComponentFeature(component, featureDb);
+            }
+
+            // Dashboard
+            if (pc.componentFeatureConfigExists(component, featureDh)) {
+                pc.deleteComponentFeatureConfig(component, featureDh);
+            } else {
+                pc.createComponentFeature(component, featureDh);
+            }
+
+            // Write new configuration
+            logger.info("Writing new configuration for " + projectName);
+
+            pc.putComponentFeatureConfig(component, featureRt, createRabbitJSON(config.getRabbitConfig()));
+            pc.putComponentFeatureConfig(component, featureDb, createDatabaseJSON(config.getDatabaseConfig()));
+            pc.putComponentFeatureConfig(component, featureDh, createMiscJSON(config.getMiscConfig()));
         } else {
-            pc.createComponentFeature(component, featureRt);
+            logger.error("Configuration validation failed");
         }
-
-        // Database
-        if (pc.componentFeatureConfigExists(component, featureDb)) {
-            pc.deleteComponentFeatureConfig(component, featureDb);
-        } else {
-            pc.createComponentFeature(component, featureDb);
-        }
-
-        // Dashboard
-        if (pc.componentFeatureConfigExists(component, featureDh)) {
-            pc.deleteComponentFeatureConfig(component, featureDh);
-        } else {
-            pc.createComponentFeature(component, featureDh);
-        }
-
-        // Write new configuration
-        logger.info("Writing new configuration for " + projectName);
-
-        pc.putComponentFeatureConfig(component, featureRt, createRabbitJSON(config.getRabbitConfig()));
-        pc.putComponentFeatureConfig(component, featureDb, createDatabaseJSON(config.getDatabaseConfig()));
-        pc.putComponentFeatureConfig(component, featureDh, createMiscJSON(config.getMiscConfig()));
     }
 
     // Private methods ---------------------------------------------------------

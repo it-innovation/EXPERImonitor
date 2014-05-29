@@ -9,6 +9,16 @@ $(document).ready(function() {
     });
     $("#localConfigurationRadioInput").trigger('change');
 
+    $("#closeNewConfigurationErrorModal").click(function(e) {
+        e.preventDefault();
+        $("#newConfigurationErrorModal").foundation('reveal', 'close');
+    });
+
+    $("#closeServicesFailedErrorModal").click(function(e) {
+        e.preventDefault();
+        $("#servicesFailedErrorModal").foundation('reveal', 'close');
+    });
+
     // check if the service is initialised successfully.
     $.ajax({
         type: 'GET',
@@ -46,37 +56,60 @@ $(document).ready(function() {
                             $('#configStatus').attr('class', 'right alert-color');
                             $('#configStatus').text('not configured');
 
-                            // display available configurations
-                            $.getJSON(BASE_URL + "/configuration/projects", function(data) {
-                                console.log(data);
-                                if (data.size > 1) {
-                                    console.log("No remote projects found");
-                                } else {
-                                    for (counter in data) {
-                                        var remoteConfigurationRadioInput = $('<input type="radio" name="configurationSet" value="rp' +
-                                                counter + '" id="rp' + counter + '"><label for="rp' + counter + '">' + data[counter] + '</label><br>').appendTo("#listofRemoteConfigurations");
-                                        remoteConfigurationRadioInput.data("link", BASE_URL + "/configuration/projects/" + data[counter]);
-                                        remoteConfigurationRadioInput.change(function(e) {
-                                            displayFetchedConfiguration($(this).data("link"));
-                                        });
-                                    }
-//                                    var customSearchRadioInput = $('<input type="radio" name="configurationSet" value="rp' +
-//                                            counter + '" id="rp' + counter + '"><input type="text" name="searchForWebDavProjectName" id="searchForWebDavProjectName"><br>').appendTo("#listofRemoteConfigurations");
-                                }
-
-                            });
-
                         } else if (cdata === true) {
                             $('#configStatus').attr('class', 'right success-color');
                             $('#configStatus').text('configured');
 
-                            // go to experiment if no flag
-                            window.location.replace(BASE_URL + "/experiment.html");
+                            // check if services started
+                            $.ajax({
+                                type: 'GET',
+                                url: BASE_URL + "/configuration/ifservicesstarted",
+                                error: function(jqXHR, textStatus, errorThrown) {
+                                    console.log(jqXHR);
+                                    console.log(textStatus);
+                                    console.log(errorThrown);
+                                    $('#configStatus').attr('class', 'right alert-color');
+                                    $('#configStatus').text("service start error (" + errorThrown + ")");
+                                },
+                                success: function(ssdata) {
+                                    if (ssdata === false) {
+                                        $('#configStatus').attr('class', 'right alert-color');
+                                        $('#configStatus').text('services failed to start');
+                                        $("#servicesFailedErrorModal").foundation('reveal', 'open');
+                                    } else if (ssdata === true) {
+                                        $('#configStatus').attr('class', 'right success-color');
+                                        $('#configStatus').text('service started');
+                                        window.location.replace(BASE_URL + "/experiment.html");
+                                    } else {
+                                        $('#configStatus').attr('class', 'right alert-color');
+                                        $('#configStatus').text('unknown service started status');
+                                    }
+                                }});
 
                         } else {
                             $('#configStatus').attr('class', 'right alert-color');
                             $('#configStatus').text('unknown configured status');
                         }
+
+                        // display available configurations
+                        $.getJSON(BASE_URL + "/configuration/projects", function(data) {
+                            console.log(data);
+                            if (data.size > 1) {
+                                console.log("No remote projects found");
+                            } else {
+                                for (counter in data) {
+                                    var remoteConfigurationRadioInput = $('<input type="radio" name="configurationSet" value="rp' +
+                                            counter + '" id="rp' + counter + '"><label for="rp' + counter + '">' + data[counter] + '</label><br>').appendTo("#listofRemoteConfigurations");
+                                    remoteConfigurationRadioInput.data("link", BASE_URL + "/configuration/projects/" + data[counter]);
+                                    remoteConfigurationRadioInput.change(function(e) {
+                                        displayFetchedConfiguration($(this).data("link"));
+                                    });
+                                }
+//                                    var customSearchRadioInput = $('<input type="radio" name="configurationSet" value="rp' +
+//                                            counter + '" id="rp' + counter + '"><input type="text" name="searchForWebDavProjectName" id="searchForWebDavProjectName"><br>').appendTo("#listofRemoteConfigurations");
+                            }
+
+                        });
                     }});
 
             } else {
@@ -118,17 +151,18 @@ $(document).ready(function() {
                 console.log(jqXHR);
                 console.log(textStatus);
                 console.log(errorThrown);
+                $("#newConfigurationErrorModal").foundation('reveal', 'open');
             },
             success: function(data) {
                 console.log(data);
                 if (data === false) {
                     $('#configStatus').attr('class', 'right alert-color');
                     $('#configStatus').text('not configured');
+                    $("#newConfigurationErrorModal").foundation('reveal', 'open');
                 } else if (data === true) {
                     $('#configStatus').attr('class', 'right success-color');
                     $('#configStatus').text('configured');
 
-                    // TODO: add services launch check
                     window.location.replace(BASE_URL + "/experiment.html");
                 } else {
                     $('#configStatus').attr('class', 'right alert-color');

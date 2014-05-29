@@ -88,7 +88,15 @@ public class ExperimentController {
         ArrayList<EccExperiment> result = new ArrayList<EccExperiment>();
 
         for (Experiment e : dataService.getAllKnownExperiments()) {
-            result.add(Convert.experimentToEccExperiment(e));
+            if (e != null) {
+                if (e.getStartTime() != null) {
+                    result.add(Convert.experimentToEccExperiment(e));
+                } else {
+                    logger.error("Invalid experiment [" + e.getUUID().toString() + "]: no start time specified. Will not return in getAllExperiments()");
+                }
+            } else {
+                logger.error("Encountered NULL experiment!");
+            }
         }
 
         if (result.size() > 1) {
@@ -115,13 +123,20 @@ public class ExperimentController {
         }
 
         for (Experiment e : dataService.getAllKnownExperiments()) {
-            // TODO: tidy this up
-            if (currentExperimentUuid == null) {
-                result.add(Convert.experimentToEccExperiment(e));
-            } else {
-                if (!e.getUUID().equals(currentExperimentUuid)) {
-                    result.add(Convert.experimentToEccExperiment(e));
+            if (e != null) {
+                if (e.getStartTime() != null) {
+                    if (currentExperimentUuid == null) {
+                        result.add(Convert.experimentToEccExperiment(e));
+                    } else {
+                        if (!e.getUUID().equals(currentExperimentUuid)) {
+                            result.add(Convert.experimentToEccExperiment(e));
+                        }
+                    }
+                } else {
+                    logger.error("Invalid experiment [" + e.getUUID().toString() + "]: no start time specified. Will not return in getLatestExperiments()");
                 }
+            } else {
+                logger.error("Encountered NULL experiment!");
             }
         }
 

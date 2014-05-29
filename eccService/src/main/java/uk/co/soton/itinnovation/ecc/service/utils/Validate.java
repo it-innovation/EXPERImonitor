@@ -24,7 +24,8 @@
 /////////////////////////////////////////////////////////////////////////
 package uk.co.soton.itinnovation.ecc.service.utils;
 
-import javax.xml.bind.ValidationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.co.soton.itinnovation.ecc.service.domain.DatabaseConfiguration;
 import uk.co.soton.itinnovation.ecc.service.domain.EccConfiguration;
 import uk.co.soton.itinnovation.ecc.service.domain.MiscConfiguration;
@@ -35,84 +36,106 @@ import uk.co.soton.itinnovation.ecc.service.domain.RabbitConfiguration;
  */
 public class Validate {
 
+    private final Logger logger = LoggerFactory.getLogger(getClass());
+
     /**
      * Tests all parameters of an {@link EccConfiguration}.
      *
      * @param config configuration to validate.
-     * @throws ValidationException in case of an error.
+     * @return
      */
-    public static void eccConfiguration(EccConfiguration config) throws ValidationException {
+    public boolean eccConfiguration(EccConfiguration config) {
 
         if (config == null) {
-            throw new ValidationException("ECC configuration error: provided configuration is NULL");
+            logger.error("ECC configuration error: provided configuration is NULL");
+            return false;
         }
-        
+
         // Project name tests
         String projectName = config.getProjectName();
 
         if (projectName == null) {
-            throw new IllegalArgumentException("ECC configuration error: project name is NULL");
+            logger.error("ECC configuration error: project name is NULL");
+            return false;
         }
 
         if (projectName.isEmpty()) {
-            throw new IllegalArgumentException("ECC configuration error: project name is EMPTY");
+            logger.error("ECC configuration error: project name is EMPTY");
+            return false;
         }
 
         // Test essential Rabbit config
         RabbitConfiguration rc = config.getRabbitConfig();
 
         if (rc == null) {
-            throw new ValidationException("ECC configuration error: Rabbit configuration is null");
+            logger.error("ECC configuration error: Rabbit configuration is null");
+            return false;
         }
         if (rc.getMonitorId() == null) {
-            throw new ValidationException("ECC configuration error: ECC UUID is invalid");
+            logger.error("ECC configuration error: ECC UUID is invalid");
+            return false;
         }
         if (rc.getIp() == null) {
-            throw new ValidationException("ECC configuration error: Rabbit server IP is null");
+            logger.error("ECC configuration error: Rabbit server IP is null");
+            return false;
         }
         if (rc.getPort() == null) {
-            throw new ValidationException("ECC configuration error: Rabbit port is null");
+            logger.error("ECC configuration error: Rabbit port is null");
+            return false;
         }
         if (rc.getUserName() == null) {
-            throw new ValidationException("ECC configuration error: Rabbit username is null");
+            logger.error("ECC configuration error: Rabbit username is null");
+            return false;
         }
         if (rc.getUserPassword() == null) {
-            throw new ValidationException("ECC configuration error: Rabbit password is null");
+            logger.error("ECC configuration error: Rabbit password is null");
+            return false;
         }
 
         // Test essential database config
         DatabaseConfiguration dc = config.getDatabaseConfig();
 
         if (dc == null) {
-            throw new ValidationException("ECC configuration error: Database configuration is null");
+            logger.error("ECC configuration error: Database configuration is null");
+            return false;
         }
         if (dc.getDatabaseName() == null) {
-            throw new ValidationException("ECC configuration error: Database name is null");
+            logger.error("ECC configuration error: Database name is null");
+            return false;
         }
         if (dc.getDatabaseType() == null) {
-            throw new ValidationException("ECC configuration error: Database type is null");
+            logger.error("ECC configuration error: Database type is null");
+            return false;
         }
         if (dc.getUrl() == null) {
-            throw new ValidationException("ECC configuration error: Database url is null");
+            logger.error("ECC configuration error: Database url is null");
+            return false;
         }
         if (dc.getUserName() == null) {
-            throw new ValidationException("ECC configuration error: Database username is null");
+            logger.error("ECC configuration error: Database username is null");
+            return false;
         }
         if (dc.getUserPassword() == null) {
-            throw new ValidationException("ECC configuration error: Database password is null");
+            logger.error("ECC configuration error: Database password is null");
+            return false;
         }
 
         // Test essential misc config
         MiscConfiguration mc = config.getMiscConfig();
 
         if (mc == null) {
-            throw new ValidationException("ECC configuration error: Misc configuration is null");
+            logger.error("ECC configuration error: Misc configuration is null");
+            return false;
         }
         if (mc.getSnapshotCount() < 1) {
-            throw new ValidationException("ECC configuration error: Snapshot count is 0 or less");
+            logger.error("ECC configuration error: Snapshot count is 0 or less");
+            return false;
         }
         if (mc.getNagiousUrl() == null) {
-            throw new ValidationException("ECC configuration error: No NAGIOS configuration found");
+            logger.error("ECC configuration error: No NAGIOS configuration found");
+            return false;
         }
+
+        return true;
     }
 }
