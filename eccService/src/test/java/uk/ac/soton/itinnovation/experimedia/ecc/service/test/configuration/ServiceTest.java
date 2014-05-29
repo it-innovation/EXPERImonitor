@@ -59,14 +59,12 @@ public class ServiceTest {
         EccConfiguration defaultRemoteEccConfiguration = configurationService.getRemoteConfiguration("Default");
         Assert.assertNotNull(defaultRemoteEccConfiguration);
 
-        try {
-            Validate.eccConfiguration(defaultRemoteEccConfiguration);
-        } catch (ValidationException ex) {
-            Assert.fail(ex.getMessage());
-        }
+        Assert.assertEquals(true, (new Validate()).eccConfiguration(defaultRemoteEccConfiguration));
 
-        Assert.assertEquals(true, configurationService.selectEccConfiguration(defaultRemoteEccConfiguration));
-        Assert.assertEquals(true, configurationService.isConfigurationSet());
+        Assert.assertEquals(
+                true, configurationService.selectEccConfiguration(defaultRemoteEccConfiguration));
+        Assert.assertEquals(
+                true, configurationService.isConfigurationSet());
     }
 
     @Test
@@ -81,7 +79,7 @@ public class ServiceTest {
         // Check, update and re-check the configuration
         try {
             // Validate
-            Validate.eccConfiguration(defaultEccConfiguration);
+            Assert.assertEquals(true, (new Validate()).eccConfiguration(defaultEccConfiguration));
 
             // Modify the configuration
             RabbitConfiguration rc = defaultEccConfiguration.getRabbitConfig();
@@ -99,7 +97,7 @@ public class ServiceTest {
             // Retrieve and test the modified configuration
             EccConfiguration updatedConfig = configurationService.getRemoteConfiguration("DefaultTest");
 
-            Validate.eccConfiguration(updatedConfig);
+            Assert.assertEquals(true, (new Validate()).eccConfiguration(updatedConfig));
 
             rc = updatedConfig.getRabbitConfig();
             Assert.assertEquals("127.0.0.1", rc.getIp());

@@ -112,16 +112,36 @@ public class DataService {
     public void shutdown() {
         logger.debug("Shutting down data service");
 
-        if (started) {
-            expReportDAO = null;
-            msetDAO = null;
-            entityDAO = null;
-            metricGenDAO = null;
-            experimentDAO = null;
-            expDataManager = null;
-        }
+        boolean stopResult = stop();
 
-        logger.debug("Data service shut down");
+        logger.debug("Data service shut down: " + stopResult);
+    }
+
+    /**
+     * Attempts to stop service.
+     *
+     * @return false on fail.
+     */
+    public boolean stop() {
+        if (started) {
+            logger.debug("Stopping data service");
+            try {
+                expReportDAO = null;
+                msetDAO = null;
+                entityDAO = null;
+                metricGenDAO = null;
+                experimentDAO = null;
+                expDataManager = null;
+
+                return true;
+            } catch (Throwable e) {
+                logger.error("Failed to stop data service", e);
+                return false;
+            }
+        } else {
+            logger.error("Failed to stop data service: not started");
+            return false;
+        }
     }
 
     /**

@@ -134,6 +134,22 @@
             </div>
         </div>
 
+        <div id="newConfigurationErrorModal" class="reveal-modal medium" data-reveal>
+            <h2>Selected configuration is not valid</h2>
+            <p class="lead">Please have a look at the service logs or browser error console</p>
+            <p>The exact details of this error are not yet available in this interface</p>
+            <a href="#" class="button medium" id="closeNewConfigurationErrorModal">Try again</a>
+            <a class="close-reveal-modal">&#215;</a>
+        </div>
+
+        <div id="servicesFailedErrorModal" class="reveal-modal medium" data-reveal>
+            <h2>Services failed to start</h2>
+            <p class="lead">Selected configuration can not be used to start an experiment</p>
+            <p>The exact details of this error are not yet available in this interface</p>
+            <a href="#" class="button medium" id="closeServicesFailedErrorModal">Try again</a>
+            <a class="close-reveal-modal">&#215;</a>
+        </div>
+
         <script src="js/vendor/jquery.min.js"></script>
         <script src="js/foundation.min.js"></script>
         <script src="js/vendor/jquery.serializeJSON.min.js"></script>

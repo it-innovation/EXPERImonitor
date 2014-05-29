@@ -38,6 +38,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import uk.co.soton.itinnovation.ecc.service.domain.EccConfiguration;
 import uk.co.soton.itinnovation.ecc.service.services.ConfigurationService;
+import uk.co.soton.itinnovation.ecc.service.utils.Validate;
 
 /**
  * Exposes ECC configuration endpoints.
@@ -83,6 +84,10 @@ public class ConfigurationController {
     public boolean ifConfigured() {
         boolean result = configurationService.isConfigurationSet();
         logger.debug("Returning service configuration status: " + result);
+
+        if (result) {
+            logger.debug(configurationService.getSelectedEccConfiguration().toJson().toString(2));
+        }
         return result;
     }
 
@@ -95,6 +100,18 @@ public class ConfigurationController {
     public boolean ifServicesStarted() {
         boolean result = configurationService.isServicesStarted();
         logger.debug("Returning services started status: " + result);
+        return result;
+    }
+
+    /**
+     * @return true if the service is configured (i.e., configuration was
+     * selected)
+     */
+    @RequestMapping(method = RequestMethod.GET, value = "/do/reset")
+    @ResponseBody
+    public boolean reset() {
+        boolean result = configurationService.reset();
+        logger.debug("Resetting service result: " + result);
         return result;
     }
 
@@ -149,16 +166,24 @@ public class ConfigurationController {
             ObjectMapper mapper = new ObjectMapper();
             logger.debug(JSONObject.fromObject(mapper.writeValueAsString(newEccConfiguration)).toString(2));
 
-            // TODO: make safe
-            configurationService.selectEccConfiguration(newEccConfiguration);
-            if (newEccConfiguration.isRemote()) {
-                logger.debug("Set and save new configuration on WebDAV");
-                configurationService.updateRemoteConfiguration(newEccConfiguration);
-            } else {
-                logger.debug("Just set new configuration");
-            }
+            // Validate configuration
+            if ((new Validate()).eccConfiguration(newEccConfiguration)) {
+                if (configurationService.selectEccConfiguration(newEccConfiguration)) {
+                    if (newEccConfiguration.isRemote()) {
+                        logger.debug("Set and save new configuration on WebDAV");
+                        configurationService.updateRemoteConfiguration(newEccConfiguration);
+                    } else {
+                        logger.debug("Just set new configuration");
+                    }
 
-            return configurationService.startServices();
+                    return configurationService.startServices();
+                } else {
+                    return false;
+                }
+            } else {
+                logger.error("Submitted configuration is not valid!");
+                return false;
+            }
         } catch (Throwable ex) {
             // TODO improve this
             logger.error("Failed to set service configuration", ex);

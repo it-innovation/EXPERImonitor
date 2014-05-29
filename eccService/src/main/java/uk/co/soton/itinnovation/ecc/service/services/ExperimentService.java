@@ -106,26 +106,45 @@ public class ExperimentService {
 
         logger.debug("Shutting down experiment service");
 
+        boolean stopResult = stop();
+
+        logger.debug("Experiment service shut down: " + stopResult);
+    }
+
+    /**
+     * Attempts to stop service.
+     *
+     * @return false on fail.
+     */
+    public boolean stop() {
         if (started) {
-            // Metrics sheduling shutdown
-            if (liveMetricScheduler != null) {
-                liveMetricScheduler.shutDown();
-                liveMetricScheduler = null;
-            }
+            logger.debug("Stopping experiment service");
+            try {
+                // Metrics sheduling shutdown
+                if (liveMetricScheduler != null) {
+                    liveMetricScheduler.shutDown();
+                    liveMetricScheduler = null;
+                }
 
-            // Experiment monitor shutdown
-            if (expMonitor != null) {
-                expMonitor.shutDown();
-                expMonitor = null;
-            }
+                // Experiment monitor shutdown
+                if (expMonitor != null) {
+                    expMonitor.shutDown();
+                    expMonitor = null;
+                }
 
-            // Experiment data manager tidy up
-            expReportAccessor = null;
-            expMetGeneratorDAO = null;
-            expDataManager = null;
+                // Experiment data manager tidy up
+                expReportAccessor = null;
+                expMetGeneratorDAO = null;
+                expDataManager = null;
+                return true;
+            } catch (Throwable e) {
+                logger.error("Failed to stop experiment service", e);
+                return false;
+            }
+        } else {
+            logger.error("Failed to stop experiment service: not started");
+            return false;
         }
-
-        logger.debug("Experiment service shut down");
     }
 
     /**
