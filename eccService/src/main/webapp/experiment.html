@@ -22,7 +22,7 @@
 
                     </div>
                     <div class="large-5 columns text-right" id="experiment_controls">
-                        <!--<p class='details'>Live monitoring phase > <a href="#">Go to Tear down phase</a></p>-->
+                        <p class='details hide'><a href="#" id="further_options">Options</a><br><br></p>
                         <p class='details'><a href="#" id="stop_experiment">Stop experiment</a><br><br></p>
                         <p class='details'><a href="#" id="download_experiment_data">Download CSV data</a></p>
                     </div>
@@ -105,6 +105,23 @@
             </div>
             <!--<a class="close-reveal-modal">&#215;</a>-->
 
+        </div>
+
+        <div id="optionsModal" class="reveal-modal medium" data-reveal>
+            <h2 class="text-center">Here is what you can do next</h2>
+            <div class="row fullWidth">
+                <div class="small-6 columns text-center">
+                    <p class="lead">Continue with current configuration</p>
+                    <p>Start new experiment, browse data from previous experiments</p>
+                    <a href="#" class="button medium" id="keepConfigButton">Keep going</a>
+                </div>
+                <div class="small-6 columns text-center">
+                    <p class="lead">Change configuration</p>
+                    <p>Go back to the configuration page and start afresh</p>
+                    <a href="#" class="button medium" id="newConfigButton">Reconfigure</a>
+                </div>
+            </div>
+            <a class="close-reveal-modal">&#215;</a>
         </div>
 
         <script src="js/vendor/jquery.min.js"></script>

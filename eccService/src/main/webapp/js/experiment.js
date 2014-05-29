@@ -101,6 +101,36 @@ $(document).ready(function() {
             if (data === true) {
                 $('#configStatus').attr('class', 'right success-color');
                 $('#configStatus').text('experiment stopped');
+                $("#stop_experiment").parent().addClass('hide');
+                $("#further_options").parent().removeClass('hide');
+                $("#further_options").click(function(e) {
+                    e.preventDefault();
+                    $("#optionsModal").foundation('reveal', 'open');
+
+                    // reload page
+                    $("#keepConfigButton").click(function(e) {
+                        e.preventDefault();
+                        window.location.replace(window.location.pathname);
+                    });
+
+                    // reset the service, go to index
+                    $("#newConfigButton").click(function(e) {
+                        e.preventDefault();
+                        $.getJSON(BASE_URL + "/configuration/do/reset", function(resetResult) {
+                            if (resetResult === true) {
+                                window.location.replace(BASE_URL + "/index.html");
+                            } else if (resetResult === false) {
+                                console.log("Service reset failed");
+                                $('#configStatus').attr('class', 'right alert-color');
+                                $('#configStatus').text('Service reset failed');
+                            } else {
+                                console.log("Unknown service reset status");
+                                $('#configStatus').attr('class', 'right alert-color');
+                                $('#configStatus').text('Unknown service reset status');
+                            }
+                        });
+                    });
+                });
             } else {
                 $('#configStatus').attr('class', 'right alert-color');
                 $('#configStatus').text('failed to stop current experiment');
@@ -226,7 +256,6 @@ $(document).ready(function() {
                         console.log(cdata);
                         showStatus(cdata, 'configured', 'not configured', 'unknown configuration status');
                         if (cdata === false) {
-
                             // go back to main page to select configuration
                             // TODO: show what is wrong with the configuration
                             window.location.replace(BASE_URL + "/index.html");

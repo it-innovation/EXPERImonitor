@@ -175,6 +175,56 @@ public class ConfigurationService {
     }
 
     /**
+     * Attempts to stop both experiment and data services.
+     *
+     * @return false on fail.
+     */
+    public boolean stopServices() {
+        if (!initialised) {
+            logger.error("Failed to stop services: configuration service not initialised");
+            return false;
+        } else {
+            boolean result;
+            if (experimentService.isStarted()) {
+                result = experimentService.stop();
+            } else {
+                logger.error("Failed to stop experiment service: experiment service not started");
+                result = false;
+            }
+
+            if (result) {
+                if (dataService.isStarted()) {
+                    result = dataService.stop();
+                } else {
+                    logger.error("Failed to stop experiment service: experiment service not started");
+                    result = false;
+                }
+            }
+
+            return result;
+        }
+    }
+
+    /**
+     * Reset the service to force reconfiguration.
+     *
+     * @return false on fail.
+     */
+    public boolean reset() {
+        if (stopServices()) {
+            logger.debug("Resetting configuration service variables");
+            servicesStarted = false;
+            configurationSet = false;
+            selectedEccConfiguration = null;
+            return true;
+        } else {
+            logger.error("Failed to stop the services");
+            return false;
+        }
+
+    }
+
+    /**
      * Starts experiment service.
      *
      * @return true if the experiment service started successfully.

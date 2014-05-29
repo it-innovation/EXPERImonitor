@@ -104,6 +104,18 @@ public class ConfigurationController {
     }
 
     /**
+     * @return true if the service is configured (i.e., configuration was
+     * selected)
+     */
+    @RequestMapping(method = RequestMethod.GET, value = "/do/reset")
+    @ResponseBody
+    public boolean reset() {
+        boolean result = configurationService.reset();
+        logger.debug("Resetting service result: " + result);
+        return result;
+    }
+
+    /**
      * @return local configuration (from application.properties).
      */
     @RequestMapping(method = RequestMethod.GET, value = "/local")
