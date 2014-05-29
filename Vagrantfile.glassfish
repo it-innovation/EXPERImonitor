@@ -48,14 +48,14 @@ glassfish_port = (ENV['GLASSFISH_PORT'] ? ENV['GLASSFISH_PORT'] : '4848')
 info = "
 ECC service is deployed on VM with IP #{ecc_ip}
 ECC service is mapped to http://localhost:#{ecc_port}/ECC on host machine.
-Tomcat manager is mapped to http://localhost:#{ecc_port}/manager/html with username manager, password manager
+Glassfish front page is mapped to http://localhost:#{ecc_port}
 OpenRDF workbench is mapped to http://localhost:#{ecc_port}/openrdf-workbench on host machine
 Using RabbitMQ deployed on #{rabbit_ip}
 RabbitMQ AMQP bus mapped to http://localhost:#{rabbit_port} on host machine.
 RabbitMQ management interface is mapped to http://localhost:#{rabbit_mgt_port} on host machine (username: guest / password: guest).
 Java debugger is mapped to port #{debugger_port} on host machine.
 
-Tail the log file with: vagrant ssh -c 'tail -f /var/log/tomcat7/catalina.out'"
+Tail the log file with: vagrant ssh -c 'tail -f /opt/glassfish3/glassfish/domains/domain1/logs/server.log'"
 
 ## The following shell script is run once the VM is built (this part is bash) ##
 
@@ -67,7 +67,7 @@ apt-get -qq update
 ## Install dependencies ##
 
 echo "Installing dependencies..."
-# sort out switching to Java 7 before installing Tomcat 
+# sort out switching to Java 7 before installing Glassfish
 apt-get install -y openjdk-7-jdk
 update-alternatives --set java /usr/lib/jvm/java-7-openjdk-i386/jre/bin/java
 rm /usr/lib/jvm/default-java
@@ -101,6 +101,13 @@ else
 	rsync -a /vagrant/ experimedia-ecc --exclude '.git' --exclude 'target'
 fi
 
+## Build ##
+echo "**** Building ECC"
+
+cd experimedia-ecc
+cd thirdPartyLibs && /bin/sh ./installLibraries.sh && cd ..
+mvn install |& tee /tmp/build.log
+
 ## Set up PostgreSQL ##
 
 # drop then create the database
@@ -132,15 +139,42 @@ wget http://download.java.net/glassfish/3.1.2.2/release/glassfish-3.1.2.2.zip
 unzip glassfish-3.1.2.2.zip
 rm glassfish-3.1.2.2.zip
 mv glassfish3 /opt/glassfish3
-cp /vagrant/vagrantConf/glassfish /etc/init.d/glassfish
+cp /vagrant/vagrantConf/glassfish/glassfish /etc/init.d/glassfish
 chmod +x /etc/init.d/glassfish
 update-rc.d glassfish defaults
-/etc/init.d/glassfish start
 
 # Grant Java permission on socket
-cp /vagrant/vagrantConf/java.policy /usr/lib/jvm/java-7-openjdk-i386/jre/lib/security/java.policy
+cp /vagrant/vagrantConf/glassfish/java.policy /usr/lib/jvm/java-7-openjdk-i386/jre/lib/security/java.policy
 
-# Start glassfish database
+# Add glassfish support for Logback
+# OpenSesame
+wget http://repo1.maven.org/maven2/ch/qos/logback/logback-core/0.9.28/logback-core-0.9.28.jar
+cp ./logback-core-0.9.28.jar /opt/glassfish3/glassfish/lib/endorsed/logback-core-0.9.28.jar
+rm logback-core-0.9.28.jar
+
+wget http://repo1.maven.org/maven2/ch/qos/logback/logback-classic/0.9.28/logback-classic-0.9.28.jar
+cp ./logback-classic-0.9.28.jar /opt/glassfish3/glassfish/lib/endorsed/logback-classic-0.9.28.jar
+
+# ECC Service
+cp ./eccService/target/EccService-2.0/WEB-INF/lib/jul-to-slf4j-1.7.6.jar /opt/glassfish3/glassfish/lib/endorsed/jul-to-slf4j-1.7.6.jar
+
+cp ./eccService/target/EccService-2.0/WEB-INF/lib/slf4j-api-1.7.6.jar /opt/glassfish3/glassfish/lib/endorsed/slf4j-api-1.7.6.jar
+
+cp ./eccService/target/EccService-2.0/WEB-INF/lib/logback-core-1.1.2.jar /opt/glassfish3/glassfish/lib/endorsed/logback-core-1.1.2.jar
+
+cp ./eccService/target/EccService-2.0/WEB-INF/lib/logback-classic-1.1.2.jar /opt/glassfish3/glassfish/lib/endorsed/logback-classic-1.1.2.jar
+
+cp ./vagrantConf/glassfish/logback.xml /opt/glassfish3/glassfish/domains/domain1/config/logback.xml
+
+cp ./vagrantConf/glassfish/logging.properties /opt/glassfish3/glassfish/domains/domain1/config/logging.properties
+
+cp ./vagrantConf/glassfish/domain.xml /opt/glassfish3/glassfish/domains/domain1/domain.xml
+
+
+# Start the Glassfish service
+/etc/init.d/glassfish start
+
+# Start Glassfish database
 /opt/glassfish3/bin/asadmin start-database --dbhome opt/glassfish3/javadb
 
 ## Configure ECC Service ##
@@ -150,13 +184,6 @@ cp /vagrant/vagrantConf/java.policy /usr/lib/jvm/java-7-openjdk-i386/jre/lib/sec
 # can't do this at the moment, it is got from config.experimedia.eu or falls back on hard-coded values
 # can alter it by hand in the GUI at start-up
 
-## Build ##
-echo "**** Building ECC"
-
-cd experimedia-ecc
-cd thirdPartyLibs && /bin/sh ./installLibraries.sh && cd ..
-mvn install |& tee /tmp/build.log
-
 ## Deploy ##
 
 # Deploy OpenRDF services into Glassfish
@@ -164,9 +191,9 @@ echo "**** Deploying OpenRDF sesame & workbench into Glassfish"
 /opt/glassfish3/bin/asadmin deploy ./thirdPartyLibs/openrdf-sesame.war
 /opt/glassfish3/bin/asadmin deploy ./thirdPartyLibs/openrdf-workbench.war
 
-# deploy the ECC into Tomcat
+# deploy the ECC into Glassfish
 #echo "**** Deploying ECC into Glassfish"
-#/opt/glassfish3/bin/asadmin deploy eccService/target/EccService-2.0.war
+/opt/glassfish3/bin/asadmin deploy --contextroot ECC ./eccService/target/EccService-2.0.war
 
 if [ '#{ecc_git}' != "" ]; then
 	echo 'ECC built from git branch #{ecc_git}'
@@ -189,7 +216,7 @@ Vagrant.configure("2") do |config|
     config.vm.box_url = "http://files.vagrantup.com/precise32.box"
     config.vm.hostname = hostname
 	
-	# Forward host port to guest port 8080 for Tomcat
+	# Forward host port to guest port 8080 for Glassfish
 	config.vm.network :forwarded_port, host: Integer(ecc_port), guest: 8080
 	# Forward host port to guest port 5672 for RabbitMQ messages
 	config.vm.network :forwarded_port, host: Integer(rabbit_port), guest: 5672

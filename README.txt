@@ -28,7 +28,23 @@ Using Vagrant to deploy the ECC
 ===============================
 Vagrant (see http://vagrantup.com) along with a suitable virtual machine system (such as Oracle VirtualBox) can be used to simply build and deploy the ECC and all its dependencies including a RabbitMQ server.  This is particularly useful for development and testing.
 
-Assuming a working vagrant system, this is done by typing "vagrant up" in the <ECC API root> folder which will execute the instructions found in the "vagrantfile" found in the same folder.  The shell script embedded in the vagrantfile is also a useful reference for deploying the system in Linux.  Once the build is completed, the ECC and a RabbitMQ server are hosted in a virtual machine with the necessary ports mapped through to the host machine.  The port mapping can be changed via environment variables in the host machine:
+Assuming a working vagrant system, this is done by first choosing your preferred web server (Apache or Glassfish are supported) and then starting the vagrant virtual machine set up.
+
+1. Choosing your preferred web server
+-------------------------------------
+Vagrant based support for the ECC offers you two set up options:
+
+ * Tomcat 7 deployment (Vagrantfile.tomcat)
+ * Glassfish 3 deployment (Vagrantfile.glassfish)
+
+Make a copy of hte deployment file you wish to use and rename it to 'Vagrantfile' (no file extension)
+
+2. Starting the vagrant virtual machine
+---------------------------------------
+This is done by simply typing "vagrant up" in the <ECC API root> folder which will execute the instructions found in the "Vagrantfile" you have just selected.  The shell script embedded in the vagrantfile is also a useful reference for deploying the system in Linux.
+
+
+Once the build is completed, the ECC and a RabbitMQ server are hosted in a virtual machine with the necessary ports mapped through to the host machine.  The port mapping can be changed via environment variables in the host machine:
 
 ECC_IP: the IP address for the ECC VM to use (default 10.0.0.10)
 ECC_PORT: the port to map the ECC to on the host machine (default 8090)
