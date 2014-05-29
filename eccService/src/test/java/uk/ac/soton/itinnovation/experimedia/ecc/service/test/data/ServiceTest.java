@@ -564,6 +564,7 @@ public class ServiceTest {
                 Experiment exp = new Experiment();
                 exp.setName("Test Experiment " + i);
                 exp.setDescription("Test experiment description " + i);
+                exp.setStartTime(new Date());
 
                 createExperimentData(i, exp);
                 testData.put(exp.getUUID(), exp);
