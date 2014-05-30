@@ -83,7 +83,7 @@ public class LivePROVConsumer
             
             // All seems well
             provWriter = provWriterImpl;
-            createDefaultNamespaces();
+            createDefaultNamespaces(expTitle);
             
             repoInitialised = true;
             lpcLog.info( "Repository created OK" );
@@ -153,13 +153,15 @@ public class LivePROVConsumer
         nsPrefixMap.put( "experimedia", "http://it-innovation.soton.ac.uk/ontologies/experimedia#" );
     }
     
-    private void createDefaultNamespaces() throws Exception
+    private void createDefaultNamespaces(String expTitle) throws Exception
     {
         EDMProvWriterImpl writerImpl = (EDMProvWriterImpl) provWriter;
         EDMProvStoreWrapper psw = writerImpl.getEDMProvStoreWrapper();
         
         if ( psw == null )        throw new Exception( "Cannot create default namespaces: ProvStoreWrapper is null" );
         if ( !psw.isConnected() ) throw new Exception( "Cannot create default namespaces: ProvStoreWrapper is not conencted" );
+		
+		psw.createNewRepository(repoID, expTitle);
         
         try
         {
