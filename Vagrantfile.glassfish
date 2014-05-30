@@ -113,7 +113,7 @@ mvn install |& tee /tmp/build.log
 # drop then create the database
 sudo -u postgres dropdb edm-metrics
 sudo -u postgres createdb -T template0 edm-metrics --encoding=UTF8 --locale=en_US.utf8
-sudo -u postgres psql -d edm-metrics -f experimedia-ecc/edm/resources/edm-metrics-postgres.sql
+sudo -u postgres psql -d edm-metrics -f edm/resources/edm-metrics-postgres.sql
 
 # set postgres user's password to "password"
 sudo -u postgres psql --command="ALTER USER postgres WITH PASSWORD 'password';"
