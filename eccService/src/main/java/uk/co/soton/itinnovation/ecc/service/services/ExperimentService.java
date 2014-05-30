@@ -85,7 +85,9 @@ public class ExperimentService {
 
     private ExperimentStateModel expStateModel;
     private LiveMetricScheduler liveMetricScheduler;
-//    private LivePROVConsumer livePROVConsumer;
+    // OPEN-RDF SERVER CONFIGURATION ISSUES TO BE RESOLVED ---------------------
+    // private LivePROVConsumer livePROVConsumer;
+    // --------------------- OPEN-RDF SERVER CONFIGURATION ISSUES TO BE RESOLVED
     private boolean started = false;
 
     public ExperimentService() {
@@ -292,7 +294,7 @@ public class ExperimentService {
                 }
 
                 // Need to reconnect previous clients, if any still exist
-//                expMonitor.tryReRegisterClients(clientInfo);
+                expMonitor.tryReRegisterClients(clientInfo);
             }
             return newExp;
         } catch (Exception e) {
@@ -356,13 +358,16 @@ public class ExperimentService {
             expDAO.saveExperiment(newExp);
 
             // Try initialising the access to the PROVenance data store for experiment
-            // TO DO: get the PROV configuration during start up
+            
+            // OPEN-RDF SERVER CONFIGURATION ISSUES TO BE RESOLVED ---------------------
 //            PROVDatabaseConfiguration pdc = new PROVDatabaseConfiguration();
 //            livePROVConsumer = new LivePROVConsumer();
 //
 //            livePROVConsumer.createExperimentRepository(newExp.getUUID(),
 //                    newExp.getName(),
 //                    pdc.getPROVRepoProperties());
+            // --------------------- OPEN-RDF SERVER CONFIGURATION ISSUES TO BE RESOLVED
+
             // Go straight into live monitoring
             expMonitor.startLifecycle(newExp, EMPhase.eEMLiveMonitoring);
 
@@ -425,7 +430,10 @@ public class ExperimentService {
                 expDAO.finaliseExperiment(exp);
 
                 // Tidy up PROV
+                // OPEN-RDF SERVER CONFIGURATION ISSUES TO BE RESOLVED ---------------------
 //                livePROVConsumer.closeCurrentExperimentRepository();
+                // --------------------- OPEN-RDF SERVER CONFIGURATION ISSUES TO BE RESOLVED
+                
                 // Set no experiment active
                 expStateModel.setActiveExperiment(null);
                 return true;
@@ -743,7 +751,8 @@ public class ExperimentService {
     }
 
     private void processLivePROVData(EDMProvReport report) throws Exception {
-
+        
+        // OPEN-RDF SERVER CONFIGURATION ISSUES TO BE RESOLVED ---------------------
 //        if (livePROVConsumer == null) {
 //            throw new Exception("Could not process PROV report: PROV consumer is null");
 //        }
@@ -760,6 +769,7 @@ public class ExperimentService {
 //
 //            throw new Exception(msg);
 //        }
+        // --------------------- OPEN-RDF SERVER CONFIGURATION ISSUES TO BE RESOLVED
     }
 
     // Private classes ---------------------------------------------------------
