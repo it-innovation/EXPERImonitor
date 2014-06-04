@@ -20,7 +20,7 @@ This object will take care of all the internals so that you only have to maintai
 
 	EDMAgent bob = factory.createAgent("agent_" + UUID.randomUUID(), "Bob Smith");
 	
-Note that the first argument needs to be unique in your experiment but there are no rules what it needs to look like. The second argument is the human readable label that will be used to display the agent in the provenance GUI of the ECC dashboard.
+Note that the first argument needs to be unique in your experiment but there are no rules regarding what it needs to look like. The second argument is the human readable label that will be used to display the agent in the provenance GUI of the ECC dashboard.
 
 Next you need to create the entities you want to use: ::
 
@@ -41,7 +41,7 @@ Again the first argument is the unique identifier, the second one the label and 
 	
 Some activities are discrete, which means they only occur at a point in time as opposed to a period of time. It would be inconvenient to start and stop the activity, which is why there is a separate method for this purpose. Again, the timestamp is optional. ::
 
-	EDMActivity usedlift = agent.doDiscreteActivity("activity_" + UUID.randomUUID(), "Used skilift", "1399626471");
+	EDMActivity usedlift = agent.doDiscreteActivity("activity_" + UUID.randomUUID(), "Pressed button", "1399626471");
 
 Now we have agents and activities linked together, but the entities are still isolated. This can be fixed by making an activity use an entity: ::
 
@@ -50,10 +50,10 @@ Now we have agents and activities linked together, but the entities are still is
 will create the necessary links in the data model.
 
 
-Digging deeper in the code
+Digging deeper into the code
 --------------------------
 
-While the simple provenance statements used in section `The code for beginners`_ might be sufficient for some users, there is a lot more provenance can be used for. This section aims at advanced users wishing to express a greater variety of provenance for a more detailed analysis.
+While the simple provenance statements used in section `The code for beginners`_ might be sufficient for some users, there is a lot more that provenance can be used for. This section aims at advanced users wishing to express a greater variety of provenance for a more detailed analysis.
 
 The structure of the EDMProv data model is the following:
 
@@ -124,7 +124,7 @@ They can derive an existing entity, for example painting the roses red. ::
 
 	public EDMEntity deriveEntity(EDMEntity entity, String derivationLabel);
 	
-Or they can invalidate and entity, rendering it unusable for further activities, e.g. a cheese sandwich, that is being eaten. ::
+Or they can invalidate an entity, rendering it unusable for further activities, e.g. a cheese sandwich, that is being eaten. ::
 	
 	public void invalidateEntity(EDMEntity entity, String timestamp);
 	
@@ -173,7 +173,7 @@ To get the triples contained in a EDMProvBaseElement object, there are several m
     
 	public HashMap<UUID, EDMTriple> getTriples()
 	
-the second one allows to filter for a specific triple type (class assertion, object property, data property) or a prefix or indeed both. ::
+The second one allows to filter for a specific triple type (class assertion, object property, data property) or a prefix or indeed both. ::
     
     public HashMap<UUID, EDMTriple> getTriples(EDMTriple.TRIPLE_TYPE type, String prefix);
     

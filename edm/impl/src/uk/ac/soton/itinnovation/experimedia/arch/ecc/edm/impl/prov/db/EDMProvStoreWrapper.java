@@ -129,7 +129,8 @@ public class EDMProvStoreWrapper extends RemoteSesameConnector {
 		try {
 			super.addOntology(props.getProperty("owlim.repositoryID"), od);
 		} catch (Exception e) {
-			logger.error("Error importing ontology", e);
+			logger.error("Error importing ontology " + od.getPrefix() + "(" + od.getBaseURI() + ")" + " to repository " + 
+					props.getProperty("owlim.repositoryID") + " on OWLim server " + props.getProperty("owlim.sesameServerURL"), e);
 		}
 	}
 	

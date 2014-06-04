@@ -72,7 +72,9 @@ public class EntryPoint
 		
 		try
 		{
-			String path = System.getProperty( "user.dir" ) + "\\edm.properties";
+			String path = System.getProperty( "user.dir" ) + 
+                          EDMMetricExporter.FILE_SEPARATOR + "edm.properties";
+            
 			edmProps.load( new FileInputStream(path) );
 		}
 		catch ( IOException ioe )

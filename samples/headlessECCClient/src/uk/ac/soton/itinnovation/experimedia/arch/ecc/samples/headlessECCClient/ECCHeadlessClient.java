@@ -77,7 +77,7 @@ public class ECCHeadlessClient implements EMIAdapterListener
     public ECCHeadlessClient( String name )
     {
         clientName = name;
-        
+		
         // Add a shut-down hook for clean terminations
         Runtime.getRuntime().addShutdownHook( new ShutdownHook() );
     }

@@ -46,7 +46,7 @@ public class EDMMetricExporter
 	private IExperimentDAO      experimentDAO;
 	private IMetricGeneratorDAO metricGenDAO;
 	private IReportDAO          expReportDAO;
-	private boolean				      edmInitialisedOK;
+	private boolean				edmInitialisedOK;
 	
 	private int experimentsExported;
 	private int experimentsNotExported;
@@ -55,6 +55,8 @@ public class EDMMetricExporter
 	private int measurementSetsExported;
 	private int measurementSetsNotExported;
 	private int measurementsExported;
+    
+    public static final String FILE_SEPARATOR = System.getProperty( "file.separator" );
 	
 	public EDMMetricExporter()
 	{}
@@ -188,7 +190,7 @@ public class EDMMetricExporter
 		dateString = dateString.replace( ' ', '_' );
 		dateString = dateString.replace( ':', '-' );
 		
-		String expPath = "exportedData\\" + dateString + "_" + exp.getUUID().toString();
+		String expPath = "exportedData" + FILE_SEPARATOR + dateString + "_" + exp.getUUID().toString();
 		
 		if ( createFolder(expPath) )
 		{			
@@ -218,7 +220,7 @@ public class EDMMetricExporter
 			try
 			{
 				// Create data file
-				fw = new FileWriter( path + "\\metaData.csv" );
+				fw = new FileWriter( path + FILE_SEPARATOR + "metaData.csv" );
 				bw = new BufferedWriter( fw );
 				
 				// Write CSV header
@@ -321,8 +323,8 @@ public class EDMMetricExporter
 		try
 		{
 			// Create data file
-		  fw = new FileWriter( path + "\\metricData.csv" );
-      bw = new BufferedWriter( fw );
+		  fw = new FileWriter( path + FILE_SEPARATOR + "metricData.csv" );
+          bw = new BufferedWriter( fw );
 			
 			// Write CSV header
 			bw.write( "MeasurementSet ID, Time, Value\n" );
@@ -402,7 +404,7 @@ public class EDMMetricExporter
 	{
 		String localPath = System.getProperty( "user.dir" );
 		
-		File folder = new File( localPath+ "\\" + path );
+		File folder = new File( localPath + FILE_SEPARATOR + path );
 		
 		if ( folder.exists() ) return true;
 		
@@ -413,7 +415,7 @@ public class EDMMetricExporter
 	{
 		String localPath = System.getProperty( "user.dir" );
 		
-		File folder = new File( localPath+ "\\" + path );
+		File folder = new File( localPath + FILE_SEPARATOR + path );
 		
 		if ( folder.mkdirs() ) return true;
 		
