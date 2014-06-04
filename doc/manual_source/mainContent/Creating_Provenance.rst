@@ -91,11 +91,11 @@ Another thing they can do is to act on behalf of another agent. This means that 
 What an entity can do
 ~~~~~~~~~~~~~~~~~~~~~
 
-Entities can - just like agents - start and end activities. Since this is not their main purpose, the convenience method has been ommitted here. ::
+Entities can - just like agents - start and end activities. Since this is not their main purpose, the convenience method to do a discrete activity (i.e. one that starts and ends at the same time) has been ommitted here. ::
 
 	public EDMActivity startActivity(String uniqueIdentifier, String label);
 	
-	public void endActivity(EDMActivity activity);
+	public void stopActivity(EDMActivity activity);
 	
 One entity can quote from another entity, an example could be a scientific paper quoting from another paper. ::
 	
