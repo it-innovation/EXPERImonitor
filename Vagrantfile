@@ -41,7 +41,7 @@ rabbit_ip = (ENV['RABBIT_IP'] ? ENV['RABBIT_IP'] : '10.0.0.10')
 #rabbit_ip = "rabbitmq.experimedia.eu"
 rabbit_port = (ENV['RABBIT_PORT'] ? ENV['RABBIT_PORT'] : '5682')
 rabbit_mgt_port = (ENV['RABBIT_MGT_PORT'] ? ENV['RABBIT_MGT_PORT'] : '55682')
-ecc_git = (ENV['ECC_GIT'] ? ENV['ECC_GIT'] : '')
+ecc_git = (ENV['ECC_GIT'] ? ENV['ECC_GIT'] : 'release/v2.1')
 debugger_port = (ENV['DEBUGGER_PORT'] ? ENV['DEBUGGER_PORT'] : '8000')
 
 info = "

@@ -85,7 +85,7 @@ public class ExperimentService {
 
     private ExperimentStateModel expStateModel;
     private LiveMetricScheduler liveMetricScheduler;
-//    private LivePROVConsumer livePROVConsumer;
+	private LivePROVConsumer livePROVConsumer;
     private boolean started = false;
 
     public ExperimentService() {
@@ -357,12 +357,12 @@ public class ExperimentService {
 
             // Try initialising the access to the PROVenance data store for experiment
             // TO DO: get the PROV configuration during start up
-//            PROVDatabaseConfiguration pdc = new PROVDatabaseConfiguration();
-//            livePROVConsumer = new LivePROVConsumer();
+            PROVDatabaseConfiguration pdc = new PROVDatabaseConfiguration();
+            livePROVConsumer = new LivePROVConsumer();
 //
-//            livePROVConsumer.createExperimentRepository(newExp.getUUID(),
-//                    newExp.getName(),
-//                    pdc.getPROVRepoProperties());
+            livePROVConsumer.createExperimentRepository(newExp.getUUID(),
+                    newExp.getName(),
+                    pdc.getPROVRepoProperties());
             // Go straight into live monitoring
             expMonitor.startLifecycle(newExp, EMPhase.eEMLiveMonitoring);
 
@@ -425,7 +425,7 @@ public class ExperimentService {
                 expDAO.finaliseExperiment(exp);
 
                 // Tidy up PROV
-//                livePROVConsumer.closeCurrentExperimentRepository();
+                livePROVConsumer.closeCurrentExperimentRepository();
                 // Set no experiment active
                 expStateModel.setActiveExperiment(null);
                 return true;
