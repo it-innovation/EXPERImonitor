@@ -229,3 +229,6 @@ The ‘Open ECC’ button will activate if your installation is correct. For mor
 .
 The ECC software package also contains some basic client software that can be used to connect to the ECC and send
 test metrics. An example of how to build and run of one of these client applications is described in the 'Building Sample ECC Clients' section
+
+.. |image11_png| image:: images/image11.png
+	:scale: 70
