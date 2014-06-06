@@ -16,6 +16,8 @@ obj/
 /charm-rabbitmq-tal/precise/management/.bzr/
 doc/javaDoc/
 doc/manual/
+doc/build/
 .vagrant/
 thirdPartyLibs/*.war
 thirdPartyLibs/*.jar
+samples/basicAndroidClient/libs/
