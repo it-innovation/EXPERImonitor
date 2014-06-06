@@ -52,6 +52,9 @@ public class LivePROVConsumer
         initialiseNamespaces();
     }
     
+    public boolean isRepoInitialised()
+    { return repoInitialised; }
+    
     public void createExperimentRepository(UUID expID, String expTitle, Properties repoProps) throws Exception
     {
         // Safety first
@@ -107,6 +110,8 @@ public class LivePROVConsumer
             lpcLog.info( "Trying to close current experiment repository" );
             
             provWriter.disconnect();
+            
+            repoInitialised = false;
             
             lpcLog.info( "Repository closed" );
         }

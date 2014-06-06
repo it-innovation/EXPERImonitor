@@ -65,6 +65,7 @@ import uk.co.soton.itinnovation.ecc.service.process.ExperimentStateModel;
 import uk.co.soton.itinnovation.ecc.service.process.LiveMetricScheduler;
 import uk.co.soton.itinnovation.ecc.service.process.LiveMetricSchedulerListener;
 import uk.co.soton.itinnovation.ecc.service.process.LivePROVConsumer;
+import uk.co.soton.itinnovation.ecc.service.utils.Validate;
 
 /**
  * ExperimentService provides executive control over the ECC and experiment
@@ -85,9 +86,8 @@ public class ExperimentService {
 
     private ExperimentStateModel expStateModel;
     private LiveMetricScheduler liveMetricScheduler;
-    // OPEN-RDF SERVER CONFIGURATION ISSUES TO BE RESOLVED ---------------------
-    // private LivePROVConsumer livePROVConsumer;
-    // --------------------- OPEN-RDF SERVER CONFIGURATION ISSUES TO BE RESOLVED
+    private LivePROVConsumer livePROVConsumer;
+    
     private boolean started = false;
 
     public ExperimentService() {
@@ -138,7 +138,14 @@ public class ExperimentService {
                 expReportAccessor = null;
                 expMetGeneratorDAO = null;
                 expDataManager = null;
+                
+                // PROV repository tidy up (if required)
+                if ( livePROVConsumer != null ) 
+                    if ( livePROVConsumer.isRepoInitialised() )
+                        livePROVConsumer.closeCurrentExperimentRepository();
+                
                 return true;
+                
             } catch (Throwable e) {
                 logger.error("Failed to stop experiment service", e);
                 return false;
@@ -356,17 +363,15 @@ public class ExperimentService {
             // Prepare metrics database
             IExperimentDAO expDAO = expDataManager.getExperimentDAO();
             expDAO.saveExperiment(newExp);
-
-            // Try initialising the access to the PROVenance data store for experiment
             
-            // OPEN-RDF SERVER CONFIGURATION ISSUES TO BE RESOLVED ---------------------
-//            PROVDatabaseConfiguration pdc = new PROVDatabaseConfiguration();
-//            livePROVConsumer = new LivePROVConsumer();
-//
-//            livePROVConsumer.createExperimentRepository(newExp.getUUID(),
-//                    newExp.getName(),
-//                    pdc.getPROVRepoProperties());
-            // --------------------- OPEN-RDF SERVER CONFIGURATION ISSUES TO BE RESOLVED
+            // Try initialising the access to the PROVenance data store for experiment
+            PROVDatabaseConfiguration pdc = new PROVDatabaseConfiguration();
+            livePROVConsumer = new LivePROVConsumer();
+
+            livePROVConsumer.createExperimentRepository(newExp.getUUID(),
+                    newExp.getName(),
+                    pdc.getPROVRepoProperties());
+
 
             // Go straight into live monitoring
             expMonitor.startLifecycle(newExp, EMPhase.eEMLiveMonitoring);
@@ -430,12 +435,12 @@ public class ExperimentService {
                 expDAO.finaliseExperiment(exp);
 
                 // Tidy up PROV
-                // OPEN-RDF SERVER CONFIGURATION ISSUES TO BE RESOLVED ---------------------
-//                livePROVConsumer.closeCurrentExperimentRepository();
-                // --------------------- OPEN-RDF SERVER CONFIGURATION ISSUES TO BE RESOLVED
+                if (livePROVConsumer.isRepoInitialised())
+                    livePROVConsumer.closeCurrentExperimentRepository();
                 
                 // Set no experiment active
                 expStateModel.setActiveExperiment(null);
+                
                 return true;
             } catch (Exception ex) {
 
@@ -752,24 +757,22 @@ public class ExperimentService {
 
     private void processLivePROVData(EDMProvReport report) throws Exception {
         
-        // OPEN-RDF SERVER CONFIGURATION ISSUES TO BE RESOLVED ---------------------
-//        if (livePROVConsumer == null) {
-//            throw new Exception("Could not process PROV report: PROV consumer is null");
-//        }
-//
-//        if (report == null) {
-//            throw new Exception("Could not process PROV report: report is null");
-//        }
-//
-//        try {
-//            livePROVConsumer.addPROVReport(report);
-//        } catch (Exception ex) {
-//            String msg = "Could not store PROV report: " + ex.getMessage();
-//            logger.error(msg);
-//
-//            throw new Exception(msg);
-//        }
-        // --------------------- OPEN-RDF SERVER CONFIGURATION ISSUES TO BE RESOLVED
+        if (livePROVConsumer == null) {
+            throw new Exception("Could not process PROV report: PROV consumer is null");
+        }
+
+        if (report == null) {
+            throw new Exception("Could not process PROV report: report is null");
+        }
+
+        try {
+            livePROVConsumer.addPROVReport(report);
+        } catch (Exception ex) {
+            String msg = "Could not store PROV report: " + ex.getMessage();
+            logger.error(msg);
+
+            throw new Exception(msg);
+        }
     }
 
     // Private classes ---------------------------------------------------------
