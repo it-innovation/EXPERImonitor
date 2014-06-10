@@ -44,6 +44,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared.*;
 
 import java.util.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.headlessECCClient.tools.QoETool;
 
 
 
@@ -538,6 +539,12 @@ public class ECCHeadlessClient implements EMIAdapterListener
         walkGroup.setMetricGeneratorUUID( mGen.getUUID() );
         walkGroup.setName( "Random walkers group" );
         walkGroup.setDescription( "Containers pseudo random number based walkers" );
+		
+		MetricGroup testGroup = new MetricGroup();
+        mGen.addMetricGroup( testGroup );
+        testGroup.setMetricGeneratorUUID( mGen.getUUID() );
+        testGroup.setName( "Metric values test group" );
+        testGroup.setDescription( "Generates random metrics" );
 
         // Define what you are going to measure and how ------------------------
         Entity thisComputer = new Entity();
@@ -556,7 +563,7 @@ public class ECCHeadlessClient implements EMIAdapterListener
                                       new Unit("Bytes"),
                                       new MemoryUsageTool(),
                                       1000 ); // Measure every second
-        
+		
         attr = new Attribute();
         thisComputer.addAttribute( attr );
         attr.setEntityUUID( thisComputer.getUUID() );
@@ -579,6 +586,56 @@ public class ECCHeadlessClient implements EMIAdapterListener
                                       MetricType.INTERVAL,
                                       new Unit("Degrees"),
                                       new PsuedoRandomWalkTool( 10 ),
+                                      4000 ); // Measure every 4 seconds
+		
+		
+		//sw: added more metrics for easier testing
+		attr = new Attribute();
+        thisComputer.addAttribute( attr );
+        attr.setEntityUUID( thisComputer.getUUID() );
+        attr.setName( "NominalTest" );
+        attr.setDescription( "Random nominal metrics" );
+        setupMeasurementForAttribute( attr,
+                                      testGroup, 
+                                      MetricType.NOMINAL,
+                                      new Unit("happiness"),
+                                      new QoETool(),
+                                      3000 ); // Measure every 3 seconds
+		
+		attr = new Attribute();
+        thisComputer.addAttribute( attr );
+        attr.setEntityUUID( thisComputer.getUUID() );
+        attr.setName( "OrdinalTest" );
+        attr.setDescription( "Random ordinal metrics" );
+        setupMeasurementForAttribute( attr,
+                                      testGroup, 
+                                      MetricType.ORDINAL,
+                                      new Unit("happiness"),
+                                      new QoETool(),
+                                      3000 ); // Measure every 3 seconds
+		
+		attr = new Attribute();
+        thisComputer.addAttribute( attr );
+        attr.setEntityUUID( thisComputer.getUUID() );
+        attr.setName( "IntervalTest" );
+        attr.setDescription( "Random interval metrics" );
+        setupMeasurementForAttribute( attr,
+                                      testGroup, 
+                                      MetricType.INTERVAL,
+                                      new Unit("degrees"),
+                                      new PsuedoRandomWalkTool( 10 ),
+                                      2000 ); // Measure every 2 seconds
+		
+		attr = new Attribute();
+        thisComputer.addAttribute( attr );
+        attr.setEntityUUID( thisComputer.getUUID() );
+        attr.setName( "RatioTest" );
+        attr.setDescription( "Random ratio metrics" );
+        setupMeasurementForAttribute( attr,
+                                      testGroup, 
+                                      MetricType.RATIO,
+                                      new Unit("degrees"),
+                                      new PsuedoRandomWalkTool( 190 ),
                                       4000 ); // Measure every 4 seconds
         
     }
