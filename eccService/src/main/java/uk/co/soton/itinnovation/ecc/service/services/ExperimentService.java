@@ -59,13 +59,10 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.factory.EMInterfaceFacto
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.IEMLifecycleListener;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.spec.workflow.IExperimentMonitor;
 import uk.co.soton.itinnovation.ecc.service.domain.DatabaseConfiguration;
-import uk.co.soton.itinnovation.ecc.service.domain.PROVDatabaseConfiguration;
 import uk.co.soton.itinnovation.ecc.service.domain.RabbitConfiguration;
 import uk.co.soton.itinnovation.ecc.service.process.ExperimentStateModel;
 import uk.co.soton.itinnovation.ecc.service.process.LiveMetricScheduler;
 import uk.co.soton.itinnovation.ecc.service.process.LiveMetricSchedulerListener;
-import uk.co.soton.itinnovation.ecc.service.process.LivePROVConsumer;
-import uk.co.soton.itinnovation.ecc.service.utils.Validate;
 
 /**
  * ExperimentService provides executive control over the ECC and experiment
@@ -86,7 +83,7 @@ public class ExperimentService {
 
     private ExperimentStateModel expStateModel;
     private LiveMetricScheduler liveMetricScheduler;
-    private LivePROVConsumer livePROVConsumer;
+    //private LivePROVConsumer livePROVConsumer;
     
     private boolean started = false;
 
@@ -140,9 +137,11 @@ public class ExperimentService {
                 expDataManager = null;
                 
                 // PROV repository tidy up (if required)
-                if ( livePROVConsumer != null ) 
-                    if ( livePROVConsumer.isRepoInitialised() )
-                        livePROVConsumer.closeCurrentExperimentRepository();
+// PROV REPOSITORY CONNECTIVITY CURRENTLY NOT WORKING --------------------------
+//                if ( livePROVConsumer != null ) 
+//                    if ( livePROVConsumer.isRepoInitialised() )
+//                        livePROVConsumer.closeCurrentExperimentRepository();
+// -----------------------------------------------------------------------------
                 
                 return true;
                 
@@ -365,13 +364,14 @@ public class ExperimentService {
             expDAO.saveExperiment(newExp);
             
             // Try initialising the access to the PROVenance data store for experiment
-            PROVDatabaseConfiguration pdc = new PROVDatabaseConfiguration();
-            livePROVConsumer = new LivePROVConsumer();
-
-            livePROVConsumer.createExperimentRepository(newExp.getUUID(),
-                    newExp.getName(),
-                    pdc.getPROVRepoProperties());
-
+// PROV REPOSITORY CONNECTIVITY CURRENTLY NOT WORKING --------------------------
+//            PROVDatabaseConfiguration pdc = new PROVDatabaseConfiguration();
+//            livePROVConsumer = new LivePROVConsumer();
+//
+//            livePROVConsumer.createExperimentRepository(newExp.getUUID(),
+//                    newExp.getName(),
+//                    pdc.getPROVRepoProperties());
+// -----------------------------------------------------------------------------
 
             // Go straight into live monitoring
             expMonitor.startLifecycle(newExp, EMPhase.eEMLiveMonitoring);
@@ -435,8 +435,10 @@ public class ExperimentService {
                 expDAO.finaliseExperiment(exp);
 
                 // Tidy up PROV
-                if (livePROVConsumer.isRepoInitialised())
-                    livePROVConsumer.closeCurrentExperimentRepository();
+// PROV REPOSITORY CONNECTIVITY CURRENTLY NOT WORKING --------------------------
+//                if (livePROVConsumer.isRepoInitialised())
+//                    livePROVConsumer.closeCurrentExperimentRepository();
+// -----------------------------------------------------------------------------
                 
                 // Set no experiment active
                 expStateModel.setActiveExperiment(null);
@@ -756,23 +758,25 @@ public class ExperimentService {
     }
 
     private void processLivePROVData(EDMProvReport report) throws Exception {
-        
-        if (livePROVConsumer == null) {
-            throw new Exception("Could not process PROV report: PROV consumer is null");
-        }
 
-        if (report == null) {
-            throw new Exception("Could not process PROV report: report is null");
-        }
-
-        try {
-            livePROVConsumer.addPROVReport(report);
-        } catch (Exception ex) {
-            String msg = "Could not store PROV report: " + ex.getMessage();
-            logger.error(msg);
-
-            throw new Exception(msg);
-        }
+// PROV REPOSITORY CONNECTIVITY CURRENTLY NOT WORKING --------------------------
+//        if (livePROVConsumer == null) {
+//            throw new Exception("Could not process PROV report: PROV consumer is null");
+//        }
+//
+//        if (report == null) {
+//            throw new Exception("Could not process PROV report: report is null");
+//        }
+//
+//        try {
+//            livePROVConsumer.addPROVReport(report);
+//        } catch (Exception ex) {
+//            String msg = "Could not store PROV report: " + ex.getMessage();
+//            logger.error(msg);
+//
+//            throw new Exception(msg);
+//        }
+// -----------------------------------------------------------------------------
     }
 
     // Private classes ---------------------------------------------------------
