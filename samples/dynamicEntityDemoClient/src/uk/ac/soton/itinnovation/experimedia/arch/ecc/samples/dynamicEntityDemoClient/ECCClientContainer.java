@@ -44,7 +44,7 @@ public class ECCClientContainer
 
         try
         {
-            String rabbitServerIP = "10.0.0.10";
+            String rabbitServerIP = "127.0.0.1";
             if ( args.length == 1 ) rabbitServerIP = args[0];     
 
             ctrl.start( rabbitServerIP,
