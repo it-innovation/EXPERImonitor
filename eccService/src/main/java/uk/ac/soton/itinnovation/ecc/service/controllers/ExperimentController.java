@@ -237,6 +237,26 @@ public class ExperimentController {
     }
 
     /**
+     * Attempts to disconnect a client.
+     *
+     * @param clientUuid
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.DELETE, value = "/current/clients/{clientUuid}")
+    @ResponseBody
+    public boolean disconnectClient(@PathVariable String clientUuid) {
+
+        logger.debug("Dicsonnecting client [" + clientUuid + "]");
+        try {
+            experimentService.deregisterClient(UUID.fromString(clientUuid));
+            return true;
+        } catch (Exception e) {
+            logger.error("Failed to disconnect client [" + clientUuid + "]", e);
+            return false;
+        }
+    }
+
+    /**
      * @param clientUuid client UUID.
      * @return list of entities for the client.
      */
