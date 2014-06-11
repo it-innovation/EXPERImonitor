@@ -3,6 +3,7 @@ var clientsDropdownList, entitiesDropdownList, attrDropdownList;
 var CLIENT_MODELS_AJAX = [];
 var CHART_POLLING_INTERVAL = 3000; // polling delay
 var CHART_SHIFT_DATA_THRESHOLD = 10; // how many points to return per graph
+var CHART_SHIFT_ORDINAL_DATA_THRESHOLD = 5; // how many points to return per graph
 var intervals = new Array(); // polling intervals
 var DISPLAY_TIME_FORMAT = "ddd, MMM Do, HH:mm [(]Z[)]";
 var current_experiment_id;
@@ -522,6 +523,9 @@ function addAttributeGraph(attribute, entityName) {
     if (attribute.type === 'NOMINAL') {
         console.log("Adding pie chart");
         chart = createEmptyPieChart(graphContainer, attribute, entityName);
+    } else if (attribute.type === 'ORDINAL') {
+        console.log("Adding bar chart");
+        chart = createEmptyColumnChart(graphContainer, attribute, entityName);
     } else {
         console.log("Adding line chart");
         chart = createEmptyLineChart(graphContainer, attribute, entityName);
@@ -535,9 +539,14 @@ function addAttributeGraph(attribute, entityName) {
 
             $.each(data.data, function(key, datapoint) {
                 console.log(datapoint);
+                console.log(moment(datapoint.key, ISO_TIME_FORMAT).valueOf());
                 shift = chart.series[0].data.length > CHART_SHIFT_DATA_THRESHOLD;
                 if (attribute.type === 'NOMINAL') {
                     chart.series[0].addPoint([datapoint.key, parseInt(datapoint.value)], true, shift);
+                } else if (attribute.type === 'ORDINAL') {
+//                    chart.series[0].addPoint([moment(datapoint.key, ISO_TIME_FORMAT).valueOf(), 1], true, chart.series[0].data.length > CHART_SHIFT_ORDINAL_DATA_THRESHOLD);
+                    chart.series[0].addPoint({x: moment(datapoint.key, ISO_TIME_FORMAT).valueOf(), y: 1, myData: datapoint.value}, true, chart.series[0].data.length > CHART_SHIFT_ORDINAL_DATA_THRESHOLD);
+//                    chart.series[0].addPoint([moment(datapoint.key, ISO_TIME_FORMAT).valueOf(), 1, 'yeah'], true, chart.series[0].data.length > CHART_SHIFT_ORDINAL_DATA_THRESHOLD);
                 } else {
                     console.log(datapoint.key);
                     console.log(moment(datapoint.key, ISO_TIME_FORMAT, true).isValid());
@@ -546,6 +555,8 @@ function addAttributeGraph(attribute, entityName) {
                 }
             });
         }
+
+        console.log(chart);
 
         lastTimestamp = data.timestamp === "" ? 0 : moment(data.timestamp, ISO_TIME_FORMAT).valueOf();
 
@@ -569,6 +580,8 @@ function addAttributeGraph(attribute, entityName) {
                         shift = chart.series[0].data.length > CHART_SHIFT_DATA_THRESHOLD;
                         if (attribute.type === 'NOMINAL') {
                             chart.series[0].addPoint([datapoint.key, parseInt(datapoint.value)], true, shift);
+                        } else if (attribute.type === 'ORDINAL') {
+                            chart.series[0].addPoint({x: moment(datapoint.key, ISO_TIME_FORMAT).valueOf(), y: 1, myData: datapoint.value}, true, chart.series[0].data.length > CHART_SHIFT_ORDINAL_DATA_THRESHOLD);
                         } else {
                             console.log(datapoint.key);
                             console.log(moment(datapoint.key, ISO_TIME_FORMAT, true).isValid());
@@ -628,6 +641,65 @@ function createEmptyPieChart(container, attribute, entityName) {
         series: [{
                 type: 'pie',
                 name: 'NOMINAL data',
+                data: []
+            }]
+    });
+}
+
+// adds empty column chart
+function createEmptyColumnChart(container, attribute, entityName) {
+    return new Highcharts.Chart({
+        chart: {
+            type: 'column',
+            renderTo: container.attr('id'),
+            animation: Highcharts.svg
+        },
+        title: {
+            text: entityName + ': ' + attribute.name
+        },
+        xAxis: {
+            type: 'datetime',
+            title: {
+                text: 'Time'
+            }
+        },
+        yAxis: {
+            title: {
+                text: attribute.unit
+            },
+            labels: {
+                enabled: false
+            }
+        },
+        legend: {
+            enabled: false
+        },
+        credits: {
+            enabled: false
+        },
+        exporting: {
+            enabled: false
+        },
+        plotOptions: {
+            column: {
+                dataLabels: {
+                    enabled: true
+                }
+            },
+            series: {
+                dataLabels: {
+                    enabled: true,
+                    rotation: -90,
+                    color: '#FFFFFF',
+                    align: 'right',
+                    x: 4,
+                    y: 10,
+                    format: '{point.myData}'
+                }
+            }
+        },
+        series: [{
+                name: 'Measurement data',
                 data: []
             }]
     });
