@@ -32,13 +32,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import uk.co.soton.itinnovation.ecc.service.services.ConfigurationService;
+import uk.ac.soton.itinnovation.ecc.service.services.ConfigurationService;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import uk.co.soton.itinnovation.ecc.service.Application;
-import uk.co.soton.itinnovation.ecc.service.domain.DatabaseConfiguration;
-import uk.co.soton.itinnovation.ecc.service.domain.EccConfiguration;
-import uk.co.soton.itinnovation.ecc.service.domain.RabbitConfiguration;
-import uk.co.soton.itinnovation.ecc.service.utils.Validate;
+import uk.ac.soton.itinnovation.ecc.service.Application;
+import uk.ac.soton.itinnovation.ecc.service.domain.DatabaseConfiguration;
+import uk.ac.soton.itinnovation.ecc.service.domain.EccConfiguration;
+import uk.ac.soton.itinnovation.ecc.service.domain.RabbitConfiguration;
+import uk.ac.soton.itinnovation.ecc.service.utils.Validate;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = Application.class)

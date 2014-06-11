@@ -32,10 +32,10 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
-import uk.co.soton.itinnovation.ecc.service.Application;
-import uk.co.soton.itinnovation.ecc.service.domain.EccConfiguration;
-import uk.co.soton.itinnovation.ecc.service.services.ConfigurationService;
-import uk.co.soton.itinnovation.ecc.service.services.ExperimentService;
+import uk.ac.soton.itinnovation.ecc.service.Application;
+import uk.ac.soton.itinnovation.ecc.service.domain.EccConfiguration;
+import uk.ac.soton.itinnovation.ecc.service.services.ConfigurationService;
+import uk.ac.soton.itinnovation.ecc.service.services.ExperimentService;
 
 /**
  * Tests the experiment service.

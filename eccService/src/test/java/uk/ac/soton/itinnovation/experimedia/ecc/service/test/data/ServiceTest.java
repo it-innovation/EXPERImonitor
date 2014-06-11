@@ -59,17 +59,17 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.IMonitorin
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao.IExperimentDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao.IMetricGeneratorDAO;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao.IReportDAO;
-import uk.co.soton.itinnovation.ecc.service.Application;
-import uk.co.soton.itinnovation.ecc.service.domain.DatabaseConfiguration;
-import uk.co.soton.itinnovation.ecc.service.domain.EccAttribute;
-import uk.co.soton.itinnovation.ecc.service.domain.EccConfiguration;
-import uk.co.soton.itinnovation.ecc.service.domain.EccCounterMeasurement;
-import uk.co.soton.itinnovation.ecc.service.domain.EccCounterMeasurementSet;
-import uk.co.soton.itinnovation.ecc.service.domain.EccEntity;
-import uk.co.soton.itinnovation.ecc.service.domain.EccMeasurement;
-import uk.co.soton.itinnovation.ecc.service.domain.EccMeasurementSet;
-import uk.co.soton.itinnovation.ecc.service.services.ConfigurationService;
-import uk.co.soton.itinnovation.ecc.service.services.DataService;
+import uk.ac.soton.itinnovation.ecc.service.Application;
+import uk.ac.soton.itinnovation.ecc.service.domain.DatabaseConfiguration;
+import uk.ac.soton.itinnovation.ecc.service.domain.EccAttribute;
+import uk.ac.soton.itinnovation.ecc.service.domain.EccConfiguration;
+import uk.ac.soton.itinnovation.ecc.service.domain.EccCounterMeasurement;
+import uk.ac.soton.itinnovation.ecc.service.domain.EccCounterMeasurementSet;
+import uk.ac.soton.itinnovation.ecc.service.domain.EccEntity;
+import uk.ac.soton.itinnovation.ecc.service.domain.EccMeasurement;
+import uk.ac.soton.itinnovation.ecc.service.domain.EccMeasurementSet;
+import uk.ac.soton.itinnovation.ecc.service.services.ConfigurationService;
+import uk.ac.soton.itinnovation.ecc.service.services.DataService;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = Application.class)

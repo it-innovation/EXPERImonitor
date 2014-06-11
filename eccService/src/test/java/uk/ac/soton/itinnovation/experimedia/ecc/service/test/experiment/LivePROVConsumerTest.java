@@ -25,8 +25,8 @@
 
 package uk.ac.soton.itinnovation.experimedia.ecc.service.test.experiment;
 
-import uk.co.soton.itinnovation.ecc.service.Application;
-import uk.co.soton.itinnovation.ecc.service.process.LivePROVConsumer;
+import uk.ac.soton.itinnovation.ecc.service.Application;
+import uk.ac.soton.itinnovation.ecc.service.process.LivePROVConsumer;
 
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.annotation.DirtiesContext;
