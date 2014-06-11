@@ -26,7 +26,6 @@ package uk.ac.soton.itinnovation.ecc.service.controllers;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.UUID;
 import org.slf4j.Logger;
@@ -226,10 +225,10 @@ public class ExperimentController {
     @ResponseBody
     public ArrayList<EccClient> getClients() {
         ArrayList<EccClient> result = new ArrayList<EccClient>();
-        for (EMClient c : experimentService.getCurrentlyConnectedClients()) {
+        for (EMClient c : experimentService.getKnownClients()) {
             result.add(new EccClient(c.getID().toString(), c.getName(), c.isConnected()));
         }
-        logger.debug("Returning currently connected clients (" + result.size() + ")");
+        logger.debug("Returning known clients (" + result.size() + ")");
         if (result.size() > 0) {
             Collections.sort(result, new EccClientsComparator());
         }

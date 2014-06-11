@@ -84,7 +84,7 @@ public class ExperimentService {
     private ExperimentStateModel expStateModel;
     private LiveMetricScheduler liveMetricScheduler;
     //private LivePROVConsumer livePROVConsumer;
-    
+
     private boolean started = false;
 
     public ExperimentService() {
@@ -135,16 +135,15 @@ public class ExperimentService {
                 expReportAccessor = null;
                 expMetGeneratorDAO = null;
                 expDataManager = null;
-                
+
                 // PROV repository tidy up (if required)
 // PROV REPOSITORY CONNECTIVITY CURRENTLY NOT WORKING --------------------------
-//                if ( livePROVConsumer != null ) 
+//                if ( livePROVConsumer != null )
 //                    if ( livePROVConsumer.isRepoInitialised() )
 //                        livePROVConsumer.closeCurrentExperimentRepository();
 // -----------------------------------------------------------------------------
-                
                 return true;
-                
+
             } catch (Throwable e) {
                 logger.error("Failed to stop experiment service", e);
                 return false;
@@ -362,7 +361,7 @@ public class ExperimentService {
             // Prepare metrics database
             IExperimentDAO expDAO = expDataManager.getExperimentDAO();
             expDAO.saveExperiment(newExp);
-            
+
             // Try initialising the access to the PROVenance data store for experiment
 // PROV REPOSITORY CONNECTIVITY CURRENTLY NOT WORKING --------------------------
 //            PROVDatabaseConfiguration pdc = new PROVDatabaseConfiguration();
@@ -372,7 +371,6 @@ public class ExperimentService {
 //                    newExp.getName(),
 //                    pdc.getPROVRepoProperties());
 // -----------------------------------------------------------------------------
-
             // Go straight into live monitoring
             expMonitor.startLifecycle(newExp, EMPhase.eEMLiveMonitoring);
 
@@ -439,10 +437,9 @@ public class ExperimentService {
 //                if (livePROVConsumer.isRepoInitialised())
 //                    livePROVConsumer.closeCurrentExperimentRepository();
 // -----------------------------------------------------------------------------
-                
                 // Set no experiment active
                 expStateModel.setActiveExperiment(null);
-                
+
                 return true;
             } catch (Exception ex) {
 
@@ -528,21 +525,22 @@ public class ExperimentService {
     }
 
     /**
-     * Use this method to retrieve the currently known connected clients. This
-     * call will return an empty set when there are no clients or no active
-     * experiment. IMPORTANT: the state of each client you find in this set will
-     * be correct only at the point of calling.
+     * Use this method to retrieve the current phase clients. This call will
+     * return an empty set when there are no clients or no active experiment.
+     * IMPORTANT: the state of each client you find in this set will be correct
+     * only at the point of calling.
      *
      * @return - Set of clients currently connected.
      */
-    public Set<EMClient> getCurrentlyConnectedClients() {
+    public Set<EMClient> getKnownClients() {
 
         HashSet<EMClient> actuallyConnectedClients = new HashSet<EMClient>();
 
         if (started) {
 
             // Get the all clients that the monitor expects to be connected
-            Set<EMClient> clients = expMonitor.getAllConnectedClients();
+//            Set<EMClient> clients = expMonitor.getAllConnectedClients();
+            Set<EMClient> clients = expMonitor.getAllKnownClients();
 
             // Only return those that are not re-registering
             for (EMClient client : clients) {
@@ -589,7 +587,7 @@ public class ExperimentService {
         if (!started) {
             throw new Exception("Cannot deregister client: service not initialised");
         }
-        
+
         if (client == null) {
             throw new Exception("Could not deregister client:  client is null");
         }
@@ -604,17 +602,17 @@ public class ExperimentService {
             throw new Exception(problem, ex);
         }
     }
-    
+
     public void deregisterClient(UUID clientID) throws Exception {
-        
+
         if (!started) {
             throw new Exception("Cannot deregister client: service not initialised");
         }
-        
+
         if (clientID == null) {
             throw new Exception("Could not deregister client: client ID is null");
         }
-        
+
         // Use overloaded method to do the work
         deregisterClient(expMonitor.getClientByID(clientID));
     }
@@ -634,7 +632,7 @@ public class ExperimentService {
         if (!started) {
             throw new Exception("Cannot force client disconnection: service not initialised");
         }
-        
+
         if (client == null) {
             throw new Exception("Cannot forcibly disconnect client: client is null");
         }
@@ -648,18 +646,18 @@ public class ExperimentService {
             logger.error("Could not forcibly remove client " + client.getName() + " because: " + ex.getMessage());
         }
     }
-    
+
     public void forceClientDisconnect(UUID clientID) throws Exception {
-        
+
         // Safety first
         if (!started) {
             throw new Exception("Cannot force client disconnection: service not initialised");
         }
-        
+
         if (clientID == null) {
             throw new Exception("Cannot forcibly disconnect client: client is null");
         }
-        
+
         // Use overloaded method to do the work
         forceClientDisconnect(expMonitor.getClientByID(clientID));
     }
