@@ -66,7 +66,7 @@ apt-get -qq update
 ## Install dependencies ##
 
 echo "Installing dependencies..."
-# sort out switching to Java 7 before installing Tomcat 
+# sort out switching to Java 7 before installing Tomcat
 apt-get install -y openjdk-7-jdk
 update-alternatives --set java /usr/lib/jvm/java-7-openjdk-i386/jre/bin/java
 rm /usr/lib/jvm/default-java
@@ -134,6 +134,10 @@ echo "<?xml version='1.0' encoding='utf-8'?><tomcat-users><user rolename='manage
 # Copy Tomcat configuration into default folder
 cp /vagrant/vagrantConf/tomcat/tomcat7 /etc/default
 
+## Add aduna folder to tomcat7
+mkdir -p /usr/share/tomcat7/.aduna/openrdf-sesame
+chown -R tomcat7 /usr/share/tomcat7/.aduna
+
 service tomcat7 restart
 
 ## Configure ECC Service ##
@@ -181,7 +185,7 @@ Vagrant.configure("2") do |config|
 	config.vm.box = "precise32"
     config.vm.box_url = "http://files.vagrantup.com/precise32.box"
     config.vm.hostname = hostname
-	
+
 	# Forward host port to guest port 8080 for Tomcat
 	config.vm.network :forwarded_port, host: Integer(ecc_port), guest: 8080
 	# Forward host port to guest port 5672 for RabbitMQ messages
@@ -190,15 +194,15 @@ Vagrant.configure("2") do |config|
 	config.vm.network :forwarded_port, host: Integer(rabbit_mgt_port), guest: 55672
 	# Forward host port to guest port 8000 for Java debugger
 	config.vm.network :forwarded_port, host: Integer(debugger_port), guest: 8000
-	
+
 	# Set static private network address.
-	# Deploying with a static IP like this means that VirtualBox will set up a virtual network 
+	# Deploying with a static IP like this means that VirtualBox will set up a virtual network
 	# card that listens on e.g. 10.0.0.0/48
-	# If you have other machines on that subnet then change the IP or you will have to delete 
-	# the virtual card from the VirtualBox GUI afterwards.  The purpose of using a static IP 
+	# If you have other machines on that subnet then change the IP or you will have to delete
+	# the virtual card from the VirtualBox GUI afterwards.  The purpose of using a static IP
 	# is so that other services deployed in the same way can communicate.
 	config.vm.network "private_network", ip: ecc_ip
-	
+
     # configure virtualbox
     config.vm.provider :virtualbox do |vb|
         vb.customize [
