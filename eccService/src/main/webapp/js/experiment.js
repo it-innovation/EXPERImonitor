@@ -18,6 +18,53 @@ $(document).ready(function() {
         }
     });
 
+    // load client disconnect popup
+    $.ajax({
+        url: "extra/clientDisconnectPopup.html",
+        success: function(data) {
+            $('body').append(data);
+
+            $(document).foundation();
+
+            // clear client name on close
+            $(document).on('close', '#clientDisconnectWarningModal', function() {
+                $("#clientDisconnectWarningModal .lead span").remove();
+                $("#clientDisconnectWarningModal .disconnectResult").text('');
+            });
+
+            $("#clientDisconnectProceed").click(function(e) {
+                e.preventDefault();
+                $('#clientDisconnectWarningModal').foundation('reveal', 'open');
+                var clientUuid = $("#clientDisconnectProceed").data('client').uuid;
+
+                console.log("Diconnecting client: " + clientUuid);
+
+                $.ajax({
+                    url: BASE_URL + "/experiments/current/clients/" + clientUuid,
+                    type: 'DELETE',
+                    success: function(disconnectResult) {
+                        console.log(disconnectResult);
+                        $('#clientDisconnectWarningModal .disconnectResult').text("Disconnect result: " + disconnectResult + ". Waiting for 3 seconds before client list refresh");
+
+                        setTimeout(
+                                function()
+                                {
+                                    $('#clientDisconnectWarningModal').foundation('reveal', 'close');
+                                    $('#reloadClientsEntitiesAttributes').trigger('click');
+                                }, 3000);
+
+                    }
+                });
+
+            });
+            $("#clientDisconnectCancel").click(function(e) {
+                e.preventDefault();
+                $('#clientDisconnectWarningModal').foundation('reveal', 'close');
+            });
+        },
+        dataType: 'html'
+    });
+
     $(document).on('open', '#nameExperimentModal', function() {
         $("#newExperimentHeader").text('Select an existing experiment or start a new one');
         // check for current experiment
@@ -390,12 +437,28 @@ function showListOfClients(clientMetadataArray) {
         clientContainer.append("<p class='sub_details'>UUID: " + client.uuid + "</p>");
         var clientStatus = client.connected === true ? 'connected' : 'disconnected';
         clientContainerWrapper.data("status", clientStatus);
-        var actionsParagraph = $("<p class='sub_details'></p>").appendTo(clientContainer);
-        var clientAddToLiveMetricsLink = $("<a class='clientCheckbox' id='c_" + client.uuid + "_input' href='#'>Add to Live metrics</a>").appendTo(actionsParagraph);
+        var actionsParagraphContainer = $('<div class="clearfix">').appendTo(clientContainer);
+        var safeActions = $('<p class="sub_details left"></p>').appendTo(actionsParagraphContainer);
+        if (client.connected === true) {
+            var unSafeActions = $('<p class="sub_details right"></p>').appendTo(actionsParagraphContainer);
+            var diconnectLink = $("<a class='clientDisconnectButton' id='c_" + client.uuid + "_disconnect' href='#'>Disconnect</a>").appendTo(unSafeActions);
+            diconnectLink.data("client", client);
+            diconnectLink.click(function(e) {
+                e.preventDefault();
+                var client = $(this).data("client");
+                $("#clientDisconnectProceed").data("client", client);
+                $('#clientDisconnectWarningModal .lead').append("<span> '" + client.name + "'</span>");
+                $('#clientDisconnectWarningModal').foundation('reveal', 'open');
+
+            });
+        }
+        var clientAddToLiveMetricsLink = $("<a class='clientCheckbox' id='c_" + client.uuid + "_input' href='#'>Add to Live metrics</a>").appendTo(safeActions);
         clientAddToLiveMetricsLink.data("client", client);
-        actionsParagraph.append("<a class='downloadLink' href='" + BASE_URL + "/data/export/client/" + client.uuid + "'>Download CSV data</a>");
-        entitiesDropdownList.append("<option value='" + client.uuid + "'>" + client.name + " (" + clientStatus + ")</option>");
-        CLIENT_MODELS_AJAX.push(appendEntitiesFromClient(client.uuid, client, attrDropdownList));
+        safeActions.append("<a class='downloadLink' href='" + BASE_URL + "/data/export/client/" + client.uuid + "'>Download data</a>");
+        if (client.connected === true) {
+            entitiesDropdownList.append("<option value='" + client.uuid + "'>" + client.name + "</option>");
+            CLIENT_MODELS_AJAX.push(appendEntitiesFromClient(client.uuid, client, attrDropdownList));
+        }
         clientAddToLiveMetricsLink.click(function(e) {
             e.preventDefault();
             var client = $(this).data("client");
@@ -452,7 +515,7 @@ function appendEntitiesFromClient(uuid, client, attrDropdownList) {
             var entityAddToLiveMetricsLink = $("<a class='entityCheckbox' id='e_" + entity.uuid + "_input' href='#'>Add to Live metrics</a>").appendTo(actionsParagraph);
             entityAddToLiveMetricsLink.data("entity", entity);
             entityAddToLiveMetricsLink.data("clientId", uuid);
-            actionsParagraph.append("<a class='downloadLink' href='" + BASE_URL + "/data/export/experiment/" + current_experiment_id + "/entity/" + entity.uuid + "'>Download CSV data</a>");
+            actionsParagraph.append("<a class='downloadLink' href='" + BASE_URL + "/data/export/experiment/" + current_experiment_id + "/entity/" + entity.uuid + "'>Download data</a>");
             entityContainerWrapper.data("clientId", uuid);
             entityAddToLiveMetricsLink.click(function(e) {
                 e.preventDefault();
@@ -483,7 +546,7 @@ function appendEntitiesFromClient(uuid, client, attrDropdownList) {
                 var attributeAddToLiveMetricsLink = $("<a id='a_" + attribute.uuid + "_input' href='#'>Add to Live metrics</a>").appendTo(actionsParagraph);
                 attributeAddToLiveMetricsLink.data("attribute", attribute);
                 attributeAddToLiveMetricsLink.data("entityName", entity.name);
-                actionsParagraph.append("<a class='downloadLink' href='" + BASE_URL + "/data/export/experiment/" + current_experiment_id + "/attribute/" + attribute.uuid + "'>Download CSV data</a>");
+                actionsParagraph.append("<a class='downloadLink' href='" + BASE_URL + "/data/export/experiment/" + current_experiment_id + "/attribute/" + attribute.uuid + "'>Download data</a>");
                 attributeContainerWrapper.data("entityId", entity.uuid);
                 attributeAddToLiveMetricsLink.click(function(e) {
                     e.preventDefault();

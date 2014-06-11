@@ -63,3 +63,7 @@ a.removeSelfGraphButton {
     margin-top: 12px;
     margin-bottom: 0px;
 }
+
+a.clientDisconnectButton {
+    color: #cf2a0e;
+}
