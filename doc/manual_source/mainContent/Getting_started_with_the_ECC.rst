@@ -107,7 +107,7 @@ This usage scenario assumes you will run a RabbitMQ server on your local Windows
 
      3. Start the RabbitMQ server, by typing: rabbitmq-service start
 
-	  
+
 After following the standard installation procedure outlined by RabbitMQ, you should have a RabbitMQ server service running locally, using the default RabbitMQ connection:
 localhost:5672. If you also installed the web-based management system, you should be able to view the status of your RabbitMQ server by navigating to
 `http://localhost:55672 <http://localhost:55672>`_  The ECC is set up by default to use this local address
@@ -147,10 +147,10 @@ Having done this, you should set up the database using the following steps:
 
 			psql -d edm-metrics -U*<username>*-f edm-metrics-postgres.sql
 
-			
+
 Above, the term *<username>* refers to your username.
 
-More detail information on setting up the EDM and running test procedures can be found in the ECC package:: 
+More detail information on setting up the EDM and running test procedures can be found in the ECC package::
 
 		edm\resources\edm-metrics-postgres.sql\README.txt
 
@@ -175,60 +175,82 @@ follow these steps:
 
 1. Using a command line in the root of the ECC API type::
 
-			cd thirdPartyLibs
-			
-			installLibraries.[bat] or [sh]
-			
-			cd ..
+	cd thirdPartyLibs
 
-      mvn clean install
-      
-			all modules in the ECC API should be reported as successfully built.
-  
-    You should find the ECC web dashboard WAR file created in the following location::
-  
-       <ECC API root>\eccDash\target\experimedia-arch-ecc-eccDash-2.0-SNAPSHOT.war
+	installLibraries.[bat] or [sh]
 
- 
+	cd ..
+
+	mvn clean install
+
+
+
+ All modules in the ECC API should be reported as successfully built. You should find the ECC web dashboard WAR file created in the following location::
+
+		<ECC API root>\eccService\target\EccService-2.0.war
+
+
 2. Deploy and run the ECC dashboard, using:
 
-	2.1 Tomcat (default deployment)
-	
-	   Step 1: Start up Tomcat
+	2.1. Tomcat (default deployment)
 
-	   Step 2: Copy WAR file generated in step 1 to Tomcat's 'webapps' directory
-	          (Tomcat should automatically unpack and deploy for you)
-	  
-	        Result: You should see the ECC dashboard running on: http://localhost:8080/experimedia-arch-ecc-eccDash-2.0-SNAPSHOT/
+	    Step 1: Start up Tomcat.
+
+	    Step 2: Copy **EccService-2.0.war** to Tomcat's **webapps** directory (Tomcat should automatically unpack and deploy it for you immediately).
+
+	    Result: You should see the ECC dashboard running on: http://localhost:8080/EccService-2.0.
+
+	2.2. Glassfish (alternative deployment)
+
+		Step 1: Update Glassfish Java permissions for socket access using **vagrantConf/glassfish/java.policy** file
+
+		Step 2: Copy the following JARs from **eccService/target/EccService-2.0/WEB-INF/lib/** into Glassfish **/lib/endorsed** folder for Logback library support:
+
+			* logback-core-1.1.2.jar
+			* logback-classic-1.1.2.jar
+			* jul-to-slf4j-1.7.6.jar
+
+		Step 3: Configure Glassfish support for Logback libraries by updating the following files:
+
+			* <Glassfish home>/glassfish/domains/domain1/config/logback.xml
+			* <Glassfish home>/glassfish/domains/domain1/config/logging.properties
+			* <Glassfish home>/glassfish/domains/domain1/domain.xml
+
+		with the ones from **vagrantConf/glassfish** folder.
+
+		Step 4: Start default Glassfish domain and database.
+
+		Step 5: Deploy **EccService-2.0.war**.
+
+		Result: You should see the ECC dashboard running on: http://localhost:8080/EccService-2.0.
+
+	2.3. Spring boot (developer's deployment)
+
+		Step 1: Change into **eccService** folder.
+
+		Step 2: Run ``mvn spring:boot`` command.
+
+		Result: ECC Dashboard deployed in build-in Tomcat on: http://localhost:8083/ECC (port and context configurable via ``server.port`` and ``server.context-path`` properties in **eccService/src/main/resources/application.properties** file).
+
+	2.4. Vagrant (automatic deployment via virtual machines)
+
+		Step 1: Install Vagrant (http://www.vagrantup.com) and Virtual Box (https://www.virtualbox.org)
+
+		Step 2: Rename:
+
+			* **<ECC API root>/Vagrantfile.tomcat** into **Vagrantfile** to deploy ECC in a virtual machine with Tomcat server.
+
+			* **<ECC API root>/Vagrantfile.glassfish** into **Vagrantfile** to deploy ECC in a virtual machine with Glassfish server.
+
+		Step 3: In **<ECC API root>** run ``vagrant up`` and wait for the script to finish.
+
+		Result: You should see the ECC dashboard running on: http://localhost:8090/ECC.
 
 
-3. Enter the ECC for your project
+3. If you deployed the Dashboard correctly, you should see ECC Service Configuration page in your browser:
 
-  3.1 Enter your project and and click 'Find'
-	
-	3.2 You will be presented a series of configuration fields for:
-	
-		Connection to the RabbitMQ service (this allows clients to connect to the ECC remotely)
-		
-		Configuration of the PostgreSQL database (allowing the ECC to store metric data)
-		
-		Various dashboard options
-		
-	At this point, the ECC will attempt to connect to the EXPERIMEDIA configuration service to retrieve your project's configuration data. If this fails,
-	the ECC will revert to the default settings for a local set up - modify your settings appropriately and continue: your configuration will be saved locally and re-used.
-					
-4.  After configuring your ECC dashboard, you should see a welcome screen similar to this:
+ .. image:: images/dashboard_configuration.png
+  :width: 100 %
 
-|image11_png|
 
-**Figure**
-**1**
-**: ECC dashboard welcome view**
-
-The ‘Open ECC’ button will activate if your installation is correct. For more information on configuring/customizing your ECC installation, see section
-.
-The ECC software package also contains some basic client software that can be used to connect to the ECC and send
-test metrics. An example of how to build and run of one of these client applications is described in the 'Building Sample ECC Clients' section
-
-.. |image11_png| image:: images/image11.png
-	:scale: 70
+You are now ready to configure ECC and start a new experiment. For further instructions please go to :doc:`Using the ECC Dashboard </mainContent/Using_the_dashboard>` section.
