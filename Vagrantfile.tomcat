@@ -49,7 +49,8 @@ $script = <<SCRIPT
 if [ ! -e /vagrant/thirdPartyLibs/owlim-lite-5.4.jar ] || [ ! -e /vagrant/thirdPartyLibs/openrdf-sesame.war ] || [ ! -e /vagrant/thirdPartyLibs/openrdf-workbench.war ]
 then
 	echo "Could not find all the required files in the thirdPartyLibs directory: aborting!"
-	exit 1
+	echo "VM may be up but not provisioned."
+	exit 0
 fi
 
 ## Install dependencies ##
