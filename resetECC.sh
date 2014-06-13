@@ -1,5 +1,7 @@
 #!/bin/sh
 
+echo "Resetting the ECC"
+
 SCRIPT=$(readlink -f "$0")
 SCRIPTPATH=$(dirname "$SCRIPT")
 
