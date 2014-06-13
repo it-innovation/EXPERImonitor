@@ -15,22 +15,6 @@
 
 ## Configuration for this script (this part is Ruby) ##
 
-# check for existence of required war files
-
-if ( !File.file?('./thirdPartyLibs/openrdf-sesame.war') )
-	abort("Could not find openrdf-sesame.war in thirdPartyLibs directory")
-end
-
-if ( !File.file?('./thirdPartyLibs/openrdf-workbench.war') )
-	abort("Could not find openrdf-workbench.war in thirdPartyLibs directory")
-end
-
-if ( !File.file?('./thirdPartyLibs/owlim-lite-5.4.jar') )
-	abort("Could not find owlim-lite-5.4.jar in thirdPartyLibs directory")
-end
-
-puts "Third party files found. Starting installation..."
-
 hostname = "ECC-21"
 ram = "1536"
 
@@ -59,14 +43,23 @@ Tail the log file with: vagrant ssh -c 'tail -f /var/log/tomcat7/catalina.out'"
 ## The following shell script is run once the VM is built (this part is bash) ##
 
 $script = <<SCRIPT
+
+## Check for existence of required third party files ##
+
+if [ ! -e /vagrant/thirdPartyLibs/owlim-lite-5.4.jar ] || [ ! -e /vagrant/thirdPartyLibs/openrdf-sesame.war ] || [ ! -e /vagrant/thirdPartyLibs/openrdf-workbench.war ]
+then
+	echo "Could not find all the required files in the thirdPartyLibs directory: aborting!"
+	exit 1
+fi
+
+## Install dependencies ##
+
 echo "Updating package index..."
 apt-get -qq update
 #apt-get upgrade -y  # could upgrade base OS packages if you want
 
-## Install dependencies ##
-
 echo "Installing dependencies..."
-# sort out switching to Java 7 before installing Tomcat
+# Switch to Java 7 before installing Tomcat
 apt-get install -y openjdk-7-jdk
 update-alternatives --set java /usr/lib/jvm/java-7-openjdk-i386/jre/bin/java
 rm /usr/lib/jvm/default-java
@@ -134,7 +127,7 @@ echo "<?xml version='1.0' encoding='utf-8'?><tomcat-users><user rolename='manage
 # Copy Tomcat configuration into default folder
 cp /vagrant/vagrantConf/tomcat/tomcat7 /etc/default
 
-## Add aduna folder to tomcat7
+# Add aduna folder to tomcat7
 mkdir -p /usr/share/tomcat7/.aduna/openrdf-sesame
 chown -R tomcat7 /usr/share/tomcat7/.aduna
 
