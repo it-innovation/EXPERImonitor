@@ -74,7 +74,7 @@ rm /usr/lib/jvm/default-java
 ln -s /usr/lib/jvm/java-1.7.0-openjdk-i386 /usr/lib/jvm/default-java
 
 apt-get install -y git
-apt-get install -y maven2
+apt-get install -y maven
 apt-get install -y postgresql-9.1
 apt-get install -y rabbitmq-server
 
