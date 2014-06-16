@@ -4,7 +4,7 @@ Getting started with the ECC
 The ‘bare bones’ software required for deploying and running the ECC are as follows:
 
 *   Java JDK
-    1.6
+    1.7
 
 
 
@@ -76,10 +76,10 @@ This software requires various third-party libraries to compile and/or execute. 
 Installing JavaJDK
 ------------------
 
-The ECC system runs using Java 1.6. To build and run the ECC, you will need to install the appropriate JDK
+The ECC system runs using Java 1.7. To build and run the ECC, you will need to install the appropriate JDK
 for your system; please visit:
 
-`http://www.oracle.com/technetwork/java/javasebusiness/downloads/java-archive-downloads-javase6-419409.html#jdk-6u41-oth-JPR <http://www.oracle.com/technetwork/java/javasebusiness/downloads/java-archive-downloads-javase6-419409.html#jdk-6u41-oth-JPR>`_
+`http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html <http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html>`_
 
 
 Installing Maven
@@ -101,7 +101,7 @@ You can download the RabbitMQ server from:
 
 This usage scenario assumes you will run a RabbitMQ server on your local Windows machine.
 
-     1. Install RabbitMQ v2.8.6 for Windows(please follow instructions from the RabbitMQ website, including the dependency on Erlang).
+     1. Install RabbitMQ v2.8.6 or later for Windows(please follow instructions from the RabbitMQ website, including the dependency on Erlang).
 
      2. Open an adminstrator level Command window in your RabbitMQ server 'sbin' folder
 
