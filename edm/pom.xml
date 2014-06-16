@@ -1,45 +1,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  
-  <!--
-  /////////////////////////////////////////////////////////////////////////
-  //
-  // © University of Southampton IT Innovation Centre, 2012
-  //
-  // Copyright in this software belongs to University of Southampton
-  // IT Innovation Centre of Gamma House, Enterprise Road, 
-  // Chilworth Science Park, Southampton, SO16 7NS, UK.
-  //
-  // This software may not be used, sold, licensed, transferred, copied
-  // or reproduced in whole or in part in any manner or form or in or
-  // on any media by any person other than in accordance with the terms
-  // of the Licence Agreement supplied with the software, or otherwise
-  // without the prior written consent of the copyright owners.
-  //
-  // This software is distributed WITHOUT ANY WARRANTY, without even the
-  // implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-  // PURPOSE, except where stated in the Licence Agreement supplied with
-  // the software.
-  //
-  //      Created By :          Vegard Engen
-  //      Created Date :        2012-08-13
-  //      Created for Project : BonFIRE
-  //
-  /////////////////////////////////////////////////////////////////////////
-  -->
-    
+
   <modelVersion>4.0.0</modelVersion>
   <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
   <artifactId>experimedia-arch-ecc-edm</artifactId>
   <name>ECC Experiment Data Manager</name>
-  <version>2.0</version>
+  <version>2.1</version>
   <packaging>pom</packaging>
-  
+
   <parent>
     <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
     <artifactId>experimedia-arch-ecc</artifactId>
-    <version>2.0</version>
+    <version>2.1</version>
   </parent>
 
   <modules>
@@ -48,7 +21,7 @@
     <module>factory</module>
 	  <module>test</module>
   </modules>
-  
+
     <dependencies>
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
@@ -56,5 +29,5 @@
 			<version>1.1.1</version>
 		</dependency>
 	</dependencies>
-    
+
 </project>

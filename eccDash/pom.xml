@@ -5,13 +5,13 @@
   <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
   <artifactId>experimedia-arch-ecc-eccDash</artifactId>
   <packaging>war</packaging>
-  <version>2.0</version>
+  <version>2.1</version>
   <name>ECC Dashboard</name>
-  
+
   <parent>
     <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
     <artifactId>experimedia-arch-ecc</artifactId>
-    <version>2.0</version>
+    <version>2.1</version>
   </parent>
 
   <properties>
@@ -19,7 +19,7 @@
     <gwt.version>2.3.0</gwt.version>
     <gwt.plugin.version>2.2.0</gwt.plugin.version>
   </properties>
-  
+
   <licenses>
     <license>
     <name>IT Innovation Experimedia License, Version 1.0</name>
@@ -39,7 +39,7 @@
           <target>1.6</target>
         </configuration>
       </plugin>
-     
+
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>gwt-maven-plugin</artifactId>
@@ -65,19 +65,19 @@
         </executions>
 
         <dependencies>
-          
+
           <dependency>
             <groupId>com.google.gwt</groupId>
             <artifactId>gwt-user</artifactId>
             <version>${gwt.version}</version>
           </dependency>
-          
+
           <dependency>
             <groupId>com.google.gwt</groupId>
             <artifactId>gwt-dev</artifactId>
             <version>${gwt.version}</version>
           </dependency>
-          
+
         </dependencies>
       </plugin>
 
@@ -85,7 +85,7 @@
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-maven-plugin</artifactId>
         <version>1.0.2</version>
-        
+
         <executions>
           <execution>
 
@@ -99,12 +99,12 @@
               <goal>update-widgetset</goal>
             </goals>
           </execution>
-          
+
         </executions>
       </plugin>
-      
+
     </plugins>
-    
+
   </build>
 
   <repositories>
@@ -122,8 +122,8 @@
       <id>vaadin-addons</id>
       <url>http://maven.vaadin.com/vaadin-addons</url>
     </repository>
-    
-    <!-- Maven source for icepush-gwt --> 
+
+    <!-- Maven source for icepush-gwt -->
     <repository>
       <id>olegych-mvn</id>
       <url>https://bitbucket.org/olegych/mvn/raw/default</url>
@@ -131,9 +131,9 @@
         <enabled>false</enabled>
       </snapshots>
     </repository>
-    
+
   </repositories>
-                  
+
   <pluginRepositories>
     <pluginRepository>
       <id>codehaus-snapshots</id>
@@ -155,13 +155,13 @@
       <releases>
         <enabled>false</enabled>
       </releases>
-    </pluginRepository>  
+    </pluginRepository>
   </pluginRepositories>
-  
-  <profiles>    
+
+  <profiles>
     <profile>
       <id>light</id>
-      
+
       <build>
         <plugins>
 
@@ -195,50 +195,50 @@
           </plugin>
         </plugins>
       </build>
-  
+
     </profile>
   </profiles>
 
   <dependencies>
-    
+
     <dependency>
       <!-- Foundation UI classes from ROBUST project _______________________ -->
       <groupId>uk.ac.soton.itinnovation.robust.cat</groupId>
       <artifactId>robust-cat-core-components-viewEngine-spec-uif</artifactId>
       <version>1.0-SNAPSHOT</version> <!-- Should not change -->
     </dependency>
-    
+
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>experimedia-arch-ecc-edc-configAPI</artifactId>
-      <version>2.0</version>
+      <version>2.1</version>
     </dependency>
-    
+
     <dependency>
       <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
       <artifactId>experimedia-arch-ecc-em-spec</artifactId>
-      <version>2.0</version>
+      <version>2.1</version>
     </dependency>
-    
+
     <dependency>
       <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
       <artifactId>experimedia-arch-ecc-em-factory</artifactId>
-      <version>2.0</version>
+      <version>2.1</version>
     </dependency>
-    
+
     <dependency>
       <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
       <artifactId>experimedia-arch-ecc-edm-spec</artifactId>
-      <version>2.0</version>
+      <version>2.1</version>
     </dependency>
-    
+
     <dependency>
       <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
       <artifactId>experimedia-arch-ecc-edm-factory</artifactId>
-      <version>2.0</version>
+      <version>2.1</version>
     </dependency>
-    
-    <!-- 3rd party dependencies ____________________________________________ -->    
+
+    <!-- 3rd party dependencies ____________________________________________ -->
     <dependency>
       <groupId>com.google.gwt</groupId>
       <artifactId>gwt-user</artifactId>
@@ -260,65 +260,65 @@
       <classifier>sources</classifier>
       <scope>provided</scope>
     </dependency>
-   
+
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
       <version>2.3</version>
       <scope>provided</scope>
     </dependency>
-    
+
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin</artifactId>
       <version>${vaadin.version}</version>
     </dependency>
-    
+
     <dependency>
       <groupId>joda-time</groupId>
       <artifactId>joda-time</artifactId>
       <version>2.1</version>
     </dependency>
-    
+
     <!-- PUSH components (to support ICEPush Vaadin add-on _________________ -->
     <dependency>
       <groupId>org.icefaces</groupId>
       <artifactId>icepush</artifactId>
       <version>3.0.1</version>
     </dependency>
-    
+
     <dependency>
-      <groupId>org.icepush</groupId> 
+      <groupId>org.icepush</groupId>
       <artifactId>icepush-gwt</artifactId>
-      <version>2.0.0-alpha3</version> 
+      <version>2.0.0-alpha3</version>
     </dependency>
-    
+
     <!-- Vaadin add-ons ____________________________________________________ -->
     <dependency>
       <groupId>org.vaadin.addons</groupId>
       <artifactId>invient-charts</artifactId>
       <version>0.8.6</version>
     </dependency>
-    
+
     <dependency>
       <groupId>org.vaadin.addons</groupId>
       <artifactId>icepush</artifactId>
       <version>0.2.1</version>
     </dependency>
-    
+
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
       <version>2.2.4</version>
       <type>jar</type>
     </dependency>
-    
+
 	<dependency>
 		<groupId>ch.qos.logback</groupId>
 		<artifactId>logback-classic</artifactId>
 		<version>1.1.1</version>
 	</dependency>
-    
+
   </dependencies>
 
 </project>

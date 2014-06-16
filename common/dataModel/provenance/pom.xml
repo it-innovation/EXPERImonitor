@@ -5,23 +5,23 @@
   <modelVersion>4.0.0</modelVersion>
   <artifactId>experimedia-arch-ecc-common-dataModel-provenance</artifactId>
   <packaging>jar</packaging>
-  
+
   <parent>
     <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
     <artifactId>experimedia-arch-ecc-common-dataModel</artifactId>
-    <version>2.0</version>
+    <version>2.1</version>
   </parent>
-  
+
   <licenses>
     <license>
     <name>IT Innovation Experimedia License, Version 1.0</name>
     <url>${session.executionRootDirectory}/ITInnov-EXPERIMEDIA-licence-v1.0.txt</url>
     </license>
   </licenses>
-  
+
   <build>
     <plugins>
-      
+
       <!-- Maven compiler -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -41,12 +41,12 @@
           </configuration>
         </plugin>
     </plugins>
-  
+
     <directory>lib</directory>
     <sourceDirectory>src</sourceDirectory>
   </build>
-  
+
   <dependencies>
   </dependencies>
-    
+
 </project>
