@@ -187,7 +187,7 @@ follow these steps:
 
  All modules in the ECC API should be reported as successfully built. You should find the ECC web dashboard WAR file created in the following location::
 
-		<ECC API root>\eccService\target\EccService-2.0.war
+		<ECC API root>\eccService\target\EccService-2.1.war
 
 
 2. Deploy and run the ECC dashboard, using:
@@ -196,15 +196,15 @@ follow these steps:
 
 	    Step 1: Start up Tomcat.
 
-	    Step 2: Copy **EccService-2.0.war** to Tomcat's **webapps** directory (Tomcat should automatically unpack and deploy it for you immediately).
+	    Step 2: Copy **EccService-2.1.war** to Tomcat's **webapps** directory (Tomcat should automatically unpack and deploy it for you immediately).
 
-	    Result: You should see the ECC dashboard running on: http://localhost:8080/EccService-2.0.
+	    Result: You should see the ECC dashboard running on: http://localhost:8080/EccService-2.1.
 
 	2.2. Glassfish (alternative deployment)
 
 		Step 1: Update Glassfish Java permissions for socket access using **vagrantConf/glassfish/java.policy** file
 
-		Step 2: Copy the following JARs from **eccService/target/EccService-2.0/WEB-INF/lib/** into Glassfish **/lib/endorsed** folder for Logback library support:
+		Step 2: Copy the following JARs from **eccService/target/EccService-2.1/WEB-INF/lib/** into Glassfish **/lib/endorsed** folder for Logback library support:
 
 			* logback-core-1.1.2.jar
 			* logback-classic-1.1.2.jar
@@ -220,9 +220,9 @@ follow these steps:
 
 		Step 4: Start default Glassfish domain and database.
 
-		Step 5: Deploy **EccService-2.0.war**.
+		Step 5: Deploy **EccService-2.1.war**.
 
-		Result: You should see the ECC dashboard running on: http://localhost:8080/EccService-2.0.
+		Result: You should see the ECC dashboard running on: http://localhost:8080/EccService-2.1.
 
 	2.3. Spring boot (developer's deployment)
 
