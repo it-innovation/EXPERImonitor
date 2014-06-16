@@ -525,12 +525,12 @@ public class ExperimentService {
     }
 
     /**
-     * Use this method to retrieve the current phase clients. This call will
-     * return an empty set when there are no clients or no active experiment.
-     * IMPORTANT: the state of each client you find in this set will be correct
-     * only at the point of calling.
+     * Use this method to retrieve all known clients. This call will return an
+     * empty set when there are no clients or no active experiment. IMPORTANT:
+     * the state of each client you find in this set will be correct only at the
+     * point of calling.
      *
-     * @return - Set of clients currently connected.
+     * @return - All known clients.
      */
     public Set<EMClient> getKnownClients() {
 
@@ -538,8 +538,7 @@ public class ExperimentService {
 
         if (started) {
 
-            // Get the all clients that the monitor expects to be connected
-//            Set<EMClient> clients = expMonitor.getAllConnectedClients();
+            // Get the all clients that the monitor is aware of
             Set<EMClient> clients = expMonitor.getAllKnownClients();
 
             // Only return those that are not re-registering
