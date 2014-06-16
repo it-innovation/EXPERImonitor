@@ -21,7 +21,7 @@ This client is currently only available as a NetBeans 7.x project and is most ea
 
  * Android SDK tools (latest is recommended; should support OS 4.1.2), see: http://developer.android.com/sdk/index.html
  * NBAndroid NetBeans plugin, see: http://www.nbandroid.org/
- 
+
 Once you have installed both the Android SDK and NBAndroid plugin, you need to set up the following:
 
   * Set up your Android SDK paths (see Android documentation)
@@ -32,33 +32,33 @@ Building the Android sample
 Having installed the above software, you now need compile the ECC (Maven) project so that you can copy the appropriate ECC JAR files into the 'libs' directory of the sample folder. Do to this:
 
   1. Naviate to the root of the ECC API
-  
+
   2. Type 'mvn clean install'
-  
+
   3. Search for and copy the following ECC JAR files into '<root>\samples\basicAndroidClient\libs':
-      * experimedia-arch-ecc-amqpAPI-impl-2.0.jar
-      * experimedia-arch-ecc-amqpAPI-spec-2.0.jar
-      * experimedia-arch-ecc-common-dataModel-experiment-2.0.jar
-      * experimedia-arch-ecc-common-dataModel-metrics-2.0.jar
-      * experimedia-arch-ecc-common-dataModel-monitor-2.0.jar
-      * experimedia-arch-ecc-common-logging-spec-2.0.jar
-      * experimedia-arch-ecc-em-factory-2.0.jar
-      * experimedia-arch-ecc-em-impl-2.0.jar
-      * experimedia-arch-ecc-em-spec-2.0.jar
-      * experimedia-arch-ecc-samples-shared-2.0.jar
-      
+      * experimedia-arch-ecc-amqpAPI-impl-2.1.jar
+      * experimedia-arch-ecc-amqpAPI-spec-2.1.jar
+      * experimedia-arch-ecc-common-dataModel-experiment-2.1.jar
+      * experimedia-arch-ecc-common-dataModel-metrics-2.1.jar
+      * experimedia-arch-ecc-common-dataModel-monitor-2.1.jar
+      * experimedia-arch-ecc-common-logging-spec-2.1.jar
+      * experimedia-arch-ecc-em-factory-2.1.jar
+      * experimedia-arch-ecc-em-impl-2.1.jar
+      * experimedia-arch-ecc-em-spec-2.1.jar
+      * experimedia-arch-ecc-samples-shared-2.1.jar
+
   4. Add the following third party libraries:
       * amqp-client-2.8.6.jar
       * base64.2.3.8.jar
       * commons-cli-1.1.jar
       * commons-io-1.2.jar
       * gson-2.2.2.jar
-  
+
   5. Open the basicAndroidClient in NetBeans
-  
+
   6. Clean and Build the basicAndroidClient (the result should be a debug APK)
 
-  
+
 Running the Android sample (on your desktop)
 --------------------------------------------
 Having built your APK (and if you have installed the NBAndroid plugin, you should be able to run your client. The recommended testing procedure for this is:
@@ -72,5 +72,4 @@ Having built your APK (and if you have installed the NBAndroid plugin, you shoul
   7. Click 'Connect' on the Android UI
   8. Move through the experiment process (using the dashboard) until you get to Live Monitoring
   9. Move the slider bar on the Android UI - you should see the data appear in the Live monitoring view
-  
- 
+
