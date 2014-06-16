@@ -77,7 +77,7 @@ $(document).ready(function() {
                                     entityContainer.append("<p class='sub_details'>UUID: " + entity.uuid + "</p>");
 
                                     var actionsParagraph = $("<p class='sub_details'></p>").appendTo(entityContainer);
-                                    actionsParagraph.append("<a class='downloadLink' href='" + BASE_URL + "/data/export/experiment/" + experimentId + "/entity/" + entity.uuid + "'>Download CSV data</a>");
+                                    actionsParagraph.append("<a class='downloadLink' href='" + BASE_URL + "/data/export/experiment/" + experimentId + "/entity/" + entity.uuid + "'>Download data</a>");
 
 
 //                                    attrDropdownList.append("<option value='" + entity.uuid + "'>" + entity.name + " (" + client.name + " client)" + "</option>");
@@ -91,7 +91,7 @@ $(document).ready(function() {
                                         attributeContainer.append("<p class='sub_details_mid'>Type: " + attribute.type + "</p>");
                                         attributeContainer.append("<p class='sub_details_mid'>Unit: " + attribute.unit + "</p>");
                                         var actionsParagraph = $("<p class='sub_details'></p>").appendTo(attributeContainer);
-                                        actionsParagraph.append("<a class='downloadLink' href='" + BASE_URL + "/data/export/experiment/" + experimentId + "/attribute/" + attribute.uuid + "'>Download CSV data</a>");
+                                        actionsParagraph.append("<a class='downloadLink' href='" + BASE_URL + "/data/export/experiment/" + experimentId + "/attribute/" + attribute.uuid + "'>Download data</a>");
 
                                     });
                                 });
