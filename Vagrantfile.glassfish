@@ -150,13 +150,13 @@ wget http://repo1.maven.org/maven2/ch/qos/logback/logback-classic/0.9.28/logback
 cp ./logback-classic-0.9.28.jar /opt/glassfish3/glassfish/lib/endorsed/logback-classic-0.9.28.jar
 
 # ECC Service
-cp ./eccService/target/EccService-2.0/WEB-INF/lib/jul-to-slf4j-1.7.6.jar /opt/glassfish3/glassfish/lib/endorsed/jul-to-slf4j-1.7.6.jar
+cp ./eccService/target/EccService-2.1/WEB-INF/lib/jul-to-slf4j-1.7.6.jar /opt/glassfish3/glassfish/lib/endorsed/jul-to-slf4j-1.7.6.jar
 
-cp ./eccService/target/EccService-2.0/WEB-INF/lib/slf4j-api-1.7.6.jar /opt/glassfish3/glassfish/lib/endorsed/slf4j-api-1.7.6.jar
+cp ./eccService/target/EccService-2.1/WEB-INF/lib/slf4j-api-1.7.6.jar /opt/glassfish3/glassfish/lib/endorsed/slf4j-api-1.7.6.jar
 
-cp ./eccService/target/EccService-2.0/WEB-INF/lib/logback-core-1.1.2.jar /opt/glassfish3/glassfish/lib/endorsed/logback-core-1.1.2.jar
+cp ./eccService/target/EccService-2.1/WEB-INF/lib/logback-core-1.1.2.jar /opt/glassfish3/glassfish/lib/endorsed/logback-core-1.1.2.jar
 
-cp ./eccService/target/EccService-2.0/WEB-INF/lib/logback-classic-1.1.2.jar /opt/glassfish3/glassfish/lib/endorsed/logback-classic-1.1.2.jar
+cp ./eccService/target/EccService-2.1/WEB-INF/lib/logback-classic-1.1.2.jar /opt/glassfish3/glassfish/lib/endorsed/logback-classic-1.1.2.jar
 
 cp ./vagrantConf/glassfish/logback.xml /opt/glassfish3/glassfish/domains/domain1/config/logback.xml
 
@@ -186,7 +186,7 @@ echo "**** Deploying OpenRDF sesame & workbench into Glassfish"
 
 # deploy the ECC into Glassfish
 #echo "**** Deploying ECC into Glassfish"
-/opt/glassfish3/bin/asadmin deploy --contextroot ECC ./eccService/target/EccService-2.0.war
+/opt/glassfish3/bin/asadmin deploy --contextroot ECC ./eccService/target/EccService-2.1.war
 
 if [ '#{ecc_git}' != "" ]; then
 	echo 'ECC built from git branch #{ecc_git}'
@@ -208,7 +208,7 @@ Vagrant.configure("2") do |config|
 	config.vm.box = "precise32"
     config.vm.box_url = "http://files.vagrantup.com/precise32.box"
     config.vm.hostname = hostname
-	
+
 	# Forward host port to guest port 8080 for Glassfish
 	config.vm.network :forwarded_port, host: Integer(ecc_port), guest: 8080
 	# Forward host port to guest port 5672 for RabbitMQ messages
@@ -221,13 +221,13 @@ Vagrant.configure("2") do |config|
 	config.vm.network :forwarded_port, host: Integer(glassfish_port), guest: 4848
 
 	# Set static private network address.
-	# Deploying with a static IP like this means that VirtualBox will set up a virtual network 
+	# Deploying with a static IP like this means that VirtualBox will set up a virtual network
 	# card that listens on e.g. 10.0.0.0/48
-	# If you have other machines on that subnet then change the IP or you will have to delete 
-	# the virtual card from the VirtualBox GUI afterwards.  The purpose of using a static IP 
+	# If you have other machines on that subnet then change the IP or you will have to delete
+	# the virtual card from the VirtualBox GUI afterwards.  The purpose of using a static IP
 	# is so that other services deployed in the same way can communicate.
 	config.vm.network "private_network", ip: ecc_ip
-	
+
     # configure virtualbox
     config.vm.provider :virtualbox do |vb|
         vb.customize [
