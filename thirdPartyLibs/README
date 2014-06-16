@@ -10,18 +10,9 @@ They can be obtained directly from Ontotext:
 2.	Extract the file owlim-lite-5.4.jar from the /lib directory and 
 	openrdf-workbench.war and openrdf-sesame.war from the /sesame_owlim
 	directory in the zip file into the /thirdPartyLibs directory.
-	
-	
-How to obtain OpenRDF WARs
-==========================
-The following 3rd party WARs are should be deployed along side the ECC WAR in your web server (Apache or Glassfish):
 
- * openrdf-sesame.war    v2.7.7 (required)
- * openrdf-workbench.war v2.7.7 (optional)
+The thirdPartyLibs folder should then contain these additional files:
 
-Both of these WARs can be obtained free of charge here:
-
-http://sourceforge.net/projects/sesame/files/Sesame%202/2.7.7/openrdf-sesame-2.7.7-sdk.zip/download
-
-These files are licensed under a BSD ADUNA style license.
-
+  * owlim-lite-5.4.jar
+  * openrdf-sesame.war
+  * openrdf-workbench.war
