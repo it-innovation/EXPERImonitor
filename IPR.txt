@@ -132,11 +132,6 @@ Newtonsoft.Json.dll
 rabbitmq-c-v0.3.0 (see https://github.com/alanxz/rabbitmq-c)
 SimpleAmqpClient (see https://github.com/alanxz/SimpleAmqpClient)
 org.slf4j:slf4j-api:1.7.6.jar
-prov-dot:0.3.0
-prov-json:0.3.0
-prov-model:0.3.0
-prov-n:0.3.0
-prov-xml:0.3.0
 
 BOOST Licence
 -----------------------------------------------
@@ -146,22 +141,12 @@ OWLIM-Lite Licence
 -----------------------------------------------
 OWLIM-Lite_licence_v5.3
 
-prov Toolbox Licence
------------------------------------------------
-prov-dot-0.3.0.jar
-prov-model-0.3.0.jar
-prov-n-0.3.0.jar
-prov-xml-0.3.0.jar
-
 Public domain
 -----------------------------------------------
 base64-2.3.8.jar
 
 LGPL
 -----------------------------------------------
-openrdf-model:1.2.7
-openrdf-util:1.2.7
-rio:1.0.10
 sesame:1.2.7
 ch.qos.logback:logback-classic:1.1.1.jar
 ch.qos.logback:slf4j-android:1.7.6.jar

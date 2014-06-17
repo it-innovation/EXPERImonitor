@@ -95,33 +95,6 @@
             <version>9.1-901.jdbc4</version>
         </dependency>
 
-        <!-- PROV ToolBox __________________________________________________ -->
-        <dependency>
-          <groupId>org.openprovenance.prov</groupId>
-          <artifactId>prov-n</artifactId>
-          <version>0.3.0</version>
-        </dependency>
-
-        <dependency>
-          <groupId>org.openprovenance.prov</groupId>
-          <artifactId>prov-dot</artifactId>
-          <version>0.3.0</version>
-        </dependency>
-
-        <!-- OpenRDF _______________________________________________________ -->
-        <dependency>
-          <groupId>org.openrdf</groupId>
-          <artifactId>rio</artifactId>
-          <version>1.0.10</version>
-        </dependency>
-
-        <!-- Other -->
-        <dependency>
-          <groupId>commons-io</groupId>
-          <artifactId>commons-io</artifactId>
-          <version>2.4</version>
-        </dependency>
-
     </dependencies>
 
 		<!-- 3rd party repositories ___________________________________________  -->
