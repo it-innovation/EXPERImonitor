@@ -783,14 +783,11 @@ public class ExperimentService {
         @Override
         public void onClientConnected(EMClient client, boolean reconnected) {
 
+            // Only log out this event here; the EM maintains an internal list of 'live'
+            // connections - these are validated within the experiment state model once the
+            // client has sent a metric model to the ECC. This ensures that we are certain
+            // of a client's connectivity (supports re-connecting clients from earlier experiments)
             logger.info("Client connected: " + client.getName() + (reconnected ? "[reconnection]" : "."));
-
-            // If the client is re-registering, do not mark them as connected
-            // just yet; they need to respond in Discovery phase before we know
-            // they are really there
-            if (!client.isReRegistering()) {
-                expStateModel.setClientConnectedState(client, true);
-            }
         }
 
         @Override
@@ -877,10 +874,14 @@ public class ExperimentService {
         public void onFoundClientWithMetricGenerators(EMClient client, Set<MetricGenerator> newGens) {
 
             if (client != null && newGens != null) {
-
-                if (client.isReRegistering()) {
-                    logger.info("Known client connected: " + client.getID() + " (\"" + client.getName() + "\")");
-                }
+            
+                // Update experiment state with confirmed client connection
+                if ( !expStateModel.isClientConnected(client) )
+                    expStateModel.setClientConnectedState(client, true);
+                 
+                // Log out if this client is one we already know about
+                if (client.isReRegistering())
+                    logger.info("Previously connected client has reconnected: " + client.getID() + " (\"" + client.getName() + "\")");
 
                 // Pass on metric generators to the EDM for storage
                 UUID expID = expStateModel.getActiveExperiment().getUUID();
