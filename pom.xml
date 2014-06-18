@@ -15,7 +15,7 @@
         <ecc.java.version>1.6</ecc.java.version>
         <ecc.javadocplugin.version>2.9</ecc.javadocplugin.version>
         <ecc.javadocpath>doc/javaDoc</ecc.javadocpath>
-        <ecc.reportplugin.version>2.6</ecc.reportplugin.version>
+        <ecc.reportplugin.version>2.7</ecc.reportplugin.version>
         <ecc.resourceplugin.version>2.5</ecc.resourceplugin.version>
         <ecc.assemblyplugin.version>2.4</ecc.assemblyplugin.version>
         <ecc.assemblypath>assembly</ecc.assemblypath>
