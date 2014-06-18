@@ -59,12 +59,12 @@ Installing 3rd party software required by the ECC
 =================================================
 You will need to install the following 3rd party software:
 
-	- Java JDK 1.6 or better
+	- Java JDK 1.7 or better
 	- Apache Maven 3
 	- Rabbit MQ server
 	- PostgreSQL server 9.0+
 	- Apache Tomcat 7.x
-	- Ontotext OWLIM lite 5.3
+	- Ontotext OWLIM lite 5.4
 
   Setting up Java and Maven
   -------------------------
@@ -120,12 +120,12 @@ You will need to install the following 3rd party software:
       - See <Tomcat root>\conf\tomcat-users.xml
 
 
-  Setting up OWLIM lite 5.3
+  Setting up OWLIM lite 5.4
   -------------------------
 	1.	Register at http://www.ontotext.com/owlim/owlim-lite-registration for a copy.
 		A zip file will be send to you by email after your registration.
 
-	2.	Copy the file owlim-lite-5.3.jar from the /lib directory in the zip file into
+	2.	Copy the file owlim-lite-5.4.jar from the /lib directory in the zip file into
 		the /thirdPartyLibs directory.
 
 	3.	Extract openrdf-workbench.war and openrdf-sesame.war from the /sesame_owlim
@@ -155,7 +155,7 @@ The ECC dashboard can be quickly built to run on your local development machine 
 
   You should find the ECC web dashboard WAR file created in the following location:
 
-      <ECC API root>\eccDash\target\experimedia-arch-ecc-eccDash-2.1.war
+      <ECC API root>\eccService\target\EccService-2.1.war
 
 
 3. Deploy and run the ECC dashboard, using:
@@ -167,7 +167,7 @@ The ECC dashboard can be quickly built to run on your local development machine 
 	  Step 2: Copy WAR file generated in step 1 to Tomcat's 'webapps' directory
 	          (Tomcat should automatically unpack and deploy for you)
 
-	  Result: You should see the ECC dashboard running on: http://localhost:8080/experimedia-arch-eccDash-2.1/
+	  Result: You should see the ECC dashboard running on: http://localhost:8080/EccService-2.1/
 
 
 
