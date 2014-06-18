@@ -256,12 +256,21 @@ $(document).ready(function() {
                 success: function(data) {
                     console.log(data);
                     if (data.hasOwnProperty('uuid')) {
-                        $('#configStatus').attr('class', 'right success-color');
-                        $('#configStatus').text('experiment in progress');
-                        startMainMonitor(data);
+                        if (data.uuid === null) {
+                            $('#configStatus').attr('class', 'right alert-color');
+                            $('#configStatus').text('failed to create experiment');
+                            $('#experimentCreationFailedModal').foundation('reveal', 'open');
+
+                        } else {
+                            $('#configStatus').attr('class', 'right success-color');
+                            $('#configStatus').text('experiment in progress');
+                            startMainMonitor(data);
+                        }
                     } else {
                         $('#configStatus').attr('class', 'right alert-color');
                         $('#configStatus').text('failed to create experiment');
+                        $('#experimentCreationFailedModal').foundation('reveal', 'open');
+
                     }
                 }
             });
@@ -272,8 +281,16 @@ $(document).ready(function() {
         }
 
     });
-//    $('#nameExperimentModal').foundation('reveal', 'open');
-//    return;
+
+    // dialog to deal with failed experiment starts:
+    $("#experimentCreationFailedModal").click(function(e) {
+        e.preventDefault();
+        $('#experimentCreationFailedModal').foundation('reveal', 'close');
+    });
+    $(document).on('close', '#experimentCreationFailedModal', function() {
+        // start again
+        window.location.replace(BASE_URL + "/experiment.html");
+    });
 
 // check if the service is initialised successfully.
     $.ajax({
