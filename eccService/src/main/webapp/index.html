@@ -23,11 +23,15 @@
                 <form id="fetchProjectConfigByNameForm">
                     <fieldset>
                         <legend>Local configuration</legend>
+                        <label>Loaded from application.properties file in ecc/eccService/src/main/resources or WEB-INF/classes</label>
+                        <br>
                         <input type="radio" name="configurationSet" value="local" id="localConfigurationRadioInput" checked>
                         <label for="localConfigurationRadioInput">Default (application.properties)</label>
                     </fieldset>
                     <fieldset id="listofRemoteConfigurations">
-                        <legend>Remote configurations (WebDAV)</legend>
+                        <legend>Remote configurations</legend>
+                        <label>Loaded from http://config.experimedia.eu. Only configurations whitelisted in application.properties:</label>
+                        <br>
                     </fieldset>
                 </form>
             </div>
@@ -37,6 +41,8 @@
                 <form id="activeProjectConfigForm" class="hide">
                     <fieldset>
                         <legend>Project name</legend>
+                        <label>No spaces and special characters for configurations to be saved remotely</label>
+                        <br>
                         <input type="text" name="projectName" id="config_projectName">
                     </fieldset>
                     <fieldset>
@@ -135,9 +141,14 @@
         </div>
 
         <div id="newConfigurationErrorModal" class="reveal-modal medium" data-reveal>
-            <h2>Selected configuration is not valid</h2>
+            <h2>Failed to submit configuration</h2>
             <p class="lead">Please have a look at the service logs or browser error console</p>
-            <p>The exact details of this error are not yet available in this interface</p>
+            <p>The exact details of this error are not yet available in this interface, but here are a couple of things to check:</p>
+            <ul>
+                <li>All fields have values in them</li>
+                <li>Correct values in each field</li>
+                <li>If saving remote configuration, check that <strong>config.experimedia.eu</strong> is online and accepts write requests</li>
+            </ul>
             <a href="#" class="button medium" id="closeNewConfigurationErrorModal">Try again</a>
             <a class="close-reveal-modal">&#215;</a>
         </div>
