@@ -1,0 +1,53 @@
+<assembly>
+    <id>src</id>
+    <formats>
+        <format>dir</format>
+        <!-- <format>zip</format> -->
+    </formats>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <files>
+
+        <!-- root readme file -->
+        <file>
+            <source>README-src.txt</source>
+            <outputDirectory></outputDirectory>
+            <filtered>true</filtered>
+            <destName>README.txt</destName>
+        </file>
+        <file>
+            <source>samples/basicAndroidClient/libs/Required JARS.txt</source>
+            <outputDirectory></outputDirectory>
+            <filtered>true</filtered>
+            <destName>samples/basicAndroidClient/libs/Required JARS.txt</destName>
+        </file>
+
+    </files>
+
+    <fileSets>
+        <fileSet>
+            <directory>.</directory>
+            <outputDirectory></outputDirectory>
+            <excludes>
+                <exclude>**/target/**</exclude>
+                <exclude>**/docs/**</exclude>
+                <exclude>**/.git/**</exclude>
+                <exclude>**/.gitignore/**</exclude>
+                <exclude>**/.gitattributes/**</exclude>
+                <exclude>**.DS_Store**</exclude>
+                <exclude>.vagrant/**</exclude>
+                <exclude>assembly/**</exclude>
+                <exclude>checkStyle/**</exclude>
+                <exclude>doc/**</exclude>
+                <exclude>licences/**</exclude>
+                <exclude>LICENSE.txt</exclude>
+                <exclude>Packaging.txt</exclude>
+                <exclude>IPR.txt</exclude>
+                <exclude>buildAll.sh</exclude>
+                <exclude>resetECC.sh</exclude>
+                <exclude>Vagrantfile</exclude>
+                <exclude>samples/basicAndroidClient/libs/Required JARS.txt</exclude>
+            </excludes>
+        </fileSet>
+
+    </fileSets>
+</assembly>
