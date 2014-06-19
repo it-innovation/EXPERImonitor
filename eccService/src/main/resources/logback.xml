@@ -44,10 +44,10 @@
 		</triggeringPolicy>
 	</appender>
 
-	<logger name="uk.co.soton.itinnovation.samplerestservice.Application" level="INFO" />
+	<logger name="uk.ac.soton.itinnovation.samplerestservice.Application" level="INFO" />
 	<logger name="org.springframework" level="INFO" />
 
-	<root level="WARN">
+	<root level="INFO">
 		<appender-ref ref="STDOUT"/>
 		<appender-ref ref="STDERR" />
 		<appender-ref ref="FILE"/>
