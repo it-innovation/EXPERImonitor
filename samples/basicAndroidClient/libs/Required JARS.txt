@@ -2,16 +2,16 @@ Libraries required for client
 -----------------------------
 ECC libraries:
 
-      * experimedia-arch-ecc-amqpAPI-impl-2.0.jar
-      * experimedia-arch-ecc-amqpAPI-spec-2.0.jar
-      * experimedia-arch-ecc-common-dataModel-experiment-2.0.jar
-      * experimedia-arch-ecc-common-dataModel-metrics-2.0.jar
-      * experimedia-arch-ecc-common-dataModel-monitor-2.0.jar
-      * experimedia-arch-ecc-em-factory-2.0.jar
-      * experimedia-arch-ecc-em-impl-2.0.jar
-      * experimedia-arch-ecc-em-spec-2.0.jar
-      * experimedia-arch-ecc-samples-shared-2.0.jar
-      
+      * experimedia-arch-ecc-amqpAPI-impl-${project.version}.jar
+      * experimedia-arch-ecc-amqpAPI-spec-${project.version}.jar
+      * experimedia-arch-ecc-common-dataModel-experiment-${project.version}.jar
+      * experimedia-arch-ecc-common-dataModel-metrics-${project.version}.jar
+      * experimedia-arch-ecc-common-dataModel-monitor-${project.version}.jar
+      * experimedia-arch-ecc-em-factory-${project.version}.jar
+      * experimedia-arch-ecc-em-impl-${project.version}.jar
+      * experimedia-arch-ecc-em-spec-${project.version}.jar
+      * experimedia-arch-ecc-samples-shared-${project.version}.jar
+
 3rd party libraries:
 
       * amqp-client-2.8.6.jar
@@ -21,4 +21,4 @@ ECC libraries:
       * gson-2.2.2.jar
       * slf4j-api-1.7.6.jar
       * slf4j-android-1.7.6.jar
-  
+
