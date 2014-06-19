@@ -1,9 +1,9 @@
 
-Welcome to the EXPERIMEDIA ECC documentation
+EXPERIMEDIA ECC v2.1 documentation
 ============================================
 
 +----------------------------------------------------------+-------------------------------------------------------+
-| **Overview**                                             | **Getting Started**                                   |
+| **Overview**                                             | **Installation**                                      |
 +----------------------------------------------------------+-------------------------------------------------------+
 | .. toctree::                                             | .. toctree::                                          |
 |    :maxdepth: 2                                          |    :maxdepth: 2                                       |
@@ -36,22 +36,12 @@ Welcome to the EXPERIMEDIA ECC documentation
 |    mainContent/ECC_monitoring_protocol                   |    mainContent/Base_line_metric_services              |              
 |                                                          |                                                       |
 +----------------------------------------------------------+-------------------------------------------------------+
-| **ECC API Change Log**                                   |  **ECC Configuration API**                            |                                                       
+| **Provenance**                                           |  **ECC Change Log**                                   |                                                       
 +----------------------------------------------------------+-------------------------------------------------------+
 | .. toctree::                                             |  .. toctree::                                         |                                                       
 |    :maxdepth: 2                                          |     :maxdepth: 2                                      |                                                       
 |                                                          |                                                       |
-|    mainContent/eccAPIChangeLog                           |      mainContent/ECC_Configuration_API                |                          
+|    mainContent/Creating_Provenance                       |     mainContent/eccAPIChangeLog                       |                          
 |                                                          |                                                       |                                
-|                                                          |                                                       |
-+----------------------------------------------------------+-------------------------------------------------------+
-| **Creating Provenance**                                  |                                                       |                                                       
-+----------------------------------------------------------+-------------------------------------------------------+
-| .. toctree::                                             |                                                       |                                                       
-|    :maxdepth: 2                                          |                                                       |                                                       
-|                                                          |                                                       |
-|    mainContent/Creating_Provenance                       |                                                       |                          
-|                                                          |                                                       |                                
-|                                                          |                                                       |
 +----------------------------------------------------------+-------------------------------------------------------+
 
