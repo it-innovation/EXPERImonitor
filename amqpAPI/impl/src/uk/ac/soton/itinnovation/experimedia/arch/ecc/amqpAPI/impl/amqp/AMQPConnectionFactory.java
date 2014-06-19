@@ -213,8 +213,8 @@ public class AMQPConnectionFactory
         // If a password exists for the Rabbit connection, use it
         if ( emProps.containsKey("Rabbit_Password") ) 
         {
-            factoryLog.info( "Will be using password to connect to AMQP" );
             userPass = emProps.getProperty( "Rabbit_Password" );
+            factoryLog.info( "Will be using password \'" + userPass + "\' to connect to AMQP" );
         } 
         else
           factoryLog.info( "No password provided, will try guest login" );
@@ -228,7 +228,7 @@ public class AMQPConnectionFactory
         else 
             factoryLog.info("No username provided, will try guest login");
         
-        factoryLog.info( "Trying to connect to AMQP bus..." );
+        factoryLog.info( "Trying to connect to AMQP bus using IP \'" + rabbitServerIP + "\' and port \'" + rabbitServerPort + "\'" );
         
         // Proceed only if these at least exist
         if ( rabbitServerIP != null && rabbitServerPort != null )
