@@ -37,7 +37,7 @@ The source release can be built manually or can be automatically copied into a v
 Deploying the ECC service using Vagrant
 =======================================
 
-The quickest method of building and deploying the ECC is to use the Vagrant deployment method: this creates a virtual machine on your host and automatically builds and deploys the ECC for you. Once you have acquired the ECC software package and its library dependencies, you will need to:
+The quickest method of building and deploying the ECC is to use the Vagrant deployment method: this creates a virtual machine on your host and automatically installs all the pre-requisites (such as PostgreSQL, Tomcat, RabbitMQ) and builds and deploys the ECC for you. Once you have acquired the ECC software package and its library dependencies, you will need to:
 
 #. Install Oracle VM VirtualBox (visit https://www.virtualbox.org/ for more details)
 #. Install Vagrant (visit http://www.vagrantup.com/ for more details)
@@ -178,6 +178,8 @@ http://localhost:8080/
 
 Deploy and run the ECC service by copying the two WAR files from the thirdPartyLibs folder and ``eccService/target/EccService-2.1.war`` to Tomcat's ``webapps`` directory (Tomcat should automatically unpack and deploy them for you immediately).
 
+Copy the owlim-lite-5.4.jar from thirdPartyLibs to the uppacked ECC service TODO where?  Then restart the Tomcat service.
+
 You should see the ECC dashboard running on: http://localhost:8080/EccService-2.1
 
 Ubuntu Linux installation
@@ -208,6 +210,14 @@ Copy in the required WAR files::
   $ sudo cp thirdPartyLibs/*.war /var/lib/tomcat7/webapps
   $ sudo cp eccService/target/EccService-2.1.war /var/lib/tomcat7/webapps
 
+Copy in the owlim-lite jar::
+
+  $ sudo cp thirdPartyLibs/*.jar /var/lib/tomcat/webapps/EccService-2.1/WEB-INF/lib
+
+Restart tomcat::
+
+  $ sudo service tomcat7 restart
+
 Glassfish
 =========
 
@@ -224,6 +234,8 @@ Glassfish may be used as an alternative to Tomcat.
   * <Glassfish home>/glassfish/domains/domain1/domain.xml
 #. Start the default Glassfish domain and database.
 #. Deploy the two WAR files from the thirdPartyLibs folder and ``eccService/target/EccService-2.1.war``.
+#. Copy the owlim-lite jar from thirdPartyLibs into the WEB-INF/lib folder of the unpacked ECC service.
+#. Restart glassfish.
 
 You should see the ECC dashboard running on: http://localhost:8080/EccService-2.1.
 
