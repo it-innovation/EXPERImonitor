@@ -80,7 +80,7 @@ rm -rf experimedia-ecc
 # get ECC code (need to do this before PostgreSQL config)
 if [ '#{ecc_git}' != "" ]; then
 	# set up deploy key to enable access to gitlab
-	cp -a /vagrant/vagrantConf/gitLab/.ssh ~
+	cp -a /vagrant/thirdPartyConfig/gitLab/.ssh ~
 	# get the latest ECC code from Git
 	git clone git@glab-i1.it-innovation.soton.ac.uk:experimedia/ecc.git experimedia-ecc
 	cd experimedia-ecc
@@ -133,12 +133,12 @@ wget http://download.java.net/glassfish/3.1.2.2/release/glassfish-3.1.2.2.zip
 unzip glassfish-3.1.2.2.zip
 rm glassfish-3.1.2.2.zip
 mv glassfish3 /opt/glassfish3
-cp /vagrant/vagrantConf/glassfish/glassfish /etc/init.d/glassfish
+cp /vagrant/thirdPartyConfig/glassfish/glassfish /etc/init.d/glassfish
 chmod +x /etc/init.d/glassfish
 update-rc.d glassfish defaults
 
 # Grant Java permission on socket
-cp /vagrant/vagrantConf/glassfish/java.policy /usr/lib/jvm/java-7-openjdk-i386/jre/lib/security/java.policy
+cp /vagrant/thirdPartyConfig/glassfish/java.policy /usr/lib/jvm/java-7-openjdk-i386/jre/lib/security/java.policy
 
 # Add glassfish support for Logback
 # OpenSesame
@@ -158,11 +158,11 @@ cp ./eccService/target/EccService-2.1/WEB-INF/lib/logback-core-1.1.2.jar /opt/gl
 
 cp ./eccService/target/EccService-2.1/WEB-INF/lib/logback-classic-1.1.2.jar /opt/glassfish3/glassfish/lib/endorsed/logback-classic-1.1.2.jar
 
-cp ./vagrantConf/glassfish/logback.xml /opt/glassfish3/glassfish/domains/domain1/config/logback.xml
+cp ./thirdPartyConfig/glassfish/logback.xml /opt/glassfish3/glassfish/domains/domain1/config/logback.xml
 
-cp ./vagrantConf/glassfish/logging.properties /opt/glassfish3/glassfish/domains/domain1/config/logging.properties
+cp ./thirdPartyConfig/glassfish/logging.properties /opt/glassfish3/glassfish/domains/domain1/config/logging.properties
 
-cp ./vagrantConf/glassfish/domain.xml /opt/glassfish3/glassfish/domains/domain1/config/domain.xml
+cp ./thirdPartyConfig/glassfish/domain.xml /opt/glassfish3/glassfish/domains/domain1/config/domain.xml
 
 # Start the Glassfish service
 /opt/glassfish3/bin/asadmin start-domain

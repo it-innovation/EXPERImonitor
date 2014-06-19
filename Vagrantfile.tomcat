@@ -81,7 +81,7 @@ rm -rf experimedia-ecc
 # get ECC code (need to do this before PostgreSQL config)
 if [ '#{ecc_git}' != "" ]; then
 	# set up deploy key to enable access to gitlab
-	cp -a /vagrant/vagrantConf/gitLab/.ssh ~
+	cp -a /vagrant/thirdPartyConfig/gitLab/.ssh ~
 	# get the latest ECC code from Git
 	git clone git@glab-i1.it-innovation.soton.ac.uk:experimedia/ecc.git experimedia-ecc
 	cd experimedia-ecc
@@ -126,7 +126,7 @@ service rabbitmq-server restart
 echo "<?xml version='1.0' encoding='utf-8'?><tomcat-users><user rolename='manager-gui'/><user username='manager' password='manager' roles='manager-gui'/></tomcat-users>" > /etc/tomcat7/tomcat-users.xml
 
 # Copy Tomcat configuration into default folder
-cp /vagrant/vagrantConf/tomcat/tomcat7 /etc/default
+cp /vagrant/thirdPartyConfig/tomcat/tomcat7 /etc/default
 
 # Add aduna folder to tomcat7
 mkdir -p /usr/share/tomcat7/.aduna/openrdf-sesame
