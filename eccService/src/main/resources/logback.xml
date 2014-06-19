@@ -31,7 +31,7 @@
 	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<!--See also http://logback.qos.ch/manual/appenders.html#RollingFileAppender-->
 		<Append>true</Append>
-		<File>log/ecc.log</File>
+		<File>${catalina.base}/logs/ecc.log</File>
 		<encoder>
 			<pattern>%d %-5p [%t] %c:%L - %m%n</pattern>
 		</encoder>
