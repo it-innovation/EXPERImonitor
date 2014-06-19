@@ -23,11 +23,15 @@
                 <form id="fetchProjectConfigByNameForm">
                     <fieldset>
                         <legend>Local configuration</legend>
+                        <label>Loaded from application.properties file in ecc/eccService/src/main/resources or WEB-INF/classes</label>
+                        <br>
                         <input type="radio" name="configurationSet" value="local" id="localConfigurationRadioInput" checked>
                         <label for="localConfigurationRadioInput">Default (application.properties)</label>
                     </fieldset>
                     <fieldset id="listofRemoteConfigurations">
-                        <legend>Remote configurations (WebDAV)</legend>
+                        <legend>Remote configurations</legend>
+                        <label>Loaded from http://config.experimedia.eu. Only configurations whitelisted in application.properties:</label>
+                        <br>
                     </fieldset>
                 </form>
             </div>
@@ -37,6 +41,8 @@
                 <form id="activeProjectConfigForm" class="hide">
                     <fieldset>
                         <legend>Project name</legend>
+                        <label>No spaces and special characters for configurations to be saved remotely</label>
+                        <br>
                         <input type="text" name="projectName" id="config_projectName">
                     </fieldset>
                     <fieldset>
