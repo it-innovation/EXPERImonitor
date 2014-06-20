@@ -230,6 +230,8 @@
                 <exclude>buildAll.sh</exclude>
                 <exclude>resetECC.sh</exclude>
                 <exclude>Vagrantfile</exclude>
+                <exclude>thirdPartyLibs/*.jar</exclude>
+                <exclude>thirdPartyLibs/*.war</exclude>
                 <exclude>samples/basicAndroidClient/libs/Required JARS.txt</exclude>
             </excludes>
         </fileSet>
