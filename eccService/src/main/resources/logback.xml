@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration>
+<configuration scan="true">
+
+	<property name="LOG_DIR" value="${catalina.base}/logs" />
 
 	<conversionRule conversionWord="colorlevel"
                     converterClass="fr.norad.logback.prettier.ColorLevelCompositeConverter" />
@@ -10,7 +12,6 @@
 		<target>System.out</target>
         <withJansi>true</withJansi>
 		<encoder>
-			<!-- <pattern>%d %-5p [%t] %c:%L - %m%n</pattern> -->
 			<pattern><![CDATA[%blue(%d{HH:mm:ss.SSS}) %colorlevel(%-5level) [%logger{7}:%line] - %m%n]]></pattern>
 		</encoder>
 		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
@@ -28,29 +29,31 @@
 		<filter class="fr.norad.logback.prettier.ErrFilter" />
 	</appender>
 
-	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+	<appender name="ECC" class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<!--See also http://logback.qos.ch/manual/appenders.html#RollingFileAppender-->
 		<Append>true</Append>
-		<File>${catalina.base}/logs/ecc.log</File>
+		<File>${LOG_DIR}/ecc.log</File>
 		<encoder>
 			<pattern>%d %-5p [%t] %C:%L - %m%n</pattern>
 		</encoder>
 		<rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
 			<maxIndex>10</maxIndex>
-			<FileNamePattern>${catalina.base}/logs/ecc.log.%i</FileNamePattern>
+			<FileNamePattern>${LOG_DIR}/ecc.log.%i</FileNamePattern>
 		</rollingPolicy>
 		<triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
 			<MaxFileSize>1024KB</MaxFileSize>
 		</triggeringPolicy>
 	</appender>
 
-	<logger name="uk.ac.soton.itinnovation.samplerestservice.Application" level="INFO" />
 	<logger name="org.springframework" level="INFO" />
 
+	<logger name="uk.ac.soton.itinnovation" level="INFO">
+		<appender-ref ref="ECC"/>
+	</logger>
+
 	<root level="INFO">
-		<appender-ref ref="STDOUT"/>
+		<appender-ref ref="STDOUT" />
 		<appender-ref ref="STDERR" />
-		<appender-ref ref="FILE"/>
 	</root>
 
 </configuration>
