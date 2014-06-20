@@ -1,16 +1,12 @@
 Packaging the ECC component (using Maven 3.x+)
 ----------------------------------------------
 
-Build:
-
-  mvn install
-
 Build docs:
 
   cd doc
   make html
 
-Make source release (use -o option if too slow) without WeGov dependencies:
+Make source release (use -o option if too slow):
 
   mvn package assembly:assembly -Preleasesrc
 
