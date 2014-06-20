@@ -16,6 +16,19 @@ Make source release (use -o option if too slow):
 
   mvn package assembly:assembly -Preleasesrc
 
-Make binary release:
+Make binary release (for version 2.1):
 
   mvn package assembly:assembly -Preleasebin
+
+this will create "target/experimedia-arch-ecc-2.1-bin". Change into:
+
+  target/experimedia-arch-ecc-2.1-bin/bin
+
+and run:
+
+  zip -d EccService-2.1.war WEB-INF/lib/owlim-lite-5.4.jar
+
+then create a zip file from experimedia-arch-ecc-2.1-bin folder manually:
+
+  cd target
+  zip -r experimedia-arch-ecc-2.1-bin.zip experimedia-arch-ecc-2.1-bin
