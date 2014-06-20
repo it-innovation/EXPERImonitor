@@ -1,5 +1,5 @@
 Experiment Content Component (ECC) v${project.version} binary release
-----------------------------------------------------------------------
+------------------------------------------------------
 
 Copyright
 =========
@@ -11,7 +11,7 @@ The licence for this software is LGPL v2.1 (see LICENSE.txt). A complete list of
 
 Documentation
 =============
-The ECC documentation can be found in the 'docs' folder. 
+The ECC documentation can be found in the 'docs' folder.
 
 Javadoc for the source code may be found in 'javadoc' folder.
 
