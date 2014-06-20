@@ -7,7 +7,7 @@ The source code in this distribution is © Copyright University of Southampton I
 
 Licences
 ========
-The licence for this software is LGPL v2.1; the licence agreement for this along with a complete list of licences for this software and associated third party software can be found in the 'licenses' folder.
+The licence for this software is LGPL v2.1 (see LICENSE.txt). A complete list of licences for this software and associated third party software can be found in the 'licenses' folder.
 
 Documentation
 =============
