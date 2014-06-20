@@ -21,6 +21,21 @@
             <destName>samples/basicAndroidClient/libs/Required JARS.txt</destName>
         </file>
 
+        <!-- License file for extensions -->
+        <file>
+            <source>LICENSE.txt</source>
+            <outputDirectory></outputDirectory>
+            <destName>extensions/LICENSE.txt</destName>
+        </file>
+
+        <!-- eccService non-java third-party licenses filtered html file -->
+        <file>
+            <source>${basedir}/eccService/src/license/extra/extra-licenses.html</source>
+            <outputDirectory>licenses/eccService</outputDirectory>
+            <filtered>true</filtered>
+            <destName>third-party-licences-non-java.html</destName>
+        </file>
+
         <!-- Filtered dependencies -->
         <file>
             <source>${basedir}/amqpAPI/impl/target/site/third-party-report.html</source>
