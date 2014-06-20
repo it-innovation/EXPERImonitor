@@ -10,7 +10,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <ecc.licenseplugin.version>1.4</ecc.licenseplugin.version>
+        <ecc.licenseplugin.version>1.5</ecc.licenseplugin.version>
         <ecc.projectInfo.version>2.6</ecc.projectInfo.version>
         <ecc.java.version>1.6</ecc.java.version>
         <ecc.javadocplugin.version>2.9</ecc.javadocplugin.version>
@@ -31,6 +31,14 @@
         <project.organization.name>IT Innovation Centre, University of Southampton</project.organization.name>
     </properties>
 
+    <!--License-->
+    <licenses>
+        <license>
+            <name>LGPL 2.1</name>
+            <url>http://www.gnu.org/licenses/lgpl-2.1.html</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
 
     <build>
         <pluginManagement>
@@ -61,11 +69,11 @@
                 </plugin>
 
                 <!-- Licensing (for packaging) _________________________________ -->
-                <!-- plugin>
+                <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>license-maven-plugin</artifactId>
                     <version>${ecc.licenseplugin.version}</version>
-                    <executions>
+<!--                    <executions>
 
                         <execution>
                             <id>third-party-report</id>
@@ -102,8 +110,8 @@
                             </configuration>
 
                         </execution>
-                    </executions>
-                </plugin -->
+                    </executions>-->
+                </plugin>
 
             </plugins>
         </pluginManagement>
@@ -314,15 +322,54 @@
                         <artifactId>license-maven-plugin</artifactId>
                     </plugin>
                     <plugin>
-                        <artifactId>maven-site-plugin</artifactId>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-project-info-reports-plugin</artifactId>
+                        <version>2.7</version>
+                        <configuration>
+                            <dependencyLocationEnabled>false</dependencyLocationEnabled>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>attach-descriptor</id>
+                                <configuration>
+                                    <aggregate>false</aggregate>
+                                </configuration>
+                                <id>attach-javadocs</id>
+                                <phase>package</phase>
                                 <goals>
-                                    <goal>attach-descriptor</goal>
+                                    <goal>javadoc</goal>
                                 </goals>
                             </execution>
                         </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-site-plugin</artifactId>
+                        <version>3.3</version>
+                        <configuration>
+                            <reportPlugins>
+                                <plugin>
+                                    <groupId>org.codehaus.mojo</groupId>
+                                    <artifactId>license-maven-plugin</artifactId>
+                                    <version>1.4</version>
+                                </plugin>
+                                <plugin>
+                                    <groupId>org.apache.maven.plugins</groupId>
+                                    <artifactId>maven-project-info-reports-plugin</artifactId>
+                                    <version>2.7</version>
+                                    <reportSets>
+                                        <reportSet>
+                                            <reports>
+                                                <report>index</report>
+                                            </reports>
+                                        </reportSet>
+                                    </reportSets>
+                                </plugin>
+                            </reportPlugins>
+                        </configuration>
                     </plugin>
                 </plugins>
                 <pluginManagement>
@@ -339,8 +386,25 @@
                         </plugin>
                         <plugin>
                             <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-site-plugin</artifactId>
-                            <version>3.3</version>
+                            <artifactId>maven-project-info-reports-plugin</artifactId>
+                            <version>2.7</version>
+                            <executions>
+                                <execution>
+                                    <id>add-licenses</id>
+                                    <phase>package</phase>
+                                    <goals>
+                                        <goal>index</goal>
+                                    </goals>
+                                </execution>
+                            </executions>
+                        </plugin>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-javadoc-plugin</artifactId>
+                            <version>2.9</version>
+                            <configuration>
+                                <quiet>true</quiet>
+                            </configuration>
                         </plugin>
                         <plugin>
                             <groupId>org.codehaus.mojo</groupId>
