@@ -13,7 +13,7 @@ Documentation
 =============
 The ECC documentation can be found in the 'docs' folder. 
 
-Javadoc for the source code may be found in 'javaDoc' folder.
+Javadoc for the source code may be found in 'javadoc' folder.
 
 Binaries
 ========
