@@ -1,0 +1,567 @@
+<assembly>
+    <id>src</id>
+    <formats>
+        <format>dir</format>
+        <!-- <format>zip</format> -->
+    </formats>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <files>
+
+        <!-- root readme file -->
+        <file>
+            <source>README-src.txt</source>
+            <outputDirectory></outputDirectory>
+            <filtered>true</filtered>
+            <destName>README.txt</destName>
+        </file>
+        <file>
+            <source>samples/basicAndroidClient/libs/Required JARS.txt</source>
+            <outputDirectory></outputDirectory>
+            <filtered>true</filtered>
+            <destName>samples/basicAndroidClient/libs/Required JARS.txt</destName>
+        </file>
+
+        <!-- Filtered dependencies -->
+        <file>
+            <source>${basedir}/amqpAPI/impl/target/site/third-party-report.html</source>
+            <outputDirectory>licenses/amqpAPI/impl</outputDirectory>
+            <filtered>true</filtered>
+            <destName>third-party-licences.html</destName>
+        </file>
+
+        <file>
+            <source>${basedir}/amqpAPI/spec/target/site/third-party-report.html</source>
+            <outputDirectory>licenses/amqpAPI/spec</outputDirectory>
+            <filtered>true</filtered>
+            <destName>third-party-licences.html</destName>
+        </file>
+
+        <file>
+            <source>${basedir}/common/dataModel/experiment/target/site/third-party-report.html</source>
+            <outputDirectory>licenses/common/dataModel/experiment</outputDirectory>
+            <filtered>true</filtered>
+            <destName>third-party-licences.html</destName>
+        </file>
+
+        <file>
+            <source>${basedir}/common/dataModel/metrics/target/site/third-party-report.html</source>
+            <outputDirectory>licenses/common/dataModel/metrics</outputDirectory>
+            <filtered>true</filtered>
+            <destName>third-party-licences.html</destName>
+        </file>
+
+        <file>
+            <source>${basedir}/common/dataModel/monitor/target/site/third-party-report.html</source>
+            <outputDirectory>licenses/common/dataModel/monitor</outputDirectory>
+            <filtered>true</filtered>
+            <destName>third-party-licences.html</destName>
+        </file>
+
+        <file>
+            <source>${basedir}/common/dataModel/provenance/target/site/third-party-report.html</source>
+            <outputDirectory>licenses/common/dataModel/provenance</outputDirectory>
+            <filtered>true</filtered>
+            <destName>third-party-licences.html</destName>
+        </file>
+
+        <file>
+            <source>${basedir}/common/uif/target/site/third-party-report.html</source>
+            <outputDirectory>licenses/common/uif</outputDirectory>
+            <filtered>true</filtered>
+            <destName>third-party-licences.html</destName>
+        </file>
+
+        <file>
+            <source>${basedir}/eccService/target/site/third-party-report.html</source>
+            <outputDirectory>licenses/eccService</outputDirectory>
+            <filtered>true</filtered>
+            <destName>third-party-licences.html</destName>
+        </file>
+
+        <file>
+            <source>${basedir}/edc/configAPI/target/site/third-party-report.html</source>
+            <outputDirectory>licenses/edc/configAPI</outputDirectory>
+            <filtered>true</filtered>
+            <destName>third-party-licences.html</destName>
+        </file>
+
+        <file>
+            <source>${basedir}/edm/factory/target/site/third-party-report.html</source>
+            <outputDirectory>licenses/edm/factory</outputDirectory>
+            <filtered>true</filtered>
+            <destName>third-party-licences.html</destName>
+        </file>
+
+        <file>
+            <source>${basedir}/edm/impl/target/site/third-party-report.html</source>
+            <outputDirectory>licenses/edm/impl</outputDirectory>
+            <filtered>true</filtered>
+            <destName>third-party-licences.html</destName>
+        </file>
+
+        <file>
+            <source>${basedir}/edm/spec/target/site/third-party-report.html</source>
+            <outputDirectory>licenses/edm/spec</outputDirectory>
+            <filtered>true</filtered>
+            <destName>third-party-licences.html</destName>
+        </file>
+
+        <file>
+            <source>${basedir}/edm/test/target/site/third-party-report.html</source>
+            <outputDirectory>licenses/edm/test</outputDirectory>
+            <filtered>true</filtered>
+            <destName>third-party-licences.html</destName>
+        </file>
+
+        <file>
+            <source>${basedir}/em/factory/target/site/third-party-report.html</source>
+            <outputDirectory>licenses/em/factory</outputDirectory>
+            <filtered>true</filtered>
+            <destName>third-party-licences.html</destName>
+        </file>
+
+        <file>
+            <source>${basedir}/em/impl/target/site/third-party-report.html</source>
+            <outputDirectory>licenses/em/impl</outputDirectory>
+            <filtered>true</filtered>
+            <destName>third-party-licences.html</destName>
+        </file>
+
+        <file>
+            <source>${basedir}/em/spec/target/site/third-party-report.html</source>
+            <outputDirectory>licenses/em/spec</outputDirectory>
+            <filtered>true</filtered>
+            <destName>third-party-licences.html</destName>
+        </file>
+
+        <file>
+            <source>${basedir}/samples/basicECCClient/target/site/third-party-report.html</source>
+            <outputDirectory>licenses/samples/basicECCClient</outputDirectory>
+            <filtered>true</filtered>
+            <destName>third-party-licences.html</destName>
+        </file>
+
+        <file>
+            <source>${basedir}/samples/basicECCContainer/target/site/third-party-report.html</source>
+            <outputDirectory>licenses/samples/basicECCContainer</outputDirectory>
+            <filtered>true</filtered>
+            <destName>third-party-licences.html</destName>
+        </file>
+
+        <file>
+            <source>${basedir}/samples/databaseExport/target/site/third-party-report.html</source>
+            <outputDirectory>licenses/samples/databaseExport</outputDirectory>
+            <filtered>true</filtered>
+            <destName>third-party-licences.html</destName>
+        </file>
+
+        <file>
+            <source>${basedir}/samples/dynamicEntityDemoClient/target/site/third-party-report.html</source>
+            <outputDirectory>licenses/samples/dynamicEntityDemoClient</outputDirectory>
+            <filtered>true</filtered>
+            <destName>third-party-licences.html</destName>
+        </file>
+
+        <file>
+            <source>${basedir}/samples/headlessECCClient/target/site/third-party-report.html</source>
+            <outputDirectory>licenses/samples/headlessECCClient</outputDirectory>
+            <filtered>true</filtered>
+            <destName>third-party-licences.html</destName>
+        </file>
+
+        <file>
+            <source>${basedir}/samples/metricGeneratorExamples/target/site/third-party-report.html</source>
+            <outputDirectory>licenses/samples/metricGeneratorExamples</outputDirectory>
+            <filtered>true</filtered>
+            <destName>third-party-licences.html</destName>
+        </file>
+
+        <file>
+            <source>${basedir}/samples/shared/target/site/third-party-report.html</source>
+            <outputDirectory>licenses/samples/shared</outputDirectory>
+            <filtered>true</filtered>
+            <destName>third-party-licences.html</destName>
+        </file>
+
+        <file>
+            <source>${basedir}/samples/simplePROVECCClient/target/site/third-party-report.html</source>
+            <outputDirectory>licenses/samples/simplePROVECCClient</outputDirectory>
+            <filtered>true</filtered>
+            <destName>third-party-licences.html</destName>
+        </file>
+
+    </files>
+
+    <fileSets>
+        <fileSet>
+            <directory>.</directory>
+            <outputDirectory></outputDirectory>
+            <excludes>
+                <exclude>**/target/**</exclude>
+                <exclude>**/doc/**</exclude>
+                <exclude>**/.git/**</exclude>
+                <exclude>**/.gitignore/**</exclude>
+                <exclude>**/.gitattributes/**</exclude>
+                <exclude>**.DS_Store**</exclude>
+                <exclude>.vagrant/**</exclude>
+                <exclude>assembly/**</exclude>
+                <exclude>checkStyle/**</exclude>
+                <exclude>licences/**</exclude>
+                <exclude>LICENSE.txt</exclude>
+                <exclude>README-src.txt</exclude>
+                <exclude>README.txt</exclude>
+                <exclude>Packaging.txt</exclude>
+                <exclude>IPR.txt</exclude>
+                <exclude>buildAll.sh</exclude>
+                <exclude>resetECC.sh</exclude>
+                <exclude>Vagrantfile</exclude>
+                <exclude>samples/basicAndroidClient/libs/Required JARS.txt</exclude>
+            </excludes>
+        </fileSet>
+
+        <!-- sphinx docs -->
+        <fileSet>
+            <directory>${basedir}/doc/build/html</directory>
+            <outputDirectory>docs</outputDirectory>
+        </fileSet>
+
+        <!-- javadocs -->
+        <fileSet>
+            <directory>${basedir}/amqpAPI/impl/target/site/apidocs</directory>
+            <outputDirectory>javadoc/amqpAPI/impl</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/amqpAPI/spec/target/site/apidocs</directory>
+            <outputDirectory>javadoc/amqpAPI/spec</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/common/dataModel/experiment/target/site/apidocs</directory>
+            <outputDirectory>javadoc/common/dataModel/experiment</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/common/dataModel/metrics/target/site/apidocs</directory>
+            <outputDirectory>javadoc/common/dataModel/metrics</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/common/dataModel/monitor/target/site/apidocs</directory>
+            <outputDirectory>javadoc/common/dataModel/monitor</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/common/dataModel/provenance/target/site/apidocs</directory>
+            <outputDirectory>javadoc/common/dataModel/provenance</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/common/uif/target/site/apidocs</directory>
+            <outputDirectory>javadoc/common/uif</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/eccService/target/site/apidocs</directory>
+            <outputDirectory>javadoc/eccService</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/edc/configAPI/target/site/apidocs</directory>
+            <outputDirectory>javadoc/edc/configAPI</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/edm/factory/target/site/apidocs</directory>
+            <outputDirectory>javadoc/edm/factory</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/edm/impl/target/site/apidocs</directory>
+            <outputDirectory>javadoc/edm/impl</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/edm/spec/target/site/apidocs</directory>
+            <outputDirectory>javadoc/edm/spec</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/edm/test/target/site/apidocs</directory>
+            <outputDirectory>javadoc/edm/test</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/em/factory/target/site/apidocs</directory>
+            <outputDirectory>javadoc/em/factory</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/em/impl/target/site/apidocs</directory>
+            <outputDirectory>javadoc/em/impl</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/em/spec/target/site/apidocs</directory>
+            <outputDirectory>javadoc/em/spec</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/samples/basicECCClient/target/site/apidocs</directory>
+            <outputDirectory>javadoc/samples/basicECCClient</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/samples/basicECCContainer/target/site/apidocs</directory>
+            <outputDirectory>javadoc/samples/basicECCContainer</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/samples/databaseExport/target/site/apidocs</directory>
+            <outputDirectory>javadoc/samples/databaseExport</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/samples/dynamicEntityDemoClient/target/site/apidocs</directory>
+            <outputDirectory>javadoc/samples/dynamicEntityDemoClient</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/samples/headlessECCClient/target/site/apidocs</directory>
+            <outputDirectory>javadoc/samples/headlessECCClient</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/samples/metricGeneratorExamples/target/site/apidocs</directory>
+            <outputDirectory>javadoc/samples/metricGeneratorExamples</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/samples/shared/target/site/apidocs</directory>
+            <outputDirectory>javadoc/samples/shared</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/samples/simplePROVECCClient/target/site/apidocs</directory>
+            <outputDirectory>javadoc/samples/simplePROVECCClient</outputDirectory>
+        </fileSet>
+
+        <!--licenses-->
+        <fileSet>
+            <directory>${basedir}/amqpAPI/impl/target/site</directory>
+            <includes>
+                <include>css/**</include>
+                <include>images/**</include>
+            </includes>
+            <outputDirectory>licenses/amqpAPI/impl</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/amqpAPI/spec/target/site</directory>
+            <includes>
+                <include>css/**</include>
+                <include>images/**</include>
+            </includes>
+            <outputDirectory>licenses/amqpAPI/spec</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/common/dataModel/experiment/target/site</directory>
+            <includes>
+                <include>css/**</include>
+                <include>images/**</include>
+            </includes>
+            <outputDirectory>licenses/common/dataModel/experiment</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/common/dataModel/metrics/target/site</directory>
+            <includes>
+                <include>css/**</include>
+                <include>images/**</include>
+            </includes>
+            <outputDirectory>licenses/common/dataModel/metrics</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/common/dataModel/monitor/target/site</directory>
+            <includes>
+                <include>css/**</include>
+                <include>images/**</include>
+            </includes>
+            <outputDirectory>licenses/common/dataModel/monitor</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/common/dataModel/provenance/target/site</directory>
+            <includes>
+                <include>css/**</include>
+                <include>images/**</include>
+            </includes>
+            <outputDirectory>licenses/common/dataModel/provenance</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/common/uif/target/site</directory>
+            <includes>
+                <include>css/**</include>
+                <include>images/**</include>
+            </includes>
+            <outputDirectory>licenses/common/uif</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/eccService/target/site</directory>
+            <includes>
+                <include>css/**</include>
+                <include>images/**</include>
+            </includes>
+            <outputDirectory>licenses/eccService</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/edc/configAPI/target/site</directory>
+            <includes>
+                <include>css/**</include>
+                <include>images/**</include>
+            </includes>
+            <outputDirectory>licenses/edc/configAPI</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/edm/factory/target/site</directory>
+            <includes>
+                <include>css/**</include>
+                <include>images/**</include>
+            </includes>
+            <outputDirectory>licenses/edm/factory</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/edm/impl/target/site</directory>
+            <includes>
+                <include>css/**</include>
+                <include>images/**</include>
+            </includes>
+            <outputDirectory>licenses/edm/impl</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/edm/spec/target/site</directory>
+            <includes>
+                <include>css/**</include>
+                <include>images/**</include>
+            </includes>
+            <outputDirectory>licenses/edm/spec</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/edm/test/target/site</directory>
+            <includes>
+                <include>css/**</include>
+                <include>images/**</include>
+            </includes>
+            <outputDirectory>licenses/edm/test</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/em/factory/target/site</directory>
+            <includes>
+                <include>css/**</include>
+                <include>images/**</include>
+            </includes>
+            <outputDirectory>licenses/em/factory</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/em/impl/target/site</directory>
+            <includes>
+                <include>css/**</include>
+                <include>images/**</include>
+            </includes>
+            <outputDirectory>licenses/em/impl</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/em/spec/target/site</directory>
+            <includes>
+                <include>css/**</include>
+                <include>images/**</include>
+            </includes>
+            <outputDirectory>licenses/em/spec</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/samples/basicECCClient/target/site</directory>
+            <includes>
+                <include>css/**</include>
+                <include>images/**</include>
+            </includes>
+            <outputDirectory>licenses/samples/basicECCClient</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/samples/basicECCContainer/target/site</directory>
+            <includes>
+                <include>css/**</include>
+                <include>images/**</include>
+            </includes>
+            <outputDirectory>licenses/samples/basicECCContainer</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/samples/databaseExport/target/site</directory>
+            <includes>
+                <include>css/**</include>
+                <include>images/**</include>
+            </includes>
+            <outputDirectory>licenses/samples/databaseExport</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/samples/dynamicEntityDemoClient/target/site</directory>
+            <includes>
+                <include>css/**</include>
+                <include>images/**</include>
+            </includes>
+            <outputDirectory>licenses/samples/dynamicEntityDemoClient</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/samples/headlessECCClient/target/site</directory>
+            <includes>
+                <include>css/**</include>
+                <include>images/**</include>
+            </includes>
+            <outputDirectory>licenses/samples/headlessECCClient</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/samples/metricGeneratorExamples/target/site</directory>
+            <includes>
+                <include>css/**</include>
+                <include>images/**</include>
+            </includes>
+            <outputDirectory>licenses/samples/metricGeneratorExamples</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/samples/shared/target/site</directory>
+            <includes>
+                <include>css/**</include>
+                <include>images/**</include>
+            </includes>
+            <outputDirectory>licenses/samples/shared</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/samples/simplePROVECCClient/target/site</directory>
+            <includes>
+                <include>css/**</include>
+                <include>images/**</include>
+            </includes>
+            <outputDirectory>licenses/samples/simplePROVECCClient</outputDirectory>
+        </fileSet>
+
+    </fileSets>
+</assembly>
