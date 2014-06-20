@@ -3,6 +3,9 @@ var BASE_URL = "/" + window.location.href.split('/')[3];
 $(document).ready(function() {
     $(document).foundation();
 
+    // disable js cache
+    $.ajaxSetup({cache: false});
+
     $("#localConfigurationRadioInput").data("link", BASE_URL + "/configuration/local");
     $("#localConfigurationRadioInput").change(function(e) {
         displayFetchedConfiguration($(this).data("link"));

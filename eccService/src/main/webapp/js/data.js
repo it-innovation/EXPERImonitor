@@ -4,6 +4,9 @@ var DISPLAY_TIME_FORMAT = "ddd, MMM Do, HH:mm [(]Z[)]";
 $(document).ready(function() {
     $(document).foundation();
 
+    // disable js cache
+    $.ajaxSetup({cache: false});
+
     var experimentId = getParameter('experimentId');
 
     $("#change_experiment").click(function(e) {

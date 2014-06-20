@@ -18,6 +18,9 @@ $(document).ready(function() {
         }
     });
 
+    // disable js cache
+    $.ajaxSetup({cache: false});
+
     // load client disconnect popup
     $.ajax({
         url: "extra/clientDisconnectPopup.html",
