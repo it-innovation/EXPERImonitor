@@ -87,6 +87,8 @@ A fast way of deploying the ECC often prefered by developers is to use spring:bo
 
 This results in the ECC service deployed in a built-in Tomcat container on http://localhost:8083/ECC (port and context configurable via ``server.port`` and ``server.context-path`` properties in ``eccService/src/main/resources/application.properties`` file).
 
+For this deployment method you may wish to change the logging configuration such that the ECC log file is placed somewhere useful. To do this, edit the LOG_DIR variable definition in the ``eccService/src/main/resources/logback.xml`` file.
+
 Binary release and web service deployment
 #########################################
 
@@ -232,6 +234,7 @@ Glassfish may be used as an alternative to Tomcat.
   * <Glassfish home>/glassfish/domains/domain1/config/logback.xml
   * <Glassfish home>/glassfish/domains/domain1/config/logging.properties
   * <Glassfish home>/glassfish/domains/domain1/domain.xml
+#. Edit the LOG_DIR variable definition in the ``eccService/src/main/resources/logback.xml`` or ``WEB-INF/classes/logback.xml`` file to set the location of the ECC log file.
 #. Start the default Glassfish domain and database.
 #. Deploy the two WAR files from the thirdPartyLibs folder and ``eccService/target/EccService-2.1.war``.
 #. Copy the owlim-lite jar from thirdPartyLibs into the WEB-INF/lib folder of the unpacked ECC service.
