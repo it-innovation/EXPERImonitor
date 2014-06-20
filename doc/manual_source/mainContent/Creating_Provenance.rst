@@ -85,7 +85,7 @@ will create the necessary links in the data model.
 
 
 Digging deeper into the code
---------------------------
+----------------------------
 
 While the simple provenance statements used in section `The code for beginners`_ might be sufficient for some users, there is a lot more that provenance can be used for. This section aims at advanced users wishing to express a greater variety of provenance for a more detailed analysis.
 
@@ -157,7 +157,8 @@ An entity is a revision of another entity if it is a newer version of it. An exa
 
 
 What an activity can do
-~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+
 Activities can, while they're happening, interact with other provenance elements in a variety of ways.
 
 They could generate a new entity, optionally at a specified time, e.g. baking a cake. ::
@@ -197,6 +198,7 @@ Activities can influence each other. This is a more general term for occasions w
 
 The EDMProvBaseElement class
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 This class contains mainly low-level utility methods. It provides a way to inject extra information into provenance objects, which requires a deeper understanding of how the provenance model works. It is highly recommended to prefer the element specific methods over the more generic ones. 
 
 Every element has a human readable name, which is saved as a rdfs:comment triple. ::
