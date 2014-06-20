@@ -224,6 +224,7 @@
                 <exclude>licences/**</exclude>
                 <exclude>LICENSE.txt</exclude>
                 <exclude>README-src.txt</exclude>
+                <exclude>README-bin.txt</exclude>
                 <exclude>README.txt</exclude>
                 <exclude>Packaging.txt</exclude>
                 <exclude>IPR.txt</exclude>
