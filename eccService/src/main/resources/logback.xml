@@ -33,7 +33,7 @@
 		<Append>true</Append>
 		<File>${catalina.base}/logs/ecc.log</File>
 		<encoder>
-			<pattern>%d %-5p [%t] %c:%L - %m%n</pattern>
+			<pattern>%d %-5p [%t] %C:%L - %m%n</pattern>
 		</encoder>
 		<rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
 			<maxIndex>10</maxIndex>

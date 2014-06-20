@@ -240,7 +240,7 @@ public class ExperimentService {
                         // Try opening the RabbitMQ entry point for this service
                         expMonitor.openEntryPoint(props);
                     } catch (Exception e) {
-                        logger.error("Failed to the RabbitMQ entry point", e);
+                        logger.error("Failed to open the RabbitMQ entry point", e);
                         return false;
                     }
 
