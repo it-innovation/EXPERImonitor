@@ -29,7 +29,7 @@
             <outputDirectory></outputDirectory>
             <excludes>
                 <exclude>**/target/**</exclude>
-                <exclude>**/docs/**</exclude>
+                <exclude>**/doc/**</exclude>
                 <exclude>**/.git/**</exclude>
                 <exclude>**/.gitignore/**</exclude>
                 <exclude>**/.gitattributes/**</exclude>
@@ -37,9 +37,10 @@
                 <exclude>.vagrant/**</exclude>
                 <exclude>assembly/**</exclude>
                 <exclude>checkStyle/**</exclude>
-                <exclude>doc/**</exclude>
                 <exclude>licences/**</exclude>
                 <exclude>LICENSE.txt</exclude>
+                <exclude>README-src.txt</exclude>
+                <exclude>README.txt</exclude>
                 <exclude>Packaging.txt</exclude>
                 <exclude>IPR.txt</exclude>
                 <exclude>buildAll.sh</exclude>
@@ -47,6 +48,12 @@
                 <exclude>Vagrantfile</exclude>
                 <exclude>samples/basicAndroidClient/libs/Required JARS.txt</exclude>
             </excludes>
+        </fileSet>
+
+        <!-- sphinx docs -->
+        <fileSet>
+            <directory>${basedir}/doc/build/html</directory>
+            <outputDirectory>docs</outputDirectory>
         </fileSet>
 
     </fileSets>
