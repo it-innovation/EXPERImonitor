@@ -124,6 +124,17 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-project-info-reports-plugin</artifactId>
                         <version>${ecc.reportplugin.version}</version>
+                        <configuration>
+                            <dependencyDetailsEnabled>false</dependencyDetailsEnabled>
+                            <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
+                        </configuration>
+                        <reportSets>
+                            <reportSet>
+                                <reports>
+                                    <report>index</report>
+                                </reports>
+                            </reportSet>
+                        </reportSets>
                     </plugin>
 
                     <!-- Check code conformance __________________________________ -->
@@ -135,6 +146,13 @@
                             <configLocation>checkStyle/checkstyle.xml</configLocation>
                             <headerLocation>checkStyle/regexp.header</headerLocation>
                         </configuration>
+                        <reportSets>
+                            <reportSet>
+                                <reports>
+                                    <report>checkstyle</report>
+                                </reports>
+                            </reportSet>
+                        </reportSets>
                     </plugin>
 
                 </plugins>
