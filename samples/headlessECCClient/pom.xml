@@ -17,29 +17,11 @@
     <build>
         <plugins>
 
-            <!-- Maven compiler -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>${ecc.java.version}</source>
-                    <target>${ecc.java.version}</target>
-                    <encoding>${project.build.sourceEncoding}</encoding>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>2.4.3</version>
-                <configuration>
-                    <encoding>${project.build.sourceEncoding}</encoding>
-                </configuration>
-            </plugin>
             <!--To run with mvn exec:java-->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
-                <version>1.2.1</version>
+                <version>${exec.maven.mojo.ver}</version>
                 <configuration>
                     <mainClass>uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.headlessECCClient.EntryPoint</mainClass>
                 </configuration>
