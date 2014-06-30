@@ -2,7 +2,7 @@
 ^//$
 ^// (©|\\u00a9) University of Southampton IT Innovation Centre, \d\d\d\d\s*$
 ^//$
-^// Copyright in this (software|library) belongs to University of Southampton
+^// Copyright in this (software|library) belongs to (?:the)? University of Southampton
 ^// IT Innovation Centre of Gamma House, Enterprise Road, 
 ^// Chilworth Science Park, Southampton, SO16 7NS, UK.
 ^//$
