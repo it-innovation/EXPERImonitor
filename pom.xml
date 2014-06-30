@@ -25,6 +25,7 @@
         <ecc.gson.version>2.2.2</ecc.gson.version>
         <ecc.owlimstore.version>1.1</ecc.owlimstore.version>
         <ecc.jodatime.version>2.1</ecc.jodatime.version>
+        <ecc.sardine.version>5.1</ecc.sardine.version>
 
         <!-- Maven plugin versions -->
         <ecc.surefire.version>2.17</ecc.surefire.version>
@@ -188,15 +189,20 @@
     <!-- PROFILES __________________________________________________________ -->
     <profiles>
 
-        <!-- ECC reporting ___________________________________________________ -->
-        <!-- Use: mvn site -Preport                                        -->
+        <!-- profile for jenkins -->
         <profile>
-            <id>report</id>
+            <id>jenkins</id>
 
             <reporting>
                 <excludeDefaults>true</excludeDefaults>
                 <outputDirectory>${project.build.directory}/site</outputDirectory>
                 <plugins>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-jxr-plugin</artifactId>
+                        <version>2.3</version>
+                    </plugin>
 
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
@@ -209,6 +215,9 @@
                             <reportSet>
                                 <reports>
                                     <report>index</report>
+                                    <report>dependencies</report>
+                                    <report>dependency-convergence</report>
+                                    <report>plugin-management</report>
                                 </reports>
                             </reportSet>
                         </reportSets>
@@ -244,6 +253,20 @@
                                 </reports>
                             </reportSet>
                         </reportSets>
+                    </plugin>
+
+                    <!-- report on tests -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-report-plugin</artifactId>
+                        <version>2.17</version>
+                    </plugin>
+
+                    <!-- report some bugs -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-pmd-plugin</artifactId>
+                        <version>3.1</version>
                     </plugin>
 
                 </plugins>

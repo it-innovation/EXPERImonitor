@@ -20,7 +20,7 @@
     <dependency>
       <groupId>com.github.lookfirst</groupId>
       <artifactId>sardine</artifactId>
-      <version>5.0.1</version>
+      <version>${ecc.sardine.version}</version>
     </dependency>
 
     <dependency>
