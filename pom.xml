@@ -39,6 +39,9 @@
         <ecc.compilerplugin.version>3.1</ecc.compilerplugin.version>
         <ecc.versionsplugin.version>2.1</ecc.versionsplugin.version>
         <exec.maven.mojo.ver>1.3.1</exec.maven.mojo.ver>
+        <ecc.deployplugin.version>2.8.1</ecc.deployplugin.version>
+        <ecc.installplugin.version>2.5.1</ecc.installplugin.version>
+        <ecc.jarplugin.version>2.5</ecc.jarplugin.version>
 
         <!--License-->
         <license.licenseName>lgpl_v2_1</license.licenseName>
@@ -86,6 +89,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${ecc.compilerplugin.version}</version>
                     <configuration>
                         <source>${ecc.java.version}</source>
                         <target>${ecc.java.version}</target>
@@ -93,6 +97,21 @@
                         <showDeprecation>true</showDeprecation>
                         <showWarnings>true</showWarnings>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>${ecc.deployplugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-install-plugin</artifactId>
+                    <version>${ecc.installplugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>${ecc.jarplugin.version}</version>
                 </plugin>
 
                 <!-- Packaging configuration ___________________________________ -->
@@ -155,21 +174,6 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-site-plugin</artifactId>
                     <version>${ecc.siteplugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>${ecc.compilerplugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                    <version>${ecc.slf4j.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>junit</groupId>
-                    <artifactId>junit</artifactId>
-                    <version>${ecc.junit.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
