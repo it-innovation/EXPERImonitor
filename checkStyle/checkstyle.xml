@@ -8,10 +8,6 @@
         <property name="headerFile" value="${checkstyle.header.file}"/>
         <!--property name="multiLines" value="3,22,25,26,34"/-->
     </module>
-    <module name="RegexpSinglelineJava">
-        <property name="format" value="System\.(out)|(err)\.print(ln)?"/>
-        <property name="ignoreComments" value="true"/>
-    </module>
     <module name="RegexpSingleline">
         <property name="format" value="TODO|FIXME"/>
         <property name="ignoreCase" value="true"/>
@@ -53,10 +49,14 @@
         </module>
         <!-- <module name="ConstantName"/> -->
         <module name="EmptyBlock">
-	    <property name="severity" value="warning"/>
-	</module>
+	       <property name="severity" value="warning"/>
+        </module>
         <module name="InnerAssignment">
             <property name="severity" value="warning"/>
+        </module>
+        <module name="RegexpSinglelineJava">
+            <property name="format" value="System\.(out)|(err)\.print(ln)?"/>
+            <property name="ignoreComments" value="true"/>
         </module>
     </module>
 </module>
