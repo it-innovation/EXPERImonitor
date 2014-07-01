@@ -18,7 +18,6 @@
 ^// the software.\s*$
 ^//$
 ^//\s+Created By ?:\s+[-A-Za-z\s.]+\s*$
-^.*$
 ^//\s+Created Date ?:\s+\d\s*$
 ^//\s+Created for Project ?:\s+[-A-Za-z]+\s*$
 ^//\s*$
