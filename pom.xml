@@ -44,7 +44,7 @@
         <ecc.installplugin.version>2.5.1</ecc.installplugin.version>
         <ecc.jarplugin.version>2.5</ecc.jarplugin.version>
         <ecc.jxrplugin.version>2.3</ecc.jxrplugin.version>
-        <ecc.surefirereport.plugin>2.17</ecc.surefirereport.plugin>
+        <ecc.surefirereportplugin.version>2.17</ecc.surefirereportplugin.version>
         <ecc.pmdplugin.version>3.1</ecc.pmdplugin.version>
 
         <!--License-->
@@ -194,6 +194,11 @@
                     <artifactId>maven-pmd-plugin</artifactId>
                     <version>${ecc.pmdplugin.version}</version>
                 </plugin>  
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-report-plugin</artifactId>
+                    <version>${ecc.surefirereportplugin.version}</version>
+                </plugin>                
             </plugins>
         </pluginManagement>
 
@@ -208,17 +213,19 @@
 
             <reporting>
                 <excludeDefaults>true</excludeDefaults>
-                <outputDirectory>${project.build.directory}/site</outputDirectory>
+                <outputDirectory>${basedir}/target/site</outputDirectory>
                 <plugins>
 
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-jxr-plugin</artifactId>
+                        <version>${ecc.jxrplugin.version}</version>
                     </plugin>
 
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-project-info-reports-plugin</artifactId>
+                        <version>${ecc.reportplugin.version}</version>
                         <configuration>
                             <dependencyDetailsEnabled>false</dependencyDetailsEnabled>
                             <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
@@ -239,6 +246,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-checkstyle-plugin</artifactId>
+                        <version>${ecc.checkstyleplugin.version}</version>
                         <configuration>
                             <configLocation>checkStyle/checkstyle.xml</configLocation>
                             <headerLocation>checkStyle/regexp.header</headerLocation>
@@ -256,6 +264,7 @@
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>versions-maven-plugin</artifactId>
+                        <version>${ecc.versionsplugin.version}</version>
                         <reportSets>
                             <reportSet>
                                 <reports>
@@ -271,12 +280,14 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-report-plugin</artifactId>
+                        <version>${ecc.surefirereportplugin.version}</version>
                     </plugin>
 
                     <!-- report some bugs -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-pmd-plugin</artifactId>
+                        <version>${ecc.pmdplugin.version}</version>
                         <reportSets>
                             <reportSet>
                                 <reports>
