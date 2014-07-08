@@ -3,7 +3,7 @@
 // © University of Southampton IT Innovation Centre, 2014
 //
 // Copyright in this software belongs to University of Southampton
-// IT Innovation Centre of Gamma House, Enterprise Road, 
+// IT Innovation Centre of Gamma House, Enterprise Road,
 // Chilworth Science Park, Southampton, SO16 7NS, UK.
 //
 // This software may not be used, sold, licensed, transferred, copied
@@ -30,7 +30,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Properties;
-import java.util.logging.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.ac.soton.itinnovation.owlimstore.common.NoSuchRepositoryException;
@@ -43,14 +42,14 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.prov.dao.IEDMProvW
 
 
 public final class EDMProvDataStoreImpl implements IEDMProvDataStore {
-    
+
     private IEDMProvWriter provWriter;
     private IEDMProvReader provReader;
-    
+
     private EDMProvStoreWrapper edmProvStoreWrapper;
     private Properties props;
     private final Logger logger;
-    
+
     public EDMProvDataStoreImpl() {
 
 		logger = LoggerFactory.getLogger(getClass());
@@ -63,17 +62,17 @@ public final class EDMProvDataStoreImpl implements IEDMProvDataStore {
 
 		init();
     }
-	
+
 	public EDMProvDataStoreImpl(Properties props) {
 
 		logger = LoggerFactory.getLogger(getClass());
 		this.props = props;
-		
+
 		logger.info("initing");
 
 		this.init();
 	}
-    
+
     private void init() {
 		try {
 			provWriter = new EDMProvWriterImpl(props);
@@ -129,7 +128,7 @@ public final class EDMProvDataStoreImpl implements IEDMProvDataStore {
 			logger.error("Error deleting repository " + repositoryID, e);
 		}
 	}
-	
+
 	@Override
 	public void disconnect() {
 		if ((edmProvStoreWrapper != null) && edmProvStoreWrapper.isConnected()) {
@@ -139,21 +138,20 @@ public final class EDMProvDataStoreImpl implements IEDMProvDataStore {
 		provWriter.disconnect();
 		provReader.disconnect();
 	}
-	
-	//TODO: remove?
+
 	/**
 	 * This is just a wrapper for EDMProvWriter.importOntology(...) for more information
-	 * 
+	 *
 	 * @see EDMProvWriter
 	 * @param ontologypath
 	 * @param baseURI
 	 * @param prefix
-	 * @param resourcepathclass 
+	 * @param resourcepathclass
 	 */
 	public void importOntology(String ontologypath, String baseURI, String prefix, Class resourcepathclass) {
 
 		provWriter.importOntology(ontologypath, baseURI, prefix, resourcepathclass);
-		
+
 		if (((EDMProvWriterImpl)provWriter).getEDMProvStoreWrapper().getRepositoryNamespaces()!=null &&
 			((EDMProvWriterImpl)provWriter).getEDMProvStoreWrapper().getRepositoryNamespaces().containsKey(props.getProperty("owlim.repositoryID"))) {
 			logger.debug("prefixes after import:");
@@ -168,10 +166,9 @@ public final class EDMProvDataStoreImpl implements IEDMProvDataStore {
 				((EDMProvWriterImpl)provWriter).getEDMProvStoreWrapper().getRepositoryNamespaces());
 	}
 	
-	//TODO: remove?
 	/**
 	 * 	This is just a wrapper for EDMProvStoreWrapper.query(sparql) for more information
-	 * 
+	 *
 	 * @see EDMProvStoreWrapper
 	 * @param sparql the query (no need to include prefixes here)
 	 * @return the result
@@ -192,5 +189,5 @@ public final class EDMProvDataStoreImpl implements IEDMProvDataStore {
 	public EDMProvStoreWrapper getEDMProvStoreWrapper() {
 		return edmProvStoreWrapper;
 	}
-	
+
 }
