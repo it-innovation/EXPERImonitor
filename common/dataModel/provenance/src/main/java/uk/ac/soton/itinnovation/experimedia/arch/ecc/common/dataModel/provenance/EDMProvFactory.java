@@ -3,7 +3,7 @@
 // © University of Southampton IT Innovation Centre, 2013
 //
 // Copyright in this software belongs to University of Southampton
-// IT Innovation Centre of Gamma House, Enterprise Road, 
+// IT Innovation Centre of Gamma House, Enterprise Road,
 // Chilworth Science Park, Southampton, SO16 7NS, UK.
 //
 // This software may not be used, sold, licensed, transferred, copied
@@ -39,22 +39,22 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance
  * The EDMProvFactory is a singleton factory which helps create provenance.
  */
 public class EDMProvFactory {
-	
+
 	public static final String FALLBACK_PREFIX = "experimedia";
 	public static final String FALLBACK_URI = "http://it-innovation.soton.ac.uk/ontologies/experimedia#";
-	
+
 	private static EDMProvFactory factory;
 	public EDMProvDataContainer container;
 
 	//related to report
 	private HashMap<UUID, EDMTriple> currentTriples;
 	private HashMap<UUID, EDMTriple> sentTriples;
-	
-	private EDMProvFactory(String prefix, String baseURI) {}
-	
+
+	private EDMProvFactory() {}
+
 	/**
 	 * Returns a factory with either the prefix/baseURI it already has or the fallback prefix/baseURI.
-	 * 
+	 *
 	 * @return the factory
 	 */
 	public static synchronized EDMProvFactory getInstance() {
@@ -65,8 +65,8 @@ public class EDMProvFactory {
 		if (EDMProvDataContainer.baseURI==null) {
 			EDMProvDataContainer.baseURI = FALLBACK_URI;
 		}
-		
-		return getInstance(EDMProvDataContainer.prefix, EDMProvDataContainer.baseURI);	
+
+		return getInstance(EDMProvDataContainer.prefix, EDMProvDataContainer.baseURI);
 	}
 
 	/**
@@ -77,7 +77,7 @@ public class EDMProvFactory {
 	 */
 	public static synchronized EDMProvFactory getInstance(String prefix, String baseURI) {
 		if (factory==null) {
-			factory = new EDMProvFactory(prefix, baseURI);
+			factory = new EDMProvFactory();
 			factory.container = new EDMProvDataContainer(prefix, baseURI);
 			factory.init();
 		} else {
@@ -86,12 +86,12 @@ public class EDMProvFactory {
 		}
         return factory;
     }
-    
+
 	protected void init() {
 		factory.container.init();
 		currentTriples = new HashMap<UUID, EDMTriple>();
 		sentTriples = new HashMap<UUID, EDMTriple>();
-		
+
 		//add primary ontology
 		addOntology(EDMProvDataContainer.prefix, EDMProvDataContainer.baseURI);
 		//add standard set on ontologies to use:
@@ -103,13 +103,13 @@ public class EDMProvFactory {
 		addOntology("dc", "http://purl.org/dc/elements/1.1/");
 		addOntology("dcterms", "http://purl.org/dc/terms/");
 		addOntology("swrl", "http://www.w3.org/2003/11/swrl#");
-		addOntology("swrlb", "http://www.w3.org/2003/11/swrlb#");	
+		addOntology("swrlb", "http://www.w3.org/2003/11/swrlb#");
 	}
-	
+
 	/**
 	 * Adds an ontology to the internal list of namespaces. If the short prefix already exists,
 	 * it will warn and overwrite its matching namespace with the provided namespace.
-	 * 
+	 *
 	 * @param prefix the short prefix
 	 * @param baseURI the namespace
 	 */
@@ -124,49 +124,49 @@ public class EDMProvFactory {
 			}
 		}
 	}
-	
+
 	/**
 	 * Create a new Agent
-	 * 
+	 *
 	 * @param uniqueIdentifier the local name
 	 * @param label the human readable label (optional)
 	 * @return the agent
 	 * @throws DatatypeConfigurationException
-	 * @throws AlreadyBoundException 
+	 * @throws AlreadyBoundException
 	 */
 	public EDMAgent createAgent(String uniqueIdentifier, String label) throws DatatypeConfigurationException, AlreadyBoundException {
 		return (EDMAgent) this.createElement(uniqueIdentifier, label, PROV_TYPE.ePROV_AGENT);
 	}
-	
+
 	/**
 	 * Create a new Activity
-	 * 
+	 *
 	 * @param uniqueIdentifier the local name
 	 * @param label the human readable label (optional)
 	 * @return the activity
 	 * @throws DatatypeConfigurationException
-	 * @throws AlreadyBoundException 
+	 * @throws AlreadyBoundException
 	 */
 	public EDMActivity createActivity(String uniqueIdentifier, String label) throws DatatypeConfigurationException, AlreadyBoundException {
 		return (EDMActivity) this.createElement(uniqueIdentifier, label, PROV_TYPE.ePROV_ACTIVITY);
 	}
-	
+
 	/**
 	 * Create a new Entity
-	 * 
+	 *
 	 * @param uniqueIdentifier the local name
 	 * @param label the human readable label (optional)
 	 * @return the entity
 	 * @throws DatatypeConfigurationException
-	 * @throws AlreadyBoundException 
+	 * @throws AlreadyBoundException
 	 */
 	public EDMEntity createEntity(String uniqueIdentifier, String label) throws DatatypeConfigurationException, AlreadyBoundException {
 		return (EDMEntity) this.createElement(uniqueIdentifier, label, PROV_TYPE.ePROV_ENTITY);
 	}
-	
+
 	/**
 	 * Get an agent (existing) identified by its unique ID from the factory
-	 * 
+	 *
 	 * @param uniqueIdentifier the local name
 	 * @return the agent
 	 * @throws DataFormatException
@@ -175,10 +175,10 @@ public class EDMProvFactory {
 	public EDMAgent getAgent(String uniqueIdentifier) throws DataFormatException, DatatypeConfigurationException {
 		return (EDMAgent) this.getElement(EDMProvDataContainer.baseURI + uniqueIdentifier);
 	}
-	
+
 	/**
 	 * Get an activity (existing) identified by its unique ID from the factory
-	 * 
+	 *
 	 * @param uniqueIdentifier the local name
 	 * @return the activity
 	 * @throws DataFormatException
@@ -187,10 +187,10 @@ public class EDMProvFactory {
 	public EDMActivity getActivity(String uniqueIdentifier) throws DataFormatException, DatatypeConfigurationException {
 		return (EDMActivity) this.getElement(EDMProvDataContainer.baseURI + uniqueIdentifier);
 	}
-	
+
 	/**
 	 * Get an entity (existing) identified by its unique ID from the factory
-	 * 
+	 *
 	 * @param uniqueIdentifier the local name
 	 * @return the entity
 	 * @throws DataFormatException
@@ -208,17 +208,17 @@ public class EDMProvFactory {
 			return null;
 		}
 	}
-	
+
 	protected EDMProvBaseElement createElement(String uniqueIdentifier, String label, EDMProvBaseElement.PROV_TYPE type) throws DatatypeConfigurationException, AlreadyBoundException {
-		
+
 		//check whether it exists
 		if (container.allProvElements.containsKey(EDMProvDataContainer.baseURI + uniqueIdentifier)) {
 			throw new AlreadyBoundException("An element with the IRI \"" + EDMProvDataContainer.baseURI
 					+ uniqueIdentifier + "\" already exists.");
 		}
-		
+
 		EDMProvBaseElement element = null;
-		
+
 		switch (type) {
 			case ePROV_AGENT:
 				element = new EDMAgent(EDMProvDataContainer.baseURI, uniqueIdentifier, label);
@@ -232,7 +232,7 @@ public class EDMProvFactory {
 			default:
 				throw new DatatypeConfigurationException(type + " is not a correct provenance type. Please use ePROV_AGENT, ePROV_ACTIVITY or ePROV_ENTITY.");
 		}
-		
+
 		if (element!=null) {
 			container.allProvElements.put(element.getIri(), element);
 
@@ -242,10 +242,10 @@ public class EDMProvFactory {
 		}
 		return element;
 	}
-	
+
 	/**
 	 * Update prov record after making changes to an element.
-	 * 
+	 *
 	 * @param element the element that was updated
 	 */
 	public void elementUpdated(EDMProvBaseElement element) {
@@ -259,7 +259,7 @@ public class EDMProvFactory {
 			}
 		}
 	}
-  
+
 	/**
 	 * Create a prov report which contains all the elements that have been changed since the last time a report was created.
 	 * @return the report
@@ -272,37 +272,37 @@ public class EDMProvFactory {
 		}
 
 		EDMProvReport report = new EDMProvReport( currentTriples );
-		
+
 		//System.out.println("Current: " + currentTriples.size() + ", Sent: " + sentTriples.size());
 		sentTriples.putAll(currentTriples);
 		currentTriples.clear();
 		//System.out.println("Current: " + currentTriples.size() + ", Sent: " + sentTriples.size());
-		
+
 		return report;
 	}
-	
+
 	/**
 	 * Clears the factory contents.
 	 */
 	public void clear() {
 		currentTriples.clear();
 		sentTriples.clear();
-    
+
 		factory.container.clear();
 	}
-	
+
 	/**
 	 * Loads a report into the factory, recreating the prov data model from the triples in the report.
 	 * The factory will be cleared beforehand so only the triples from the report are contained.
-	 * 
+	 *
 	 * @param report the report to load
 	 * @throws DataFormatException
-	 * @throws DatatypeConfigurationException 
+	 * @throws DatatypeConfigurationException
 	 */
 	public void loadReport(EDMProvReport report) throws DataFormatException, DatatypeConfigurationException {
-		
+
 		HashMap<String, HashMap<UUID, EDMTriple>> elements = new HashMap<String, HashMap<UUID,EDMTriple>>();
-		
+
 		//first group triples by element
 		for (Entry<UUID, EDMTriple> e: report.getTriples().entrySet()) {
 			if (!elements.containsKey(e.getValue().getSubject())) {
@@ -310,29 +310,29 @@ public class EDMProvFactory {
 			}
 			elements.get(e.getValue().getSubject()).put(e.getKey(), e.getValue());
 		}
-		
+
 		//look at each element identified in the factory
 		for (HashMap<UUID, EDMTriple> element: elements.values()) {
-			
+
 			//first run: identify prov elements
 			for (Entry<UUID, EDMTriple> e: element.entrySet()) {
-				if (e.getValue().getType().equals(TRIPLE_TYPE.CLASS_ASSERTION)) {
-					//look at prov classes only
-					if ( e.getValue().getObject().startsWith(container.namespaces.get("prov"))) {
-						//get local name
-						String localName = EDMTriple.splitURI(e.getValue().getSubject(), 1);
-						
-						if (e.getValue().getObject().endsWith("#Agent")) {
-							factory.getAgent(localName);
-						} else if (e.getValue().getObject().endsWith("#Entity")) {
-							factory.getEntity(localName);
-						} else if (e.getValue().getObject().endsWith("#Activity")) {
-							factory.getActivity(localName);
-						}
+				if (e.getValue().getType().equals(TRIPLE_TYPE.CLASS_ASSERTION)
+				//look at prov classes only
+				&& e.getValue().getObject().startsWith(container.namespaces.get("prov"))) {
+
+					//get local name
+					String localName = EDMTriple.splitURI(e.getValue().getSubject(), 1);
+
+					if (e.getValue().getObject().endsWith("#Agent")) {
+						factory.getAgent(localName);
+					} else if (e.getValue().getObject().endsWith("#Entity")) {
+						factory.getEntity(localName);
+					} else if (e.getValue().getObject().endsWith("#Activity")) {
+						factory.getActivity(localName);
 					}
 				}
 			}
-			
+
 			//second run: add triples
 			for (EDMTriple triple: element.values()) {
 				String iri = triple.getSubject();
@@ -346,13 +346,13 @@ public class EDMProvFactory {
 			}
 		}
 	}
-	
+
 	//GETTERS/SETTERS//////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Returns the factory's base URI. If it hasn't been set, the experimedia prefix will be returned
 	 * as a fallback.
-	 * 
+	 *
 	 * @return the (long) prefix
 	 */
 	public String getPrefix() {
@@ -362,13 +362,13 @@ public class EDMProvFactory {
 			return FALLBACK_PREFIX;
 		}
 	}
-	
+
 	/**
 	 * Translates a short prefix into a long one.
-	 * 
+	 *
 	 * @param prefix the short prefix
 	 * @return the long prefix
-	 * @throws NoSuchFieldException 
+	 * @throws NoSuchFieldException
 	 */
 	public String getNamespaceForPrefix(String prefix) throws NoSuchFieldException {
 		if (container.namespaces.containsKey(prefix)) {
@@ -377,11 +377,11 @@ public class EDMProvFactory {
 			throw new NoSuchFieldException("The prefix '" + prefix + "' doesn't exist in this factory");
 		}
 	}
-	
+
 	/**
 	 * Returns all the triples that have already been sent in a prov report.
-	 * 
-	 * @return the sent triples 
+	 *
+	 * @return the sent triples
 	 */
 	public HashMap<UUID, EDMTriple> getSentTriples() {
 		return sentTriples;
@@ -390,7 +390,7 @@ public class EDMProvFactory {
 	/**
 	 * Returns all the triples that haven't been set in a prov report yet and will be included in
 	 * the next prov report.
-	 * 
+	 *
 	 * @return the current triples
 	 */
 	public HashMap<UUID, EDMTriple> getCurrentTriples() {

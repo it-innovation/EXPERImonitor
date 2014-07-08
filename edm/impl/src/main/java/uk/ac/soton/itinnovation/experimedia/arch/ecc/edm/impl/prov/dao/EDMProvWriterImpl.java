@@ -3,7 +3,7 @@
 // © University of Southampton IT Innovation Centre, 2014
 //
 // Copyright in this software belongs to University of Southampton
-// IT Innovation Centre of Gamma House, Enterprise Road, 
+// IT Innovation Centre of Gamma House, Enterprise Road,
 // Chilworth Science Park, Southampton, SO16 7NS, UK.
 //
 // This software may not be used, sold, licensed, transferred, copied
@@ -38,19 +38,19 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.prov.db.EDMProvSto
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.prov.dao.IEDMProvWriter;
 
 public class EDMProvWriterImpl implements IEDMProvWriter {
-	
+
 	private final Properties props;
 	private final Logger logger;
-	
+
 	private EDMProvStoreWrapper edmProvStoreWrapper;
-    
+
     public EDMProvWriterImpl(Properties props) throws SesameException {
 		logger = LoggerFactory.getLogger(getClass());
 		this.props = props;
-		
+
 		connect();
     }
-	
+
 	private void connect() throws SesameException {
 		try {
             edmProvStoreWrapper = new EDMProvStoreWrapper(props);
@@ -59,10 +59,10 @@ public class EDMProvWriterImpl implements IEDMProvWriter {
 			throw new SesameException("Error connecting to store", e);
         }
 	}
-	
+
 	@Override
 	public void disconnect() {
-		if ((edmProvStoreWrapper != null) && edmProvStoreWrapper.isConnected()) {
+		if (edmProvStoreWrapper != null && edmProvStoreWrapper.isConnected()) {
 			logger.debug("EDMProvStoreWrapper has still got an open connection - disconnecting now");
 			edmProvStoreWrapper.disconnect();
 		} else {
@@ -72,7 +72,7 @@ public class EDMProvWriterImpl implements IEDMProvWriter {
 
     @Override
     public void storeReport(EDMProvReport report) {
-		
+
        ArrayList<Triple> triples = new ArrayList<Triple>();
 		if (report==null || report.getTriples()==null || report.getTriples().values()==null) {
 			logger.error("Error adding triples: Invalid or empty report");
@@ -83,25 +83,25 @@ public class EDMProvWriterImpl implements IEDMProvWriter {
 					RelationshipType.fromValue(t.getType().name())));
 			}
 		}
-		
+
     	try {
 			edmProvStoreWrapper.addTriples(props.getProperty("owlim.repositoryID"), triples);
 		} catch (Exception e) {
 			logger.error("Error adding triples", e);
 		}
     }
-	
+
 	@Override
 	public void importOntology(String ontologypath, String baseURI, String prefix, Class resourcepathclass) {
 		edmProvStoreWrapper.importOntologyToKnowledgeBase(ontologypath, baseURI, prefix, resourcepathclass);
 	}
-	
+
 	@Override
 	public void clearRepository(String repositoryID) {
 		logger.debug("Clearing repository " + repositoryID + " by deleting all triples");
 		edmProvStoreWrapper.clearRepository(repositoryID);
 	}
-	
+
 	public EDMProvStoreWrapper getEDMProvStoreWrapper() {
 		return edmProvStoreWrapper;
 	}

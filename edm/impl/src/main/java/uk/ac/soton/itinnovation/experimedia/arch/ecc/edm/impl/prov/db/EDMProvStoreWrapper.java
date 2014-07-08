@@ -3,7 +3,7 @@
 // © University of Southampton IT Innovation Centre, 2014
 //
 // Copyright in this software belongs to University of Southampton
-// IT Innovation Centre of Gamma House, Enterprise Road, 
+// IT Innovation Centre of Gamma House, Enterprise Road,
 // Chilworth Science Park, Southampton, SO16 7NS, UK.
 //
 // This software may not be used, sold, licensed, transferred, copied
@@ -44,18 +44,18 @@ import uk.ac.soton.itinnovation.owlimstore.common.SesameException;
 import uk.ac.soton.itinnovation.owlimstore.sesame.RemoteSesameConnector;
 
 public class EDMProvStoreWrapper extends RemoteSesameConnector {
-	
+
 	private final Properties props;
 	private String prefixes;
-	
+
 	public EDMProvStoreWrapper(Properties props) throws NoSuchRepositoryException, SesameException, Exception {
-		
+
 		super(props, props.getProperty("owlim.sesameServerURL"));
 		logger = LoggerFactory.getLogger(RemoteSesameConnector.class);
-			
+
 		this.props = props;
 		this.prefixes = null;
-		
+
 		if (!repositoryExists(props.getProperty("owlim.repositoryID"))) {
 			logger.warn("Repository \"" + props.getProperty("owlim.repositoryID")
 				+ "\" doesn't exist and needs to be created");
@@ -73,10 +73,10 @@ public class EDMProvStoreWrapper extends RemoteSesameConnector {
 		try {
 			super.setNamespacesFromRepository(props.getProperty("owlim.repositoryID"));
 		} catch (SesameException e) {
-		
+			logger.warn("Error setting namespaces from repository", e);
 		}
 	}
-	
+
 	public final boolean repositoryExists(String repositoryID) throws SesameException {
 		try {
 			getRepository(repositoryID);
@@ -87,7 +87,7 @@ public class EDMProvStoreWrapper extends RemoteSesameConnector {
 			throw new SesameException("Not connected to store", e);
 		}
 	}
-	
+
 	public void importOntologyToKnowledgeBase(String ontologypath, String baseURI, String prefix, Class resourcepathclass) {
 		logger.debug(" - " + prefix + " (" + baseURI + ")");
 		OntologyDetails od = new OntologyDetails();
@@ -100,7 +100,7 @@ public class EDMProvStoreWrapper extends RemoteSesameConnector {
 				try {
 					URL remoteOntology = new URL(ontologypath);
 					od.setURL(remoteOntology);
-					        
+
 				} catch (MalformedURLException e) {
 					logger.error("Error loading ontology from URL " + ontologypath, e);
 				}
@@ -115,7 +115,7 @@ public class EDMProvStoreWrapper extends RemoteSesameConnector {
 					logger.error("Error reading resource file", e);
 				}
 			}
-			
+
 		} else {
 			logger.debug("Loading ontology from file " + ontologypath);
 			try {
@@ -129,25 +129,25 @@ public class EDMProvStoreWrapper extends RemoteSesameConnector {
 		try {
 			super.addOntology(props.getProperty("owlim.repositoryID"), od);
 		} catch (Exception e) {
-			logger.error("Error importing ontology " + od.getPrefix() + "(" + od.getBaseURI() + ")" + " to repository " + 
+			logger.error("Error importing ontology " + od.getPrefix() + "(" + od.getBaseURI() + ")" + " to repository " +
 					props.getProperty("owlim.repositoryID") + " on OWLim server " + props.getProperty("owlim.sesameServerURL"), e);
 		}
 	}
-	
+
     public LinkedList<HashMap<String,String>> query(String sparql) {
-		
+
 		if (this.prefixes==null) {
 			logger.debug("prefixes are null");
 			loadPrefixes();
 		}
 		loadPrefixes();
 		sparql = prefixes + sparql;
-		
+
 		logger.debug(sparql);
-				
+
         TupleQueryResult result = null;
         LinkedList<HashMap<String, String>> results = new LinkedList<HashMap<String,String>>();
-		
+
 		try {
 			long queryBegin = System.nanoTime();
 			result = this.query(props.getProperty("owlim.repositoryID"), sparql);
@@ -173,7 +173,7 @@ public class EDMProvStoreWrapper extends RemoteSesameConnector {
 			}
 			long queryEnd = System.nanoTime();
 			logger.debug(" - Got " + counter + " result(s) in " + (queryEnd - queryBegin) / 1000000 + "ms.");
-			
+
 		} catch (Exception ex) {
 			logger.error("Exception caught when querying repository: " + ex, ex);
 		} finally {
@@ -187,20 +187,20 @@ public class EDMProvStoreWrapper extends RemoteSesameConnector {
 		}
 		return results;
 	}
-	
+
 	public HashMap<String, HashMap<String, String>> getRepositoryNamespaces() {
 		return super.repositoryNamespaces;
 	}
-	
+
 	public void setRepositoryNamespaces(HashMap<String, HashMap<String, String>> ns) {
 		//TODO: necessary? filter out standard namespace (":"), otherwise it would be overwritten with every ontology import
 		//ns.get(props.getProperty("owlim.repositoryID")).remove(""); => doesn't work
 		super.repositoryNamespaces = ns;
 		this.loadPrefixes();
 	}
-	
+
 	public String getPrefixes() {
 		return prefixes;
 	}
-	
+
 }

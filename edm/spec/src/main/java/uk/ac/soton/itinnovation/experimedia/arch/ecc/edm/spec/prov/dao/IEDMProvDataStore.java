@@ -3,7 +3,7 @@
 // © University of Southampton IT Innovation Centre, 2014
 //
 // Copyright in this software belongs to University of Southampton
-// IT Innovation Centre of Gamma House, Enterprise Road, 
+// IT Innovation Centre of Gamma House, Enterprise Road,
 // Chilworth Science Park, Southampton, SO16 7NS, UK.
 //
 // This software may not be used, sold, licensed, transferred, copied
@@ -29,30 +29,30 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.prov.dao;
  * This is an interface to the EDM prov store.
  */
 public interface IEDMProvDataStore {
-	
+
 	/**
 	 * Connects to the store
 	 */
-	public void connect();
-	
+	void connect();
+
 	/**
 	 * Creates a repository with the given ID and name
-	 * 
+	 *
 	 * @param repositoryID the ID
 	 * @param repositoryName the human readable name
 	 */
-	public void createRepository(String repositoryID, String repositoryName);
-	
+	void createRepository(String repositoryID, String repositoryName);
+
 	/**
 	 * Deletes the repository with the given ID.
-	 * 
-	 * @param repositoryID 
+	 *
+	 * @param repositoryID
 	 */
-	public void deleteRepository(String repositoryID);
-	
+	void deleteRepository(String repositoryID);
+
 	/**
 	 * Disconnects from the store.
 	 */
-	public void disconnect();
+	void disconnect();
 
 }

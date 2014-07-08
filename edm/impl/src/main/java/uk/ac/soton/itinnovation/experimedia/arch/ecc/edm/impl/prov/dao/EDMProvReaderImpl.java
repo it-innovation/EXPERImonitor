@@ -3,7 +3,7 @@
 // © University of Southampton IT Innovation Centre, 2014
 //
 // Copyright in this software belongs to University of Southampton
-// IT Innovation Centre of Gamma House, Enterprise Road, 
+// IT Innovation Centre of Gamma House, Enterprise Road,
 // Chilworth Science Park, EDMProvReaderImplK.
 //
 // This software may not be used, sold, licensed, EDMProvReaderImplr reproduced in whole or in part in any manner or form or in or
@@ -45,23 +45,23 @@ import uk.ac.soton.itinnovation.owlimstore.common.SesameException;
 public final class EDMProvReaderImpl implements IEDMProvReader {
 
 	private static final SimpleDateFormat format = new SimpleDateFormat("\"yyyy-MM-dd'T'HH:mm:ss'Z\"^^xsd:dateTime'");
-	
+
 	private final Properties props;
 	private final Logger logger;
-	
+
 	private EDMProvStoreWrapper edmProvStoreWrapper;
 	private SPARQLProvTranslator translator;
-	
+
 	public EDMProvReaderImpl(Properties props) throws SesameException  {
 		logger = LoggerFactory.getLogger(getClass());
 		this.props = props;
 		translator = new SPARQLProvTranslator(props);
 		format.setTimeZone(TimeZone.getTimeZone("UTC"));
-		
+
 		connect();
 	}
 
-	
+
 	private void connect() throws SesameException {
 		try {
             edmProvStoreWrapper = new EDMProvStoreWrapper(props);
@@ -71,26 +71,26 @@ public final class EDMProvReaderImpl implements IEDMProvReader {
 			throw new SesameException("Could not connect to EDM Prov store", e);
         }
 	}
-	
+
 	@Override
 	public void disconnect() {
-		if ((edmProvStoreWrapper != null) && edmProvStoreWrapper.isConnected()) {
+		if (edmProvStoreWrapper != null && edmProvStoreWrapper.isConnected()) {
 			logger.warn("EDMProvStoreWrapper has still got an open connection - disconnecting now");
 			edmProvStoreWrapper.disconnect();
 		} else {
 			logger.debug("EDMProvStoreWrapper is already disconnected");
 		}
 	}
-	
+
 	@Override
 	public EDMProvBaseElement getElementCore(String IRI) {
 		//important: don't change variable names as SPARQLProvTranslator depends on them!
 		String query = "SELECT DISTINCT * WHERE { " +
 			"?s ?p ?o ." +
-	
+
 			//filter IRI
 			"FILTER(?s = <" + IRI + ">) . " +
-				
+
 			//filter by class: only prov classes
 			"?s a ?c ." +
 			"FILTER((?p = rdf:type && ?c in(prov:Agent, prov:Activity, prov:Entity) && ?c = ?o) || ?p = rdfs:label) .  " +
@@ -116,7 +116,7 @@ public final class EDMProvReaderImpl implements IEDMProvReader {
 
 		String t1 = "\"0001-01-01T00:00:00Z\"^^xsd:dateTime";
 		String t2 = "\"9999-12-31T23:59:59Z\"^^xsd:dateTime";
-		
+
 		boolean skip = true;
 		if (start!=null) {
 			t1 = format.format(start);
@@ -126,24 +126,24 @@ public final class EDMProvReaderImpl implements IEDMProvReader {
 			t2 = format.format(end);
 			skip = false;
 		}
-		
+
 		//important: don't change variable names as SPARQLProvTranslator depends on them!
 		String query = "SELECT DISTINCT * WHERE { " +
 			"?s ?p ?o ." +
-				
+
 			//filter IRI
 			"FILTER(?s = <" + IRI + ">) . " +
 
 			//filter by class: only prov classes
 			"?s a ?c ." +
 			"FILTER(?c in(prov:Agent, prov:Activity, prov:Entity)) ." +
-				
+
 			//filter by property type
 			"?p a ?t ." +
 			"FILTER(?t in(owl:ObjectProperty, owl:DatatypeProperty, owl:AnnotationProperty) " +
 				"|| (?p=rdf:type && ?t=rdf:Property)) .";
-				
-			
+
+
 		if (!skip) {
 			//time span
 			//activity needs to have a start time
@@ -152,13 +152,13 @@ public final class EDMProvReaderImpl implements IEDMProvReader {
 			"OPTIONAL { ?s prov:endedAtTime ?t2 ." +
 			"FILTER((?t1 <= " + t2 + ") && (?t2 >= " + t1 + ")) . } .";
 		}
-			
+
 		query += "} ORDER BY ?c ?s ?t1 ?t2 ?t ?p ";
 
 		LinkedList<HashMap<String, String>> rawresult = edmProvStoreWrapper.query(query);
 		EDMProvDataContainer result = translator.translate(rawresult);
 		return result.getAllElements().get(IRI);
-		
+
 	}
 
 	@Override
@@ -168,10 +168,10 @@ public final class EDMProvReaderImpl implements IEDMProvReader {
 
 	@Override
 	public EDMProvDataContainer getElements(EDMProvBaseElement.PROV_TYPE type, Date start, Date end) {
-		
+
 		String t1 = "\"0001-01-01T00:00:00Z\"^^xsd:dateTime";
 		String t2 = "\"9999-12-31T23:59:59Z\"^^xsd:dateTime";
-		
+
 		boolean skip = true;
 		if (start!=null) {
 			t1 = format.format(start);
@@ -181,12 +181,12 @@ public final class EDMProvReaderImpl implements IEDMProvReader {
 			t2 = format.format(end);
 			skip = false;
 		}
-		
+
 		//first query: get all activities matching the timeframe
 		//important: don't change variable names as SPARQLProvTranslator depends on them!
 		String query = "SELECT DISTINCT * WHERE { " +
 			"?s ?p ?o ." +
-				
+
 			//filter by class: only prov classes
 			"?s a ?c ." +
 			"FILTER(?c in(prov:Agent, prov:Activity, prov:Entity)) ." +
@@ -195,8 +195,8 @@ public final class EDMProvReaderImpl implements IEDMProvReader {
 			"?p a ?t ." +
 			"FILTER(?t in(owl:ObjectProperty, owl:DatatypeProperty, owl:AnnotationProperty) " +
 				"|| (?p=rdf:type && ?t=rdf:Property)) .";
-		
-		
+
+
 
 		if (!skip) {
 			//time span:
@@ -225,11 +225,11 @@ public final class EDMProvReaderImpl implements IEDMProvReader {
 				}
 			}
 		}
-			
+
 		query += "} ORDER BY ?c ?s ?t1 ?t2 ?t ?p ";
-		
+
 		//System.out.println("query 1: " + query);
-		
+
 		EDMProvDataContainer result = translator.translate(edmProvStoreWrapper.query(query));
 
 		//do a second query to get related prov elements. only necessary if filtered by time
@@ -289,7 +289,7 @@ public final class EDMProvReaderImpl implements IEDMProvReader {
 				query += "} ORDER BY ?c ?s ?t1 ?t2 ?t ?p ";
 
 				//System.out.println("query 2: " + query);
-				
+
 				//workaround for deep copying resultsets - otherwise result is overwritten when result2 is retrieved
 				translator = new SPARQLProvTranslator(props);
 				EDMProvDataContainer result2 = translator.translate(edmProvStoreWrapper.query(query));
@@ -312,14 +312,14 @@ public final class EDMProvReaderImpl implements IEDMProvReader {
 
 	@Override
 	public Set<EDMTriple> getTriples(String subjectIRI, String predicate, String objectIRI) {
-		
+
 		if (subjectIRI==null && predicate==null && objectIRI==null) {
 			return null;
 		}
 
 		String query = "SELECT DISTINCT * WHERE { " +
 			"?s ?p ?o ." +
-				
+
 			//filter by property type
 			"?p a ?t ." +
 			"FILTER(?t in(owl:ObjectProperty, owl:DatatypeProperty, owl:AnnotationProperty) " +
@@ -335,9 +335,9 @@ public final class EDMProvReaderImpl implements IEDMProvReader {
 		if (objectIRI!=null) {
 			//time span
 			query += "FILTER( ?o = <" + objectIRI + ">) .";
-		}	
+		}
 		query += "} ORDER BY ?s ?t ?p ?o ";
-		
+
 		Set<EDMTriple> triples = new HashSet<EDMTriple>();
 		for (HashMap<String, String> t: edmProvStoreWrapper.query(query)) {
 			if (t.containsKey("s") && t.containsKey("p") && t.containsKey("o")
@@ -362,16 +362,16 @@ public final class EDMProvReaderImpl implements IEDMProvReader {
 				} else {
 					logger.warn("Unknown triple type: " + type);
 				}
-				
+
 				triples.add(new EDMTriple(t.get("s"), t.get("p"), t.get("o"), tripletype));
 			}
 		}
-		
+
 		return triples;
 	}
-	
+
 	//GETTERS/SETTERS
-	
+
 	public EDMProvStoreWrapper getEDMProvStoreWrapper() {
 		return edmProvStoreWrapper;
 	}
