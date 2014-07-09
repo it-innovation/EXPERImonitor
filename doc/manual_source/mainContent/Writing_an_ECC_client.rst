@@ -175,6 +175,58 @@ Some clients may wish to signal to the ECC that want to enable or disable an Ent
   
 Client writers can send 'enable' or 'disable' signals to the ECC by using the ECC adapter call EMInterfaceAdapter.sendEntityEnabled(..).
 
+
+Disconnection/re-connection strategies
+-----------------------------------
+Your ECC client software is typically remotely connected to the ECC via an internet connection. As with writing any software that communicates with other software via an internet connection, there may be occasions when communication between your client and the ECC becomes severed at run-time. There may be a number of reasons for this disconnection: some are the result of deliberate actions by the software, others may be the result of a network or system failure. The ECC API does not automatically attempt to restore a connection to the ECC on your behalf - this is currently the responsibility of the client software. In this section, a number of strategies for dealing with situations like these are presented below; technical notes for guidance follow.
+
+
+SCENARIO 1
+~~~~~~~~~~
+*The ECC client is either disconnected from the network or is restarted: the client wishes to reconnect as the same client to an existing experiment running on the ECC.*
+
+In this case, there are two possible options:
+
+  1. Store and re-use your existing metric model when you re-connect to an experiment. When your client re-connects with the ECC, it will be asked to send its metric model - it can simply re-send the model it used before. Currently there is no direct support for reading/writing the metric model from/to disk, however this can be achieved relatively simply using one of the following methods:
+	
+		1.1 Java: the metric model is serializable or can be 'JSONized' (using the GSON library, for example)
+    
+		1.2 C#  : the metric model can be 'JSONized' (using the Newtonsoft JSON library, for example)
+		
+		1.3 C++ : the metric model can be 'JSONized' (using the 'toJSON(..)' and 'fromJSON(..)' methods on the model classes [requires BOOST JSON support]
+	
+  2. Create and send a new metric model (however, this will add duplicated entities to the experiment). If your client is 'pulled' by the ECC, it will continue to receive requests for data for measurement sets relating to the old model: simply return empty reports in this case. Clients pushing data to the ECC do not need to take any further action.
+	
+See also section 'Reconnecting your client (technical)' to understand how to present your client as the same instance to the ECC.
+
+
+SCENARIO 2
+~~~~~~~~~~
+*Client crashes and is unable to locally recover any experiment related data. The client is re-started and attempts to connect to an existing experiment running on the ECC.*
+
+Here, we assume that no experiment related data (such as a metric or provenance model) was stored or can be recovered by the client. In this situation, your software should connect to the ECC as a *new client*, creating and sending a *new metric model* to the ECC. This new model will be added to the current experiment and result in duplicated entities that your client has reported represented in the experiment.
+
+
+SCENARIO 3
+~~~~~~~~~~
+*The RabbitMQ server crashes.*
+
+If the RabbitMQ service crashes or is shutdown (this is a rare event), communications between the ECC and its clients will fail. In this case, ECC clients should close down their connection to the ECC and the experimenter should stop the current experiment.
+
+Once the RabbitMQ service has been restarted, the experimenter will then re-establish the ECC's connection to the Rabbit server by returning to the dashboard configuration page and attempting a reconnect. If successful, the experimenter should then start a new experiment. Clients should reconnect to the ECC and send a *new metric model* for the *new experiment*.
+
+
+SCENARIO 4
+~~~~~~~~~~
+*The ECC service crashes.*
+
+In the case where the ECC service crashes, any currently running experiment will be discontinued and the experimenter will have to create a new experiment once the ECC has been restarted. Once the ECC has been restarted and a new experiment is created, all previously connected clients (that remain connected to the RabbitMQ server) will be sent a message to start a new experiment by the ECC. Client should create a *new metric model* for the *new experiment*.
+
+
+Reconnecting your client (technical)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+When connecting (or re-connecting) to the ECC, your client identifies itself using a UUID which allows the ECC to uniquely identify your client. This is done using the class and method call *EMInterfaceAdapter.registerWithEM(..)* (parameter 4). If you wish to re-connect to an experiment as the same client instance, you should use the same client UUID as you used previously. If you are reconnecting to an on-going experiment, the ECC will assume your client will be able to provide data for the previous metric model sent (although this is not strictly required; see scenario 1 above).
+
   
 Testing clients against the ECC
 -------------------------------
