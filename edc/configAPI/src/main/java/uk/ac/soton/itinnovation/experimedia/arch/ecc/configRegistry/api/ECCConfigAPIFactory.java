@@ -35,7 +35,6 @@ public class ECCConfigAPIFactory {
    
     private static final String repositoryURL = "http://config.experimedia.eu/";
     
-    private ECCConfigAPIFactory(){}
     /**
      * Method to create a new instance of the directory configuration interface.
      * 
