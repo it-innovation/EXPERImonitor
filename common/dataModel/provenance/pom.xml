@@ -12,32 +12,4 @@
     <version>2.1</version>
   </parent>
 
-  <build>
-    <plugins>
-
-      <!-- Maven compiler -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>${ecc.java.version}</source>
-          <target>${ecc.java.version}</target>
-          <encoding>${project.build.sourceEncoding}</encoding>
-        </configuration>
-      </plugin>
-        <plugin>
-		  <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-resources-plugin</artifactId>
-          <version>2.4.3</version>
-          <configuration>
-            <encoding>${project.build.sourceEncoding}</encoding>
-          </configuration>
-        </plugin>
-    </plugins>
-
-  </build>
-
-  <dependencies>
-  </dependencies>
-
 </project>
