@@ -635,12 +635,4 @@ public class ExperimentMonitor implements IExperimentMonitor,
     
     return simpleClients;
   }
-	
-	private boolean entryPointExists() throws Exception
-	{
-		String faceName  = "IECCMonitorEntryPoint 0.1_" + entryPointID.toString() + "[P]";
-		String queueName = faceName + "/" + faceName;
-		
-		return AMQPBasicChannel.amqpQueueExists( amqpConnectionFactory, queueName );
-	}
 }

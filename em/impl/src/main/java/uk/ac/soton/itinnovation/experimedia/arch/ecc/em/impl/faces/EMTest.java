@@ -96,7 +96,7 @@ public class EMTest extends EMBaseInterface
   {
     switch ( methodID )
     {
-      case ( 1 ) :
+      case 1 :
       {
         if ( testListener != null )
         {

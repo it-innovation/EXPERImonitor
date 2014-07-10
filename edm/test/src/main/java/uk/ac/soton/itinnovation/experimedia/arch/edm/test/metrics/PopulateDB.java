@@ -102,7 +102,7 @@ public class PopulateDB
       
         log.info("Populating the EDM metrics database with test data");
         Properties prop = new Properties();
-        if ((args != null) && (args.length == 5) && isArgsValid(args))
+        if (args != null && (args.length == 5) && isArgsValid(args))
         {
             log.debug("Getting properties from the arguments");
             prop.setProperty("dbURL", args[0]);
@@ -143,19 +143,19 @@ public class PopulateDB
     
     private static boolean isArgsValid(String[] args)
     {
-        if ((args[0] == null) || args[0].isEmpty()) {
+        if (args[0] == null || args[0].isEmpty()) {
             return false;
         }
-        if ((args[1] == null) || args[1].isEmpty()) {
+        if (args[1] == null || args[1].isEmpty()) {
             return false;
         }
-        if ((args[2] == null) || args[2].isEmpty()) {
+        if (args[2] == null || args[2].isEmpty()) {
             return false;
         }
-        if ((args[3] == null) || args[3].isEmpty()) {
+        if (args[3] == null || args[3].isEmpty()) {
             return false;
         }
-        if ((args[4] == null) || args[4].isEmpty()) {
+        if (args[4] == null || args[4].isEmpty()) {
             return false;
         }
         
@@ -544,7 +544,7 @@ public class PopulateDB
         if (expFromDB.getEndTime() != null) log.info("    - End:   " + expFromDB.getEndTime() + " (" + expFromDB.getEndTime().getTime() + ")");
         if (expFromDB.getExperimentID() != null) log.info("    - ID:    " + expFromDB.getExperimentID());
         
-        if ((expFromDB.getMetricGenerators() == null) || expFromDB.getMetricGenerators().isEmpty()) {
+        if (expFromDB.getMetricGenerators() == null || expFromDB.getMetricGenerators().isEmpty()) {
             log.info("  * There are NO metric generators");
         } else {
             log.info("  * There's " + expFromDB.getMetricGenerators().size() + " metric generator(s)");
@@ -557,7 +557,7 @@ public class PopulateDB
                 if (mGen.getDescription() != null)
                     log.info("      - Desc: " + mGen.getDescription());
                 
-                if ((mGen.getMetricGroups() == null) || mGen.getMetricGroups().isEmpty()){
+                if (mGen.getMetricGroups() == null || mGen.getMetricGroups().isEmpty()){
                     log.info("      * There are NO metric groups");
                 } else {
                     log.info("      * There's " + mGen.getMetricGroups().size() + " metric group(s)");
@@ -570,7 +570,7 @@ public class PopulateDB
                         if (mGrp.getDescription() != null)
                             log.info("          - Desc: " + mGrp.getDescription());
                         
-                        if ((mGrp.getMeasurementSets() == null) || mGrp.getMeasurementSets().isEmpty()){
+                        if (mGrp.getMeasurementSets() == null || mGrp.getMeasurementSets().isEmpty()){
                             log.info("          * There are NO measurement sets");
                         } else {
                             log.info("          * There's " + mGrp.getMeasurementSets().size() + " measurement set(s)");
@@ -603,7 +603,7 @@ public class PopulateDB
                         } // end else there's measurement sets
                     } // end for each metric group
                     
-                    if ((mGen.getEntities() == null) || mGen.getEntities().isEmpty()){
+                    if (mGen.getEntities() == null || mGen.getEntities().isEmpty()){
                         log.info("      * There are NO entities in the metric generator");
                     } else {
                         log.info("      * There's " + mGen.getEntities().size() + " entity/entities in the metric generator");
@@ -614,7 +614,7 @@ public class PopulateDB
                         if (entity.getEntityID() != null) log.info("        - ID:    " + entity.getEntityID());
                             if (entity.getName() != null) log.info("        - Name:  " + entity.getName());
                             if (entity.getDescription() != null) log.info("        - Desc:  " + entity.getDescription());
-                            if ((entity.getAttributes() == null) || entity.getAttributes().isEmpty()) {
+                            if (entity.getAttributes() == null || entity.getAttributes().isEmpty()) {
                                 log.info("        - There are NO attributes");
                             } else {
                                 log.info("        - There are " + entity.getAttributes().size() + " attributes");

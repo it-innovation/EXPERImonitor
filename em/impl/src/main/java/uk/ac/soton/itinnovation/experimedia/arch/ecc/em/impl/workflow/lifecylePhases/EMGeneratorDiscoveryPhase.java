@@ -314,12 +314,9 @@ public class EMGeneratorDiscoveryPhase extends AbstractEMLCPhase
   {
     EMClientEx client = getClient( senderID );
 
-    if ( client != null )
-    {
-      // Try enabling/disabling entity (& notify if successful (ie., entity exists))
-      if ( client.setEntityEnabled( entityID, enabled ) )
+    // Try enabling/disabling entity (& notify if successful (ie., entity exists))
+    if ( client != null && client.setEntityEnabled( entityID, enabled ) )
         phaseListener.onClientEnabledMetricCollection( client, entityID, enabled );
-    }
   }
   
   @Override

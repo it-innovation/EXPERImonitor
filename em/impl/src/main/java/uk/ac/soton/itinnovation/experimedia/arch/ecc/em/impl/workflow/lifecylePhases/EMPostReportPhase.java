@@ -270,7 +270,7 @@ public class EMPostReportPhase extends AbstractEMLCPhase
       UUID popBatchID  = populatedBatch.getID();
       Report popReport = populatedBatch.getBatchReport();
       
-      boolean handleReport = ( popBatchID != null && popReport != null );
+      boolean handleReport = popBatchID != null && popReport != null;
 
       // If this is the batch we expected, see if we need any more data
       if ( handleReport && popBatchID.equals(currExpectedClientBatch.getID()) )

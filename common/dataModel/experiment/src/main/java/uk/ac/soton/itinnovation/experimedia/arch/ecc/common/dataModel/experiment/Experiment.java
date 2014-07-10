@@ -258,7 +258,7 @@ public class Experiment implements Serializable
      */
     public void addMetricGenerators(Set<MetricGenerator> metricGenerators)
     {
-        if ((metricGenerators == null) || metricGenerators.isEmpty())
+        if (metricGenerators == null || metricGenerators.isEmpty())
             return;
         
         if (this.metricGenerators == null)

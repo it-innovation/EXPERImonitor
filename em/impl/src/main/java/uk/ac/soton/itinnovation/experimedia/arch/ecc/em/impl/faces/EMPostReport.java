@@ -136,14 +136,14 @@ public class EMPostReport extends EMBaseInterface
   {
     switch ( methodID )
     {
-      case ( 1 ) :
+      case 1 :
       {
         if ( userListener != null )
           userListener.onRequestPostReportSummary( interfaceProviderID );
         
       } break;
         
-      case ( 2 ) :
+      case 2 :
       {
         if ( userListener != null )
         {
@@ -154,7 +154,7 @@ public class EMPostReport extends EMBaseInterface
         
       } break;
         
-      case ( 3 ) :
+      case 3 :
       {
         if ( userListener != null )
         {
@@ -165,14 +165,14 @@ public class EMPostReport extends EMBaseInterface
         
       } break;
         
-      case ( 4 ) :
+      case 4 :
       {
         if ( providerListener != null )
           providerListener.onNotifyReadyToReport( interfaceUserID );
         
       } break;
         
-      case ( 5 ) :
+      case 5 :
       {
         if ( providerListener != null )
         {
@@ -184,7 +184,7 @@ public class EMPostReport extends EMBaseInterface
         
       } break;
         
-      case ( 6 ) :
+      case 6 :
       {
         if ( providerListener != null )
         {

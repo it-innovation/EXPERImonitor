@@ -115,7 +115,7 @@ public class AMQPBasicChannel
   public boolean isOpen()
   {
     if ( amqpChannel != null )
-      return ( amqpChannel.isOpen() );
+      return amqpChannel.isOpen();
     
     return false;
   }
@@ -146,7 +146,7 @@ public class AMQPBasicChannel
   {
     if ( !isClosingDown && sse != null )
     {
-      boolean connectionOK = ( !sse.isHardError() );
+      boolean connectionOK = !sse.isHardError();
       
       if ( channelListener != null )
         channelListener.onChannelShutdown( connectionOK,

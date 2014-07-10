@@ -305,7 +305,7 @@ public class EMClientEx extends EMClient
   
   // Setup phase state ---------------------------------------------------------  
   public boolean hasGeneratorToSetup()
-  { return ( !generatorsToSetup.isEmpty() ); }
+  { return !generatorsToSetup.isEmpty(); }
   
   public UUID getCurrentMetricGenSetupID()
   { return currentMGSetupID; }
@@ -380,8 +380,7 @@ public class EMClientEx extends EMClient
         if ( msID.equals(expectedPullMSID) ) expectedPullMSID = null;
         
         // ... and ensure our state of currently pulling remains accurate
-        isQueueingMSPulls = ( !currentMeasurementSetPulls.isEmpty() || 
-                              expectedPullMSID != null );
+        isQueueingMSPulls = !currentMeasurementSetPulls.isEmpty() || expectedPullMSID != null;
       }
     }
   }

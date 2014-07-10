@@ -146,7 +146,7 @@ public interface IECCDirectoryConfig{
      * @return  - The drive and directory path as a string, or null if it does not exist.
      * @throws Exception - Throws if local configuration repository does not exist.
      */
-    public String getLocalConfigPath() throws Exception;
+    String getLocalConfigPath() throws Exception;
     
     /**
      * Method to create multiple local directories using a complete path including drive letter.
@@ -155,7 +155,7 @@ public interface IECCDirectoryConfig{
      * @param directoryPath - The complete path including the drive letter.
      * @throws Exception  - Throws if the path is null.
      */
-    public void createLocalRepository(String directoryPath) throws Exception;
+    void createLocalRepository(String directoryPath) throws Exception;
     
     /**
      * Used to create a directory on the local computer.

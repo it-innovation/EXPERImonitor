@@ -215,7 +215,7 @@ public class EMDiscovery extends EMBaseInterface
   {
     switch ( methodID )
     {
-      case ( 1 ) :
+      case 1 :
       {
         if ( userListener != null )
         {
@@ -225,7 +225,7 @@ public class EMDiscovery extends EMBaseInterface
         
       } break;
         
-      case ( 2 ) :
+      case 2 :
       {
         if ( userListener != null )
         {
@@ -243,35 +243,35 @@ public class EMDiscovery extends EMBaseInterface
         }
       } break;
         
-      case ( 3 ) :
+      case 3 :
       {
         if ( userListener != null )
           userListener.onRequestActivityPhases( interfaceProviderID );
         
       } break;
         
-      case ( 4 ) :
+      case 4 :
       {
         if ( userListener != null )
           userListener.onDiscoverMetricGenerators( interfaceProviderID );
         
       } break;
         
-      case ( 5 ) :
+      case 5 :
       {
         if ( userListener != null )
           userListener.onRequestMetricGeneratorInfo( interfaceProviderID );
         
       } break;
         
-      case ( 6 ) :
+      case 6 :
       {
         if ( userListener != null )
           userListener.onDiscoveryTimeOut( interfaceProviderID );
         
       } break;
         
-      case ( 7 ) :
+      case 7 :
       {
         if ( userListener != null )
         {
@@ -281,14 +281,14 @@ public class EMDiscovery extends EMBaseInterface
         
       } break;
         
-      case ( 8 ) :
+      case 8 :
       {
         if ( providerListener != null )
           providerListener.onReadyToInitialise( interfaceUserID );
         
       } break;
         
-      case ( 9 ) :
+      case 9 :
       {
         if ( providerListener != null )
         {
@@ -306,7 +306,7 @@ public class EMDiscovery extends EMBaseInterface
         
       } break;
         
-      case ( 10 ) :
+      case 10 :
       {
         if ( providerListener != null )
         {
@@ -316,7 +316,7 @@ public class EMDiscovery extends EMBaseInterface
           
       } break;
         
-      case ( 11 ) :
+      case 11 :
       {
         if ( providerListener != null )
         {          
@@ -334,14 +334,14 @@ public class EMDiscovery extends EMBaseInterface
         
       } break;
         
-      case ( 12 ) :
+      case 12 :
       {
         if ( providerListener != null )
           providerListener.onClientDisconnecting( interfaceUserID );
         
       } break;
         
-      case ( 13 ) :
+      case 13 :
       {
         if ( userListener != null )
         {
@@ -351,7 +351,7 @@ public class EMDiscovery extends EMBaseInterface
         
       } break;
         
-      case ( 14 ) :
+      case 14 :
       {
         if ( providerListener != null )
         {

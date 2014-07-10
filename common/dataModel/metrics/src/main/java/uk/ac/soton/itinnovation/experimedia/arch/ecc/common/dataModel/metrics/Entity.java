@@ -244,7 +244,7 @@ public class Entity implements Serializable
      */
     public void addAttributes(Set<Attribute> attributes)
     {
-        if ((attributes == null) || attributes.isEmpty())
+        if (attributes == null || attributes.isEmpty())
             return;
         
         if (this.attributes == null)

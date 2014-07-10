@@ -142,8 +142,8 @@ public class EMLifecycleManager implements EMConnectionManagerListener,
   
   public boolean isLifecycleActive()
   { 
-    return ( !currentPhase.equals(EMPhase.eEMUnknownPhase) &&
-             !currentPhase.equals(EMPhase.eEMProtocolComplete) ); 
+    return !currentPhase.equals(EMPhase.eEMUnknownPhase) &&
+           !currentPhase.equals(EMPhase.eEMProtocolComplete); 
   }
   
   public void setExperimentInfo( Experiment expInfo ) throws Exception

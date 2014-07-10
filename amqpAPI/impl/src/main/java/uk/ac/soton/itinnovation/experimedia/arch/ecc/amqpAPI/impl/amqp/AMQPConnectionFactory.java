@@ -255,7 +255,7 @@ public class AMQPConnectionFactory
                 // Might still try connect to the (unverified) AMQP server using SSL
                 boolean useSSL = false;
                 if ( emProps.containsKey("Rabbit_Use_SSL") )
-                    useSSL = ( emProps.getProperty( "Rabbit_Use_SSL" ).equals("true") );
+                    useSSL = emProps.getProperty( "Rabbit_Use_SSL" ).equals("true");
                 
                 try
                 { 
@@ -273,7 +273,7 @@ public class AMQPConnectionFactory
     }
 
     public boolean isConnectionValid()
-    { return (amqpConnection != null); }
+    { return amqpConnection != null; }
 
     public AMQPBasicChannel createNewChannel() throws Exception
     {
