@@ -37,10 +37,9 @@ import org.slf4j.LoggerFactory;
 
 public abstract class AbstractAMQPInterface
 {
-  private final Logger amqpIntLogger = LoggerFactory.getLogger(getClass());
-  
   private AMQPBasicSubscriptionProcessor subProcessor;
   
+  protected Logger amqpIntLogger = LoggerFactory.getLogger(getClass());
   protected AMQPBasicChannel    amqpChannel;
   protected AMQPMessageDispatch msgDispatch;
 
@@ -177,7 +176,11 @@ public abstract class AbstractAMQPInterface
                                                        msgDispatch );
   
     try { channel.basicConsume( subListenQueue, false, subProcessor ); }
-    catch ( IOException ioe ) {}
+    catch ( IOException ioe )
+    {
+        String err = "AMQP Interface could not create subscription component: " + ioe.getMessage();
+        amqpIntLogger.error( err, ioe );
+    }
   }
   
   protected void assignBindings()

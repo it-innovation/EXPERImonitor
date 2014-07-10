@@ -101,7 +101,7 @@ public class PopulateDB
     {
       
         log.info("Populating the EDM metrics database with test data");
-        Properties prop = new Properties();;
+        Properties prop = new Properties();
         if ((args != null) && (args.length == 5) && isArgsValid(args))
         {
             log.debug("Getting properties from the arguments");

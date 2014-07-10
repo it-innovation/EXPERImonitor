@@ -65,13 +65,17 @@ public class AMQPFullInterfaceBase extends AbstractAMQPInterface
       // Create queue and subscription
       createQueue();
       createSubscriptionComponent();
+      
+      // Finished
+      interfaceReady = true;
   
     }
-    catch (IOException ioe) {}
+    catch (IOException ioe) 
+    {
+        String err = "Could not initialise AMQP interface " + iName + ": " + ioe.getMessage();
+        amqpIntLogger.error( err, ioe );
+    }
     
-    // Finished
-    interfaceReady = true;
-
     return interfaceReady;
   }
 

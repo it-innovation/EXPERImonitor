@@ -26,30 +26,37 @@
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx;
 
 import net.iharder.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 
 
 public class EMByteWrapper
 {
-  public String encode( byte[] data )
-  {
-    String code = null;
+    private final Logger logger = LoggerFactory.getLogger(getClass());
     
-    if ( data != null && data.length > 0 )
-      code = Base64.encodeBytes( data );
-    
-    return code;
-  }
-  
-  public byte[] decode( String data )
-  {
-    byte[] dataBytes = null;
-    
-    if ( data != null && !data.isEmpty() )
-      try { dataBytes = Base64.decode( data ); }
-      catch ( Exception e ) {}
-    
-    return dataBytes;
-  }
+    public String encode( byte[] data )
+    {
+      String code = null;
+
+      if ( data != null && data.length > 0 )
+        code = Base64.encodeBytes( data );
+
+      return code;
+    }
+
+    public byte[] decode( String data )
+    {
+      byte[] dataBytes = null;
+
+      if ( data != null && !data.isEmpty() )
+        try { dataBytes = Base64.decode( data ); }
+        catch ( Exception ex ) 
+        {
+            logger.error("Failed to decode byte data: " + ex.getMessage(), ex);
+        }
+
+      return dataBytes;
+    }
 }

@@ -41,7 +41,7 @@ import java.util.*;
 
 
 public class EDMMetricExporter
-{
+{    
 	private IMonitoringEDM      expDataManager;
 	private IExperimentDAO      experimentDAO;
 	private IMetricGeneratorDAO metricGenDAO;
@@ -305,7 +305,11 @@ public class EDMMetricExporter
 						fw.close();
 					}
 				}
-				catch ( IOException ioex ) {}
+				catch ( IOException ioex ) 
+                {
+                    // Throw it up
+                    throw ioex;
+                }
 			}
 			
 			System.out.println( "Meta-data written" );
@@ -396,7 +400,11 @@ public class EDMMetricExporter
 					fw.close();
 				}
 			}
-			catch ( IOException ioex ) {}
+			catch ( IOException ioex )
+            {
+                // Throw it up
+                throw ioex;
+            }
 		}
 	}
 	
