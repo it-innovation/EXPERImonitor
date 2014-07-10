@@ -71,9 +71,6 @@ public class EDMTest
         UUID mGenUUID = UUID.fromString("782e5097-2e29-4219-a984-bf48dfcd7f63");
         UUID mGrpUUID = UUID.fromString("189064a5-f1d8-41f2-b2c1-b88776841009");
         UUID mSetUUID = UUID.fromString("2b915932-41b1-45d7-b4f6-2de4f30020b8");
-        UUID reportUUID = UUID.fromString("165c8058-5c67-4f92-ae34-df7ee2129821");
-        
-        boolean withSubClasses = true;
         
         IMonitoringEDM edm = EDMInterfaceFactory.getMonitoringEDM();
         if (!edm.isDatabaseSetUpAndAccessible())
@@ -180,7 +177,7 @@ public class EDMTest
             if (expFromDB.getEndTime() != null) log.info("  - End:   " + expFromDB.getEndTime() + " (" + expFromDB.getEndTime().getTime() + ")");
             if (expFromDB.getExperimentID() != null) log.info("  - ID:    " + expFromDB.getExperimentID());
 
-            if ((expFromDB.getMetricGenerators() == null) || expFromDB.getMetricGenerators().isEmpty())
+            if (expFromDB.getMetricGenerators() == null || expFromDB.getMetricGenerators().isEmpty())
                 log.info("  - There are NO metric generators");
             else
                 log.info("  - There are " + expFromDB.getMetricGenerators().size() + " metric generators");
@@ -273,7 +270,7 @@ public class EDMTest
         if (entityFromDB.getEntityID() != null) log.info("  - ID:    " + entityFromDB.getEntityID());
         if (entityFromDB.getName() != null) log.info("  - Name:  " + entityFromDB.getName());
         if (entityFromDB.getDescription() != null) log.info("  - Desc:  " + entityFromDB.getDescription());
-        if ((entityFromDB.getAttributes() == null) || entityFromDB.getAttributes().isEmpty()) {
+        if (entityFromDB.getAttributes() == null || entityFromDB.getAttributes().isEmpty()) {
             log.info("  - There are NO attributes");
         } else {
             log.info("  - There are " + entityFromDB.getAttributes().size() + " attributes");
@@ -306,7 +303,7 @@ public class EDMTest
                 if (ent.getEntityID() != null) log.info("   - ID:    " + ent.getEntityID());
                 if (ent.getName() != null) log.info("   - Name:  " + ent.getName());
                 if (ent.getDescription() != null) log.info("   - Desc:  " + ent.getDescription());
-                if ((ent.getAttributes() == null) || ent.getAttributes().isEmpty()) {
+                if (ent.getAttributes() == null || ent.getAttributes().isEmpty()) {
                     log.info("   - There are NO attributes");
                 } else {
                     log.info("   - There are " + ent.getAttributes().size() + " attributes");
@@ -341,7 +338,7 @@ public class EDMTest
                 if (ent.getEntityID() != null) log.info("   - ID:    " + ent.getEntityID());
                 if (ent.getName() != null) log.info("   - Name:  " + ent.getName());
                 if (ent.getDescription() != null) log.info("   - Desc:  " + ent.getDescription());
-                if ((ent.getAttributes() == null) || ent.getAttributes().isEmpty()) {
+                if (ent.getAttributes() == null || ent.getAttributes().isEmpty()) {
                     log.info("   - There are NO attributes");
                 } else {
                     log.info("   - There are " + ent.getAttributes().size() + " attributes");
@@ -684,7 +681,6 @@ public class EDMTest
     
     public static void measurementSetViolation(IMonitoringEDM edm, UUID attribUUID, UUID mGrpUUID, UUID mSetUUID) throws Exception
     {
-        boolean withSubClasses = false;
         IMeasurementSetDAO mSetDAO = null;
         try {
             mSetDAO = edm.getMeasurementSetDAO();
@@ -740,9 +736,7 @@ public class EDMTest
     }
     
     public static void experimentCompleteChain(IMonitoringEDM edm, UUID expUUID, UUID entityUUID, UUID attribUUID, UUID mGenUUID, UUID mGrpUUID, UUID mSetUUID) throws Exception
-    {
-        boolean withSubClasses = true;
-        
+    {        
         IExperimentDAO expDAO = null;
         try {
             expDAO = edm.getExperimentDAO();
@@ -1300,7 +1294,7 @@ public class EDMTest
             log.info("    - To date:      " + report.getToDate() + " (" + report.getToDate().getTime() + ")");
             log.info("    - Num measures: " + report.getNumberOfMeasurements());
             
-            if ((report.getMeasurementSet().getMeasurements() == null) || report.getMeasurementSet().getMeasurements().isEmpty()) {
+            if (report.getMeasurementSet().getMeasurements() == null || report.getMeasurementSet().getMeasurements().isEmpty()) {
                 log.info("    * No measurements data!");
             } else {
                 log.info("    * Got " + report.getMeasurementSet().getMeasurements().size() + " measurements:");
@@ -1348,7 +1342,7 @@ public class EDMTest
         if (experiment.getEndTime() != null) log.info("    - End:   " + experiment.getEndTime() + " (" + experiment.getEndTime().getTime() + ")");
         if (experiment.getExperimentID() != null) log.info("    - ID:    " + experiment.getExperimentID());
         
-        if ((experiment.getMetricGenerators() == null) || experiment.getMetricGenerators().isEmpty()) {
+        if (experiment.getMetricGenerators() == null || experiment.getMetricGenerators().isEmpty()) {
             log.info("  * There are NO metric generators");
         } else {
             log.info("  * There's " + experiment.getMetricGenerators().size() + " metric generator(s)");
@@ -1361,7 +1355,7 @@ public class EDMTest
                 if (mGen.getDescription() != null)
                     log.info("      - Desc: " + mGen.getDescription());
                 
-                if ((mGen.getMetricGroups() == null) || mGen.getMetricGroups().isEmpty()){
+                if (mGen.getMetricGroups() == null || mGen.getMetricGroups().isEmpty()){
                     log.info("      * There are NO metric groups");
                 } else {
                     log.info("      * There's " + mGen.getMetricGroups().size() + " metric group(s)");
@@ -1374,7 +1368,7 @@ public class EDMTest
                         if (mGrp.getDescription() != null)
                             log.info("          - Desc: " + mGrp.getDescription());
                         
-                        if ((mGrp.getMeasurementSets() == null) || mGrp.getMeasurementSets().isEmpty()){
+                        if (mGrp.getMeasurementSets() == null || mGrp.getMeasurementSets().isEmpty()){
                             log.info("          * There are NO measurement sets");
                         } else {
                             log.info("          * There's " + mGrp.getMeasurementSets().size() + " measurement set(s)");
@@ -1398,7 +1392,7 @@ public class EDMTest
                     }
                 }
                 
-                if ((mGen.getEntities() == null) || mGen.getEntities().isEmpty()){
+                if (mGen.getEntities() == null || mGen.getEntities().isEmpty()){
                     log.info("      * There are NO entities in the metric generator");
                 } else {
                     log.info("      * There's " + mGen.getEntities().size() + " entity/entities in the metric generator");
@@ -1409,7 +1403,7 @@ public class EDMTest
                         if (entity.getEntityID() != null) log.info("        - ID:    " + entity.getEntityID());
                         if (entity.getName() != null) log.info("        - Name:  " + entity.getName());
                         if (entity.getDescription() != null) log.info("        - Desc:  " + entity.getDescription());
-                        if ((entity.getAttributes() == null) || entity.getAttributes().isEmpty()) {
+                        if (entity.getAttributes() == null || entity.getAttributes().isEmpty()) {
                             log.info("        - There are NO attributes");
                         } else {
                             log.info("        - There are " + entity.getAttributes().size() + " attributes");
@@ -1437,7 +1431,7 @@ public class EDMTest
         if (mGen.getDescription() != null)
             log.info("      - Desc: " + mGen.getDescription());
 
-        if ((mGen.getMetricGroups() == null) || mGen.getMetricGroups().isEmpty()){
+        if (mGen.getMetricGroups() == null || mGen.getMetricGroups().isEmpty()){
             log.info("      * There are NO metric groups");
         } else {
             log.info("      * There's " + mGen.getMetricGroups().size() + " metric group(s)");
@@ -1450,7 +1444,7 @@ public class EDMTest
                 if (mGrp.getDescription() != null)
                     log.info("          - Desc: " + mGrp.getDescription());
 
-                if ((mGrp.getMeasurementSets() == null) || mGrp.getMeasurementSets().isEmpty()){
+                if (mGrp.getMeasurementSets() == null || mGrp.getMeasurementSets().isEmpty()){
                     log.info("          * There are NO measurement sets");
                 } else {
                     log.info("          * There's " + mGrp.getMeasurementSets().size() + " measurement set(s)");
@@ -1482,7 +1476,7 @@ public class EDMTest
         if (mGrp.getDescription() != null)
             log.info("          - Desc: " + mGrp.getDescription());
 
-        if ((mGrp.getMeasurementSets() == null) || mGrp.getMeasurementSets().isEmpty()){
+        if (mGrp.getMeasurementSets() == null || mGrp.getMeasurementSets().isEmpty()){
             log.info("          * There are NO measurement sets");
         } else {
             log.info("          * There's " + mGrp.getMeasurementSets().size() + " measurement set(s)");

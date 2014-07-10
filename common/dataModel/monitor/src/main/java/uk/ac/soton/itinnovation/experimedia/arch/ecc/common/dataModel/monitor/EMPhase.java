@@ -90,5 +90,5 @@ public enum EMPhase implements Comparator
   }
   
   public boolean equals( EMPhase lhs, EMPhase rhs )
-  { return ( lhs.phaseIndex == rhs.phaseIndex ); }
+  { return lhs.phaseIndex == rhs.phaseIndex; }
 }

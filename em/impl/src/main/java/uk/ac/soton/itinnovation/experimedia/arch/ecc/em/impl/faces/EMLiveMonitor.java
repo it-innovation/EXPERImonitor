@@ -194,14 +194,14 @@ public class EMLiveMonitor extends EMBaseInterface
   {    
     switch ( methodID )
     {
-      case ( 1 ) :
+      case 1 :
       {
         if ( userListener != null )
           userListener.onStartPushing( interfaceProviderID );
         
       } break;
         
-      case ( 2 ) :
+      case 2 :
       {
         if ( userListener != null )
         {
@@ -211,14 +211,14 @@ public class EMLiveMonitor extends EMBaseInterface
         
       } break;
         
-      case ( 3 ) :
+      case 3 :
       {
         if ( userListener != null )
           userListener.onStopPushing( interfaceProviderID );
         
       } break;
         
-      case ( 4 ) :
+      case 4 :
       {
         if ( userListener != null )
         {
@@ -228,7 +228,7 @@ public class EMLiveMonitor extends EMBaseInterface
         
       } break;
         
-      case ( 5 ) :
+      case 5 :
       {
         if ( userListener != null )
         {
@@ -238,21 +238,21 @@ public class EMLiveMonitor extends EMBaseInterface
         
       } break;
         
-      case ( 6 ) :
+      case 6 :
       {
         if ( userListener != null )
           userListener.onPullingStopped( interfaceProviderID );
         
       } break;
         
-      case ( 7 ) :
+      case 7 :
       {
         if ( providerListener != null )
           providerListener.onNotifyReadyToPush( interfaceUserID );
         
       } break;
         
-      case ( 8 ) :
+      case 8 :
       {
         if ( providerListener != null )
         {
@@ -262,21 +262,21 @@ public class EMLiveMonitor extends EMBaseInterface
         
       } break;
         
-      case ( 9 ) :
+      case 9 :
       {
         if ( providerListener != null )
           providerListener.onNotifyPushingCompleted( interfaceUserID );
         
       } break;
         
-      case ( 10 ) :
+      case 10 :
       {
         if ( providerListener != null )
           providerListener.onNotifyReadyForPull( interfaceUserID );
         
       } break;
         
-      case ( 11 ) :
+      case 11 :
       {
         if ( providerListener != null )
         {          
@@ -286,7 +286,7 @@ public class EMLiveMonitor extends EMBaseInterface
         
       } break;
         
-      case ( 12 ) :
+      case 12 :
       {
         if ( userListener != null )
         {
@@ -295,7 +295,7 @@ public class EMLiveMonitor extends EMBaseInterface
         }
       } break;
         
-      case ( 13 ) :
+      case 13 :
       {
         if ( providerListener != null )
         {

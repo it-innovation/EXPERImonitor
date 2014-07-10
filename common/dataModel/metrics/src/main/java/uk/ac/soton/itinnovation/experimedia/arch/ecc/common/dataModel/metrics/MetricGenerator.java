@@ -215,7 +215,7 @@ public class MetricGenerator implements Serializable
      */
     public void addMetricGroups(Set<MetricGroup> metricGroups)
     {
-        if ((metricGroups == null) || metricGroups.isEmpty())
+        if (metricGroups == null || metricGroups.isEmpty())
             return;
         
         if (this.metricGroups == null)
@@ -259,7 +259,7 @@ public class MetricGenerator implements Serializable
      */
     public void addEntities(Set<Entity> entities)
     {
-        if ((entities == null) || entities.isEmpty())
+        if (entities == null || entities.isEmpty())
             return;
         
         if (this.entities == null)

@@ -421,7 +421,10 @@ public class EMController implements IEMLifecycleListener
   private void onViewClosed()
   {
     try { expMonitor.endLifecycle(); }
-    catch ( Exception e ) {}
+    catch ( Exception ex ) 
+    {
+      emCtrlLogger.error( "Could not end lifecyclye: " + ex.getMessage() );
+    }
   }
   
   private void startMonitoringProcess() throws Exception

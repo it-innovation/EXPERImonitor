@@ -115,7 +115,7 @@ public class AMQPBasicChannel
   public boolean isOpen()
   {
     if ( amqpChannel != null )
-      return ( amqpChannel.isOpen() );
+      return amqpChannel.isOpen();
     
     return false;
   }
@@ -134,7 +134,11 @@ public class AMQPBasicChannel
           amqpChannel.close();
           amqpChannel = null;
         }
-        catch (IOException ioe) {}
+        catch (IOException ioe) 
+        {
+            String err = "Failed to close AMQP channel: " + ioe.getMessage();
+            channelLogger.error(err);
+        }
   } 
   
   // Private methods/classes ---------------------------------------------------
@@ -142,7 +146,7 @@ public class AMQPBasicChannel
   {
     if ( !isClosingDown && sse != null )
     {
-      boolean connectionOK = ( !sse.isHardError() );
+      boolean connectionOK = !sse.isHardError();
       
       if ( channelListener != null )
         channelListener.onChannelShutdown( connectionOK,

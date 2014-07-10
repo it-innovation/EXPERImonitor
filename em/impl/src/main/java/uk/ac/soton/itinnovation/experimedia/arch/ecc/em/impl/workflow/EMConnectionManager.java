@@ -65,29 +65,26 @@ public class EMConnectionManager implements IEMMonitorEntryPoint_ProviderListene
   public boolean initialise( UUID epID, 
                              AMQPBasicChannel channel )
   {
-    if ( !entryPointOpen )
+    if ( !entryPointOpen && epID != null && channel != null )
     {
-      if ( epID != null && channel != null )
-      {
-        entryPointID    = epID;
+      entryPointID    = epID;
 
-        AMQPMessageDispatch dispatch = new AMQPMessageDispatch();
+      AMQPMessageDispatch dispatch = new AMQPMessageDispatch();
 
-        entryPointPump = new AMQPMessageDispatchPump( "EM Entry Point pump",
-                                                      IAMQPMessageDispatchPump.ePumpPriority.MINIMUM );
+      entryPointPump = new AMQPMessageDispatchPump( "EM Entry Point pump",
+                                                    IAMQPMessageDispatchPump.ePumpPriority.MINIMUM );
 
-        entryPointPump.addDispatch( dispatch );
+      entryPointPump.addDispatch( dispatch );
 
-        entryPointPump.startPump();
+      entryPointPump.startPump();
 
-        entryPointInterface = new EMMonitorEntryPoint( channel,
-                                                       dispatch,
-                                                       entryPointID,
-                                                       true );
-        entryPointInterface.setListener( this );
+      entryPointInterface = new EMMonitorEntryPoint( channel,
+                                                     dispatch,
+                                                     entryPointID,
+                                                     true );
+      entryPointInterface.setListener( this );
 
-        entryPointOpen = true;
-      }
+      entryPointOpen = true;
     }
     
     return entryPointOpen;
@@ -208,22 +205,19 @@ public class EMConnectionManager implements IEMMonitorEntryPoint_ProviderListene
 	
     public void reRegisterEMClient( UUID userID, String userName )
     {
-        if ( userID != null && userName != null )
+        // Only re-register client if it is not already connected
+        if ( userID != null && userName != null && !connectedClients.containsKey( userID ) )
         {
-            // Only re-register client if it is not already connected
-            if ( !connectedClients.containsKey( userID ) )
-            {
-                boolean clientKnown	= historicClients.containsKey( userID );
-                
-                EMClientEx incomingClient = createRegisteredClient( userID, userName );
+            boolean clientKnown	= historicClients.containsKey( userID );
 
-                // Notify listener of new connection
-                if ( incomingClient != null )
-                {
-                    incomingClient.setIsReRegistering( true );
-                    connectionListener.onClientRegistered( incomingClient, clientKnown );
-                }
-            }
+            EMClientEx incomingClient = createRegisteredClient( userID, userName );
+
+            // Notify listener of new connection
+            if ( incomingClient != null )
+            {
+                incomingClient.setIsReRegistering( true );
+                connectionListener.onClientRegistered( incomingClient, clientKnown );
+            }   
         }
     }
   

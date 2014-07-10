@@ -35,6 +35,7 @@ namespace uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp
 
     public class AMQPBasicChannel
     {
+        private readonly log4net.ILog channelLogger = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         private IModel amqpChannel;
 
         public static bool amqpQueueExists(AMQPConnectionFactory conFactory, String queueName)
@@ -96,9 +97,12 @@ namespace uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp
                         amqpChannel.Close();
                         amqpChannel = null;
                     }
-                    catch (Exception) { }
+                    catch (Exception ioe)
+                    {
+                        String err = "Failed to close AMQP channel: " + ioe.Message;
+                        channelLogger.Error(err);
+                    }
         }
-
     }
 
 } // namespace

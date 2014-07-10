@@ -110,21 +110,21 @@ public class EMTearDown extends EMBaseInterface
   {
     switch ( methodID )
     {
-      case ( 1 ) :
+      case 1 :
       {
         if ( userListener != null )
           userListener.onTearDownMetricGenerators( interfaceProviderID );
         
       } break;
         
-      case ( 2 ) :
+      case 2 :
       {
         if ( userListener != null )
           userListener.onTearDownTimeOut( interfaceProviderID );
         
       } break;
         
-      case ( 3 ) :
+      case 3 :
       {
         if ( providerListener != null )
         {
@@ -133,7 +133,7 @@ public class EMTearDown extends EMBaseInterface
         
       } break;
         
-      case ( 4 ) :
+      case 4 :
       {
         if ( providerListener != null )
         {

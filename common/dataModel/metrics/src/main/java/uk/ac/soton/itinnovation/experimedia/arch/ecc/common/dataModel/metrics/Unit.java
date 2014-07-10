@@ -24,6 +24,8 @@
 /////////////////////////////////////////////////////////////////////////
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics;
 
+import java.io.Serializable;
+
 /**
  * A simple class representing a unit by a name.
  * 
@@ -31,7 +33,7 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics;
  * 
  * @author Vegard Engen
  */
-public class Unit
+public class Unit implements Serializable
 {
     private String name;
     

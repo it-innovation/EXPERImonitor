@@ -66,39 +66,9 @@ public class EDMStorageTest
         Properties edmConfig = MonitoringEDMUtil.getConfigs();
         log.info("isConfigValid() = " + MonitoringEDMUtil.isConfigValid(edmConfig));
         IMonitoringEDM edm = EDMInterfaceFactory.getMonitoringEDM(edmConfig);
-        
-        UUID expUUID = UUID.fromString("bfe4c710-61ba-46f8-a519-be2f7808192e");
-        UUID entityUUID = UUID.fromString("5718cd67-4310-4b2c-aeb9-9b72314630ca");
-        UUID attributeUUID = UUID.fromString("4f2817b5-603a-4d02-a032-62cfca314962");
-        UUID mGenUUID = UUID.fromString("782e5097-2e29-4219-a984-bf48dfcd7f63");
-        UUID mGrpUUID = UUID.fromString("189064a5-f1d8-41f2-b2c1-b88776841009");
-        UUID mSetUUID = UUID.fromString("2b915932-41b1-45d7-b4f6-2de4f30020b8");
-        UUID reportUUID = UUID.fromString("165c8058-5c67-4f92-ae34-df7ee2129821");
-        
-        //log.info("Clearing the database");
+                
+        log.info("Clearing the database");
         edm.clearMetricsDatabase();
-        
-//----- CASE 1
-        
-        //case1noMeasurements(edm, expUUID, entityUUID, attributeUUID, mGenUUID, mGrpUUID, mSetUUID);        
-        //case1withMeasurements(edm, expUUID, entityUUID, attributeUUID, mGenUUID, mGrpUUID, mSetUUID, 86400);
-        //case1withMeasurements(edm, expUUID, entityUUID, attributeUUID, mGenUUID, mGrpUUID, mSetUUID, 604800);
-        //case1withMeasurements(edm, expUUID, entityUUID, attributeUUID, mGenUUID, mGrpUUID, mSetUUID, 2419200);
-
-//----- CASE 2
-        
-        //case2noMeasurements(edm, expUUID, mGenUUID, mGrpUUID);
-        //case2withMeasurements(edm, expUUID, mGenUUID, mGrpUUID, 86400); // 1 day
-        //case2withMeasurements(edm, expUUID, mGenUUID, mGrpUUID, 172800); // 2 days
-        //case2withMeasurements(edm, expUUID, mGenUUID, mGrpUUID, 259200); // 3 days
-        //case2withMeasurements(edm, expUUID, mGenUUID, mGrpUUID, 345600); // 4 days
-        //case2withMeasurements(edm, expUUID, mGenUUID, mGrpUUID, 432000); // 5 days
-        //case2withMeasurements(edm, expUUID, mGenUUID, mGrpUUID, 518400); // 6 days
-        //case2withMeasurements(edm, expUUID, mGenUUID, mGrpUUID, 604800); // 7 days
-        
-//----- CASE 3
-        
-        //case3noMeasurements(edm, expUUID, mGenUUID, mGrpUUID);
     }
     
     public static void case1noMeasurements(IMonitoringEDM edm, UUID expUUID, UUID entityUUID, UUID attribUUID, UUID mGenUUID, UUID mGrpUUID, UUID mSetUUID) throws Exception
@@ -573,7 +543,7 @@ public class EDMStorageTest
             if ((numMeasurements - tot) > maxBatchSize)
                 num = maxBatchSize;
             else
-                num = (numMeasurements - tot);
+                num = numMeasurements - tot;
             
             tot += num;
             if (numMeasurements > 100000)
@@ -601,8 +571,8 @@ public class EDMStorageTest
             }
 
             long finishStore = System.nanoTime();
-            createTimeElapsed += (finishCreateStartStore-startCreate);
-            storageTimeElapsed += (finishStore-finishCreateStartStore);
+            createTimeElapsed += finishCreateStartStore-startCreate;
+            storageTimeElapsed += finishStore-finishCreateStartStore;
             
             if (tot < numMeasurements)
                 log.info("  - Still " + (numMeasurements-tot) + " measurements to go...");
@@ -620,7 +590,7 @@ public class EDMStorageTest
         long ms = timeElapsedNano/1000000;
         long s = ms/1000;
         
-        return new String(s + "s and " + (ms - (s*1000)) + "ms");
+        return s + "s and " + (ms - (s*1000)) + "ms";
     }
     
     public static Map<UUID, List<UUID>> generateEntityAndAttributeUUIDs(int numEntities, int numAttributes)

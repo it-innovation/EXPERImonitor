@@ -212,7 +212,7 @@ public class MetricGroup implements Serializable
      */
     public void addMeasurementSets(Set<MeasurementSet> measurementSets)
     {
-        if ((measurementSets == null) || measurementSets.isEmpty())
+        if (measurementSets == null || measurementSets.isEmpty())
             return;
         
         if (this.measurementSets == null)

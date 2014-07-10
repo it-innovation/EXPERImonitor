@@ -37,12 +37,12 @@ namespace uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.faces
 
 public abstract class AbstractAMQPInterface
 {
-  private static readonly log4net.ILog amqpIntLogger = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
   private readonly Object sendMessageLock   = new Object();
 
   private UTF8Encoding utf8Encode = new UTF8Encoding();
   private AMQPBasicSubscriptionProcessor subProcessor;
-  
+
+  protected static readonly log4net.ILog amqpIntLogger = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
   protected AMQPBasicChannel    amqpChannel;
   protected AMQPMessageDispatch msgDispatch;
 
@@ -175,7 +175,11 @@ public abstract class AbstractAMQPInterface
                                                          msgDispatch );
       
       try { channel.BasicConsume( subListenQueue, false, subProcessor ); }
-      catch ( Exception ) {}
+      catch ( Exception ex ) 
+      {
+          String err = "AMQP Interface could not create subscription component: " + ex.Message;
+          amqpIntLogger.Error(err, ex);
+      }
   }
   
   protected virtual void assignBindings()

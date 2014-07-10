@@ -63,12 +63,16 @@ public class AMQPFullInterfaceBase : AbstractAMQPInterface
           // Create queue and subscription
           createQueue();
           createSubscriptionComponent();
+
+          // Finished
+          interfaceReady = true;
       }
-      catch (Exception) {}
+      catch (Exception ioe) 
+      {
+          String err = "Could not initialise AMQP interface " + iName + ": " + ioe.Message;
+          amqpIntLogger.Error(err, ioe);
+      }
     
-      // Finished
-      interfaceReady = true;
-      
       return interfaceReady;
   }
 

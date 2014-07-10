@@ -319,9 +319,7 @@ public class MeasurementSet implements Serializable
      */
     public boolean addMeasurements( Set<Measurement> measurements )
     {
-        if ( (measurements == null) || measurements.isEmpty() ) return false;
-        
-        if ( measurements == null ) measurements = new HashSet<Measurement>();
+        if ( measurements == null || measurements.isEmpty() ) return false;
         
         boolean skippedMeasurement = false;
         

@@ -234,7 +234,7 @@ public class EMClient
    * @return - Returns true if a metric generator is being set up.
    */
   public boolean isSettingUpMetricGenerator()
-  { return (currentMGSetupID != null); }
+  { return currentMGSetupID != null; }
   
   /**
    * Returns the set-up result the client reported (if supported) during the the

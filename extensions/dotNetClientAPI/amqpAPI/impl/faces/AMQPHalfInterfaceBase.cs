@@ -67,12 +67,16 @@ public class AMQPHalfInterfaceBase : AbstractAMQPInterface
           
           // If we're a provider, then listen to messages sent
           if ( actingAsProvider ) createSubscriptionComponent();
+
+          // Finished
+          interfaceReady = true;
       }
-      catch (Exception) {}
+      catch (Exception ioe) 
+      {
+          String err = "Could not initialise AMQP interface " + iName + ": " + ioe.Message;
+          amqpIntLogger.Error(err, ioe);
+      }
     
-      // Finished
-      interfaceReady = true;
-      
       return interfaceReady;
   }
   

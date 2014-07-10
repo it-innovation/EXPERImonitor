@@ -65,12 +65,16 @@ public class AMQPHalfInterfaceBase extends AbstractAMQPInterface
       
       // If we're a provider, then listen to messages sent
       if ( actingAsProvider ) createSubscriptionComponent();
+      
+      // Finished
+      interfaceReady = true;
     }
-    catch (IOException ioe) {}
+    catch (IOException ioe) 
+    {
+        String err = "Could not initialise AMQP interface " + iName + ": " + ioe.getMessage();
+        amqpIntLogger.error( err, ioe );
+    }
     
-    // Finished
-    interfaceReady = true;
-
     return interfaceReady;
   }
   
