@@ -1,14 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-    <!-- encoders are assigned the type
-         ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
-    <encoder>
-      <pattern>%d{HH:mm:ss.SSS} [%-5level]  %logger{0}:%line - %msg%n</pattern>
-    </encoder>
-  </appender>
+	<conversionRule conversionWord="colorlevel"
+                    converterClass="fr.norad.logback.prettier.ColorLevelCompositeConverter" />
+    <conversionRule conversionWord="bold"
+                    converterClass="fr.norad.logback.prettier.BoldCompositeConverter" />
 
-  <root level="info">
-    <appender-ref ref="STDOUT" />
-  </root>
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<target>System.out</target>
+        <withJansi>true</withJansi>
+		<encoder>
+			<pattern>%blue(%d{HH:mm:ss.SSS}) %colorlevel(%-5level) [%logger{0}:%line] - %m%n</pattern>
+		</encoder>
+	</appender>
+
+	<logger name="uk.ac.soton.itinnovation.experimedia.arch.edm.test.prov" level="debug"/>
+
+	<root level="INFO">
+		<appender-ref ref="STDOUT"/>
+	</root>
+
 </configuration>
