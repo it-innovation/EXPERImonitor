@@ -336,7 +336,7 @@ public class ECCNewEntityView extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addAttributeButton;
     private javax.swing.JButton addButton;
-    private javax.swing.JList attributeList;
+    private javax.swing.JList<Object> attributeList;
     private javax.swing.JPanel attributePanel;
     private javax.swing.JButton cancelButton;
     private javax.swing.JLabel jLabel1;

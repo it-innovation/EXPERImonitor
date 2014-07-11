@@ -45,11 +45,11 @@ import java.util.Iterator;
  */
 public class EMView extends javax.swing.JFrame
 {
-  private DefaultListModel clientListModel;
-  private DefaultListModel entityListModel;
-  private DefaultListModel attributeListModel;
-  private EMClient         currSelectedClient;
-  private Entity           currSelectedEntity;
+  private DefaultListModel<EMClient>  clientListModel;
+  private DefaultListModel<Entity>    entityListModel;
+  private DefaultListModel<Attribute> attributeListModel;
+  private EMClient                    currSelectedClient;
+  private Entity                      currSelectedEntity;
   
   private EMViewListener   viewListener;
   private boolean          monitoringStarted = false;
@@ -60,9 +60,9 @@ public class EMView extends javax.swing.JFrame
     
     initComponents();
     
-    clientListModel    = new DefaultListModel();
-    entityListModel    = new DefaultListModel();
-    attributeListModel = new DefaultListModel();
+    clientListModel    = new DefaultListModel<>();
+    entityListModel    = new DefaultListModel<>();
+    attributeListModel = new DefaultListModel<>();
     
     connectedClientMainList.setModel( clientListModel );
     connectedClientMiniList.setModel( clientListModel );
@@ -659,13 +659,13 @@ public class EMView extends javax.swing.JFrame
   }//GEN-LAST:event_onRepeatPullClicked
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.JList attributeList;
+  private javax.swing.JList<Attribute> attributeList;
   private javax.swing.JToggleButton autoFireButton;
   private javax.swing.JButton beginMonitoringProcButton;
   private javax.swing.JLabel clientNameField;
-  private javax.swing.JList connectedClientMainList;
-  private javax.swing.JList connectedClientMiniList;
-  private javax.swing.JList entityList;
+  private javax.swing.JList<EMClient> connectedClientMainList;
+  private javax.swing.JList<EMClient> connectedClientMiniList;
+  private javax.swing.JList<Entity> entityList;
   private javax.swing.JButton jButton1;
   private javax.swing.JLabel jLabel1;
   private javax.swing.JLabel jLabel2;
