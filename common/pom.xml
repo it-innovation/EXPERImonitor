@@ -17,7 +17,6 @@
 
     <modules>
       <module>dataModel</module>
-      <module>uif</module>
     </modules>
 
     <dependencies>

@@ -135,7 +135,7 @@ public abstract class EMBaseInterface implements IAMQPMessageDispatchListener
     {
       if ( parameters == null ) parameters = new ArrayList<Object>();
       
-      Collection methodList = new ArrayList();
+      Collection<Object> methodList = new ArrayList<Object>();
       methodList.add( methodID );
       methodList.addAll( parameters );
       

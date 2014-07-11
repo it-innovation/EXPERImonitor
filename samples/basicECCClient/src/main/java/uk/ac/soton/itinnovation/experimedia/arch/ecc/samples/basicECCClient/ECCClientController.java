@@ -216,7 +216,7 @@ public class ECCClientController implements EMIAdapterListener,
         clientView.addLogMessage( "Discovered generator: " + metricGen.getName() );
 
         // Ready our metric generator for the EM
-        HashSet mgSet = new HashSet<MetricGenerator>();
+        HashSet<MetricGenerator> mgSet = new HashSet<MetricGenerator>();
         mgSet.addAll( metricGenerators.values() );
         emiAdapter.sendMetricGenerators( mgSet );
     }

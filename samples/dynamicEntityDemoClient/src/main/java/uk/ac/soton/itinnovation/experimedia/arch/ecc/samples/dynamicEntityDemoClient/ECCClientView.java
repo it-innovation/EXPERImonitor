@@ -404,13 +404,13 @@ public class ECCClientView extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addEntityButton;
-    private javax.swing.JList clientEntitiesList;
+    private javax.swing.JList<Object> clientEntitiesList;
     private javax.swing.JTextArea clientMessages;
     private javax.swing.JLabel clientNameLabel;
     private javax.swing.JLabel clientNameLabel1;
     private javax.swing.JLabel clientNameLabel2;
     private javax.swing.JButton disableEntityButton;
-    private javax.swing.JList disabledEntitiesList;
+    private javax.swing.JList<Object> disabledEntitiesList;
     private javax.swing.JButton enableEntityButton;
     private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItem1;
     private javax.swing.JLabel jLabel2;
