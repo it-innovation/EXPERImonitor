@@ -14,7 +14,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <ecc.java.version>1.6</ecc.java.version>
+        <ecc.java.version>1.7</ecc.java.version>
 
         <ecc.javadocpath>doc/javaDoc</ecc.javadocpath>
         <ecc.assemblypath>src/assembly</ecc.assemblypath>
