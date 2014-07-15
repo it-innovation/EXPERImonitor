@@ -1,23 +1,88 @@
+Introduction
+============
+In this part of the documentation, we provide you with a technical guide on how to write software using the ECC API. This section is primarily intended for software engineers - a higher level introduction to the ECC can be found at the beginning of this document.
+
+Here we present:
+
+* Key concepts for the ECC client writer
+* The basic architectural pattern for ECC clients
+* An overview of ECC API classes
+
+In the later section ('Advanced ECC client programming') we explore some of the more advanced aspects of ECC client writing including guidelines for ECC integration and an introduction to generating Provenance based experimental data.
+
 Writing an ECC client
 =====================
-
-EXPERIMEDIA’s baseline technologies provide the technologist and experimenter a set of FMI technologies for integration within both
-the *content* and *experiment* lifecycles. From a purely experimental point of view, the experimenter will have access to a number of metrics already available for use from the baseline components themselves. For a list of these metrics, see section 'Baseline Metric Services'.
+EXPERIMEDIA’s baseline technologies provide the technologist and experimenter a set of FMI technologies for integration within both the *content* and *experiment* life-cycles. From a purely experimental point of view, the experimenter will have access to a number of metrics already available for use from the baseline components themselves. For a list of these metrics, see section 'Baseline Metric Services'.
 
 It is anticipated that additional metrics, based on observations of the behaviours of the new technologies brought to the EXPERIMEDIA baseline (or users associated with their use), will also need to be captured. In the following sections, we will explore how an ECC client can be developed to communicate metrics during the experimental process.
 
+Key ECC client concepts
+-----------------------
+When setting out to write an ECC client there a number of high-level, key concepts that you need to be familiar with before development begins.
+
+1. Connecting to the ECC using unique identifiers
+
+2. The ECC metric model
+
+3. Pushing and pulling metric data
+
+
+Connecting to the ECC using unique identifiers
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The ECC API makes extensive use of unique identifiers (referred to as UUIDs or GUIDs). Before any other kind of communication can happen between the ECC and an ECC client, the client must first try connecting to the ECC (via RabbitMQ). In order to do so, the client minimally requires:
+
+1. The RabbitMQ server IP, port number and authentication (username/password)
+2. A UUID that identifies ECC service deployment
+3. A UUID that identifies the client (software process) to the ECC service
+
+It is typical that the information relating to [1] and [2] above will remain constant throughout the lifetime of an ECC based experimental project. The UUID used by the client is up to the client writer: you may wish to re-use a single UUID or generate a new one each time your client connects to the ECC. Below is a summary of the advantages and disadvantages of both approaches:
+
++-------------------------------+------------------------------------------------------------------------+---------------------------------------------------------------------+
+| Connect strategy              | Advantages                                                             | Disadvantages                                                       |
+|-------------------------------+------------------------------------------------------------------------+---------------------------------------------------------------------+
+| Connect client with same UUID | Status of specific process instance always known to the experimenter   | Client ID & model must be persisted for re-use if client restarted  |
+|                               | Just re-send existing metric model when reconnecting to the ECC        | New metric model needed for new experiment anyway                   |          
+|                               | Just one metric model generated per experiment (data analysis simpler) |                                                                     |
+|-------------------------------+------------------------------------------------------------------------+---------------------------------------------------------------------+
+| Connect client with new UUID  | No need to persist client ID & model in event of a client re-start     | Duplicated entities in experiment data (data analysis more complex) |
++-------------------------------+------------------------------------------------------------------------+---------------------------------------------------------------------+
+
+For further discussion on this topic, see the 'disconnection/re-connection strategies' section in this document.
+
+The ECC metric model
+~~~~~~~~~~~~~~~~~~~~
+Central to an experiment is the experimental metric model: a collection of observable entities ('things' that have attributes describing aspects of them in some way). The ECC metric model separates the specification of the things we wish to observe from the measurement units and raw data used to specify an observation. This allows experimenters to attach multiple data sets to the same observable phenomenon in a variety of ways. For example, the colour of the surface of an object could be quantitatively measured (simplistically) as the reflected wave length of light in nanometres, say 475nm, or qualitatively as the nominal value 'blue'. In addition to this, metric models can also be potentially shared between clients, meaning a super set of observations can be made from the aggregation of multiple data sets. The ECC metric model is explored with a simple example elsewhere in this document.
+
+An ECC client creates a metric model to describe what it is observing during an experiment. This model is sent to the ECC service, which allows it to recognize and store (in a consistent way) the metric data sent by multiple clients as well providing the experimenter some fine-grained control over the data-flow of experimental data at run-time (see the 'More advanced ECC clients' section for further information). Almost all the components of the ECC metric model are uniquely identified using UUIDS: this means that if you wish to re-use (or share) the same metric model during an experiment, you must ensure that this model remains consistent - see the 'disconnection/re-connection strategies' for a further discussion of this.
+
+Pushing and pulling metric data
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+At run-time, clients can elect to either PUSH metric data to the ECC or allow the ECC to query them (by PULLing) for metric data periodically. As has been already stated, ECC clients are connected to the ECC service via an Internet connection which may be discontinuous. The ECC API will throw exceptions in any case where a client attempts to send data to the ECC and network connectivity is no longer available. However, be aware that the ECC API currently does not actively monitor network connectivity on the client's behalf: if the client is waiting for its next PULL request, it may do so indefinitely if a network connection is no longer available.
+
+Below is a summary of the advantages and disadvantages of both PUSH and PULL strategies:
+
++-------------------------------+------------------------------------------------------------------------+---------------------------------------------------------------------+
+| Send data strategy            | Advantages                                                             | Disadvantages                                                       |
+|-------------------------------+------------------------------------------------------------------------+---------------------------------------------------------------------+
+| Pushing client                | Allows client to send metric data on an ad-hoc basis                   | Periodic data pushing must be scheduled by the client itself        |
+|                               | Exceptions immediately raised if client network connection lost        |                                                                     |        
+|-------------------------------+------------------------------------------------------------------------+---------------------------------------------------------------------+
+| Pulling client                | Regular sampling of measurements managed by the ECC                    | Client network connection loss may not be raised as an exception    |
+|                               | Finer grained control over sampling part of ECC API                    |                                                                     |
++-------------------------------+------------------------------------------------------------------------+---------------------------------------------------------------------+
+
+Some examples for selecting an appropriate integration strategy is discussed in more detail in the section 'ECC Integration pattern guidelines'.
+
 Basic monitoring pattern
 ------------------------
-In this section, we look at a general monitoring pattern suggested for ECC client writers; the principal (Java) classes that are used by a client;
-a review of two sample clients provided in the ECC API; how to test a client; and finally a review of the indicative sample code.
+In this section, we look at a general monitoring pattern suggested for ECC client writers; the principal (Java) classes that are used by a client; a review of two sample clients provided in the ECC API; how to test a client; and finally a review of the indicative sample code.
 
 |image20_png|
 
 Figure 9
 : Client/ECC high-level monitoring pattern
 
-The basic monitoring pattern recommended for client writers is illustrated in the figure above. Here, we see the ‘Headless client’ (a client with no user interface) connected to the ECC (and its dashboard) via a RabbitMQ server. This client uses the EMInterfaceAdapter class to help handle the messages passing executed during the experimental phases. Its controller responds to the essential requests for information via the adapter and, during *Live Monitoring* and
-*Post Reporting* phases, uses an instance of the EDMAgent to help manage its metric data. Meanwhile, the ECC handles in-coming and out-going messages via the *Experiment Monitor* (EM) sub-component; stores all metric data it receives from the client using its Experiment Data management (EDM) sub-component; and presents the experimental process to the user via the dashboard view.
+The basic monitoring pattern recommended for client writers is illustrated in the figure above. Here, we see the ‘Headless client’ (a client with no user interface) connected to the ECC (and its dashboard) via a RabbitMQ server. This client uses the EMInterfaceAdapter class to help handle the messages passing executed during the experimental phases. Its controller responds to the essential requests for information via the adapter and, during *Live Monitoring* and *Post Reporting* phases, uses an instance of the EDMAgent to help manage its metric data. Meanwhile, the ECC handles in-coming and out-going messages via the *Experiment Monitor* (EM) sub-component; stores all metric data it receives from the client using its Experiment Data management (EDM) sub-component; and presents the experimental process to the user via the dashboard view.
 
 |image21_png|
 
@@ -29,6 +94,7 @@ Client writers are likely to encounter many, or all, of the classes presented he
 Common data classes shared by all scopes illustrated above provide the fundamental data types to be exchanged and populated during an experimental process. The ‘*Basic ECC container*’ sample is a desktop testing for early development phases that provides ‘bare bones’ ECC server behaviour (it still requires a RabbitMQ server to be installed) and a means by which basic communication can be tested. For more information on the use of this tool, see technote ‘*T05 ECC sample notes V1.0*’ packaged within the API.
 
 Software engineers should review these classes and their use through reading the JavaDoc provided in the ECC API. The bundled example clients (‘*Basic ECC Client*’ and ‘*Headless Client*’) are described in more detail below.
+
 
 ECC example clients
 -------------------
@@ -87,8 +153,7 @@ A high-level class view of the client code samples (both ‘basic’ and ‘head
 Figure 11
 : Client class interactions for sample code
 
-As indicated in the figure above, both client samples share the use of adapter classes (a legacy class adapter is also provided in the shared package, but this is now deprecated). An MVC architecture is applied in the
-*Basic ECC Client*; the headless client does not require this structuring. The ‘*tools*’ sub-package demonstrates how individual classes can be used to encapsulate actual measurement behaviour which can be abstracted scheduled as required.
+As indicated in the figure above, both client samples share the use of adapter classes (a legacy class adapter is also provided in the shared package, but this is now deprecated). An MVC architecture is applied in the *Basic ECC Client*; the headless client does not require this structuring. The ‘*tools*’ sub-package demonstrates how individual classes can be used to encapsulate actual measurement behaviour which can be abstracted scheduled as required.
 
 Class roles
 ~~~~~~~~~~~
@@ -98,8 +163,7 @@ The roles of each class in the client sample code are as follows:
 ECCClientContainer (basic)/EntryPoint (headless) classes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Both classes simple act as the entry point for the client application. In addition to this, the ‘headless’ entry point class demonstrates how property files can be used to set up connection to the ECC and create a local
-*EDMAgent*.
+Both classes simple act as the entry point for the client application. In addition to this, the ‘headless’ entry point class demonstrates how property files can be used to set up connection to the ECC and create a local *EDMAgent*.
 
 ECCClientController (Basic client only)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -151,82 +215,6 @@ Tools: PsuedoRandomWalkTool & MemoryUsageTool (Headless client only)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Two trivial metric producing classes (both implementing the *ITakeMeasurement* interface) have been supplied for use in the headless client. The *PsuedoRandomWalkTool* class simulates the change in direction a walker might take on a random path (providing their direction in degrees: 0:-359). The *MemoryUsageTool* takes a rough estimation of the memory being used by the headless client at run-time.
-
-More advanced client programming
---------------------------------
-The ECC provides client writers with a number of more advanced levels of control over the way their client interacts with the ECC - these features are outlined below.
-For more detailed information, please read the inline documentation.
-
-Metric PULL semantics
-~~~~~~~~~~~~~~~~~~~~~
-Metrics that will be pulled from the client by the ECC can be scheduled and limited by the client. When a client constructs its metric model, it creates *MeasurementSets* that are associated with an Entity's attribute.
-Using the MeasurementSet class, the client is able to:
-
-  * Set a limit on the number of times the ECC can ask for metric data for this set [see MeasurementSet.setMeasurementRule(..) & MeasurementSet.setMeasurementCountMax(..)]
-  * Set the frequency at which the ECC will ask for metric data for this set [see MeasurementSet.setSamplingInterval(..)]
-
-Entity enabling and disabling
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Some clients may wish to signal to the ECC that want to enable or disable an Entity during the live monitoring process. The meaning of this is as follows:
-
-  * Enabled entities. Pushed metrics will be captured and stored by the ECC. If the client supports pulling, the ECC will issue pull requests for metrics associated with the entity
-    
-  * Disabled entities. Any pushed metrics associated with the entity will be discarded by the ECC. The ECC will not make pull requests for any metrics associated with the entity
-  
-Client writers can send 'enable' or 'disable' signals to the ECC by using the ECC adapter call EMInterfaceAdapter.sendEntityEnabled(..).
-
-
-Disconnection/re-connection strategies
------------------------------------
-Your ECC client software is typically remotely connected to the ECC via an internet connection. As with writing any software that communicates with other software via an internet connection, there may be occasions when communication between your client and the ECC becomes severed at run-time. There may be a number of reasons for this disconnection: some are the result of deliberate actions by the software, others may be the result of a network or system failure. The ECC API does not automatically attempt to restore a connection to the ECC on your behalf - this is currently the responsibility of the client software. In this section, a number of strategies for dealing with situations like these are presented below; technical notes for guidance follow.
-
-
-SCENARIO 1
-~~~~~~~~~~
-*The ECC client is either disconnected from the network or is restarted: the client wishes to reconnect as the same client to an existing experiment running on the ECC.*
-
-In this case, there are two possible options:
-
-  1. Store and re-use your existing metric model when you re-connect to an experiment. When your client re-connects with the ECC, it will be asked to send its metric model - it can simply re-send the model it used before. Currently there is no direct support for reading/writing the metric model from/to disk, however this can be achieved relatively simply using one of the following methods:
-	
-		1.1 Java: the metric model is serializable or can be 'JSONized' (using the GSON library, for example)
-    
-		1.2 C#  : the metric model can be 'JSONized' (using the Newtonsoft JSON library, for example)
-		
-		1.3 C++ : the metric model can be 'JSONized' (using the 'toJSON(..)' and 'fromJSON(..)' methods on the model classes [requires BOOST JSON support]
-	
-  2. Create and send a new metric model (however, this will add duplicated entities to the experiment). If your client is 'pulled' by the ECC, it will continue to receive requests for data for measurement sets relating to the old model: simply return empty reports in this case. Clients pushing data to the ECC do not need to take any further action.
-	
-See also section 'Reconnecting your client (technical)' to understand how to present your client as the same instance to the ECC.
-
-
-SCENARIO 2
-~~~~~~~~~~
-*Client crashes and is unable to locally recover any experiment related data. The client is re-started and attempts to connect to an existing experiment running on the ECC.*
-
-Here, we assume that no experiment related data (such as a metric or provenance model) was stored or can be recovered by the client. In this situation, your software should connect to the ECC as a *new client*, creating and sending a *new metric model* to the ECC. This new model will be added to the current experiment and result in duplicated entities that your client has reported represented in the experiment.
-
-
-SCENARIO 3
-~~~~~~~~~~
-*The RabbitMQ server crashes.*
-
-If the RabbitMQ service crashes or is shutdown (this is a rare event), communications between the ECC and its clients will fail. In this case, ECC clients should close down their connection to the ECC and the experimenter should stop the current experiment.
-
-Once the RabbitMQ service has been restarted, the experimenter will then re-establish the ECC's connection to the Rabbit server by returning to the dashboard configuration page and attempting a reconnect. If successful, the experimenter should then start a new experiment. Clients should reconnect to the ECC and send a *new metric model* for the *new experiment*.
-
-
-SCENARIO 4
-~~~~~~~~~~
-*The ECC service crashes.*
-
-In the case where the ECC service crashes, any currently running experiment will be discontinued and the experimenter will have to create a new experiment once the ECC has been restarted. Once the ECC has been restarted and a new experiment is created, all previously connected clients (that remain connected to the RabbitMQ server) will be sent a message to start a new experiment by the ECC. Client should create a *new metric model* for the *new experiment*.
-
-
-Reconnecting your client (technical)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-When connecting (or re-connecting) to the ECC, your client identifies itself using a UUID which allows the ECC to uniquely identify your client. This is done using the class and method call *EMInterfaceAdapter.registerWithEM(..)* (parameter 4). If you wish to re-connect to an experiment as the same client instance, you should use the same client UUID as you used previously. If you are reconnecting to an on-going experiment, the ECC will assume your client will be able to provide data for the previous metric model sent (although this is not strictly required; see scenario 1 above).
-
   
 Testing clients against the ECC
 -------------------------------
