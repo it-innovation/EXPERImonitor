@@ -18,8 +18,8 @@
 // the software.
 //
 //      Created By :            Stefanie Wiegand
-//      Created Date :          09-Jul-2014
-//      Created for Project :   EXPERIMEDIA
+//      Created Date :          2014-07-17
+//      Created for Project :   Experimedia
 //
 /////////////////////////////////////////////////////////////////////////
 
@@ -36,6 +36,7 @@ import java.util.LinkedList;
 import java.util.Properties;
 import java.util.Random;
 import java.util.UUID;
+import java.util.logging.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMActivity;
@@ -43,61 +44,40 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMEntity;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvFactory;
 
-public class SSGGeneratorTest {
+public class ExperimentDataGenerator {
 
 	//how many seconds to wait until reading the next log. Set to 0 for max speed
-	private static final int SPEED = 1;
+	public static final int SPEED = 1;
 	//located in resources folder
-	private static final String LOGFILE = "sample.log";
+	public static final String LOGFILE = "sample.log";
 
 	private LinkedList<String> rawlog = new LinkedList<String>();
 
 	private EDMProvFactory factory;
 
 	private static final Properties props = new Properties();
-	private static final Logger logger = LoggerFactory.getLogger(SSGGeneratorTest.class);
+	private static final Logger logger = LoggerFactory.getLogger(ExperimentDataGenerator.class);
 
-	private SSGGeneratorTest() {
+	public ExperimentDataGenerator() {
 
-		logger.info("Starting Prov Test");
+		logger.info("Starting ExperimentDataGenerator");
 
 		try {
 			logger.info("Loading properties file");
-			props.load(SSGGeneratorTest.class.getClassLoader().getResourceAsStream("prov.properties"));
+			props.load(ExperimentDataGeneratorTest.class.getClassLoader().getResourceAsStream("prov.properties"));
 		} catch (IOException e) {
 			logger.error("Error loading properties file", e);
 		}
 
-		try {
-			logger.info("Parsing log");
-			parseLog();
 
-			logger.info("Prov report:");
-			logger.info(factory.createProvReport().toString());
-
-		} catch (Exception e) {
-			logger.error("Exception caught: ", e);
-		}
 	}
 
-	@SuppressWarnings("unused")
-	public static void main(String[] args) {
-		SSGGeneratorTest ssggentest = new SSGGeneratorTest();
-	}
-
-	private void parseLog() {
+	/**
+	 * Reads the logfile and saves contents in memory
+	 */
+	public void readLog() {
 		try {
-
-			//init factory
-			factory = EDMProvFactory.getInstance();
-			factory.addOntology("foaf", "http://xmlns.com/foaf/0.1/");
-			factory.addOntology("sioc", "http://rdfs.org/sioc/ns#");
-
-			//add skiing ontology
-			factory.addOntology("ski", "http://www.semanticweb.org/sw/ontologies/skiing#");
-
-			try {
-				String logfilePath = SSGGeneratorTest.class.getClassLoader().getResource(LOGFILE).getPath();
+				String logfilePath = ExperimentDataGeneratorTest.class.getClassLoader().getResource(LOGFILE).getPath();
 				FileReader fr = new FileReader(new File(logfilePath));
 				BufferedReader br = new BufferedReader(fr);
 
@@ -106,23 +86,44 @@ public class SSGGeneratorTest {
 					rawlog.add(line.trim());
 				}
 			} catch (IOException e) {
-				logger.error("Error reading from logfile", e);
+				logger.error("Error reading from logfile " + LOGFILE, e);
 			}
+	}
+
+	/**
+	 * Parses the in-memory log and creates prov statements
+	 */
+	public void parseLog() {
+
+		try {
+			//init factory
+			factory = EDMProvFactory.getInstance();
+			factory.addOntology("foaf", "http://xmlns.com/foaf/0.1/");
+			factory.addOntology("sioc", "http://rdfs.org/sioc/ns#");
+
+			//add ontology namespaces
+			factory.addOntology("eee", "http://experimedia.eu/ontologies/ExperimediaExperimentExplorer#");
+			factory.addOntology("ski", "http://www.semanticweb.org/sw/ontologies/skiing#");
 
 			//create bob
 			EDMAgent bob = factory.createAgent("agent_" + UUID.randomUUID(), "Bob");
 			bob.addOwlClass(factory.getNamespaceForPrefix("foaf") + "Person");
+			bob.addOwlClass(factory.getNamespaceForPrefix("eee") + "Participant");
 			//TODO: link bob to his metric entity representation
 
 			//create app
 			EDMActivity useApp = bob.startActivity("useAppActivity_" + UUID.randomUUID(), "Use app", "1387531200");
 			EDMEntity appEntity = useApp.generateEntity("entity_" + UUID.randomUUID(), "App", "1387531201");
+			appEntity.addOwlClass(factory.getNamespaceForPrefix("eee") + "Application");
 			EDMAgent appAgent = factory.createAgent(appEntity.getIri(), appEntity.getFriendlyName());
+			appAgent.addTriple(factory.getNamespaceForPrefix("owl") + "sameAs", appEntity.getIri());
 			appAgent.actOnBehalfOf(bob);
 
 			//create services
 			EDMEntity twitterService = factory.createEntity("entity_" + UUID.randomUUID(), "Twitter service");
+			twitterService.addOwlClass(factory.getNamespaceForPrefix("eee") + "Service");
 			EDMEntity messageService = factory.createEntity("entity_" + UUID.randomUUID(), "Message service");
+			messageService.addOwlClass(factory.getNamespaceForPrefix("eee") + "Service");
 
 			//create skilifts
 			EDMEntity[] skilifts = new EDMEntity[5];
@@ -190,14 +191,14 @@ public class SSGGeneratorTest {
 					if (messageReceived>0) {
 						messageReceived -= 1;
 						EDMActivity a = bob.doDiscreteActivity("readMessageActivity_" + UUID.randomUUID(), "Read Message", log.timestamp.toString());
-						//TODO: add message entity for metric data?
+						a.useEntity(messages.pollFirst());
 					}
 				} else if (random<=0.8 && random>0.75) {
 					//read tweet
 					if (tweetReceived>0) {
 						tweetReceived -= 1;
 						EDMActivity a = bob.doDiscreteActivity("readTweetActivity_" + UUID.randomUUID(), "Read Tweet", log.timestamp.toString());
-						//TODO: add tweet entity for metric data?
+						a.useEntity(tweets.pollFirst());
 					}
 				} else if (random<=0.7 && random>0.65) {
 					//receive message
@@ -208,7 +209,9 @@ public class SSGGeneratorTest {
 					a.informActivity(b);
 					b.useEntity(messageService);
 					EDMEntity data = b.generateEntity("MessageData_" + UUID.randomUUID(), "Message data", log.timestamp.toString());
+					data.addOwlClass(factory.getNamespaceForPrefix("eee") + "Content");
 					a.useEntity(data);
+					messages.add(data);
 					//TODO: put metric data here, link to relevant entities
 				} else if (random<=0.6 && random>0.55) {
 					//receive tweet
@@ -219,17 +222,20 @@ public class SSGGeneratorTest {
 					a.informActivity(b);
 					b.useEntity(twitterService);
 					EDMEntity data = b.generateEntity("TweetData_" + UUID.randomUUID(), "Tweet data", log.timestamp.toString());
+					data.addOwlClass(factory.getNamespaceForPrefix("eee") + "Content");
 					a.useEntity(data);
+					tweets.add(data);
 					//TODO: put metric data here, link to relevant entities
 				} else if (random<=0.55 && random>0.5) {
 					//tweet
 					EDMActivity a = bob.doDiscreteActivity("TweetActivity_" + UUID.randomUUID(), bob.getFriendlyName() + " tweets", log.timestamp.toString());
 					EDMEntity tweet = a.generateEntity("Tweet_" + UUID.randomUUID(), bob.getFriendlyName() + "'s tweet", log.timestamp.toString());
+					tweet.addOwlClass(factory.getNamespaceForPrefix("eee") + "Content");
 					EDMActivity b = appAgent.startActivity("SendTweetActivity_" + UUID.randomUUID(), "Send tweet to server", log.timestamp.toString());
 					b.useEntity(twitterService);
 					b.useEntity(tweet);
 					a.informActivity(b);
-					
+
 				} else {
 					//do nothing
 				}
@@ -246,6 +252,15 @@ public class SSGGeneratorTest {
 	}
 
 	private Log getNextLog() {
+
+		//sleep if pause required
+		if (SPEED>0) {
+			try {
+				Thread.sleep(SPEED);
+			} catch (InterruptedException e) {
+				logger.warn("Error slowing parser down for more realistic simulation", e);
+			}
+		}
 
 		Log log = null;
 
@@ -355,6 +370,20 @@ public class SSGGeneratorTest {
 		public String toString() {
 			return this.lines[0] + "\n" + this.lines[1] + "\n" + this.lines[2];
 		}
+	}
+
+	//GETTERS/SETTERS//////////////////////////////////////////////////////////////////////////////
+
+	public LinkedList<String> getRawlog() {
+		return rawlog;
+	}
+
+	public EDMProvFactory getFactory() {
+		return factory;
+	}
+
+	public static Properties getProps() {
+		return props;
 	}
 
 }
