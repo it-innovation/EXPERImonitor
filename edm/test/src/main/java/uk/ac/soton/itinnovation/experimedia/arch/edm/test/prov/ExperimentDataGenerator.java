@@ -29,6 +29,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.rmi.AlreadyBoundException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -36,7 +37,8 @@ import java.util.LinkedList;
 import java.util.Properties;
 import java.util.Random;
 import java.util.UUID;
-import java.util.logging.Level;
+import java.util.zip.DataFormatException;
+import javax.xml.datatype.DatatypeConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMActivity;
@@ -124,6 +126,8 @@ public class ExperimentDataGenerator {
 			twitterService.addOwlClass(factory.getNamespaceForPrefix("eee") + "Service");
 			EDMEntity messageService = factory.createEntity("entity_" + UUID.randomUUID(), "Message service");
 			messageService.addOwlClass(factory.getNamespaceForPrefix("eee") + "Service");
+			EDMEntity babylonService = factory.createEntity("entity_" + UUID.randomUUID(), "Babylon service");
+			babylonService.addOwlClass(factory.getNamespaceForPrefix("eee") + "Service");
 
 			//create skilifts
 			EDMEntity[] skilifts = new EDMEntity[5];
@@ -148,8 +152,6 @@ public class ExperimentDataGenerator {
 			skilift1.addOwlClass(factory.getNamespaceForPrefix("ski") + "Skilift");
 			skilifts[4] = skilift5;
 
-			int messageReceived = 0;
-			int tweetReceived = 0;
 			LinkedList<EDMEntity> messages = new LinkedList<EDMEntity>();
 			LinkedList<EDMEntity> tweets = new LinkedList<EDMEntity>();
 
@@ -166,76 +168,45 @@ public class ExperimentDataGenerator {
 
 					//only makes sense while not skiing
 					if ((new Double(log.speed))<5) {
-						//choose random skilift
-						EDMEntity skilift = skilifts[rand.nextInt(skilifts.length)];
 
-						//use skilift
-						EDMActivity a = bob.doDiscreteActivity("useSkiliftActivity_" + UUID.randomUUID(), "Use skilift " + skilift.getFriendlyName(), log.timestamp.toString());
+						//use random skilift
+						EDMActivity a = useRealWorldEntity(bob, skilifts[rand.nextInt(skilifts.length)], log.timestamp.toString());
 						a.addOwlClass(factory.getNamespaceForPrefix("ski") + "UsingSkiliftActivity");
-						a.useEntity(skilift);
 
 						//create some random liftwaiting time data + QoE
-						EDMActivity b = bob.doDiscreteActivity("generateQoEActivity_" + UUID.randomUUID(), "Generate QoE data", log.timestamp.toString());
-						b.useEntity(appEntity);
-						EDMEntity qoe = b.generateEntity("QoEEntity_" + UUID.randomUUID(), "QoE data", log.timestamp.toString());
+						EDMEntity qoe = createDataAtService(bob, appAgent, appEntity, babylonService, "rate skilift", log.timestamp.toString());
+
 						//TODO: link QoE entity to metrics
 
 					}
 				} else if (random<=0.95 && random>0.9) {
 					//navigate app
-					EDMActivity a = bob.doDiscreteActivity("navigateAppActitivy_" + UUID.randomUUID(), "Navigate app", log.timestamp.toString());
-					a.useEntity(appEntity);
+					navigateClient(bob, appEntity, log.timestamp.toString());
 
 				} else if (random<=0.9 && random>0.85) {
 					//read message
-					if (messageReceived>0) {
-						messageReceived -= 1;
-						EDMActivity a = bob.doDiscreteActivity("readMessageActivity_" + UUID.randomUUID(), "Read Message", log.timestamp.toString());
-						a.useEntity(messages.pollFirst());
+					if (messages.size()>0) {
+						useDataOnClient(bob, appEntity, messages.pollFirst(), "message", log.timestamp.toString());
 					}
+				} else if (random<=0.85 && random>0.8) {
+					//create data on client
+					EDMEntity photo = createDataOnClient(bob, appEntity, "Photo", log.timestamp.toString());
 				} else if (random<=0.8 && random>0.75) {
 					//read tweet
-					if (tweetReceived>0) {
-						tweetReceived -= 1;
-						EDMActivity a = bob.doDiscreteActivity("readTweetActivity_" + UUID.randomUUID(), "Read Tweet", log.timestamp.toString());
-						a.useEntity(tweets.pollFirst());
+					if (tweets.size()>0) {
+						useDataOnClient(bob, appEntity, tweets.pollFirst(), "tweet", log.timestamp.toString());
 					}
 				} else if (random<=0.7 && random>0.65) {
 					//receive message
-					messageReceived += 1;
-					EDMActivity a = bob.doDiscreteActivity("receiveMessageActivity_" + UUID.randomUUID(), "Receive Message", log.timestamp.toString());
-					a.useEntity(appEntity);
-					EDMActivity b = appAgent.doDiscreteActivity("retrieveMessageActivity_" + UUID.randomUUID(), "Retrieve Message", log.timestamp.toString());
-					a.informActivity(b);
-					b.useEntity(messageService);
-					EDMEntity data = b.generateEntity("MessageData_" + UUID.randomUUID(), "Message data", log.timestamp.toString());
-					data.addOwlClass(factory.getNamespaceForPrefix("eee") + "Content");
-					a.useEntity(data);
-					messages.add(data);
+					messages.add(retrieveDataFromService(bob, appAgent, appEntity, messageService, "message", log.timestamp.toString()));
 					//TODO: put metric data here, link to relevant entities
 				} else if (random<=0.6 && random>0.55) {
 					//receive tweet
-					tweetReceived += 1;
-					EDMActivity a = bob.doDiscreteActivity("receiveTweetActivity_" + UUID.randomUUID(), "Receive Tweet", log.timestamp.toString());
-					a.useEntity(appEntity);
-					EDMActivity b = appAgent.doDiscreteActivity("retrieveTweetActivity_" + UUID.randomUUID(), "Retrieve Tweet", log.timestamp.toString());
-					a.informActivity(b);
-					b.useEntity(twitterService);
-					EDMEntity data = b.generateEntity("TweetData_" + UUID.randomUUID(), "Tweet data", log.timestamp.toString());
-					data.addOwlClass(factory.getNamespaceForPrefix("eee") + "Content");
-					a.useEntity(data);
-					tweets.add(data);
+					tweets.add(retrieveDataFromService(bob, appAgent, appEntity, twitterService, "tweet", log.timestamp.toString()));
 					//TODO: put metric data here, link to relevant entities
 				} else if (random<=0.55 && random>0.5) {
 					//tweet
-					EDMActivity a = bob.doDiscreteActivity("TweetActivity_" + UUID.randomUUID(), bob.getFriendlyName() + " tweets", log.timestamp.toString());
-					EDMEntity tweet = a.generateEntity("Tweet_" + UUID.randomUUID(), bob.getFriendlyName() + "'s tweet", log.timestamp.toString());
-					tweet.addOwlClass(factory.getNamespaceForPrefix("eee") + "Content");
-					EDMActivity b = appAgent.startActivity("SendTweetActivity_" + UUID.randomUUID(), "Send tweet to server", log.timestamp.toString());
-					b.useEntity(twitterService);
-					b.useEntity(tweet);
-					a.informActivity(b);
-
+					createDataAtService(bob, appAgent, appEntity, twitterService, "tweet", log.timestamp.toString());
 				} else {
 					//do nothing
 				}
@@ -249,6 +220,72 @@ public class ExperimentDataGenerator {
 		} catch (Exception e) {
 			logger.error("Error filling EDMProvFactory with data", e);
 		}
+	}
+
+	public EDMActivity useRealWorldEntity(EDMAgent participant, EDMEntity entity, String timestamp)
+			throws DataFormatException, DatatypeConfigurationException, AlreadyBoundException {
+
+		EDMActivity a = participant.doDiscreteActivity("useSkiliftActivity_" + UUID.randomUUID(), "Use " + entity.getFriendlyName(), timestamp);
+		a.useEntity(entity);
+		return a;
+	}
+
+	public EDMEntity createDataOnClient(EDMAgent participant, EDMEntity client, String dataName, String timestamp)
+			throws DataFormatException, DatatypeConfigurationException, AlreadyBoundException, NoSuchFieldException {
+
+		String dName = dataName.substring(0,1).toUpperCase() + dataName.replaceAll(" ", "").substring(1);
+		EDMActivity a = participant.doDiscreteActivity("Create" + dName + "Activity_" + UUID.randomUUID(), "Create " + dataName, timestamp);
+		a.useEntity(client);
+		EDMEntity data = a.generateEntity("Content_" + UUID.randomUUID(), dataName);
+		data.addOwlClass(factory.getNamespaceForPrefix("eee") + "Content");
+		return data;
+	}
+
+	public void useDataOnClient(EDMAgent participant, EDMEntity client, EDMEntity data, String dataName, String timestamp)
+			throws DataFormatException, DatatypeConfigurationException, AlreadyBoundException {
+
+		String dName = dataName.substring(0,1).toUpperCase() + dataName.replaceAll(" ", "").substring(1);
+		EDMActivity a = participant.doDiscreteActivity("Use" + dName + "Activity_" + UUID.randomUUID(), "Use " + dataName, timestamp);
+		a.useEntity(data);
+		a.useEntity(client);
+	}
+
+	public void navigateClient(EDMAgent participant, EDMEntity client, String timestamp)
+			throws DataFormatException, DatatypeConfigurationException, AlreadyBoundException {
+
+		EDMActivity a = participant.doDiscreteActivity("NavigateClientActitivy_" + UUID.randomUUID(), "Navigate " + client.getFriendlyName(), timestamp);
+		a.useEntity(client);
+	}
+
+	public EDMEntity retrieveDataFromService(EDMAgent participant, EDMAgent clientAgent, EDMEntity clientEntity, EDMEntity service, String activityName, String timestamp)
+			throws DataFormatException, DatatypeConfigurationException, AlreadyBoundException, NoSuchFieldException {
+
+		String actName = activityName.substring(0,1).toUpperCase() + activityName.substring(1);
+		EDMActivity a = participant.doDiscreteActivity("Receive" + actName + "Activity_" + UUID.randomUUID(), "Receive " + activityName, timestamp);
+		a.useEntity(clientEntity);
+		EDMActivity b = clientAgent.doDiscreteActivity("Retrieve" + actName + "Activity_" + UUID.randomUUID(), "Retrieve " + activityName, timestamp);
+		a.informActivity(b);
+		b.useEntity(service);
+		EDMEntity data = b.generateEntity(actName + "Data_" + UUID.randomUUID(), actName + " data", timestamp);
+		data.addOwlClass(factory.getNamespaceForPrefix("eee") + "Content");
+		a.useEntity(data);
+		return data;
+	}
+
+	public EDMEntity createDataAtService(EDMAgent participant, EDMAgent clientAgent, EDMEntity clientEntity, EDMEntity service, String activityName, String timestamp)
+			throws DataFormatException, DatatypeConfigurationException, AlreadyBoundException, NoSuchFieldException {
+
+		String actName = activityName.substring(0,1).toUpperCase() + activityName.substring(1);
+		EDMActivity a = participant.doDiscreteActivity("Create" + actName + "Activity_" + UUID.randomUUID(), participant.getFriendlyName() + " tweets", timestamp);
+		a.useEntity(clientEntity);
+		EDMEntity data = a.generateEntity(actName + "_" + UUID.randomUUID(), participant.getFriendlyName() + "'s " + activityName, timestamp);
+		data.addOwlClass(factory.getNamespaceForPrefix("eee") + "Content");
+		EDMActivity b = clientAgent.startActivity("Send" + actName + "Activity_" + UUID.randomUUID(), "Send " + activityName + " to server", timestamp);
+		b.useEntity(service);
+		b.useEntity(data);
+		a.informActivity(b);
+
+		return data;
 	}
 
 	private Log getNextLog() {
