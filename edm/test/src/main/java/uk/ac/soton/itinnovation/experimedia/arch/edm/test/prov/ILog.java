@@ -18,37 +18,24 @@
 // the software.
 //
 //      Created By :            Stefanie Wiegand
-//      Created Date :          09-Jul-2014
+//      Created Date :          25-Jul-2014
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
 package uk.ac.soton.itinnovation.experimedia.arch.edm.test.prov;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+public interface ILog {
 
-public class ExperimentDataGeneratorTest {
+	@Override
+	public String toString();
 
-	private static final Logger logger = LoggerFactory.getLogger(ExperimentDataGeneratorTest.class);
+	public String getDate();
 
-	public static void main(String[] args) {
-		ExperimentDataGenerator ssggentest = new ExperimentDataGenerator();
+	public String getTime();
 
-		try {
+	public Long getTimestamp();
 
-			logger.info("Reading log");
-			ssggentest.readLog("alice.log");
-
-			logger.info("Parsing log");
-			ssggentest.parseLog("PerfectLog");
-
-			logger.info("Prov report:");
-			logger.info(ssggentest.getFactory().createProvReport().toString());
-
-		} catch (Exception e) {
-			logger.error("Exception caught: ", e);
-		}
-	}
+	public String getSpeed();
 
 }
