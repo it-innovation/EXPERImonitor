@@ -3,7 +3,7 @@
 // © University of Southampton IT Innovation Centre, 2013
 //
 // Copyright in this software belongs to University of Southampton
-// IT Innovation Centre of Gamma House, Enterprise Road, 
+// IT Innovation Centre of Gamma House, Enterprise Road,
 // Chilworth Science Park, Southampton, SO16 7NS, UK.
 //
 // This software may not be used, sold, licensed, transferred, copied
@@ -49,21 +49,21 @@ public class EDMProvBaseElement {
     private String prefix;
     private String uniqueIdentifier;
 	private HashMap<UUID, EDMTriple> triples;
-    
+
     protected static SimpleDateFormat format = new SimpleDateFormat("\"yyyy-MM-dd'T'HH:mm:ss'Z\"^^xsd:dateTime'");
-    
+
     protected static final String rdfType = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
     protected static final String rdfsLabel = "http://www.w3.org/2000/01/rdf-schema#label";
     protected static final String prov = "http://www.w3.org/ns/prov#";
-	
-    public enum PROV_TYPE { ePROV_UNKNOWN_TYPE, 
-                            ePROV_ENTITY, 
-                            ePROV_AGENT, 
+
+    public enum PROV_TYPE { ePROV_UNKNOWN_TYPE,
+                            ePROV_ENTITY,
+                            ePROV_AGENT,
                             ePROV_ACTIVITY };
 
     /**
      * Creates an EDMProvBaseElement
-     * 
+     *
      * @param prefix the prefix of the element
 	 * @param uniqueIdentifier
      * @param a unique identifier. This could be something like domain_uniqueID, e.g. facebook_56735762153.
@@ -76,15 +76,15 @@ public class EDMProvBaseElement {
     	this.uniqueIdentifier = uniqueIdentifier;
         this.iri = prefix + uniqueIdentifier;
         this.triples = new HashMap<UUID, EDMTriple>();
-        
+
         EDMProvBaseElement.format.setTimeZone(TimeZone.getTimeZone("UTC"));
-        
+
         setLabel(label);
     }
-    
+
     /**
      * Returns the label, if it exists. Otherwise falls back to IRI
-     * 
+     *
      * @return the label or IRI
      */
     public String getFriendlyName() {
@@ -98,7 +98,7 @@ public class EDMProvBaseElement {
     	}
     	return this.iri;
     }
-    
+
 	@Override
     public String toString() {
     	String contents = "[" + this.getProvType() + "] " + this.getFriendlyName() + " (" + this.iri + ")\n";
@@ -107,10 +107,10 @@ public class EDMProvBaseElement {
     	}
     	return contents;
     }
-    
+
     /**
      * Checks for the existence of a certain triple
-     * 
+     *
      * @param triple The triple for which it should be checked
      * @return Whether that triple is already in the element or not
      */
@@ -124,10 +124,10 @@ public class EDMProvBaseElement {
     	}
     	return contains;
     }
-    
+
     /**
      * Get all the prefixes from triples in this element.
-     * 
+     *
      * @return the prefixes
      */
     public HashSet<String> getPrefixes() {
@@ -139,12 +139,12 @@ public class EDMProvBaseElement {
     	}
     	return prefixes;
     }
-    
+
     /**
      * Returns triples of a specific type and/or prefix.
      * null means it isn't a restriction, so getTriples(null, null);
      * returns the exact same result as getTriples();
-     * 
+     *
      * @param type the type of triples that should be returned
 	 * @param prefix the prefix of the predicate to look for
      * @return the triples of the specified type
@@ -165,16 +165,16 @@ public class EDMProvBaseElement {
     	}
     	return result;
     }
-    
+
     /**
      * Return specific triples
-     * 
+     *
      * @param pred The predicate of the triple
      * @return All the triples that match the given predicate
      */
     public HashMap<UUID, EDMTriple> getTriplesWithPredicate(String pred) {
       HashMap<UUID, EDMTriple> result = new HashMap<UUID, EDMTriple>();
-      
+
       if (pred != null) {
         for (Entry<UUID, EDMTriple> e : triples.entrySet()) {
           if (e.getValue().hasPredicate(pred)) {
@@ -182,13 +182,13 @@ public class EDMProvBaseElement {
           }
         }
       }
-      
+
       return result;
     }
-	
+
 	/**
 	 * Returns only the incoming triples, i.e. triples in which the element itself is the object.
-	 * 
+	 *
 	 * @return the incoming triples
 	 */
 	public HashMap<UUID, EDMTriple> getIncomingTriples() {
@@ -200,10 +200,10 @@ public class EDMProvBaseElement {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Returns only the outgoing triples, i.e. triples in which the element itself is the subject.
-	 * 
+	 *
 	 * @return the outgoing triples
 	 */
 	public HashMap<UUID, EDMTriple> getOutgoingTriples() {
@@ -218,17 +218,17 @@ public class EDMProvBaseElement {
 
     /**
      * Adds a triple to the element with the element itself as subject
-     * 
+     *
      * @param predicate the predicate of the new triple
      * @param object the object of the new triple
      */
     public void addTriple(String predicate, String object) {
     	this.addTriple(predicate, object, TRIPLE_TYPE.UNKNOWN_TYPE);
     }
-    
+
     /**
      * Adds a triple of a specific typr to the element
-     * 
+     *
      * @param predicate the predicate of the new triple
      * @param object the object of the new triple
      * @param type the triple type
@@ -236,7 +236,7 @@ public class EDMProvBaseElement {
     public void addTriple(String predicate, String object, TRIPLE_TYPE type) {
     	this.addTriple(this.iri, predicate, object, type);
     }
-    
+
     private void addTriple(String subject, String predicate, String object, TRIPLE_TYPE type) {
     	EDMTriple newTriple = new EDMTriple(subject, predicate, object, type);
     	boolean contained = false;
@@ -251,28 +251,28 @@ public class EDMProvBaseElement {
     		this.triples.put(newTriple.getID(), newTriple);
     	}
     }
-    
+
     /**
      * Remove a specified triple from the list of triples.
      * The subject is always the element itself.
-     * 
+     *
      * @param predicate the predicate of the triple to remove
      * @param object the object of the triple to remove
      */
     public void removeTriple(String predicate, String object) {
     	this.removeTriple(this.iri, predicate, object);
     }
-    
+
     private void removeTriple(String subject, String predicate, String object) {
     	EDMTriple triple = new EDMTriple(subject, predicate, object);
     	if (this.triples.containsValue(triple)) {
     		this.triples.remove(triple.getID());
     	}
     }
-    
+
     /**
      * Adds a relationship to the element to connect it to a location
-     * 
+     *
      * @param location the element which represents the location
      */
     public void atLocation(EDMProvBaseElement location) {
@@ -280,31 +280,31 @@ public class EDMProvBaseElement {
     	//this will be discovered by the reasoner automatically
     	this.addTriple(prov + "atLocation", location.iri);
     }
-    
+
     /**
      * Adds a class assertion making the element an individual of that class.
-     * 
+     *
      * @param c the class to which the element should belong
      */
     public void addOwlClass(String c) {
     	this.addTriple(this.iri, rdfType, c, TRIPLE_TYPE.CLASS_ASSERTION);
     }
-    
+
     /**
      * Removes the class assertion
-     * 
+     *
      * @param c The class of which the assertion should be removed
      */
     public void removeOwlClass(String c) {
-    	//TODO: what if this is called on an existing element (already in store)?
+    	//note that this has no effect if called on an existing element (already in store)!
     	this.removeTriple(this.iri, rdfType, c);
     }
-    
+
     //GETTERS/SETTERS//////////////////////////////////////////////////////////////////////////////
 
     /**
      * Get the element's IRI
-     * 
+     *
      * @see org.semanticweb.owlapi.model.IRI
      * @return a String representation of the IRI
      */
@@ -314,22 +314,22 @@ public class EDMProvBaseElement {
 
 	/**
 	 * This returns the instance ID, a UUID which links the prov model to the metric model.
-	 * 
+	 *
 	 * @return the instance id
 	 */
     public UUID getInstanceID() {
         return instanceID;
     }
-    
+
 	/**
 	 * This returns the prov type, which can be one of the following values.
-	 * 
-	 * ePROV_UNKNOWN_TYPE, 
-     * ePROV_ENTITY, 
-     * ePROV_AGENT, 
+	 *
+	 * ePROV_UNKNOWN_TYPE,
+     * ePROV_ENTITY,
+     * ePROV_AGENT,
      * ePROV_ACTIVITY
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
     public PROV_TYPE getProvType() {
         return provType;
@@ -338,7 +338,7 @@ public class EDMProvBaseElement {
 	/**
 	 * Returns all the triples related to the element. This can be both, incoming and outgoing
 	 * relationships, i.e. the element itself can be the subject or object of the triple.
-	 * 
+	 *
 	 * @return the triples
 	 */
     public HashMap<UUID, EDMTriple> getTriples() {
@@ -348,7 +348,7 @@ public class EDMProvBaseElement {
 	/**
 	 * This returns the prefix of the element. The prefix is internally kept as the full prefix,
 	 * even when only the short prefix is used for the creation of the element.
-	 * 
+	 *
 	 * @return the prefix
 	 */
     public String getPrefix() {
@@ -357,7 +357,7 @@ public class EDMProvBaseElement {
 
 	/**
 	 * Returns the local name of the element. This is the IRI without the prefix.
-	 * 
+	 *
 	 * @return the local name
 	 */
 	public String getUniqueIdentifier() {
@@ -367,12 +367,12 @@ public class EDMProvBaseElement {
 	/**
 	 * Sets an element's prov type. Though the unknown type exists as a fallback, it is not
 	 * recommended to use it. Possible values are:
-	 * 
-	 * ePROV_UNKNOWN_TYPE, 
-     * ePROV_ENTITY, 
-     * ePROV_AGENT, 
+	 *
+	 * ePROV_UNKNOWN_TYPE,
+     * ePROV_ENTITY,
+     * ePROV_AGENT,
      * ePROV_ACTIVITY
-	 * 
+	 *
 	 * @param provType the prov type
 	 */
 	public void setProvType(PROV_TYPE provType) {
@@ -381,7 +381,7 @@ public class EDMProvBaseElement {
 
 	/**
 	 * Sets a label for the element, which will be used for rendering the element in the UI.
-	 * 
+	 *
 	 * @param label the label
 	 */
 	public void setLabel(String label) {
@@ -395,6 +395,6 @@ public class EDMProvBaseElement {
 			}
 		}
 	}
-	
+
 
 }
