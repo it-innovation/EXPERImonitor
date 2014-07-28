@@ -38,7 +38,7 @@ public class ExperimentDataGeneratorTest {
 		try {
 
 			logger.info("Reading log");
-			ssggentest.readLog("alice.log");
+			ssggentest.readLog("alice.txt");
 
 			logger.info("Parsing log");
 			ssggentest.parseLog("PerfectLog");
