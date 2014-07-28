@@ -131,7 +131,7 @@ public final class EDMProvDataStoreImpl implements IEDMProvDataStore {
 
 	@Override
 	public void disconnect() {
-		if ((edmProvStoreWrapper != null) && edmProvStoreWrapper.isConnected()) {
+		if (edmProvStoreWrapper != null && edmProvStoreWrapper.isConnected()) {
 			logger.warn("EDMProvStoreWrapper has still got an open connection - disconnecting now");
 			edmProvStoreWrapper.disconnect();
 		}
@@ -165,7 +165,7 @@ public final class EDMProvDataStoreImpl implements IEDMProvDataStore {
 		edmProvStoreWrapper.setRepositoryNamespaces(
 				((EDMProvWriterImpl)provWriter).getEDMProvStoreWrapper().getRepositoryNamespaces());
 	}
-	
+
 	/**
 	 * 	This is just a wrapper for EDMProvStoreWrapper.query(sparql) for more information
 	 *

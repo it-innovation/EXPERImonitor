@@ -50,7 +50,7 @@ public final class EDMProvFactory {
 	private HashMap<UUID, EDMTriple> currentTriples;
 	private HashMap<UUID, EDMTriple> sentTriples;
 
-	private EDMProvFactory(String prefix, String baseURI) {}
+	private EDMProvFactory() {}
 
 	/**
 	 * Returns a factory with either the prefix/baseURI it already has or the fallback prefix/baseURI.
@@ -77,7 +77,7 @@ public final class EDMProvFactory {
 	 */
 	public static synchronized EDMProvFactory getInstance(String prefix, String baseURI) {
 		if (factory==null) {
-			factory = new EDMProvFactory(prefix, baseURI);
+			factory = new EDMProvFactory();
 			factory.container = new EDMProvDataContainer(prefix, baseURI);
 			factory.init();
 		} else {
@@ -314,19 +314,19 @@ public final class EDMProvFactory {
 
 			//first run: identify prov elements
 			for (Entry<UUID, EDMTriple> e: element.entrySet()) {
-				if (e.getValue().getType().equals(TRIPLE_TYPE.CLASS_ASSERTION)) {
-					//look at prov classes only
-					if ( e.getValue().getObject().startsWith(container.namespaces.get("prov"))) {
-						//get local name
-						String localName = EDMTriple.splitURI(e.getValue().getSubject(), 1);
+				if (e.getValue().getType().equals(TRIPLE_TYPE.CLASS_ASSERTION)
+				//look at prov classes only
+				&& e.getValue().getObject().startsWith(container.namespaces.get("prov"))) {
 
-						if (e.getValue().getObject().endsWith("#Agent")) {
-							factory.getAgent(localName);
-						} else if (e.getValue().getObject().endsWith("#Entity")) {
-							factory.getEntity(localName);
-						} else if (e.getValue().getObject().endsWith("#Activity")) {
-							factory.getActivity(localName);
-						}
+					//get local name
+					String localName = EDMTriple.splitURI(e.getValue().getSubject(), 1);
+
+					if (e.getValue().getObject().endsWith("#Agent")) {
+						factory.getAgent(localName);
+					} else if (e.getValue().getObject().endsWith("#Entity")) {
+						factory.getEntity(localName);
+					} else if (e.getValue().getObject().endsWith("#Activity")) {
+						factory.getActivity(localName);
 					}
 				}
 			}

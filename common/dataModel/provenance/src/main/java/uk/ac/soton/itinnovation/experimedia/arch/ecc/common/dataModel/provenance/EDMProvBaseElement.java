@@ -88,15 +88,18 @@ public class EDMProvBaseElement {
      * @return the label or IRI
      */
     public String getFriendlyName() {
+		String friendlyNameReturn = this.iri;
+
     	for (Entry<UUID, EDMTriple> e: this.getTriplesWithPredicate(rdfsLabel).entrySet()) {
     		String friendlyName = e.getValue().getObject();
     		//cut type in case of "proper" usage (e.g. "Label"^^xsd:string)
     		if (friendlyName.indexOf("\"")>=0) {
     			friendlyName = friendlyName.substring(friendlyName.indexOf("\"") + 1, friendlyName.lastIndexOf("\""));
     		}
-    		return friendlyName;
+    		friendlyNameReturn = friendlyName;
+			break;
     	}
-    	return this.iri;
+    	return friendlyNameReturn;
     }
 
 	@Override
