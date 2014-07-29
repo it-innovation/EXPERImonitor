@@ -24,6 +24,7 @@
 	  <module>dynamicEntityDemoClient</module>
 		<module>simplePROVECCClient</module>
 		<module>databaseExport</module>
+		<module>experimentSimulation</module>
   </modules>
 
 </project>
