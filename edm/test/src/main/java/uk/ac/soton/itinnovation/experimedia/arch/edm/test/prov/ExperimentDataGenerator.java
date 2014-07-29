@@ -35,6 +35,7 @@ import java.util.LinkedList;
 import java.util.Properties;
 import java.util.Random;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.zip.DataFormatException;
 import javax.xml.datatype.DatatypeConfigurationException;
 import org.slf4j.Logger;
@@ -43,6 +44,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMAgent;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMEntity;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvFactory;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMTriple;
 
 public class ExperimentDataGenerator {
 
@@ -67,8 +69,6 @@ public class ExperimentDataGenerator {
 		} catch (IOException e) {
 			logger.error("Error loading properties file", e);
 		}
-
-
 	}
 
 	/**
@@ -125,19 +125,15 @@ public class ExperimentDataGenerator {
 			EDMActivity useApp = participant.startActivity("useAppActivity_" + UUID.randomUUID(), "Use app", "1387531200");
 			EDMEntity appEntity = useApp.generateEntity("entity_" + UUID.randomUUID(), "App", "1387531201");
 			appEntity.addOwlClass(factory.getNamespaceForPrefix("eee") + "Application");
-			EDMAgent appAgent = factory.createAgent(appEntity.getIri(), appEntity.getFriendlyName());
-			appAgent.addTriple(factory.getNamespaceForPrefix("owl") + "sameAs", appEntity.getIri());
+			EDMAgent appAgent = factory.createAgent("entity_" + UUID.randomUUID(), "App");
+			appAgent.addTriple(factory.getNamespaceForPrefix("owl") + "sameAs", appEntity.getIri(), EDMTriple.TRIPLE_TYPE.OBJECT_PROPERTY);
 			appAgent.actOnBehalfOf(participant);
 
 			//create services
-			EDMEntity twitterService = factory.createEntity("entity_" + UUID.randomUUID(), "Twitter service");
-			twitterService.addOwlClass(factory.getNamespaceForPrefix("eee") + "Service");
-			EDMEntity messageService = factory.createEntity("entity_" + UUID.randomUUID(), "Message service");
-			messageService.addOwlClass(factory.getNamespaceForPrefix("eee") + "Service");
-			EDMEntity babylonService = factory.createEntity("entity_" + UUID.randomUUID(), "Babylon service");
-			babylonService.addOwlClass(factory.getNamespaceForPrefix("eee") + "Service");
-			EDMEntity lwtService = factory.createEntity("entity_" + UUID.randomUUID(), "Lift Waiting Time service");
-			lwtService.addOwlClass(factory.getNamespaceForPrefix("eee") + "Service");
+			EDMEntity twitterService = createService("entity_" + UUID.randomUUID(), "Twitter service");
+			EDMEntity messageService = createService("entity_" + UUID.randomUUID(), "Message service");
+			EDMEntity babylonService = createService("entity_" + UUID.randomUUID(), "Babylon service");
+			EDMEntity lwtService = createService("entity_" + UUID.randomUUID(), "Lift Waiting Time service");
 
 			//create skilifts
 			HashMap<String, EDMEntity> lifts = new HashMap<String, EDMEntity>();
@@ -253,68 +249,189 @@ public class ExperimentDataGenerator {
 		}
 	}
 
-	public EDMActivity useRealWorldEntity(EDMAgent participant, EDMEntity entity, String timestamp)
-			throws DataFormatException, DatatypeConfigurationException, AlreadyBoundException {
+	/**
+	 * Creates a participant including all required triples. Note that name doesn't have to be unique.
+	 *
+	 * @param name the name of the participant. Will be used as a label.
+	 * @return the participant object
+	 */
+	public EDMAgent createParticipant(String name) {
+		EDMAgent participant = null;
+		try {
+			participant = factory.createAgent("agent_" + UUID.randomUUID(), name);
+			participant.addOwlClass(factory.getNamespaceForPrefix("foaf") + "Person");
+			participant.addOwlClass(factory.getNamespaceForPrefix("eee") + "Participant");
+		} catch (Exception e) {
+			logger.error("Error creating participant", e);
+		}
+		return participant;
+	}
 
-		EDMActivity a = participant.doDiscreteActivity("useSkiliftActivity_" + UUID.randomUUID(), "Use " + entity.getFriendlyName(), timestamp);
-		a.useEntity(entity);
+	/**
+	 * Creates an experimedia service including all required triples.
+	 *
+	 * @param uniqueIdentifier the local name of the service
+	 * @param label a human readable label
+	 * @return the service object
+	 */
+	public EDMEntity createService(String uniqueIdentifier, String label) {
+		EDMEntity service = null;
+		try {
+			service = factory.createEntity(uniqueIdentifier, label);
+			service.addOwlClass(factory.getNamespaceForPrefix("eee") + "Service");
+		} catch (Exception e) {
+			logger.error("Could not create service", e);
+		}
+		return service;
+	}
+
+	/**
+	 * Make a participant use a real world entity
+	 *
+	 * @param participant the participant
+	 * @param entity the entity to be used
+	 * @param timestamp the unix timestamp of this discrete activity (start=end)
+	 *
+	 * @return the activity of the agent using the entity
+	 */
+	public EDMActivity useRealWorldEntity(EDMAgent participant, EDMEntity entity, String timestamp) {
+
+		EDMActivity a = null;
+		try {
+			a = participant.doDiscreteActivity("useSkiliftActivity_" + UUID.randomUUID(), "Use " + entity.getFriendlyName(), timestamp);
+			a.useEntity(entity);
+		} catch (Exception e) {
+			logger.error("Error creating \"use entity\" pattern", e);
+		}
 		return a;
 	}
 
-	public EDMEntity createDataOnClient(EDMAgent participant, EDMEntity client, String dataName, String timestamp)
-			throws DataFormatException, DatatypeConfigurationException, AlreadyBoundException, NoSuchFieldException {
+	/**
+	 * Make the participant create data on the client without sending it to the service
+	 *
+	 * @param participant the participant
+	 * @param client the client which the participant is using
+	 * @param dataName the name of the data to be used for labelling
+	 * @param timestamp the unix timestamp of this discrete activity (start=end)
+	 *
+	 * @return the data created on the client
+	 */
+	public EDMEntity createDataOnClient(EDMAgent participant, EDMEntity client, String dataName, String timestamp) {
 
-		String dName = dataName.substring(0,1).toUpperCase() + dataName.replaceAll(" ", "").substring(1);
-		EDMActivity a = participant.doDiscreteActivity("Create" + dName + "Activity_" + UUID.randomUUID(), "Create " + dataName, timestamp);
-		a.useEntity(client);
-		EDMEntity data = a.generateEntity("Content_" + UUID.randomUUID(), dataName);
-		data.addOwlClass(factory.getNamespaceForPrefix("eee") + "Content");
+		EDMEntity data = null;
+		try {
+			String dName = dataName.substring(0,1).toUpperCase() + dataName.replaceAll(" ", "").substring(1);
+			EDMActivity a = participant.doDiscreteActivity("Create" + dName + "Activity_" + UUID.randomUUID(), "Create " + dataName, timestamp);
+			a.useEntity(client);
+			data = a.generateEntity("Content_" + UUID.randomUUID(), dataName);
+			data.addOwlClass(factory.getNamespaceForPrefix("eee") + "Content");
+		} catch (Exception e) {
+			logger.error("Error creating \"create data on client\" pattern", e);
+		}
 		return data;
 	}
 
-	public void useDataOnClient(EDMAgent participant, EDMEntity client, EDMEntity data, String dataName, String timestamp)
-			throws DataFormatException, DatatypeConfigurationException, AlreadyBoundException {
+	/**
+	 * Make the participant create data on the client without sending it to the service
+	 *
+	 * @param participant the participant
+	 * @param client the client which the participant is using
+	 * @param data the data which is used
+	 * @param dataName the name of the data to be used for labelling
+	 * @param timestamp the unix timestamp of this discrete activity (start=end)
+	 */
+	public void useDataOnClient(EDMAgent participant, EDMEntity client, EDMEntity data,
+			String dataName, String timestamp) {
 
-		String dName = dataName.substring(0,1).toUpperCase() + dataName.replaceAll(" ", "").substring(1);
-		EDMActivity a = participant.doDiscreteActivity("Use" + dName + "Activity_" + UUID.randomUUID(), "Use " + dataName, timestamp);
-		a.useEntity(data);
-		a.useEntity(client);
+		try {
+			String dName = dataName.substring(0,1).toUpperCase() + dataName.replaceAll(" ", "").substring(1);
+			EDMActivity a = participant.doDiscreteActivity("Use" + dName + "Activity_" + UUID.randomUUID(), "Use " + dataName, timestamp);
+			a.useEntity(data);
+			a.useEntity(client);
+		} catch (Exception e) {
+			logger.error("Error creating \"use data on client\" pattern", e);
+		}
 	}
 
-	public void navigateClient(EDMAgent participant, EDMEntity client, String timestamp)
-			throws DataFormatException, DatatypeConfigurationException, AlreadyBoundException {
+	/**
+	 * Make the participant navigate the client
+	 *
+	 * @param participant the participant
+	 * @param client the client which the participant is using
+	 * @param timestamp the unix timestamp of this discrete activity (start=end)
+	 */
+	public void navigateClient(EDMAgent participant, EDMEntity client, String timestamp) {
 
-		EDMActivity a = participant.doDiscreteActivity("NavigateClientActitivy_" + UUID.randomUUID(), "Navigate " + client.getFriendlyName(), timestamp);
-		a.useEntity(client);
+		try {
+			EDMActivity a = participant.doDiscreteActivity("NavigateClientActitivy_" + UUID.randomUUID(), "Navigate " + client.getFriendlyName(), timestamp);
+			a.useEntity(client);
+		} catch (Exception e) {
+			logger.error("Error creating \"navigate client\" pattern", e);
+		}
 	}
 
-	public EDMEntity retrieveDataFromService(EDMAgent participant, EDMAgent clientAgent, EDMEntity clientEntity, EDMEntity service, String activityName, String timestamp)
-			throws DataFormatException, DatatypeConfigurationException, AlreadyBoundException, NoSuchFieldException {
+	/**
+	 * Creates the "Application Service Interaction (retrieve data from service)" pattern.
+	 *
+	 * @param participant the participant
+	 * @param clientAgent agent representation of the client
+	 * @param clientEntity entity representation of the client
+	 * @param service the service
+	 * @param activityName the name of the activity to be used for labelling
+	 * @param timestamp the unix timestamp of this discrete activity (start=end)
+	 *
+	 * @return the data retrieved from the service
+	 */
+	public EDMEntity retrieveDataFromService(EDMAgent participant, EDMAgent clientAgent,
+			EDMEntity clientEntity, EDMEntity service, String activityName, String timestamp) {
 
-		String actName = activityName.substring(0,1).toUpperCase() + activityName.substring(1);
-		EDMActivity a = participant.doDiscreteActivity("Receive" + actName + "Activity_" + UUID.randomUUID(), "Receive " + activityName, timestamp);
-		a.useEntity(clientEntity);
-		EDMActivity b = clientAgent.doDiscreteActivity("Retrieve" + actName + "Activity_" + UUID.randomUUID(), "Retrieve " + activityName, timestamp);
-		a.informActivity(b);
-		b.useEntity(service);
-		EDMEntity data = b.generateEntity(actName + "Data_" + UUID.randomUUID(), actName + " data", timestamp);
-		data.addOwlClass(factory.getNamespaceForPrefix("eee") + "Content");
-		a.useEntity(data);
+		EDMEntity data = null;
+		try {
+			String actName = activityName.substring(0,1).toUpperCase() + activityName.substring(1);
+			EDMActivity a = participant.doDiscreteActivity("Receive" + actName + "Activity_" + UUID.randomUUID(), "Receive " + activityName, timestamp);
+			a.useEntity(clientEntity);
+			EDMActivity b = clientAgent.doDiscreteActivity("Retrieve" + actName + "Activity_" + UUID.randomUUID(), "Retrieve " + activityName, timestamp);
+			a.informActivity(b);
+			b.useEntity(service);
+			data = b.generateEntity(actName + "Data_" + UUID.randomUUID(), actName + " data", timestamp);
+			data.addOwlClass(factory.getNamespaceForPrefix("eee") + "Content");
+			a.useEntity(data);
+		} catch (Exception e) {
+			logger.error("Error creating \"retrieve data from service\" pattern", e);
+		}
 		return data;
 	}
 
-	public EDMEntity createDataAtService(EDMAgent participant, EDMAgent clientAgent, EDMEntity clientEntity, EDMEntity service, String activityName, String timestamp)
-			throws DataFormatException, DatatypeConfigurationException, AlreadyBoundException, NoSuchFieldException {
+	/**
+	 * Creates the "Application Service Interaction (create data at service)" pattern.
+	 *
+	 * @param participant the participant
+	 * @param clientAgent agent representation of the client
+	 * @param clientEntity entity representation of the client
+	 * @param service the service
+	 * @param activityName the name of the activity to be used for labelling
+	 * @param timestamp the unix timestamp of this discrete activity (start=end)
+	 *
+	 * @return the data created in the process
+	 */
+	public EDMEntity createDataAtService(EDMAgent participant, EDMAgent clientAgent,
+			EDMEntity clientEntity, EDMEntity service, String activityName, String timestamp) {
 
-		String actName = activityName.substring(0,1).toUpperCase() + activityName.substring(1);
-		EDMActivity a = participant.doDiscreteActivity("Create" + actName + "Activity_" + UUID.randomUUID(), participant.getFriendlyName() + " tweets", timestamp);
-		a.useEntity(clientEntity);
-		EDMEntity data = a.generateEntity(actName + "_" + UUID.randomUUID(), participant.getFriendlyName() + "'s " + activityName, timestamp);
-		data.addOwlClass(factory.getNamespaceForPrefix("eee") + "Content");
-		EDMActivity b = clientAgent.startActivity("Send" + actName + "Activity_" + UUID.randomUUID(), "Send " + activityName + " to server", timestamp);
-		b.useEntity(service);
-		b.useEntity(data);
-		a.informActivity(b);
+		EDMEntity data = null;
+
+		try {
+			String actName = activityName.substring(0,1).toUpperCase() + activityName.substring(1);
+			EDMActivity a = participant.doDiscreteActivity("Create" + actName + "Activity_" + UUID.randomUUID(), participant.getFriendlyName() + " tweets", timestamp);
+			a.useEntity(clientEntity);
+			data = a.generateEntity(actName + "_" + UUID.randomUUID(), participant.getFriendlyName() + "'s " + activityName, timestamp);
+			data.addOwlClass(factory.getNamespaceForPrefix("eee") + "Content");
+			EDMActivity b = clientAgent.startActivity("Send" + actName + "Activity_" + UUID.randomUUID(), "Send " + activityName + " to server", timestamp);
+			b.useEntity(service);
+			b.useEntity(data);
+			a.informActivity(b);
+		} catch (Exception e) {
+			logger.error("Error creating \"create data at service\" pattern", e);
+		}
 
 		return data;
 	}
