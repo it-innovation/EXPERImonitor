@@ -45,6 +45,13 @@
 
         <!-- 3rd party dependencies ________________________________________ -->
 
+		<!--Pretty Logback, see https://github.com/n0rad/logback-prettier-->
+		<dependency>
+			<groupId>fr.norad.logback.prettier</groupId>
+			<artifactId>logback-prettier</artifactId>
+			<version>0.5</version>
+		</dependency>
+		
     </dependencies>
 
 </project>

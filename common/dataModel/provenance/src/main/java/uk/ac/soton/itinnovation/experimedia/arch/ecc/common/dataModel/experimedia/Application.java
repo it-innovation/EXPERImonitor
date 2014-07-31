@@ -18,37 +18,27 @@
 // the software.
 //
 //      Created By :            Stefanie Wiegand
-//      Created Date :          09-Jul-2014
-//      Created for Project :   EXPERIMEDIA
+//      Created Date :          2014-07-30
+//      Created for Project :   Experimedia
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.edm.test.prov;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experimedia;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMActivity;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMAgent;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMEntity;
 
-public class ExperimentDataGeneratorTest {
+/**
+ * An application which is connected to the ECC as a client.
+ */
+public class Application {
 
-	private static final Logger logger = LoggerFactory.getLogger(ExperimentDataGeneratorTest.class);
-
-	public static void main(String[] args) {
-		ExperimentDataGenerator ssggentest = new ExperimentDataGenerator();
-
-		try {
-
-			logger.info("Reading log");
-			ssggentest.readLog("alice.txt");
-
-			logger.info("Parsing log");
-			ssggentest.parseLog("PerfectLog");
-
-			logger.info("Prov report:");
-			logger.info(ssggentest.getFactory().createProvReport().toString());
-
-		} catch (Exception e) {
-			logger.error("Exception caught: ", e);
-		}
-	}
+	//the prov agent representation of the application
+	public EDMAgent agent;
+	//the prov entity representation of the same application
+	public EDMEntity entity;
+	//the activity of running the application. Ususally started on application startup and ended on application shutdown.
+	public EDMActivity activity;
 
 }

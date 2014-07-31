@@ -18,24 +18,21 @@
 // the software.
 //
 //      Created By :            Stefanie Wiegand
-//      Created Date :          25-Jul-2014
-//      Created for Project :   EXPERIMEDIA
+//      Created Date :          2014-07-30
+//      Created for Project :   Experimedia
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.edm.test.prov;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experimedia;
 
-public interface ILog {
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMEntity;
 
-	@Override
-	public String toString();
+/**
+ * A service in an Experimedia experiment
+ */
+public class Service {
 
-	public String getDate();
-
-	public String getTime();
-
-	public Long getTimestamp();
-
-	public String getSpeed();
+	//the prov representation of the service
+	public EDMEntity entity;
 
 }

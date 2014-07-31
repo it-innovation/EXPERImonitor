@@ -23,7 +23,7 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.edm.test.prov;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.experimentSimulation;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
