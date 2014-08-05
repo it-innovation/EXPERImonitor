@@ -30,8 +30,8 @@ import uk.ac.soton.itinnovation.ecc.service.domain.explorer.provenance.EccPROVAc
 import uk.ac.soton.itinnovation.ecc.service.domain.explorer.provenance.EccPROVApplication;
 import uk.ac.soton.itinnovation.ecc.service.domain.explorer.provenance.EccPROVService;
 import uk.ac.soton.itinnovation.ecc.service.domain.explorer.provenance.EccParticipant;
-import uk.ac.soton.itinnovation.ecc.service.domain.explorer.distributions.EccINTRATDistributionData;
-import uk.ac.soton.itinnovation.ecc.service.domain.explorer.distributions.EccNOMORDDistributionData;
+import uk.ac.soton.itinnovation.ecc.service.domain.explorer.distributions.EccINTRATSummary;
+import uk.ac.soton.itinnovation.ecc.service.domain.explorer.distributions.EccNOMORDSummary;
 import uk.ac.soton.itinnovation.ecc.service.domain.explorer.*;
 
 import java.util.*;
@@ -60,7 +60,7 @@ public class ExplorerDemoData
     public EccAttributeInfo                           qoeAttrTWO;
     public EccAttributeInfo                           qoeAttrTHREE;
     public EccParticipantAttributeResultSet           partAttrInfoSet;
-    public HashMap<String, EccNOMORDDistributionData> demoQOEDistribData;
+    public HashMap<String, EccNOMORDSummary> demoQOEDistribData;
     
     public ArrayList<EccPROVActivity>    linearActivities;
     public ArrayList<EccPROVApplication> linearApplications;
@@ -72,7 +72,7 @@ public class ExplorerDemoData
     
     public HashMap<String, EccAttributeResultSet> serviceQoSAttributes;
     
-    public ArrayList<EccINTRATDistributionData> qosDistributionData; // Cheating here: all activities these link to are serial
+    public ArrayList<EccINTRATSummary> qosDistributionData; // Cheating here: all activities these link to are serial
     
     
     public ExplorerDemoData()
@@ -144,14 +144,14 @@ public class ExplorerDemoData
         return applicationServices.get( appIRI );
     }
     
-    public EccINTRATDistributionData getINTRATDistData( UUID attrID, long start, long end )
+    public EccINTRATSummary getINTRATDistData( UUID attrID, long start, long end )
     {
         // Cheating here: just using the time stamp to get the appopriate data
         // Search through finding the nearest time and return
         
-        EccINTRATDistributionData target = null;
+        EccINTRATSummary target = null;
         
-        for ( EccINTRATDistributionData dd : qosDistributionData )
+        for ( EccINTRATSummary dd : qosDistributionData )
         {
             if ( dd.getStartTime().getTime() >= start &&
                  dd.getEndTime().getTime()   <= end )
@@ -223,19 +223,19 @@ public class ExplorerDemoData
         demoQOEDistribData = new HashMap<>();
         
         // Question 1
-        EccNOMORDDistributionData data = new EccNOMORDDistributionData( qoeAttrONE,
+        EccNOMORDSummary data = new EccNOMORDSummary( qoeAttrONE,
                                                                         createNOMORDDistributionDataSet( qoeAttrONE.getMetaContent() ) );
         
         demoQOEDistribData.put( qoeAttrONE.getName(), data );
         qoeAttrONE.setSampleCount( distributionDataTotal(data) );
         
         // Question 2
-        data = new EccNOMORDDistributionData( qoeAttrTWO, createNOMORDDistributionDataSet( qoeAttrTWO.getMetaContent() ) );
+        data = new EccNOMORDSummary( qoeAttrTWO, createNOMORDDistributionDataSet( qoeAttrTWO.getMetaContent() ) );
         demoQOEDistribData.put( qoeAttrTWO.getName(), data );
         qoeAttrTWO.setSampleCount( distributionDataTotal(data) );
         
         // Question 3
-        data = new EccNOMORDDistributionData( qoeAttrTHREE, createNOMORDDistributionDataSet( qoeAttrTHREE.getMetaContent() ) );
+        data = new EccNOMORDSummary( qoeAttrTHREE, createNOMORDDistributionDataSet( qoeAttrTHREE.getMetaContent() ) );
         demoQOEDistribData.put( qoeAttrTHREE.getName(), data );
         qoeAttrTHREE.setSampleCount( distributionDataTotal(data) );
     }
@@ -257,7 +257,7 @@ public class ExplorerDemoData
         return dataSet;
     }
     
-    private int distributionDataTotal( EccNOMORDDistributionData data )
+    private int distributionDataTotal( EccNOMORDSummary data )
     {
         int count = 0;
         
@@ -439,7 +439,7 @@ public class ExplorerDemoData
                 avg   += 302.0f;
             }
             
-            EccINTRATDistributionData dd = new EccINTRATDistributionData( info,
+            EccINTRATSummary dd = new EccINTRATSummary( info,
                                                                           floor, ceil, avg,
                                                                           act.getStartTime(),
                                                                           act.getEndTime() );

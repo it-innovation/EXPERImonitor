@@ -31,14 +31,14 @@ import uk.ac.soton.itinnovation.ecc.service.domain.explorer.EccAttributeInfo;
 
 
 
-public class EccNOMORDDistributionData
+public class EccNOMORDSummary
 {
     private EccAttributeInfo        attrInfo;
     private ArrayList<EccItemCount> distribData;
     
     
-    public EccNOMORDDistributionData( EccAttributeInfo     atInfo,
-                                      Map<String, Integer> valueCounts )
+    public EccNOMORDSummary( EccAttributeInfo     atInfo,
+                             Map<String, Integer> valueCounts )
     {
         if ( atInfo != null && valueCounts != null )
         {

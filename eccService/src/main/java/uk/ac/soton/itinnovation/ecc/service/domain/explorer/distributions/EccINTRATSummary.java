@@ -31,7 +31,7 @@ import uk.ac.soton.itinnovation.ecc.service.domain.explorer.EccAttributeInfo;
 
 
 
-public class EccINTRATDistributionData
+public class EccINTRATSummary
 {
     private EccAttributeInfo attrInfo;
     
@@ -41,9 +41,9 @@ public class EccINTRATDistributionData
     private Date  startTime;
     private Date  endTime;
     
-    public EccINTRATDistributionData( EccAttributeInfo info,
-                                      float fV, float cV, float aV,
-                                      Date sT, Date eT )
+    public EccINTRATSummary( EccAttributeInfo info,
+                             float fV, float cV, float aV,
+                             Date sT, Date eT )
     {
         attrInfo     = info;
         floorValue   = fV;

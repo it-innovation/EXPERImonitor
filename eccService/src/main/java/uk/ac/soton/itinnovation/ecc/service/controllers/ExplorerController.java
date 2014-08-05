@@ -109,10 +109,10 @@ public class ExplorerController {
     // -------------------------------------------------------------------------
     @RequestMapping(method = RequestMethod.GET, value = "/{expID}/attributes/distribution/qoe" )
     @ResponseBody
-    public ArrayList<EccNOMORDDistributionData> getNOMORDAttributeDistributionDataByName( @PathVariable UUID   expID,
+    public ArrayList<EccNOMORDSummary> getNOMORDAttributeDistributionDataByName( @PathVariable UUID   expID,
                                                                                           @RequestParam(value="attrName", defaultValue="") String attrName )
     {
-        ArrayList<EccNOMORDDistributionData> result = new ArrayList<>();
+        ArrayList<EccNOMORDSummary> result = new ArrayList<>();
         result.add( demoData.demoQOEDistribData.get( attrName ) );
         
         return result;
@@ -120,7 +120,7 @@ public class ExplorerController {
     
     @RequestMapping(method = RequestMethod.GET, value = "/{expID}/attributes/distribution/qos" )
     @ResponseBody
-    public EccINTRATDistributionData getINTRATAttributeDistributionDataByID( @PathVariable UUID                                expID,
+    public EccINTRATSummary getINTRATAttributeDistributionDataByID( @PathVariable UUID                                expID,
                                                                              @RequestParam(value="attrID", defaultValue="")    UUID attrID,
                                                                              @RequestParam(value="startTime", defaultValue="") long startTime,
                                                                              @RequestParam(value="endTime", defaultValue="")   long endTime )
