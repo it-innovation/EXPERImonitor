@@ -23,9 +23,10 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.ecc.service.domain.explorer;
+package uk.ac.soton.itinnovation.ecc.service.domain.explorer.distributions;
 
 import java.util.Date;
+import uk.ac.soton.itinnovation.ecc.service.domain.explorer.EccAttributeInfo;
 
 
 

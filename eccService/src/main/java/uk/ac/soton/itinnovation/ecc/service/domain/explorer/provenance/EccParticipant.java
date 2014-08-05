@@ -23,7 +23,7 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.ecc.service.domain.explorer;
+package uk.ac.soton.itinnovation.ecc.service.domain.explorer.provenance;
 
 import java.util.UUID;
 
