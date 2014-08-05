@@ -25,13 +25,8 @@
 
 package uk.ac.soton.itinnovation.ecc.service.utils;
 
-import uk.ac.soton.itinnovation.ecc.service.domain.explorer.distributions.EccItemCount;
-import uk.ac.soton.itinnovation.ecc.service.domain.explorer.provenance.EccPROVActivity;
-import uk.ac.soton.itinnovation.ecc.service.domain.explorer.provenance.EccPROVApplication;
-import uk.ac.soton.itinnovation.ecc.service.domain.explorer.provenance.EccPROVService;
-import uk.ac.soton.itinnovation.ecc.service.domain.explorer.provenance.EccParticipant;
-import uk.ac.soton.itinnovation.ecc.service.domain.explorer.distributions.EccINTRATSummary;
-import uk.ac.soton.itinnovation.ecc.service.domain.explorer.distributions.EccNOMORDSummary;
+import uk.ac.soton.itinnovation.ecc.service.domain.explorer.provenance.*;
+import uk.ac.soton.itinnovation.ecc.service.domain.explorer.distributions.*;
 import uk.ac.soton.itinnovation.ecc.service.domain.explorer.*;
 
 import java.util.*;
@@ -56,11 +51,12 @@ public class ExplorerDemoData
     public EccParticipantResultSet eccParticipants;
     public EccParticipant AlicePART, BobPART, CarolPART;
     
-    public EccAttributeInfo                           qoeAttrONE;
-    public EccAttributeInfo                           qoeAttrTWO;
-    public EccAttributeInfo                           qoeAttrTHREE;
-    public EccParticipantAttributeResultSet           partAttrInfoSet;
-    public HashMap<String, EccNOMORDSummary> demoQOEDistribData;
+    public EccAttributeInfo                      qoeAttrONE;
+    public EccAttributeInfo                      qoeAttrTWO;
+    public EccAttributeInfo                      qoeAttrTHREE;
+    public EccParticipantAttributeResultSet      partAttrInfoSet;
+    public HashMap<String, EccNOMORDSummary>     qoeSummaryDistribData;
+    public ArrayList<EccNOMORDStratifiedSummary> qoeStratifiedSummaryDistribData;
     
     public ArrayList<EccPROVActivity>    linearActivities;
     public ArrayList<EccPROVApplication> linearApplications;
@@ -73,7 +69,6 @@ public class ExplorerDemoData
     public HashMap<String, EccAttributeResultSet> serviceQoSAttributes;
     
     public ArrayList<EccINTRATSummary> qosDistributionData; // Cheating here: all activities these link to are serial
-    
     
     public ExplorerDemoData()
     {
@@ -220,24 +215,62 @@ public class ExplorerDemoData
     
     private void createNOMORDDistributionData()
     {
-        demoQOEDistribData = new HashMap<>();
+        qoeSummaryDistribData = new HashMap<>();
         
         // Question 1
         EccNOMORDSummary data = new EccNOMORDSummary( qoeAttrONE,
-                                                                        createNOMORDDistributionDataSet( qoeAttrONE.getMetaContent() ) );
+                                                      createNOMORDDistributionDataSet( qoeAttrONE.getMetaContent() ) );
         
-        demoQOEDistribData.put( qoeAttrONE.getName(), data );
+        qoeSummaryDistribData.put( qoeAttrONE.getName(), data );
         qoeAttrONE.setSampleCount( distributionDataTotal(data) );
         
         // Question 2
         data = new EccNOMORDSummary( qoeAttrTWO, createNOMORDDistributionDataSet( qoeAttrTWO.getMetaContent() ) );
-        demoQOEDistribData.put( qoeAttrTWO.getName(), data );
+        qoeSummaryDistribData.put( qoeAttrTWO.getName(), data );
         qoeAttrTWO.setSampleCount( distributionDataTotal(data) );
         
         // Question 3
         data = new EccNOMORDSummary( qoeAttrTHREE, createNOMORDDistributionDataSet( qoeAttrTHREE.getMetaContent() ) );
-        demoQOEDistribData.put( qoeAttrTHREE.getName(), data );
+        qoeSummaryDistribData.put( qoeAttrTHREE.getName(), data );
         qoeAttrTHREE.setSampleCount( distributionDataTotal(data) );
+        
+        // Stratified summary data (simply mock up this data)
+        qoeStratifiedSummaryDistribData = new ArrayList<>();
+        
+        // 1 of 5
+        EccNOMORDStratifiedSummary nss = new EccNOMORDStratifiedSummary( "1 of 5" );
+        nss.addStratifiedItem( new EccItemCount( qoeAttrONE.getName(), 1 ) );
+        nss.addStratifiedItem( new EccItemCount( qoeAttrTWO.getName(), 1 ) );
+        nss.addStratifiedItem( new EccItemCount( qoeAttrTHREE.getName(), 1 ) );
+        qoeStratifiedSummaryDistribData.add( nss );
+        
+        // 2 of 5
+        nss = new EccNOMORDStratifiedSummary( "2 of 5" );
+        nss.addStratifiedItem( new EccItemCount( qoeAttrONE.getName(), 0 ) );
+        nss.addStratifiedItem( new EccItemCount( qoeAttrTWO.getName(), 0 ) );
+        nss.addStratifiedItem( new EccItemCount( qoeAttrTHREE.getName(), 0 ) );
+        qoeStratifiedSummaryDistribData.add( nss );
+        
+        // 3 of 5
+        nss = new EccNOMORDStratifiedSummary( "3 of 5" );
+        nss.addStratifiedItem( new EccItemCount( qoeAttrONE.getName(), 1 ) );
+        nss.addStratifiedItem( new EccItemCount( qoeAttrTWO.getName(), 1 ) );
+        nss.addStratifiedItem( new EccItemCount( qoeAttrTHREE.getName(), 1 ) );
+        qoeStratifiedSummaryDistribData.add( nss );
+        
+        // 4 of 5
+        nss = new EccNOMORDStratifiedSummary( "4 of 5" );
+        nss.addStratifiedItem( new EccItemCount( qoeAttrONE.getName(), 1 ) );
+        nss.addStratifiedItem( new EccItemCount( qoeAttrTWO.getName(), 0 ) );
+        nss.addStratifiedItem( new EccItemCount( qoeAttrTHREE.getName(), 0 ) );
+        qoeStratifiedSummaryDistribData.add( nss );
+        
+        // 5 of 5
+        nss = new EccNOMORDStratifiedSummary( "5 of 5" );
+        nss.addStratifiedItem( new EccItemCount( qoeAttrONE.getName(), 0 ) );
+        nss.addStratifiedItem( new EccItemCount( qoeAttrTWO.getName(), 1 ) );
+        nss.addStratifiedItem( new EccItemCount( qoeAttrTHREE.getName(), 1 ) );
+        qoeStratifiedSummaryDistribData.add( nss );
     }
     
     private Map<String, Integer> createNOMORDDistributionDataSet( String labels )
