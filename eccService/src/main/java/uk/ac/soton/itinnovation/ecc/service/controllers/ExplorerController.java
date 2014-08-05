@@ -107,6 +107,14 @@ public class ExplorerController {
     
     // Metric distribution based queries ---------------------------------------
     // -------------------------------------------------------------------------
+    @RequestMapping(method = RequestMethod.GET, value = "/{expID}/participants/iri/distribution/qoe" )
+    @ResponseBody
+    public EccNOMORDParticipantSummary getNOMORDParticipantDistribution( @PathVariable UUID expID,
+                                                                         @RequestParam(value="IRI", defaultValue="") String partIRI )
+    {
+        return demoData.qoeParticipantSummaryData.get( partIRI );
+    }
+    
     @RequestMapping(method = RequestMethod.GET, value="/{expID}/participants/distribution/stratified" )
     @ResponseBody
     public ArrayList<EccNOMORDStratifiedSummary> getNOMORDStratifiedParticipantDistribution( @PathVariable UUID expID )
@@ -117,10 +125,10 @@ public class ExplorerController {
     
     @RequestMapping(method = RequestMethod.GET, value = "/{expID}/attributes/distribution/qoe" )
     @ResponseBody
-    public ArrayList<EccNOMORDSummary> getNOMORDAttributeDistributionDataByName( @PathVariable UUID   expID,
-                                                                                 @RequestParam(value="attrName", defaultValue="") String attrName )
+    public ArrayList<EccNOMORDAttributeSummary> getNOMORDAttributeDistributionDataByName( @PathVariable UUID   expID,
+                                                                                          @RequestParam(value="attrName", defaultValue="") String attrName )
     {
-        ArrayList<EccNOMORDSummary> result = new ArrayList<>();
+        ArrayList<EccNOMORDAttributeSummary> result = new ArrayList<>();
         result.add( demoData.qoeSummaryDistribData.get( attrName ) );
         
         return result;
@@ -128,7 +136,7 @@ public class ExplorerController {
     
     @RequestMapping(method = RequestMethod.GET, value = "/{expID}/attributes/distribution/qos" )
     @ResponseBody
-    public EccINTRATSummary getINTRATAttributeDistributionDataByID( @PathVariable UUID                                expID,
+    public EccINTRATSummary getINTRATAttributeDistributionDataByID( @PathVariable UUID                                         expID,
                                                                              @RequestParam(value="attrID", defaultValue="")    UUID attrID,
                                                                              @RequestParam(value="startTime", defaultValue="") long startTime,
                                                                              @RequestParam(value="endTime", defaultValue="")   long endTime )

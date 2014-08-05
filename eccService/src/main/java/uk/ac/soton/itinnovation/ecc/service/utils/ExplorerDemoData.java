@@ -51,12 +51,13 @@ public class ExplorerDemoData
     public EccParticipantResultSet eccParticipants;
     public EccParticipant AlicePART, BobPART, CarolPART;
     
-    public EccAttributeInfo                      qoeAttrONE;
-    public EccAttributeInfo                      qoeAttrTWO;
-    public EccAttributeInfo                      qoeAttrTHREE;
-    public EccParticipantAttributeResultSet      partAttrInfoSet;
-    public HashMap<String, EccNOMORDSummary>     qoeSummaryDistribData;
-    public ArrayList<EccNOMORDStratifiedSummary> qoeStratifiedSummaryDistribData;
+    public EccAttributeInfo                             qoeAttrONE;
+    public EccAttributeInfo                             qoeAttrTWO;
+    public EccAttributeInfo                             qoeAttrTHREE;
+    public EccParticipantAttributeResultSet             partAttrInfoSet;
+    public HashMap<String, EccNOMORDAttributeSummary>   qoeSummaryDistribData;
+    public HashMap<String, EccNOMORDParticipantSummary> qoeParticipantSummaryData;
+    public ArrayList<EccNOMORDStratifiedSummary>        qoeStratifiedSummaryDistribData;
     
     public ArrayList<EccPROVActivity>    linearActivities;
     public ArrayList<EccPROVApplication> linearApplications;
@@ -218,22 +219,46 @@ public class ExplorerDemoData
         qoeSummaryDistribData = new HashMap<>();
         
         // Question 1
-        EccNOMORDSummary data = new EccNOMORDSummary( qoeAttrONE,
+        EccNOMORDAttributeSummary data = new EccNOMORDAttributeSummary( qoeAttrONE,
                                                       createNOMORDDistributionDataSet( qoeAttrONE.getMetaContent() ) );
         
         qoeSummaryDistribData.put( qoeAttrONE.getName(), data );
         qoeAttrONE.setSampleCount( distributionDataTotal(data) );
         
         // Question 2
-        data = new EccNOMORDSummary( qoeAttrTWO, createNOMORDDistributionDataSet( qoeAttrTWO.getMetaContent() ) );
+        data = new EccNOMORDAttributeSummary( qoeAttrTWO, createNOMORDDistributionDataSet( qoeAttrTWO.getMetaContent() ) );
         qoeSummaryDistribData.put( qoeAttrTWO.getName(), data );
         qoeAttrTWO.setSampleCount( distributionDataTotal(data) );
         
         // Question 3
-        data = new EccNOMORDSummary( qoeAttrTHREE, createNOMORDDistributionDataSet( qoeAttrTHREE.getMetaContent() ) );
+        data = new EccNOMORDAttributeSummary( qoeAttrTHREE, createNOMORDDistributionDataSet( qoeAttrTHREE.getMetaContent() ) );
         qoeSummaryDistribData.put( qoeAttrTHREE.getName(), data );
         qoeAttrTHREE.setSampleCount( distributionDataTotal(data) );
         
+        // Create summary for each participant
+        qoeParticipantSummaryData = new HashMap<>();
+        
+        // Alice
+        EccNOMORDParticipantSummary ps = new EccNOMORDParticipantSummary( AlicePART );
+        ps.addORDINALResponse( qoeAttrONE.getName(), "not easy/difficult", 3 );
+        ps.addORDINALResponse( qoeAttrTWO.getName(), "sometimes useful", 3 );
+        ps.addORDINALResponse( qoeAttrTHREE.getName(), "moderately responsive", 3 );
+        qoeParticipantSummaryData.put( AlicePART.getIRI() , ps );        
+                
+        // Bob
+        ps = new EccNOMORDParticipantSummary( BobPART );
+        ps.addORDINALResponse( qoeAttrONE.getName(), "Very difficult", 1 );
+        ps.addORDINALResponse( qoeAttrTWO.getName(), "Not at all useful", 1 );
+        ps.addORDINALResponse( qoeAttrTHREE.getName(), "Very unresponsive", 1 );
+        qoeParticipantSummaryData.put( BobPART.getIRI() , ps );             
+                
+        // Carol
+        ps = new EccNOMORDParticipantSummary( CarolPART );
+        ps.addORDINALResponse( qoeAttrONE.getName(), "easy", 4 );
+        ps.addORDINALResponse( qoeAttrTWO.getName(), "always useful", 5 );
+        ps.addORDINALResponse( qoeAttrTHREE.getName(), "very responsive", 5 );
+        qoeParticipantSummaryData.put( CarolPART.getIRI() , ps );
+                
         // Stratified summary data (simply mock up this data)
         qoeStratifiedSummaryDistribData = new ArrayList<>();
         
@@ -290,7 +315,7 @@ public class ExplorerDemoData
         return dataSet;
     }
     
-    private int distributionDataTotal( EccNOMORDSummary data )
+    private int distributionDataTotal( EccNOMORDAttributeSummary data )
     {
         int count = 0;
         
