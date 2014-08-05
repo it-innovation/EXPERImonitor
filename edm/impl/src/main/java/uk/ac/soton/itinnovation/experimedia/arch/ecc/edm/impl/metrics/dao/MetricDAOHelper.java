@@ -66,23 +66,6 @@ private static final Logger log = LoggerFactory.getLogger(MetricDAOHelper.class)
             return new ValidationReturnObject(false, new IllegalArgumentException("The Metric type is NULL"));
         }
         
-        // TOOD: include check for unit again when serialisation issue has been sorted by SGC
-        /*if (metric.getUnit() == null)
-        {
-            return new ValidationReturnObject(false, new IllegalArgumentException("The Metric unit is NULL"));
-        }*/
-        
-        // check if it exists in the DB already
-        /*
-        try {
-            if (objectExists(metric.getUUID(), connection))
-            {
-                return new ValidationReturnObject(false, new RuntimeException("The Metric already exists; the UUID is not unique"));
-            }
-        } catch (Exception ex) {
-            throw ex;
-        }*/
-        
         return new ValidationReturnObject(true);
     }
     
@@ -109,33 +92,20 @@ private static final Logger log = LoggerFactory.getLogger(MetricDAOHelper.class)
         }
         
         try {
-            /*
-            byte[] unitBytes = null;
-            
-            if (metric.getUnit() != null)
-            {
-                // serialising unit
-                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                ObjectOutputStream oos = new ObjectOutputStream(bos);
 
-                oos.writeObject(metric.getUnit());
-                oos.flush();
-                oos.close();
-                bos.close();
-
-                unitBytes = bos.toByteArray();
-            }
-            */
-            String query = "INSERT INTO Metric (metricUUID, mType, unit) VALUES (?, ?, ?)";
+            String query = "INSERT INTO Metric (metricUUID, mType, unit, metaType, metaContent) VALUES (?, ?, ?, ?, ?)";
             PreparedStatement pstmt = connection.prepareStatement(query);
             pstmt.setObject(1, metric.getUUID(), java.sql.Types.OTHER);
             pstmt.setString(2, metric.getMetricType().name());
+            
             if (metric.getUnit() == null)
                 pstmt.setObject(3, null);
             else
                 pstmt.setObject(3, metric.getUnit().getName());
-            //pstmt.setObject(3, unitBytes);
             
+            pstmt.setString(4, metric.getMetaType());
+            pstmt.setString(5, metric.getMetaContent());
+                  
             int rowCount = pstmt.executeUpdate();
             
             // check if the result set got the generated table key
@@ -167,12 +137,6 @@ private static final Logger log = LoggerFactory.getLogger(MetricDAOHelper.class)
             throw new RuntimeException("Cannot get the Metric because the connection to the DB is closed");
         }
         
-        /*if (!MetricHelper.objectExists(metricUUID, connection, closeDBcon))
-        {
-            log.error("There is no metric with the given UUID: " + metricUUID.toString());
-            throw new RuntimeException("There is no metric with the given UUID: " + metricUUID.toString());
-        }*/
-        
         Metric metric = null;
         
         try {
@@ -188,22 +152,6 @@ private static final Logger log = LoggerFactory.getLogger(MetricDAOHelper.class)
                 String unitName = rs.getString("unit");
                 if (unitName != null)
                     unit = new Unit(unitName);
-
-                /*ByteArrayInputStream bais;
-                /ObjectInputStream ins;
-                if (rs.getBytes("unit") != null)
-                {
-                    try {
-                        bais = new ByteArrayInputStream(rs.getBytes("unit"));
-                        ins = new ObjectInputStream(bais);
-                        unit =(Unit)ins.readObject();
-                        ins.close();
-                    }
-                    catch (Exception e) {
-                        log.error("Unable to read the unit from the database: " + e.getMessage());
-                        throw new RuntimeException("Unable to read the unit from the database", e);
-                    }
-                }*/
                 
                 String metricTypeStr = rs.getString("mType");
                 if (metricTypeStr == null)
@@ -213,6 +161,10 @@ private static final Logger log = LoggerFactory.getLogger(MetricDAOHelper.class)
                 }
                 
                 metric = new Metric(metricUUID, MetricType.fromValue(metricTypeStr), unit);
+                
+                // Add meta-data (nulls will be ignored)
+                metric.setMetaType( rs.getString("metaType") );
+                metric.setMetaContent( rs.getString("metaContent") );
             }
             else // nothing in the result set
             {
@@ -245,12 +197,6 @@ private static final Logger log = LoggerFactory.getLogger(MetricDAOHelper.class)
             log.error("Cannot get the Metric for the MeasurementSet because the connection to the DB is closed");
             throw new RuntimeException("Cannot get the Metric for the MeasurementSet because the connection to the DB is closed");
         }
-        
-        /*if (!MeasurementSetHelper.objectExists(measurementSetUUID, connection, closeDBcon))
-        {
-            log.error("There is no measurement set with the given UUID: " + measurementSetUUID.toString());
-            throw new RuntimeException("There is no measurement set with the given UUID: " + measurementSetUUID.toString());
-        }*/
         
         Metric metric = null;
         
@@ -292,6 +238,10 @@ private static final Logger log = LoggerFactory.getLogger(MetricDAOHelper.class)
                 }
                 
                 metric = new Metric(UUID.fromString(uuidStr), MetricType.fromValue(metricTypeStr), unit);
+                
+                // Add meta-data (nulls will be ignored)
+                metric.setMetaType( rs.getString("metaType") );
+                metric.setMetaContent( rs.getString("metaContent") );
             }
             else // nothing in the result set
             {

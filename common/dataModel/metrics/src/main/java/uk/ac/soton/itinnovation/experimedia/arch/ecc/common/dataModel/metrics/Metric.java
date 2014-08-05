@@ -34,10 +34,12 @@ import java.util.UUID;
  */
 public class Metric implements Serializable
 {
-    private UUID uuid;
-    //private UUID measurementSetUUID;
+    private UUID       uuid;
     private MetricType metricType;
-    private Unit unit;
+    private Unit       unit;
+    private String     metaType    = "unknown";
+    private String     metaContent = "unknown";
+    
 
     /**
      * Default constructor, which sets a random UUID for the object instance.
@@ -123,5 +125,49 @@ public class Metric implements Serializable
     public void setUnit(Unit unit)
     {
         this.unit = unit;
+    }
+    
+    /**
+     * Returns a meta-type value that provides additional information regarding the
+     * the semantics of the measurements for this metric.
+     * 
+     * @return - A String with the meta-type data
+     */
+    public String getMetaType()
+    { 
+        return metaType; 
+    }
+    
+    /**
+     * Set the meta-type value for this metric - provides additional information
+     * regarding the semantics of the measurements for this metric.
+     * 
+     * @param type - Non-null string representation of the metric meta-type
+     */
+    public void setMetaType( String type )
+    {
+        if ( type != null ) metaType = type;
+    }
+    
+    /**
+     * Returns the meta-content for this metric's meta-type. For example, if the type
+     * is 'location' then the content for this type might be 'longitude,latitude'
+     * 
+     * @return - Returns the meta-content for this meta-type
+     */
+    public String getMetaContent()
+    {
+        return metaContent;
+    }
+    
+    /**
+     * Sets the meta-content for this metric's meta-type. For example, if the type
+     * is 'location' then the content for this type might be 'longitude,latitude'
+     * 
+     * @param content - Non-null string representing the meta-content
+     */
+    public void setMetaContent( String content )
+    {
+        if ( content != null ) metaContent = content;
     }
 }

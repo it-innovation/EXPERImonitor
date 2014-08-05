@@ -48,10 +48,7 @@ namespace ecc_amqpAPI_impl
 
   bool AMQPBasicChannel::isOpen()
   {
-    if ( amqpChannel != NULL )
-      return amqpChannel->isChannelOpen();
-
-    return false;
+    return ( amqpChannel != NULL );
   }
 
   void AMQPBasicChannel::close()

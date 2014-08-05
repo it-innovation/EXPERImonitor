@@ -36,7 +36,9 @@ namespace ecc_commonDataModel
 {
 
 Metric::Metric()
-  : metricType(RATIO)
+  : metricType(RATIO),
+    metricMetaType( L"unknown" ),
+    metricMetaContent( L"unknown" )
 {
   metricUUID = createRandomUUID();
 }
@@ -109,6 +111,28 @@ void Metric::setUnit( Unit::ptr_t unit )
   metricUnit = unit;
 }
 
+
+String Metric::getMetaType()
+{
+  return metricMetaType;
+}
+
+void Metric::setMetaType( const String& type )
+{
+  metricMetaType = type;
+}
+
+String Metric::getMetaContent()
+{
+  return metricMetaContent;
+}
+
+void Metric::setMetaContent( const String& content )
+{
+  metricMetaContent = content;
+}
+
+
 // ModelBase -----------------------------------------------------------------
 String Metric::toJSON()
 {
@@ -133,7 +157,13 @@ String Metric::toJSON()
 
   // Unit
   json.append( L"\"unit\":" );
-  json.append( metricUnit->toJSON() );
+  json.append( metricUnit->toJSON() + L"," );
+
+  // Meta-type
+  json.append( createJSON_Prop( L"metaType", metricMetaType ) + L"," );
+
+  // Meta-content
+  json.append( createJSON_Prop( L"metaContent", metricMetaContent ) );
 
   json.append( L"}" );
 

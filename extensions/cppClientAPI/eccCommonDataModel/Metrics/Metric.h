@@ -85,6 +85,14 @@ public:
 
     void setUnit( Unit::ptr_t unit );
 
+    String getMetaType();
+
+    void setMetaType( const String& type );
+
+    String getMetaContent();
+
+    void setMetaContent( const String& content );
+
     // ModelBase -----------------------------------------------------------------
     virtual String toJSON();
 
@@ -97,6 +105,8 @@ private:
   UUID        metricUUID;
   MetricType  metricType;
   Unit::ptr_t metricUnit;
+  String      metricMetaType;
+  String      metricMetaContent;
 
 };
 
