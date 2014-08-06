@@ -36,14 +36,15 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Me
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGroup;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricHelper;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricType;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Unit;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared.ECCSimpleLogger;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared.Utilitybox;
 
 
 public class EntryPoint
 {
-	public static final Logger logger = LoggerFactory.getLogger(EntryPoint.class);
+	private static final Logger logger = LoggerFactory.getLogger(EntryPoint.class);
+	private static PeriodicMetricLogParserTool logTool;
 	private static MeasurementSet ms;
 
     // Main entry point
@@ -58,6 +59,9 @@ public class EntryPoint
         // Create a simple ECC Logger
         ECCSimpleLogger	eccLogger = new ECCSimpleLogger();
 
+		//Create Log tool
+		logTool = new PeriodicMetricLogParserTool();
+
         // Try connecting to the ECC...
         try
         {
@@ -71,18 +75,33 @@ public class EntryPoint
             logger.error( msg, ex );
         }
 
+
+		try {
+			//sleep
+			Thread.sleep(10000);
+		} catch (InterruptedException ex) {
+			logger.info("ZZzZzzzzzzZZZzzZz");
+		}
+
 		boolean lwtServiceRunning = true;
 
 		while ( lwtServiceRunning )
 		{
+			//check for break:
+			if (logTool.hasFinished) {
+				logger.info("Stopping now");
+				lwtServiceRunning = false;
+				break;
+			}
 
-			// Do cool simulation codey bit
-			Report report = new Report();
-			report.setMeasurementSet(ms);
-			eccLogger.logTool.createReport(report, 60);
-			
-			//TODO: push whole report to ECC using Simon's new and shiny method
+			try {
+				// Do cool simulation codey bit & push whole report to ECC using Simon's new and shiny method
+				eccLogger.pushSimpleMetric("LWTService", "Response time", logTool.createReport(ms, 60));
+			} catch (Exception e) {
+				logger.error("Error pushing metric", e);
+			}
 		}
+		logger.info("Done!");
     }
 
 	private static MetricGenerator createSimpleModel()

@@ -55,7 +55,7 @@ public class ExperimentDataGenerator {
 	private String logclass;
 	private ILog currentLog;
 
-	private final ExperimediaFactory factory = new ExperimediaFactory("eee", "http://experimedia.eu/ontologies/ExperimediaExperimentExplorer#>");
+	private final ExperimediaFactory factory = new ExperimediaFactory("eee", "http://experimedia.eu/ontologies/ExperimediaExperimentExplorer#");
 	private ECCSimpleLogger eccLogger;
 
 	//services

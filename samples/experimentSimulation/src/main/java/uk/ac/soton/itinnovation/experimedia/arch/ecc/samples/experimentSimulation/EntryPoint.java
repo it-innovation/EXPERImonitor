@@ -1,3 +1,4 @@
+
 /////////////////////////////////////////////////////////////////////////
 //
 // © University of Southampton IT Innovation Centre, 2014
@@ -42,7 +43,7 @@ public class EntryPoint
     {
         // Get EXPERIMonitor EM properties to connect to service (in src/main/resources)
         Properties emProps = Utilitybox.getProperties( EntryPoint.class, "em" );
-        
+
         // Create a very simple metric model
         MetricGenerator			metGen  = createSimpleModel();
 
@@ -89,7 +90,7 @@ public class EntryPoint
                         long timeStamp = new Date().getTime();
 
                         // Push the metric (referring to Entity and its attribute)
-                        eccLogger.pushSimpleMetric( "Simulation service", 
+                        eccLogger.pushSimpleMetric( "Simulation service",
                                                     "Last push",
                                                     Long.toString(timeStamp) );
 

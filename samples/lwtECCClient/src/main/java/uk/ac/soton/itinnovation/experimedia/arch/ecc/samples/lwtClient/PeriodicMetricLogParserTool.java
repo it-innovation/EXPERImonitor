@@ -52,6 +52,7 @@ public class PeriodicMetricLogParserTool
     private int  currentResponseTime;
 	private int  nextResponseTime;
 	private int currentRandomResponseTime;
+	public boolean hasFinished = false;
 
 	public static final int VARIANCE_PERCENTAGE = 10;
 	public static final int FREQUENCY = 60; //Time between measurements in seconds
@@ -116,35 +117,34 @@ public class PeriodicMetricLogParserTool
 			logger.debug(nextDate.toString() + ", " + nextResponseTime);
 		} else {
 			nextDate = null;
-			logger.info("log empty!");
 		}
 	}
 
-    public void createReport( Report reportOUT, int sampleCount )
+    public Collection<Measurement> createReport( MeasurementSet ms, int sampleCount )
     {
 
-		Measurement measure = new Measurement();
+		Collection<Measurement> samples = new LinkedList<Measurement>();
 
-		reportOUT.setNumberOfMeasurements( sampleCount );
-		reportOUT.setFromDate( currentDate );
-		//calc end date
-		Date end = new Date(currentDate.getTime() + (FREQUENCY * sampleCount * 1000L));
-		reportOUT.setToDate( end );
 
 		while (nextDate!=null) {
 			for (int i=0; i<sampleCount; i++) {
 				measure();
+				logger.info("Current date: " + currentDate.toString());
 
 				// Create measurement instance
-				measure = new Measurement(currentRandomResponseTime + "");
-				measure.setMeasurementSetUUID( reportOUT.getMeasurementSet().getID() );
+				Measurement m = new Measurement(currentRandomResponseTime + "");
+				m.setTimeStamp(currentDate);
+				m.setMeasurementSetUUID( ms.getID() );
+				samples.add(m);
 
-				// Create report
-				reportOUT.getMeasurementSet().addMeasurement( measure );
-
+				if (nextDate==null) {
+					hasFinished = true;
+					break;
+				}
 			}
-			logger.info("Measurement " + measure.getValue());
 		}
+
+		return samples;
 	}
 
 	public Date getCurrentDate() {
