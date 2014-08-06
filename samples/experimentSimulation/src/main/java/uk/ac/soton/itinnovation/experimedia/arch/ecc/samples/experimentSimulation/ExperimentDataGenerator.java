@@ -43,6 +43,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experimedi
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experimedia.ExperimediaFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experimedia.Participant;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experimedia.Service;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared.ECCSimpleLogger;
 
 public class ExperimentDataGenerator {
 
@@ -247,7 +248,7 @@ public class ExperimentDataGenerator {
 						Content liftinfo = factory.retrieveDataFromService(participant, app, lwtService, "lwtinfo", currentLog.getTimestamp().toString());
 
 						//TODO: link liftinfo entity to metrics (entity, attribute, metric)
-						eccLogger.pushMetric("LWTService", "Response time", eventValue);
+						eccLogger.pushSimpleMetric("LWTService", "Response time", eventValue);
 
 					} else if (eventKey.equals("questionnaire")) {
 						//TODO
