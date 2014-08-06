@@ -1,0 +1,10 @@
+name: headlesseccclient
+summary: "Headless ECC Client"
+maintainer: "Thomas Leonard <tal@it-innovation.soton.ac.uk>"
+description: |
+    Sends test data to the ECC.
+requires:
+  localdb:
+    interface: pgsql
+  rabbit:
+    interface: rabbitmq
