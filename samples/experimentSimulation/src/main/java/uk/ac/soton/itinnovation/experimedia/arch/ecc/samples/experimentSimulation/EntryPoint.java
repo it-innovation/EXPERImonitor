@@ -27,7 +27,7 @@ package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.experimentSimulati
 
 import java.io.IOException;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared.Utilitybox;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared.*;
 
 import java.util.*;
 import org.slf4j.*;
@@ -40,8 +40,8 @@ public class EntryPoint
     public static void main(String[] args)
     {
         // Get EXPERIMonitor EM properties to connect to service (in src/main/resources)
-        Properties				emProps = Utilitybox.getProperties( EntryPoint.class, "em" );
-
+        Properties emProps = Utilitybox.getProperties( EntryPoint.class, "em" );
+        
         // Create a very simple metric model
         MetricGenerator			metGen  = createSimpleModel();
 
@@ -88,9 +88,9 @@ public class EntryPoint
                         long timeStamp = new Date().getTime();
 
                         // Push the metric (referring to Entity and its attribute)
-                        eccLogger.pushMetric( "Simulation service",
-                                              "Last push",
-                                              Long.toString(timeStamp) );
+                        eccLogger.pushSimpleMetric( "Simulation service", 
+                                                    "Last push",
+                                                    Long.toString(timeStamp) );
 
 						//push prov
 						if (provGen.processNextLog()) {
