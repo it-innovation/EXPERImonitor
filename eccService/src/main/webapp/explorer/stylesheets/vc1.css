@@ -1,0 +1,47 @@
+/* https://variancecharts.com/examples/line/ */
+#line-example {
+  width: 100%;
+  padding: 60px 80px 80px 120px;
+  color: #444444;
+  font-family: Helvetica, Arial, sans-serif;
+  font-weight: bold;
+}
+#line-example h3 {
+  text-align: center;
+  margin: 0 0 28px 0;
+}
+#line-example chart {
+  width: 100%;
+  height: 400px;
+}
+#line-example line path {
+  stroke-width: 2px;
+  stroke: #dc7062;
+}
+
+/* http://codepen.io/variancecharts/pen/Blywt/?editors=110 */
+#bar-example {
+  width: 80%;
+  padding: 60px 80px 80px 120px;
+  color: #444444;
+  font-family: Helvetica, Arial, sans-serif;
+  font-weight: bold;
+}
+#bar-example h3 {
+  text-align: center;
+  margin: 0 0 28px 0;
+}
+#bar-example chart {
+  width: 100%;
+  height: 400px;
+}
+#bar-example bar {
+  margin: 0 8px;
+  border: none;
+  background-color: #66a8d4;
+}
+#bar-example annotation {
+  text-transform: capitalize;
+  bottom: -8px;
+  font-size: 12px;
+}

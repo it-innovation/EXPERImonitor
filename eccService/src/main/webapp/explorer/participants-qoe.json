@@ -1,0 +1,87 @@
+[
+  {
+    "key": "1 out of 5",
+    "values": [
+      { 
+        "label" : "Ease of Use" ,
+        "value" : 20
+      },
+      { 
+        "label" : "Usefulness" ,
+        "value" : 8
+      },
+      { 
+        "label" : "Responsiveness" ,
+        "value" : 9
+      }
+    ]
+  },
+  {
+    "key": "2 out of 5",
+    "values": [
+      { 
+        "label" : "Ease of Use" ,
+        "value" : 5
+      },
+      { 
+        "label" : "Usefulness" ,
+        "value" : 6
+      },
+      { 
+        "label" : "Responsiveness" ,
+        "value" : 16
+      }
+    ]
+  },
+  {
+    "key": "3 out of 5",
+    "values": [
+      { 
+        "label" : "Ease of Use" ,
+        "value" : 8
+      },
+      { 
+        "label" : "Usefulness" ,
+        "value" : 13
+      },
+      { 
+        "label" : "Responsiveness" ,
+        "value" : 6
+      }
+    ]
+  },
+  {
+    "key": "4 out of 5",
+    "values": [
+      { 
+        "label" : "Ease of Use" ,
+        "value" : 7
+      },
+      { 
+        "label" : "Usefulness" ,
+        "value" : 8
+      },
+      { 
+        "label" : "Responsiveness" ,
+        "value" : 8
+      }
+    ]
+  },
+  {
+    "key": "5 out of 5",
+    "values": [
+      { 
+        "label" : "Ease of Use" ,
+        "value" : 3
+      },
+      { 
+        "label" : "Usefulness" ,
+        "value" : 8
+      },
+      { 
+        "label" : "Responsiveness" ,
+        "value" : 4
+      }
+    ]
+  }
+]
