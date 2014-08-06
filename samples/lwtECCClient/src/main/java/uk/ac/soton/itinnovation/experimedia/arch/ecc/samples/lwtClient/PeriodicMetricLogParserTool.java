@@ -43,7 +43,7 @@ public class PeriodicMetricLogParserTool
 {
     private final Random random = new Random();
 	private static final Logger logger = LoggerFactory.getLogger(PeriodicMetricLogParserTool.class);
-	private final SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+    private final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	private final LinkedList<String> log = new LinkedList<String>();
 
@@ -133,7 +133,7 @@ public class PeriodicMetricLogParserTool
 
 				// Create measurement instance
 				Measurement m = new Measurement(currentRandomResponseTime + "");
-				m.setTimeStamp(currentDate);
+				m.setTimeStamp( new Date(currentDate.getTime()) );
 				m.setMeasurementSetUUID( ms.getID() );
 				samples.add(m);
 
