@@ -23,13 +23,12 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.experimentSimulation;
+package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.amqpAPI.impl.amqp.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.monitor.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared.*;
 
 import java.util.*;
 import org.slf4j.*;
@@ -46,14 +45,13 @@ public class ECCSimpleLogger
 {
     private static final Logger sLog = LoggerFactory.getLogger(ECCSimpleLogger.class);
 
-    private AMQPBasicChannel		amqpChannel;
-    private EMInterfaceAdapter		emAdapter;
-    private EMIAListener			emAdapterListener;
-	public MetricGenerator			metricGenerator;
-	private ExperimentDataGenerator provGenerator;
-    private boolean					connectedToECC;
-    private boolean					readyToPush;
-    private boolean					shuttingDown;
+    private AMQPBasicChannel   amqpChannel;
+    private EMInterfaceAdapter emAdapter;
+    private EMIAListener	   emAdapterListener;
+	public  MetricGenerator	   metricGenerator;
+    private boolean			   connectedToECC;
+    private boolean			   readyToPush;
+    private boolean			   shuttingDown;
 
 
     public ECCSimpleLogger()
@@ -150,20 +148,84 @@ public class ECCSimpleLogger
      * @param value         - The actual measurement value (in string format)
      * @throws Exception    - Throws if not ready to push; the input parameters invalid; or the Entity/Attribute cannot be found in the metric model
      */
-    public synchronized void pushMetric( String entityName, String attributeName, String value ) throws Exception
+    public synchronized void pushSimpleMetric( String entityName, String attributeName, String value ) throws Exception
+    {
+        try
+        {
+            // Validate push arguments
+            MetricPushArgs mpa = validateMetricPushArgs( entityName, attributeName );
+            
+            // Check value is good
+            if ( value == null )
+            {
+                String err = "Could not push metric data: input parameter(s) invalid";
+
+                sLog.error( err );
+                throw new Exception( err );
+            }
+            
+            // Create measurement
+            Measurement m = new Measurement();
+            m.setValue( value );
+
+            // Try sending it
+            Report report = MetricHelper.createMeasurementReport( mpa.msArg, m );
+            emAdapter.pushMetric( report );
+            
+            // Wait for acknowledgement
+            wait();
+        }
+        catch ( Exception ex )
+        {
+            // Throw it (problem already logged)
+            throw ex;
+        }
+    }
+    
+    /**
+     * Use this method to send multiple metric samples tot he EXPERIMonitor
+     * 
+     * @param entityName     - Name of the entity the metric belongs to
+     * @param attributeName  - Name of the attribute the metric value represents
+     * @param samples        - Non-null collection of measurement instances
+     * @throws Exception     - throws if input parameters are invalid; the model entity/attribute does not exist
+     */
+    public synchronized void pushSimpleMetric( String entityName, String attributeName, Collection<Measurement> samples ) throws Exception
+    {
+        try
+        {
+            // Validate push arguments
+            MetricPushArgs mpa = validateMetricPushArgs( entityName, attributeName );
+            
+            // Check value is good
+            if ( samples == null )
+            {
+                String err = "Could not push metric data: measurements are invalid";
+
+                sLog.error( err );
+                throw new Exception( err );
+            }
+            
+            // Try sending it
+            Report report = MetricHelper.createMeasurementReport( mpa.msArg, samples );
+            emAdapter.pushMetric( report );
+            
+            // Wait for acknowledgement
+            wait();
+        }
+        catch ( Exception ex )
+        {
+            // Throw it (problem already logged)
+            throw ex;
+        }
+    }
+    // Private methods/classes -------------------------------------------------
+    private MetricPushArgs validateMetricPushArgs( String entityName, String attributeName ) throws Exception
     {
         // Safety first
         if ( !readyToPush )
         {
             String err = "Cannot push metric data: ECC/client connection not ready";
-
-            sLog.error( err );
-            throw new Exception( err );
-        }
-
-        if ( entityName == null || attributeName == null || value == null )
-        {
-            String err = "Could not push metric data: input parameter(s) invalid";
 
             sLog.error( err );
             throw new Exception( err );
@@ -178,8 +240,8 @@ public class ECCSimpleLogger
             throw new Exception( err );
         }
 
-        Attribute attr = MetricHelper.getAttributeByName( attributeName, entity );
-        if ( attr == null )
+        Attribute attribute = MetricHelper.getAttributeByName( attributeName, entity );
+        if ( attribute == null )
         {
             String err = "Could not push metric data: attribute not found";
 
@@ -187,7 +249,7 @@ public class ECCSimpleLogger
             throw new Exception( err );
         }
 
-        MeasurementSet ms = MetricHelper.getMeasurementSetForAttribute( attr, metricGenerator );
+        MeasurementSet ms = MetricHelper.getMeasurementSetForAttribute( attribute, metricGenerator );
         if ( ms == null )
         {
             String err = "Could not push metric data: measurement set not found";
@@ -195,20 +257,8 @@ public class ECCSimpleLogger
             sLog.error( err );
             throw new Exception( err );
         }
-
-        Measurement m = new Measurement();
-        m.setValue( value );
-
-        Report report = MetricHelper.createMeasurementReport( ms, m );
-
-        emAdapter.pushMetric( report );
-
-        try
-        {
-            wait();
-        }
-        catch( InterruptedException ie )
-        { sLog.info( "Push acknowledgement interrupted" ); }
+        
+        return new MetricPushArgs( entity, attribute, ms );
     }
 
 	public synchronized void pushProv(EDMProvReport report) {
@@ -216,6 +266,7 @@ public class ECCSimpleLogger
 	}
 
     // Private methods/classes -------------------------------------------------
+
     private synchronized void pushedReportReceived()
     {
         sLog.info( "Pushed reported received" );
@@ -226,6 +277,20 @@ public class ECCSimpleLogger
     {
         shuttingDown = false;
         connectedToECC = false;
+    }
+    
+    private class MetricPushArgs
+    {
+        Entity         entityArg;
+        Attribute      attrArg;
+        MeasurementSet msArg;
+        
+        public MetricPushArgs( Entity ent, Attribute attr, MeasurementSet ms )
+        {
+            entityArg = ent;
+            attrArg   = attr;
+            msArg     = ms;
+        }    
     }
 
     // EMIAdapterListener ------------------------------------------------------
