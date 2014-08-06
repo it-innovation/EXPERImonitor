@@ -21,3 +21,4 @@ doc/build/
 thirdPartyLibs/*.war
 thirdPartyLibs/*.jar
 samples/basicAndroidClient/libs/
+/eccService/src/main/webapp/explorer/eed/nbproject/private
