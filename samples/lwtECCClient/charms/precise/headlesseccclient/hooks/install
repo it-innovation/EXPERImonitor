@@ -1,7 +1,0 @@
-#!/bin/sh
-
-set -eu
-
-apt-get install --no-install-recommends -y openjdk-6-jre-headless
-
-apt-get -y install postgresql-client-9.1

@@ -25,20 +25,12 @@
 
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.lwtClient;
 
-import java.util.Date;
-import java.util.Properties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Attribute;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Entity;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGroup;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricHelper;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricType;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Unit;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared.ECCSimpleLogger;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared.Utilitybox;
+import java.util.*;
+import org.slf4j.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared.*;
+
+
 
 
 public class EntryPoint
@@ -74,15 +66,20 @@ public class EntryPoint
             String msg = "Could not start ECC logger: " + ex.getMessage();
             logger.error( msg, ex );
         }
+        
+        // Sleep until we are ready
+        while ( !eccLogger.isReadyToPush() ) {
+            try {
+                logger.info("ZZzZzzzzzzZZZzzZz");
+                Thread.sleep(1000);
+            }
+            catch ( InterruptedException ex )
+            {
+                logger.info("Ready to send data!");
+            }            
+        }
 
-
-		try {
-			//sleep
-			Thread.sleep(10000);
-		} catch (InterruptedException ex) {
-			logger.info("ZZzZzzzzzzZZZzzZz");
-		}
-
+        // Start sending data
 		boolean lwtServiceRunning = true;
 
 		while ( lwtServiceRunning )
@@ -101,7 +98,12 @@ public class EntryPoint
 				logger.error("Error pushing metric", e);
 			}
 		}
+        
+        eccLogger.shutdown();
+        
 		logger.info("Done!");
+        
+        System.exit( 0 );
     }
 
 	private static MetricGenerator createSimpleModel()
