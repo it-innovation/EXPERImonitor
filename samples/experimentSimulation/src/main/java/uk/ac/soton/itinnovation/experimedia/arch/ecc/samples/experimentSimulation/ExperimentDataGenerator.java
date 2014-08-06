@@ -54,7 +54,7 @@ public class ExperimentDataGenerator {
 	private String logclass;
 	private ILog currentLog;
 
-	private final ExperimediaFactory factory = new ExperimediaFactory();
+	private final ExperimediaFactory factory = new ExperimediaFactory("eee", "http://experimedia.eu/ontologies/ExperimediaExperimentExplorer#>");
 	private ECCSimpleLogger eccLogger;
 
 	//services
@@ -123,7 +123,7 @@ public class ExperimentDataGenerator {
 				this.logclass = logClass;
 			} catch (IOException e) {
 				logger.error("Error reading from logfile " + logfile, e);
-			}
+		}
 	}
 
 	/**
@@ -239,8 +239,7 @@ public class ExperimentDataGenerator {
 							a.activity.addOwlClass(factory.getProvFactory().getNamespaceForPrefix("ski") + "UsingSkiliftActivity");
 
 							//create some liftwaiting time QoE data
-							Content qoe = factory.createDataAtService(participant, app, babylonService, "liftrating", currentLog.getTimestamp().toString());
-
+							//Content qoe = factory.createDataAtService(participant, app, babylonService, "liftrating", String.valueOf(rand.nextInt(5)));
 
 						}
 					} else if (eventKey.equals("lwtservice")) {

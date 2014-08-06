@@ -31,6 +31,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared.Utilitybox;
 
 import java.util.*;
 import org.slf4j.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvReport;
 
 
 public class EntryPoint
@@ -94,8 +95,10 @@ public class EntryPoint
 
 						//push prov
 						if (provGen.processNextLog()) {
+							EDMProvReport report = provGen.getFactory().getProvFactory().createProvReport();
 							logger.info("Processed log line:\n" + provGen.getCurrentLog().toString() + "\nCurrent triples:\n"
-									+ provGen.getFactory().getProvFactory().createProvReport().toString());
+									+ report.toString());
+							eccLogger.pushProv(report);
 						} else {
 							logger.info("End of log reached, stopping client");
 							running = false;

@@ -33,6 +33,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared.*;
 
 import java.util.*;
 import org.slf4j.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvReport;
 
 
 
@@ -209,6 +210,10 @@ public class ECCSimpleLogger
         catch( InterruptedException ie )
         { sLog.info( "Push acknowledgement interrupted" ); }
     }
+
+	public synchronized void pushProv(EDMProvReport report) {
+		emAdapter.pushPROVStatement(report);
+	}
 
     // Private methods/classes -------------------------------------------------
     private synchronized void pushedReportReceived()

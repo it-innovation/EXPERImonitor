@@ -35,8 +35,12 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance
  */
 public class ExperimediaFactory {
 
-	private final EDMProvFactory provFactory = EDMProvFactory.getInstance();
+	private final EDMProvFactory provFactory;
 	private static final Logger logger = LoggerFactory.getLogger(ExperimediaFactory.class);
+
+	public ExperimediaFactory(String prefix, String baseURI) {
+		provFactory = EDMProvFactory.getInstance(prefix, baseURI);
+	}
 
 	/**
 	 * Creates a participant
