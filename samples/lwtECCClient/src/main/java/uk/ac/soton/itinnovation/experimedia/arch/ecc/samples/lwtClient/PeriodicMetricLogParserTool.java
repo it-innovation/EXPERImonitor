@@ -179,7 +179,7 @@ public class PeriodicMetricLogParserTool
 				// Create measurement instances
 				Measurement m = null;
 
-				if (aName.equals("Response time")) {
+				if (aName.equals("Average response time")) {
 					m = new Measurement(currentRandomResponseTime + "");
 				} else if (aName.equals("CPU usage")) {
 					m = new Measurement(currentRandomCPU + "");

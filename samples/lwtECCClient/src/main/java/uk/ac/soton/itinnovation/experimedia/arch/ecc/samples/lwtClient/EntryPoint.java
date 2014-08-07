@@ -127,17 +127,18 @@ public class EntryPoint
 		 // A simple entity
         Entity e = new Entity();
         e.setName( "LWTService" );
+		e.setEntityID("http://experimedia.eu/ontologies/ExperimediaExperimentExplorer#entity_lwtService");
         e.setDescription( "Lift waiting time service" );
         metGen.addEntity( e );
 
         // A simple attribute
-        Attribute a = MetricHelper.createAttribute( "Response time", "The Server's response time", e );
+        Attribute a = MetricHelper.createAttribute( "Average response time", "The Server's response time", e );
 		Attribute b = MetricHelper.createAttribute( "CPU usage", "The Server's CPU usage in percent", e );
 		Attribute c = MetricHelper.createAttribute( "Memory usage", "The Server's memory usage in percent", e );
 
         // A measurement set associated with the attribute
         ResponseTime = MetricHelper.createMeasurementSet( a, MetricType.RATIO,
-                                           new Unit( "milliseconds" ),
+                                           new Unit( "ms" ),
                                            group );
 
 		CPUUsage = MetricHelper.createMeasurementSet( b, MetricType.RATIO,
