@@ -25,8 +25,6 @@
 
 package uk.ac.soton.itinnovation.ecc.service.domain.explorer.provenance;
 
-import uk.ac.soton.itinnovation.ecc.service.domain.explorer.provenance.EccPROVActivity;
-import uk.ac.soton.itinnovation.ecc.service.domain.explorer.provenance.EccPROVApplication;
 import java.util.ArrayList;
 
 
@@ -34,25 +32,25 @@ import java.util.ArrayList;
 
 public class EccActivityApplicationResultSet
 {
-    private EccPROVActivity               activity;
-    private ArrayList<EccPROVApplication> applicationList;
+    private EccActivity               activity;
+    private ArrayList<EccApplication> applicationList;
     
-    public EccActivityApplicationResultSet( EccPROVActivity act )
+    public EccActivityApplicationResultSet( EccActivity act )
     {
         activity = act;
         applicationList = new ArrayList<>();
     }
     
-    public void addApplication( EccPROVApplication app )
+    public void addApplication( EccApplication app )
     {
         if ( app != null && !applicationList.contains(app) )
             applicationList.add( app );
     }
     
-    public EccPROVActivity getActivity()
+    public EccActivity getActivity()
     { return activity; }
     
-    public ArrayList<EccPROVApplication> getApplications()
+    public ArrayList<EccApplication> getApplications()
     { return applicationList; }
     
     public int getApplicationTotal()

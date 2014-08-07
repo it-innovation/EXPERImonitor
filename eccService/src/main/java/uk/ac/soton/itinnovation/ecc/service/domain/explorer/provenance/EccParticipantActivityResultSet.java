@@ -25,9 +25,8 @@
 
 package uk.ac.soton.itinnovation.ecc.service.domain.explorer.provenance;
 
-import uk.ac.soton.itinnovation.ecc.service.domain.explorer.provenance.EccPROVActivity;
-import uk.ac.soton.itinnovation.ecc.service.domain.explorer.provenance.EccParticipant;
 import java.util.ArrayList;
+
 
 
 
@@ -35,7 +34,7 @@ import java.util.ArrayList;
 public class EccParticipantActivityResultSet
 {
     private EccParticipant             participant;
-    private ArrayList<EccPROVActivity> activityList;
+    private ArrayList<EccActivity> activityList;
     
     public EccParticipantActivityResultSet( EccParticipant part )
     {
@@ -44,7 +43,7 @@ public class EccParticipantActivityResultSet
         activityList = new ArrayList<>();
     }
     
-    public void addActivity( EccPROVActivity act )
+    public void addActivity( EccActivity act )
     {
         if ( act != null && !activityList.contains(act) )
             activityList.add( act );
@@ -53,7 +52,7 @@ public class EccParticipantActivityResultSet
     public EccParticipant getParticipant()
     { return participant; }
     
-    public ArrayList<EccPROVActivity> getActivities()
+    public ArrayList<EccActivity> getActivities()
     {
         return activityList;
     }

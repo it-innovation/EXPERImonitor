@@ -25,8 +25,6 @@
 
 package uk.ac.soton.itinnovation.ecc.service.domain.explorer.provenance;
 
-import uk.ac.soton.itinnovation.ecc.service.domain.explorer.provenance.EccPROVApplication;
-import uk.ac.soton.itinnovation.ecc.service.domain.explorer.provenance.EccPROVService;
 import java.util.ArrayList;
 
 
@@ -34,27 +32,27 @@ import java.util.ArrayList;
 
 public class EccApplicationServiceResultSet
 {
-    private EccPROVApplication        application;
-    private ArrayList<EccPROVService> serviceList;
+    private EccApplication        application;
+    private ArrayList<EccService> serviceList;
     
     
-    public EccApplicationServiceResultSet( EccPROVApplication app )
+    public EccApplicationServiceResultSet( EccApplication app )
     {
         serviceList = new ArrayList<>();
         
         application = app;
     }
     
-    public EccPROVApplication getApplication()
+    public EccApplication getApplication()
     { return application; }
     
-    public ArrayList<EccPROVService> getServices()
+    public ArrayList<EccService> getServices()
     { return serviceList; }
     
     public int getServiceTotal()
     { return serviceList.size(); }
     
-    public void addService( EccPROVService service )
+    public void addService( EccService service )
     {
         if ( service != null && !serviceList.contains(service) )
             serviceList.add( service );

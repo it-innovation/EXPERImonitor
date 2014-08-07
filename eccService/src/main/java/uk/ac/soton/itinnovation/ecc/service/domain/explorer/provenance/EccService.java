@@ -28,14 +28,14 @@ package uk.ac.soton.itinnovation.ecc.service.domain.explorer.provenance;
 
 
 
-public class EccPROVService
+public class EccService
 {
     private String name;
     private String description;
     private String provIRI;
     
     
-    public EccPROVService( String serName,
+    public EccService( String serName,
                            String serDesc,
                            String serIRI )
     {

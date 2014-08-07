@@ -60,9 +60,9 @@ public class ExplorerDemoData
     public HashMap<String, EccNOMORDParticipantSummary> qoeParticipantSummaryData;
     public ArrayList<EccNOMORDStratifiedSummary>        qoeStratifiedSummaryDistribData;
     
-    public ArrayList<EccPROVActivity>    linearActivities;
-    public ArrayList<EccPROVApplication> linearApplications;
-    public ArrayList<EccPROVService>     linearServices;
+    public ArrayList<EccActivity>    linearActivities;
+    public ArrayList<EccApplication> linearApplications;
+    public ArrayList<EccService>     linearServices;
     
     public HashMap<String, EccParticipantActivityResultSet> participantActivities;
     public HashMap<String, EccActivityApplicationResultSet> activityApplications;
@@ -332,7 +332,7 @@ public class ExplorerDemoData
         
         
         // Activity 1 (1 minute)
-        EccPROVActivity act = new EccPROVActivity( "Used lift application",
+        EccActivity act = new EccActivity( "Used lift application",
                                                    "Checked lift waiting time",
                                                    "http://it-innovation.soton.ac.uk/ontologies/experimedia#activity_d5b1ba72-f0e4-45f2-a996-fff97cdc2de2",
                                                    new Date( expStartDate.getTime()),
@@ -340,7 +340,7 @@ public class ExplorerDemoData
         linearActivities.add( act );
         
         // Activity 2 (5 minutes)
-        act = new EccPROVActivity( "Used lift application",
+        act = new EccActivity( "Used lift application",
                                    "Checked lift waiting time",
                                    "http://it-innovation.soton.ac.uk/ontologies/experimedia#activity_c108742d-d41d-40ee-b532-7f8fd6508baf",
                                    new Date( expStartDate.getTime() +600000),
@@ -348,7 +348,7 @@ public class ExplorerDemoData
         linearActivities.add( act );
         
         // Activity 3 (5 minutes)
-        act = new EccPROVActivity( "Used lift application",
+        act = new EccActivity( "Used lift application",
                                    "Checked lift waiting time",
                                    "http://it-innovation.soton.ac.uk/ontologies/experimedia#activity_0f9d7667-1276-4a20-9278-a355ccb6e467",
                                    new Date( expStartDate.getTime() +960000),
@@ -356,7 +356,7 @@ public class ExplorerDemoData
         linearActivities.add( act );
         
         // Activity 4 (5 minutes)
-        act = new EccPROVActivity( "Used lift application",
+        act = new EccActivity( "Used lift application",
                                    "Checked lift waiting time",
                                    "http://it-innovation.soton.ac.uk/ontologies/experimedia#activity_aee642e6-ade7-4b44-870d-bb70ff5c02f1",
                                    new Date( expStartDate.getTime() +1320000),
@@ -364,7 +364,7 @@ public class ExplorerDemoData
         linearActivities.add( act );
         
         // Activity 5 (1 minute)
-        act = new EccPROVActivity( "Used lift application",
+        act = new EccActivity( "Used lift application",
                                    "Checked lift waiting time",
                                    "http://it-innovation.soton.ac.uk/ontologies/experimedia#activity_98626f59-47d0-467c-b43b-a0ae253ec193",
                                    new Date( expStartDate.getTime() +3000000),
@@ -372,7 +372,7 @@ public class ExplorerDemoData
         linearActivities.add( act );
         
         // Activity 6 (1 minute)
-        act = new EccPROVActivity( "Used lift application",
+        act = new EccActivity( "Used lift application",
                                    "Checked lift waiting time",
                                    "http://it-innovation.soton.ac.uk/ontologies/experimedia#activity_98626f59-47d0-467c-b43b-a0ae253ec193",
                                    new Date( expStartDate.getTime() +3120000),
@@ -407,17 +407,17 @@ public class ExplorerDemoData
         activityApplications = new HashMap<>();
         
         // 3 x different application instancess
-        EccPROVApplication app = new EccPROVApplication( "Ski Lift Waiting App",
+        EccApplication app = new EccApplication( "Ski Lift Waiting App",
                                                          "Mobile application used to predict waiting time",
                                                          "http://it-innovation.soton.ac.uk/ontologies/experimedia#application_14e3e008-95bb-4423-a21f-c216c614d591" );    
         linearApplications.add( app );
         
-        app = new EccPROVApplication( "Ski Lift Waiting App",
+        app = new EccApplication( "Ski Lift Waiting App",
                                       "Mobile application used to predict waiting time",
                                       "http://it-innovation.soton.ac.uk/ontologies/experimedia#application_3af4c091-2019-4f1c-a867-89c44970a509" );    
         linearApplications.add( app );
         
-        app = new EccPROVApplication( "Ski Lift Waiting App",
+        app = new EccApplication( "Ski Lift Waiting App",
                                       "Mobile application used to predict waiting time",
                                       "http://it-innovation.soton.ac.uk/ontologies/experimedia#application_7ee60153-0ba0-4765-b44c-bb1137533d16" );    
         linearApplications.add( app );
@@ -429,7 +429,7 @@ public class ExplorerDemoData
             
             int appIndex = 0;
             
-            for ( EccPROVActivity act : ais.getActivities() )
+            for ( EccActivity act : ais.getActivities() )
             {
                 EccActivityApplicationResultSet aais = new EccActivityApplicationResultSet( act );
                 aais.addApplication( linearApplications.get(appIndex) );
@@ -446,13 +446,13 @@ public class ExplorerDemoData
         applicationServices = new HashMap<>();
         
         // Create a single service for all the applications
-        EccPROVService service = new EccPROVService( "VAS Component (Service)",
+        EccService service = new EccService( "VAS Component (Service)",
                                                      "VAS provides video analytics",
                                                      "http://it-innovation.soton.ac.uk/ontologies/experimedia#service_14e3e008-95bb-4423-a21f-c216c614d591" );
         linearServices.add( service );
         
         // Associate each application with the service
-        for ( EccPROVApplication app : linearApplications )
+        for ( EccApplication app : linearApplications )
         {
             EccApplicationServiceResultSet asrs = new EccApplicationServiceResultSet( app );
             asrs.addService( service );
@@ -484,7 +484,7 @@ public class ExplorerDemoData
         // Create generic QoS distribution data for each activity frame
         Random rand = new Random();
         int index = 0;
-        for ( EccPROVActivity act : linearActivities )
+        for ( EccActivity act : linearActivities )
         {
             float floor = rand.nextFloat() * 3.0f;
             float ceil  = rand.nextFloat() * 10.0f;

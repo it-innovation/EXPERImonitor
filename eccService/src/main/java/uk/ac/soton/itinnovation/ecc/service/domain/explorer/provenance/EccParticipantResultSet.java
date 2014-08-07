@@ -25,7 +25,6 @@
 
 package uk.ac.soton.itinnovation.ecc.service.domain.explorer.provenance;
 
-import uk.ac.soton.itinnovation.ecc.service.domain.explorer.provenance.EccParticipant;
 import java.util.ArrayList;
 
 

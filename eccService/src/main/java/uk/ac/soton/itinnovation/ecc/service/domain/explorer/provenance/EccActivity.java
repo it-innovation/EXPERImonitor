@@ -30,7 +30,7 @@ import java.util.Date;
 
 
 
-public class EccPROVActivity
+public class EccActivity
 {
     private String name;
     private String description;
@@ -39,7 +39,7 @@ public class EccPROVActivity
     private Date   actEnded;
     
     
-    public EccPROVActivity( String aName,
+    public EccActivity( String aName,
                             String aDesc,
                             String aIRI,
                             Date   started,
