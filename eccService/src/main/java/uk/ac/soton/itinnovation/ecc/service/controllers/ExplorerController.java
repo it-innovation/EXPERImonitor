@@ -25,6 +25,12 @@
 
 package uk.ac.soton.itinnovation.ecc.service.controllers;
 
+import uk.ac.soton.itinnovation.ecc.service.domain.explorer.provenance.EccActivityApplicationResultSet;
+import uk.ac.soton.itinnovation.ecc.service.domain.explorer.provenance.EccApplicationServiceResultSet;
+import uk.ac.soton.itinnovation.ecc.service.domain.explorer.provenance.EccParticipantResultSet;
+import uk.ac.soton.itinnovation.ecc.service.domain.explorer.metrics.EccParticipantAttributeResultSet;
+import uk.ac.soton.itinnovation.ecc.service.domain.explorer.provenance.EccParticipantActivityResultSet;
+import uk.ac.soton.itinnovation.ecc.service.domain.explorer.metrics.EccAttributeResultSet;
 import uk.ac.soton.itinnovation.ecc.service.domain.explorer.provenance.*;
 import uk.ac.soton.itinnovation.ecc.service.domain.explorer.distributions.*;
 import uk.ac.soton.itinnovation.ecc.service.domain.explorer.*;

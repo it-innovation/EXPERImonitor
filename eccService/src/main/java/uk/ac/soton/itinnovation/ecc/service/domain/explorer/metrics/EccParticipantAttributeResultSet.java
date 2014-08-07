@@ -23,8 +23,9 @@
 //
 /////////////////////////////////////////////////////////////////////////
 
-package uk.ac.soton.itinnovation.ecc.service.domain.explorer;
+package uk.ac.soton.itinnovation.ecc.service.domain.explorer.metrics;
 
+import uk.ac.soton.itinnovation.ecc.service.domain.explorer.metrics.EccAttributeInfo;
 import java.util.ArrayList;
 
 
