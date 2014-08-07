@@ -37,7 +37,12 @@ public class EntryPoint
 {
 	private static final Logger logger = LoggerFactory.getLogger(EntryPoint.class);
 	private static PeriodicMetricLogParserTool logTool;
-	private static MeasurementSet ms;
+
+	private static MetricGenerator metGen;
+
+	private static MeasurementSet ResponseTime;
+	private static MeasurementSet CPUUsage;
+	private static MeasurementSet MemoryUsage;
 
     // Main entry point
     public static void main( String args[] )
@@ -66,7 +71,7 @@ public class EntryPoint
             String msg = "Could not start ECC logger: " + ex.getMessage();
             logger.error( msg, ex );
         }
-        
+
         // Sleep until we are ready
         while ( !eccLogger.isReadyToPush() ) {
             try {
@@ -76,7 +81,7 @@ public class EntryPoint
             catch ( InterruptedException ex )
             {
                 logger.info("Ready to send data!");
-            }            
+            }
         }
 
         // Start sending data
@@ -93,23 +98,25 @@ public class EntryPoint
 
 			try {
 				// Do cool simulation codey bit & push whole report to ECC using Simon's new and shiny method
-				eccLogger.pushSimpleMetric("LWTService", "Response time", logTool.createReport(ms, 60));
+				eccLogger.pushSimpleMetric("LWTService", "Response time", logTool.createReport(ResponseTime, metGen, 60));
+				eccLogger.pushSimpleMetric("LWTService", "CPU usage", logTool.createReport(CPUUsage, metGen, 60));
+				eccLogger.pushSimpleMetric("LWTService", "Memory usage", logTool.createReport(MemoryUsage, metGen, 60));
 			} catch (Exception e) {
 				logger.error("Error pushing metric", e);
 			}
 		}
-        
+
         eccLogger.shutdown();
-        
+
 		logger.info("Done!");
-        
+
         System.exit( 0 );
     }
 
 	private static MetricGenerator createSimpleModel()
     {
         // Metric Generator
-        MetricGenerator metGen = new MetricGenerator();
+        metGen = new MetricGenerator();
         metGen.setName( "Lift waiting time metric generator" );
         metGen.setDescription("Created: " + (new Date()).toString() );
 
@@ -125,10 +132,20 @@ public class EntryPoint
 
         // A simple attribute
         Attribute a = MetricHelper.createAttribute( "Response time", "The Server's response time", e );
+		Attribute b = MetricHelper.createAttribute( "CPU usage", "The Server's CPU usage in percent", e );
+		Attribute c = MetricHelper.createAttribute( "Memory usage", "The Server's memory usage in percent", e );
 
         // A measurement set associated with the attribute
-        ms = MetricHelper.createMeasurementSet( a, MetricType.RATIO,
+        ResponseTime = MetricHelper.createMeasurementSet( a, MetricType.RATIO,
                                            new Unit( "milliseconds" ),
+                                           group );
+
+		CPUUsage = MetricHelper.createMeasurementSet( b, MetricType.RATIO,
+                                           new Unit( "%" ),
+                                           group );
+
+		MemoryUsage = MetricHelper.createMeasurementSet( c, MetricType.RATIO,
+                                           new Unit( "%" ),
                                            group );
 
         return metGen;

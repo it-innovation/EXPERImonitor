@@ -247,7 +247,7 @@ public class ExperimentDataGenerator {
 						Content liftinfo = factory.retrieveDataFromService(participant, app, lwtService, "lwtinfo", currentLog.getTimestamp().toString());
 
 						//TODO: link liftinfo entity to metrics (entity, attribute, metric)
-						eccLogger.pushSimpleMetric("LWTService", "Response time", eventValue);
+						//eccLogger.pushSimpleMetric("LWTService", "Response time", eventValue);
 
 					} else if (eventKey.equals("questionnaire")) {
 						//TODO

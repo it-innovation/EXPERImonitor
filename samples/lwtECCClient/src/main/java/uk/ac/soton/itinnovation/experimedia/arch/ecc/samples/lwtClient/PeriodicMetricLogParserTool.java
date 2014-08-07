@@ -49,9 +49,19 @@ public class PeriodicMetricLogParserTool
 
     private Date currentDate;
     private Date nextDate;
+
     private int  currentResponseTime;
 	private int  nextResponseTime;
 	private int currentRandomResponseTime;
+
+	private int  currentMem;
+	private int  nextMem;
+	private int currentRandomMem;
+
+	private int  currentCPU;
+	private int  nextCPU;
+	private int currentRandomCPU;
+
 	public boolean hasFinished = false;
 
 	public static final int VARIANCE_PERCENTAGE = 10;
@@ -59,7 +69,11 @@ public class PeriodicMetricLogParserTool
 
     public PeriodicMetricLogParserTool()
     {
-        //read log
+       init();
+    }
+
+	private void init() {
+		 //read log
 		String logfilePath = PeriodicMetricLogParserTool.class.getClassLoader().getResource("lwt.txt").getPath();
 		try {
 			FileReader fr = new FileReader(new File(logfilePath));
@@ -72,34 +86,51 @@ public class PeriodicMetricLogParserTool
 		} catch (IOException e) {
 			logger.error("Error reading from logfile " + logfilePath, e);
 		}
-		//first date so everything will be null until then
+		//first date; everything will be null until then
 		getNextLog();
 		currentDate = nextDate;
-		currentResponseTime = nextResponseTime;
+		rollForward();
 		getNextLog();
-    }
+	}
+
+	private void rollForward() {
+		currentResponseTime = nextResponseTime;
+		currentCPU = nextCPU;
+		currentMem = nextMem;
+	}
 
 	private void measure() {
 
 		if (nextDate!=null) {
-			//set current time to one second in the future
+			//set current time to next step in the future (amount = frequency)
 			currentDate.setTime(currentDate.getTime() + (FREQUENCY * 1000L));
 			//if next checkpoint reached use new value
 			if (currentDate.equals(nextDate) || currentDate.after(nextDate)) {
-				currentResponseTime = nextResponseTime;
+				rollForward();
 				//get next line from log
 				getNextLog();
 			}
-			//modify value randomly
-			boolean negative = random.nextBoolean();
-			double rand = random.nextDouble() * 0.01 * VARIANCE_PERCENTAGE * currentResponseTime;
-			if (negative) {
-				currentRandomResponseTime = currentResponseTime - Integer.valueOf(String.valueOf(Math.round(rand)));
-			} else {
-				currentRandomResponseTime = currentResponseTime + Integer.valueOf(String.valueOf(Math.round(rand)));
-			}
 
-			logger.debug("Current random response time: " + String.valueOf(currentRandomResponseTime));
+			//modify value randomly
+			currentRandomResponseTime = currentResponseTime + createRandomVarianceOf(currentResponseTime);
+			currentRandomCPU = currentCPU + createRandomVarianceOf(currentCPU);
+			currentRandomMem = currentMem + createRandomVarianceOf(currentMem);
+
+			//logger.debug("Current random response time: " + String.valueOf(currentRandomResponseTime));
+			//logger.debug("Current random CPU: " + String.valueOf(currentRandomCPU));
+			//logger.debug("Current random Mem: " + String.valueOf(currentRandomMem));
+		}
+	}
+
+	private int createRandomVarianceOf(int value) {
+		//randomise value
+		double rand = random.nextDouble() * 0.01 * VARIANCE_PERCENTAGE * value;
+		int randy = (int) Math.round(rand);
+		//positive or negative?
+		if (random.nextBoolean()) {
+			return -randy;
+		} else {
+			return randy;
 		}
 	}
 
@@ -114,28 +145,56 @@ public class PeriodicMetricLogParserTool
 				logger.error("Error formatting date: " + date, e);
 			}
 			nextResponseTime = Integer.valueOf(l.split(",")[1].split(":")[1]);
-			logger.debug(nextDate.toString() + ", " + nextResponseTime);
+			nextMem = Integer.valueOf(l.split(",")[2].split(":")[1]);
+			nextCPU = Integer.valueOf(l.split(",")[3].split(":")[1]);
+
+			//logger.debug(nextDate.toString() + ", " + nextResponseTime);
+			//logger.debug("Response time: " + nextResponseTime);
+			//logger.debug("Mem: " + nextMem);
+			//logger.debug("CPU: " + nextCPU);
+
 		} else {
 			nextDate = null;
 		}
 	}
 
-    public Collection<Measurement> createReport( MeasurementSet ms, int sampleCount )
+    public Collection<Measurement> createReport( MeasurementSet ms, MetricGenerator metGen, int sampleCount )
     {
 
 		Collection<Measurement> samples = new LinkedList<Measurement>();
 
+		//get attribute for measurement
+		Entity entity = MetricHelper.getEntityFromName("LWTService", metGen);
+		UUID aID = ms.getAttributeID();
+		Attribute a = MetricHelper.getAttributeByID(aID, entity);
+		String aName = a.getName();
+
+		logger.debug(ms.getAttributeID() + ", " + aName);
 
 		while (nextDate!=null) {
 			for (int i=0; i<sampleCount; i++) {
 				measure();
-				logger.info("Current date: " + currentDate.toString());
+				logger.debug("Current date: " + currentDate.toString());
 
-				// Create measurement instance
-				Measurement m = new Measurement(currentRandomResponseTime + "");
+				// Create measurement instances
+				Measurement m = null;
+
+				if (aName.equals("Response time")) {
+					m = new Measurement(currentRandomResponseTime + "");
+				} else if (aName.equals("CPU usage")) {
+					m = new Measurement(currentRandomCPU + "");
+				} else if (aName.equals("Memory usage")) {
+					m = new Measurement(currentRandomMem + "");
+				} else {
+					logger.warn("Unknown attribute for measurement: " + aName + ", skipping");
+					break;
+				}
+
 				m.setTimeStamp( new Date(currentDate.getTime()) );
 				m.setMeasurementSetUUID( ms.getID() );
 				samples.add(m);
+
+				logger.debug("Added " + aName + " measurement");
 
 				if (nextDate==null) {
 					hasFinished = true;
@@ -143,6 +202,9 @@ public class PeriodicMetricLogParserTool
 				}
 			}
 		}
+
+		//reset log
+		init();
 
 		return samples;
 	}
