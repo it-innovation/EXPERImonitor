@@ -64,9 +64,10 @@ public class ExplorerDemoData
     public ArrayList<EccApplication> linearApplications;
     public ArrayList<EccService>     linearServices;
     
-    public HashMap<String, EccParticipantActivityResultSet> participantActivities;
-    public HashMap<String, EccActivityApplicationResultSet> activityApplications;
-    public HashMap<String, EccApplicationServiceResultSet>  applicationServices;
+    public HashMap<String, EccParticipantActivitySummaryResultSet> participantActivitySummary;
+    public HashMap<String, EccParticipantActivityResultSet>        participantActivities;
+    public HashMap<String, EccActivityApplicationResultSet>        activityApplications;
+    public HashMap<String, EccApplicationServiceResultSet>         applicationServices;
     
     public HashMap<String, EccAttributeResultSet> serviceQoSAttributes;
     
@@ -96,6 +97,7 @@ public class ExplorerDemoData
         createActivityData();
         createApplicationData();
         createServiceData();
+        createParticipantSummaryData();
     }
     
     public EccParticipant getParticipant( String IRI )
@@ -124,6 +126,11 @@ public class ExplorerDemoData
         partInfoSet.addParticipant( BobPART );
         
         return partInfoSet;
+    }
+    
+    public EccParticipantActivitySummaryResultSet getPROVSummaryByParticipant( String partIRI )
+    {
+        return participantActivitySummary.get( partIRI );
     }
     
     public EccParticipantActivityResultSet getActivitiesByParticipant( String partIRI )
@@ -266,36 +273,36 @@ public class ExplorerDemoData
         // 1 of 5
         EccNOMORDStratifiedSummary nss = new EccNOMORDStratifiedSummary( "1 of 5" );
         nss.addStratifiedItem( new EccItemCount( qoeAttrONE.getName(), 1 ) );
-        nss.addStratifiedItem( new EccItemCount( qoeAttrTWO.getName(), 1 ) );
-        nss.addStratifiedItem( new EccItemCount( qoeAttrTHREE.getName(), 1 ) );
+        nss.addStratifiedItem( new EccItemCount( qoeAttrTWO.getName(), 2 ) );
+        nss.addStratifiedItem( new EccItemCount( qoeAttrTHREE.getName(), 3 ) );
         qoeStratifiedSummaryDistribData.add( nss );
         
         // 2 of 5
         nss = new EccNOMORDStratifiedSummary( "2 of 5" );
-        nss.addStratifiedItem( new EccItemCount( qoeAttrONE.getName(), 0 ) );
-        nss.addStratifiedItem( new EccItemCount( qoeAttrTWO.getName(), 0 ) );
-        nss.addStratifiedItem( new EccItemCount( qoeAttrTHREE.getName(), 0 ) );
+        nss.addStratifiedItem( new EccItemCount( qoeAttrONE.getName(), 3 ) );
+        nss.addStratifiedItem( new EccItemCount( qoeAttrTWO.getName(), 2 ) );
+        nss.addStratifiedItem( new EccItemCount( qoeAttrTHREE.getName(), 3 ) );
         qoeStratifiedSummaryDistribData.add( nss );
         
         // 3 of 5
         nss = new EccNOMORDStratifiedSummary( "3 of 5" );
-        nss.addStratifiedItem( new EccItemCount( qoeAttrONE.getName(), 1 ) );
-        nss.addStratifiedItem( new EccItemCount( qoeAttrTWO.getName(), 1 ) );
-        nss.addStratifiedItem( new EccItemCount( qoeAttrTHREE.getName(), 1 ) );
+        nss.addStratifiedItem( new EccItemCount( qoeAttrONE.getName(), 2 ) );
+        nss.addStratifiedItem( new EccItemCount( qoeAttrTWO.getName(), 4 ) );
+        nss.addStratifiedItem( new EccItemCount( qoeAttrTHREE.getName(), 4 ) );
         qoeStratifiedSummaryDistribData.add( nss );
         
         // 4 of 5
         nss = new EccNOMORDStratifiedSummary( "4 of 5" );
-        nss.addStratifiedItem( new EccItemCount( qoeAttrONE.getName(), 1 ) );
-        nss.addStratifiedItem( new EccItemCount( qoeAttrTWO.getName(), 0 ) );
-        nss.addStratifiedItem( new EccItemCount( qoeAttrTHREE.getName(), 0 ) );
+        nss.addStratifiedItem( new EccItemCount( qoeAttrONE.getName(), 4 ) );
+        nss.addStratifiedItem( new EccItemCount( qoeAttrTWO.getName(), 3 ) );
+        nss.addStratifiedItem( new EccItemCount( qoeAttrTHREE.getName(), 5 ) );
         qoeStratifiedSummaryDistribData.add( nss );
         
         // 5 of 5
         nss = new EccNOMORDStratifiedSummary( "5 of 5" );
-        nss.addStratifiedItem( new EccItemCount( qoeAttrONE.getName(), 0 ) );
-        nss.addStratifiedItem( new EccItemCount( qoeAttrTWO.getName(), 1 ) );
-        nss.addStratifiedItem( new EccItemCount( qoeAttrTHREE.getName(), 1 ) );
+        nss.addStratifiedItem( new EccItemCount( qoeAttrONE.getName(), 5 ) );
+        nss.addStratifiedItem( new EccItemCount( qoeAttrTWO.getName(), 6 ) );
+        nss.addStratifiedItem( new EccItemCount( qoeAttrTHREE.getName(), 4 ) );
         qoeStratifiedSummaryDistribData.add( nss );
     }
     
@@ -333,50 +340,50 @@ public class ExplorerDemoData
         
         // Activity 1 (1 minute)
         EccActivity act = new EccActivity( "Used lift application",
-                                                   "Checked lift waiting time",
-                                                   "http://it-innovation.soton.ac.uk/ontologies/experimedia#activity_d5b1ba72-f0e4-45f2-a996-fff97cdc2de2",
-                                                   new Date( expStartDate.getTime()),
-                                                   new Date( expStartDate.getTime() + 60000) );
+                                           "Checked lift waiting time",
+                                           "http://it-innovation.soton.ac.uk/ontologies/experimedia#activity_d5b1ba72-f0e4-45f2-a996-fff97cdc2de2",
+                                           new Date( expStartDate.getTime()),
+                                           new Date( expStartDate.getTime() + 60000) );
         linearActivities.add( act );
         
         // Activity 2 (5 minutes)
         act = new EccActivity( "Used lift application",
-                                   "Checked lift waiting time",
-                                   "http://it-innovation.soton.ac.uk/ontologies/experimedia#activity_c108742d-d41d-40ee-b532-7f8fd6508baf",
-                                   new Date( expStartDate.getTime() +600000),
-                                   new Date( expStartDate.getTime() +900000) );
+                               "Checked lift waiting time",
+                               "http://it-innovation.soton.ac.uk/ontologies/experimedia#activity_c108742d-d41d-40ee-b532-7f8fd6508baf",
+                               new Date( expStartDate.getTime() +600000),
+                               new Date( expStartDate.getTime() +900000) );
         linearActivities.add( act );
         
         // Activity 3 (5 minutes)
         act = new EccActivity( "Used lift application",
-                                   "Checked lift waiting time",
-                                   "http://it-innovation.soton.ac.uk/ontologies/experimedia#activity_0f9d7667-1276-4a20-9278-a355ccb6e467",
-                                   new Date( expStartDate.getTime() +960000),
-                                   new Date( expStartDate.getTime() +1260000) );
+                               "Checked lift waiting time",
+                               "http://it-innovation.soton.ac.uk/ontologies/experimedia#activity_0f9d7667-1276-4a20-9278-a355ccb6e467",
+                               new Date( expStartDate.getTime() +960000),
+                               new Date( expStartDate.getTime() +1260000) );
         linearActivities.add( act );
         
         // Activity 4 (5 minutes)
         act = new EccActivity( "Used lift application",
-                                   "Checked lift waiting time",
-                                   "http://it-innovation.soton.ac.uk/ontologies/experimedia#activity_aee642e6-ade7-4b44-870d-bb70ff5c02f1",
-                                   new Date( expStartDate.getTime() +1320000),
-                                   new Date( expStartDate.getTime() +1620000) );
+                               "Checked lift waiting time",
+                               "http://it-innovation.soton.ac.uk/ontologies/experimedia#activity_aee642e6-ade7-4b44-870d-bb70ff5c02f1",
+                               new Date( expStartDate.getTime() +1320000),
+                               new Date( expStartDate.getTime() +1620000) );
         linearActivities.add( act );
         
         // Activity 5 (1 minute)
         act = new EccActivity( "Used lift application",
-                                   "Checked lift waiting time",
-                                   "http://it-innovation.soton.ac.uk/ontologies/experimedia#activity_98626f59-47d0-467c-b43b-a0ae253ec193",
-                                   new Date( expStartDate.getTime() +3000000),
-                                   new Date( expStartDate.getTime() +3060000) );
+                               "Checked lift waiting time",
+                               "http://it-innovation.soton.ac.uk/ontologies/experimedia#activity_98626f59-47d0-467c-b43b-a0ae253ec193",
+                               new Date( expStartDate.getTime() +3000000),
+                               new Date( expStartDate.getTime() +3060000) );
         linearActivities.add( act );
         
         // Activity 6 (1 minute)
         act = new EccActivity( "Used lift application",
-                                   "Checked lift waiting time",
-                                   "http://it-innovation.soton.ac.uk/ontologies/experimedia#activity_98626f59-47d0-467c-b43b-a0ae253ec193",
-                                   new Date( expStartDate.getTime() +3120000),
-                                   new Date( expStartDate.getTime() +3180000) );
+                               "Checked lift waiting time",
+                               "http://it-innovation.soton.ac.uk/ontologies/experimedia#activity_98626f59-47d0-467c-b43b-a0ae253ec193",
+                               new Date( expStartDate.getTime() +3120000),
+                               new Date( expStartDate.getTime() +3180000) );
         linearActivities.add( act );
         
         // Map to participants
@@ -408,18 +415,18 @@ public class ExplorerDemoData
         
         // 3 x different application instancess
         EccApplication app = new EccApplication( "Ski Lift Waiting App",
-                                                         "Mobile application used to predict waiting time",
-                                                         "http://it-innovation.soton.ac.uk/ontologies/experimedia#application_14e3e008-95bb-4423-a21f-c216c614d591" );    
+                                                 "Mobile application used to predict waiting time",
+                                                 "http://it-innovation.soton.ac.uk/ontologies/experimedia#application_14e3e008-95bb-4423-a21f-c216c614d591" );    
         linearApplications.add( app );
         
         app = new EccApplication( "Ski Lift Waiting App",
-                                      "Mobile application used to predict waiting time",
-                                      "http://it-innovation.soton.ac.uk/ontologies/experimedia#application_3af4c091-2019-4f1c-a867-89c44970a509" );    
+                                  "Mobile application used to predict waiting time",
+                                  "http://it-innovation.soton.ac.uk/ontologies/experimedia#application_3af4c091-2019-4f1c-a867-89c44970a509" );    
         linearApplications.add( app );
         
         app = new EccApplication( "Ski Lift Waiting App",
-                                      "Mobile application used to predict waiting time",
-                                      "http://it-innovation.soton.ac.uk/ontologies/experimedia#application_7ee60153-0ba0-4765-b44c-bb1137533d16" );    
+                                  "Mobile application used to predict waiting time",
+                                  "http://it-innovation.soton.ac.uk/ontologies/experimedia#application_7ee60153-0ba0-4765-b44c-bb1137533d16" );    
         linearApplications.add( app );
         
         // Associate one application per participant's activities
@@ -505,5 +512,25 @@ public class ExplorerDemoData
             qosDistributionData.add( dd );
             ++index;
         }
+    }
+    
+    public void createParticipantSummaryData()
+    {
+        participantActivitySummary = new HashMap<>();
+        
+        // Alice
+        EccParticipantActivitySummaryResultSet psrs = new EccParticipantActivitySummaryResultSet( AlicePART );
+        psrs.addActivitySummary( new EccActivitySummaryInfo("Used lift application",1) );
+        participantActivitySummary.put( AlicePART.getIRI(), psrs );
+        
+        // Bob
+        psrs = new EccParticipantActivitySummaryResultSet( BobPART );
+        psrs.addActivitySummary( new EccActivitySummaryInfo("Used lift application",3) );
+        participantActivitySummary.put( BobPART.getIRI(), psrs );
+        
+        // Carol
+        psrs = new EccParticipantActivitySummaryResultSet( CarolPART );
+        psrs.addActivitySummary( new EccActivitySummaryInfo("Used lift application",1) );
+        participantActivitySummary.put( CarolPART.getIRI(), psrs );
     }
 }

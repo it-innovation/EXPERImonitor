@@ -87,18 +87,18 @@ public class ExplorerController {
         return part;
     }
     
-    @RequestMapping(method = RequestMethod.GET, value = "/{expID}/participants/groupAttributes" )
-    @ResponseBody
-    public EccParticipantAttributeResultSet getParticipantAttributes( @PathVariable UUID expID )
-    {
-        return demoData.partAttrInfoSet;
-    }
-    
     @RequestMapping(method = RequestMethod.GET, value = "/{expID}/participants/iri/attributes" )
     @ResponseBody
     public EccParticipantAttributeResultSet getParticipantAttributes( @PathVariable UUID expID,
                                                                       @RequestParam(value="IRI", defaultValue="") String IRI )
     {    
+        return demoData.partAttrInfoSet;
+    }
+    
+    @RequestMapping(method = RequestMethod.GET, value = "/{expID}/participants/groupAttributes" )
+    @ResponseBody
+    public EccParticipantAttributeResultSet getParticipantAttributes( @PathVariable UUID expID )
+    {
         return demoData.partAttrInfoSet;
     }
     
@@ -149,7 +149,7 @@ public class ExplorerController {
     {
         return demoData.getINTRATDistData( attrID, startTime, endTime );
     }
-    
+     
     // Activity based queries --------------------------------------------------
     // -------------------------------------------------------------------------
     @RequestMapping(method = RequestMethod.GET, value = "/{expID}/participants/iri/activities" )
@@ -158,6 +158,14 @@ public class ExplorerController {
                                                                      @RequestParam(value="IRI", defaultValue = "") String IRI )
     {        
         return demoData.getActivitiesByParticipant( IRI );
+    }
+    
+    @RequestMapping(method = RequestMethod.GET, value = "/{expID}/participants/iri/activities/summary" )
+    @ResponseBody
+    public EccParticipantActivitySummaryResultSet getParticipantActivitiesSummary( @PathVariable UUID expID,
+                                                                           @RequestParam(value="IRI", defaultValue = "") String IRI )
+    {        
+        return demoData.getPROVSummaryByParticipant( IRI );
     }
     
     // Application based queries -----------------------------------------------
