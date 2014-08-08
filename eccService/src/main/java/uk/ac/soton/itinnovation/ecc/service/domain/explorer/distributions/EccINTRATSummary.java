@@ -38,19 +38,14 @@ public class EccINTRATSummary
     private float floorValue;
     private float ceilingValue;
     private float averageValue;
-    private Date  startTime;
-    private Date  endTime;
     
     public EccINTRATSummary( EccAttributeInfo info,
-                             float fV, float cV, float aV,
-                             Date sT, Date eT )
+                             float fV, float cV, float aV )
     {
         attrInfo     = info;
         floorValue   = fV;
         ceilingValue = cV;
         averageValue = aV;
-        startTime    = sT;
-        endTime      = eT;
     }
     
     public EccAttributeInfo getAttribute()
@@ -64,10 +59,4 @@ public class EccINTRATSummary
     
     public float getAverageValue()
     { return averageValue; }
-    
-    public Date getStartTime()
-    { return startTime; }
-    
-    public Date getEndTime()
-    { return endTime; }
 }

@@ -70,8 +70,8 @@ public class ExplorerDemoData
     public HashMap<String, EccApplicationServiceResultSet>         applicationServices;
     
     public HashMap<String, EccAttributeResultSet> serviceQoSAttributes;
+    public HashMap<Long,   EccINTRATSummary>      qosDiscreteDistributionData;
     
-    public ArrayList<EccINTRATSummary> qosDistributionData; // Cheating here: all activities these link to are serial
     
     public ExplorerDemoData()
     {
@@ -148,24 +148,10 @@ public class ExplorerDemoData
         return applicationServices.get( appIRI );
     }
     
-    public EccINTRATSummary getINTRATDistData( UUID attrID, long start, long end )
+    public EccINTRATSummary getINTRATDistDataDiscrete( UUID attrID, ArrayList<Long> stamps )
     {
-        // Cheating here: just using the time stamp to get the appopriate data
-        // Search through finding the nearest time and return
-        
-        EccINTRATSummary target = null;
-        
-        for ( EccINTRATSummary dd : qosDistributionData )
-        {
-            if ( dd.getStartTime().getTime() >= start &&
-                 dd.getEndTime().getTime()   <= end )
-            {
-                target = dd;
-                break;
-            }
-        }
-        
-        return target;
+        // Cheating here: just use first time stamp to return made-up distribution
+        return qosDiscreteDistributionData.get( stamps.get(0) );
     }
     
     // Private methods ---------------------------------------------------------
@@ -454,8 +440,8 @@ public class ExplorerDemoData
         
         // Create a single service for all the applications
         EccService service = new EccService( "VAS Component (Service)",
-                                                     "VAS provides video analytics",
-                                                     "http://it-innovation.soton.ac.uk/ontologies/experimedia#service_14e3e008-95bb-4423-a21f-c216c614d591" );
+                                             "VAS provides video analytics",
+                                             "http://it-innovation.soton.ac.uk/ontologies/experimedia#service_14e3e008-95bb-4423-a21f-c216c614d591" );
         linearServices.add( service );
         
         // Associate each application with the service
@@ -486,7 +472,7 @@ public class ExplorerDemoData
         serviceQoSAttributes.put( service.getIRI(), ars );
         
         // Create summary data for service
-        qosDistributionData = new ArrayList<>();
+        qosDiscreteDistributionData = new HashMap<>();
         
         // Create generic QoS distribution data for each activity frame
         Random rand = new Random();
@@ -505,16 +491,14 @@ public class ExplorerDemoData
                 avg   += 302.0f;
             }
             
-            EccINTRATSummary dd = new EccINTRATSummary( info,
-                                                                          floor, ceil, avg,
-                                                                          act.getStartTime(),
-                                                                          act.getEndTime() );
-            qosDistributionData.add( dd );
+            EccINTRATSummary dd = new EccINTRATSummary( info, floor, ceil, avg );
+            
+            qosDiscreteDistributionData.put( act.getStartTime().getTime(), dd );
             ++index;
         }
     }
     
-    public void createParticipantSummaryData()
+    private void createParticipantSummaryData()
     {
         participantActivitySummary = new HashMap<>();
         
