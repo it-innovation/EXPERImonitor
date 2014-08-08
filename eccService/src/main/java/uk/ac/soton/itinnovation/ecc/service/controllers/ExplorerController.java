@@ -25,12 +25,7 @@
 
 package uk.ac.soton.itinnovation.ecc.service.controllers;
 
-import uk.ac.soton.itinnovation.ecc.service.domain.explorer.provenance.EccActivityApplicationResultSet;
-import uk.ac.soton.itinnovation.ecc.service.domain.explorer.provenance.EccApplicationServiceResultSet;
-import uk.ac.soton.itinnovation.ecc.service.domain.explorer.provenance.EccParticipantResultSet;
-import uk.ac.soton.itinnovation.ecc.service.domain.explorer.metrics.EccParticipantAttributeResultSet;
-import uk.ac.soton.itinnovation.ecc.service.domain.explorer.provenance.EccParticipantActivityResultSet;
-import uk.ac.soton.itinnovation.ecc.service.domain.explorer.metrics.EccAttributeResultSet;
+import uk.ac.soton.itinnovation.ecc.service.domain.explorer.metrics.*;
 import uk.ac.soton.itinnovation.ecc.service.domain.explorer.provenance.*;
 import uk.ac.soton.itinnovation.ecc.service.domain.explorer.distributions.*;
 import uk.ac.soton.itinnovation.ecc.service.domain.explorer.*;
@@ -59,14 +54,23 @@ public class ExplorerController {
     // --------------------------------- REMOVE THIS ONCE CONTROLLER IS COMPLETE
     
     @Autowired
-    @Qualifier("dataService")
-    DataService dataService;
+    @Qualifier("explorerService")
+    ExplorerService explorerService;
+    
     
     @RequestMapping(method = RequestMethod.GET, value = "/{expID}/summary" )
     @ResponseBody
     public EccExperimentSummary getExperimentSummary( @PathVariable String expID )
     {
-        return demoData.expSummary;
+        EccExperimentSummary result = null;
+        
+        if ( explorerService != null && explorerService.isReady() )
+        {
+            result = demoData.expSummary;
+        }
+        else logger.error( "Could not execute explorer service: service is not ready" );
+        
+        return result;
     }
     
     // Participant based queries -----------------------------------------------
@@ -74,32 +78,62 @@ public class ExplorerController {
     @ResponseBody
     public EccParticipantResultSet getParticipants( @PathVariable String expID )
     {
-        return demoData.eccParticipants;
+        EccParticipantResultSet result = null;
+        
+        if ( explorerService != null && explorerService.isReady() )
+        {
+            result = demoData.eccParticipants;            
+        }
+        else logger.error( "Could not execute explorer service: service is null" );
+        
+        return result;
     }
     
     @RequestMapping(method = RequestMethod.GET, value = "/{expID}/participants/iri")
     @ResponseBody
     public EccParticipant getParticipantByIRI( @PathVariable String expID,
                                                @RequestParam(value="IRI", defaultValue="") String IRI )
-    {        
-        EccParticipant part = demoData.getParticipant( IRI );
+    {
+        EccParticipant result = null;
         
-        return part;
+        if ( explorerService != null && explorerService.isReady() )
+        {
+            result = demoData.getParticipant( IRI );
+        }
+        else logger.error( "Could not execute explorer service: service is null" );
+        
+        return result;
     }
     
     @RequestMapping(method = RequestMethod.GET, value = "/{expID}/participants/iri/attributes" )
     @ResponseBody
     public EccParticipantAttributeResultSet getParticipantAttributes( @PathVariable UUID expID,
                                                                       @RequestParam(value="IRI", defaultValue="") String IRI )
-    {    
-        return demoData.partAttrInfoSet;
+    {
+        EccParticipantAttributeResultSet result = null;
+        
+       if ( explorerService != null && explorerService.isReady() )
+        {
+            result = demoData.partAttrInfoSet;
+        }
+        else logger.error( "Could not execute explorer service: service is null" );
+        
+        return result;
     }
     
     @RequestMapping(method = RequestMethod.GET, value = "/{expID}/participants/groupAttributes" )
     @ResponseBody
     public EccParticipantAttributeResultSet getParticipantAttributes( @PathVariable UUID expID )
     {
-        return demoData.partAttrInfoSet;
+        EccParticipantAttributeResultSet result = null;
+        
+        if ( explorerService != null && explorerService.isReady() )
+        {
+            result = demoData.partAttrInfoSet;
+        }
+        else logger.error( "Could not execute explorer service: service is null" );
+        
+        return result;
     }
     
     @RequestMapping(method = RequestMethod.GET, value = "/{expID}/participants/attributes/select" )
@@ -107,8 +141,16 @@ public class ExplorerController {
     public EccParticipantResultSet getParticipantsByAttributeNomOrdValue( @PathVariable UUID expID,
                                                                           @RequestParam(value="attrName", defaultValue = "")  String attrName,
                                                                           @RequestParam(value="nomOrdLabel", defaultValue="") String nomOrdLabel )
-    {        
-        return demoData.getParticipantsByAttributeScaleLabel( attrName, nomOrdLabel );
+    {
+        EccParticipantResultSet result = null;
+        
+        if ( explorerService != null && explorerService.isReady() )
+        {
+            result = demoData.getParticipantsByAttributeScaleLabel( attrName, nomOrdLabel );
+        }
+        else logger.error( "Could not execute explorer service: service is null" );
+        
+        return result;
     }
     
     // Metric distribution based queries ---------------------------------------
@@ -118,14 +160,30 @@ public class ExplorerController {
     public EccNOMORDParticipantSummary getNOMORDParticipantDistribution( @PathVariable UUID expID,
                                                                          @RequestParam(value="IRI", defaultValue="") String partIRI )
     {
-        return demoData.qoeParticipantSummaryData.get( partIRI );
+        EccNOMORDParticipantSummary result = null;
+        
+        if ( explorerService != null && explorerService.isReady() )
+        {
+            result = demoData.qoeParticipantSummaryData.get( partIRI );
+        }
+        else logger.error( "Could not execute explorer service: service is null" );
+        
+        return result;
     }
     
     @RequestMapping(method = RequestMethod.GET, value="/{expID}/participants/distribution/stratified" )
     @ResponseBody
     public ArrayList<EccNOMORDStratifiedSummary> getNOMORDStratifiedParticipantDistribution( @PathVariable UUID expID )
     {
-        return demoData.qoeStratifiedSummaryDistribData;
+        ArrayList<EccNOMORDStratifiedSummary> result = null;
+        
+        if ( explorerService != null && explorerService.isReady() )
+        {
+            result = demoData.qoeStratifiedSummaryDistribData;
+        }
+        else logger.error( "Could not execute explorer service: service is null" );
+        
+        return result;
     }
     
     
@@ -134,20 +192,48 @@ public class ExplorerController {
     public ArrayList<EccNOMORDAttributeSummary> getNOMORDAttributeDistributionDataByName( @PathVariable UUID   expID,
                                                                                           @RequestParam(value="attrName", defaultValue="") String attrName )
     {
-        ArrayList<EccNOMORDAttributeSummary> result = new ArrayList<>();
-        result.add( demoData.qoeSummaryDistribData.get( attrName ) );
+        ArrayList<EccNOMORDAttributeSummary> result = null;
+        
+        if ( explorerService != null && explorerService.isReady() )
+        {
+            result = new ArrayList<>();
+            result.add( demoData.qoeSummaryDistribData.get( attrName ) );
+        }
+        else logger.error( "Could not execute explorer service: service is null" );
         
         return result;
     }
     
-    @RequestMapping(method = RequestMethod.GET, value = "/{expID}/attributes/distribution/qos" )
+    @RequestMapping(method = RequestMethod.GET, value = "/{expID}/attributes/distribution/qos/discrete" )
     @ResponseBody
-    public EccINTRATSummary getINTRATAttributeDistributionDataByID( @PathVariable UUID                                         expID,
-                                                                             @RequestParam(value="attrID", defaultValue="")    UUID attrID,
-                                                                             @RequestParam(value="startTime", defaultValue="") long startTime,
-                                                                             @RequestParam(value="endTime", defaultValue="")   long endTime )
+    public EccINTRATSummary getINTRATAttributeDistributionDataByID( @PathVariable UUID                                 expID,
+                                                                    @RequestParam(value="attrID", defaultValue="")     UUID attrID,
+                                                                    @RequestParam(value="timeStamps", defaultValue="") String timeStamps )
     {
-        return demoData.getINTRATDistData( attrID, startTime, endTime );
+        EccINTRATSummary result = null;
+        
+        if ( explorerService != null && explorerService.isReady() )
+        {
+            // Process timeStams as a comman delimited list of long values
+            String[] stamps = timeStamps.split( "," );
+            ArrayList<Long> validTimeStamps = new ArrayList<>();
+
+            for ( String stamp : stamps )
+            {
+                try
+                {
+                    validTimeStamps.add( Long.parseLong( stamp ) );
+                }
+                catch ( NumberFormatException nfe )
+                { logger.warn( "Caught bad time stamp parameter for QoS discrete distribution query"); }
+            }
+            
+            result = demoData.getINTRATDistDataDiscrete( attrID, validTimeStamps );
+            
+        }
+        else logger.error( "Could not execute explorer service: service is null" );
+        
+        return result;
     }
      
     // Activity based queries --------------------------------------------------
@@ -156,16 +242,32 @@ public class ExplorerController {
     @ResponseBody
     public EccParticipantActivityResultSet getParticipantActivities( @PathVariable UUID expID,
                                                                      @RequestParam(value="IRI", defaultValue = "") String IRI )
-    {        
-        return demoData.getActivitiesByParticipant( IRI );
+    {
+        EccParticipantActivityResultSet result = null;
+                
+        if ( explorerService != null && explorerService.isReady() )
+        {
+            result = demoData.getActivitiesByParticipant( IRI );
+        }
+        else logger.error( "Could not execute explorer service: service is null" );
+        
+        return result;
     }
     
     @RequestMapping(method = RequestMethod.GET, value = "/{expID}/participants/iri/activities/summary" )
     @ResponseBody
     public EccParticipantActivitySummaryResultSet getParticipantActivitiesSummary( @PathVariable UUID expID,
                                                                            @RequestParam(value="IRI", defaultValue = "") String IRI )
-    {        
-        return demoData.getPROVSummaryByParticipant( IRI );
+    {
+        EccParticipantActivitySummaryResultSet result = null;
+        
+        if ( explorerService != null && explorerService.isReady() )
+        {
+            result = demoData.getPROVSummaryByParticipant( IRI );
+        }
+        else logger.error( "Could not execute explorer service: service is null" );
+        
+        return result;
     }
     
     // Application based queries -----------------------------------------------
@@ -174,8 +276,16 @@ public class ExplorerController {
     @ResponseBody
     public EccActivityApplicationResultSet getActivityApplications( @PathVariable UUID expID,
                                                                     @RequestParam(value="IRI", defaultValue = "") String IRI )
-    {        
-        return demoData.getApplicationsByActivity( IRI );
+    {
+        EccActivityApplicationResultSet result = null;
+        
+        if ( explorerService != null && explorerService.isReady() )
+        {
+            result = demoData.getApplicationsByActivity( IRI );
+        }
+        else logger.error( "Could not execute explorer service: service is null" );
+        
+        return result;
     }
     
     // Application based queries -----------------------------------------------
@@ -184,8 +294,16 @@ public class ExplorerController {
     @ResponseBody
     public EccApplicationServiceResultSet getApplicationServices( @PathVariable UUID expID,
                                                                   @RequestParam(value="IRI", defaultValue = "") String IRI )
-    {        
-        return demoData.getServicesByApplication( IRI );
+    {
+        EccApplicationServiceResultSet result = null;
+        
+        if ( explorerService != null && explorerService.isReady() )
+        {
+            result = demoData.getServicesByApplication( IRI );
+        }
+        else logger.error( "Could not execute explorer service: service is null" );
+        
+        return result;
     }
     
     // Service based queries -----------------------------------------------
@@ -195,7 +313,16 @@ public class ExplorerController {
     public EccAttributeResultSet getServiceAttributes( @PathVariable UUID expID,
                                                        @RequestParam(value="IRI", defaultValue = "") String IRI )
     {
-        return demoData.serviceQoSAttributes.get( IRI );
+        EccAttributeResultSet result = null;
+        
+        if ( explorerService != null && explorerService.isReady() )
+        {
+            
+            result = demoData.serviceQoSAttributes.get( IRI );            
+        }
+        else logger.error( "Could not execute explorer service: service is null" );
+        
+        return result;
     }
     
 }
