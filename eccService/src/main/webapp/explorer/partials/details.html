@@ -9,7 +9,7 @@
     </div>
     <div class="large-3 columns">
         <label>Activities: <strong>{{activitySelection.name}}</strong></label>
-        <select ng-model="activitySelection" ng-options="activity.name for activity in activities"></select>
+        <select ng-model="activitySelection" ng-options="activity.label for activity in activities"></select>
     </div>
     <div class="large-3 columns" ng-show="getApplications(activitySelection)">
         <label>Applications: <strong>{{applicationSelection.name}}</strong></label>
@@ -21,9 +21,9 @@
     </div>
 </div>
 <div class="row">
-    <div class="large-7 columns" ng-model="activities">
+    <div class="large-7 columns" ng-model="activityInstances">
         <h5>Activities</h5>
-        <h6>Number of Activities: <strong>{{numActivities}}</strong></h6>
+        <h6>Number of Activity Instances: <strong>{{numActivities}}</strong></h6>
         <table>
             <thead>
                 <tr>
@@ -34,7 +34,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr ng-repeat="activity in activities">
+              <tr ng-repeat="activity in activityInstances">
                 <td>{{activity.name}}</td>
                 <td>{{activity.description}}</td>
                 <td>{{activity.startTime}}</td>
@@ -52,5 +52,11 @@
         <h5>Service</h5>
         <p>{{serviceSelection.name}}</p>
         <p>{{serviceSelection.description}}</p>
+    </div>
+    <div id="qosChart1">
+        <svg></svg>
+    </div>
+    <div id="qosChart2">
+        <svg></svg>
     </div>
 </div>

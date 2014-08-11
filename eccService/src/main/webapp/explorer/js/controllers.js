@@ -58,10 +58,11 @@ appControllers.controller('ParticipantController', ['$scope', '$http', function(
             d3.json(BASE_URL + EXP_ID + "/attributes/distribution/qoe?attrName=" + encodeURIComponent(attributeSelection), function(data) {
                 // clear the canvas before redrawing !!!! find a better way to allow for interactivity
                 d3.select('#chart1 svg').remove();
-                d3.select('#chart2 svg').remove();
+                $('#chart2 svg').remove();
                 d3.select('#chart3 svg').remove();
                 $('#chart1').append('<svg class="large-6 text-center columns"></svg>');
                 $('#chart2').append('<svg class="large-6 text-center columns"></svg>');
+                $('#chart3').append('<svg class="large-6 text-center columns"></svg>');
                 // histogram
                 nv.addGraph(function() {
                     var chart = nv.models.discreteBarChart()
@@ -118,8 +119,6 @@ appControllers.controller('ParticipantController', ['$scope', '$http', function(
 
 appControllers.controller('DetailsController', ['$scope', '$http', '$routeParams', function($scope, $http, $routeParams) {
     var partIRI = encodeURIComponent($routeParams.iri);
-    var actIRI = "http%3A%2F%2Fit-innovation.soton.ac.uk%2Fontologies%2Fexperimedia%23activity_c108742d-d41d-40ee-b532-7f8fd6508baf";
-    var serIRI = "http%3A%2F%2Fit-innovation.soton.ac.uk%2Fontologies%2Fexperimedia%23application_3af4c091-2019-4f1c-a867-89c44970a509";
     $http.get(BASE_URL + EXP_ID + "/participants").success(function(data) {
         $scope.participants = data.participants;
     });
@@ -128,12 +127,14 @@ appControllers.controller('DetailsController', ['$scope', '$http', '$routeParams
         // TODO: need to fix routeparams to show current selction
         $scope.participantSelection = data.name;
     });
-    // get activities
-    $http.get(BASE_URL + EXP_ID + "/participants/iri/activities?IRI=" + partIRI).success(function(data) {
+//    // get activities
+    $http.get(BASE_URL + EXP_ID + "/participants/iri/activities/summary?IRI=" + partIRI).success(function(data) {
         $scope.activities = data.activities;
+    });
+    // get activity instances
+    $http.get(BASE_URL + EXP_ID + "/participants/iri/activities?IRI=" + partIRI).success(function(data) {
+        $scope.activityInstances = data.activities;
         $scope.numActivities = data.activityTotal;
-        //TODO: Pick from selection
-        actIRI = encodeURIComponent(data.activities[0].iri);
     });
     $scope.activitySelection = "";
     $scope.getApplications = function(activitySelection){
@@ -158,7 +159,7 @@ appControllers.controller('DetailsController', ['$scope', '$http', '$routeParams
     //$('#chart5').append('<svg class="large-6 text-center columns"></svg>');
     //$('#chart6').append('<svg class="large-12 text-center columns"></svg>');
     // bar chart
-    d3.json("qoe.json", function(data) {
+    d3.json("json/qoe.json", function(data) {
         nv.addGraph(function() {
             var chart = nv.models.multiBarHorizontalChart()
                 .x(function(d) { return d.label })
@@ -169,7 +170,7 @@ appControllers.controller('DetailsController', ['$scope', '$http', '$routeParams
                 .showControls(false);
             chart.yAxis
                 .tickFormat(d3.format(',.1f'));
-            d3.select('#chart4 svg')
+            d3.select('#qosChart svg')
                 .datum(data)
               .transition().duration(500)
                 .call(chart);
@@ -177,26 +178,29 @@ appControllers.controller('DetailsController', ['$scope', '$http', '$routeParams
             return chart;
         });
     });
-    // line chart
-    d3.json('cumulativeLineData.json', function(data) {
+    // qos line-area chart   
+    d3.json("json/service.json", function(error, data) {
         nv.addGraph(function() {
-            var chart = nv.models.cumulativeLineChart()
-                .x(function(d) { return d[0]; })
-                .y(function(d) { return d[1]/100; }) //adjusting, 100% is 1.00, not 100 as it is in the data
-                .color(d3.scale.category10().range())
-                .useInteractiveGuideline(true);
+            var chart;
+            chart = nv.models.lineChart()
+                .x(function(d) { return d.date; })
+                .y(function(d) { return d.value; })
+                .useInteractiveGuideline(true)
+                .isArea(true)
+                .forceY([0]);
             chart.xAxis
-              .tickValues([1078030800000,1122782400000,1167541200000,1251691200000])
-              .tickFormat(function(d) {
-                  return d3.time.format('%x')(new Date(d));
-                });
-          chart.yAxis
-              .tickFormat(d3.format(',.1%'));
-          d3.select('#chart6 svg')
-              .datum(data)
-              .call(chart);
-          nv.utils.windowResize(chart.update);
-          return chart;
+                .showMaxMin(false)
+                .tickFormat(function(d) { return d3.time.format('%x')(new Date(d)); });
+            chart.yAxis
+                .axisLabel('Response Time(ms)')
+                .tickFormat(d3.format(',.2f'));
+            d3.select('#qosChart1 svg')
+                .datum(data)
+                .transition().duration(500)
+                .call(chart);
+            nv.utils.windowResize(chart.update);
+            return chart;
         });
     });
+    
 }]);
