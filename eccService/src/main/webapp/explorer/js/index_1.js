@@ -22,8 +22,10 @@ function curves() {
   t.call(chart.tension(this.checked ? .5 : 1));
 }
 
-d3.csv("json/titanic_1.csv", function(error, data) {
+d3.json("json/service.json", function(error, data) {
+    
   vis.datum(data).call(chart);
+  
 });
 
 function iceTransition(g) {
