@@ -22,8 +22,3 @@ eedApp.config(['$routeProvider', function($routeProvider) {
 
 // Foundation JavaScript
 $(document).foundation();
-
-// jQuery JavaScript
-$(document).ready(function () {
-    
-});
