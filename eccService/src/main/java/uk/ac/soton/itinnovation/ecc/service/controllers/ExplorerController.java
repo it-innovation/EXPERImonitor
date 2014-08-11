@@ -239,10 +239,10 @@ public class ExplorerController {
         return result;
     }
     
-    @RequestMapping(method = RequestMethod.GET, value = "/{expID}/attributes/distribution/qos/series/highlight/activities" )
+    @RequestMapping(method = RequestMethod.GET, value = "/{expID}/attributes/series/qos/highlight/activities" )
     @ResponseBody
     public EccINTRATSeriesSet getINTRATAttributeSeriesHighlightActivities( @PathVariable UUID expID,
-                                                                           @RequestParam(value="qosAttrID", defaultValue="") UUID   qosAttrID,
+                                                                           @RequestParam(value="attrID", defaultValue="")    UUID   attrID,
                                                                            @RequestParam(value="IRI",       defaultValue="") String IRI,
                                                                            @RequestParam(value="actLabel",  defaultValue="") String actLabel )
     {
@@ -250,7 +250,7 @@ public class ExplorerController {
         
         if ( explorerService != null && explorerService.isReady() )
         {
-            return demoData.getINTRATSeriesHighlightActivities( qosAttrID, IRI, actLabel );
+            return demoData.getINTRATSeriesHighlightActivities( attrID, IRI, actLabel );
         }
         else logger.error( "Could not execute explorer service: service is not ready" );
         
