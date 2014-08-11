@@ -35,7 +35,6 @@ import uk.ac.soton.itinnovation.ecc.service.domain.DatabaseConfiguration;
 
 import java.util.*;
 import org.slf4j.*;
-import uk.ac.soton.itinnovation.ecc.service.domain.explorer.provenance.EccParticipant;
 
 
 

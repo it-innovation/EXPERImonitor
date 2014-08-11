@@ -551,7 +551,7 @@ public class ExplorerDemoData
         qosSeriesHighlights.put( BobPART.getIRI(), 
                                  createHiliteSeries("Bob's activities", 10, 100) );
         
-        qosSeriesHighlights.put( BobPART.getIRI(), 
+        qosSeriesHighlights.put( CarolPART.getIRI(), 
                                  createHiliteSeries("Carol's activities", 400, 450) ); 
     }
     
