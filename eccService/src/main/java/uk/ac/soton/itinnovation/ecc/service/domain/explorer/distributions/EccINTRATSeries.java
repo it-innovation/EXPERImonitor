@@ -18,44 +18,46 @@
 // the software.
 //
 //      Created By :            Simon Crowle
-//      Created Date :          31-Jul-2014
+//      Created Date :          11-Aug-2014
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
 package uk.ac.soton.itinnovation.ecc.service.domain.explorer.distributions;
 
-import uk.ac.soton.itinnovation.ecc.service.domain.explorer.metrics.EccAttributeInfo;
+import uk.ac.soton.itinnovation.ecc.service.domain.EccMeasurement;
+
+import java.util.ArrayList;
 
 
 
 
-public class EccINTRATSummary
+public class EccINTRATSeries
 {
-    private EccAttributeInfo attrInfo;
+    private String                    key;
+    private boolean                   disabled;
+    private ArrayList<EccMeasurement> values;
     
-    private float floorValue;
-    private float ceilingValue;
-    private float averageValue;
-    
-    public EccINTRATSummary( EccAttributeInfo info,
-                             float fV, float cV, float aV )
+    public EccINTRATSeries( String                    seriesKey, 
+                            boolean                   seriesDisabled,
+                            ArrayList<EccMeasurement> dataList )
     {
-        attrInfo     = info;
-        floorValue   = fV;
-        ceilingValue = cV;
-        averageValue = aV;
+        key      = seriesKey;
+        disabled = seriesDisabled;
+        
+        values = new ArrayList<>();
+        
+        if ( dataList != null )
+            for ( EccMeasurement m : dataList )
+                if ( m != null ) values.add( m );
     }
     
-    public EccAttributeInfo getAttribute()
-    { return attrInfo; }
+    public String getKey()
+    { return key; }
     
-    public float getFloorValue()
-    { return floorValue; }
+    public boolean getDisabled()
+    { return disabled; }
     
-    public float getCeilingValue()
-    { return ceilingValue; }
-    
-    public float getAverageValue()
-    { return averageValue; }
+    public ArrayList<EccMeasurement> getValues()
+    { return values; }
 }

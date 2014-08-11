@@ -30,9 +30,12 @@ import uk.ac.soton.itinnovation.ecc.service.domain.explorer.provenance.*;
 import uk.ac.soton.itinnovation.ecc.service.domain.explorer.distributions.*;
 import uk.ac.soton.itinnovation.ecc.service.domain.explorer.*;
 
+import uk.ac.soton.itinnovation.ecc.service.domain.EccMeasurement;
+
 import java.util.*;
 import java.text.*;
 import org.slf4j.*;
+
 
 
 
@@ -71,6 +74,8 @@ public class ExplorerDemoData
     
     public HashMap<String, EccAttributeResultSet> serviceQoSAttributes;
     public HashMap<Long,   EccINTRATSummary>      qosDiscreteDistributionData;
+    public ArrayList<EccMeasurement>              qosSeriesDemo;
+    public HashMap<String, EccINTRATSeries>       qosSeriesHighlights;
     
     
     public ExplorerDemoData()
@@ -152,6 +157,24 @@ public class ExplorerDemoData
     {
         // Cheating here: just use first time stamp to return made-up distribution
         return qosDiscreteDistributionData.get( stamps.get(0) );
+    }
+    
+    public EccINTRATSeriesSet getINTRATSeriesHighlightActivities( UUID seriesAttrID,
+                                                                  String partIRI,
+                                                                  String activityLabel )
+    {
+        // Just return some highlighted time stamps
+        EccINTRATSeriesSet result = new EccINTRATSeriesSet();
+        
+        // Get QoS series first
+        EccINTRATSeries series = new EccINTRATSeries( "VAS response time", false,
+                                                      qosSeriesDemo );
+        result.addSeries( series );
+        
+        // Then add highlight
+        result.addSeries( qosSeriesHighlights.get(partIRI) );
+        
+        return result;
     }
     
     // Private methods ---------------------------------------------------------
@@ -456,7 +479,7 @@ public class ExplorerDemoData
         // Create QoS attribue for this service
         serviceQoSAttributes = new HashMap<>();
         
-        EccAttributeInfo info = new EccAttributeInfo( "Service response time",
+        EccAttributeInfo info = new EccAttributeInfo( "VAS response time",
                                                       "Time taken between query and response being sent",
                                                       UUID.fromString("e13ac84e-3a09-45f8-8287-a48a8f3f9d73"),
                                                       "Seconds",
@@ -496,6 +519,40 @@ public class ExplorerDemoData
             qosDiscreteDistributionData.put( act.getStartTime().getTime(), dd );
             ++index;
         }
+        
+        // Create dummy QoS data (we won't bother artificially raising this data)
+        qosSeriesDemo = new ArrayList<>();
+        Date ts = new Date( expStartDate.getTime() );
+        float value = 10.0f;
+        
+        for ( int i = 0; i < 600; ++i )
+        {
+            EccMeasurement m = new EccMeasurement();
+            m.setTimestamp( ts );
+            m.setValue( Float.toString(value) );
+            
+            qosSeriesDemo.add( m );
+            
+            // Update time & value
+            ts = new Date ( ts.getTime() + 60000 );
+            value += ( rand.nextFloat() * 10.0f );
+            value -= ( rand.nextFloat() * 10.0f );
+            
+            if ( value < 1.0f ) value = 1.0f;
+                else if ( value > 400.0f ) value = 400.0f;
+        }
+        
+        // Create dummy series highlights based on activities
+        qosSeriesHighlights = new HashMap<>();
+  
+        qosSeriesHighlights.put( AlicePART.getIRI(), 
+                                 createHiliteSeries("Alice's activities", 150, 160) );
+        
+        qosSeriesHighlights.put( BobPART.getIRI(), 
+                                 createHiliteSeries("Bob's activities", 10, 100) );
+        
+        qosSeriesHighlights.put( BobPART.getIRI(), 
+                                 createHiliteSeries("Carol's activities", 400, 450) ); 
     }
     
     private void createParticipantSummaryData()
@@ -517,4 +574,30 @@ public class ExplorerDemoData
         psrs.addActivitySummary( new EccActivitySummaryInfo("Used lift application",1) );
         participantActivitySummary.put( CarolPART.getIRI(), psrs );
     }
+    
+    private EccINTRATSeries createHiliteSeries( String key, int startIndex, int endIndex )
+    {
+        ArrayList<EccMeasurement> copyMeasures = new ArrayList<>();
+        
+        int srcIndex = 0;
+        for ( EccMeasurement srcM : qosSeriesDemo )
+        {
+            // Create copy of measurement components
+            Date   targDate = new Date( srcM.getTimestamp().getTime() );
+            String targValue = null;
+            
+            // Add the value if within index range
+            if ( srcIndex >= startIndex && srcIndex <= endIndex )
+                targValue = srcM.getValue();
+            
+            // Add the duplicated measurement
+            copyMeasures.add( new EccMeasurement( targDate, targValue) );
+            
+            ++srcIndex;
+        }
+        
+        // Return new series
+        return new EccINTRATSeries( key, true, copyMeasures );
+    }
+    
 }

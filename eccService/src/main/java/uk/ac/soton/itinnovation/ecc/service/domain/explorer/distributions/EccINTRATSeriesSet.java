@@ -18,44 +18,33 @@
 // the software.
 //
 //      Created By :            Simon Crowle
-//      Created Date :          31-Jul-2014
+//      Created Date :          11-Aug-2014
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 
 package uk.ac.soton.itinnovation.ecc.service.domain.explorer.distributions;
 
-import uk.ac.soton.itinnovation.ecc.service.domain.explorer.metrics.EccAttributeInfo;
+import java.util.ArrayList;
 
 
 
 
-public class EccINTRATSummary
+public class EccINTRATSeriesSet
 {
-    private EccAttributeInfo attrInfo;
+    private ArrayList<EccINTRATSeries> seriesSet;
     
-    private float floorValue;
-    private float ceilingValue;
-    private float averageValue;
-    
-    public EccINTRATSummary( EccAttributeInfo info,
-                             float fV, float cV, float aV )
+    public EccINTRATSeriesSet()
     {
-        attrInfo     = info;
-        floorValue   = fV;
-        ceilingValue = cV;
-        averageValue = aV;
+        seriesSet = new ArrayList<>();
     }
     
-    public EccAttributeInfo getAttribute()
-    { return attrInfo; }
+    public ArrayList<EccINTRATSeries> getSeriesSet()
+    { return seriesSet; }
     
-    public float getFloorValue()
-    { return floorValue; }
-    
-    public float getCeilingValue()
-    { return ceilingValue; }
-    
-    public float getAverageValue()
-    { return averageValue; }
+    public void addSeries( EccINTRATSeries series )
+    {
+        if ( series != null && !seriesSet.contains(series) )
+            seriesSet.add( series );
+    }
 }

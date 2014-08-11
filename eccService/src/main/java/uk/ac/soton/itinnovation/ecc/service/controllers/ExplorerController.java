@@ -112,8 +112,9 @@ public class ExplorerController {
     {
         EccParticipantAttributeResultSet result = null;
         
-       if ( explorerService != null && explorerService.isReady() )
+        if ( explorerService != null && explorerService.isReady() )
         {
+            // Will be using: explorerService.getPartCommonAttrResultSet(..)
             result = demoData.partAttrInfoSet;
         }
         else logger.error( "Could not execute explorer service: service is null" );
@@ -129,6 +130,7 @@ public class ExplorerController {
         
         if ( explorerService != null && explorerService.isReady() )
         {
+            // Will be using: explorerService.getPartCommonAttrResultSet(..)
             result = demoData.partAttrInfoSet;
         }
         else logger.error( "Could not execute explorer service: service is null" );
@@ -138,14 +140,15 @@ public class ExplorerController {
     
     @RequestMapping(method = RequestMethod.GET, value = "/{expID}/participants/attributes/select" )
     @ResponseBody
-    public EccParticipantResultSet getParticipantsByAttributeNomOrdValue( @PathVariable UUID expID,
-                                                                          @RequestParam(value="attrName", defaultValue = "")  String attrName,
-                                                                          @RequestParam(value="nomOrdLabel", defaultValue="") String nomOrdLabel )
+    public EccParticipantResultSet getParticipantsQoEAttributeSelection( @PathVariable UUID expID,
+                                                                         @RequestParam(value="attrName", defaultValue = "")  String attrName,
+                                                                         @RequestParam(value="nomOrdLabel", defaultValue="") String nomOrdLabel )
     {
         EccParticipantResultSet result = null;
         
         if ( explorerService != null && explorerService.isReady() )
         {
+            // Will be using: explorerService.getPartQoEAttrSelection(..)
             result = demoData.getParticipantsByAttributeScaleLabel( attrName, nomOrdLabel );
         }
         else logger.error( "Could not execute explorer service: service is null" );
@@ -189,7 +192,7 @@ public class ExplorerController {
     
     @RequestMapping(method = RequestMethod.GET, value = "/{expID}/attributes/distribution/qoe" )
     @ResponseBody
-    public ArrayList<EccNOMORDAttributeSummary> getNOMORDAttributeDistributionDataByName( @PathVariable UUID   expID,
+    public ArrayList<EccNOMORDAttributeSummary> getNOMORDAttributeDistributionDataByName( @PathVariable UUID expID,
                                                                                           @RequestParam(value="attrName", defaultValue="") String attrName )
     {
         ArrayList<EccNOMORDAttributeSummary> result = null;
@@ -206,7 +209,7 @@ public class ExplorerController {
     
     @RequestMapping(method = RequestMethod.GET, value = "/{expID}/attributes/distribution/qos/discrete" )
     @ResponseBody
-    public EccINTRATSummary getINTRATAttributeDistributionDataByID( @PathVariable UUID                                 expID,
+    public EccINTRATSummary getINTRATAttributeDistributionDataByID( @PathVariable UUID expID,
                                                                     @RequestParam(value="attrID", defaultValue="")     UUID attrID,
                                                                     @RequestParam(value="timeStamps", defaultValue="") String timeStamps )
     {
@@ -235,6 +238,24 @@ public class ExplorerController {
         
         return result;
     }
+    
+    @RequestMapping(method = RequestMethod.GET, value = "/{expID}/attributes/distribution/qos/series/highlight/activities" )
+    @ResponseBody
+    public EccINTRATSeriesSet getINTRATAttributeSeriesHighlightActivities( @PathVariable UUID expID,
+                                                                           @RequestParam(value="qosAttrID", defaultValue="") UUID   qosAttrID,
+                                                                           @RequestParam(value="IRI",       defaultValue="") String IRI,
+                                                                           @RequestParam(value="actLabel",  defaultValue="") String actLabel )
+    {
+        EccINTRATSeriesSet result = null;
+        
+        if ( explorerService != null && explorerService.isReady() )
+        {
+            return demoData.getINTRATSeriesHighlightActivities( qosAttrID, IRI, actLabel );
+        }
+        else logger.error( "Could not execute explorer service: service is not ready" );
+        
+        return result;
+    }
      
     // Activity based queries --------------------------------------------------
     // -------------------------------------------------------------------------
@@ -254,10 +275,28 @@ public class ExplorerController {
         return result;
     }
     
+    @RequestMapping(method = RequestMethod.GET, value = "/{expID}/participants/iri/activities/select" )
+    @ResponseBody
+    public EccParticipantActivityResultSet getParticipantActivitiesByName( @PathVariable UUID expID,
+                                                                           @RequestParam(value="IRI", defaultValue = "") String IRI,
+                                                                           @RequestParam(value="actLabel", defaultValue ="") String actLabel )
+    {
+        EccParticipantActivityResultSet result = null;
+                
+        if ( explorerService != null && explorerService.isReady() )
+        {
+            // For now just return the same activities - we've only got one set in the demo
+            result = demoData.getActivitiesByParticipant( IRI );
+        }
+        else logger.error( "Could not execute explorer service: service is null" );
+        
+        return result;
+    }
+    
     @RequestMapping(method = RequestMethod.GET, value = "/{expID}/participants/iri/activities/summary" )
     @ResponseBody
     public EccParticipantActivitySummaryResultSet getParticipantActivitiesSummary( @PathVariable UUID expID,
-                                                                           @RequestParam(value="IRI", defaultValue = "") String IRI )
+                                                                                   @RequestParam(value="IRI", defaultValue = "") String IRI )
     {
         EccParticipantActivitySummaryResultSet result = null;
         
