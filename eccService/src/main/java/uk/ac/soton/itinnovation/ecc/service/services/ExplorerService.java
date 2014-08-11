@@ -25,7 +25,8 @@
 
 package uk.ac.soton.itinnovation.ecc.service.services;
 
-import uk.ac.soton.itinnovation.ecc.service.domain.explorer.metrics.EccParticipantAttributeResultSet;
+import uk.ac.soton.itinnovation.ecc.service.domain.explorer.metrics.*;
+import uk.ac.soton.itinnovation.ecc.service.domain.explorer.provenance.*;
 import uk.ac.soton.itinnovation.ecc.service.domain.DatabaseConfiguration;
 import uk.ac.soton.itinnovation.ecc.service.utils.*;
 
@@ -37,9 +38,6 @@ import javax.annotation.*;
 import org.slf4j.*;
 
 import java.util.*;
-import uk.ac.soton.itinnovation.ecc.service.domain.explorer.metrics.EccAttributeInfo;
-
-
 
 
 
@@ -54,8 +52,8 @@ public class ExplorerService
 {
     private final Logger logger = LoggerFactory.getLogger(getClass());
     
-    private ExplorerMetricsQueryHelper    metricsHelper;
-    private ExplorerProvenanceQueryHelper provenanceHelper;
+    private ExplorerMetricsQueryHelper    metricsQueryHelper;
+    private ExplorerProvenanceQueryHelper provenanceQueryHelper;
  
     private boolean serviceReady;
         
@@ -67,8 +65,8 @@ public class ExplorerService
     @PostConstruct
     public void init()
     {
-        metricsHelper    = new ExplorerMetricsQueryHelper();
-        provenanceHelper = new ExplorerProvenanceQueryHelper();
+        metricsQueryHelper    = new ExplorerMetricsQueryHelper();
+        provenanceQueryHelper = new ExplorerProvenanceQueryHelper();
         
         serviceReady = false;
     }
@@ -76,8 +74,8 @@ public class ExplorerService
     @PreDestroy
     public void shutdown()
     {
-        if ( metricsHelper != null )    metricsHelper.shutdown();
-        if ( provenanceHelper != null ) provenanceHelper.shutdown();
+        if ( metricsQueryHelper != null )    metricsQueryHelper.shutdown();
+        if ( provenanceQueryHelper != null ) provenanceQueryHelper.shutdown();
         
         serviceReady   = false;        
     }
@@ -87,7 +85,7 @@ public class ExplorerService
         serviceReady = false;
         
         // Check pre-requisites
-        if ( metricsHelper == null || provenanceHelper == null )
+        if ( metricsQueryHelper == null || provenanceQueryHelper == null )
         {
             String msg = "Could not start Explorer service: helpers not yet created";
             logger.error( msg );
@@ -98,8 +96,8 @@ public class ExplorerService
         // Initialise helpers
         try
         {
-            metricsHelper.initialise( dbConfig );
-            provenanceHelper.initialise();
+            metricsQueryHelper.initialise( dbConfig );
+            provenanceQueryHelper.initialise();
         }
         catch ( Exception ex )
         {
@@ -118,20 +116,20 @@ public class ExplorerService
     public boolean isReady()
     { return serviceReady; }
     
-    public EccParticipantAttributeResultSet getPartCommonAttrResultSet( UUID expID, ArrayList<String> partIRIs )
+    public EccParticipantAttributeResultSet getPartCommonAttrResultSet( UUID expID, ArrayList<String> allPartIRIs )
     {
         EccParticipantAttributeResultSet result = new EccParticipantAttributeResultSet();
         
         // Safety
-        if ( expID != null && partIRIs != null && !partIRIs.isEmpty() )
+        if ( expID != null && allPartIRIs != null && !allPartIRIs.isEmpty() )
         {
             // Get common Attributes
-            Set<Attribute> commonAttributes = metricsHelper.getPartCommonAttributes( expID, partIRIs );
+            Map<UUID,Attribute> commonAttributes = metricsQueryHelper.getPartCommonAttributes( expID, allPartIRIs );
             
             // Push each attribute into result appropriately (so long as it has a metric; it should do)
-            for ( Attribute attr : commonAttributes )
+            for ( Attribute attr : commonAttributes.values() )
             {
-                Metric metric = metricsHelper.getAttributeMetric( expID, attr.getUUID() );
+                Metric metric = metricsQueryHelper.getAttributeMetric( expID, attr.getUUID() );
                 
                 if ( metric != null )
                 {
@@ -156,7 +154,82 @@ public class ExplorerService
                 else logger.warn( "Found attribute without metric. Not included in common attribute result set" );
             }
         }
-        else logger.warn( "Could not retrieve participant common attributes: parameter(s) invalid" );
+        else logger.error( "Could not retrieve participant common attributes: parameter(s) invalid" );
+        
+        return result;
+    }
+    
+    public EccParticipantResultSet getPartQoEAttrSelection( UUID              expID, 
+                                                            ArrayList<String> allPartIRIs,
+                                                            String            attrName,
+                                                            String            selLabel )
+    {
+        EccParticipantResultSet result = new EccParticipantResultSet();
+        
+        // Safety
+        if ( expID != null && allPartIRIs != null && !allPartIRIs.isEmpty() &&
+             attrName != null && selLabel != null )
+        {
+            // Get all entities representing participants
+            Map<UUID,Entity> entities = metricsQueryHelper.getParticipantEntities( expID, allPartIRIs );
+            
+            // Get all the attributes of the given name from the participants
+            Map<UUID,Attribute> attrsByEntities = metricsQueryHelper.getAllEntityAttributes( entities.values() );
+            
+            // Select just those attributes with the target name
+            HashSet<Attribute> selAttributes = new HashSet<>();
+            
+            for ( Attribute attr : attrsByEntities.values() )
+                if ( attr.getName().equals(attrName) ) selAttributes.add( attr );
+            
+            // For select attributes, retrieve measurement set(s) and search for label instance & add Entities
+            HashSet<Entity> selectedEntities = new HashSet<>();
+            
+            for ( Attribute attr : selAttributes )
+            {
+                Map<UUID,MeasurementSet> msets = metricsQueryHelper.getMeasurementSetsForAttribute( expID, attr.getUUID() );
+                
+                boolean foundLabel = false;
+                
+                for ( MeasurementSet ms : msets.values() )
+                {
+                    // If the instance exists, add participant to result
+                    for ( Measurement m : ms.getMeasurements() )
+                    {
+                        if ( m.getValue().equals(selLabel) )
+                        {
+                            foundLabel = true;
+                            
+                            // Find entity and add to result set            
+                            Entity targetEntity = entities.get( attr.getEntityUUID() );
+                            
+                            if ( targetEntity != null )
+                            {
+                               if ( !selectedEntities.contains(targetEntity) )
+                                    selectedEntities.add( targetEntity );
+                            }
+                            else
+                                logger.error( "Could not retrieve QoE label selection: entity not found for attribute");
+                            
+                            // Stop the search - no need to search again
+                            break;
+                        }
+                    }
+                    
+                    // If we've already found the label, don't bother searching other measurement sets
+                    if ( foundLabel ) break;
+                }
+            }
+            
+            // Finally, create the PROV participant information for any metric entities we have found
+            // We don't actually need any additional information than that already found in the metric data base for this
+            for ( Entity entity : selectedEntities )
+                result.addParticipant( new EccParticipant( entity.getName(),
+                                                           entity.getDescription(),
+                                                           entity.getUUID(),
+                                                           entity.getEntityID() ) );
+        }
+        else logger.error( "Could not retrieve QoE label selection: parameter(s) invalid" ); 
         
         return result;
     }

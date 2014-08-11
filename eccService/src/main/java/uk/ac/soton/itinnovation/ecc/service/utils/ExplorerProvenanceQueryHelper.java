@@ -25,6 +25,8 @@
 
 package uk.ac.soton.itinnovation.ecc.service.utils;
 
+import java.util.*;
+
 
 
 
@@ -40,5 +42,19 @@ public class ExplorerProvenanceQueryHelper {
     
     public void shutdown() {
         
+    }
+    
+    /**
+     * Use this method to get the IRI for all Participants associated with an experiment.
+     * 
+     * @param expID - Non-null experiment ID
+     * @return      - Returns a (possibly empty) set of IRIs representing participants
+     */
+    public Set<String> getParticipantIRIsForExperiment( UUID expID ) {
+        
+        HashSet<String> result = new HashSet<>();
+        
+        
+        return result;
     }
 }

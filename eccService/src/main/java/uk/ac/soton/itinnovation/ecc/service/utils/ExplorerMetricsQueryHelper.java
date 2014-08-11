@@ -35,6 +35,7 @@ import uk.ac.soton.itinnovation.ecc.service.domain.DatabaseConfiguration;
 
 import java.util.*;
 import org.slf4j.*;
+import uk.ac.soton.itinnovation.ecc.service.domain.explorer.provenance.EccParticipant;
 
 
 
@@ -55,6 +56,12 @@ public class ExplorerMetricsQueryHelper
     public ExplorerMetricsQueryHelper()
     {}
     
+    /**
+     * Initialises query helper with appropriate database configuration
+     * 
+     * @param dbConfig      - Non-null database configuration instance
+     * @throws Exception    - Throws if configuration is invalid or database unreachable
+     */
     public void initialise( DatabaseConfiguration dbConfig ) throws Exception
     {
         helperInitialised = false;
@@ -108,6 +115,10 @@ public class ExplorerMetricsQueryHelper
         helperInitialised = true;
     }
     
+    /**
+     * Cleans up database connections
+     * 
+     */
     public void shutdown()
     {
         msDAO          = null;
@@ -115,37 +126,147 @@ public class ExplorerMetricsQueryHelper
         expDataManager = null;
     }
     
-    public Set<Attribute> getPartCommonAttributes( UUID expID, ArrayList<String> partIRIs )
+    /**
+     * Use this method to retrieve the metric Entities that map to PROV participants.
+     * 
+     * @param expID     - Non-null experiment ID
+     * @param partIRIs  - List of known PROV participants for the experiment
+     * @return          - returns a map of metric Entities indexed by their metric IDs
+     */
+    public Map<UUID,Entity> getParticipantEntities( UUID expID, ArrayList<String> partIRIs )
     {
-        HashSet<Attribute> result = new HashSet<>();
+        HashMap<UUID,Entity> result = new HashMap<>();
         
-        // Safety
         if ( helperInitialised && expID != null && partIRIs != null && !partIRIs.isEmpty() )
         {
-            // Get participant related entities
-            Set<Entity> partEntities = getParticipantEntities( expID, partIRIs );
-            
-            HashMap<String, Attribute> commonAttrs = new HashMap<>();
-            
-            // Assemble common attributes
-            for ( Entity entity : partEntities )
-                for ( Attribute attr : entity.getAttributes() )
-                    commonAttrs.put( attr.getName(), attr );
-            
-            // Return result
-            result.addAll( commonAttrs.values() );
+            try
+            {
+                // Retrieve all entities
+                Set<Entity> entities = entityDAO.getEntitiesForExperiment( expID, true );
+
+                // Look through targets to see if we can find them in the entity set
+                for ( String iri : partIRIs )
+                {
+                    for ( Entity entity : entities )
+                        if ( entity.getEntityID().equals(iri) )
+                        {
+                            UUID entityID = entity.getUUID();
+                            
+                            if ( !result.containsKey(entityID) ) 
+                                result.put(entityID, entity);
+                            break;
+                        }
+                }
+            }
+            catch ( Exception ex )
+            { logger.warn( "Could not retrieve entities from EDM: " + ex.getMessage() ); }
         }
         else logger.error( failedRequest );
         
         return result;
     }
     
+    /**
+     * Use this method to retrieve an aggregated set of attributes associated with the metric
+     * Entities representing the PROV participants
+     * 
+     * @param expID     - Non-null experiment ID
+     * @param partIRIs  - List of known PROV participants for the experiment
+     * @return          - Returns a map of metric Attributes indexed by their metric IDs
+     */
+    public Map<UUID,Attribute> getPartCommonAttributes( UUID expID, ArrayList<String> partIRIs )
+    {
+        HashMap<UUID,Attribute> result = new HashMap<>();
+        
+        // Safety
+        if ( helperInitialised && expID != null && partIRIs != null && !partIRIs.isEmpty() )
+        {
+            // Get participant related entities
+            Map<UUID, Entity> partEntities = getParticipantEntities( expID, partIRIs );
+            
+            HashMap<String, Attribute> commonAttrs = new HashMap<>();
+            
+            // Assemble common attributes
+            for ( Entity entity : partEntities.values() )
+                for ( Attribute attr : entity.getAttributes() )
+                    commonAttrs.put( attr.getName(), attr );
+            
+            // Recompile result
+            for ( Attribute attr : commonAttrs.values() )
+                result.put( attr.getUUID(), attr );
+        }
+        else logger.error( failedRequest );
+        
+        return result;
+    }
+    
+    /**
+     * Use this method to retrieve ALL the attribute instances associated with a collection
+     * of Entities.
+     * 
+     * @param entities - Non-null collection of Entities to extract attributes
+     * @return         - A map of Attributes indexed by their metric ID
+     */
+    public Map<UUID,Attribute> getAllEntityAttributes( Collection<Entity> entities )
+    {
+        HashMap<UUID,Attribute> result = new HashMap<>();
+        
+        if ( helperInitialised && entities != null && !entities.isEmpty() )
+        {
+            for ( Entity entity : entities )
+                for ( Attribute attr : entity.getAttributes() )
+                    result.put( attr.getUUID(), attr );
+        }
+        else logger.error( failedRequest );
+        
+        return result;
+    }
+    
+    /**
+     * Use this method to retrieve all measurement sets associated with an Attribute (by ID)
+     * 
+     * @param expID     - Non-null ID of the experiment
+     * @param attrID    - Non-null ID of the attribute
+     * @return          - returns a map of measurement sets indexed by their metric IDs
+     */
+    public Map<UUID,MeasurementSet> getMeasurementSetsForAttribute( UUID expID, UUID attrID )
+    {
+        HashMap<UUID,MeasurementSet> result = new HashMap<>();
+        
+        if ( helperInitialised && expID != null && attrID != null )
+        {
+            try
+            {
+                Set<MeasurementSet> sets = msDAO.getMeasurementSetsForAttribute(attrID, expID, true);
+                
+                for ( MeasurementSet ms : sets )
+                    result.put( ms.getID(), ms );
+            }
+            catch ( Exception ex )
+            {
+                logger.warn( "Could not retrieve measurement sets for attribute: " + ex );
+            }
+        }
+        else logger.error( failedRequest );
+        
+        return result;
+    }
+    
+    /**
+     * Use this method to extract a Metric instance from an attribute. Note that it is possible
+     * for an Attribute to have more than one metric associated with it (this is not current common);
+     * this method retrieves the first available metric from the database.
+     * 
+     * @param expID     - Non-null Experiment ID
+     * @param attrID    - Non-null Attribute ID
+     * @return          - Returns the Metric instance for the attribute (may be null)
+     */
     public Metric getAttributeMetric( UUID expID, UUID attrID )
     {
         Metric result = null;
         
         // Safety
-        if ( helperInitialised && attrID != null )
+        if ( helperInitialised && expID != null && attrID != null )
         {
             try
             {
@@ -164,32 +285,5 @@ public class ExplorerMetricsQueryHelper
         else logger.error( failedRequest );
         
         return result;
-    }
-    
-    // Private methods ---------------------------------------------------------
-    private Set<Entity> getParticipantEntities( UUID expID, ArrayList<String> partIRIs )
-    {
-        HashSet<Entity> result = new HashSet<>();
-        
-        try
-        {
-            // Retrieve all entities
-            Set<Entity> entities = entityDAO.getEntitiesForExperiment( expID, true );
-            
-            // Look through targets to see if we can find them in the entity set
-            for ( String iri : partIRIs )
-            {
-                for ( Entity entity : entities )
-                    if ( entity.getEntityID().equals(iri) )
-                    {
-                        if ( !result.contains(entity) ) result.add(entity);
-                        break;
-                    }
-            }
-        }
-        catch ( Exception ex )
-        { logger.warn( "Could not retrieve entities from EDM: " + ex.getMessage() ); }
-        
-        return result;
-    }
+    }    
 }
