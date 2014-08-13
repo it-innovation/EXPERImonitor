@@ -41,8 +41,8 @@ public class MetricHelper
      * @param mgenSet     - Collection of metric generators, must not be null
      * @return            - Returned attribute instance, if it exists, otherwise null.
      */
-    public static Attribute getAttributeFromID( UUID attributeID,
-                                                Collection<MetricGenerator> mgenSet )
+    public static Attribute getAttributeFromGenerators( UUID attributeID,
+                                                        Collection<MetricGenerator> mgenSet )
     {
       Attribute attr = null;
       
@@ -53,6 +53,32 @@ public class MetricHelper
       }
       
       return attr;
+    }
+    
+    /**
+     * Use this method to find an attribute from a collection of entities.
+     * 
+     * @param attrID    - Non-null attribute ID
+     * @param entities  - non-null collection of entities
+     * @return          - A (possibly null) attribute
+     */
+    public static Attribute getAttributeFromEntities( UUID attrID, 
+                                                      Collection<Entity> entities )
+    {
+        Attribute result = null;
+        
+        if ( entities != null && !entities.isEmpty() )
+        {
+            for( Entity ent : entities )
+                for ( Attribute attr : ent.getAttributes() )
+                    if ( attr.getUUID().equals(attrID) )
+                    {
+                        result = attr;
+                        break;
+                    }
+        }
+        
+        return result;
     }
     
     /**

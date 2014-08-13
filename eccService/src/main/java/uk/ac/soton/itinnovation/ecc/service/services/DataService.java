@@ -627,7 +627,7 @@ public class DataService {
 
         if (currentExperiment != null) {
             try {
-                Attribute attr = MetricHelper.getAttributeFromID(UUID.fromString(attributeId), metricGenDAO.getMetricGeneratorsForExperiment(currentExperiment.getUUID(), true));
+                Attribute attr = MetricHelper.getAttributeFromGenerators(UUID.fromString(attributeId), metricGenDAO.getMetricGeneratorsForExperiment(currentExperiment.getUUID(), true));
                 Set<MeasurementSet> measurementSets = getTailMeasurementSetsForAttribute(currentExperiment.getUUID(), attr, new Date(since), limit);
                 Iterator<MeasurementSet> it = measurementSets.iterator();
                 MeasurementSet ms;
@@ -696,7 +696,7 @@ public class DataService {
 
         if (currentExperiment != null) {
             try {
-                Attribute attr = MetricHelper.getAttributeFromID(UUID.fromString(attributeId), metricGenDAO.getMetricGeneratorsForExperiment(currentExperiment.getUUID(), true));
+                Attribute attr = MetricHelper.getAttributeFromGenerators(UUID.fromString(attributeId), metricGenDAO.getMetricGeneratorsForExperiment(currentExperiment.getUUID(), true));
                 Set<MeasurementSet> measurementSets = getSinceMeasurementSetsForAttribute(currentExperiment.getUUID(), attr, new Date(since), limit);
                 Iterator<MeasurementSet> it = measurementSets.iterator();
                 MeasurementSet ms;
