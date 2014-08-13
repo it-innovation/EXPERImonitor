@@ -96,6 +96,7 @@ public class MetricGroup
         this.metricGeneratorUUID = metricGeneratorUUID;
         this.name = name;
         this.description = description;
+        this.measurementSets = new HashSet<MeasurementSet>();
     }
     
     /**

@@ -254,24 +254,20 @@ public class MetricHelper
      */
     public static Map<UUID, MeasurementSet> getAllMeasurementSets( Collection<MetricGenerator> mgenSet )
     {
-        HashMap<UUID, MeasurementSet> mSets = new HashMap<UUID, MeasurementSet>();
+        HashMap<UUID, MeasurementSet> mSets = new HashMap<>();
         
         if ( mgenSet != null )
         {
-            Iterator<MetricGenerator> mgenIt = mgenSet.iterator();
-            while ( mgenIt.hasNext() )
-            {
-                Iterator<MetricGroup> mgIt = mgenIt.next().getMetricGroups().iterator();
-                while ( mgIt.hasNext() )
+            for ( MetricGenerator metGen : mgenSet )
+                for ( MetricGroup metGrp : metGen.getMetricGroups() )
                 {
-                    Iterator<MeasurementSet> msIt = mgIt.next().getMeasurementSets().iterator();
-                    while ( msIt.hasNext() )
-                    {
-                      MeasurementSet ms = msIt.next();
-                      mSets.put( ms.getID(), ms ); 
-                    }
-                }
-            }
+                    // Make sure measurement set set is not null
+                    Set<MeasurementSet> msSet = metGrp.getMeasurementSets();
+                    
+                    if ( msSet != null )
+                        for ( MeasurementSet ms : msSet)
+                            mSets.put( ms.getID(), ms );
+                }                        
         }
         
         return mSets;        
