@@ -49,6 +49,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experimedi
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Attribute;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Measurement;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Metric;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGroup;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricHelper;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricType;
@@ -218,6 +219,18 @@ public class ExperimentDataGenerator {
 				MeasurementSet ms = MetricHelper.createMeasurementSet( a, MetricType.ORDINAL,
 									   new Unit( "Scale item" ),
 									   metricGroup );
+                
+                // Add appropriate metric meta-data to measurement set
+                Metric metric = ms.getMetric();
+                metric.setMetaType("Likert scale");
+                
+                ArrayList<String> scaleItems = ordinalValues.get(i);
+                String scaleMeta = "";
+                for ( String item : scaleItems )
+                    scaleMeta += item + ",";
+                
+                scaleMeta = scaleMeta.substring(0, scaleMeta.length() -1 );
+                metric.setMetaContent( scaleMeta );
 
 				if (measurementSets.get(agentName)==null) {
 					measurementSets.put(agentName, new ArrayList<MeasurementSet>());
