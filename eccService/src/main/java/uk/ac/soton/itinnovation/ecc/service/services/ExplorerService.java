@@ -238,6 +238,60 @@ public class ExplorerService
         return result;
     }
 
+    public ArrayList<EccNOMORDAttributeSummary> getQoEDistributionByName( UUID   expID,
+                                                                          String attrName )
+    {
+        // NOTE: it is only expected that ONE instance end up in this collection;
+        // presented as a collection for the purposes of JSONising to web UI
+        ArrayList<EccNOMORDAttributeSummary> result = new ArrayList<>();
+        
+        // Safety
+         if ( serviceReady && expID != null && attrName != null )
+         {
+             // Get all attribute instances by name
+             ArrayList<String> attrNames = new ArrayList<>();
+             attrNames.add( attrName );
+             
+             Map<String,Set<Attribute>> allAttrs = 
+                     metricsQueryHelper.getAttributeInstancesByName( expID, attrNames );
+             
+             Set<Attribute> attrResult = allAttrs.get( attrName );
+             
+             if ( attrResult != null && !attrResult.isEmpty() )
+             {
+                 // Only use the QoE attributes
+                 List<Attribute> qoeResult = extractSortedQoEAttributes( expID, attrResult );
+                 
+                 // Get measurement set for combined attributes
+                 MeasurementSet ms = 
+                         metricsQueryHelper.getCombinedMeasurementSetForAttributes( expID, qoeResult );
+                 
+                 // If we have data, create the summary distribution
+                 if ( ms != null )
+                 {
+                     Map<String, Integer> distrib = 
+                             MetricCalculator.countValueFrequencies( ms.getMeasurements() );
+                     
+                     // Create info based on any attribute instance
+                     EccAttributeInfo attrInfo = 
+                             createAttributeInfo( expID, attrResult.iterator().next() );
+                     
+                     // Create summary distribution result
+                     EccNOMORDAttributeSummary summary =
+                             new EccNOMORDAttributeSummary( attrInfo, distrib );
+                     
+                     result.add( summary );
+                 }
+                 else logger.error( "Could not find any measurement sets for attributes by name " + attrName );
+             }
+             else logger.warn( "Could not find any attributes by name " + attrName );
+             
+         }
+         else logger.error( callFail );
+         
+         return result;
+    }
+    
     public EccNOMORDParticipantSummary getPartQoEDistribution( UUID expID,
                                                                String partIRI )
     {
@@ -420,6 +474,26 @@ public class ExplorerService
                                    ent.getDescription(),
                                    ent.getUUID(),
                                    ent.getEntityID() );
+    }
+    
+    private EccAttributeInfo createAttributeInfo( UUID expID, Attribute attr )
+    {
+        EccAttributeInfo result = null;
+        
+        Metric metric = metricsQueryHelper.getAttributeMetric( expID, attr.getUUID() );
+        
+        if ( metric != null )
+            result = new EccAttributeInfo( attr.getName(),
+                                           attr.getDescription(),
+                                           attr.getUUID(),
+                                           metric.getUnit().getName(),
+                                           metric.getMetricType().name(),
+                                           metric.getMetaType(),
+                                           metric.getMetaContent() );
+        else 
+            logger.error( "Could not create Attribute Info: metric is unavailable" );
+        
+        return result;
     }
     
     private List<Attribute> extractSortedQoEAttributes( UUID expID, Collection<Attribute> attrs )

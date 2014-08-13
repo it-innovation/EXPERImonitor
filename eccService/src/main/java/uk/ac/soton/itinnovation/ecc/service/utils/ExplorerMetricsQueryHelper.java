@@ -166,7 +166,7 @@ public class ExplorerMetricsQueryHelper
      * @param partIRIs  - List of known PROV participants for the experiment
      * @return          - returns a map of metric Entities indexed by their metric IDs
      */
-    public Map<UUID,Entity> getParticipantEntities( UUID expID, ArrayList<String> partIRIs )
+    public Map<UUID,Entity> getParticipantEntities( UUID expID, Collection<String> partIRIs )
     {
         HashMap<UUID,Entity> result = new HashMap<>();
         
@@ -207,7 +207,7 @@ public class ExplorerMetricsQueryHelper
      * @param attrNames - Non-null/empty list of attributes names of interest
      * @return          - A map of attribute instances, indexed by the name list
      */
-    public Map<String,Set<Attribute>> getAttributeInstancesByName( UUID expID, ArrayList<String> attrNames )
+    public Map<String,Set<Attribute>> getAttributeInstancesByName( UUID expID, Collection<String> attrNames )
     {
         HashMap<String,Set<Attribute>> result = new HashMap<>();
         
@@ -253,7 +253,7 @@ public class ExplorerMetricsQueryHelper
      * @param partIRIs  - List of known PROV participants for the experiment
      * @return          - Returns a map of metric Attributes indexed by their metric IDs
      */
-    public Map<UUID,Attribute> getPartCommonAttributes( UUID expID, ArrayList<String> partIRIs )
+    public Map<UUID,Attribute> getPartCommonAttributes( UUID expID, Collection<String> partIRIs )
     {
         HashMap<UUID,Attribute> result = new HashMap<>();
         
@@ -340,7 +340,7 @@ public class ExplorerMetricsQueryHelper
      * @param attributes    - Non-null/empty set of attributes
      * @return              - Single measurement set representing all valid measurement data
      */
-    public MeasurementSet getCombinedMeasurementSetForAttributes( UUID expID, Set<Attribute> attributes )
+    public MeasurementSet getCombinedMeasurementSetForAttributes( UUID expID, Collection<Attribute> attributes )
     {
         MeasurementSet result = null;
         

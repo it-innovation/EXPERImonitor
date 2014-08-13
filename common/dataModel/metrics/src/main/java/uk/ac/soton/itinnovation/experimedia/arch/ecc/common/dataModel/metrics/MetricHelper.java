@@ -1077,4 +1077,20 @@ public class MetricHelper
         
         return result;        
     }
+    
+    public static ArrayList<String> getORDINALLabels( Metric metric )
+    {
+        ArrayList<String> result = new ArrayList<>();
+        
+        // Safety
+        if ( metric != null && metric.getMetricType() == MetricType.ORDINAL )
+        {
+            String[] labels = metric.getMetaContent().split( "," );
+            
+            for ( String label : labels )
+                result.add( label );
+        }
+        
+        return result;
+    }
 }
