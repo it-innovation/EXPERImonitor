@@ -89,13 +89,6 @@ public class EntryPoint
 					logger.debug("ready to push");
                     try
                     {
-                        // Create a time-stamp
-                        long timeStamp = new Date().getTime();
-
-                        // Push the metric (referring to Entity and its attribute)
-                        provGen.getEccLogger().pushSimpleMetric( "Simulation service",
-                                                    "Last push",
-                                                    Long.toString(timeStamp) );
 
 						//push prov
 						if (provGen.processNextLog()) {
@@ -143,21 +136,6 @@ public class EntryPoint
 
         // A simple metric group belonging to the metric generator
         MetricGroup group = MetricHelper.createMetricGroup( "Demo group", "Data set for demo", metGen );
-
-        // A simple entity
-        Entity entity = new Entity();
-        entity.setName( "Simulation service" );
-        entity.setDescription( "Simple entity for demo purposes only" );
-        metGen.addEntity( entity );
-
-        // A simple attribute
-        Attribute attr = MetricHelper.createAttribute( "Last push", "Time of last push", entity );
-
-        // A measurement set associated with the attribute
-        MetricHelper.createMeasurementSet( attr, MetricType.RATIO,
-                                           new Unit( "milliseconds" ),
-                                           group );
-
 
 		//Prov-metric link
 		 // A simple entity

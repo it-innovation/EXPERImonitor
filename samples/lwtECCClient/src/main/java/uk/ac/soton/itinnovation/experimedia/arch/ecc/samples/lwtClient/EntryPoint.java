@@ -98,7 +98,7 @@ public class EntryPoint
 
 			try {
 				// Do cool simulation codey bit & push whole report to ECC using Simon's new and shiny method
-				eccLogger.pushSimpleMetric("LWTService", "Response time", logTool.createReport(ResponseTime, metGen, 60));
+				eccLogger.pushSimpleMetric("LWTService", "Average response time", logTool.createReport(ResponseTime, metGen, 60));
 				eccLogger.pushSimpleMetric("LWTService", "CPU usage", logTool.createReport(CPUUsage, metGen, 60));
 				eccLogger.pushSimpleMetric("LWTService", "Memory usage", logTool.createReport(MemoryUsage, metGen, 60));
 			} catch (Exception e) {
