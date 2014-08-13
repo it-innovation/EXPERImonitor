@@ -25,7 +25,10 @@
 
 package uk.ac.soton.itinnovation.ecc.service.utils;
 
+import uk.ac.soton.itinnovation.ecc.service.domain.explorer.provenance.*;
+
 import java.util.*;
+
 
 
 
@@ -36,12 +39,40 @@ public class ExplorerProvenanceQueryHelper {
         
     }
     
+    /**
+     * Use this method to initialise the query helper
+     * 
+     * @throws Exception 
+     */
     public void initialise() throws Exception {
         
     }
     
+    /**
+     * Use this method to shut down the query helper. (Will close repositories if open)
+     * 
+     */
     public void shutdown() {
         
+    }
+    
+    /**
+     * Use this method to get a summary of an experiment in a properties file that
+     * provides:
+     * 
+     * participantCount         : number of participants in the experiment 
+     * activitiesPerformedCount : number of activities performed
+     * applicationsUsedCount    : number of applications used
+     * servicesUsedCount        : number of services used
+     * 
+     * @param expID - Non-null UUID of experiment
+     * @return      - Non-null property instance (with summary data if available)
+     */
+    public Properties getExperimentProvSummary( UUID expID ) {
+        
+        Properties result = new Properties();
+        
+        return result;
     }
     
     /**
@@ -50,11 +81,88 @@ public class ExplorerProvenanceQueryHelper {
      * @param expID - Non-null experiment ID
      * @return      - Returns a (possibly empty) set of IRIs representing participants
      */
-    public Set<String> getParticipantIRIsForExperiment( UUID expID ) {
+    public Set<String> getParticipantIRIs( UUID expID ) {
         
         HashSet<String> result = new HashSet<>();
         
         
         return result;
+    }
+    
+    /**
+     * Use this method to retrieve a summary of the activities associated with a participant
+     * of a particular experiment
+     * 
+     * @param expID     - Non-null experiment ID
+     * @param partIRI   - Non-null participant IRI
+     * @return          - A (possibly null) summary of activities
+     */
+    public EccParticipantActivitySummaryResultSet getParticipantActivitySummary( UUID   expID,
+                                                                                 String partIRI ) {
+        
+        EccParticipantActivitySummaryResultSet result = null;
+        
+        
+        return result;        
+    }
+    
+    /**
+     * Use this method to retrieve a set of activity instances that relate to a participant in
+     * an experiment.
+     * 
+     * @param expID     - Non-null experiment ID
+     * @param partIRI   - Non-null IRI of the participant in question
+     * @return          - Returns a (possibly null) activity result set
+     */
+    public EccParticipantActivityResultSet getParticipantsActivityInstances( UUID   expID,
+                                                                             String partIRI ) {
+        
+        EccParticipantActivityResultSet result = null;
+        
+        // Stefanie - don't worry if you can't derive a description of the activity, 
+        // just leave it as " " for now
+        
+        
+        return result;        
+    }
+    
+    /**
+     * Use this method to retrieve a set of activity instances that relate to a participant in
+     * an experiment and that share the same activity label.
+     * 
+     * @param expID     - Non-null experiment ID
+     * @param partIRI   - Non-null IRI of the participant in question
+     * @param actLabel  - Non-null String with the label of an activity
+     * @return          - Returns a (possibly null) activity result set
+     */
+    public EccParticipantActivityResultSet getParticipantActivityInstances( UUID   expID,
+                                                                            String partIRI,
+                                                                            String actLabel ) {
+        EccParticipantActivityResultSet result = null;
+        
+        // Stefanie - very similar to the above, only this time the result is filtered by an activity label
+        
+        
+        return result;   
+    }
+    
+    // -------------------------------------------------------------------------
+    // Stefanie: at this point I think you can guess the rest. Please add the JavaDoc
+    // once you have implemented the call
+    // -------------------------------------------------------------------------
+    
+    public EccActivityApplicationResultSet getApplicationsUsedByActivity( UUID   expID,
+                                                                          String activityIRI ) {
+        EccActivityApplicationResultSet result = null;
+        
+        return result;
+    }
+    
+    public EccApplicationServiceResultSet getServicesUsedByAppplication( UUID expID,
+                                                                         String appIRI ) {
+        
+        EccApplicationServiceResultSet result = null;
+        
+        return result;        
     }
 }

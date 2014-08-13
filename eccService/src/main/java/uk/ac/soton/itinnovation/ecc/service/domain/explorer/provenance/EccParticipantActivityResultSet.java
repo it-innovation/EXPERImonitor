@@ -33,7 +33,7 @@ import java.util.ArrayList;
 
 public class EccParticipantActivityResultSet
 {
-    private EccParticipant             participant;
+    private EccParticipant         participant;
     private ArrayList<EccActivity> activityList;
     
     public EccParticipantActivityResultSet( EccParticipant part )

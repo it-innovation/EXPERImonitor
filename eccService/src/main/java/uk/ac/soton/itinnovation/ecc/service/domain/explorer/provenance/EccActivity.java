@@ -40,10 +40,10 @@ public class EccActivity
     
     
     public EccActivity( String aName,
-                            String aDesc,
-                            String aIRI,
-                            Date   started,
-                            Date   ended )
+                        String aDesc,
+                        String aIRI,
+                        Date   started,
+                        Date   ended )
     {
         name        = aName;
         description = aDesc;
