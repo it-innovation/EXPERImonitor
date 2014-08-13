@@ -25,6 +25,7 @@
 
 package uk.ac.soton.itinnovation.ecc.service.services;
 
+import uk.ac.soton.itinnovation.ecc.service.utils.MetricCalculator;
 import uk.ac.soton.itinnovation.ecc.service.domain.explorer.metrics.*;
 import uk.ac.soton.itinnovation.ecc.service.domain.explorer.provenance.*;
 import uk.ac.soton.itinnovation.ecc.service.domain.DatabaseConfiguration;
