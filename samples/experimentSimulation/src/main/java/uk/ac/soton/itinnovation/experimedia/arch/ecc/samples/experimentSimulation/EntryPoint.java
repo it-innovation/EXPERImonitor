@@ -137,24 +137,8 @@ public class EntryPoint
         // A simple metric group belonging to the metric generator
         MetricGroup group = MetricHelper.createMetricGroup( "Demo group", "Data set for demo", metGen );
 
-		//Prov-metric link
-		 // A simple entity
-        Entity e = new Entity();
-        e.setName( "LWTService" );
-        e.setDescription( "Lift waiting time service" );
-        metGen.addEntity( e );
-
-        // A simple attribute
-        Attribute a = MetricHelper.createAttribute( "Response time", "The Server's response time", e );
-
-        // A measurement set associated with the attribute
-        MetricHelper.createMeasurementSet( a, MetricType.RATIO,
-                                           new Unit( "milliseconds" ),
-                                           group );
-
-
-
-
+        // That's all for now - will create Entities representing participants later
+        
         return metGen;
     }
 
