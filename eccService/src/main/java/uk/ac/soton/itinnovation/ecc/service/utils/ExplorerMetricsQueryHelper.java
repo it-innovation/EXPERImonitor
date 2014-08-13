@@ -125,6 +125,29 @@ public class ExplorerMetricsQueryHelper
         expDataManager = null;
     }
     
+    public Attribute getAttribute( UUID expID, UUID attrID )
+    {
+        Attribute result = null;
+        
+        if ( helperInitialised && expID != null && attrID != null )
+        {
+            try
+            {
+                // Retrieve all entities
+                Set<Entity> entities = entityDAO.getEntitiesForExperiment( expID, true );
+                
+                if ( entities != null ) 
+                    result = MetricHelper.getAttributeFromEntities( attrID, entities ); 
+            }
+            catch ( Exception ex )
+            { logger.error( "Could not find attribute in database ",ex ); }
+            
+        
+        } logger.error( failedRequest );
+        
+        return result;
+    }
+    
     /**
      * Use this method to retrieve a Metric Entity based on a PROV IRI
      * 
@@ -403,4 +426,38 @@ public class ExplorerMetricsQueryHelper
         
         return result;
     }
+    
+    public boolean isQoSAttribute( UUID expID, UUID attrID ) throws Exception
+    {
+        Metric metric = getAttributeMetric( expID, attrID );
+        
+        if ( metric != null )
+        {
+            MetricType mt = metric.getMetricType();
+            
+            if ( mt == MetricType.INTERVAL || mt == MetricType.RATIO )
+                return true;
+        }
+        else throw new Exception( "Cannot determine metric type: no metric data" );
+        
+        return false;
+    }
+    
+    public boolean isQoEAttribute( UUID expID, UUID attrID ) throws Exception
+    {
+        Metric metric = getAttributeMetric( expID, attrID );
+        
+        if ( metric != null )
+        {
+            MetricType mt = metric.getMetricType();
+            
+            if ( mt == MetricType.NOMINAL || mt == MetricType.ORDINAL )
+                return true;
+        }
+        else throw new Exception( "Cannot determine metric type: no metric data" );
+        
+        return false;
+    }
+    
+    
 }

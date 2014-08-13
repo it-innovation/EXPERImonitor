@@ -27,7 +27,10 @@ package uk.ac.soton.itinnovation.ecc.service.utils;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+
 import java.util.*;
+
 
 
 
@@ -164,5 +167,88 @@ public class MetricCalculator
         }
         
         return result;
+    }
+    
+    public static MeasurementSet findNearestMeasurements( MeasurementSet   mSet,
+                                                          Collection<Date> timeStamps )
+    {
+        MeasurementSet result = null;
+        
+        if ( mSet != null && timeStamps != null && !timeStamps.isEmpty() )
+        {
+            // Create a result set based on the input (but without measurements)
+            result = new MeasurementSet( mSet, false );
+            
+            // Sort the known measurements
+            List<Measurement> sorted = 
+                    MetricHelper.sortMeasurementsByDateLinear( mSet.getMeasurements() );
+            
+            // Search through the requested time stamps, trying to find the nearest dates
+            for ( Date targStamp : timeStamps )
+            {
+                Date        lastStamp = new Date( 0 );
+                Measurement nearMeasure = null;
+                
+                for ( Measurement m : sorted )
+                {
+                    Date mStamp = m.getTimeStamp();
+                    
+                    if ( mStamp.before(targStamp) )
+                        lastStamp = mStamp;
+                    else
+                    {
+                        nearMeasure = m;
+                        break;                        
+                    }
+                }
+                
+                // Add the measurement, if once is found
+                if ( nearMeasure != null ) result.addMeasurement( nearMeasure );
+            }
+        }
+        
+        return result;
+    }
+    
+    public static Properties calcINTRATSummary( MeasurementSet ms ) throws Exception
+    {
+        Properties result = new Properties();
+        
+        try
+        {
+            if ( validateINTRATMeasurementSet(ms) )
+            {
+                DescriptiveStatistics ds = new DescriptiveStatistics();
+                
+                for ( Measurement m : ms.getMeasurements() )
+                    ds.addValue( Double.parseDouble(m.getValue()) );
+                
+                result.put( "floor",   ds.getMin() );
+                result.put( "mean",    ds.getMean() );
+                result.put( "ceiling", ds.getMax() );
+            }
+        }
+        catch ( Exception ex ) { throw ex; }
+        
+        return result;
+    }
+    
+    // Private methods ---------------------------------------------------------
+    private static boolean validateINTRATMeasurementSet( MeasurementSet ms ) throws Exception
+    {
+        if ( ms == null ) throw new Exception( "Measurement set invalid" );
+        
+        Set<Measurement> measures = ms.getMeasurements();
+        if ( measures == null ) throw new Exception( "Measurements in set invalid" );
+        
+        Metric metric = ms.getMetric();
+        if ( metric == null ) throw new Exception( "Metric is invalid" );
+        
+        MetricType mt = metric.getMetricType();
+        
+        if ( mt == MetricType.NOMINAL || mt == MetricType.ORDINAL )
+            throw new Exception( "Metric is not INTERVAL or RATIO" );
+        
+        return true;            
     }
 }

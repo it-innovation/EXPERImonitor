@@ -187,8 +187,8 @@ public class ExplorerService
             for ( Attribute attr : attrsByEntities.values() )
                 if ( attr.getName().equals(attrName) ) selAttributes.add( attr );
             
-            // Sort selected attributes by name
-            selAttributes = MetricHelper.sortAttributesByName( selAttributes );
+            // Sort selected (QoE) attributes by name
+            selAttributes = extractSortedQoEAttributes( expID, selAttributes );
             
             // For select attributes, retrieve measurement set(s) and search for label instance & add Entities
             HashSet<Entity> selectedEntities = new HashSet<>();
@@ -468,6 +468,59 @@ public class ExplorerService
         return result;
     }
     
+    public EccINTRATSummary getINTRATAttrDistributionDiscreteSampling( UUID expID, UUID attrID,
+                                                                       Collection<Date> timeStamps )
+    {
+        EccINTRATSummary result = null;
+        
+        if ( serviceReady && expID != null && timeStamps != null && 
+             !timeStamps.isEmpty() )
+        {
+            try
+            {
+                // Only operate on INTERVAL or RATIO data
+                if ( metricsQueryHelper.isQoSAttribute(expID, attrID) )
+                {
+                    Map<UUID,MeasurementSet> msSet = 
+                            metricsQueryHelper.getMeasurementSetsForAttribute( expID, attrID );
+
+                    // Combine data
+                    MeasurementSet superMS = MetricHelper.combineMeasurementSets( msSet.values() );
+                    
+                    // Get back the discrete measurements nearest our timestamps
+                    superMS = MetricCalculator.findNearestMeasurements( superMS, timeStamps );
+                    
+                    // Get related attribute
+                    Attribute attr = metricsQueryHelper.getAttribute( expID, attrID );
+ 
+                    if ( superMS != null && attr != null )
+                    {
+                        Properties calcResult = MetricCalculator.calcINTRATSummary( superMS );
+                        
+                        // Create summary if possible
+                        if ( !calcResult.isEmpty() )
+                        {
+                            double floor = (Double) calcResult.get( "floor" );
+                            double mean  = (Double) calcResult.get( "mean" );
+                            double ceil  = (Double) calcResult.get( "ceiling" );
+                            
+                            result = new EccINTRATSummary( createAttributeInfo(expID, attr),
+                                                           floor, mean, ceil );
+                        }
+                    }
+                }
+            }
+            catch ( Exception ex )
+            {
+                String msg = "Could not get discrete distribution for QoS data: " + ex.getMessage();
+                logger.error( msg, ex );
+            }
+        }
+        else logger.error( callFail );
+        
+        return result;
+    }
+    
     // Private methods ---------------------------------------------------------
     private EccParticipant createParticipant( Entity ent )
     {
@@ -500,17 +553,16 @@ public class ExplorerService
     private List<Attribute> extractSortedQoEAttributes( UUID expID, Collection<Attribute> attrs )
     {  
         HashSet<Attribute> qoeAttrs = new HashSet<>();
+        
         for ( Attribute attr : attrs )
         {
-            Metric attrMet = metricsQueryHelper.getAttributeMetric( expID, attr.getUUID() );
-
-            if ( attrMet != null )
+            try
             {
-                MetricType mt = attrMet.getMetricType();
-                
-                if ( mt != null && mt == MetricType.NOMINAL || mt == MetricType.ORDINAL )
-                    qoeAttrs.add( attr );                    
+                if ( metricsQueryHelper.isQoEAttribute(expID, attr.getUUID()) )
+                    qoeAttrs.add( attr );
             }
+            catch ( Exception ex )
+            { logger.error( "Could not extract QoE attribute", ex);}
         }
 
         return MetricHelper.sortAttributesByName( qoeAttrs );

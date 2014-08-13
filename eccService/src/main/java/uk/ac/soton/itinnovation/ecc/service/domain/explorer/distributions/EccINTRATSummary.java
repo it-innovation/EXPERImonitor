@@ -34,12 +34,12 @@ public class EccINTRATSummary
 {
     private EccAttributeInfo attrInfo;
     
-    private float floorValue;
-    private float ceilingValue;
-    private float averageValue;
+    private double floorValue;
+    private double ceilingValue;
+    private double averageValue;
     
     public EccINTRATSummary( EccAttributeInfo info,
-                             float fV, float cV, float aV )
+                             double fV, double cV, double aV )
     {
         attrInfo     = info;
         floorValue   = fV;
@@ -50,12 +50,12 @@ public class EccINTRATSummary
     public EccAttributeInfo getAttribute()
     { return attrInfo; }
     
-    public float getFloorValue()
+    public double getFloorValue()
     { return floorValue; }
     
-    public float getCeilingValue()
+    public double getCeilingValue()
     { return ceilingValue; }
     
-    public float getAverageValue()
+    public double getAverageValue()
     { return averageValue; }
 }

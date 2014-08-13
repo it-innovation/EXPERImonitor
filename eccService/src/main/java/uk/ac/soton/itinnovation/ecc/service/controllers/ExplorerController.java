@@ -222,18 +222,19 @@ public class ExplorerController {
         {
             // Process timeStams as a comman delimited list of long values
             String[] stamps = timeStamps.split( "," );
-            ArrayList<Long> validTimeStamps = new ArrayList<>();
+            ArrayList<Date> validTimeStamps = new ArrayList<>();
 
             for ( String stamp : stamps )
             {
                 try
-                {
-                    validTimeStamps.add( Long.parseLong( stamp ) );
+                {                    
+                    validTimeStamps.add( new Date(Long.parseLong(stamp)) );
                 }
                 catch ( NumberFormatException nfe )
                 { logger.warn( "Caught bad time stamp parameter for QoS discrete distribution query"); }
             }
             
+            // Will use getINTRATAttrDistributionDiscreteSampling(...)
             result = demoData.getINTRATDistDataDiscrete( attrID, validTimeStamps );
             
         }
@@ -348,7 +349,7 @@ public class ExplorerController {
         return result;
     }
     
-    // Service based queries -----------------------------------------------
+    // Service based queries ---------------------------------------------------
     // -------------------------------------------------------------------------
     @RequestMapping(method = RequestMethod.GET, value = "/{expID}/services/iri/attributes" )
     @ResponseBody

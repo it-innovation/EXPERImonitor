@@ -73,7 +73,7 @@ public class ExplorerDemoData
     public HashMap<String, EccApplicationServiceResultSet>         applicationServices;
     
     public HashMap<String, EccAttributeResultSet> serviceQoSAttributes;
-    public HashMap<Long,   EccINTRATSummary>      qosDiscreteDistributionData;
+    public HashMap<Date,   EccINTRATSummary>      qosDiscreteDistributionData;
     public ArrayList<EccMeasurement>              qosSeriesDemo;
     public HashMap<String, EccINTRATSeries>       qosSeriesHighlights;
     
@@ -153,7 +153,7 @@ public class ExplorerDemoData
         return applicationServices.get( appIRI );
     }
     
-    public EccINTRATSummary getINTRATDistDataDiscrete( UUID attrID, ArrayList<Long> stamps )
+    public EccINTRATSummary getINTRATDistDataDiscrete( UUID attrID, ArrayList<Date> stamps )
     {
         // Cheating here: just use first time stamp to return made-up distribution
         return qosDiscreteDistributionData.get( stamps.get(0) );
@@ -516,7 +516,7 @@ public class ExplorerDemoData
             
             EccINTRATSummary dd = new EccINTRATSummary( info, floor, ceil, avg );
             
-            qosDiscreteDistributionData.put( act.getStartTime().getTime(), dd );
+            qosDiscreteDistributionData.put( act.getStartTime(), dd );
             ++index;
         }
         
