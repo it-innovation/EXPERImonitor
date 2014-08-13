@@ -14,9 +14,9 @@
 		</encoder>
 	</appender>
 
-	<logger name="uk.ac.soton.itinnovation.experimedia.arch.edm.test.prov" level="debug"/>
+	<logger name="package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experimedia" level="debug"/>
 
-	<root level="INFO">
+	<root level="DEBUG">
 		<appender-ref ref="STDOUT"/>
 	</root>
 

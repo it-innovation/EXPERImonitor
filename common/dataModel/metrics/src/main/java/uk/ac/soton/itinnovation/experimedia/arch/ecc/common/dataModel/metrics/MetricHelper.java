@@ -871,6 +871,31 @@ public class MetricHelper
       return targetReport;
     }
     
+    public static Report createMeasurementReport( MeasurementSet sourceMS,
+                                                  Collection<Measurement> measures )
+    {
+        Report targetReport = null;
+      
+        if ( sourceMS != null && measures != null )
+        {
+          MeasurementSet newMS = new MeasurementSet( sourceMS, false );
+          Date now = new Date();
+
+          // Take only non-null measurements
+          HashSet<Measurement> validMeasures = new HashSet<Measurement>();
+          for ( Measurement m : measures )
+              if ( m != null )
+                  validMeasures.add( m );
+          
+          newMS.addMeasurements( validMeasures );
+          
+          targetReport = new Report( UUID.randomUUID(), newMS, now, now, now );
+          targetReport.setNumberOfMeasurements( validMeasures.size() );
+        }
+
+        return targetReport;
+    }
+    
     /**
      * Use this method to iterate through the contents of a metric generator.
      * 

@@ -1,0 +1,67 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
+    <artifactId>experimedia-arch-ecc-samples-lwtECCClient</artifactId>
+    <version>2.1</version>
+    <packaging>jar</packaging>
+
+    <parent>
+        <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
+        <artifactId>experimedia-arch-ecc-samples</artifactId>
+        <version>2.1</version>
+    </parent>
+
+    <build>
+        <plugins>
+
+            <!-- Maven compiler -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>${ecc.java.version}</source>
+                    <target>${ecc.java.version}</target>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.4.3</version>
+                <configuration>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
+            </plugin>
+            <!--To run with mvn exec:java-->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.2.1</version>
+                <configuration>
+                    <mainClass>uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.headlessECCClient.EntryPoint</mainClass>
+                </configuration>
+            </plugin>
+        </plugins>
+
+    </build>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
+            <artifactId>experimedia-arch-ecc-samples-shared</artifactId>
+            <version>2.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
+            <artifactId>experimedia-arch-ecc-common-dataModel-metrics</artifactId>
+            <version>2.1</version>
+        </dependency>
+
+    </dependencies>
+
+</project>

@@ -3,7 +3,7 @@
 // © University of Southampton IT Innovation Centre, 2014
 //
 // Copyright in this software belongs to University of Southampton
-// IT Innovation Centre of Gamma House, Enterprise Road, 
+// IT Innovation Centre of Gamma House, Enterprise Road,
 // Chilworth Science Park, Southampton, SO16 7NS, UK.
 //
 // This software may not be used, sold, licensed, transferred, copied
@@ -50,22 +50,22 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMProvPersiste
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.prov.dao.EDMProvDataStoreImpl;
 
 public final class SSGParserTest {
-	
+
 	private final String logdir = "/home/sw/projects/Experimedia/ssglogs";
 	private final Logger logger = LoggerFactory.getLogger(SSGParserTest.class);
 	private final Properties props = new Properties();
-	
+
 	private HashSet<String> types = new HashSet<String>();
 	private HashMap<String, LinkedList<Log>> lines = new HashMap<String, LinkedList<Log>>();
 	private HashMap<String, TreeSet<Log>> logs = new HashMap<String, TreeSet<Log>>();
-	
+
 	private int numDir = 0;
 	private int numFile = 0;
-	
+
 	public SSGParserTest() {
-	
+
 		logger.info("Starting SSGParserTest");
-		
+
 		try {
 			logger.info("Loading properties file");
 			props.load(KnowledgeBaseTest.class.getClassLoader().getResourceAsStream("prov.properties"));
@@ -81,20 +81,20 @@ public final class SSGParserTest {
 		} catch (Exception e) {
 			logger.error("Error parsing logfiles", e);
 		}
-		
+
 		analyseFiles();
-		
+
 		createProvenance();
 	}
-	
+
 	public static void main(String[] args) {
 		SSGParserTest test = new SSGParserTest();
 	}
 
 	public final void parseFiles(File[] files) {
-		
+
 		if (files==null) { return; }
-		
+
 		for (File file : files) {
 			if (file.isDirectory()) {
 				numDir++;
@@ -108,7 +108,7 @@ public final class SSGParserTest {
 
 					String line;
 					while((line = br.readLine()) != null) {
-						
+
 						Log log;
 						try {
 							log = new Log(file.getName(), line);
@@ -116,8 +116,8 @@ public final class SSGParserTest {
 							logger.debug("Error creating Log object", e);
 							continue;
 						}
-						
-						
+
+
 						if (log.type==null) { continue; }
 
 						//collect all the different types
@@ -128,7 +128,7 @@ public final class SSGParserTest {
 							lines.put(log.type, new LinkedList<Log>());
 						}
 						lines.get(log.type).add(log);
-						
+
 						//add to collection of lines ordered by device
 						if (logs.get(log.device)==null) {
 							logs.put(log.device, new TreeSet<Log>());
@@ -138,23 +138,23 @@ public final class SSGParserTest {
 				} catch (IOException e) {
 					logger.error("Error in recursive function", e);
 				}
-			
+
 			}
 		}
 	}
-	
+
 	public void analyseFiles() {
-		
+
 		LinkedList<String> unknownTypes = new LinkedList<String>();
 		HashSet<String> skilifts = new HashSet<String>();
-		
+
 		for (String type: types) {
 			//Speed of the user	speed in km/h
 			if (type.equals("speed")) {
 				logger.info(lines.get(type).size() + " speed logs found");
 			//Location of the user	gps position
 			} else if (type.equals("gps")) {
-				logger.info(lines.get(type).size() + " gps logs found");		
+				logger.info(lines.get(type).size() + " gps logs found");
 			//User entered notificaiton	millseconds since 1970
 			} else if (type.equals("notification-start")) {
 				logger.info(lines.get(type).size() + " notification-start");
@@ -183,8 +183,8 @@ public final class SSGParserTest {
 			} else if (type.equals("individual-duration")) {
 				logger.info(lines.get(type).size() + " individual-duration logs found");
 			//Time spent in lift info	time in milliseconds spent in screen
-			} else if (type.equals("liftonfo-duration")) {
-				logger.info(lines.get(type).size() + " liftonfo-duration logs found");
+			} else if (type.equals("liftinfo-duration")) {
+				logger.info(lines.get(type).size() + " liftinfo-duration logs found");
 			//Time spent in hospitality	time in milliseconds spent in screen
 			} else if (type.equals("hospitality-duration")) {
 				logger.info(lines.get(type).size() + " hospitality-duration logs found");
@@ -205,10 +205,10 @@ public final class SSGParserTest {
 				logger.info(lines.get(type).size() + " network-level logs found");
 			//round trip time of request	milliseconds of request taken
 			} else if (type.equals("roundtriptime")) {
-				logger.info(lines.get(type).size() + " roundtriptime logs found");		
+				logger.info(lines.get(type).size() + " roundtriptime logs found");
 			//average speed during last track	average speed of user in km/h
 			} else if (type.equals("avgtrackspeed")) {
-				logger.info(lines.get(type).size() + " avgtrackspeed logs found");		
+				logger.info(lines.get(type).size() + " avgtrackspeed logs found");
 			//last lift used	name of lift
 			} else if (type.equals("usedlift") || type.equals("used-lift")) {
 				logger.info(lines.get(type).size() + " usedlift logs found");
@@ -217,28 +217,28 @@ public final class SSGParserTest {
 				}
 			//time taken until user read notification	milliseconds between receiving and reading
 			} else if (type.equals("userreactiontime")) {
-				logger.info(lines.get(type).size() + " userreactiontime logs found");		
+				logger.info(lines.get(type).size() + " userreactiontime logs found");
 			//navigation route initiated	name of source and target
 			} else if (type.equals("navigationinitated")) {
-				logger.info(lines.get(type).size() + " navigationinitated logs found");		
+				logger.info(lines.get(type).size() + " navigationinitated logs found");
 			//number of pois started to navigate to	number of pois
 			} else if (type.equals("poinavigated")) {
-				logger.info(lines.get(type).size() + " poinavigated logs found");		
+				logger.info(lines.get(type).size() + " poinavigated logs found");
 			//number of pois completed to navigate to	number of pois
 			} else if (type.equals("poicompleted")) {
-				logger.info(lines.get(type).size() + " poicompleted logs found");		
+				logger.info(lines.get(type).size() + " poicompleted logs found");
 			//lift wait time of Planai 6er	number of measurements received during last 5 minutes
 			} else if (type.equals("liftwaittime1")) {
-				logger.info(lines.get(type).size() + " liftwaittime1 logs found");		
+				logger.info(lines.get(type).size() + " liftwaittime1 logs found");
 			//lift wait time of Mitterhausbahn	number of measurements received during last 5 minutes
 			} else if (type.equals("liftwaittime2")) {
-				logger.info(lines.get(type).size() + " liftwaittime2 logs found");		
+				logger.info(lines.get(type).size() + " liftwaittime2 logs found");
 			//lift wait time of Märchenwiesebahn	number of measurements received during last 5 minutes
 			} else if (type.equals("liftwaittime3")) {
-				logger.info(lines.get(type).size() + " liftwaittime3 logs found");		
+				logger.info(lines.get(type).size() + " liftwaittime3 logs found");
 			//lift wait time of Laerchkogelbahn	number of measurements received during last 5 minutes
 			} else if (type.equals("liftwaittime4")) {
-				logger.info(lines.get(type).size() + " liftwaittime4 logs found");		
+				logger.info(lines.get(type).size() + " liftwaittime4 logs found");
 
 
 				//LinkedList<String> list = lines.get(type);
@@ -249,35 +249,35 @@ public final class SSGParserTest {
 				unknownTypes.add(type);
 			}
 		}
-		
+
 		//logger.info("Unknown log types:");
 		//for (String u: unknownTypes) {
 		//	logger.info(u);
 		//}
-		
+
 		logger.info(skilifts.size() + " skilifts found");
 		for (String s: skilifts) {
 			logger.info(s);
 		}
-		
+
 	}
-	
+
 	public void createProvenance() {
-		
+
 		try {
 			//init
 			EDMProvFactory factory = EDMProvFactory.getInstance();
 			factory.addOntology("foaf", "http://xmlns.com/foaf/0.1/");
 			factory.addOntology("sioc", "http://rdfs.org/sioc/ns#");
 			factory.addOntology("ski", "http://www.semanticweb.org/sw/ontologies/skiing#");
-			
+
 			//data container for long term applicationUseActivities
 			ArrayList<ActivityCollection> applicationUseActivities = new ArrayList<ActivityCollection>();
-			
+
 			//add all agents (i.e. SSG devices in this case)
 			for (String device: logs.keySet()) {
 				EDMAgent agent = factory.createAgent("agent_" + device, device);
-				
+
 				logger.info("logs: " + logs.get(device).size());
 				//process logs by device
 				Iterator<Log> it = logs.get(device).iterator();
@@ -286,13 +286,13 @@ public final class SSGParserTest {
 					//lift use
 					if (log.type.equals("used-lift")) {
 						logger.debug("Used lift: " + log.csv[7] + " (" + log.csv[8] + ") at " + log.timestamp);
-						
+
 						EDMEntity skilift = factory.getEntity(log.csv[7]);
 						if (skilift==null) {
 							skilift = factory.createEntity(log.csv[7], log.csv[8]);
 						}
 						skilift.addOwlClass(factory.getNamespaceForPrefix("ski") + "Skilift");
-						
+
 						EDMActivity usedlift = agent.doDiscreteActivity("activity_" + UUID.randomUUID(), "Used skilift", log.timestamp);
 						usedlift.addOwlClass(factory.getNamespaceForPrefix("ski") + "UsingSkiliftActivity");
 						usedlift.useEntity(skilift);
@@ -361,17 +361,17 @@ public final class SSGParserTest {
 				"http://rdfs.org/sioc/ns#", "sioc", SSGParserTest.class);
 			store.importOntology("skiing.rdf",
 				"http://www.semanticweb.org/sw/ontologies/skiing#", "ski", SSGParserTest.class);
-			
+
 			store.getProvWriter().storeReport(factory.createProvReport());
-			
+
 			//EDMProvBaseElement result = store.getProvElementReader().getElement("http://it-innovation.soton.ac.uk/ontologies/experimedia#agent_EVO-OA-07");
 			//logger.info(result.toString());
-		
+
 		} catch (Throwable e) {
 			logger.error("Error filling EDMProvFactory with test data", e);
 		}
 	}
-	
+
 	private class ActivityCollection {
 		public EDMActivity activity;
 		public Log log;
@@ -381,8 +381,13 @@ public final class SSGParserTest {
 			this.log = log;
 		}
 	}
-	
+
 	private class Log implements Comparable<Log> {
+
+		//2013-12-20 09:22:36,gps,47.40415954589844,14.199807167053223,1644.0
+		//2013-12-20 09:22:36,speed,2
+		//2013-12-20 09:22:36,temperature,0.0
+
 		public String line;
 		public String date;
 		public String time;
@@ -392,15 +397,15 @@ public final class SSGParserTest {
 		public String latitude = null;
 		public String altitude = null;
 		public String type = null;
-		
+
 		public String[] csv;
-		
+
 		Log(String filename, String line) throws ParseException {
 			this.line = line.trim();
-		
+
 			//log is mostly separated by ;
 			csv = line.split(";");
-		
+
 			//date and time are always the first two columns
 			if (csv.length>=1) {
 				this.date = csv[0].trim();
@@ -537,7 +542,7 @@ public final class SSGParserTest {
 				} else if (lowerline.contains("notification-duration")) {
 					type = "notification-duration";
 				} else if (lowerline.contains("batterylevel")) {
-					type = "batterylevel";	
+					type = "batterylevel";
 				} else if (lowerline.contains("message-received")) {
 					type = "message-received";
 					line = line.replace("\"\"", "\"");
@@ -565,7 +570,7 @@ public final class SSGParserTest {
 			try {
 				d1 = format.parse(date.trim());
 				d2 = format.parse(l.date.trim());
-				
+
 				//compare date
 				if (d1.before(d2)) {
 					return -1;
