@@ -167,6 +167,7 @@ public class ExplorerController {
         
         if ( explorerService != null && explorerService.isReady() )
         {
+            // Will be using: getPartQoEDistribution(...)
             result = demoData.qoeParticipantSummaryData.get( partIRI );
         }
         else logger.error( "Could not execute explorer service: service is null" );
@@ -182,6 +183,7 @@ public class ExplorerController {
         
         if ( explorerService != null && explorerService.isReady() )
         {
+            // Will be using: getPartQoEStratifiedSummary(...)
             result = demoData.qoeStratifiedSummaryDistribData;
         }
         else logger.error( "Could not execute explorer service: service is null" );

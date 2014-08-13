@@ -126,6 +126,40 @@ public class ExplorerMetricsQueryHelper
     }
     
     /**
+     * Use this method to retrieve a Metric Entity based on a PROV IRI
+     * 
+     * @param expID     - Non-null experiment ID
+     * @param partIRI   - Non-null PROV IRI
+     * @return          - Returns a metric Entity (null if it does not exist)
+     */
+    public Entity getParticipantEntity( UUID expID, String partIRI )
+    {
+        Entity result = null;
+        
+        if ( helperInitialised && expID != null && partIRI != null )
+        {
+            try
+            {
+                // Retrieve all entities
+                Set<Entity> entities = entityDAO.getEntitiesForExperiment( expID, true );
+
+                // Try find entity
+                for ( Entity entity : entities )
+                    if ( entity.getEntityID().equals(partIRI) )
+                    {
+                        result = entity;
+                        break;
+                    }
+            }
+            catch ( Exception ex )
+            { logger.warn( "Could not retrieve entities from EDM: " + ex.getMessage() ); }
+        }
+        else logger.error( failedRequest );
+        
+        return result;        
+    }
+    
+    /**
      * Use this method to retrieve the metric Entities that map to PROV participants.
      * 
      * @param expID     - Non-null experiment ID
@@ -157,6 +191,52 @@ public class ExplorerMetricsQueryHelper
                         }
                 }
             }
+            catch ( Exception ex )
+            { logger.warn( "Could not retrieve entities from EDM: " + ex.getMessage() ); }
+        }
+        else logger.error( failedRequest );
+        
+        return result;
+    }
+    
+    /**
+     * Use this method to retrieve a map of attribute instances indexed by (common)
+     * attribute names.
+     * 
+     * @param expID     - Non-null experiment ID within which to search
+     * @param attrNames - Non-null/empty list of attributes names of interest
+     * @return          - A map of attribute instances, indexed by the name list
+     */
+    public Map<String,Set<Attribute>> getAttributeInstancesByName( UUID expID, ArrayList<String> attrNames )
+    {
+        HashMap<String,Set<Attribute>> result = new HashMap<>();
+        
+        // Safety
+        if ( helperInitialised && expID != null && attrNames != null && !attrNames.isEmpty() )
+        {
+            try
+            {
+                // Retrieve all entities
+                Set<Entity> entities = entityDAO.getEntitiesForExperiment( expID, true );
+                
+                if ( entities != null )
+                {
+                    // For each matchable attribute, search entities for any instances
+                    for ( String targAttrName : attrNames )
+                    {
+                        HashSet<Attribute> attrInstances = new HashSet<>();
+                        
+                        // Search entities
+                        for ( Entity ent : entities )
+                            for ( Attribute entAttr : ent.getAttributes() )
+                                if ( entAttr.getName().equals(targAttrName) )
+                                    attrInstances.add( entAttr );
+
+                        // Place instances in result
+                        result.put( targAttrName, attrInstances );
+                    }   
+                } 
+            }    
             catch ( Exception ex )
             { logger.warn( "Could not retrieve entities from EDM: " + ex.getMessage() ); }
         }
@@ -252,6 +332,44 @@ public class ExplorerMetricsQueryHelper
     }
     
     /**
+     * Use this method to combined multiple measurement sets belonging to a set of
+     * common attributes. Important note: all the input attributes must have the exact same
+     * Metric type and semantics
+     * 
+     * @param expID         - Non-null ID of experiment
+     * @param attributes    - Non-null/empty set of attributes
+     * @return              - Single measurement set representing all valid measurement data
+     */
+    public MeasurementSet getCombinedMeasurementSetForAttributes( UUID expID, Set<Attribute> attributes )
+    {
+        MeasurementSet result = null;
+        
+        if ( helperInitialised && attributes != null && !attributes.isEmpty() )
+        {
+            // Create super set of measurement sets
+            HashSet<MeasurementSet> superMSSet = new HashSet<>();
+            for ( Attribute attr: attributes )
+            {
+                Collection<MeasurementSet> sets = 
+                        getMeasurementSetsForAttribute( expID, attr.getUUID() ).values();
+                
+                superMSSet.addAll( sets );
+            }
+            
+            // Try to reduce to a single set
+            try
+            {
+                result = MetricHelper.combineMeasurementSets( superMSSet );
+            }
+            catch ( Exception ex )
+            { logger.error( "Could not combine measurement sets for attribute", ex ); }
+        }
+        else logger.error( failedRequest );
+        
+        return result;
+    }
+    
+    /**
      * Use this method to extract a Metric instance from an attribute. Note that it is possible
      * for an Attribute to have more than one metric associated with it (this is not current common);
      * this method retrieves the first available metric from the database.
@@ -284,5 +402,5 @@ public class ExplorerMetricsQueryHelper
         else logger.error( failedRequest );
         
         return result;
-    }    
+    }
 }

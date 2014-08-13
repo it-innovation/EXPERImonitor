@@ -34,9 +34,9 @@ public class MetricCalculator
 {
     public static Map<String, Integer> countValueFrequencies( Set<Measurement> measurements )
     {
-        HashMap<String, Integer> freqMap = new HashMap<String, Integer>();
+        HashMap<String, Integer> freqMap = new HashMap<>();
         
-        if ( measurements != null )
+        if ( measurements != null && !measurements.isEmpty() )
         {
             for ( Measurement m : measurements )
             {
@@ -54,5 +54,113 @@ public class MetricCalculator
         }
                 
         return freqMap;        
+    }
+    
+    public static String getMostFrequentValue( Set<Measurement> measurements )
+    {
+        String result = null;
+        
+        if ( measurements != null && !measurements.isEmpty() )
+        {
+            Map<String, Integer> freqMap = countValueFrequencies( measurements );
+            int largest = 0;
+            
+            for ( String value : freqMap.keySet() )
+            {
+                int size = freqMap.get( value );
+                if ( largest < size )
+                {
+                    result = value;
+                    largest = size;
+                }
+            }
+        }
+        
+        return result;
+    }
+    
+    public static float calcORDINALMedianValuePosition( MeasurementSet mSet )
+    {
+        float result = Float.NaN;
+        
+        if ( mSet != null )
+        {
+            // Check semantics before trying calculation
+            Metric metric = mSet.getMetric();
+            
+            if ( metric != null && metric.getMetricType() == MetricType.ORDINAL &&
+                 !metric.getMetaType().equals("Unknown") )
+            {
+                // Initialise scale map
+                HashMap<String, Integer> ordMap = new HashMap<>();
+                
+                String[] orderedItems = metric.getMetaContent().split( "," );
+                int index = 0;
+                for ( String ordItem : orderedItems )
+                {
+                    ordMap.put( ordItem, index );
+                    ++index;
+                }
+                
+                // Create distribution map of values
+                TreeSet<Integer> medMap = new TreeSet<>();
+                
+                for ( Measurement m : mSet.getMeasurements() )
+                {
+                    Integer order = ordMap.get( m.getValue() );
+                    if ( order != null )
+                        medMap.add( order );
+                }
+                
+                // Create sorted list of results
+                ArrayList<Integer> medList = new ArrayList();
+                Iterator<Integer> medIt    = medMap.iterator();
+                
+                while ( medIt.hasNext() )
+                    medList.add( medIt.next() );
+                
+                // If we have items to work with, find the median
+                if ( !medList.isEmpty() )
+                {
+                    int medListSize = medList.size();
+                    
+                    // Single item ---------------------------------------------
+                    if ( medListSize == 1 )
+                        result = medList.get( 0 );
+                    
+                    // Two items -----------------------------------------------
+                    else if ( medListSize == 2 )
+                    {
+                        // If the values are the same, return the index
+                        if ( medList.get(0).compareTo(medList.get(1)) == 0 )
+                            result = medList.get( 0 );
+                        else
+                            // Otherwise return point in the middle
+                            result = (float) medList.get( 1 ) / (float) medList.get( 0 );
+                    }
+                    // More than two items -------------------------------------
+                    else
+                    {
+                        int middle = medListSize / 2;
+                        
+                        // Even number of items means checking centre two values
+                        if ( medListSize % 2 == 0 )
+                        {
+                            // If the values are the same, return the index
+                            if ( medList.get(middle).compareTo(medList.get(middle -1)) == 0 )
+                                result = medList.get( middle );
+                            else
+                                // Otherwise return point in the middle
+                                result = (float) medList.get(middle) / (float) medList.get(middle-1);
+                        }
+                        // Odd number of items resolves to centre
+                        else
+                            result = middle;
+                    }
+                }
+            }
+        }
+        
+        return result;
     }
 }

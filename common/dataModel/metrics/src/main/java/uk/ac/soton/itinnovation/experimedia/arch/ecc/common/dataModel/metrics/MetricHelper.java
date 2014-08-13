@@ -521,6 +521,27 @@ public class MetricHelper
         return resultMeasurementList;        
     }
     
+    public static List<Attribute> sortAttributesByName( Collection<Attribute> attributes )
+    {
+        ArrayList<Attribute> result = new ArrayList<>();
+        
+        TreeMap<String, Attribute> sortedAttrs = new TreeMap<>();
+        
+        if ( attributes != null && !attributes.isEmpty() )
+        {
+            // Sort
+            for ( Attribute attr: attributes )
+                sortedAttrs.put( attr.getName(), attr );
+            
+            // Write out (ascending order)
+            Iterator<String> nameIt = sortedAttrs.keySet().iterator();
+            while ( nameIt.hasNext() )
+                result.add( sortedAttrs.get(nameIt.next()) );
+        }
+        
+        return result;
+    }
+    
     public static List<Measurement> truncateMeasurements( List<Measurement> measures,
                                                           int count,
                                                           boolean tail )        
@@ -914,4 +935,125 @@ public class MetricHelper
       
       return desc;
     } 
+    
+    /**
+     * Use this method to check the consistency of a collection of measurement sets.
+     * 
+     * @param mSets - Non-null set of MeasuementSets
+     * @return      - Returns true if inputs are valid and consistent
+     */
+    public static boolean areMeasurementSetsConsistent( Collection<MeasurementSet> mSets )
+    {
+        if ( mSets == null ) return false;
+        
+        Iterator<MeasurementSet> msIt = mSets.iterator();
+        
+        MeasurementSet firstMS = msIt.next();
+        if ( firstMS == null ) return false;
+        
+        Metric keyMetric = firstMS.getMetric();
+        if ( keyMetric == null ) return false;
+        
+        // Run through remaining sets checking for consistency
+        while ( msIt.hasNext() )
+        {
+            MeasurementSet nextMS = msIt.next();
+            if ( nextMS == null ) return false;
+            
+            Metric nextMetric = nextMS.getMetric();
+            if ( nextMetric == null ) return false;
+            
+            if ( nextMetric.getMetricType().compareTo(keyMetric.getMetricType()) != 0 ) return false;
+            
+            if ( !nextMetric.getUnit().getName().equals(keyMetric.getUnit().getName()) ) return false;
+            
+            if ( !nextMetric.getMetaType().equals(keyMetric.getMetaType()) ) return false;
+            
+            if ( !nextMetric.getMetaContent().equals(keyMetric.getMetaContent()) ) return false;
+        }
+        
+        return true;        
+    }
+    
+    /**
+     * Use this method to combine a number of MeasuementSet instances. This method will
+     * iterate through the sets checking that they are all consistent before then combining
+     * the measurements found therein. Duplicated measurement instances will be discarded but
+     * measurements with the same date stamp will not.
+     * 
+     * @param mSets         - Non-null collection of measurement sets
+     * @return              - Returns a joined set of measurements
+     * @throws Exception    - Throws if input parameter is invalid or measurement sets are inconsistent
+     */
+    public static MeasurementSet combineMeasurementSets( Collection<MeasurementSet> mSets ) throws Exception
+    {
+        MeasurementSet result = null;
+        
+        // Safety
+        if ( mSets == null )     throw new Exception( "Could not combined measurement sets: invalid input" );
+        if ( mSets.isEmpty() )   throw new Exception( "Could not combine measurement sets: zero sets" );
+        if ( mSets.size() == 1 ) return mSets.iterator().next();
+        
+        // Combine if measurement sets are consistent (semantically)
+        if ( areMeasurementSetsConsistent(mSets) )
+        {
+            // First create single super measurement collection
+            HashMap<UUID, Measurement> allMeasurements = new HashMap<>();
+            
+            for ( MeasurementSet ms : mSets )
+                for ( Measurement m : ms.getMeasurements() )
+                    allMeasurements.put( m.getUUID(), m );
+            
+            // Then create (empty) result set
+            result = new MeasurementSet( mSets.iterator().next(), false );
+            
+            // Push in super measurement set
+            result.addMeasurements( allMeasurements.values() );
+        }
+        else throw new Exception( "Could not combine measurement sets: sets inconsistent" );
+        
+        return result;        
+    }
+    
+    public static int getORDINALIndexFromLabel( Metric metric, String label )
+    {
+        int result = -1;
+        
+        if ( metric != null && metric.getMetricType() == MetricType.NOMINAL && 
+             metric.getMetaContent() != null && label != null )
+        {
+            String[] items = metric.getMetaContent().split( "," );
+            
+            int index = 0;
+            for ( String item : items )
+            {
+                if ( item.equals(label) )
+                {
+                    result = index;
+                    break;
+                }
+                ++index;
+            }
+        }
+        
+        return result;
+    }
+    
+    public static String getORDINALLabelFromIndex( Metric metric, float position )
+    {
+        String result = null;
+        
+        // Safety before we get the position
+        if ( metric != null && metric.getMetricType() == MetricType.NOMINAL &&
+             position != Float.NaN && position >= 0.0f )
+        {
+            String[] items = metric.getMetaContent().split( "," );
+            int intPos     = (int) position;
+            
+            if ( items.length >= intPos )
+                result = items[intPos];
+        }
+        
+        return result;        
+    }
 }

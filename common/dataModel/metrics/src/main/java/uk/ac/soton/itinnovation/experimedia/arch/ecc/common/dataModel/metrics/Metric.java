@@ -60,10 +60,15 @@ public class Metric implements Serializable
         
         if (m.getUUID() != null)
             this.uuid = UUID.fromString(m.getUUID().toString());
+        
         if (m.getMetricType() != null)
             this.metricType = m.getMetricType();
+        
         if (m.getUnit() != null)
             this.unit = new Unit(m.getUnit());
+        
+        this.metaType    = m.getMetaType();
+        this.metaContent = m.getMetaContent();
     }
     
     /**

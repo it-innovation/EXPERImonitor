@@ -32,6 +32,8 @@ import uk.ac.soton.itinnovation.ecc.service.utils.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 
+import uk.ac.soton.itinnovation.ecc.service.domain.explorer.distributions.*;
+
 import org.springframework.stereotype.Service;
 
 import javax.annotation.*;
@@ -51,6 +53,7 @@ import java.util.*;
 public class ExplorerService  
 {
     private final Logger logger = LoggerFactory.getLogger(getClass());
+    private final String callFail = "Could not execute Explorer service: not ready or parameter(s) invalid";
     
     private ExplorerMetricsQueryHelper    metricsQueryHelper;
     private ExplorerProvenanceQueryHelper provenanceQueryHelper;
@@ -121,13 +124,14 @@ public class ExplorerService
         EccParticipantAttributeResultSet result = new EccParticipantAttributeResultSet();
         
         // Safety
-        if ( expID != null && allPartIRIs != null && !allPartIRIs.isEmpty() )
+        if ( serviceReady && expID != null && allPartIRIs != null && !allPartIRIs.isEmpty() )
         {
             // Get common Attributes
             Map<UUID,Attribute> commonAttributes = metricsQueryHelper.getPartCommonAttributes( expID, allPartIRIs );
             
             // Push each attribute into result appropriately (so long as it has a metric; it should do)
-            for ( Attribute attr : commonAttributes.values() )
+            List<Attribute> sortedAttrs = MetricHelper.sortAttributesByName( commonAttributes.values() );
+            for ( Attribute attr : sortedAttrs )
             {
                 Metric metric = metricsQueryHelper.getAttributeMetric( expID, attr.getUUID() );
                 
@@ -154,7 +158,7 @@ public class ExplorerService
                 else logger.warn( "Found attribute without metric. Not included in common attribute result set" );
             }
         }
-        else logger.error( "Could not retrieve participant common attributes: parameter(s) invalid" );
+        else logger.error( callFail );
         
         return result;
     }
@@ -167,8 +171,8 @@ public class ExplorerService
         EccParticipantResultSet result = new EccParticipantResultSet();
         
         // Safety
-        if ( expID != null && allPartIRIs != null && !allPartIRIs.isEmpty() &&
-             attrName != null && selLabel != null )
+        if ( serviceReady && expID != null && allPartIRIs != null && 
+             !allPartIRIs.isEmpty() && attrName != null && selLabel != null )
         {
             // Get all entities representing participants
             Map<UUID,Entity> entities = metricsQueryHelper.getParticipantEntities( expID, allPartIRIs );
@@ -177,10 +181,13 @@ public class ExplorerService
             Map<UUID,Attribute> attrsByEntities = metricsQueryHelper.getAllEntityAttributes( entities.values() );
             
             // Select just those attributes with the target name
-            HashSet<Attribute> selAttributes = new HashSet<>();
+            List<Attribute> selAttributes = new ArrayList<>();
             
             for ( Attribute attr : attrsByEntities.values() )
                 if ( attr.getName().equals(attrName) ) selAttributes.add( attr );
+            
+            // Sort selected attributes by name
+            selAttributes = MetricHelper.sortAttributesByName( selAttributes );
             
             // For select attributes, retrieve measurement set(s) and search for label instance & add Entities
             HashSet<Entity> selectedEntities = new HashSet<>();
@@ -224,13 +231,213 @@ public class ExplorerService
             // Finally, create the PROV participant information for any metric entities we have found
             // We don't actually need any additional information than that already found in the metric data base for this
             for ( Entity entity : selectedEntities )
-                result.addParticipant( new EccParticipant( entity.getName(),
-                                                           entity.getDescription(),
-                                                           entity.getUUID(),
-                                                           entity.getEntityID() ) );
+                result.addParticipant( createParticipant(entity) );
         }
-        else logger.error( "Could not retrieve QoE label selection: parameter(s) invalid" ); 
+        else logger.error( callFail );
         
         return result;
+    }
+
+    public EccNOMORDParticipantSummary getPartQoEDistribution( UUID expID,
+                                                               String partIRI )
+    {
+        EccNOMORDParticipantSummary result = null;
+        
+        // Safety
+        if ( serviceReady && expID != null && partIRI != null )
+        {
+            Entity entity = metricsQueryHelper.getParticipantEntity( expID, partIRI );
+            if ( entity != null )
+            {
+                // Create participant info just from entity data
+                result = new EccNOMORDParticipantSummary( createParticipant(entity) );
+                
+                // Sort attributes and then...
+                List<Attribute> sortedAttrs = extractSortedQoEAttributes( expID, entity.getAttributes() );
+                
+                // For each (QoE) attribute, get the measurement set and get the median response in each case
+                for ( Attribute attr : sortedAttrs )
+                {
+                    Map<UUID, MeasurementSet> srcSets = 
+                            metricsQueryHelper.getMeasurementSetsForAttribute( expID, attr.getUUID() );
+                    try
+                    {
+                        MeasurementSet fullSet = MetricHelper.combineMeasurementSets( srcSets.values() );
+
+                        if ( fullSet != null )
+                        {
+                            Metric metric = fullSet.getMetric();
+                            MetricType mt = metric.getMetricType();
+                            
+                            // Can only be NOMINAL or ORDINAL
+                            if ( mt == MetricType.NOMINAL )
+                            {
+                                // Get most common
+                                result.addNOMINALResponse( attr.getName(), 
+                                                           MetricCalculator.getMostFrequentValue(fullSet.getMeasurements()) );
+                            }
+                            else
+                            {
+                                // Get the median
+                                float medianPos = MetricCalculator.calcORDINALMedianValuePosition( fullSet );
+                                String value    = MetricHelper.getORDINALLabelFromIndex( metric, medianPos );
+
+                                result.addORDINALResponse( attr.getName(), value, (int) medianPos );
+                            }
+                        }
+                        else logger.error( "Failed to combine measurement sets: no measurement sets available" );
+                    }
+                    catch ( Exception ex )
+                    { logger.error( "Failed to combine measurement sets: " + ex.getMessage() ); }
+                }
+            }
+            else logger.warn( "Could not find Entity in metric database based on IRI: " + partIRI );
+            
+        } else logger.error( callFail );
+        
+        return result;
+    }
+    
+    public ArrayList<EccNOMORDStratifiedSummary> getPartQoEStratifiedSummary( UUID expID,
+                                                                              ArrayList<String> allPartIRIs )
+    {
+        ArrayList<EccNOMORDStratifiedSummary> result = new ArrayList<>();
+        
+        // Safety
+        if ( serviceReady && expID != null && allPartIRIs != null )
+        {
+            // Get common attributes for participants
+            Map<UUID, Attribute> commonAttributes = metricsQueryHelper.getPartCommonAttributes( expID, allPartIRIs );
+            
+            // Sort out the QoE attributes            
+            List<Attribute> sortedAttrs = extractSortedQoEAttributes( expID, commonAttributes.values() );
+
+            // Make a list of attribute names...
+            ArrayList<String> attrNames = new ArrayList<>();
+            for ( Attribute attr : sortedAttrs )
+                attrNames.add( attr.getName() );
+            
+            // ... and get the actual attribute instances
+            Map<String,Set<Attribute>> attrInstances = 
+                    metricsQueryHelper.getAttributeInstancesByName( expID, attrNames );
+            
+            // For each attribute name, combine measurement sets from all attributes
+            HashMap<String, MeasurementSet> superMSSet = new HashMap<>();
+            
+            for ( String attrName : attrInstances.keySet() )
+            {
+                Set<Attribute> instances = attrInstances.get( attrName );
+                
+                MeasurementSet allMeasurements = 
+                        metricsQueryHelper.getCombinedMeasurementSetForAttributes( expID, instances );
+                
+                superMSSet.put( attrName, allMeasurements );  
+            }
+            
+            // Now get a frequency distribution for each attribute's complete measurement set
+            HashMap<String,Map<String,Integer>> attrDistrMap = new HashMap<>();
+            
+            for ( String attrName : superMSSet.keySet() )
+            {
+                MeasurementSet ms = superMSSet.get( attrName );
+                
+                Map<String,Integer> freqMap 
+                        = MetricCalculator.countValueFrequencies( ms.getMeasurements() );
+                
+                attrDistrMap.put( attrName, freqMap );
+            }
+        
+            // Summarise distributions by indexed order
+            HashMap<Integer, TreeMap<String, Integer>> stratifiedSamples = new HashMap<>();
+            
+            for ( String attrName : attrDistrMap.keySet() )
+            {
+                // Get associated metric for attribute
+                Metric metric = superMSSet.get( attrName ).getMetric();
+                
+                // Get distribution of each item for attribute
+                Map<String, Integer> attrValueDistr = attrDistrMap.get( attrName );
+                
+                for ( String indLabel : attrValueDistr.keySet() )
+                {
+                    // Convert label to index (an index of -1 means NOMINAL data)
+                    int index = MetricHelper.getORDINALIndexFromLabel( metric, indLabel );
+                    
+                    TreeMap<String,Integer> stratDistr = null;
+                    
+                    // Get entry for specific index if it exists..
+                    if ( stratifiedSamples.containsKey(index) )
+                        stratDistr = stratifiedSamples.get(index);
+                    else
+                    // ... or create one if it does not exist
+                    {
+                        stratDistr = new TreeMap<>();
+                        stratifiedSamples.put( index, stratDistr );
+                    }
+                    
+                    // Add count for this attribute's index
+                    stratDistr.put( attrName, attrValueDistr.get(indLabel) );
+                }
+            }
+            
+            // Finally, convert to domain data objects
+            String keyPostLabel = " of " + stratifiedSamples.keySet().size();
+            
+            for ( int index : stratifiedSamples.keySet() )
+            {
+                // Create the index label
+                String indexLabel = (index == -1) ? "NOMINAL" 
+                                                  // Add 1 to index to display as non-zero scale
+                                                  : Integer.toString( index +1 ) + keyPostLabel;
+                
+                // Create summary
+                EccNOMORDStratifiedSummary ss =
+                        new EccNOMORDStratifiedSummary( indexLabel );
+                
+                // Create summary items
+                TreeMap<String, Integer> stratAttrs = stratifiedSamples.get( index );
+                
+                for ( String attrName : stratAttrs.keySet() )
+                {
+                    EccItemCount eic = new EccItemCount( attrName, 
+                                                        stratAttrs.get(attrName) );
+                    
+                    ss.addStratifiedItem( eic );
+                }
+                
+                result.add( ss );
+            }
+        }
+        else logger.error( callFail );
+        
+        return result;
+    }
+    
+    // Private methods ---------------------------------------------------------
+    private EccParticipant createParticipant( Entity ent )
+    {
+        return new EccParticipant( ent.getName(),
+                                   ent.getDescription(),
+                                   ent.getUUID(),
+                                   ent.getEntityID() );
+    }
+    
+    private List<Attribute> extractSortedQoEAttributes( UUID expID, Collection<Attribute> attrs )
+    {  
+        HashSet<Attribute> qoeAttrs = new HashSet<>();
+        for ( Attribute attr : attrs )
+        {
+            Metric attrMet = metricsQueryHelper.getAttributeMetric( expID, attr.getUUID() );
+
+            if ( attrMet != null )
+            {
+                MetricType mt = attrMet.getMetricType();
+                
+                if ( mt != null && mt == MetricType.NOMINAL || mt == MetricType.ORDINAL )
+                    qoeAttrs.add( attr );                    
+            }
+        }
+
+        return MetricHelper.sortAttributesByName( qoeAttrs );
     }
 }
