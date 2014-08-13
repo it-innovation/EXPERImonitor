@@ -79,18 +79,21 @@ public class EntryPoint
 				//abort on q
                 if ( System.in.read() == 113 ) {
                     running = false;
+				} else {
+					logger.debug("input received");
 				}
 
                 // Send a metric (if we are ready to do so)
-                if ( eccLogger.isReadyToPush() )
+                if ( provGen.getEccLogger().isReadyToPush() )
                 {
+					logger.debug("ready to push");
                     try
                     {
                         // Create a time-stamp
                         long timeStamp = new Date().getTime();
 
                         // Push the metric (referring to Entity and its attribute)
-                        eccLogger.pushSimpleMetric( "Simulation service",
+                        provGen.getEccLogger().pushSimpleMetric( "Simulation service",
                                                     "Last push",
                                                     Long.toString(timeStamp) );
 
@@ -99,7 +102,7 @@ public class EntryPoint
 							EDMProvReport report = provGen.getFactory().getProvFactory().createProvReport();
 							logger.info("Processed log line:\n" + provGen.getCurrentLog().toString() + "\nCurrent triples:\n"
 									+ report.toString());
-							eccLogger.pushProv(report);
+							provGen.getEccLogger().pushProv(report);
 						} else {
 							logger.info("End of log reached, stopping client");
 							running = false;
@@ -111,7 +114,9 @@ public class EntryPoint
                         // Catch & log problems
                         logger.error( "Failed to send metric: " + ex.getMessage() );
                     }
-                }
+                } else {
+					logger.debug("NOT ready to push");
+				}
             }
             catch (IOException ioe)
             {

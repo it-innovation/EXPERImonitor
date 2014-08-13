@@ -29,10 +29,14 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Properties;
 import java.util.Random;
+import java.util.UUID;
 import java.util.zip.DataFormatException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +47,14 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experimedi
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experimedia.ExperimediaFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experimedia.Participant;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experimedia.Service;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Attribute;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Measurement;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGroup;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricHelper;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricType;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Unit;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared.ECCSimpleLogger;
 
 public class ExperimentDataGenerator {
@@ -56,7 +68,10 @@ public class ExperimentDataGenerator {
 	private ILog currentLog;
 
 	private final ExperimediaFactory factory = new ExperimediaFactory("eee", "http://experimedia.eu/ontologies/ExperimediaExperimentExplorer#");
-	private ECCSimpleLogger eccLogger;
+	private ECCSimpleLogger eccLogger = new ECCSimpleLogger();
+
+	private HashMap<String, ArrayList<MeasurementSet>> measurementSets = new HashMap<String, ArrayList<MeasurementSet>>();
+	private ArrayList<ArrayList<String>> ordinalValues = new ArrayList<ArrayList<String>>();
 
 	//services
 	Service twitterService;
@@ -97,6 +112,7 @@ public class ExperimentDataGenerator {
 	 * @param eccLogger the link to metric land :)
 	 */
 	public void init(String logfile, String logClass, ECCSimpleLogger eccLogger) {
+		this.eccLogger = eccLogger;
 		//read log into memory
 		readLog(logfile, logClass);
 
@@ -139,16 +155,77 @@ public class ExperimentDataGenerator {
 			factory.getProvFactory().addOntology("eee", "http://experimedia.eu/ontologies/ExperimediaExperimentExplorer#");
 			factory.getProvFactory().addOntology("ski", "http://www.semanticweb.org/sw/ontologies/skiing#");
 
+			//prepare metric attributes
+			ArrayList<String> genericAttributes = new ArrayList<String>();
+			genericAttributes.ensureCapacity(3);
+			genericAttributes.add(0, "Ease of use: Ski lift app");
+			genericAttributes.add(1, "Usefulness: Ski lift app");
+			genericAttributes.add(2, "Responsiveness: Ski lift app");
+
+			logger.info(props.entrySet().toString());
+
+			MetricGroup metricGroup = MetricHelper.createMetricGroup( "SSG questionnaire group",
+					"Questionnaire data set for SSG experiment", eccLogger.metricGenerator );
+
+			ordinalValues.ensureCapacity(3);
+
+			ordinalValues.add(0,new ArrayList<String>());
+			ordinalValues.get(0).add(0, "very difficult");
+			ordinalValues.get(0).add(1, "difficult");
+			ordinalValues.get(0).add(2, "not easy/difficult");
+			ordinalValues.get(0).add(3, "easy");
+			ordinalValues.get(0).add(4, "very easy");
+
+			ordinalValues.add(1,new ArrayList<String>());
+			ordinalValues.get(1).add(0, "not at all useful");
+			ordinalValues.get(1).add(1, "not very useful");
+			ordinalValues.get(1).add(2, "sometimes useful");
+			ordinalValues.get(1).add(3, "often useful");
+			ordinalValues.get(1).add(4, "always useful");
+
+			ordinalValues.add(2,new ArrayList<String>());
+			ordinalValues.get(2).add(0, "very unresponsive");
+			ordinalValues.get(2).add(1, "not very responsive");
+			ordinalValues.get(2).add(2, "moderately responsive");
+			ordinalValues.get(2).add(3, "quite responsive");
+			ordinalValues.get(2).add(4, "very responsive");
+
 			//create participant
+			String agentName = "";
 			if (this.logclass.equals("PerfectLog")) {
 				//create participant as per name of logfile
-				String agentName = logname.substring(0,1).toUpperCase() + logname.substring(1).toLowerCase();
+				agentName = logname.substring(0,1).toUpperCase() + logname.substring(1).toLowerCase();
 				participant = factory.createParticipant(agentName);
 			} else {
 				//create randy, the random participant
-				participant = factory.createParticipant("Randy");
+				agentName = "Randy";
+				participant = factory.createParticipant(agentName);
 			}
-			//TODO: link participant to his metric entity representation
+
+			//link participant to his metric entity representation
+			uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Entity e
+						 = new uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Entity();
+			e.setName(agentName);
+			e.setEntityID(participant.agent.getIri());
+			e.setDescription(participant.agent.getFriendlyName());
+			logger.info(eccLogger.metricGenerator.toString());
+
+			eccLogger.metricGenerator.addEntity(e);
+
+			//create specific attributes for agent
+			for (int i=0; i<genericAttributes.size(); i++) {
+
+				Attribute a = MetricHelper.createAttribute( genericAttributes.get(i), "Question " + i, e );
+
+				MeasurementSet ms = MetricHelper.createMeasurementSet( a, MetricType.ORDINAL,
+									   new Unit( "Scale item" ),
+									   metricGroup );
+
+				if (measurementSets.get(agentName)==null) {
+					measurementSets.put(agentName, new ArrayList<MeasurementSet>());
+				}
+				measurementSets.get(agentName).add(i, ms);
+			}
 
 			//create app for participant
 			app = factory.createApplication(participant, "SSG client", "1387531200");
@@ -250,7 +327,29 @@ public class ExperimentDataGenerator {
 						//eccLogger.pushSimpleMetric("LWTService", "Response time", eventValue);
 
 					} else if (eventKey.equals("questionnaire")) {
-						//TODO
+						//get agent metric entity
+						uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Entity entity
+								= MetricHelper.getEntityFromName(participant.agent.getFriendlyName(), eccLogger.metricGenerator);
+
+						//get value from log
+						int i=0;
+						for (String v: eventValue.split(";")) {
+
+							MeasurementSet ms = measurementSets.get(participant.agent.getFriendlyName()).get(i);
+
+							//get attribute
+							UUID aID = ms.getAttributeID();
+							Attribute a = MetricHelper.getAttributeByID(aID, entity);
+							String aName = a.getName();
+
+							Measurement m = new Measurement(v);
+							m.setTimeStamp( new Date(currentLog.getTimestamp()) );
+							m.setMeasurementSetUUID(ms.getID());
+
+							eccLogger.pushSimpleMetric( entity.getName(), aName, v );
+
+							i++;
+						}
 					}
 
 				} catch (Exception e) {
@@ -294,6 +393,26 @@ public class ExperimentDataGenerator {
 
 		return goOn;
 	}
+
+	private void measureRandomQoe(uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Entity entity) throws Exception {
+		//iterate over agent's measurement sets
+		int i=0;
+		for (MeasurementSet ms: measurementSets.get(participant.agent.getFriendlyName())) {
+
+			UUID aID = ms.getAttributeID();
+			Attribute a = MetricHelper.getAttributeByID(aID, entity);
+			String aName = a.getName();
+
+			String randomValue = ordinalValues.get(i).get((int) rand.nextDouble()*5);
+			Measurement m = new Measurement(randomValue);
+			m.setTimeStamp( new Date(currentLog.getTimestamp()) );
+			m.setMeasurementSetUUID(ms.getID());
+
+			eccLogger.pushSimpleMetric( entity.getName(), aName, randomValue );
+
+			i++;
+		}
+}
 
 	/**
 	 * Get next log from memory. Obviously needs to be used AFTER reading log to memory.
@@ -378,5 +497,9 @@ public class ExperimentDataGenerator {
 
 	public static Properties getProps() {
 		return props;
+	}
+
+	public ECCSimpleLogger getEccLogger() {
+		return eccLogger;
 	}
 }
