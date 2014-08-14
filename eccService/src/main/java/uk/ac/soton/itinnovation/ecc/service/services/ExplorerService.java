@@ -137,7 +137,6 @@ public class ExplorerService
         if ( serviceReady && expID != null )
         {
 			// Get all participant IRIs for experiment
-
 			Set<String> allPartIRIs = null;
 
 			try
@@ -149,6 +148,59 @@ public class ExplorerService
 
 				// Push each attribute into result appropriately (so long as it has a metric; it should do)
 				List<Attribute> sortedAttrs = MetricHelper.sortAttributesByName( commonAttributes.values() );
+				for ( Attribute attr : sortedAttrs )
+				{
+					Metric metric = metricsQueryHelper.getAttributeMetric( expID, attr.getUUID() );
+
+					if ( metric != null )
+					{
+						// Create attribute info
+						EccAttributeInfo info = new EccAttributeInfo( attr.getName(),
+																	  attr.getDescription(),
+																	  attr.getUUID(),
+																	  metric.getUnit().getName(),
+																	  metric.getMetricType().name(),
+																	  metric.getMetaType(),
+																	  metric.getMetaContent() );
+						// Place into appropriate list
+						switch ( metric.getMetricType() )
+						{
+							case NOMINAL :
+							case ORDINAL : result.addQoEAttribute( info ); break;
+
+							case INTERVAL :
+							case RATIO    : result.addOtherAttribute( info ); break;
+						}
+					}
+					else logger.warn( "Found attribute without metric. Not included in common attribute result set" );
+				}
+			} catch (Exception e) {
+
+				logger.error(callFail + " could not find experiment participants", e );
+			}
+		}
+
+        return result;
+    }
+    
+    public EccParticipantAttributeResultSet getPartAttrResultSet( UUID expID,
+                                                                  String partIRI )
+    {
+        EccParticipantAttributeResultSet result = new EccParticipantAttributeResultSet();
+
+        // Safety
+        if ( serviceReady && expID != null && partIRI != null )
+        {
+			try
+			{
+				// Get common attributes for just one participant
+                ArrayList<String> iriSet = new ArrayList<>();
+                iriSet.add( partIRI );
+                
+				Map<UUID,Attribute> partAttributes = metricsQueryHelper.getPartCommonAttributes( expID, iriSet );
+
+				// Push each attribute into result appropriately (so long as it has a metric; it should do)
+				List<Attribute> sortedAttrs = MetricHelper.sortAttributesByName( partAttributes.values() );
 				for ( Attribute attr : sortedAttrs )
 				{
 					Metric metric = metricsQueryHelper.getAttributeMetric( expID, attr.getUUID() );
