@@ -198,9 +198,9 @@ public class ECCSimpleLogger
             MetricPushArgs mpa = validateMetricPushArgs( entityName, attributeName );
             
             // Check value is good
-            if ( samples == null )
+            if ( samples == null || samples.isEmpty() )
             {
-                String err = "Could not push metric data: measurements are invalid";
+                String err = "Could not push metric data: measurements are invalid or do not exist";
 
                 sLog.error( err );
                 throw new Exception( err );

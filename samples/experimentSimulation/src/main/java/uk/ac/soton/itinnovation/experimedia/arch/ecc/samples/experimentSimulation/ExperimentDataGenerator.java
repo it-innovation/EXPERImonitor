@@ -30,12 +30,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Properties;
 import java.util.Random;
-import java.util.UUID;
 import java.util.zip.DataFormatException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +45,6 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experimedi
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experimedia.Participant;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experimedia.Service;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Attribute;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Measurement;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Metric;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGroup;
@@ -69,7 +66,7 @@ public class ExperimentDataGenerator {
 	private final ExperimediaFactory factory = new ExperimediaFactory("eee", "http://experimedia.eu/ontologies/ExperimediaExperimentExplorer#");
 	private ECCSimpleLogger eccLogger = new ECCSimpleLogger();
 
-	private HashMap<String, ArrayList<MeasurementSet>> measurementSets = new HashMap<String, ArrayList<MeasurementSet>>();
+	private ArrayList<String> genericAttributes = new ArrayList<String>();
 	private ArrayList<ArrayList<String>> ordinalValues = new ArrayList<ArrayList<String>>();
 
 	//services
@@ -155,7 +152,6 @@ public class ExperimentDataGenerator {
 			factory.getProvFactory().addOntology("ski", "http://www.semanticweb.org/sw/ontologies/skiing#");
 
 			//prepare metric attributes
-			ArrayList<String> genericAttributes = new ArrayList<String>();
 			genericAttributes.ensureCapacity(3);
 			genericAttributes.add(0, "Ease of use: Ski lift app");
 			genericAttributes.add(1, "Usefulness: Ski lift app");
@@ -231,11 +227,6 @@ public class ExperimentDataGenerator {
                 
                 scaleMeta = scaleMeta.substring(0, scaleMeta.length() -1 );
                 metric.setMetaContent( scaleMeta );
-
-				if (measurementSets.get(agentName)==null) {
-					measurementSets.put(agentName, new ArrayList<MeasurementSet>());
-				}
-				measurementSets.get(agentName).add(i, ms);
 			}
 
 			//create app for participant
@@ -326,16 +317,9 @@ public class ExperimentDataGenerator {
 							//use skilift
 							Activity a = factory.useRealWorldEntity(participant, lifts.get(eventValue), currentLog.getTimestamp().toString());
 							a.activity.addOwlClass(factory.getProvFactory().getNamespaceForPrefix("ski") + "UsingSkiliftActivity");
-
-							//create some liftwaiting time QoE data
-							//Content qoe = factory.createDataAtService(participant, app, babylonService, "liftrating", String.valueOf(rand.nextInt(5)));
-
 						}
 					} else if (eventKey.equals("lwtservice")) {
 						Content liftinfo = factory.retrieveDataFromService(participant, app, lwtService, "lwtinfo", currentLog.getTimestamp().toString());
-
-						//TODO: link liftinfo entity to metrics (entity, attribute, metric)
-						//eccLogger.pushSimpleMetric("LWTService", "Response time", eventValue);
 
 					} else if (eventKey.equals("questionnaire")) {
 						//get agent metric entity
@@ -345,19 +329,12 @@ public class ExperimentDataGenerator {
 						//get value from log
 						int i=0;
 						for (String v: eventValue.split(";")) {
-
-							MeasurementSet ms = measurementSets.get(participant.agent.getFriendlyName()).get(i);
-
-							//get attribute
-							UUID aID = ms.getAttributeID();
-							Attribute a = MetricHelper.getAttributeByID(aID, entity);
-							String aName = a.getName();
-
-							Measurement m = new Measurement(v);
-							m.setTimeStamp( new Date(currentLog.getTimestamp()) );
-							m.setMeasurementSetUUID(ms.getID());
-
-							eccLogger.pushSimpleMetric( entity.getName(), aName, v );
+                            
+                            String attrName = genericAttributes.get(i);
+                            String value = ordinalValues.get(i).get(Integer.parseInt(v));
+                            
+                            if ( attrName != null && value != null )
+                                eccLogger.pushSimpleMetric( entity.getName(), attrName, value );
 
 							i++;
 						}
@@ -404,26 +381,6 @@ public class ExperimentDataGenerator {
 
 		return goOn;
 	}
-
-	private void measureRandomQoe(uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Entity entity) throws Exception {
-		//iterate over agent's measurement sets
-		int i=0;
-		for (MeasurementSet ms: measurementSets.get(participant.agent.getFriendlyName())) {
-
-			UUID aID = ms.getAttributeID();
-			Attribute a = MetricHelper.getAttributeByID(aID, entity);
-			String aName = a.getName();
-
-			String randomValue = ordinalValues.get(i).get((int) rand.nextDouble()*5);
-			Measurement m = new Measurement(randomValue);
-			m.setTimeStamp( new Date(currentLog.getTimestamp()) );
-			m.setMeasurementSetUUID(ms.getID());
-
-			eccLogger.pushSimpleMetric( entity.getName(), aName, randomValue );
-
-			i++;
-		}
-}
 
 	/**
 	 * Get next log from memory. Obviously needs to be used AFTER reading log to memory.

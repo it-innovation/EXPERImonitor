@@ -115,10 +115,6 @@ public class PeriodicMetricLogParserTool
 			currentRandomResponseTime = currentResponseTime + createRandomVarianceOf(currentResponseTime);
 			currentRandomCPU = currentCPU + createRandomVarianceOf(currentCPU);
 			currentRandomMem = currentMem + createRandomVarianceOf(currentMem);
-
-			//logger.debug("Current random response time: " + String.valueOf(currentRandomResponseTime));
-			//logger.debug("Current random CPU: " + String.valueOf(currentRandomCPU));
-			//logger.debug("Current random Mem: " + String.valueOf(currentRandomMem));
 		}
 	}
 
@@ -147,29 +143,18 @@ public class PeriodicMetricLogParserTool
 			nextResponseTime = Integer.valueOf(l.split(",")[1].split(":")[1]);
 			nextMem = Integer.valueOf(l.split(",")[2].split(":")[1]);
 			nextCPU = Integer.valueOf(l.split(",")[3].split(":")[1]);
-
-			//logger.debug(nextDate.toString() + ", " + nextResponseTime);
-			//logger.debug("Response time: " + nextResponseTime);
-			//logger.debug("Mem: " + nextMem);
-			//logger.debug("CPU: " + nextCPU);
-
+            
 		} else {
 			nextDate = null;
 		}
 	}
 
-    public Collection<Measurement> createReport( MeasurementSet ms, MetricGenerator metGen, int sampleCount )
+    public Collection<Measurement> createReport( String attrName, int sampleCount )
     {
 
-		Collection<Measurement> samples = new LinkedList<Measurement>();
+		Collection<Measurement> samples = new LinkedList<>();
 
-		//get attribute for measurement
-		Entity entity = MetricHelper.getEntityFromName("LWTService", metGen);
-		UUID aID = ms.getAttributeID();
-		Attribute a = MetricHelper.getAttributeByID(aID, entity);
-		String aName = a.getName();
-
-		logger.debug(ms.getAttributeID() + ", " + aName);
+		logger.debug( "Creating report data for " + attrName );
 
 		while (nextDate!=null) {
 			for (int i=0; i<sampleCount; i++) {
@@ -179,22 +164,19 @@ public class PeriodicMetricLogParserTool
 				// Create measurement instances
 				Measurement m = null;
 
-				if (aName.equals("Average response time")) {
+				if (attrName.equals("Average response time")) {
 					m = new Measurement(currentRandomResponseTime + "");
-				} else if (aName.equals("CPU usage")) {
+				} else if (attrName.equals("CPU usage")) {
 					m = new Measurement(currentRandomCPU + "");
-				} else if (aName.equals("Memory usage")) {
+				} else if (attrName.equals("Memory usage")) {
 					m = new Measurement(currentRandomMem + "");
 				} else {
-					logger.warn("Unknown attribute for measurement: " + aName + ", skipping");
+					logger.warn("Unknown attribute for measurement: " + attrName + ", skipping");
 					break;
 				}
 
 				m.setTimeStamp( new Date(currentDate.getTime()) );
-				m.setMeasurementSetUUID( ms.getID() );
 				samples.add(m);
-
-				logger.debug("Added " + aName + " measurement");
 
 				if (nextDate==null) {
 					hasFinished = true;

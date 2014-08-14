@@ -40,10 +40,6 @@ public class EntryPoint
 
 	private static MetricGenerator metGen;
 
-	private static MeasurementSet ResponseTime;
-	private static MeasurementSet CPUUsage;
-	private static MeasurementSet MemoryUsage;
-
     // Main entry point
     public static void main( String args[] )
     {
@@ -98,9 +94,9 @@ public class EntryPoint
 
 			try {
 				// Do cool simulation codey bit & push whole report to ECC using Simon's new and shiny method
-				eccLogger.pushSimpleMetric("LWTService", "Average response time", logTool.createReport(ResponseTime, metGen, 60));
-				eccLogger.pushSimpleMetric("LWTService", "CPU usage", logTool.createReport(CPUUsage, metGen, 60));
-				eccLogger.pushSimpleMetric("LWTService", "Memory usage", logTool.createReport(MemoryUsage, metGen, 60));
+				eccLogger.pushSimpleMetric("LWTService", "Average response time", logTool.createReport("Average response time", 60));
+				eccLogger.pushSimpleMetric("LWTService", "CPU usage", logTool.createReport("CPU usage", 60));
+				eccLogger.pushSimpleMetric("LWTService", "Memory usage", logTool.createReport("Memory usage", 60));
 			} catch (Exception e) {
 				logger.error("Error pushing metric", e);
 			}
@@ -137,15 +133,15 @@ public class EntryPoint
 		Attribute c = MetricHelper.createAttribute( "Memory usage", "The Server's memory usage in percent", e );
 
         // A measurement set associated with the attribute
-        ResponseTime = MetricHelper.createMeasurementSet( a, MetricType.RATIO,
+        MetricHelper.createMeasurementSet( a, MetricType.RATIO,
                                            new Unit( "ms" ),
                                            group );
 
-		CPUUsage = MetricHelper.createMeasurementSet( b, MetricType.RATIO,
+		MetricHelper.createMeasurementSet( b, MetricType.RATIO,
                                            new Unit( "%" ),
                                            group );
 
-		MemoryUsage = MetricHelper.createMeasurementSet( c, MetricType.RATIO,
+		MetricHelper.createMeasurementSet( c, MetricType.RATIO,
                                            new Unit( "%" ),
                                            group );
 
