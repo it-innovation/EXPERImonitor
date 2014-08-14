@@ -27,6 +27,7 @@ package uk.ac.soton.itinnovation.ecc.service.services;
 
 import java.io.IOException;
 import uk.ac.soton.itinnovation.ecc.service.utils.MetricCalculator;
+import uk.ac.soton.itinnovation.ecc.service.domain.explorer.EccExperimentSummary;
 import uk.ac.soton.itinnovation.ecc.service.domain.explorer.metrics.*;
 import uk.ac.soton.itinnovation.ecc.service.domain.explorer.provenance.*;
 import uk.ac.soton.itinnovation.ecc.service.domain.DatabaseConfiguration;
@@ -42,7 +43,6 @@ import javax.annotation.*;
 import org.slf4j.*;
 
 import java.util.*;
-import uk.ac.soton.itinnovation.ecc.service.domain.explorer.EccExperimentSummary;
 
 
 
