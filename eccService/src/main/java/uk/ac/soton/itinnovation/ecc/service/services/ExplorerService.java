@@ -579,14 +579,25 @@ public class ExplorerService
         return result;
     }
 
-    public ArrayList<EccNOMORDStratifiedSummary> getPartQoEStratifiedSummary( UUID expID,
-                                                                              ArrayList<String> allPartIRIs )
+    public ArrayList<EccNOMORDStratifiedSummary> getPartQoEStratifiedSummary( UUID expID )
     {
         ArrayList<EccNOMORDStratifiedSummary> result = new ArrayList<>();
 
         // Safety
-        if ( serviceReady && expID != null && allPartIRIs != null )
+        if ( serviceReady && expID != null )
         {
+            // Try find participants for summary
+            Set<String> allPartIRIs = null;
+            try
+            {
+                allPartIRIs = provenanceQueryHelper.getParticipantIRIs( expID );
+            }
+            catch ( Exception ex )
+            { logger.warn( "Could not find any participants for experiment" ); }
+            
+            // Duck out early if we can't find any participants
+            if ( allPartIRIs == null || allPartIRIs.isEmpty() ) return result;
+            
             // Get common attributes for participants
             Map<UUID, Attribute> commonAttributes = metricsQueryHelper.getPartCommonAttributes( expID, allPartIRIs );
 
@@ -662,15 +673,12 @@ public class ExplorerService
             }
 
             // Finally, convert to domain data objects
-            String keyPostLabel = " of " + stratifiedSamples.keySet().size();
-
             for ( int index : stratifiedSamples.keySet() )
             {
                 // Create the index label
                 String indexLabel = (index == -1) ? "NOMINAL"
                                                   // Add 1 to index to display as non-zero scale
-                                                  : Integer.toString( index +1 ) + keyPostLabel;
-
+                                                  : "Scale index: " + Integer.toString( index +1 );
                 // Create summary
                 EccNOMORDStratifiedSummary ss =
                         new EccNOMORDStratifiedSummary( indexLabel );

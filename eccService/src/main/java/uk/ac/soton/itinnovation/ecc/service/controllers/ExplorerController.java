@@ -172,11 +172,9 @@ public class ExplorerController {
         ArrayList<EccNOMORDStratifiedSummary> result = null;
 
         if ( explorerService != null && explorerService.isReady() && expID != null )
-        {
-            // Will be using: getPartQoEStratifiedSummary(...)
-            result = demoData.qoeStratifiedSummaryDistribData;
-        }
-        else logger.error( "Could not execute explorer service: service is null" );
+            result = explorerService.getPartQoEStratifiedSummary( expID );
+        else
+            logger.error( "Could not execute explorer service: service is null" );
 
         return result;
     }
