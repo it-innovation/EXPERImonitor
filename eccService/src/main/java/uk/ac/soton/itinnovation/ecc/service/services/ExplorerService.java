@@ -520,9 +520,12 @@ public class ExplorerService
                             {
                                 // Get the median
                                 float medianPos = MetricCalculator.calcORDINALMedianValuePosition( fullSet );
-                                String value    = MetricHelper.getORDINALLabelFromIndex( metric, medianPos );
-
-                                result.addORDINALResponse( attr.getName(), value, (int) medianPos );
+                                
+                                if ( !Float.isNaN(medianPos) )
+                                {
+                                    String value = MetricHelper.getORDINALLabelFromIndex( metric, medianPos );
+                                    result.addORDINALResponse( attr.getName(), value, (int) medianPos );
+                                }
                             }
                         }
                         else logger.error( "Failed to combine measurement sets: no measurement sets available" );
