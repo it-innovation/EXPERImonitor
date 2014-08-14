@@ -350,16 +350,26 @@ public class ExplorerService
     }
 
     public EccParticipantResultSet getPartQoEAttrSelection( UUID              expID,
-                                                            ArrayList<String> allPartIRIs,
                                                             String            attrName,
                                                             String            selLabel )
     {
         EccParticipantResultSet result = new EccParticipantResultSet();
 
         // Safety
-        if ( serviceReady && expID != null && allPartIRIs != null &&
-             !allPartIRIs.isEmpty() && attrName != null && selLabel != null )
+        if ( serviceReady && expID != null && attrName != null && selLabel != null )
         {
+            // Get all participant IRIs first (get out early if nothing)
+            Set<String> allPartIRIs = null;
+            try
+            {
+                allPartIRIs = provenanceQueryHelper.getParticipantIRIs( expID );
+            }
+            catch ( Exception ex )
+            { logger.error("Could not retrieve participants for experiment"); }
+            
+            // Get out early if we don't have any participants
+            if ( allPartIRIs == null || allPartIRIs.isEmpty() ) return result;
+            
             // Get all entities representing participants
             Map<UUID,Entity> entities = metricsQueryHelper.getParticipantEntities( expID, allPartIRIs );
 
