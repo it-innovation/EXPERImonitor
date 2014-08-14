@@ -52,6 +52,11 @@
         <h5>Service</h5>
         <p>{{serviceSelection.name}}</p>
         <p>{{serviceSelection.description}}</p>
+        <div class="large-3 columns" ng-show="getServiceMetrics(serviceSelection)">
+            <label>Service Metrics: <strong>{{serviceMetricSelection.name}}</strong></label>
+            <select ng-model="serviceMetricSelection" ng-options="serviceMetric.name for serviceMetric in serviceMetrics" ></select>
+            <button ng-click="timeSeries(serviceMetricSelection, serviceSelection, activitySelection)" class="small button">Visualize</button>
+        </div>
     </div>
     <div id="qosChart1">
         <svg></svg>
@@ -59,11 +64,29 @@
     <div id="qosChart2">
         <svg></svg>
     </div>
-<!--    <div class="options">
-        <span class="curves">
-            <label for="curved">
-                <input type="checkbox" id="curved" onchange="curves.call(this)"> Curves
-            </label>
-        </span>    
-    </div>-->
+    <script>
+        d3.json("json/tst.json", function(error, data) {
+        //d3.json(BASE_URL + EXP_ID + "/attributes/series/qos/highlight/activities?attrID=" + serviceMetricSelection.metricID + "&IRI=" + partIRI + "&actLabel=" + encodeURIComponent(activitySelection.label), function(error, data) {
+            nv.addGraph(function() {
+                var chart = nv.models.lineChart()
+                    .x(function(d) { return d.timestamp; })
+                    .y(function(d) { return d.value/100; })
+                    .useInteractiveGuideline(true)
+                    .isArea(true)
+                    //.forceY([0]);
+                chart.xAxis
+                    .showMaxMin(true)
+                    .tickFormat(function(d) { return d3.time.format('%X')(new Date(d)); });
+                chart.yAxis
+                    .axisLabel('Response Time(ms)')
+                    .tickFormat(d3.format(',.2f'));
+                d3.select('#qosChart1 svg')
+                    .datum(data.seriesSet)
+                    .transition().duration(500)
+                    .call(chart);
+                nv.utils.windowResize(chart.update);
+                return chart;
+            });
+        });
+    </script>
 </div>

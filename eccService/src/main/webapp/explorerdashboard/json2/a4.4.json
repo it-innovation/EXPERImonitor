@@ -1,0 +1,28 @@
+
+
+{
+  "participant": {
+    "name": "Bob",
+    "description": "Bob is a test participant",
+    "metricEntityID": "74e3e2aa-0d86-49c9-8336-a44a1482a887",
+    "iri": "http://it-innovation.soton.ac.uk/ontologies/experimedia#participant_74e3e2aa-0d86-49c9-8336-a44a1482a887"
+  },
+  "summary": [
+    {
+      "label": "Ease of use: Ski lift app",
+      "value": "Very difficult",
+      "order": 1
+    },
+    {
+      "label": "Usefulness: Ski lift app",
+      "value": "Not at all useful",
+      "order": 1
+    },
+    {
+      "label": "Responsiveness: Ski lift app",
+      "value": "Very unresponsive",
+      "order": 1
+    }
+  ]
+}
+

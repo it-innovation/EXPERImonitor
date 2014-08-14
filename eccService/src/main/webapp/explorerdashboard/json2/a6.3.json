@@ -1,0 +1,18 @@
+
+
+{
+  "application": {
+    "name": "Ski Lift Waiting App",
+    "description": "Mobile application used to predict waiting time",
+    "iri": "http://it-innovation.soton.ac.uk/ontologies/experimedia#application_3af4c091-2019-4f1c-a867-89c44970a509"
+  },
+  "serviceTotal": 1,
+  "services": [
+    {
+      "name": "VAS Component (Service)",
+      "description": "VAS provides video analytics",
+      "iri": "http://it-innovation.soton.ac.uk/ontologies/experimedia#service_14e3e008-95bb-4423-a21f-c216c614d591"
+    }
+  ]
+}
+

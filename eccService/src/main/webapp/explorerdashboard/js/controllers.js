@@ -1,22 +1,30 @@
-var BASE_URL = "http://zts14:8080/EccService-2.1/explorer/";
-var EXP_ID = "c91c05ed-c6ba-4880-82af-79eb5d4a58cd"; 
-var appControllers = angular.module('appControllers', []);
+var BASE_URL = "http://zts14:8080/EccService-2.1/";
+var EXP_ID;
+
+var appControllers = angular.module('appControllers', ['angular-loading-bar']);
 
 appControllers.filter('encodeURIComponent', function() {
     return window.encodeURIComponent;
 });
 
 appControllers.controller('MainController', ['$scope', '$http', function($scope, $http) {
-    $http.get(BASE_URL + EXP_ID + "/summary").success(function(data) {
+    $http.get(BASE_URL + "/experiments").success(function(data) {
+        $scope.experiments = data;
+    });
+}]);
+
+appControllers.controller('ExperimentController', ['$scope', '$http', '$routeParams', function($scope, $http, $routeParams) {
+    EXP_ID = $routeParams.uuid;
+    $http.get(BASE_URL + "explorer/" + EXP_ID + "/summary").success(function(data) {
         $scope.summary = data;
     });
 }]);
 
 appControllers.controller('ParticipantController', ['$scope', '$http', function($scope, $http) {        
-    $http.get(BASE_URL + EXP_ID + "/participants").success(function(data) {
+    $http.get(BASE_URL + "explorer/" + EXP_ID + "/participants").success(function(data) {
         $scope.participants = data.participants;
     });
-    $http.get(BASE_URL + EXP_ID + "/participants/groupAttributes").success(function(data) {
+    $http.get(BASE_URL + "explorer/" + EXP_ID + "/participants/groupAttributes").success(function(data) {
         $scope.attributes = data.qoEAttributes;
     });
     // need to change---too coupled
@@ -24,7 +32,7 @@ appControllers.controller('ParticipantController', ['$scope', '$http', function(
     $scope.visualize = function(participantSelection, attributeSelection){
         // draw chart
         if(attributeSelection === "All"){
-            d3.json(BASE_URL + EXP_ID + "/participants/distribution/stratified", function(data) {
+            d3.json(BASE_URL + "explorer/" + EXP_ID + "/participants/distribution/stratified", function(data) {
                 // clear the canvas before redrawing !!!! find a better way to allow for interactivity
                 d3.select('#chart1 svg').remove();
                 d3.select('#chart2 svg').remove();
@@ -55,7 +63,7 @@ appControllers.controller('ParticipantController', ['$scope', '$http', function(
                 });
             });
         } else {
-            d3.json(BASE_URL + EXP_ID + "/attributes/distribution/qoe?attrName=" + encodeURIComponent(attributeSelection), function(data) {
+            d3.json(BASE_URL + "explorer/" + EXP_ID + "/attributes/distribution/qoe?attrName=" + encodeURIComponent(attributeSelection), function(data) {
                 // clear the canvas before redrawing !!!! find a better way to allow for interactivity
                 d3.select('#chart1 svg').remove();
                 $('#chart2 svg').remove();
@@ -107,7 +115,7 @@ appControllers.controller('ParticipantController', ['$scope', '$http', function(
                 });
                 // click event function
                 function chartClick(e) {
-                    $http.get(BASE_URL + EXP_ID + "/participants/attributes/select?attrName" + encodeURIComponent(attributeSelection) + "&nomOrdLabel=" + encodeURIComponent(e.point.label)).success(function(data) {
+                    $http.get(BASE_URL + "explorer/" + EXP_ID + "/participants/attributes/select?attrName" + encodeURIComponent(attributeSelection) + "&nomOrdLabel=" + encodeURIComponent(e.point.label)).success(function(data) {
                         $scope.participants = data.participants;
                     });
                 }
@@ -119,35 +127,49 @@ appControllers.controller('ParticipantController', ['$scope', '$http', function(
 
 appControllers.controller('DetailsController', ['$scope', '$http', '$routeParams', function($scope, $http, $routeParams) {
     var partIRI = encodeURIComponent($routeParams.iri);
-    $http.get(BASE_URL + EXP_ID + "/participants").success(function(data) {
+    $http.get(BASE_URL + "explorer/" + EXP_ID + "/participants").success(function(data) {
         $scope.participants = data.participants;
     });
-    $http.get(BASE_URL + EXP_ID + "/participants/iri?IRI=" + partIRI).success(function(data) {
+    $http.get(BASE_URL + "explorer/" + EXP_ID + "/participants/iri?IRI=" + partIRI).success(function(data) {
         $scope.whichPeople = data.name;
         // TODO: need to fix routeparams to show current selction
         $scope.participantSelection = data.name;
     });
-//    // get activities
-    $http.get(BASE_URL + EXP_ID + "/participants/iri/activities/summary?IRI=" + partIRI).success(function(data) {
+    // get activities
+    $http.get(BASE_URL + "explorer/" + EXP_ID + "/participants/iri/activities/summary?IRI=" + partIRI).success(function(data) {
         $scope.activities = data.activities;
     });
-    // get activity instances
-    $http.get(BASE_URL + EXP_ID + "/participants/iri/activities?IRI=" + partIRI).success(function(data) {
+    // All participant activities
+    $.get(BASE_URL + "explorer/" + EXP_ID + "/participants/iri/activities?IRI=" + partIRI).success(function(data) {
         $scope.activityInstances = data.activities;
         $scope.numActivities = data.activityTotal;
     });
     $scope.activitySelection = "";
     $scope.getApplications = function(activitySelection){
-        //using jqery get since angular http.get looping
-        $.get( BASE_URL + EXP_ID + "/activities/iri/applications?IRI=" + encodeURIComponent(activitySelection.iri), function( data ) {
-            $scope.applications = data.applications;
+        // beacause an activuty label has no IRI we need to use it to return an instance and get th IRI
+        // use jquery $.get rather than angular $http.get to avoid continous loop
+        // get filtered activities
+        $.get(BASE_URL + "explorer/" + EXP_ID + "/participants/iri/activities/select?IRI=" + partIRI + "&actLabel=" + encodeURIComponent(activitySelection.label)).success(function(data) {
+            $scope.activityInstances = data.activities;
+            $scope.numActivities = data.activityTotal;
+            var actIRI = data.activities[0].iri;
+            $.get( BASE_URL + "explorer/" + EXP_ID + "/activities/iri/applications?IRI=" + encodeURIComponent(actIRI), function( data ) {
+                $scope.applications = data.applications;
+            });
         });
         return true;    // to enable angular ng-show
     };
     $scope.applicationSelection = "";
     $scope.getServices = function(applicationSelection){
-        $.get( BASE_URL + EXP_ID + "/applications/iri/services?IRI=" + encodeURIComponent(applicationSelection.iri), function( data ) {
+        $.get( BASE_URL + "explorer/" + EXP_ID + "/applications/iri/services?IRI=" + encodeURIComponent(applicationSelection.iri), function( data ) {
             $scope.services = data.services;
+        });
+        return true;    // to enable angular ng-show
+    };
+    $scope.serviceSelection = "";
+    $scope.getServiceMetrics = function(serviceSelection){
+        $.get( BASE_URL + "explorer/" + EXP_ID + "/services/iri/attributes?IRI=" + encodeURIComponent(serviceSelection.iri), function( data ) {
+            $scope.serviceMetrics = data.attributes;
         });
         return true;    // to enable angular ng-show
     };
@@ -178,29 +200,32 @@ appControllers.controller('DetailsController', ['$scope', '$http', '$routeParams
             return chart;
         });
     });
-    // qos line-area chart   
-    d3.json("json/ts.json", function(error, data) {
-        nv.addGraph(function() {
-            var chart = nv.models.lineChart()
-                .x(function(d) { return d.date; })
-                .y(function(d) { return d.value; })
-                .useInteractiveGuideline(true)
-                .isArea(true)
-                .forceY([0]);
-            chart.xAxis
-                .showMaxMin(true)
-                .tickFormat(function(d) { return d3.time.format('%x')(new Date(d)); });
-            chart.yAxis
-                .axisLabel('Response Time(ms)')
-                .tickFormat(d3.format(',.2f'));
-            d3.select('#qosChart1 svg')
-                .datum(data)
-                .transition().duration(500)
-                .call(chart);
-            nv.utils.windowResize(chart.update);
-            return chart;
+    
+    $scope.timeSeries = function(serviceMetricSelection, serviceSelection, activitySelection){
+        d3.json("json/tst.json", function(error, data) {
+        //d3.json(BASE_URL + "explorer/" + EXP_ID + "/attributes/series/qos/highlight/activities?attrID=" + serviceMetricSelection.metricID + "&IRI=" + partIRI + "&actLabel=" + encodeURIComponent(activitySelection.label), function(error, data) {
+            nv.addGraph(function() {
+                var chart = nv.models.lineChart()
+                    .x(function(d) { return d.timestamp; })
+                    .y(function(d) { return d.value/100; })
+                    .useInteractiveGuideline(true)
+                    .isArea(true)
+                    //.forceY([0]);
+                chart.xAxis
+                    .showMaxMin(true)
+                    .tickFormat(function(d) { return d3.time.format('%X')(new Date(d)); });
+                chart.yAxis
+                    .axisLabel('Response Time(ms)')
+                    .tickFormat(d3.format(',.2f'));
+                d3.select('#qosChart1 svg')
+                    .datum(data.seriesSet)
+                    .transition().duration(500)
+                    .call(chart);
+                nv.utils.windowResize(chart.update);
+                return chart;
+            });
         });
-    });
+    };
     
     // BEGIN parallel sets viz
     var chart = d3.parsets()
