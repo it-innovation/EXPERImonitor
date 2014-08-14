@@ -90,10 +90,11 @@ public class ExplorerProvenanceQueryHelper {
      *
      * @param expID - Non-null experiment ID
      * @return      - Returns a (possibly empty) set of IRIs representing participants
+	 * @throws java.lang.Exception if the query fails
      */
     public Set<String> getParticipantIRIs( UUID expID ) throws Exception {
 
-		String sparql = "SELECT * WHERE { ?participant a http://experimedia.eu/ontologies/ExperimediaExperimentExplorer:Participant . }";
+		String sparql = "SELECT * WHERE { ?participant a <http://experimedia.eu/ontologies/ExperimediaExperimentExplorer#Participant> . }";
         TupleQueryResult tqr = store.query(expID.toString(), sparql);
         HashSet<String> result = new HashSet<>();
 		while (tqr.hasNext()) {
@@ -107,15 +108,40 @@ public class ExplorerProvenanceQueryHelper {
      * Use this method to retrieve a summary of the activities associated with a participant
      * of a particular experiment
      *
-     * @param expID     - Non-null experiment ID
-     * @param partIRI   - Non-null participant IRI
-     * @return          - A (possibly null) summary of activities
+     * @param expID		- Non-null experiment ID
+     * @param partIRI	- Non-null participant IRI
+	 * @param part		- Non-null participant
+     * @return			- A (possibly null) summary of activities
+	 * @throws java.lang.Exception if the query fails
      */
-    public EccParticipantActivitySummaryResultSet getParticipantActivitySummary( UUID   expID,
-                                                                                 String partIRI ) {
+    public EccParticipantActivitySummaryResultSet getPartActivitySummary( UUID   expID,
+                                                                          String partIRI,
+																		  EccParticipant part ) throws Exception {
 
-        EccParticipantActivitySummaryResultSet result = null;
+        EccParticipantActivitySummaryResultSet result = new EccParticipantActivitySummaryResultSet(part);
 
+		String sparql = "SELECT * WHERE { ?activity a <http://www.w3.org/ns/prov#Activity> . "
+					  + "?activity <http://www.w3.org/ns/prov#wasStartedBy> <" + part.getIRI() + "> . "
+					  + "?activity rdfs:label ?label }";
+		TupleQueryResult tqr = store.query(expID.toString(), sparql);
+
+		HashMap<String, Integer> activities = new HashMap<>();
+		if (tqr!=null) {
+			while (tqr.hasNext()) {
+				String label = tqr.next().getBinding("label").getValue().toString();
+
+				if (!activities.containsKey(label)) {
+					activities.put(label, 1);
+				} else {
+					activities.put(label, activities.get(label)+1);
+				}
+			}
+		}
+
+		for (Map.Entry<String, Integer> e: activities.entrySet()) {
+			logger.info("Activity count: " + e.getKey() + ": " + e.getValue());
+			result.addActivitySummary(new EccActivitySummaryInfo(e.getKey(), e.getValue()));
+		}
 
         return result;
     }
