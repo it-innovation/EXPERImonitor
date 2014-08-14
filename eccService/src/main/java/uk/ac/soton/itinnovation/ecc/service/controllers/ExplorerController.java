@@ -114,7 +114,7 @@ public class ExplorerController {
 
         if ( explorerService != null && explorerService.isReady() )
         {
-            // Will be using: explorerService.getPartCommonAttrResultSet(..)
+            // Will be using: explorerService.getPartAttrResultSet(..)
             result = demoData.partAttrInfoSet;
         }
         else logger.error( "Could not execute explorer service: service is null" );
@@ -129,12 +129,9 @@ public class ExplorerController {
         EccParticipantAttributeResultSet result = null;
 
         if ( explorerService != null && explorerService.isReady() )
-        {
-            // Will be using: explorerService.getPartCommonAttrResultSet(..)
-			result = explorerService.getPartCommonAttrResultSet( expID );
-            //result = demoData.partAttrInfoSet;
-        }
-        else logger.error( "Could not execute explorer service: service is null" );
+            result = explorerService.getPartCommonAttrResultSet( expID );
+        else
+            logger.error( "Could not execute explorer service: service is null" );
 
         return result;
     }
@@ -167,11 +164,9 @@ public class ExplorerController {
         EccNOMORDParticipantSummary result = null;
 
         if ( explorerService != null && explorerService.isReady() )
-        {
-            // Will be using: getPartQoEDistribution(...)
-            result = demoData.qoeParticipantSummaryData.get( partIRI );
-        }
-        else logger.error( "Could not execute explorer service: service is null" );
+            result = explorerService.getPartQoEDistribution( expID, partIRI );
+        else
+            logger.error( "Could not execute explorer service: service is null" );
 
         return result;
     }

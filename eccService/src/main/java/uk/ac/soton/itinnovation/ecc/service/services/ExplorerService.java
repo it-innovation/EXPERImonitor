@@ -380,7 +380,8 @@ public class ExplorerService
 
             for ( Attribute attr : selAttributes )
             {
-                Map<UUID,MeasurementSet> msets = metricsQueryHelper.getMeasurementSetsForAttribute( expID, attr.getUUID() );
+                Map<UUID,MeasurementSet> msets = 
+                        metricsQueryHelper.getMeasurementSetsForAttribute( expID, attr.getUUID(), true );
 
                 boolean foundLabel = false;
 
@@ -450,7 +451,7 @@ public class ExplorerService
 
                  // Get measurement set for combined attributes
                  MeasurementSet ms =
-                         metricsQueryHelper.getCombinedMeasurementSetForAttributes( expID, qoeResult );
+                         metricsQueryHelper.getCombinedMeasurementSetDataForAttributes( expID, qoeResult );
 
                  // If we have data, create the summary distribution
                  if ( ms != null )
@@ -499,7 +500,7 @@ public class ExplorerService
                 for ( Attribute attr : sortedAttrs )
                 {
                     Map<UUID, MeasurementSet> srcSets =
-                            metricsQueryHelper.getMeasurementSetsForAttribute( expID, attr.getUUID() );
+                            metricsQueryHelper.getMeasurementSetsForAttribute( expID, attr.getUUID(), true );
                     try
                     {
                         MeasurementSet fullSet = MetricHelper.combineMeasurementSets( srcSets.values() );
@@ -572,7 +573,7 @@ public class ExplorerService
                 Set<Attribute> instances = attrInstances.get( attrName );
 
                 MeasurementSet allMeasurements =
-                        metricsQueryHelper.getCombinedMeasurementSetForAttributes( expID, instances );
+                        metricsQueryHelper.getCombinedMeasurementSetDataForAttributes( expID, instances );
 
                 superMSSet.put( attrName, allMeasurements );
             }
@@ -670,7 +671,7 @@ public class ExplorerService
                 if ( metricsQueryHelper.isQoSAttribute(expID, attrID) )
                 {
                     Map<UUID,MeasurementSet> msSet = 
-                            metricsQueryHelper.getMeasurementSetsForAttribute( expID, attrID );
+                            metricsQueryHelper.getMeasurementSetsForAttribute( expID, attrID, true );
 
                     // Combine data
                     MeasurementSet superMS = MetricHelper.combineMeasurementSets( msSet.values() );
