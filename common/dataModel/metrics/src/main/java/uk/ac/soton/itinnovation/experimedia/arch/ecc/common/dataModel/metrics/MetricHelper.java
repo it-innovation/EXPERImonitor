@@ -1091,7 +1091,7 @@ public class MetricHelper
         String result = null;
         
         // Safety before we get the position
-        if ( metric != null && metric.getMetricType() == MetricType.NOMINAL &&
+        if ( metric != null && metric.getMetricType() == MetricType.ORDINAL &&
              position != Float.NaN && position >= 0.0f )
         {
             String[] items = metric.getMetaContent().split( "," );
