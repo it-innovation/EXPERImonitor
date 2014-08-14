@@ -188,12 +188,9 @@ public class ExplorerController {
         ArrayList<EccNOMORDAttributeSummary> result = null;
 
         if ( explorerService != null && explorerService.isReady() && expID != null && attrName != null )
-        {
-            // Will be using: getQoEDistributionByName(..)
-            result = new ArrayList<>();
-            result.add( demoData.qoeSummaryDistribData.get( attrName ) );
-        }
-        else logger.error( "Could not execute explorer service: service is null" );
+            result = explorerService.getQoEDistributionByName( expID, attrName );
+        else 
+            logger.error( "Could not execute explorer service: service is null" );
 
         return result;
     }
