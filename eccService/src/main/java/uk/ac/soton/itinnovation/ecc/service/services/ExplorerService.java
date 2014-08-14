@@ -147,34 +147,58 @@ public class ExplorerService
     // Called from controller [line 79]    
     public EccParticipantResultSet getParticipants( UUID expID )
     {
-        EccParticipantResultSet result = null;
-        
-        // We need a list of participants related to the experiment ID here
-        
-        // Strategy:
-        
-        // 1. Get list of participant IRIs
-        
+        EccParticipantResultSet result = new EccParticipantResultSet();
+
+		// 1. Get list of participant IRIs
+		Set<String> participants = null;
+		try {
+			participants = provenanceQueryHelper.getParticipantIRIs(expID);
+		} catch (Exception e) {
+			logger.warn("Could not retrieve participants from PROV store", e);
+		}
+
         // 2. For each IRI, use the metricsQueryHelper to get corresponding Metric Entity
-        
-        // 3. Create EccParticipant using createParticipant(..) method (below)
-        
-        // 4. Add to collection
-        
-        return null;        
+		if (participants!=null) {
+			for (String participant: participants) {
+
+				// 3. Create EccParticipant using createParticipant(..) method (below)
+				Entity metricEntity = metricsQueryHelper.getParticipantEntity(expID, participant);
+				EccParticipant p = createParticipant(metricEntity);
+				 // 4. Add to collection
+				result.addParticipant(p);
+			}
+		}
+
+        return result;
     }
     
     // Called from controller [line 94]
     public EccParticipant getParticipant( UUID expID, String partIRI )
     {
         EccParticipant result = null;
-        
-        // Stefanie - can you implement a method on the PROV helper to verify the
-        // existence of the participant IRI here?
-        
-        // Then, very similar strategy to above
-        
-        return null;
+
+        // 1. Get list of participant IRIs
+		Set<String> participants = null;
+		try {
+			participants = provenanceQueryHelper.getParticipantIRIs(expID);
+		} catch (Exception e) {
+			logger.warn("Could not retrieve participants from PROV store", e);
+		}
+
+        // 2. For each IRI, use the metricsQueryHelper to get corresponding Metric Entity
+		if (participants!=null) {
+			for (String participant: participants) {
+
+				if (partIRI.equals(participant)) {
+					// 3. Create EccParticipant using createParticipant(..) method (below)
+					Entity metricEntity = metricsQueryHelper.getParticipantEntity(expID, participant);
+					result = createParticipant(metricEntity);
+					break;
+				}
+			}
+		}
+
+        return result;
     }
     
     // Called from controller [line 270]
@@ -208,15 +232,18 @@ public class ExplorerService
                                                                           String partIRI )
     {
         EccParticipantActivitySummaryResultSet result = null;
-        
-        // Here we want to return a high-level description of all activities for a participant
-        // This means running through the activities and counting how many of each activity label.
-        //
-        // Example:
-        //
-        // 'Skiing' : 5
-        // 'Used lift application' : 3
-        
+
+        // See above strategy for create EccParticipant
+		Entity metricEntity = metricsQueryHelper.getParticipantEntity(expID, partIRI);
+		EccParticipant p = createParticipant(metricEntity);
+
+        // Then stuff result full of EccActivity instances (don't worry about description if we don't have one)
+		try {
+			result = provenanceQueryHelper.getPartActivitySummary(expID, partIRI, p);
+		} catch (Exception e) {
+			logger.warn("Could not retrieve participants from PROV store", e);
+		}
+
         return result;
     }
     
@@ -723,29 +750,37 @@ public class ExplorerService
     // Private methods ---------------------------------------------------------
     private EccParticipant createParticipant( Entity ent )
     {
-        return new EccParticipant( ent.getName(),
-                                   ent.getDescription(),
-                                   ent.getUUID(),
-                                   ent.getEntityID() );
+        EccParticipant part = null;
+        
+        if ( ent != null )
+            part = new EccParticipant( ent.getName(),
+                                       ent.getDescription(),
+                                       ent.getUUID(),
+                                       ent.getEntityID() );
+        
+        return part;
     }
 
     private EccAttributeInfo createAttributeInfo( UUID expID, Attribute attr )
     {
         EccAttributeInfo result = null;
+        
+        if ( expID != null && attr != null )
+        {
+            Metric metric = metricsQueryHelper.getAttributeMetric( expID, attr.getUUID() );
 
-        Metric metric = metricsQueryHelper.getAttributeMetric( expID, attr.getUUID() );
-
-        if ( metric != null )
-            result = new EccAttributeInfo( attr.getName(),
-                                           attr.getDescription(),
-                                           attr.getUUID(),
-                                           metric.getUnit().getName(),
-                                           metric.getMetricType().name(),
-                                           metric.getMetaType(),
-                                           metric.getMetaContent() );
-        else
-            logger.error( "Could not create Attribute Info: metric is unavailable" );
-
+            if ( metric != null )
+                result = new EccAttributeInfo( attr.getName(),
+                                               attr.getDescription(),
+                                               attr.getUUID(),
+                                               metric.getUnit().getName(),
+                                               metric.getMetricType().name(),
+                                               metric.getMetaType(),
+                                               metric.getMetaContent() );
+            else
+                logger.error( "Could not create Attribute Info: metric is unavailable" );   
+        }
+        
         return result;
     }
 
