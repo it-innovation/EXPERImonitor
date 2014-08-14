@@ -547,18 +547,36 @@ public class MetricHelper
     {
         ArrayList<Attribute> result = new ArrayList<>();
         
-        TreeMap<String, Attribute> sortedAttrs = new TreeMap<>();
+        TreeMap<String, ArrayList<Attribute>> sortedAttrs = new TreeMap<>();
         
         if ( attributes != null && !attributes.isEmpty() )
         {
-            // Sort
+            // Sort (allowing attributes with the same name)
             for ( Attribute attr: attributes )
-                sortedAttrs.put( attr.getName(), attr );
+            {
+                String attrName = attr.getName();
+                
+                if ( sortedAttrs.containsKey(attrName) )
+                {
+                    ArrayList<Attribute> bucket = sortedAttrs.get( attrName );
+                    bucket.add( attr );
+                }
+                else
+                {
+                    ArrayList<Attribute> bucket = new ArrayList<>();
+                    bucket.add( attr );
+                    
+                    sortedAttrs.put( attrName, bucket );
+                }
+            }
             
-            // Write out (ascending order)
-            Iterator<String> nameIt = sortedAttrs.keySet().iterator();
-            while ( nameIt.hasNext() )
-                result.add( sortedAttrs.get(nameIt.next()) );
+            // Write out all attributes (ascending order)
+            for ( String attrName : sortedAttrs.keySet() )
+            {
+                ArrayList<Attribute> bucket = sortedAttrs.get( attrName );
+                for ( Attribute attr : bucket )
+                    result.add( attr );
+            }
         }
         
         return result;
