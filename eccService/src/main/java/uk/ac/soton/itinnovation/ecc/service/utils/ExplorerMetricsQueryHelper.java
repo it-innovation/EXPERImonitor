@@ -48,6 +48,7 @@ public class ExplorerMetricsQueryHelper
     private IMonitoringEDM     expDataManager;
     private IEntityDAO         entityDAO;
     private IMeasurementSetDAO msDAO;
+    private IReportDAO         reportDAO;
     
     private boolean            helperInitialised;
     
@@ -92,8 +93,9 @@ public class ExplorerMetricsQueryHelper
             
             if ( expDataManager.isDatabaseSetUpAndAccessible() )
             {
-                entityDAO = expDataManager.getEntityDAO();
-                msDAO     = expDataManager.getMeasurementSetDAO();
+                entityDAO  = expDataManager.getEntityDAO();
+                msDAO      = expDataManager.getMeasurementSetDAO();
+                reportDAO  = expDataManager.getReportDAO();
             }
             else
             {
@@ -120,6 +122,7 @@ public class ExplorerMetricsQueryHelper
      */
     public void shutdown()
     {
+        reportDAO      = null;
         msDAO          = null;
         entityDAO      = null;
         expDataManager = null;
@@ -327,11 +330,12 @@ public class ExplorerMetricsQueryHelper
     /**
      * Use this method to retrieve all measurement sets associated with an Attribute (by ID)
      * 
-     * @param expID     - Non-null ID of the experiment
-     * @param attrID    - Non-null ID of the attribute
-     * @return          - returns a map of measurement sets indexed by their metric IDs
+     * @param expID            - Non-null ID of the experiment
+     * @param attrID           - Non-null ID of the attribute
+     * @param withMeasurements - Set true if actual measurements are required for this set
+     * @return                 - returns a map of measurement sets indexed by their metric IDs
      */
-    public Map<UUID,MeasurementSet> getMeasurementSetsForAttribute( UUID expID, UUID attrID )
+    public Map<UUID,MeasurementSet> getMeasurementSetsForAttribute( UUID expID, UUID attrID, boolean withMeasurements )
     {
         HashMap<UUID,MeasurementSet> result = new HashMap<>();
         
@@ -343,6 +347,23 @@ public class ExplorerMetricsQueryHelper
                 
                 for ( MeasurementSet ms : sets )
                     result.put( ms.getID(), ms );
+                
+                // Collect data if required
+                if ( withMeasurements )
+                    for ( MeasurementSet ms : sets )
+                    {
+                        try
+                        {
+                            Report report = 
+                                reportDAO.getReportForAllMeasurements(ms.getID(), true);
+                        
+                            ms.addMeasurements( report.getMeasurementSet().getMeasurements() );
+                        }
+                        catch ( Exception ex )
+                        { logger.warn( "Did not find measurements for MS: " + ms.getID().toString() );
+                            
+                        }
+                    }
             }
             catch ( Exception ex )
             {
@@ -363,7 +384,7 @@ public class ExplorerMetricsQueryHelper
      * @param attributes    - Non-null/empty set of attributes
      * @return              - Single measurement set representing all valid measurement data
      */
-    public MeasurementSet getCombinedMeasurementSetForAttributes( UUID expID, Collection<Attribute> attributes )
+    public MeasurementSet getCombinedMeasurementSetDataForAttributes( UUID expID, Collection<Attribute> attributes )
     {
         MeasurementSet result = null;
         
@@ -374,7 +395,7 @@ public class ExplorerMetricsQueryHelper
             for ( Attribute attr: attributes )
             {
                 Collection<MeasurementSet> sets = 
-                        getMeasurementSetsForAttribute( expID, attr.getUUID() ).values();
+                        getMeasurementSetsForAttribute( expID, attr.getUUID(), true ).values();
                 
                 superMSSet.addAll( sets );
             }
