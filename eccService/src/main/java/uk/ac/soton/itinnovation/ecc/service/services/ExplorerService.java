@@ -42,6 +42,7 @@ import javax.annotation.*;
 import org.slf4j.*;
 
 import java.util.*;
+import uk.ac.soton.itinnovation.ecc.service.domain.explorer.EccExperimentSummary;
 
 
 
@@ -129,6 +130,118 @@ public class ExplorerService
     public boolean isReady()
     { return serviceReady; }
 
+    // Called from controller [line 63]
+    public EccExperimentSummary getExperimentPROVSummary( String expName,
+                                                          String expDesc,
+                                                          UUID   expID )
+    {
+        EccExperimentSummary result = null;
+        
+        // You should receive the experiment name, description and ID as parameters
+        // for you to 'fill in' for the result. We need the provenance bits from the helper here
+        
+        
+        return result;
+    }
+    
+    // Called from controller [line 79]    
+    public EccParticipantResultSet getParticipants( UUID expID )
+    {
+        EccParticipantResultSet result = null;
+        
+        // We need a list of participants related to the experiment ID here
+        
+        // Strategy:
+        
+        // 1. Get list of participant IRIs
+        
+        // 2. For each IRI, use the metricsQueryHelper to get corresponding Metric Entity
+        
+        // 3. Create EccParticipant using createParticipant(..) method (below)
+        
+        // 4. Add to collection
+        
+        return null;        
+    }
+    
+    // Called from controller [line 94]
+    public EccParticipant getParticipant( UUID expID, String partIRI )
+    {
+        EccParticipant result = null;
+        
+        // Stefanie - can you implement a method on the PROV helper to verify the
+        // existence of the participant IRI here?
+        
+        // Then, very similar strategy to above
+        
+        return null;
+    }
+    
+    // Called from controller [line 270]
+    public EccParticipantActivityResultSet getPartActivities( UUID   expID,
+                                                              String partIRI )
+    {
+        EccParticipantActivityResultSet result = null;
+        
+        // See above strategy for create EccParticipant
+        
+        // Then stuff result full of EccActivity instances (don't worry about description if we don't have one)
+        
+        return result;
+    }
+    
+    // Called from controller [line 286]
+    public EccParticipantActivityResultSet getPartActivitiesByName( UUID   expID,
+                                                                    String partIRI,
+                                                                    String activityLabel )
+    {
+        EccParticipantActivityResultSet result = null;
+        
+        // Pretty much the same as the above method, only we are just retrieving those
+        // activities with the label specified by activityLabel
+        
+        return result;
+    }
+    
+    // Called from controller [line 304]
+    public EccParticipantActivitySummaryResultSet getPartActivitySummary( UUID   expID,
+                                                                          String partIRI )
+    {
+        EccParticipantActivitySummaryResultSet result = null;
+        
+        // Here we want to return a high-level description of all activities for a participant
+        // This means running through the activities and counting how many of each activity label.
+        //
+        // Example:
+        //
+        // 'Skiing' : 5
+        // 'Used lift application' : 3
+        
+        return result;
+    }
+    
+    // Call from controller [line 322]
+    public EccActivityApplicationResultSet getActApplications( UUID   expID,
+                                                               String activityIRI )
+    {
+        EccActivityApplicationResultSet result = null;
+        
+        // Here we need to find all the applications associated with a specific activity
+        
+        return result;
+    }
+    
+    // Called from controller [line 340]
+    public EccApplicationServiceResultSet getAppServices( UUID expID,
+                                                          String applicationIRI )
+    {
+        EccApplicationServiceResultSet result = null;
+        
+        // Here we need to find all the services used by a particular application
+        
+        return result;
+    }
+    
     public EccParticipantAttributeResultSet getPartCommonAttrResultSet( UUID expID )
     {
         EccParticipantAttributeResultSet result = new EccParticipantAttributeResultSet();
