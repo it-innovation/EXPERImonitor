@@ -90,8 +90,13 @@ public class EccNOMORDAttributeSummary
         
         for ( String label : orderedLabels )
         {
-            EccItemCount eic = new EccItemCount( label, valueCounts.get(label) );
-            distribData.add( eic );
+            Integer val = valueCounts.get(label);
+            
+            if ( val != null )
+            {
+                EccItemCount eic = new EccItemCount( label, val );
+                distribData.add( eic );
+            }
         }
     }
 }
