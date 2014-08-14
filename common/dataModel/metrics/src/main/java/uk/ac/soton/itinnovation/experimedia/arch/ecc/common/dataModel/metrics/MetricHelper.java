@@ -1084,7 +1084,7 @@ public class MetricHelper
     {
         int result = -1;
         
-        if ( metric != null && metric.getMetricType() == MetricType.NOMINAL && 
+        if ( metric != null && metric.getMetricType() == MetricType.ORDINAL && 
              metric.getMetaContent() != null && label != null )
         {
             String[] items = metric.getMetaContent().split( "," );
