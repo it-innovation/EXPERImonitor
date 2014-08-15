@@ -178,33 +178,33 @@ public class MetricCalculator
         {
             // Create a result set based on the input (but without measurements)
             result = new MeasurementSet( mSet, false );
+            Set<Measurement> resultMS = result.getMeasurements();
             
-            // Sort the known measurements
-            List<Measurement> sorted = 
-                    MetricHelper.sortMeasurementsByDateLinear( mSet.getMeasurements() );
+            // Search through input samples
+            Set<Measurement> samples = mSet.getMeasurements();
             
-            // Search through the requested time stamps, trying to find the nearest dates
-            for ( Date targStamp : timeStamps )
-            {
-                Date        lastStamp = new Date( 0 );
-                Measurement nearMeasure = null;
-                
-                for ( Measurement m : sorted )
+            if ( samples != null && !samples.isEmpty() )
+                for ( Date stamp : timeStamps )
                 {
-                    Date mStamp = m.getTimeStamp();
-                    
-                    if ( mStamp.before(targStamp) )
-                        lastStamp = mStamp;
-                    else
-                    {
-                        nearMeasure = m;
-                        break;                        
-                    }
+                     Measurement nearest = null;
+                     long stampTime      = stamp.getTime();
+                     long lastDist       = 999999999999999999L;
+                     
+                     for ( Measurement m : samples )
+                     {
+                         long sampTime = m.getTimeStamp().getTime();
+                         long diff = Math.abs( sampTime - stampTime );
+                         
+                         if ( diff < lastDist )
+                         {
+                             nearest  = m;
+                             lastDist = diff;
+                         }
+                     }
+                     
+                     // Add result
+                     if ( nearest != null ) resultMS.add( nearest );
                 }
-                
-                // Add the measurement, if once is found
-                if ( nearMeasure != null ) result.addMeasurement( nearMeasure );
-            }
         }
         
         return result;
