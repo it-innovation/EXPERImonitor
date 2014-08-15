@@ -104,6 +104,51 @@ public class ExplorerProvenanceQueryHelper {
         return result;
     }
 
+	/**
+	 * Get a single activity
+	 *
+	 * @param expID
+	 * @param actIRI
+	 * @return
+	 * @throws java.lang.Exception
+	 */
+	public EccActivity getActivity( UUID	expID,
+									String	actIRI) throws Exception {
+
+		EccActivity activity = null;
+
+		String sparql = "SELECT * WHERE { ?activity a <http://www.w3.org/ns/prov#Activity> . "
+					  + "?activity <http://www.w3.org/ns/prov#startedAtTime> ?start . "
+				      + "?activity <http://www.w3.org/ns/prov#endedAtTime> ?end . "
+					  + "?activity rdfs:label ?label }";
+
+		TupleQueryResult tqr = store.query(expID.toString(), sparql);
+
+		HashMap<String, Integer> activities = new HashMap<>();
+		if (tqr!=null) {
+			while (tqr.hasNext()) {
+
+				BindingSet tqrb = tqr.next();
+
+				String s = tqrb.getBinding("start").getValue().toString();
+				String e = tqrb.getBinding("end").getValue().toString();
+				Calendar start = javax.xml.bind.DatatypeConverter.parseDateTime(s.substring(s.indexOf("\"")+1, s.lastIndexOf("\"")));
+				Calendar end = javax.xml.bind.DatatypeConverter.parseDateTime(e.substring(e.indexOf("\"")+1, e.lastIndexOf("\"")));
+				//TODO: not sure about timestamp format here...
+
+				String l = tqrb.getBinding("label").getValue().toString();
+				activity = new EccActivity(l.substring(l.indexOf("\"")+1, l.lastIndexOf("\"")), "TODO: description",
+						actIRI, new Date(start.getTimeInMillis()), new Date(end.getTimeInMillis()));
+
+				//this is intentional; there should only be one row returned since we're querying by iri.
+				// if there were more, they would be ignored
+				break;
+			}
+		}
+
+		return activity;
+	}
+
     /**
      * Use this method to get the IRI for all Participants associated with an experiment.
      *
@@ -148,6 +193,7 @@ public class ExplorerProvenanceQueryHelper {
 		if (tqr!=null) {
 			while (tqr.hasNext()) {
 				String label = tqr.next().getBinding("label").getValue().toString();
+				label = label.substring(label.indexOf("\"")+1, label.lastIndexOf("\""));
 
 				if (!activities.containsKey(label)) {
 					activities.put(label, 1);
@@ -246,14 +292,45 @@ public class ExplorerProvenanceQueryHelper {
         return result;
     }
 
-    // -------------------------------------------------------------------------
-    // Stefanie: at this point I think you can guess the rest. Please add the JavaDoc
-    // once you have implemented the call
-    // -------------------------------------------------------------------------
 
+	/**
+	 * Get all the applications used by one activity
+	 *
+	 * @param expID
+	 * @param activityIRI
+	 * @return
+	 * @throws Exception
+	 */
     public EccActivityApplicationResultSet getApplicationsUsedByActivity( UUID   expID,
-                                                                          String activityIRI ) {
+                                                                          String activityIRI) throws Exception {
+
         EccActivityApplicationResultSet result = null;
+
+		String sparql = "SELECT * WHERE { <" + activityIRI + "> <http://www.w3.org/ns/prov#used> ?app . "
+				+ "?app a <http://experimedia.eu/ontologies/ExperimediaExperimentExplorer#Application> . "
+				//currently just pulling the entity presentation of the Application
+				+ "?app a <http://www.w3.org/ns/prov#Entity> . "
+				+ "?app rdfs:label ?label . }";
+
+        TupleQueryResult tqr = store.query(expID.toString(), sparql);
+
+		if (tqr!=null) {
+
+			EccActivity act = getActivity(expID, activityIRI);
+			result = new EccActivityApplicationResultSet(act);
+
+			while (tqr.hasNext()) {
+
+				BindingSet tqrb = tqr.next();
+
+				String l = tqrb.getBinding("label").getValue().toString();
+				String app = tqrb.getBinding("app").getValue().toString();
+
+				EccApplication application = new EccApplication(l.substring(l.indexOf("\"")+1, l.lastIndexOf("\"")), "TODO: description", app);
+
+				result.addApplication(application);
+			}
+		}
 
         return result;
     }

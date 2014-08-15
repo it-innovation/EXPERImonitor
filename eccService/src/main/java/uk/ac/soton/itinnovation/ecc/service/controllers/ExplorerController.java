@@ -319,10 +319,9 @@ public class ExplorerController {
         EccActivityApplicationResultSet result = null;
 
         if ( explorerService != null && explorerService.isReady() && expID != null && IRI != null )
-        {
-            result = demoData.getApplicationsByActivity( IRI );
-        }
-        else logger.error( "Could not execute explorer service: service is null" );
+            result = explorerService.getActApplications( expID, IRI );
+        else 
+            logger.error( "Could not execute explorer service: service is null" );
 
         return result;
     }
@@ -337,10 +336,9 @@ public class ExplorerController {
         EccApplicationServiceResultSet result = null;
 
         if ( explorerService != null && explorerService.isReady() && expID != null && IRI != null )
-        {
-            result = demoData.getServicesByApplication( IRI );
-        }
-        else logger.error( "Could not execute explorer service: service is null" );
+            result = explorerService.getAppServices( expID, IRI );
+        else 
+            logger.error( "Could not execute explorer service: service is null" );
 
         return result;
     }

@@ -301,7 +301,16 @@ public class ExplorerService
     {
         EccActivityApplicationResultSet result = null;
         
-        // Here we need to find all the applications associated with a specific activity
+        if ( serviceReady && expID != null && activityIRI != null )
+        {
+            try
+            {
+                result = provenanceQueryHelper.getApplicationsUsedByActivity( expID, activityIRI ); 
+            }
+            catch ( Exception ex )
+            { logger.error( "Could not retrieve applications by activity", ex ); }
+        }
+        else logger.error( callFail );
         
         return result;
     }
@@ -312,7 +321,16 @@ public class ExplorerService
     {
         EccApplicationServiceResultSet result = null;
         
-        // Here we need to find all the services used by a particular application
+        if ( serviceReady && expID != null && applicationIRI != null )
+        {
+            try
+            {
+                result = provenanceQueryHelper.getServicesUsedByAppplication( expID, applicationIRI ); 
+            }
+            catch ( Exception ex )
+            { logger.error( "Could not retrieve applications by activity", ex ); }
+        }
+        else logger.error( callFail );
         
         return result;
     }
