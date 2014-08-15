@@ -193,12 +193,27 @@ public class ExplorerController {
 
         return result;
     }
+    
+    @RequestMapping(method = RequestMethod.GET, value = "/{expID}/attributes/distribution/qos" )
+    @ResponseBody
+    public EccINTRATSummary getINTRATAttributeDistributionSummary( @PathVariable UUID expID,
+                                                                   @RequestParam(value="attrID", defaultValue="") UUID attrID )
+    {
+        EccINTRATSummary result = null;
+        
+        if ( explorerService != null && explorerService.isReady() && expID != null && attrID != null )
+            result = explorerService.getINTRATAttrDistribution( expID, attrID );
+        else 
+            logger.error( "Could not execute explorer service: service is null/not ready/parameters are invalid" );
+        
+        return result;
+    }
 
     @RequestMapping(method = RequestMethod.GET, value = "/{expID}/attributes/distribution/qos/discrete" )
     @ResponseBody
-    public EccINTRATSummary getINTRATAttributeDistributionDataByID( @PathVariable UUID expID,
-                                                                    @RequestParam(value="attrID", defaultValue="")     UUID attrID,
-                                                                    @RequestParam(value="timeStamps", defaultValue="") String timeStamps )
+    public EccINTRATSummary getINTRATAttributeDistributionSummaryDiscrete( @PathVariable UUID expID,
+                                                                           @RequestParam(value="attrID", defaultValue="")     UUID attrID,
+                                                                           @RequestParam(value="timeStamps", defaultValue="") String timeStamps )
     {
         EccINTRATSummary result = null;
 

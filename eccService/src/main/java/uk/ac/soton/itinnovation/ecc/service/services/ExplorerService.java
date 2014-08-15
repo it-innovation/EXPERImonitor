@@ -749,6 +749,41 @@ public class ExplorerService
         return result;
     }
     
+    public EccINTRATSummary getINTRATAttrDistribution( UUID expID,
+                                                       UUID attrID )
+    {
+        EccINTRATSummary result = null;
+        
+        if ( serviceReady && expID != null && attrID != null )
+        {
+            try
+            {
+                // Only operate on INTERVAL or RATIO data
+                if ( metricsQueryHelper.isQoSAttribute(expID, attrID) )
+                {
+                    Attribute attr = metricsQueryHelper.getAttribute( expID, attrID );
+                    
+                    Map<UUID,MeasurementSet> msSet = 
+                            metricsQueryHelper.getMeasurementSetsForAttribute( expID, attrID, true );
+
+                    if ( attr != null && msSet != null )
+                    {
+                        // Combine data
+                        MeasurementSet superMS = MetricHelper.combineMeasurementSets( msSet.values() );
+                        
+                        // Create summary
+                        result = createINTRATSummary( attr, superMS );
+                    }
+                }
+            }
+            catch ( Exception ex )
+            { logger.error( "Could not create QoS Summary for attribute", ex ); }
+        }
+        else logger.error( callFail );
+        
+        return result;
+    }
+    
     public EccINTRATSummary getINTRATAttrDistributionDiscreteSampling( UUID             expID, 
                                                                        UUID             attrID,
                                                                        Collection<Date> timeStamps )
@@ -944,6 +979,26 @@ public class ExplorerService
         
         return result;
     }
+    
+    private EccAttributeInfo createAttributeInfo( Attribute attr, MeasurementSet ms )
+    {
+        EccAttributeInfo result = null;
+        
+        if ( attr != null && ms != null )
+        {
+            Metric metric = ms.getMetric();
+            
+            result = new EccAttributeInfo( attr.getName(),
+                                           attr.getDescription(),
+                                           attr.getUUID(),
+                                           metric.getUnit().getName(),
+                                           metric.getMetricType().name(),
+                                           metric.getMetaType(),
+                                           metric.getMetaContent() );
+        }
+        
+        return result;
+    }
 
     private List<Attribute> extractSortedQoEAttributes( UUID expID, Collection<Attribute> attrs )
     {
@@ -969,6 +1024,42 @@ public class ExplorerService
         
         for ( Measurement m : ms.getMeasurements() )
             result.add( new EccMeasurement( m.getTimeStamp(), m.getValue() ));
+        
+        return result;
+    }
+    
+    private EccINTRATSummary createINTRATSummary( Attribute attr, MeasurementSet ms )
+    {
+        EccINTRATSummary result = null;
+        
+        if ( attr != null && ms != null )
+        {
+            try
+            {
+                // Check we are dealing with QoS like data
+                Metric metric = ms.getMetric();
+                MetricType mt = metric.getMetricType();
+
+                if ( mt == MetricType.INTERVAL || mt == MetricType.RATIO )
+                {
+                    Properties calcResult = MetricCalculator.calcINTRATSummary( ms );
+
+                    // Create summary if possible
+                    if ( !calcResult.isEmpty() )
+                    {
+                        double floor = (Double) calcResult.get( "floor" );
+                        double mean  = (Double) calcResult.get( "mean" );
+                        double ceil  = (Double) calcResult.get( "ceiling" );
+
+                        result = new EccINTRATSummary( createAttributeInfo(attr,ms),
+                                                       floor, mean, ceil );
+                    }
+                }
+                else logger.error( "Could not create INTRAT summary: metric type incorrect" );
+            }  
+            catch ( Exception ex )
+            { logger.error("Could not create INTRAT summary", ex); }
+        }
         
         return result;
     }
