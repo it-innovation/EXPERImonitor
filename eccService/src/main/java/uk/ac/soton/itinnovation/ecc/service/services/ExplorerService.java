@@ -32,6 +32,7 @@ import uk.ac.soton.itinnovation.ecc.service.domain.explorer.provenance.*;
 import uk.ac.soton.itinnovation.ecc.service.domain.DatabaseConfiguration;
 import uk.ac.soton.itinnovation.ecc.service.utils.*;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 
 import uk.ac.soton.itinnovation.ecc.service.domain.explorer.distributions.*;
@@ -42,6 +43,7 @@ import javax.annotation.*;
 import org.slf4j.*;
 import java.io.IOException;
 import java.util.*;
+
 
 
 
@@ -129,87 +131,119 @@ public class ExplorerService
     public boolean isReady()
     { return serviceReady; }
 
-    // Called from controller [line 63]
-    public EccExperimentSummary getExperimentPROVSummary( String expName,
-                                                          String expDesc,
-                                                          UUID   expID )
+    public EccExperimentSummary getExperimentPROVSummary( UUID expID )
     {
         EccExperimentSummary result = null;
         
-        // You should receive the experiment name, description and ID as parameters
-        // for you to 'fill in' for the result. We need the provenance bits from the helper here
-        
+        // Safety
+        if ( serviceReady && expID != null )
+        {
+            try
+            {
+                Experiment experiment = metricsQueryHelper.getExperiment( expID );
+                Properties provProps  = provenanceQueryHelper.getExperimentProvSummary( expID );
+                
+                if ( experiment != null && provProps != null && !provProps.isEmpty() )
+                {
+                    result = new EccExperimentSummary( experiment.getName(),
+                                                       experiment.getDescription(),
+                                                       expID.toString(),
+                                                       Integer.parseInt( (String) provProps.get("participantCount") ) ,
+                                                       Integer.parseInt( (String) provProps.get("activitiesPerformedCount") ) ,
+                                                       Integer.parseInt( (String) provProps.get("applicationsUsedCount") ) ,
+                                                       Integer.parseInt( (String) provProps.get("servicesUsedCount") ) );
+                }
+            }
+            catch ( Exception ex )
+            { logger.error( "Could not get provenance experiment summary", ex); }
+        }
+        else logger.error( callFail );
         
         return result;
     }
-    
-    // Called from controller [line 79]    
+        
     public EccParticipantResultSet getParticipants( UUID expID )
     {
         EccParticipantResultSet result = new EccParticipantResultSet();
+        
+        if ( serviceReady && expID != null )
+        {
+            // 1. Get list of participant IRIs
+            Set<String> participants = null;
+            try {
+                participants = provenanceQueryHelper.getParticipantIRIs(expID);
+            } catch (Exception e) {
+                logger.warn("Could not retrieve participants from PROV store", e);
+            }
 
-		// 1. Get list of participant IRIs
-		Set<String> participants = null;
-		try {
-			participants = provenanceQueryHelper.getParticipantIRIs(expID);
-		} catch (Exception e) {
-			logger.warn("Could not retrieve participants from PROV store", e);
-		}
+            // 2. For each IRI, use the metricsQueryHelper to get corresponding Metric Entity
+            if (participants!=null) {
+                for (String participant: participants) {
 
-        // 2. For each IRI, use the metricsQueryHelper to get corresponding Metric Entity
-		if (participants!=null) {
-			for (String participant: participants) {
-
-				// 3. Create EccParticipant using createParticipant(..) method (below)
-				Entity metricEntity = metricsQueryHelper.getParticipantEntity(expID, participant);
-				EccParticipant p = createParticipant(metricEntity);
-				 // 4. Add to collection
-				result.addParticipant(p);
-			}
-		}
-
+                    // 3. Create EccParticipant using createParticipant(..) method (below)
+                    Entity metricEntity = metricsQueryHelper.getParticipantEntity(expID, participant);
+                    EccParticipant p = createParticipant(metricEntity);
+                     // 4. Add to collection
+                    result.addParticipant(p);
+                }
+            }
+        }
+        else logger.error( callFail );
+        
         return result;
     }
     
-    // Called from controller [line 94]
     public EccParticipant getParticipant( UUID expID, String partIRI )
     {
         EccParticipant result = null;
+        
+        if ( serviceReady && expID != null && partIRI != null )
+        {
+            // 1. Get list of participant IRIs
+            Set<String> participants = null;
+            try {
+                participants = provenanceQueryHelper.getParticipantIRIs(expID);
+            } catch (Exception e) {
+                logger.warn("Could not retrieve participants from PROV store", e);
+            }
 
-        // 1. Get list of participant IRIs
-		Set<String> participants = null;
-		try {
-			participants = provenanceQueryHelper.getParticipantIRIs(expID);
-		} catch (Exception e) {
-			logger.warn("Could not retrieve participants from PROV store", e);
-		}
+            // 2. For each IRI, use the metricsQueryHelper to get corresponding Metric Entity
+            if (participants!=null) {
+                for (String participant: participants) {
 
-        // 2. For each IRI, use the metricsQueryHelper to get corresponding Metric Entity
-		if (participants!=null) {
-			for (String participant: participants) {
-
-				if (partIRI.equals(participant)) {
-					// 3. Create EccParticipant using createParticipant(..) method (below)
-					Entity metricEntity = metricsQueryHelper.getParticipantEntity(expID, participant);
-					result = createParticipant(metricEntity);
-					break;
-				}
-			}
-		}
-
+                    if (partIRI.equals(participant)) {
+                        // 3. Create EccParticipant using createParticipant(..) method (below)
+                        Entity metricEntity = metricsQueryHelper.getParticipantEntity(expID, participant);
+                        result = createParticipant(metricEntity);
+                        break;
+                    }
+                }
+            } 
+        }
+        else logger.error( callFail );
+        
         return result;
     }
     
-    // Called from controller [line 270]
+
     public EccParticipantActivityResultSet getPartActivities( UUID   expID,
                                                               String partIRI )
     {
         EccParticipantActivityResultSet result = null;
         
-        // See above strategy for create EccParticipant
-        
-        // Then stuff result full of EccActivity instances (don't worry about description if we don't have one)
-        
+        if ( serviceReady && expID != null && partIRI != null )
+        {
+            Entity metricEntity = metricsQueryHelper.getParticipantEntity(expID, partIRI);
+            EccParticipant p = createParticipant(metricEntity);
+
+            try {
+                result = provenanceQueryHelper.getParticipantsActivityInstances(expID, partIRI, p);
+            } catch (Exception e) {
+                logger.warn("Could not retrieve activities from PROV store", e);
+            }
+        }
+        else logger.error( callFail );
+
         return result;
     }
     
@@ -220,8 +254,18 @@ public class ExplorerService
     {
         EccParticipantActivityResultSet result = null;
         
-        // Pretty much the same as the above method, only we are just retrieving those
-        // activities with the label specified by activityLabel
+        if ( serviceReady && expID != null && partIRI != null && activityLabel != null )
+        {
+            Entity metricEntity = metricsQueryHelper.getParticipantEntity(expID, partIRI);
+            EccParticipant p = createParticipant(metricEntity);
+
+            try {
+                result = provenanceQueryHelper.getParticipantActivityInstances(expID, partIRI, activityLabel, p);
+            } catch (Exception e) {
+                logger.warn("Could not retrieve activities from PROV store", e);
+            }
+        }
+        else logger.error( callFail );
         
         return result;
     }
@@ -231,18 +275,22 @@ public class ExplorerService
                                                                           String partIRI )
     {
         EccParticipantActivitySummaryResultSet result = null;
+        
+        if ( serviceReady && expID != null && partIRI != null )
+        {
+            // See above strategy for create EccParticipant
+            Entity metricEntity = metricsQueryHelper.getParticipantEntity(expID, partIRI);
+            EccParticipant p = createParticipant(metricEntity);
 
-        // See above strategy for create EccParticipant
-		Entity metricEntity = metricsQueryHelper.getParticipantEntity(expID, partIRI);
-		EccParticipant p = createParticipant(metricEntity);
-
-        // Then stuff result full of EccActivity instances (don't worry about description if we don't have one)
-		try {
-			result = provenanceQueryHelper.getPartActivitySummary(expID, partIRI, p);
-		} catch (Exception e) {
-			logger.warn("Could not retrieve participants from PROV store", e);
-		}
-
+            // Then stuff result full of EccActivity instances (don't worry about description if we don't have one)
+            try {
+                result = provenanceQueryHelper.getPartActivitySummary(expID, partIRI, p);
+            } catch (Exception e) {
+                logger.warn("Could not retrieve participants from PROV store", e);
+            }   
+        }
+        else logger.error( callFail );
+        
         return result;
     }
     
@@ -366,10 +414,9 @@ public class ExplorerService
 					}
 					else logger.warn( "Found attribute without metric. Not included in common attribute result set" );
 				}
-			} catch (Exception e) {
-
-				logger.error(callFail + " could not find experiment participants", e );
-			}
+			} 
+            catch ( Exception ex )
+            { logger.error(callFail + " could not find experiment participants", ex ); }
 		}
 
         return result;

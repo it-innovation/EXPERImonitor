@@ -29,6 +29,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.IMonitorin
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMInterfaceFactory;
 
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 
 import uk.ac.soton.itinnovation.ecc.service.domain.DatabaseConfiguration;
@@ -46,6 +47,7 @@ public class ExplorerMetricsQueryHelper
     private final String failedRequest = "Explorer metric query helper failed: uninitialied or parameter(s) invalid";
     
     private IMonitoringEDM     expDataManager;
+    private IExperimentDAO     experimentDAO;
     private IEntityDAO         entityDAO;
     private IMeasurementSetDAO msDAO;
     private IReportDAO         reportDAO;
@@ -93,9 +95,10 @@ public class ExplorerMetricsQueryHelper
             
             if ( expDataManager.isDatabaseSetUpAndAccessible() )
             {
-                entityDAO  = expDataManager.getEntityDAO();
-                msDAO      = expDataManager.getMeasurementSetDAO();
-                reportDAO  = expDataManager.getReportDAO();
+                experimentDAO = expDataManager.getExperimentDAO();
+                entityDAO     = expDataManager.getEntityDAO();
+                msDAO         = expDataManager.getMeasurementSetDAO();
+                reportDAO     = expDataManager.getReportDAO();
             }
             else
             {
@@ -125,7 +128,25 @@ public class ExplorerMetricsQueryHelper
         reportDAO      = null;
         msDAO          = null;
         entityDAO      = null;
+        experimentDAO  = null;
         expDataManager = null;
+    }
+    
+    public Experiment getExperiment( UUID expID )
+    {
+        Experiment result = null;
+        
+        if ( helperInitialised && expID != null )
+        {
+            try
+            {
+                result = experimentDAO.getExperiment( expID, true );
+            }
+            catch ( Exception ex )
+            { logger.error( "Could not find experiment: ", ex ); }
+        }
+        
+        return result;
     }
     
     public Attribute getAttribute( UUID expID, UUID attrID )

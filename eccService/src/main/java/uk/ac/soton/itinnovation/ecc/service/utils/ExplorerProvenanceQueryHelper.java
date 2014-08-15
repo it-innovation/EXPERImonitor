@@ -27,6 +27,8 @@ package uk.ac.soton.itinnovation.ecc.service.utils;
 
 
 import java.util.*;
+import org.openrdf.query.BindingSet;
+import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.TupleQueryResult;
 import org.slf4j.LoggerFactory;
 import uk.ac.soton.itinnovation.ecc.service.domain.explorer.provenance.*;
@@ -77,10 +79,27 @@ public class ExplorerProvenanceQueryHelper {
      *
      * @param expID - Non-null UUID of experiment
      * @return      - Non-null property instance (with summary data if available)
+	 * @throws java.lang.Exception is any of the queries fail
      */
-    public Properties getExperimentProvSummary( UUID expID ) {
+    public Properties getExperimentProvSummary( UUID expID ) throws Exception {
 
         Properties result = new Properties();
+
+		//experimentID
+		result.setProperty("experimentID", expID.toString());
+
+		//participantCount
+		Set<String> participants = getParticipantIRIs(expID);
+		result.setProperty("participantCount", participants.size() + "");
+
+		//activitiesPerformedCount	TODO
+		result.setProperty("activitiesPerformedCount", "-1" );
+
+		//applicationsUsedCount	TODO
+		result.setProperty("applicationsUsedCount", "-1" );
+
+		//servicesUsedCount	TODO
+		result.setProperty("servicesUsedCount", "-1" );
 
         return result;
     }
@@ -152,16 +171,45 @@ public class ExplorerProvenanceQueryHelper {
      *
      * @param expID     - Non-null experiment ID
      * @param partIRI   - Non-null IRI of the participant in question
+	 * @param part		- Non-null participant
      * @return          - Returns a (possibly null) activity result set
+	 * @throws org.openrdf.query.QueryEvaluationException if query fails
      */
     public EccParticipantActivityResultSet getParticipantsActivityInstances( UUID   expID,
-                                                                             String partIRI ) {
+                                                                             String partIRI,
+																			 EccParticipant part ) throws QueryEvaluationException, Exception {
 
-        EccParticipantActivityResultSet result = null;
+		EccParticipantActivityResultSet result = null;
 
-        // Stefanie - don't worry if you can't derive a description of the activity,
-        // just leave it as " " for now
+		String sparql = "SELECT * WHERE { ?activity a <http://www.w3.org/ns/prov#Activity> . "
+					+ "?activity <http://www.w3.org/ns/prov#wasStartedBy> <" + partIRI + "> . "
+					+ "?activity rdfs:label ?label . "
+					+ "?activity <http://www.w3.org/ns/prov#startedAtTime> ?start . "
+					+ "?activity <http://www.w3.org/ns/prov#endedAtTime> ?end . }";
+		TupleQueryResult tqr = store.query(expID.toString(), sparql);
 
+
+		if (tqr!=null) {
+
+			result = new EccParticipantActivityResultSet(part);
+			while (tqr.hasNext()) {
+
+				BindingSet tqrb = tqr.next();
+				String label = tqrb.getBinding("label").getValue().toString();
+
+				String s = tqrb.getBinding("start").getValue().toString();
+				String e = tqrb.getBinding("end").getValue().toString();
+				Calendar start = javax.xml.bind.DatatypeConverter.parseDateTime(s.substring(s.indexOf("\"")+1, s.lastIndexOf("\"")));
+				Calendar end = javax.xml.bind.DatatypeConverter.parseDateTime(e.substring(e.indexOf("\"")+1, e.lastIndexOf("\"")));
+				//TODO: not sure about timestamp format here...
+				
+				String l = tqrb.getBinding("label").getValue().toString();
+				EccActivity a = new EccActivity(l.substring(l.indexOf("\"")+1, l.lastIndexOf("\"")), "TODO: description",
+						tqrb.getBinding("activity").getValue().toString(), new Date(start.getTimeInMillis()), new Date(end.getTimeInMillis()));
+
+				result.addActivity(a);
+			}
+		}
 
         return result;
     }
@@ -173,15 +221,27 @@ public class ExplorerProvenanceQueryHelper {
      * @param expID     - Non-null experiment ID
      * @param partIRI   - Non-null IRI of the participant in question
      * @param actLabel  - Non-null String with the label of an activity
+	 * @param part		- Non-null participant
      * @return          - Returns a (possibly null) activity result set
+	 * @throws java.lang.Exception if the query fails
      */
     public EccParticipantActivityResultSet getParticipantActivityInstances( UUID   expID,
                                                                             String partIRI,
-                                                                            String actLabel ) {
+                                                                            String actLabel,
+																			EccParticipant part ) throws Exception {
+
         EccParticipantActivityResultSet result = null;
 
-        // Stefanie - very similar to the above, only this time the result is filtered by an activity label
-
+		ArrayList<EccActivity> activities = getParticipantsActivityInstances(expID, partIRI, part).getActivities();
+		if (!activities.isEmpty()) {
+			result = new EccParticipantActivityResultSet(part);
+			for (EccActivity a: activities) {
+				//using label as name
+				if (a.getName().equals(actLabel)) {
+					result.addActivity(a);
+				}
+			}
+		}
 
         return result;
     }

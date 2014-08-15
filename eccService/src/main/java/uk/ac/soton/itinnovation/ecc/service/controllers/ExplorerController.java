@@ -60,15 +60,14 @@ public class ExplorerController {
 
     @RequestMapping(method = RequestMethod.GET, value = "/{expID}/summary" )
     @ResponseBody
-    public EccExperimentSummary getExperimentSummary( @PathVariable String expID )
+    public EccExperimentSummary getExperimentSummary( @PathVariable UUID expID )
     {
         EccExperimentSummary result = null;
 
         if ( explorerService != null && explorerService.isReady() && expID != null )
-        {
-            result = demoData.expSummary;
-        }
-        else logger.error( "Could not execute explorer service: service is not ready" );
+            result = explorerService.getExperimentPROVSummary( expID );
+        else
+            logger.error( "Could not execute explorer service: service is not ready" );
 
         return result;
     }
@@ -227,6 +226,8 @@ public class ExplorerController {
         return result;
     }
 
+    // Metric series based queries ---------------------------------------------
+    // -------------------------------------------------------------------------    
     @RequestMapping(method = RequestMethod.GET, value = "/{expID}/attributes/series/qos/highlight/activities" )
     @ResponseBody
     public EccINTRATSeriesSet getINTRATAttributeSeriesHighlightActivities( @PathVariable UUID expID,
@@ -237,10 +238,11 @@ public class ExplorerController {
         EccINTRATSeriesSet result = null;
 
         if ( explorerService != null && explorerService.isReady() && attrID != null && IRI != null && actLabel != null )
-        {
+            //result = explorerService.get
             return demoData.getINTRATSeriesHighlightActivities( attrID, IRI, actLabel );
-        }
-        else logger.error( "Could not execute explorer service: service is not ready" );
+        
+        else
+            logger.error( "Could not execute explorer service: service is not ready" );
 
         return result;
     }
@@ -255,10 +257,9 @@ public class ExplorerController {
         EccParticipantActivityResultSet result = null;
 
         if ( explorerService != null && explorerService.isReady() && expID != null && IRI != null )
-        {
-            result = demoData.getActivitiesByParticipant( IRI );
-        }
-        else logger.error( "Could not execute explorer service: service is null" );
+            result = explorerService.getPartActivities( expID, IRI );
+        else 
+            logger.error( "Could not execute explorer service: service is null" );
 
         return result;
     }
@@ -272,11 +273,9 @@ public class ExplorerController {
         EccParticipantActivityResultSet result = null;
 
         if ( explorerService != null && explorerService.isReady() && expID != null && IRI != null && actLabel != null )
-        {
-            // For now just return the same activities - we've only got one set in the demo
-            result = demoData.getActivitiesByParticipant( IRI );
-        }
-        else logger.error( "Could not execute explorer service: service is null" );
+            result = explorerService.getPartActivitiesByName( expID, IRI, actLabel );
+        else
+            logger.error( "Could not execute explorer service: service is null" );
 
         return result;
     }
