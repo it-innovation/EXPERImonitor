@@ -331,7 +331,8 @@ public class ExperimentDataGenerator {
 						for (String v: eventValue.split(";")) {
                             
                             String attrName = genericAttributes.get(i);
-                            String value = ordinalValues.get(i).get(Integer.parseInt(v));
+                            int vIndex = Integer.parseInt(v) -1;
+                            String value = ordinalValues.get(i).get(vIndex);
                             
                             if ( attrName != null && value != null )
                                 eccLogger.pushSimpleMetric( entity.getName(), attrName, value );
