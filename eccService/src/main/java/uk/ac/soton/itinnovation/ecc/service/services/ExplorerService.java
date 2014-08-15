@@ -25,7 +25,6 @@
 
 package uk.ac.soton.itinnovation.ecc.service.services;
 
-import java.io.IOException;
 import uk.ac.soton.itinnovation.ecc.service.utils.MetricCalculator;
 import uk.ac.soton.itinnovation.ecc.service.domain.explorer.EccExperimentSummary;
 import uk.ac.soton.itinnovation.ecc.service.domain.explorer.metrics.*;
@@ -41,7 +40,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.*;
 import org.slf4j.*;
-
+import java.io.IOException;
 import java.util.*;
 
 
@@ -376,9 +375,9 @@ public class ExplorerService
         return result;
     }
 
-    public EccParticipantResultSet getPartQoEAttrSelection( UUID              expID,
-                                                            String            attrName,
-                                                            String            selLabel )
+    public EccParticipantResultSet getPartQoEAttrSelection( UUID   expID,
+                                                            String attrName,
+                                                            String selLabel )
     {
         EccParticipantResultSet result = new EccParticipantResultSet();
 
@@ -702,7 +701,8 @@ public class ExplorerService
         return result;
     }
     
-    public EccINTRATSummary getINTRATAttrDistributionDiscreteSampling( UUID expID, UUID attrID,
+    public EccINTRATSummary getINTRATAttrDistributionDiscreteSampling( UUID             expID, 
+                                                                       UUID             attrID,
                                                                        Collection<Date> timeStamps )
     {
         EccINTRATSummary result = null;
@@ -755,6 +755,36 @@ public class ExplorerService
         return result;
     }
 
+    public EccINTRATSeriesSet getINTRATAttrSeriesHilitePartActivites( UUID   expID,
+                                                                      UUID   attrID,
+                                                                      String partIRI,
+                                                                      String actLabel )
+    {
+        EccINTRATSeriesSet result = new EccINTRATSeriesSet();
+        
+        if ( expID != null && attrID != null && partIRI != null && actLabel != null )
+        {
+            try 
+            {
+                // Get target participant activities based on label
+
+                // Get target attribute measurements
+                Map<UUID,MeasurementSet> mSets = metricsQueryHelper.getMeasurementSetsForAttribute( expID, attrID, true );
+                MeasurementSet targMS = MetricHelper.combineMeasurementSets( mSets.values() );
+
+                // If both are good create superset (attribute values) and subset
+                // (copy of the same values with non-null elements during activities)
+                if ( targMS != null )
+                {
+                    
+                }
+            }
+            catch ( Exception ex )
+            { logger.error( "Could not create attribute series highlight", ex ); }
+        }
+        return result;        
+    }
+    
     // Private methods ---------------------------------------------------------
     private EccParticipant createParticipant( Entity ent )
     {
