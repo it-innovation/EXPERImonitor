@@ -32,21 +32,30 @@ import java.util.UUID;
 
 public class EccParticipant
 {
-    private final String name;
-    private final String description;
-    private final String metricEntityID; // No default ctor for UUID (JSON requires this)
-    private final String provIRI;
+    private String name;
+    private String description;
+    private String metricEntityID; // No default ctor for UUID (JSON requires this)
+    private String provIRI;
     
     
     public EccParticipant( String pName,
                            String pDesc, 
-                           UUID pmID, 
-                           String ppID ) {
+                           UUID   metricID, 
+                           String pIRI ) {
         
         name           = pName;
         description    = pDesc;
-        metricEntityID = pmID.toString();
-        provIRI        = ppID;
+        metricEntityID = metricID.toString();
+        provIRI        = pIRI;
+    }
+    
+    public EccParticipant( String pName,
+                           String pIRI )
+    {
+        name           = pName;
+        description    = "No data yet";
+        provIRI        = pIRI;
+        metricEntityID = "Unknown";
     }
     
     public String getName()
@@ -54,6 +63,16 @@ public class EccParticipant
     
     public String getDescription()
     { return description; }
+    
+    public void setDescription( String desc )
+    {
+        if ( desc != null ) description = desc;
+    }
+    
+    public void setMetricEntityID( UUID id )
+    {
+        if ( id != null ) metricEntityID = id.toString();
+    }
     
     public UUID getMetricEntityID()
     { return UUID.fromString(metricEntityID); }

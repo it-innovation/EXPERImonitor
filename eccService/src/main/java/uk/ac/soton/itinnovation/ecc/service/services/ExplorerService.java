@@ -43,6 +43,7 @@ import javax.annotation.*;
 import org.slf4j.*;
 import java.io.IOException;
 import java.util.*;
+import uk.ac.soton.itinnovation.ecc.service.domain.EccMeasurement;
 
 
 
@@ -813,17 +814,58 @@ public class ExplorerService
         {
             try 
             {
-                // Get target participant activities based on label
-
-                // Get target attribute measurements
-                Map<UUID,MeasurementSet> mSets = metricsQueryHelper.getMeasurementSetsForAttribute( expID, attrID, true );
-                MeasurementSet targMS = MetricHelper.combineMeasurementSets( mSets.values() );
-
-                // If both are good create superset (attribute values) and subset
-                // (copy of the same values with non-null elements during activities)
-                if ( targMS != null )
+                // Create domain series for attribute and to result
+                EccINTRATSeries attrSeries = createDomainSeries( expID, attrID, true );
+                
+                if ( attrSeries != null ) result.addSeries( attrSeries );
+                
+                // Now try get participant activities based on label
+                Entity ent = metricsQueryHelper.getParticipantEntity( expID, partIRI );
+                EccParticipant part = createParticipant( ent );
+                ArrayList<EccActivity> partActs = null;
+                
+                // If we are good, then create a sub-set series based on the attribute data
+                if ( part != null && attrSeries != null )
                 {
+                    EccParticipantActivityResultSet pars = 
+                            provenanceQueryHelper.getParticipantActivityInstances( expID, 
+                                                                                   partIRI, 
+                                                                                   actLabel, 
+                                                                                   part );
+                    partActs = pars.getActivities();
                     
+                    // Copy attribute series and 'turn off' data not relavant to activities
+                    EccINTRATSeries subSeries = copySeries( part.getName() + ": " + actLabel, 
+                                                            false, attrSeries );
+                    
+                    ArrayList<EccMeasurement> subMeasures = subSeries.getValues();
+                    
+                    // 'Turn off' not relevant measurements
+                    for ( EccMeasurement m : subMeasures )
+                    {
+                        Date mStamp = m.getTimestamp();
+                        
+                        boolean switchOff = true;
+                        for ( EccActivity act : partActs )
+                        {
+                            Date start = act.getStartTime();
+                            Date end   = act.getEndTime();
+                            
+                            if ( mStamp.after(start)  ||
+                                 mStamp.equals(start) ||
+                                 mStamp.before(end)   ||
+                                 mStamp.equals(end) )
+                            {
+                                switchOff = false;
+                                break;
+                            }
+                        }
+                        
+                        if ( switchOff ) m.setValue( null );
+                    }
+                    
+                    // Add sub-set to result
+                    result.addSeries( subSeries );
                 }
             }
             catch ( Exception ex )
@@ -885,5 +927,49 @@ public class ExplorerService
         }
 
         return MetricHelper.sortAttributesByName( qoeAttrs );
+    }
+    
+    private ArrayList<EccMeasurement> createDomainMeasurements( MeasurementSet ms )
+    {
+        ArrayList<EccMeasurement> result = new ArrayList<>();
+        
+        for ( Measurement m : ms.getMeasurements() )
+            result.add( new EccMeasurement( m.getTimeStamp(), m.getValue() ));
+        
+        return result;
+    }
+    
+    private EccINTRATSeries createDomainSeries( UUID expID, UUID attrID, boolean enabled )
+    {
+        EccINTRATSeries result         = null;
+        Attribute attr                 = metricsQueryHelper.getAttribute( expID, attrID );
+        Map<UUID,MeasurementSet> mSets = metricsQueryHelper.getMeasurementSetsForAttribute( expID, attrID, true );
+        
+        try
+        {
+            MeasurementSet targMS = MetricHelper.combineMeasurementSets( mSets.values() );
+            
+            if ( attr != null && targMS != null )
+            result = new EccINTRATSeries( attr.getName(), 
+                                          !enabled, // flag is actually disabled :(
+                                          createDomainMeasurements( targMS ) );
+        }
+        catch ( Exception ex )
+        { logger.error( "Could not create domain data series for attribute", ex ); }
+        
+        return result;
+    }
+    
+    private EccINTRATSeries copySeries( String key, 
+                                        boolean enabled, 
+                                        EccINTRATSeries srcSeries )
+    {
+        ArrayList<EccMeasurement> targMeasures = new ArrayList<>();
+        ArrayList<EccMeasurement> srcMeasures  = srcSeries.getValues();
+        
+        for ( EccMeasurement srcM : srcMeasures )
+            targMeasures.add( new EccMeasurement(srcM) );
+        
+        return new EccINTRATSeries( key, !enabled, targMeasures );
     }
 }

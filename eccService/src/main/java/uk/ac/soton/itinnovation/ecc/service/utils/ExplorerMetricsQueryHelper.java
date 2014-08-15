@@ -167,7 +167,8 @@ public class ExplorerMetricsQueryHelper
             { logger.error( "Could not find attribute in database ",ex ); }
             
         
-        } logger.error( failedRequest );
+        }
+        else logger.error( failedRequest );
         
         return result;
     }
