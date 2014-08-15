@@ -219,8 +219,7 @@ public class ExplorerController {
                 { logger.warn( "Caught bad time stamp parameter for QoS discrete distribution query"); }
             }
             
-            // Will use getINTRATAttrDistributionDiscreteSampling(...)
-            result = demoData.getINTRATDistDataDiscrete( attrID, validTimeStamps );
+            result = explorerService.getINTRATAttrDistributionDiscreteSampling( expID, attrID, validTimeStamps );
 
         }
         else logger.error( "Could not execute explorer service: service is null" );
