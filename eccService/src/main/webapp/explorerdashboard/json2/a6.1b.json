@@ -1,0 +1,35 @@
+
+
+{
+  "participant": {
+    "name": "Bob",
+    "description": "Bob is a test participant",
+    "metricEntityID": "74e3e2aa-0d86-49c9-8336-a44a1482a887",
+    "iri": "http://it-innovation.soton.ac.uk/ontologies/experimedia#participant_74e3e2aa-0d86-49c9-8336-a44a1482a887"
+  },
+  "activityTotal": 3,
+  "activities": [
+    {
+      "name": "Used lift application",
+      "description": "Checked lift waiting time",
+      "iri": "http://it-innovation.soton.ac.uk/ontologies/experimedia#activity_c108742d-d41d-40ee-b532-7f8fd6508baf",
+      "startTime": 1406801400000,
+      "endTime": 1406801700000
+    },
+    {
+      "name": "Used lift application",
+      "description": "Checked lift waiting time",
+      "iri": "http://it-innovation.soton.ac.uk/ontologies/experimedia#activity_0f9d7667-1276-4a20-9278-a355ccb6e467",
+      "startTime": 1406801760000,
+      "endTime": 1406802060000
+    },
+    {
+      "name": "Used lift application",
+      "description": "Checked lift waiting time",
+      "iri": "http://it-innovation.soton.ac.uk/ontologies/experimedia#activity_aee642e6-ade7-4b44-870d-bb70ff5c02f1",
+      "startTime": 1406802120000,
+      "endTime": 1406802420000
+    }
+  ]
+}
+
