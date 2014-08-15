@@ -29,7 +29,7 @@ import uk.ac.soton.itinnovation.ecc.service.utils.MetricCalculator;
 import uk.ac.soton.itinnovation.ecc.service.domain.explorer.EccExperimentSummary;
 import uk.ac.soton.itinnovation.ecc.service.domain.explorer.metrics.*;
 import uk.ac.soton.itinnovation.ecc.service.domain.explorer.provenance.*;
-import uk.ac.soton.itinnovation.ecc.service.domain.DatabaseConfiguration;
+import uk.ac.soton.itinnovation.ecc.service.domain.*;
 import uk.ac.soton.itinnovation.ecc.service.utils.*;
 
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experiment.Experiment;
@@ -43,7 +43,7 @@ import javax.annotation.*;
 import org.slf4j.*;
 import java.io.IOException;
 import java.util.*;
-import uk.ac.soton.itinnovation.ecc.service.domain.EccMeasurement;
+
 
 
 
@@ -872,6 +872,40 @@ public class ExplorerService
             { logger.error( "Could not create attribute series highlight", ex ); }
         }
         return result;        
+    }
+    
+    public EccAttributeResultSet getProvenanceAttributeSet( UUID   expID,
+                                                            String IRI )
+    {
+        EccAttributeResultSet result = new EccAttributeResultSet();
+        
+        if ( serviceReady && expID != null && IRI != null )
+        {
+            // Try find entity, then return attributes
+            Entity entity = metricsQueryHelper.getParticipantEntity( expID, IRI );
+            
+            for ( Attribute attr : entity.getAttributes() )
+            {
+                Metric metric = metricsQueryHelper.getAttributeMetric( expID, attr.getUUID() );
+                
+                if ( metric != null )
+                {
+                    EccAttributeInfo info = 
+                            new EccAttributeInfo( attr.getName(),
+                                                  attr.getDescription(),
+                                                  attr.getUUID(),
+                                                  metric.getUnit().getName(),
+                                                  metric.getMetricType().name(),
+                                                  metric.getMetaType(),
+                                                  metric.getMetaContent() );
+                    
+                    result.addAttributeInfo( info );
+                }
+            }
+        }
+        else logger.error( callFail );
+        
+        return result;
     }
     
     // Private methods ---------------------------------------------------------

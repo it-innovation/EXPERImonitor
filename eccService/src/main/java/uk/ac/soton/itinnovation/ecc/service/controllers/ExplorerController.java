@@ -340,11 +340,9 @@ public class ExplorerController {
         EccAttributeResultSet result = null;
 
         if ( explorerService != null && explorerService.isReady() && expID != null && IRI != null )
-        {
-
-            result = demoData.serviceQoSAttributes.get( IRI );
-        }
-        else logger.error( "Could not execute explorer service: service is null" );
+            result = explorerService.getProvenanceAttributeSet( expID, IRI );
+        else 
+            logger.error( "Could not execute explorer service: service is null" );
 
         return result;
     }
