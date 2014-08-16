@@ -937,26 +937,70 @@ public class ExplorerService
             // Try find entity, then return attributes
             Entity entity = metricsQueryHelper.getParticipantEntity( expID, IRI );
             
-            for ( Attribute attr : entity.getAttributes() )
+            if ( entity != null )
             {
-                Metric metric = metricsQueryHelper.getAttributeMetric( expID, attr.getUUID() );
-                
-                if ( metric != null )
+                for ( Attribute attr : entity.getAttributes() )
                 {
-                    EccAttributeInfo info = 
-                            new EccAttributeInfo( attr.getName(),
-                                                  attr.getDescription(),
-                                                  attr.getUUID(),
-                                                  metric.getUnit().getName(),
-                                                  metric.getMetricType().name(),
-                                                  metric.getMetaType(),
-                                                  metric.getMetaContent() );
-                    
-                    result.addAttributeInfo( info );
+                    Metric metric = metricsQueryHelper.getAttributeMetric( expID, attr.getUUID() );
+
+                    if ( metric != null )
+                    {
+                        EccAttributeInfo info = 
+                                new EccAttributeInfo( attr.getName(),
+                                                      attr.getDescription(),
+                                                      attr.getUUID(),
+                                                      metric.getUnit().getName(),
+                                                      metric.getMetricType().name(),
+                                                      metric.getMetaType(),
+                                                      metric.getMetaContent() );
+
+                        result.addAttributeInfo( info );
+                    }
                 }
             }
         }
         else logger.error( callFail );
+        
+        return result;
+    }
+    
+    public EccParallelSet getParallelSet( UUID expID )
+    {
+        EccParallelSet result = new EccParallelSet();
+        
+        if ( serviceReady && expID != null )
+        {
+            try
+            {
+                // Get all participants for this experiment
+                Set<String> partIRIs = provenanceQueryHelper.getParticipantIRIs( expID );
+                if ( partIRIs != null && !partIRIs.isEmpty() )
+                {
+                    // Create tuples (for participants known to metric database)
+                    HashMap<String, EccParallelSetData> partTuples = new HashMap<>();   
+                    for ( String iri : partIRIs )
+                    {
+                        Entity ent = metricsQueryHelper.getParticipantEntity( expID, iri );
+                        EccParticipant part = createParticipant( ent );
+                        
+                        if ( part != null )
+                        {
+                            EccParallelSetData psd 
+                                = new EccParallelSetData( expID,
+                                                          provenanceQueryHelper,
+                                                          metricsQueryHelper,
+                                                          part );
+                        
+                            if ( psd.createActivitySet() )
+                                if ( psd.createApplicationSet() )
+                                    if ( psd.createServiceSet() );
+                        }
+                    }
+                }
+            }
+            catch ( Exception ex )
+            { logger.error( "Could not create parallel set", ex ); }
+        } else logger.error( callFail );
         
         return result;
     }
@@ -1040,7 +1084,10 @@ public class ExplorerService
     {
         ArrayList<EccMeasurement> result = new ArrayList<>();
         
-        for ( Measurement m : ms.getMeasurements() )
+        // Sort the measurements first
+        List<Measurement> sorted = MetricHelper.sortMeasurementsByDateLinearReverse( ms.getMeasurements() );
+        
+        for ( Measurement m : sorted )
             result.add( new EccMeasurement( m.getTimeStamp(), m.getValue() ));
         
         return result;
@@ -1090,6 +1137,7 @@ public class ExplorerService
         
         try
         {
+            // Get measurements
             MeasurementSet targMS = MetricHelper.combineMeasurementSets( mSets.values() );
             
             if ( attr != null && targMS != null )

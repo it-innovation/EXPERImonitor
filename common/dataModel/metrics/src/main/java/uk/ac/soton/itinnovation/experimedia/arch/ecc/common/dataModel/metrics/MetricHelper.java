@@ -543,6 +543,23 @@ public class MetricHelper
         return resultMeasurementList;        
     }
     
+    public static List<Measurement> sortMeasurementsByDateLinearReverse( Set<Measurement> measurements )
+    {
+        ArrayList<Measurement> resultMeasurementList = new ArrayList<>();
+        
+        if ( measurements != null )
+        {
+            // ..sort them
+            TreeMap <Date, Measurement> sortedMeasures = sortMeasurementsByDate(measurements);
+            
+            // Push into linear list (oldest first)
+            for ( Date d : sortedMeasures.keySet() ) 
+                resultMeasurementList.add( sortedMeasures.get(d) );   
+        }
+        
+        return resultMeasurementList;        
+    }
+    
     public static List<Attribute> sortAttributesByName( Collection<Attribute> attributes )
     {
         ArrayList<Attribute> result = new ArrayList<>();
