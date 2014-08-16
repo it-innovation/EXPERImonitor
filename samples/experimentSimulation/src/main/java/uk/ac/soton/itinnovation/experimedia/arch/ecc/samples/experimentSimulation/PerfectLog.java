@@ -52,9 +52,9 @@ public class PerfectLog implements ILog {
 
 		//timestamp
 		try {
-			SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			Date fullDate = formatter.parse(this.date + " " + this.time);
-			this.timestamp = fullDate.getTime()/1000L;
+			this.timestamp = fullDate.getTime() /1000L;
 		} catch (ParseException e) {
 			logger.error("Error parsing date to create timestamp", e);
 		}
