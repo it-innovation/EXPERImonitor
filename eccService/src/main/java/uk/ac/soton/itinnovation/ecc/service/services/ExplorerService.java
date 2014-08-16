@@ -893,28 +893,29 @@ public class ExplorerService
                     
                     ArrayList<EccMeasurement> subMeasures = subSeries.getValues();
                     
-                    // 'Turn off' not relevant measurements
-                    for ( EccMeasurement m : subMeasures )
+                    // 'Turn off' not relevant measurements (use two sample interval
+                    // to catch 'single date stamp' activity measurements
+                    for ( int i = 0; i < subMeasures.size()-2; i++ )
                     {
-                        Date mStamp = m.getTimestamp();
+                        Date m1Stamp = subMeasures.get( i ).getTimestamp();
+                        Date m2Stamp = subMeasures.get( i + 1 ).getTimestamp();
                         
                         boolean switchOff = true;
                         for ( EccActivity act : partActs )
                         {
-                            Date start = act.getStartTime();
-                            Date end   = act.getEndTime();
+                            Date actStart = act.getStartTime();
+                            Date actEnd   = act.getEndTime();
                             
-                            if ( mStamp.after(start)  ||
-                                 mStamp.equals(start) ||
-                                 mStamp.before(end)   ||
-                                 mStamp.equals(end) )
+                            if ( (actStart.equals(m1Stamp) || actStart.after(m1Stamp)) &&
+                                 (actEnd.equals(m2Stamp)   || actEnd.before(m2Stamp)) )
                             {
                                 switchOff = false;
                                 break;
                             }
                         }
                         
-                        if ( switchOff ) m.setValue( null );
+                        // Switch 'off' measurement
+                        if ( switchOff ) subMeasures.get( i ).setValue( null );
                     }
                     
                     // Add sub-set to result
