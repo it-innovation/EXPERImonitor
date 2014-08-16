@@ -92,17 +92,122 @@ public class ExplorerProvenanceQueryHelper {
 		Set<String> participants = getParticipantIRIs(expID);
 		result.setProperty("participantCount", participants.size() + "");
 
-		//activitiesPerformedCount	TODO
-		result.setProperty("activitiesPerformedCount", "-1" );
+		//activitiesPerformedCount
+		result.setProperty("activitiesPerformedCount", countAmountOf(expID.toString(), "http://www.w3.org/ns/prov#Activity"));
 
-		//applicationsUsedCount	TODO
-		result.setProperty("applicationsUsedCount", "-1" );
+		//applicationsUsedCount
+		result.setProperty("applicationsUsedCount", countAmountOf(expID.toString(), "http://experimedia.eu/ontologies/ExperimediaExperimentExplorer#Application"));
 
-		//servicesUsedCount	TODO
-		result.setProperty("servicesUsedCount", "-1" );
+		//servicesUsedCount
+		result.setProperty("servicesUsedCount", countAmountOf(expID.toString(), "http://experimedia.eu/ontologies/ExperimediaExperimentExplorer#Service"));
 
         return result;
     }
+
+	/**
+	 * Counts the amount of instances of a given class
+	 *
+	 * @param expID the experiment ID
+	 * @param typeIRI the class of which to count instances
+	 * @return the amount of found instances
+	 * @throws org.openrdf.query.QueryEvaluationException
+	 */
+	public String countAmountOf(String expID, String typeIRI) throws QueryEvaluationException, Exception {
+
+		String amount = null;
+
+		String sparql = "SELECT (COUNT(DISTINCT ?instance) AS ?count) WHERE {" +
+						"?instance a <" + typeIRI + "> . }";
+
+		TupleQueryResult tqr = store.query(expID, sparql);
+
+		if (tqr!=null) {
+			while (tqr.hasNext()) {
+
+				BindingSet tqrb = tqr.next();
+				amount = tqrb.getBinding("count").getValue().toString();
+				amount = amount.substring(amount.indexOf("\"")+1, amount.lastIndexOf("\""));
+
+				//this is intentional; there should only be one row returned since we're counting
+				// if there were more, they would be ignored
+				break;
+			}
+		}
+
+		return amount;
+	}
+
+	/**
+	 * Get a single service
+	 *
+	 * @param expID
+	 * @param svcIRI
+	 * @return
+	 * @throws Exception
+	 */
+	public EccService getService( UUID	 expID,
+								  String svcIRI) throws Exception {
+
+		EccService svc = null;
+
+		String sparql = "SELECT * WHERE { ?svc a <http://experimedia.eu/ontologies/ExperimediaExperimentExplorer#Service> . "
+					  + "?svc rdfs:label ?label }";
+
+		TupleQueryResult tqr = store.query(expID.toString(), sparql);
+
+		if (tqr!=null) {
+			while (tqr.hasNext()) {
+				BindingSet tqrb = tqr.next();
+
+				String service = tqrb.getBinding("svc").getValue().toString();
+
+				if (service.equals(svcIRI)) {
+					String l = tqrb.getBinding("label").getValue().toString();
+					svc = new EccService(l.substring(l.indexOf("\"")+1, l.lastIndexOf("\"")), "TODO: description", svcIRI);
+					break;
+				}
+			}
+		}
+
+		return svc;
+	}
+
+	/**
+	 * Get a single application
+	 *
+	 * @param expID
+	 * @param appIRI
+	 * @return
+	 * @throws Exception
+	 */
+	public EccApplication getApplication( UUID	expID,
+									String	appIRI) throws Exception {
+
+		EccApplication app = null;
+
+		String sparql = "SELECT * WHERE { ?app a <http://experimedia.eu/ontologies/ExperimediaExperimentExplorer#Application> . "
+					  + "?app rdfs:label ?label }";
+
+		TupleQueryResult tqr = store.query(expID.toString(), sparql);
+
+		if (tqr!=null) {
+			while (tqr.hasNext()) {
+
+				BindingSet tqrb = tqr.next();
+
+				String application = tqrb.getBinding("app").getValue().toString();
+
+				if (application.equals(appIRI)) {
+
+					String l = tqrb.getBinding("label").getValue().toString();
+					app = new EccApplication(l.substring(l.indexOf("\"")+1, l.lastIndexOf("\"")), "TODO: description", appIRI);
+					break;
+				}
+			}
+		}
+
+		return app;
+	}
 
 	/**
 	 * Get a single activity
@@ -317,7 +422,7 @@ public class ExplorerProvenanceQueryHelper {
 		if (tqr!=null) {
 
 			EccActivity act = getActivity(expID, activityIRI);
-			result = new EccActivityApplicationResultSet(act);
+            result = new EccActivityApplicationResultSet(act);
 
 			while (tqr.hasNext()) {
 
@@ -327,8 +432,10 @@ public class ExplorerProvenanceQueryHelper {
 				String app = tqrb.getBinding("app").getValue().toString();
 
 				EccApplication application = new EccApplication(l.substring(l.indexOf("\"")+1, l.lastIndexOf("\"")), "TODO: description", app);
-
-				result.addApplication(application);
+                
+                // TODO: Stefanie to fix SPARQL query: for now, manually select only entities
+                if ( application.getIRI().contains("entity") )
+                    result.addApplication(application);
 			}
 		}
 
@@ -336,9 +443,14 @@ public class ExplorerProvenanceQueryHelper {
     }
 
     public EccApplicationServiceResultSet getServicesUsedByAppplication( UUID expID,
-                                                                         String appIRI ) {
+                                                                         String appIRI ) throws Exception {
 
         EccApplicationServiceResultSet result = null;
+
+		result = new EccApplicationServiceResultSet(getApplication(expID, appIRI));
+
+		//TODO: perform a proper query here!
+		result.addService(getService(expID, "http://experimedia.eu/ontologies/ExperimediaExperimentExplorer#entity_lwtService"));
 
         return result;
     }
