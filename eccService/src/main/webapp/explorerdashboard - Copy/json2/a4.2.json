@@ -1,0 +1,18 @@
+
+
+{
+  "floorValue": 302.73758,
+  "ceilingValue": 309.72012,
+  "averageValue": 307.4861,
+  "attribute": {
+    "name": "VAS response time",
+    "description": "Time taken between query and response being sent",
+    "metricID": "e13ac84e-3a09-45f8-8287-a48a8f3f9d73",
+    "metricType": "RATIO",
+    "sampleCount": 600,
+    "unit": "Seconds",
+    "metaType": "None",
+    "metaContent": "None"
+  }
+}
+

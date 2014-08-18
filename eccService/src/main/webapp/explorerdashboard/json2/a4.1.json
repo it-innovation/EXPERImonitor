@@ -1,27 +1,25 @@
-
-
 [
   {
     "values": [
       {
-        "label": "Very difficult",
+        "label": "Very Difficult",
         "count": 1
       },
       {
-        "label": " difficult",
-        "count": 1
+        "label": "Difficult",
+        "count": 2
       },
       {
-        "label": " not easy/difficult",
+        "label": "Neutral",
         "count": 4
       },
       {
-        "label": " easy",
-        "count": 4
-      },
-      {
-        "label": " very easy",
+        "label": "Easy",
         "count": 3
+      },
+      {
+        "label": "Very Easy",
+        "count": 2
       }
     ],
     "attributeInfo": {
@@ -36,4 +34,3 @@
     }
   }
 ]
-

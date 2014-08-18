@@ -1,0 +1,32 @@
+[
+  {
+    "uuid": "5c6fe5bf-82d7-491f-ba88-61d163dbc1ba",
+    "name": "Smart Ski Goggles",
+    "description": "“Smart Ski Goggles” aims to experiment with a real-time information system implemented into a wearable data goggle",
+    "phase": "Three",
+    "status": "Completed",
+    "projectName": "My Local EXPERIMEDIA Project",
+    "startTime": 1407947422902,
+    "endTime": 1407947724622
+  },
+  {
+    "uuid": "5c6fe5bf-82d7-491f-ba88-61d163dbc1ba",
+    "name": "Ski App Test Experiment",
+    "description": "Unique sports, culture and entertainment venues providing live events",
+    "phase": "Unknown",
+    "status": "Completed",
+    "projectName": "Ski App Demo Project",
+    "startTime": 1407947422902,
+    "endTime": 1407947724622
+  },
+  {
+    "uuid": "5c6fe5bf-82d7-491f-ba88-61d163dbc1ba",
+    "name": "Weather App test experiment",
+    "description": "Experiments exploring new forms of experience in real world and online communities",
+    "phase": "One",
+    "status": "In Progress",
+    "projectName": "CCRN Project",
+    "startTime": 1407947422902,
+    "endTime": 1407947724622
+  }
+]

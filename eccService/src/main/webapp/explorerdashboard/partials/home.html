@@ -1,31 +1,30 @@
-<h5>Please select an Experiment</h5>
-<hr>
+<h4>List of Experiments</h4>
 <div class="row">
     <div class="large-12 columns">
-        <table>
+        <p>Number of experiments on the ECC: <strong>{{experiments.length}}</strong></p>
+        <p>Select the experiment you would like to view from the list below.</p>
+        <table style="margin: 0 auto;">
             <thead>
-<!-- find out is there a way to get table header info from the json 
-nice way to represent tables using angular ng-table-->
                 <tr>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Phase</th>
-                <th>Status</th>
-                <th>Project Name</th>
-                <th>Start Time</th>
-                <th>End Time</th>
-              </tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Phase</th>
+                    <th>Status</th>
+                    <th>Project Name</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                </tr>
             </thead>
             <tbody>
-              <tr ng-repeat="item in experiments">
-                <td><a href="#/experiment?uuid={{item.uuid}}">{{item.name}}</a></td>
-                <td>{{item.description}}</td>
-                <td>{{item.phase}}</td>
-                <td>{{item.status}}</td>
-                <td>{{item.projectName}}</td>
-                <td>{{item.startTime}}</td>
-                <td>{{item.endTime}}</td>
-              </tr>
+                <tr ng-repeat="experiment in experiments">
+                    <td><a href="#/experiment?uuid={{experiment.uuid}}">{{experiment.name}}</a></td>
+                    <td data-title="'Name'">{{experiment.description}}</td>
+                    <td>{{experiment.phase}}</td>
+                    <td>{{experiment.status}}</td>
+                    <td>{{experiment.projectName}}</td>
+                    <td>{{experiment.startTime | date:'yyyy-MM-dd HH:mm:ss Z'}}</td>
+                    <td>{{experiment.endTime | date:'yyyy-MM-dd HH:mm:ss Z'}}</td>
+                </tr>
             </tbody>
         </table>
     </div>

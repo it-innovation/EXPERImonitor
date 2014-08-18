@@ -1,20 +1,22 @@
-
-
 [
   {
     "key": "1 of 5",
     "values": [
       {
-        "label": "Ease of use: Ski lift app",
-        "count": 1
+        "label": "Ease of use",
+        "count": 4
       },
       {
-        "label": "Usefulness: Ski lift app",
+        "label": "Usefulness",
         "count": 2
       },
       {
-        "label": "Responsiveness: Ski lift app",
+        "label": "Responsiveness",
         "count": 3
+      },
+      {
+        "label": "Aesthetics",
+        "count": 4
       }
     ]
   },
@@ -22,16 +24,20 @@
     "key": "2 of 5",
     "values": [
       {
-        "label": "Ease of use: Ski lift app",
+        "label": "Ease of use",
         "count": 3
       },
       {
-        "label": "Usefulness: Ski lift app",
-        "count": 2
+        "label": "Usefulness",
+        "count": 4
       },
       {
-        "label": "Responsiveness: Ski lift app",
+        "label": "Responsiveness",
         "count": 3
+      },
+      {
+        "label": "Aesthetics",
+        "count": 5
       }
     ]
   },
@@ -39,16 +45,20 @@
     "key": "3 of 5",
     "values": [
       {
-        "label": "Ease of use: Ski lift app",
+        "label": "Ease of use",
         "count": 2
       },
       {
-        "label": "Usefulness: Ski lift app",
+        "label": "Usefulness",
         "count": 4
       },
       {
-        "label": "Responsiveness: Ski lift app",
+        "label": "Responsiveness",
         "count": 4
+      },
+      {
+        "label": "Aesthetics",
+        "count": 3
       }
     ]
   },
@@ -56,16 +66,20 @@
     "key": "4 of 5",
     "values": [
       {
-        "label": "Ease of use: Ski lift app",
-        "count": 4
+        "label": "Ease of use",
+        "count": 5
       },
       {
-        "label": "Usefulness: Ski lift app",
+        "label": "Usefulness",
         "count": 3
       },
       {
-        "label": "Responsiveness: Ski lift app",
-        "count": 5
+        "label": "Responsiveness",
+        "count": 6
+      },
+      {
+        "label": "Aesthetics",
+        "count": 3
       }
     ]
   },
@@ -73,15 +87,19 @@
     "key": "5 of 5",
     "values": [
       {
-        "label": "Ease of use: Ski lift app",
+        "label": "Ease of use",
         "count": 5
       },
       {
-        "label": "Usefulness: Ski lift app",
+        "label": "Usefulness",
         "count": 6
       },
       {
-        "label": "Responsiveness: Ski lift app",
+        "label": "Responsiveness",
+        "count": 3
+      },
+      {
+        "label": "Aesthetics",
         "count": 4
       }
     ]

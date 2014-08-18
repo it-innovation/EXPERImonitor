@@ -7,7 +7,7 @@ and open the template in the editor.
 <html>
     <head>
         <meta charset="UTF-8">
-        <link href="js/libs/d3/d3-parsets/d3.parsets.css" rel="stylesheet" type="text/css"/>
+        <link href="../js/libs/d3/d3-parsets/d3.parsets.css" rel="stylesheet" type="text/css"/>
         <style>
             html { 
                 height:100%;
@@ -25,13 +25,14 @@ and open the template in the editor.
             <svg></svg>
         </div>
         <div class="options">
-        <script src="js/libs/d3/d3.js" type="text/javascript"></script>
-        <script src="js/libs/d3/d3-parsets/d3.parsets.js" type="text/javascript"></script>
+            <script src="../js/libs/jquery/jquery.js" type="text/javascript"></script>
+        <script src="../js/libs/d3/d3.js" type="text/javascript"></script>
+        <script src="../js/libs/d3/d3-parsets/d3.parsets.js" type="text/javascript"></script>
         <script>
             var chart = d3.parsets()
                 .dimensions(["QoE", "Activities", "Applications", "Services"])
-            .width(1310)
-            .height(600);
+            .width($( document ).width()-15)
+            .height($( document ).height()-50);
 
             var vis = d3.select('#test10 svg')
                 .attr("height", chart.height())
@@ -54,7 +55,7 @@ and open the template in the editor.
               t.call(chart.tension(this.checked ? .5 : 1));
             }
 
-            d3.json("json/ps.json", function(error, data) {
+            d3.json("../json/ps.json", function(error, data) {
 
                 vis.datum(data).call(chart);
 

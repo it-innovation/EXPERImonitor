@@ -1,5 +1,31 @@
-<h5>QoE of Experiment Participants</h5>
+<h5>QoE of Participants recorded at the end of the experiment</h5>
 <hr>
+<h2 id="heroStat"><strong>{{participants.length}}</strong> participants</h2>
+<div class="row">
+    <div class="large-6 columns">
+        <label>Participants</label>
+        <select 
+            ng-change="viz()"
+            ng-model="participantSelection" 
+            ng-options="participant.iri as participant.name for participant in participants">
+            <option value="">All</option>
+        </select>
+    </div>
+    <div class="large-6 columns">
+        <label>Attributes</label>
+        <select 
+            ng-change="viz()"
+            ng-model="attributeSelection" 
+            ng-options="attribute.name as attribute.name for attribute in attributes">
+            <option value="">All</option>
+        </select>
+    </div>
+</div>
+<div id="charts" class="row" ng-show="viz()">
+    <div id="chart1"><svg class="large-6 text-center columns"></svg></div>
+    <div id="chart2"><svg class="large-6 text-center columns"></svg></div>
+    <div id="chart3"><svg class="large-12 text-center columns"></svg></div>
+</div>
 <div class="row">
     <div class="large-2 columns">
         <h6>Participants</h6>
@@ -9,13 +35,11 @@
     nice way to represent tables using angular ng-table-->
                 <tr>
                 <th>Name</th>
-                <th>Description</th>
               </tr>
             </thead>
             <tbody>
                 <tr ng-repeat="item in participants" ng-click="showParticipant(item)">
                     <td><a ng-href="#/participants/qoe?iri={{item.iri | encodeURIComponent}}">{{item.name}}</a></td>
-                    <td>{{item.description}}</td>
                 </tr>
             </tbody>
         </table>
@@ -47,27 +71,4 @@ nice way to represent tables using angular ng-table-->
             </tbody>
         </table>
     </div>
-</div>
-<div class="row">
-    <div class="large-4 columns">
-        <label>Participants</label>
-        <select ng-model="participantSelection" ng-options="participant.name for participant in participants"></select>
-    </div>
-    <div class="large-4 columns">
-        <label>Applications</label>
-        <select ng-model="appSelection" ng-options="app.name for app in applications"></select>
-    </div>
-    <div class="large-4 columns">
-        <label>Attributes</label>
-        <select ng-model="attributeSelection">
-            <option value="All">All</option>
-            <option ng-repeat="attribute in attributes">{{attribute.name}}</option>
-        </select>
-    </div>
-</div>
-<div id="charts" class="row" ng-show="visualize(participantSelection, attributeSelection)">
-    <h3 class="text-center">QoE responses of Participants</h3>
-    <div id="chart1"></div>
-    <div id="chart2"></div>
-    <div id="chart3"></div>
 </div>

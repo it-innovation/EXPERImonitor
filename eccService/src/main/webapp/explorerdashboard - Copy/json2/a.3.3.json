@@ -1,0 +1,13 @@
+
+
+{
+  "participants": [
+    {
+      "name": "Bob",
+      "description": "Bob is a test participant",
+      "metricEntityID": "74e3e2aa-0d86-49c9-8336-a44a1482a887",
+      "iri": "http://it-innovation.soton.ac.uk/ontologies/experimedia#participant_74e3e2aa-0d86-49c9-8336-a44a1482a887"
+    }
+  ]
+}
+

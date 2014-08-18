@@ -1,0 +1,90 @@
+
+
+[
+  {
+    "key": "1 of 5",
+    "values": [
+      {
+        "label": "Ease of use: Ski lift app",
+        "count": 1
+      },
+      {
+        "label": "Usefulness: Ski lift app",
+        "count": 2
+      },
+      {
+        "label": "Responsiveness: Ski lift app",
+        "count": 3
+      }
+    ]
+  },
+  {
+    "key": "2 of 5",
+    "values": [
+      {
+        "label": "Ease of use: Ski lift app",
+        "count": 3
+      },
+      {
+        "label": "Usefulness: Ski lift app",
+        "count": 2
+      },
+      {
+        "label": "Responsiveness: Ski lift app",
+        "count": 3
+      }
+    ]
+  },
+  {
+    "key": "3 of 5",
+    "values": [
+      {
+        "label": "Ease of use: Ski lift app",
+        "count": 2
+      },
+      {
+        "label": "Usefulness: Ski lift app",
+        "count": 4
+      },
+      {
+        "label": "Responsiveness: Ski lift app",
+        "count": 4
+      }
+    ]
+  },
+  {
+    "key": "4 of 5",
+    "values": [
+      {
+        "label": "Ease of use: Ski lift app",
+        "count": 4
+      },
+      {
+        "label": "Usefulness: Ski lift app",
+        "count": 3
+      },
+      {
+        "label": "Responsiveness: Ski lift app",
+        "count": 5
+      }
+    ]
+  },
+  {
+    "key": "5 of 5",
+    "values": [
+      {
+        "label": "Ease of use: Ski lift app",
+        "count": 5
+      },
+      {
+        "label": "Usefulness: Ski lift app",
+        "count": 6
+      },
+      {
+        "label": "Responsiveness: Ski lift app",
+        "count": 4
+      }
+    ]
+  }
+]
+
