@@ -172,8 +172,7 @@ public class ExplorerDemoData {
         EccINTRATSeriesSet result = new EccINTRATSeriesSet();
 
         // Get QoS series first
-        EccINTRATSeries series = new EccINTRATSeries("VAS response time", false,
-                qosSeriesDemo);
+        EccINTRATSeries series = new EccINTRATSeries("VAS response time", false, qosSeriesDemo);
         result.addSeries(series);
 
         // Then add highlight

@@ -264,7 +264,7 @@ public class ExplorerController {
 
         if (explorerService != null && explorerService.isReady() && attrID != null && IRI != null && actLabel != null) {
 //            result = explorerService.getINTRATAttrSeriesHilitePartActivites(expID, attrID, IRI, actLabel);
-            demoData.getINTRATSeriesHighlightActivities(attrID, IRI, actLabel);
+            result = demoData.getINTRATSeriesHighlightActivities(attrID, IRI, actLabel);
         } else {
             logger.error("Could not execute explorer service: service is not ready");
         }
