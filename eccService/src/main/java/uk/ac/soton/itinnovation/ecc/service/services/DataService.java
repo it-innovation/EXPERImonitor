@@ -616,11 +616,12 @@ public class DataService {
      *
      * @param attributeId the attribute.
      * @param since
+     * @param limit
      * @return last 10 measurements for the attribute.
      */
     public EccMeasurementSet getTailMeasurementsForAttribute(String attributeId, Long since, int limit) {
         EccMeasurementSet result = new EccMeasurementSet();
-        ArrayList<EccMeasurement> data = new ArrayList<EccMeasurement>();
+        ArrayList<EccMeasurement> data = new ArrayList<>();
         result.setData(data);
 
         Experiment currentExperiment = experimentService.getActiveExperiment();
