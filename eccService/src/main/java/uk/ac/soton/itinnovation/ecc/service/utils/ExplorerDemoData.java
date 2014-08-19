@@ -75,7 +75,7 @@ public class ExplorerDemoData {
     public ArrayList<EccMeasurement> qosSeriesDemo;
     public HashMap<String, EccINTRATSeries> qosSeriesHighlights;
 
-    private Questionnaire questionnaire;
+    private final Questionnaire questionnaire;
     public HashMap<UUID, UUID> usersParticipants;
 
     public ExplorerDemoData() {
@@ -156,7 +156,7 @@ public class ExplorerDemoData {
                 for (EccParticipant participant : eccParticipants.getParticipants()) {
                     if (participant.getMetricEntityID().equals(usersParticipants.get(u.getId()))) {
                         partInfoSet.addParticipant(participant);
-                        logger.error("Matching user found: " + participant.getName());
+                        logger.debug("Matching user found: " + participant.getName());
                     }
                 }
             }
