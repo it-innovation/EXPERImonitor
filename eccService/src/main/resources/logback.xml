@@ -1,59 +1,59 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true">
 
-	<property name="LOG_DIR" value="${catalina.base}/logs" />
+    <property name="LOG_DIR" value="${catalina.base}/logs" />
 
-	<conversionRule conversionWord="colorlevel"
+    <conversionRule conversionWord="colorlevel"
                     converterClass="fr.norad.logback.prettier.ColorLevelCompositeConverter" />
     <conversionRule conversionWord="bold"
                     converterClass="fr.norad.logback.prettier.BoldCompositeConverter" />
 
-	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-		<target>System.out</target>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <target>System.out</target>
         <withJansi>true</withJansi>
-		<encoder>
-			<pattern><![CDATA[%blue(%d{HH:mm:ss.SSS}) %colorlevel(%-5level) [%logger{7}:%line] - %m%n]]></pattern>
-		</encoder>
-		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-			<level>INFO</level>
-		</filter>
-		<filter class="fr.norad.logback.prettier.OutFilter" />
-	</appender>
+        <encoder>
+            <pattern><![CDATA[%blue(%d{HH:mm:ss.SSS}) %colorlevel(%-5level) [%logger{7}:%line] - %m%n]]></pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+        <filter class="fr.norad.logback.prettier.OutFilter" />
+    </appender>
 
-	<appender name="STDERR" class="ch.qos.logback.core.ConsoleAppender">
-		<target>System.err</target>
-		<withJansi>true</withJansi>
-		<encoder>
-			<pattern><![CDATA[%boldBlue(%d{HH:mm:ss.SSS}) %bold([%-10.10thread]) %colorlevel(%-5level) %bold(%-45.45(%41C{41}:%L)) - %colorlevel(%msg) %n]]></pattern>
-		</encoder>
-		<filter class="fr.norad.logback.prettier.ErrFilter" />
-	</appender>
+    <appender name="STDERR" class="ch.qos.logback.core.ConsoleAppender">
+        <target>System.err</target>
+        <withJansi>true</withJansi>
+        <encoder>
+            <pattern><![CDATA[%boldBlue(%d{HH:mm:ss.SSS}) %bold([%-10.10thread]) %colorlevel(%-5level) %bold(%-45.45(%41C{41}:%L)) - %colorlevel(%msg) %n]]></pattern>
+        </encoder>
+        <filter class="fr.norad.logback.prettier.ErrFilter" />
+    </appender>
 
-	<appender name="ECC" class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<!--See also http://logback.qos.ch/manual/appenders.html#RollingFileAppender-->
-		<Append>true</Append>
-		<File>${LOG_DIR}/ecc.log</File>
-		<encoder>
-			<pattern>%d %-5p [%t] %C:%L - %m%n</pattern>
-		</encoder>
-		<rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
-			<maxIndex>10</maxIndex>
-			<FileNamePattern>${LOG_DIR}/ecc.log.%i</FileNamePattern>
-		</rollingPolicy>
-		<triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
-			<MaxFileSize>1024KB</MaxFileSize>
-		</triggeringPolicy>
-	</appender>
+    <appender name="ECC" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!--See also http://logback.qos.ch/manual/appenders.html#RollingFileAppender-->
+        <Append>true</Append>
+        <File>${LOG_DIR}/ecc.log</File>
+        <encoder>
+            <pattern>%d %-5p [%t] %C:%L - %m%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <maxIndex>10</maxIndex>
+            <FileNamePattern>${LOG_DIR}/ecc.log.%i</FileNamePattern>
+        </rollingPolicy>
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <MaxFileSize>1024KB</MaxFileSize>
+        </triggeringPolicy>
+    </appender>
 
-	<logger name="org.springframework" level="INFO" />
+    <logger name="org.springframework" level="INFO" />
 
-	<logger name="uk.ac.soton.itinnovation" level="INFO">
-		<appender-ref ref="ECC"/>
-	</logger>
+    <logger name="uk.ac.soton.itinnovation" level="INFO">
+        <appender-ref ref="ECC"/>
+    </logger>
 
-	<root level="INFO">
-		<appender-ref ref="STDOUT" />
-		<appender-ref ref="STDERR" />
-	</root>
+    <root level="INFO">
+        <appender-ref ref="STDOUT" />
+        <appender-ref ref="STDERR" />
+    </root>
 
 </configuration>

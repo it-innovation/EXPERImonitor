@@ -75,11 +75,15 @@ public class ExplorerDemoData {
     public ArrayList<EccMeasurement> qosSeriesDemo;
     public HashMap<String, EccINTRATSeries> qosSeriesHighlights;
 
+    private Questionnaire questionnaire;
+    public HashMap<UUID, UUID> usersParticipants;
+
     public ExplorerDemoData() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd H:m");
+        questionnaire = new Questionnaire();
 
         try {
-            expStartDate = sdf.parse("2014-07-31 10:00");
+            expStartDate = sdf.parse("2014-07-31 07:00");
         } catch (ParseException pe) {
             logger.error("Could not create demo experiment date! ", pe);
         }
@@ -101,6 +105,8 @@ public class ExplorerDemoData {
                 "None");
 
         qosAttribute.setSampleCount(600); // 6 x 100 samples
+
+        usersParticipants = new HashMap<>();
 
         createParticipants();
         createPARTAttributeInfo();
@@ -125,12 +131,38 @@ public class ExplorerDemoData {
         return result;
     }
 
-    public EccParticipantResultSet getParticipantsByAttributeScaleLabel(String attrName,
-            String nomOrdLabel) {
+    public EccParticipantResultSet getParticipantsByAttributeScaleLabel(String attrName, String nomOrdLabel) {
         EccParticipantResultSet partInfoSet = new EccParticipantResultSet();
 
-        // Just return Bob for now
-        partInfoSet.addParticipant(BobPART);
+        logger.debug("Requested users for attribute '" + attrName + "' and label '" + nomOrdLabel + "'");
+
+        int option = -1;
+        for (EccAttributeInfo attr : partAttrInfoSet.getQoEAttributes()) {
+            if (attr.getName().equals(attrName)) {
+                int counter = 1;
+                for (String label : attr.getMetaContent().split(",")) {
+                    if (label.trim().equals(nomOrdLabel.trim())) {
+                        option = counter;
+                        break;
+                    }
+                    counter++;
+                }
+                break;
+            }
+        }
+
+        if (option > 0) {
+            for (User u : questionnaire.getUsersForQuestionAndOption(option, questionnaire.getQuestionByName(attrName))) {
+                for (EccParticipant participant : eccParticipants.getParticipants()) {
+                    if (participant.getMetricEntityID().equals(usersParticipants.get(u.getId()))) {
+                        partInfoSet.addParticipant(participant);
+                        logger.error("Matching user found: " + participant.getName());
+                    }
+                }
+            }
+        } else {
+            logger.error("No user selected this option");
+        }
 
         return partInfoSet;
     }
@@ -209,7 +241,7 @@ public class ExplorerDemoData {
                 "scale item",
                 "ORDINAL",
                 "Likert scale",
-                "Very difficult, difficult, not easy/difficult, easy, very easy");
+                "very difficult, difficult, not easy/difficult, easy, very easy");
 
         qoeAttrTWO = new EccAttributeInfo("Usefulness: Ski lift app",
                 "Questionnaire: item 2",
@@ -217,7 +249,7 @@ public class ExplorerDemoData {
                 "scale item",
                 "ORDINAL",
                 "Likert scale",
-                "Not at all useful, not very useful, sometimes useful, often useful, always useful");
+                "not at all useful, not very useful, sometimes useful, often useful, always useful");
 
         qoeAttrTHREE = new EccAttributeInfo("Responsiveness: Ski lift app",
                 "Questionnaire: item 3",
@@ -225,7 +257,7 @@ public class ExplorerDemoData {
                 "scale item",
                 "ORDINAL",
                 "Likert scale",
-                "Very unresponsive, not very responsive, moderately responsive, quite responsive, very responsive");
+                "very unresponsive, not very responsive, moderately responsive, quite responsive, very responsive");
 
         partAttrInfoSet = new EccParticipantAttributeResultSet();
         partAttrInfoSet.addQoEAttribute(qoeAttrONE);
@@ -233,102 +265,142 @@ public class ExplorerDemoData {
         partAttrInfoSet.addQoEAttribute(qoeAttrTHREE);
     }
 
+    private String getStringForIndexStartingAtOne(String labels, int index) {
+        String result = labels.split(",")[index - 1];
+
+        return result.trim();
+    }
+
     private void createNOMORDDistributionData() {
-        qoeSummaryDistribData = new HashMap<>();
 
-        // Question 1
-        EccNOMORDAttributeSummary data = new EccNOMORDAttributeSummary(qoeAttrONE,
-                createNOMORDDistributionDataSet(qoeAttrONE.getMetaContent()));
-
-        qoeSummaryDistribData.put(qoeAttrONE.getName(), data);
-        qoeAttrONE.setSampleCount(distributionDataTotal(data));
-
-        // Question 2
-        data = new EccNOMORDAttributeSummary(qoeAttrTWO, createNOMORDDistributionDataSet(qoeAttrTWO.getMetaContent()));
-        qoeSummaryDistribData.put(qoeAttrTWO.getName(), data);
-        qoeAttrTWO.setSampleCount(distributionDataTotal(data));
-
-        // Question 3
-        data = new EccNOMORDAttributeSummary(qoeAttrTHREE, createNOMORDDistributionDataSet(qoeAttrTHREE.getMetaContent()));
-        qoeSummaryDistribData.put(qoeAttrTHREE.getName(), data);
-        qoeAttrTHREE.setSampleCount(distributionDataTotal(data));
+        Question q1 = new Question(qoeAttrONE.getName());
+        Question q2 = new Question(qoeAttrTWO.getName());
+        Question q3 = new Question(qoeAttrTHREE.getName());
+        questionnaire.addQuestion(q1);
+        questionnaire.addQuestion(q2);
+        questionnaire.addQuestion(q3);
+        User alice = new User(AlicePART.getMetricEntityID(), AlicePART.getName());
+        questionnaire.addUser(alice);
+        usersParticipants.put(alice.getId(), AlicePART.getMetricEntityID());
+        User bob = new User(BobPART.getMetricEntityID(), BobPART.getName());
+        questionnaire.addUser(bob);
+        usersParticipants.put(bob.getId(), BobPART.getMetricEntityID());
+        User carol = new User(CarolPART.getMetricEntityID(), CarolPART.getName());
+        questionnaire.addUser(carol);
+        usersParticipants.put(carol.getId(), CarolPART.getMetricEntityID());
 
         // Create summary for each participant
         qoeParticipantSummaryData = new HashMap<>();
 
         // Alice
+        int[] answers = new int[]{1, 3, 5};
         EccNOMORDParticipantSummary ps = new EccNOMORDParticipantSummary(AlicePART);
-        ps.addORDINALResponse(qoeAttrONE.getName(), "not easy/difficult", 3);
-        ps.addORDINALResponse(qoeAttrTWO.getName(), "sometimes useful", 3);
-        ps.addORDINALResponse(qoeAttrTHREE.getName(), "moderately responsive", 3);
+        ps.addORDINALResponse(qoeAttrONE.getName(), getStringForIndexStartingAtOne(qoeAttrONE.getMetaContent(), answers[0]), answers[0]);
+        questionnaire.addAnswer(new Answer(alice, q1, answers[0]));
+        ps.addORDINALResponse(qoeAttrTWO.getName(), getStringForIndexStartingAtOne(qoeAttrTWO.getMetaContent(), answers[1]), answers[1]);
+        questionnaire.addAnswer(new Answer(alice, q2, answers[1]));
+        ps.addORDINALResponse(qoeAttrTHREE.getName(), getStringForIndexStartingAtOne(qoeAttrTHREE.getMetaContent(), answers[2]), answers[2]);
+        questionnaire.addAnswer(new Answer(alice, q3, answers[2]));
         qoeParticipantSummaryData.put(AlicePART.getIRI(), ps);
 
         // Bob
+        answers = new int[]{1, 1, 5};
         ps = new EccNOMORDParticipantSummary(BobPART);
-        ps.addORDINALResponse(qoeAttrONE.getName(), "Very difficult", 1);
-        ps.addORDINALResponse(qoeAttrTWO.getName(), "Not at all useful", 1);
-        ps.addORDINALResponse(qoeAttrTHREE.getName(), "Very unresponsive", 1);
+        ps.addORDINALResponse(qoeAttrONE.getName(), getStringForIndexStartingAtOne(qoeAttrONE.getMetaContent(), answers[0]), answers[0]);
+        questionnaire.addAnswer(new Answer(bob, q1, answers[0]));
+        ps.addORDINALResponse(qoeAttrTWO.getName(), getStringForIndexStartingAtOne(qoeAttrTWO.getMetaContent(), answers[1]), answers[1]);
+        questionnaire.addAnswer(new Answer(bob, q2, answers[1]));
+        ps.addORDINALResponse(qoeAttrTHREE.getName(), getStringForIndexStartingAtOne(qoeAttrTHREE.getMetaContent(), answers[2]), answers[2]);
+        questionnaire.addAnswer(new Answer(bob, q3, answers[2]));
         qoeParticipantSummaryData.put(BobPART.getIRI(), ps);
 
         // Carol
+        answers = new int[]{4, 5, 5};
         ps = new EccNOMORDParticipantSummary(CarolPART);
-        ps.addORDINALResponse(qoeAttrONE.getName(), "easy", 4);
-        ps.addORDINALResponse(qoeAttrTWO.getName(), "always useful", 5);
-        ps.addORDINALResponse(qoeAttrTHREE.getName(), "very responsive", 5);
+        ps.addORDINALResponse(qoeAttrONE.getName(), getStringForIndexStartingAtOne(qoeAttrONE.getMetaContent(), answers[0]), answers[0]);
+        questionnaire.addAnswer(new Answer(carol, q1, answers[0]));
+        ps.addORDINALResponse(qoeAttrTWO.getName(), getStringForIndexStartingAtOne(qoeAttrTWO.getMetaContent(), answers[1]), answers[1]);
+        questionnaire.addAnswer(new Answer(carol, q2, answers[1]));
+        ps.addORDINALResponse(qoeAttrTHREE.getName(), getStringForIndexStartingAtOne(qoeAttrTHREE.getMetaContent(), answers[2]), answers[2]);
+        questionnaire.addAnswer(new Answer(carol, q3, answers[2]));
         qoeParticipantSummaryData.put(CarolPART.getIRI(), ps);
+
+        qoeSummaryDistribData = new HashMap<>();
+
+        // Distribution of answers to Question 1: number of people in each category 1 - 5
+        // getDistributionOfAnswersForQuestion(q1)
+        EccNOMORDAttributeSummary data = new EccNOMORDAttributeSummary(qoeAttrONE, createNOMORDDistributionDataSet(qoeAttrONE.getMetaContent(), q1));
+        qoeSummaryDistribData.put(qoeAttrONE.getName(), data);
+        qoeAttrONE.setSampleCount(distributionDataTotal(data));
+
+        // Distribution of answers to Question 2: number of people in each category 1 - 5
+        data = new EccNOMORDAttributeSummary(qoeAttrTWO, createNOMORDDistributionDataSet(qoeAttrTWO.getMetaContent(), q2));
+        qoeSummaryDistribData.put(qoeAttrTWO.getName(), data);
+        qoeAttrTWO.setSampleCount(distributionDataTotal(data));
+
+        // Distribution of answers to Question 3: number of people in each category 1 - 5
+        data = new EccNOMORDAttributeSummary(qoeAttrTHREE, createNOMORDDistributionDataSet(qoeAttrTHREE.getMetaContent(), q3));
+        qoeSummaryDistribData.put(qoeAttrTHREE.getName(), data);
+        qoeAttrTHREE.setSampleCount(distributionDataTotal(data));
 
         // Stratified summary data (simply mock up this data)
         qoeStratifiedSummaryDistribData = new ArrayList<>();
 
-        // 1 of 5
-        EccNOMORDStratifiedSummary nss = new EccNOMORDStratifiedSummary("1 of 5");
-        nss.addStratifiedItem(new EccItemCount(qoeAttrONE.getName(), 1));
-        nss.addStratifiedItem(new EccItemCount(qoeAttrTWO.getName(), 2));
-        nss.addStratifiedItem(new EccItemCount(qoeAttrTHREE.getName(), 3));
-        qoeStratifiedSummaryDistribData.add(nss);
-
-        // 2 of 5
-        nss = new EccNOMORDStratifiedSummary("2 of 5");
-        nss.addStratifiedItem(new EccItemCount(qoeAttrONE.getName(), 3));
-        nss.addStratifiedItem(new EccItemCount(qoeAttrTWO.getName(), 2));
-        nss.addStratifiedItem(new EccItemCount(qoeAttrTHREE.getName(), 3));
-        qoeStratifiedSummaryDistribData.add(nss);
-
-        // 3 of 5
-        nss = new EccNOMORDStratifiedSummary("3 of 5");
-        nss.addStratifiedItem(new EccItemCount(qoeAttrONE.getName(), 2));
-        nss.addStratifiedItem(new EccItemCount(qoeAttrTWO.getName(), 4));
-        nss.addStratifiedItem(new EccItemCount(qoeAttrTHREE.getName(), 4));
-        qoeStratifiedSummaryDistribData.add(nss);
-
-        // 4 of 5
-        nss = new EccNOMORDStratifiedSummary("4 of 5");
-        nss.addStratifiedItem(new EccItemCount(qoeAttrONE.getName(), 4));
-        nss.addStratifiedItem(new EccItemCount(qoeAttrTWO.getName(), 3));
-        nss.addStratifiedItem(new EccItemCount(qoeAttrTHREE.getName(), 5));
-        qoeStratifiedSummaryDistribData.add(nss);
-
-        // 5 of 5
-        nss = new EccNOMORDStratifiedSummary("5 of 5");
-        nss.addStratifiedItem(new EccItemCount(qoeAttrONE.getName(), 5));
-        nss.addStratifiedItem(new EccItemCount(qoeAttrTWO.getName(), 6));
-        nss.addStratifiedItem(new EccItemCount(qoeAttrTHREE.getName(), 4));
-        qoeStratifiedSummaryDistribData.add(nss);
-    }
-
-    private Map<String, Integer> createNOMORDDistributionDataSet(String labels) {
-        HashMap<String, Integer> dataSet = new HashMap<>();
-
-        String[] labelItems = labels.split(",");
-        Random rand = new Random();
-
-        for (String label : labelItems) {
-            dataSet.put(label, rand.nextInt(labelItems.length));
+        // Number of people who picked answer i for each question
+        for (int i = 1; i < 6; i++) {
+            EccNOMORDStratifiedSummary nss = new EccNOMORDStratifiedSummary(i + " of 5");
+            nss.addStratifiedItem(new EccItemCount(qoeAttrONE.getName(), questionnaire.getDistributionOfAnswersForOptionAndQuestion(i, q1)));
+            nss.addStratifiedItem(new EccItemCount(qoeAttrTWO.getName(), questionnaire.getDistributionOfAnswersForOptionAndQuestion(i, q2)));
+            nss.addStratifiedItem(new EccItemCount(qoeAttrTHREE.getName(), questionnaire.getDistributionOfAnswersForOptionAndQuestion(i, q3)));
+            qoeStratifiedSummaryDistribData.add(nss);
         }
 
-        // Fix the first item to always equal 1 (for demo purposes only)
-        dataSet.remove(labelItems[0]);
-        dataSet.put(labelItems[0], 1);
+//        // Number of people who picked option 1 for each question
+//        // getDistributionOfAnswersForOption(o1)
+//        EccNOMORDStratifiedSummary nss = new EccNOMORDStratifiedSummary("1 of 5");
+//        nss.addStratifiedItem(new EccItemCount(qoeAttrONE.getName(), questionnaire.getDistributionOfAnswersForOptionAndQuestion(1, q1)));
+//        nss.addStratifiedItem(new EccItemCount(qoeAttrTWO.getName(), questionnaire.getDistributionOfAnswersForOptionAndQuestion(1, q2)));
+//        nss.addStratifiedItem(new EccItemCount(qoeAttrTHREE.getName(), questionnaire.getDistributionOfAnswersForOptionAndQuestion(1, q3)));
+//        qoeStratifiedSummaryDistribData.add(nss);
+//
+//        // Number of people who picked option 2 for each question
+//        nss = new EccNOMORDStratifiedSummary("2 of 5");
+//        nss.addStratifiedItem(new EccItemCount(qoeAttrONE.getName(), 3));
+//        nss.addStratifiedItem(new EccItemCount(qoeAttrTWO.getName(), 2));
+//        nss.addStratifiedItem(new EccItemCount(qoeAttrTHREE.getName(), 3));
+//        qoeStratifiedSummaryDistribData.add(nss);
+//
+//        // Number of people who picked option 3 for each question
+//        nss = new EccNOMORDStratifiedSummary("3 of 5");
+//        nss.addStratifiedItem(new EccItemCount(qoeAttrONE.getName(), 2));
+//        nss.addStratifiedItem(new EccItemCount(qoeAttrTWO.getName(), 4));
+//        nss.addStratifiedItem(new EccItemCount(qoeAttrTHREE.getName(), 4));
+//        qoeStratifiedSummaryDistribData.add(nss);
+//
+//        // Number of people who picked option 4 for each question
+//        nss = new EccNOMORDStratifiedSummary("4 of 5");
+//        nss.addStratifiedItem(new EccItemCount(qoeAttrONE.getName(), 4));
+//        nss.addStratifiedItem(new EccItemCount(qoeAttrTWO.getName(), 3));
+//        nss.addStratifiedItem(new EccItemCount(qoeAttrTHREE.getName(), 5));
+//        qoeStratifiedSummaryDistribData.add(nss);
+//
+//        // Number of people who picked option 5 for each question
+//        nss = new EccNOMORDStratifiedSummary("5 of 5");
+//        nss.addStratifiedItem(new EccItemCount(qoeAttrONE.getName(), 5));
+//        nss.addStratifiedItem(new EccItemCount(qoeAttrTWO.getName(), 6));
+//        nss.addStratifiedItem(new EccItemCount(qoeAttrTHREE.getName(), 4));
+//        qoeStratifiedSummaryDistribData.add(nss);
+    }
+
+    private Map<String, Integer> createNOMORDDistributionDataSet(String labels, Question q) {
+        HashMap<String, Integer> dataSet = new HashMap<>();
+
+        int counter = 1, numPeople;
+        for (String label : labels.split(",")) {
+            numPeople = questionnaire.getDistributionOfAnswersForQuestion(q).get(counter);
+            dataSet.put(label, numPeople);
+            counter++;
+        }
 
         return dataSet;
     }

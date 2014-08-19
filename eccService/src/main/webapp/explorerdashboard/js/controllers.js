@@ -13,11 +13,11 @@ appControllers.controller('MainController', ['$scope', '$http', function($scope,
                 "uuid": "c91c05ed-c6ba-4880-82af-79eb5d4a58cd",
                 "name": "Test Experiment",
                 "description": "New EXPERIMEDIA Experiment",
-                "phase": "unknown",
+                "phase": "Teardown",
                 "status": "Finished",
                 "projectName": "My Local EXPERIMEDIA Project",
-                "startTime": 1408378746438,
-                "endTime": 1408378877686
+                "startTime": 1406786400000,
+                "endTime": 1406836800000
             }
         ];
         //});
@@ -26,7 +26,7 @@ appControllers.controller('MainController', ['$scope', '$http', function($scope,
 appControllers.controller('ExperimentController', ['$scope', '$http', '$routeParams', function($scope, $http, $routeParams) {
         EXP_ID = $routeParams.uuid;
         $http.get(BASE_URL + "/explorer/" + EXP_ID + "/summary").success(function(data) {
-            console.log(BASE_URL + "/explorer/" + EXP_ID + "/summary");
+//            console.log(BASE_URL + "/explorer/" + EXP_ID + "/summary");
             //$http.get("json2/a1.1.json").success(function(data) {
             $scope.summary = data;
         });
@@ -152,7 +152,7 @@ appControllers.controller('ParticipantController', ['$scope', '$http', function(
                     });
                     // click event function
                     function chartClick(e) {
-                        $http.get(BASE_URL + "/explorer/" + EXP_ID + "/participants/attributes/select?attrName" + encodeURIComponent($scope.attributeSelection) + "&nomOrdLabel=" + encodeURIComponent(e.point.label)).success(function(data) {
+                        $http.get(BASE_URL + "/explorer/" + EXP_ID + "/participants/attributes/select?attrName=" + encodeURIComponent($scope.attributeSelection) + "&nomOrdLabel=" + encodeURIComponent(e.point.label)).success(function(data) {
                             $scope.participants = data.participants;
                         });
                     }
@@ -224,7 +224,7 @@ appControllers.controller('DetailsController', ['$scope', '$http', '$routeParams
             $('#qosChart1 svg').height(CHART_HEIGHT);
             //d3.json("json/tst.json", function(error, data) {
             d3.json(BASE_URL + "/explorer/" + EXP_ID + "/attributes/series/qos/highlight/activities?attrID=" + serviceMetricSelection.metricID + "&IRI=" + partIRI + "&actLabel=" + encodeURIComponent(activitySelection.label), function(error, data) {
-                console.log(data);
+//                console.log(data);
                 nv.addGraph(function() {
                     var chart = nv.models.lineChart()
                             .x(function(d) {
