@@ -6,15 +6,27 @@ var CHART_HEIGHT = 500;
 var appControllers = angular.module('appControllers', ['angular-loading-bar', 'ngTable']);
 
 appControllers.controller('MainController', ['$scope', '$http', function($scope, $http) {
-    $http.get(BASE_URL + "/experiments").success(function(data) {
+    //$http.get(BASE_URL + "/experiments").success(function(data) {
     //$http.get("json2/a0.1.json").success(function(data) {
-        $scope.experiments = data;
-    });
+        $scope.experiments = [
+            {
+                "uuid": "c91c05ed-c6ba-4880-82af-79eb5d4a58cd",
+                "name": "Test Experiment",
+                "description": "New EXPERIMEDIA Experiment",
+                "phase": "unknown",
+                "status": "Finished",
+                "projectName": "My Local EXPERIMEDIA Project",
+                "startTime": 1408378746438,
+                "endTime": 1408378877686
+            }
+        ];
+     //});
 }]);
 
 appControllers.controller('ExperimentController', ['$scope', '$http', '$routeParams', function($scope, $http, $routeParams) {
     EXP_ID = $routeParams.uuid;
     $http.get(BASE_URL + "/explorer/" + EXP_ID + "/summary").success(function(data) {
+        console.log(BASE_URL + "/explorer/" + EXP_ID + "/summary");
     //$http.get("json2/a1.1.json").success(function(data) {
         $scope.summary = data;
     });
@@ -39,8 +51,8 @@ appControllers.controller('ParticipantController', ['$scope', '$http', function(
             d3.scale.customColors = function() {
                 return d3.scale.ordinal().range(customColors);
             };
-            d3.json(BASE_URL + "/explorer/" + EXP_ID + "/participants/distribution/stratified", function(data) {
-            //$.get("json2/a4.3.json").success(function(data) {
+            $http.get(BASE_URL + "/explorer/" + EXP_ID + "/participants/distribution/stratified").success(function(data) {
+            //d3.json("json2/a4.3.json", function(data) {
                 $('#chart1 svg').hide();
                 $('#chart2 svg').hide();
                 $('#chart3 svg').show().height(CHART_HEIGHT);
@@ -130,7 +142,7 @@ appControllers.controller('ParticipantController', ['$scope', '$http', function(
         } else if(participantSelection !== null && attributeSelection === null){
             
         } else if(participantSelection !== null && attributeSelection !== null){
-            console.log(BASE_URL + "/explorer/" + EXP_ID + "/participants/iri/attributes?IRI=" + encodeURIComponent(participantSelection));
+            //console.log(BASE_URL + "/explorer/" + EXP_ID + "/participants/iri/attributes?IRI=" + encodeURIComponent(participantSelection));
             //$.get(BASE_URL + "explorer/" + EXP_ID + "/participants", function(data){});
         }       
         return true;    // to enable angular ng-show
@@ -192,8 +204,8 @@ appControllers.controller('DetailsController', ['$scope', '$http', '$routeParams
     
     $scope.timeSeries = function(serviceMetricSelection, serviceSelection, activitySelection){
         $('#qosChart1 svg').height(CHART_HEIGHT);
-        d3.json("json/tst.json", function(error, data) {
-        //d3.json(BASE_URL + "/explorer/" + EXP_ID + "/attributes/series/qos/highlight/activities?attrID=" + serviceMetricSelection.metricID + "&IRI=" + partIRI + "&actLabel=" + encodeURIComponent(activitySelection.label), function(error, data) {
+        //d3.json("json/tst.json", function(error, data) {
+        d3.json(BASE_URL + "/explorer/" + EXP_ID + "/attributes/series/qos/highlight/activities?attrID=" + serviceMetricSelection.metricID + "&IRI=" + partIRI + "&actLabel=" + encodeURIComponent(activitySelection.label), function(error, data) {
             nv.addGraph(function() {
                 var chart = nv.models.lineChart()
                     .x(function(d) { return d.timestamp; })

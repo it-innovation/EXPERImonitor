@@ -5,7 +5,7 @@
     <div class="large-6 columns">
         <label>Participants</label>
         <select 
-            ng-change="viz()"
+            
             ng-model="participantSelection" 
             ng-options="participant.iri as participant.name for participant in participants">
             <option value="">All</option>
@@ -14,14 +14,15 @@
     <div class="large-6 columns">
         <label>Attributes</label>
         <select 
-            ng-change="viz()"
+            
             ng-model="attributeSelection" 
             ng-options="attribute.name as attribute.name for attribute in attributes">
             <option value="">All</option>
         </select>
     </div>
+    <button ng-click="viz()">POST</button>
 </div>
-<div id="charts" class="row" ng-show="viz()">
+<div id="charts" class="row">
     <div id="chart1"><svg class="large-6 text-center columns"></svg></div>
     <div id="chart2"><svg class="large-6 text-center columns"></svg></div>
     <div id="chart3"><svg class="large-12 text-center columns"></svg></div>
