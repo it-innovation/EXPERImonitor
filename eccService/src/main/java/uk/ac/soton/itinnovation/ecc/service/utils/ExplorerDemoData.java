@@ -561,13 +561,13 @@ public class ExplorerDemoData {
         for (int i = 1; i < 6; i++) {
             EccNOMORDStratifiedSummary nss = new EccNOMORDStratifiedSummary(i + " of 5");
             
-            String labelValue = extractLabelFromIndex( i, qoeAttrONE.getMetaContent() );
+            String labelValue = extractLabelFromIndex( i-1, qoeAttrONE.getMetaContent() );
             nss.addStratifiedItem(new EccItemCount(qoeAttrONE.getName(), questionnaire.getDistributionOfAnswersForOptionAndQuestion(i, q1), labelValue));
             
-            labelValue = extractLabelFromIndex( i, qoeAttrTWO.getMetaContent() );
+            labelValue = extractLabelFromIndex( i-1, qoeAttrTWO.getMetaContent() );
             nss.addStratifiedItem(new EccItemCount(qoeAttrTWO.getName(), questionnaire.getDistributionOfAnswersForOptionAndQuestion(i, q2), labelValue));
             
-            labelValue = extractLabelFromIndex( i, qoeAttrTHREE.getMetaContent() );
+            labelValue = extractLabelFromIndex( i-1, qoeAttrTHREE.getMetaContent() );
             nss.addStratifiedItem(new EccItemCount(qoeAttrTHREE.getName(), questionnaire.getDistributionOfAnswersForOptionAndQuestion(i, q3), labelValue));
             
             qoeStratifiedSummaryDistribData.add(nss);
