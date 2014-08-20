@@ -32,12 +32,20 @@ public class EccItemCount
 {
     private String label;
     private int    count;
-    
+    private String labelValue;
     
     public EccItemCount( String eicLabel, int eicCount )
     {
         label = eicLabel;
         count = eicCount;
+        labelValue = "Unknown";
+    }
+    
+    public EccItemCount( String eicLabel, int eicCount, String lV )
+    {
+        label = eicLabel;
+        count = eicCount;
+        labelValue = lV;
     }
     
     public String getLabel()
@@ -45,4 +53,7 @@ public class EccItemCount
     
     public int getCount()
     { return count; }
+    
+    public String getLabelValue()
+    { return labelValue; }
 }

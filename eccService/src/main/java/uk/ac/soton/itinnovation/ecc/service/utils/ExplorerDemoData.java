@@ -560,9 +560,16 @@ public class ExplorerDemoData {
         // Number of people who picked answer i for each question
         for (int i = 1; i < 6; i++) {
             EccNOMORDStratifiedSummary nss = new EccNOMORDStratifiedSummary(i + " of 5");
-            nss.addStratifiedItem(new EccItemCount(qoeAttrONE.getName(), questionnaire.getDistributionOfAnswersForOptionAndQuestion(i, q1)));
-            nss.addStratifiedItem(new EccItemCount(qoeAttrTWO.getName(), questionnaire.getDistributionOfAnswersForOptionAndQuestion(i, q2)));
-            nss.addStratifiedItem(new EccItemCount(qoeAttrTHREE.getName(), questionnaire.getDistributionOfAnswersForOptionAndQuestion(i, q3)));
+            
+            String labelValue = extractLabelFromIndex( i, qoeAttrONE.getMetaContent() );
+            nss.addStratifiedItem(new EccItemCount(qoeAttrONE.getName(), questionnaire.getDistributionOfAnswersForOptionAndQuestion(i, q1), labelValue));
+            
+            labelValue = extractLabelFromIndex( i, qoeAttrTWO.getMetaContent() );
+            nss.addStratifiedItem(new EccItemCount(qoeAttrTWO.getName(), questionnaire.getDistributionOfAnswersForOptionAndQuestion(i, q2), labelValue));
+            
+            labelValue = extractLabelFromIndex( i, qoeAttrTHREE.getMetaContent() );
+            nss.addStratifiedItem(new EccItemCount(qoeAttrTHREE.getName(), questionnaire.getDistributionOfAnswersForOptionAndQuestion(i, q3), labelValue));
+            
             qoeStratifiedSummaryDistribData.add(nss);
         }
 
@@ -1138,4 +1145,13 @@ public class ExplorerDemoData {
         return new EccINTRATSeries( newKey, true, targMeasures );
     }
 
+    private String extractLabelFromIndex( int i, String metaContent )
+    {
+        String[] items = metaContent.split( "," );
+        
+        if ( items.length > i )
+            return items[i].trim();
+        else
+            return "Unknown";
+    }
 }
