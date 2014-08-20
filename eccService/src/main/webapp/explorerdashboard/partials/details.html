@@ -2,26 +2,46 @@
 <hr>
 <div class="row" ng-model="participants">
     <div class="large-3 columns">
-        <label>Participants: <strong>{{whichPeople}}</strong></label>
-        <select ng-model="participantSelection" ng-options="participant.name for participant in participants">
-            <option value="">All</option>
+        <label>Participants</label>
+        <select 
+            ng-model="participantSelection" 
+            ng-init="getActivities()"
+            ng-change="getActivities()"
+            ng-options="participant.iri as participant.name for participant in participants">
         </select>
     </div>
-    <div class="large-3 columns">
-        <label>Activities: <strong>{{activitySelection.name}}</strong></label>
-        <select ng-model="activitySelection" ng-options="activity.label for activity in activities"></select>
+    <div id="activities" class="large-3 columns">
+        <label>Activities<strong></strong></label>
+        <select 
+            ng-change="getActivityInstancesNApps()"
+            ng-model="activitySelection" 
+            ng-options="activity.label for activity in activities"></select>
     </div>
-    <div class="large-3 columns" ng-show="getApplications(activitySelection)">
-        <label>Applications: <strong>{{applicationSelection.name}}</strong></label>
-        <select ng-model="applicationSelection" ng-options="app.name for app in applications"></select>
+    <div id="applications" class="large-3 columns">
+        <label>Applications<strong></strong></label>
+        <select 
+            ng-change="getServices()"
+            ng-model="applicationSelection" 
+            ng-options="app.name for app in applications"></select>
     </div>
-    <div class="large-3 columns" ng-show="getServices(applicationSelection)">
-        <label>Services: <strong>{{serviceSelection.name}}</strong></label>
-        <select ng-model="serviceSelection" ng-options="service.name for service in services" ></select>
+    <div id="services" class="large-3 columns">
+        <label>Services<strong></strong></label>
+        <select 
+            ng-change="getServiceMetrics()"
+            ng-model="serviceSelection" 
+            ng-options="service.name for service in services" ></select>
+    </div>
+    <div id="serviceMetrics" class="large-3 columns">
+        <label>Service Metrics<strong></strong></label>
+        <select 
+            ng-change="timeSeries()"
+            ng-model="serviceMetricSelection" 
+            ng-options="serviceMetric.name for serviceMetric in serviceMetrics" ></select>
+<!--        <button ng-click="" class="small button">Visualize</button>-->
     </div>
 </div>
 <div class="row">
-    <div class="large-7 columns" ng-model="activityInstances">
+<!--    <div class="large-7 columns" ng-model="activityInstances">
         <h5>Activities</h5>
         <h6>Number of Activity Instances: <strong>{{numActivities}}</strong></h6>
         <table>
@@ -42,51 +62,8 @@
               </tr>
             </tbody>
         </table>
-    </div>
-    <div class="large-5 columns" ng-show="getApplications(activitySelection)">
-        <h5>Application</h5>
-        <p>{{applicationSelection.name}}</p>
-        <p>{{applicationSelection.description}}</p>
-    </div>
-    <div class="large-12 columns" ng-show="getServices(applicationSelection)">
-        <h5>Service</h5>
-        <p>{{serviceSelection.name}}</p>
-        <p>{{serviceSelection.description}}</p>
-        <div class="large-3 columns" ng-show="getServiceMetrics(serviceSelection)">
-            <label>Service Metrics: <strong>{{serviceMetricSelection.name}}</strong></label>
-            <select ng-model="serviceMetricSelection" ng-options="serviceMetric.name for serviceMetric in serviceMetrics" ></select>
-            <button ng-click="timeSeries(serviceMetricSelection, serviceSelection, activitySelection)" class="small button">Visualize</button>
-        </div>
-    </div>
-    <div id="qosChart1">
+    </div>-->
+    <div id="qosChart">
         <svg></svg>
     </div>
-    <div id="qosChart2">
-        <svg></svg>
-    </div>
-    <script>
-        d3.json("json/tst.json", function(error, data) {
-        //d3.json(BASE_URL + EXP_ID + "/attributes/series/qos/highlight/activities?attrID=" + serviceMetricSelection.metricID + "&IRI=" + partIRI + "&actLabel=" + encodeURIComponent(activitySelection.label), function(error, data) {
-            nv.addGraph(function() {
-                var chart = nv.models.lineChart()
-                    .x(function(d) { return d.timestamp; })
-                    .y(function(d) { return d.value/100; })
-                    .useInteractiveGuideline(true)
-                    .isArea(true)
-                    //.forceY([0]);
-                chart.xAxis
-                    .showMaxMin(true)
-                    .tickFormat(function(d) { return d3.time.format('%X')(new Date(d)); });
-                chart.yAxis
-                    .axisLabel('Response Time(ms)')
-                    .tickFormat(d3.format(',.2f'));
-                d3.select('#qosChart1 svg')
-                    .datum(data.seriesSet)
-                    .transition().duration(500)
-                    .call(chart);
-                nv.utils.windowResize(chart.update);
-                return chart;
-            });
-        });
-    </script>
 </div>

@@ -1,11 +1,10 @@
-<h5>QoE of Participants recorded at the end of the experiment</h5>
+<h3>QoE of Participants recorded at the end of the experiment</h3>
 <hr>
-<h2 id="heroStat"><strong>{{participants.length}}</strong> participants</h2>
 <div class="row">
     <div class="large-6 columns">
         <label>Participants</label>
         <select 
-            
+            ng-change="viz()"
             ng-model="participantSelection" 
             ng-options="participant.iri as participant.name for participant in participants">
             <option value="">All</option>
@@ -14,43 +13,33 @@
     <div class="large-6 columns">
         <label>Attributes</label>
         <select 
-            
+            ng-change="viz()"
             ng-model="attributeSelection" 
             ng-options="attribute.name as attribute.name for attribute in attributes">
             <option value="">All</option>
         </select>
     </div>
-    <button ng-click="viz()">POST</button>
 </div>
-<div id="charts" class="row">
-    <div id="chart1"><svg class="large-6 text-center columns"></svg></div>
-    <div id="chart2"><svg class="large-6 text-center columns"></svg></div>
-    <div id="chart3"><svg class="large-12 text-center columns"></svg></div>
+<div id="charts" class="row" ng-init="viz()">
+    <div id="attribBarChart"><svg class="large-6 text-center columns"></svg></div>
+    <div id="attribDonutChart"><svg class="large-6 text-center columns"></svg></div>
+    <div id="allQoEChart"><svg class="large-12 text-center columns"></svg></div>
 </div>
 <div class="row">
-    <div class="large-2 columns">
-        <h6>Participants</h6>
+    <div id="selectedParticipants" class="large-2 columns">
+        <h6><strong>{{selectedParticipants.length}}</strong> Participants</h6>
         <table>
-            <thead>
-    <!-- find out is there a way to get table header info from the json 
-    nice way to represent tables using angular ng-table-->
-                <tr>
-                <th>Name</th>
-              </tr>
-            </thead>
             <tbody>
-                <tr ng-repeat="item in participants" ng-click="showParticipant(item)">
-                    <td><a ng-href="#/participants/qoe?iri={{item.iri | encodeURIComponent}}">{{item.name}}</a></td>
+                <tr ng-repeat="participant in selectedParticipants">
+                    <td><a ng-href="#/participants/qoe?iri={{participant.iri | encodeURIComponent}}">{{participant.name}}</a></td>
                 </tr>
             </tbody>
         </table>
     </div>
-    <div class="large-10 columns">
+    <div id="selectedAttributes" class="large-10 columns">
         <h6>Attributes</h6>
         <table>
             <thead>
-<!-- find out is there a way to get table header info from the json 
-nice way to represent tables using angular ng-table-->
                 <tr>
                 <th>Name</th>
                 <th>Description</th>
@@ -61,13 +50,13 @@ nice way to represent tables using angular ng-table-->
               </tr>
             </thead>
             <tbody>
-              <tr ng-repeat="item in attributes">
-                <td>{{item.name}}</td>
-                <td>{{item.description}}</td>
-                <td>{{item.metricType}}</td>
-                <td>{{item.sampleCount}}</td>
-                <td>{{item.metaContent}}</td>
-                <td>{{item.metaType}}</td>
+              <tr ng-repeat="attribute in selectedAttributes">
+                <td>{{attribute.name}}</td>
+                <td>{{attribute.description}}</td>
+                <td>{{attribute.metricType}}</td>
+                <td>{{attribute.sampleCount}}</td>
+                <td>{{attribute.metaContent}}</td>
+                <td>{{attribute.metaType}}</td>
               </tr>
             </tbody>
         </table>
