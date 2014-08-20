@@ -43,7 +43,9 @@ import org.slf4j.*;
 public class ExplorerDemoData {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
-
+    
+    private enum ProvAct { eWeather, eTweet, eLiftWaiting };
+    
     // All attributes are public - this is a demo support class only, so we don't care
     public UUID expID = UUID.fromString("c91c05ed-c6ba-4880-82af-79eb5d4a58cd");
     public Date expStartDate;
@@ -51,11 +53,11 @@ public class ExplorerDemoData {
 
     public EccParticipantResultSet eccParticipants;
     public EccParticipant AlicePART, BobPART, CarolPART;
+    public HashMap<String, EccParticipant> participantsByName;
 
     public EccAttributeInfo qoeAttrONE;
     public EccAttributeInfo qoeAttrTWO;
     public EccAttributeInfo qoeAttrTHREE;
-    public EccAttributeInfo qosAttribute;
     public EccParticipantAttributeResultSet partAttrInfoSet;
     public HashMap<String, EccNOMORDAttributeSummary> qoeSummaryDistribData;
     public HashMap<String, EccNOMORDParticipantSummary> qoeParticipantSummaryData;
@@ -63,17 +65,18 @@ public class ExplorerDemoData {
 
     public ArrayList<EccActivity> linearActivities;
     public ArrayList<EccApplication> linearApplications;
-    public ArrayList<EccService> linearServices;
+    public HashMap<String, EccService> servicesByIRI;
 
     public HashMap<String, EccParticipantActivitySummaryResultSet> participantActivitySummary;
     public HashMap<String, EccParticipantActivityResultSet> participantActivities;
     public HashMap<String, EccActivityApplicationResultSet> activityApplications;
     public HashMap<String, EccApplicationServiceResultSet> applicationServices;
-
+    
     public HashMap<String, EccAttributeResultSet> serviceQoSAttributes;
-    public HashMap<Date, EccINTRATSummary> qosDiscreteDistributionData;
-    public ArrayList<EccMeasurement> qosSeriesDemo;
-    public HashMap<String, EccINTRATSeries> qosSeriesHighlights;
+    
+    //public HashMap<Date, EccINTRATSummary> qosDiscreteDistributionData;
+    //public ArrayList<EccMeasurement> qosSeriesDemo;
+    //public HashMap<String, EccINTRATSeries> qosSeriesHighlights;
 
     private final Questionnaire questionnaire;
     public HashMap<UUID, UUID> usersParticipants;
@@ -84,27 +87,10 @@ public class ExplorerDemoData {
 
         try {
             expStartDate = sdf.parse("2014-07-31 07:00");
+            
         } catch (ParseException pe) {
             logger.error("Could not create demo experiment date! ", pe);
         }
-
-        expSummary = new EccExperimentSummary("Test experiment",
-                "This experiment has been created to test the EXPERIMonitor data explorer",
-                expID.toString(),
-                3, // Alice, Bob, Carol
-                10, // 10 activities
-                3, // 3 applications
-                1);  // 1 service
-
-        qosAttribute = new EccAttributeInfo("VAS response time",
-                "Time taken between query and response being sent",
-                UUID.fromString("e13ac84e-3a09-45f8-8287-a48a8f3f9d73"),
-                "Seconds",
-                "RATIO",
-                "None",
-                "None");
-
-        qosAttribute.setSampleCount(600); // 6 x 100 samples
 
         usersParticipants = new HashMap<>();
 
@@ -112,9 +98,17 @@ public class ExplorerDemoData {
         createPARTAttributeInfo();
         createNOMORDDistributionData();
         createActivityData();
+        createParticipantActivitySummaryData();
         createApplicationData();
         createServiceData();
-        createParticipantSummaryData();
+        
+        expSummary = new EccExperimentSummary("Test experiment",
+                "This experiment has been created to test the EXPERIMonitor data explorer",
+                expID.toString(),
+                3, // Alice, Bob, Carol
+                10, // 10 activities
+                3, // 3 applications
+                1);  // 1 service
     }
 
     public EccParticipant getParticipant(String IRI) {
@@ -167,7 +161,7 @@ public class ExplorerDemoData {
         return partInfoSet;
     }
 
-    public EccParticipantActivitySummaryResultSet getPROVSummaryByParticipant(String partIRI) {
+    public EccParticipantActivitySummaryResultSet getActivitySummaryByParticipant(String partIRI) {
         return participantActivitySummary.get(partIRI);
     }
 
@@ -185,52 +179,69 @@ public class ExplorerDemoData {
 
     public EccINTRATSummary getINTRATDistDataDiscrete(UUID attrID, ArrayList<Date> stamps) {
         // Cheating here: just use first time stamp to return made-up distribution
-        return qosDiscreteDistributionData.get(stamps.get(0));
+        
+        
+        
+        return null;
+        //return qosDiscreteDistributionData.get(stamps.get(0));
     }
 
-    public EccINTRATSummary getQosSummary() {
+    public EccINTRATSummary getQosSummary()
+    {
 
-        DescriptiveStatistics ds = new DescriptiveStatistics();
-        for (EccMeasurement m : qosSeriesDemo) {
-            ds.addValue(Double.parseDouble(m.getValue()));
-        }
-        return new EccINTRATSummary(qosAttribute, ds.getMin(), ds.getMean(), ds.getMax());
+//        DescriptiveStatistics ds = new DescriptiveStatistics();
+//        for (EccMeasurement m : qosSeriesDemo) {
+//            ds.addValue(Double.parseDouble(m.getValue()));
+//        }
+//        return new EccINTRATSummary(qosAttribute, ds.getMin(), ds.getMean(), ds.getMax());
+        
+        
+        return null;
     }
 
-    public EccINTRATSeriesSet getINTRATSeriesHighlightActivities(UUID seriesAttrID,
-            String partIRI,
-            String activityLabel) {
-        // Just return some highlighted time stamps
-        EccINTRATSeriesSet result = new EccINTRATSeriesSet();
-
-        // Get QoS series first
-        EccINTRATSeries series = new EccINTRATSeries("VAS response time", false, qosSeriesDemo);
-        result.addSeries(series);
-
-        // Then add highlight
-        result.addSeries(qosSeriesHighlights.get(partIRI));
-
-        return result;
+    public EccINTRATSeriesSet getINTRATSeriesHighlightActivities( UUID   seriesAttrID,
+                                                                  String partIRI,
+                                                                  String activityLabel)
+    {
+//        // Just return some highlighted time stamps
+//        EccINTRATSeriesSet result = new EccINTRATSeriesSet();
+//
+//        // Get QoS series first
+//        EccINTRATSeries series = new EccINTRATSeries("VAS response time", false, qosSeriesDemo);
+//        result.addSeries(series);
+//
+//        // Then add highlight
+//        result.addSeries(qosSeriesHighlights.get(partIRI));
+//
+//        return result;
+        
+        return null;
     }
 
     // Private methods ---------------------------------------------------------
     private void createParticipants() {
-        eccParticipants = new EccParticipantResultSet();
+        eccParticipants    = new EccParticipantResultSet();
+        participantsByName = new HashMap<>();
 
         AlicePART = new EccParticipant("Alice", "Alice is a test participant",
                 UUID.fromString("02bcc340-3254-4eee-b9dc-5132c2e25cbf"),
                 "http://it-innovation.soton.ac.uk/ontologies/experimedia#participant_02bcc340-3254-4eee-b9dc-5132c2e25cbf");
 
+        participantsByName.put( "Alice", AlicePART );
+        eccParticipants.addParticipant(AlicePART);
+        
         BobPART = new EccParticipant("Bob", "Bob is a test participant",
                 UUID.fromString("74e3e2aa-0d86-49c9-8336-a44a1482a887"),
                 "http://it-innovation.soton.ac.uk/ontologies/experimedia#participant_74e3e2aa-0d86-49c9-8336-a44a1482a887");
 
+        participantsByName.put( "Bob", BobPART );
+        eccParticipants.addParticipant(BobPART);
+        
         CarolPART = new EccParticipant("Carol", "Carol is a test participant",
                 UUID.fromString("81ace737-818e-42e3-b7c3-d2c1fa1d7a0c"),
                 "http://it-innovation.soton.ac.uk/ontologies/experimedia#participant_81ace737-818e-42e3-b7c3-d2c1fa1d7a0c");
 
-        eccParticipants.addParticipant(AlicePART);
-        eccParticipants.addParticipant(BobPART);
+        participantsByName.put( "Carol", CarolPART );
         eccParticipants.addParticipant(CarolPART);
     }
 
@@ -418,250 +429,357 @@ public class ExplorerDemoData {
     private void createActivityData() {
         linearActivities = new ArrayList<>();
 
-        // Activity 1 (1 minute)
-        EccActivity act = new EccActivity("Used lift application",
-                "Checked lift waiting time",
-                "http://it-innovation.soton.ac.uk/ontologies/experimedia#activity_d5b1ba72-f0e4-45f2-a996-fff97cdc2de2",
-                new Date(expStartDate.getTime()),
-                new Date(expStartDate.getTime() + 60000));
-        linearActivities.add(act);
-
-        // Activity 2 (5 minutes)
-        act = new EccActivity("Used lift application",
-                "Checked lift waiting time",
-                "http://it-innovation.soton.ac.uk/ontologies/experimedia#activity_c108742d-d41d-40ee-b532-7f8fd6508baf",
-                new Date(expStartDate.getTime() + 600000),
-                new Date(expStartDate.getTime() + 900000));
-        linearActivities.add(act);
-
-        // Activity 3 (5 minutes)
-        act = new EccActivity("Used lift application",
-                "Checked lift waiting time",
-                "http://it-innovation.soton.ac.uk/ontologies/experimedia#activity_0f9d7667-1276-4a20-9278-a355ccb6e467",
-                new Date(expStartDate.getTime() + 960000),
-                new Date(expStartDate.getTime() + 1260000));
-        linearActivities.add(act);
-
-        // Activity 4 (5 minutes)
-        act = new EccActivity("Used lift application",
-                "Checked lift waiting time",
-                "http://it-innovation.soton.ac.uk/ontologies/experimedia#activity_aee642e6-ade7-4b44-870d-bb70ff5c02f1",
-                new Date(expStartDate.getTime() + 1320000),
-                new Date(expStartDate.getTime() + 1620000));
-        linearActivities.add(act);
-
-        // Activity 5 (1 minute)
-        act = new EccActivity("Used lift application",
-                "Checked lift waiting time",
-                "http://it-innovation.soton.ac.uk/ontologies/experimedia#activity_98626f59-47d0-467c-b43b-a0ae253ec193",
-                new Date(expStartDate.getTime() + 3000000),
-                new Date(expStartDate.getTime() + 3060000));
-        linearActivities.add(act);
-
-        // Activity 6 (1 minute)
-        act = new EccActivity("Used lift application",
-                "Checked lift waiting time",
-                "http://it-innovation.soton.ac.uk/ontologies/experimedia#activity_98626f59-47d0-467c-b43b-a0ae253ec193",
-                new Date(expStartDate.getTime() + 3120000),
-                new Date(expStartDate.getTime() + 3180000));
-        linearActivities.add(act);
+        // Bob's activities
+        createActivityInstance( ProvAct.eWeather,     "2014-07-31 8:00", 10 );
+        createActivityInstance( ProvAct.eTweet,       "2014-07-31 8:10", 5 );
+        createActivityInstance( ProvAct.eLiftWaiting, "2014-07-31 8:12", 30 );
+        createActivityInstance( ProvAct.eTweet,       "2014-07-31 8:25", 5 );
+        createActivityInstance( ProvAct.eLiftWaiting, "2014-07-31 8:28", 35 );
+        createActivityInstance( ProvAct.eWeather,     "2014-07-31 8:30", 10 );
+        createActivityInstance( ProvAct.eLiftWaiting, "2014-07-31 8:32", 25 );
+        createActivityInstance( ProvAct.eTweet,       "2014-07-31 8:40", 5 );
+        createActivityInstance( ProvAct.eTweet,       "2014-07-31 8:42", 5 );
+ 
+        // Alice's activities
+        createActivityInstance( ProvAct.eWeather,     "2014-07-31 9:50",  15 );
+        createActivityInstance( ProvAct.eLiftWaiting, "2014-07-31 9:55",  12 );
+        createActivityInstance( ProvAct.eTweet,       "2014-07-31 10:03", 8 );
+        createActivityInstance( ProvAct.eLiftWaiting, "2014-07-31 10:15", 10 );
+        createActivityInstance( ProvAct.eTweet,       "2014-07-31 10:17", 8 );
+        createActivityInstance( ProvAct.eLiftWaiting, "2014-07-31 10:27", 10 );
+        
+        // Carols activities
+        createActivityInstance( ProvAct.eTweet,       "2014-07-31 10:32", 8 );
+        createActivityInstance( ProvAct.eWeather,     "2014-07-31 10:39", 7 );
+        createActivityInstance( ProvAct.eLiftWaiting, "2014-07-31 10:44", 10 );
+        createActivityInstance( ProvAct.eTweet,       "2014-07-31 10:50", 7 );
+        createActivityInstance( ProvAct.eLiftWaiting, "2014-07-31 10:53", 8 );
+        createActivityInstance( ProvAct.eLiftWaiting, "2014-07-31 10:55", 10 );
 
         // Map to participants
         participantActivities = new HashMap<>();
-
-        // Alice's activities (1)
-        EccParticipantActivityResultSet pais = new EccParticipantActivityResultSet(AlicePART);
-        pais.addActivity(linearActivities.get(0));
-        participantActivities.put(AlicePART.getIRI(), pais);
-
-        // Bob's activities (3)
-        pais = new EccParticipantActivityResultSet(BobPART);
-        pais.addActivity(linearActivities.get(1));
-        pais.addActivity(linearActivities.get(2));
-        pais.addActivity(linearActivities.get(3));
-        participantActivities.put(BobPART.getIRI(), pais);
-
-        // Carol's activities (1)
-        pais = new EccParticipantActivityResultSet(CarolPART);
-        pais.addActivity(linearActivities.get(4));
-        pais.addActivity(linearActivities.get(5));
-        participantActivities.put(CarolPART.getIRI(), pais);
+        
+        mapActivityInstances( "Alice", 9,  14 );
+        mapActivityInstances( "Bob",   0,  8 );
+        mapActivityInstances( "Carol", 15, 20 );
     }
 
-    private void createApplicationData() {
-        linearApplications = new ArrayList<>();
+    private void createActivityInstance( ProvAct provAct, String timeStamp, int secondsOffset )
+    {
+        
+        String actLabel = null;
+        String actDesc  = null;
+        
+        switch ( provAct )
+        {
+            case eWeather: 
+            {
+                actLabel = "Checked weather";
+                actDesc  = "Checked weather prediction";
+            } break;
+                
+            case eTweet:
+            {
+                actLabel = "Checked Twitter messages";
+                actDesc  = "Checked for hot tweet";
+            } break;
+                
+            case eLiftWaiting:
+            {
+                actLabel = "Checked lift waiting times";
+                actDesc  = "Checked lift waiting times on slope";
+            } break;
+        }        
+        
+        try
+        {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd H:m");
+            Date start = sdf.parse( timeStamp );
+            Date end   = new Date( start.getTime() + (secondsOffset *1000) );
+            
+            String actIRI = "http://it-innovation.soton.ac.uk/ontologies/experimedia#activity_" +
+                            UUID.randomUUID().toString();
+            
+            EccActivity act = new EccActivity( actLabel, actDesc, actIRI, start, end );
+            
+            linearActivities.add( act );
+        } 
+        catch (ParseException pe) 
+        { logger.error("Could not create demo activity date! ", pe); }
+    }
+    
+    private void mapActivityInstances( String partName, int actStart, int actEnd )
+    {
+        EccParticipant part = participantsByName.get( partName );
+        
+        if ( part != null )
+        {
+            EccParticipantActivityResultSet pais = new EccParticipantActivityResultSet( part );
+            
+            for ( int i = actStart; i <= actEnd; i++ )
+                if ( linearActivities.size() > i )
+                    pais.addActivity( linearActivities.get(i) );
+            
+            participantActivities.put( part.getIRI(), pais );
+        }
+    }
+    
+    private void createApplicationData() 
+    {
+        linearApplications   = new ArrayList<>();
         activityApplications = new HashMap<>();
-
-        // 3 x different application instancess
-        EccApplication app = new EccApplication("Ski Lift Waiting App",
-                "Mobile application used to predict waiting time",
-                "http://it-innovation.soton.ac.uk/ontologies/experimedia#application_14e3e008-95bb-4423-a21f-c216c614d591");
-        linearApplications.add(app);
-
-        app = new EccApplication("Ski Lift Waiting App",
-                "Mobile application used to predict waiting time",
-                "http://it-innovation.soton.ac.uk/ontologies/experimedia#application_3af4c091-2019-4f1c-a867-89c44970a509");
-        linearApplications.add(app);
-
-        app = new EccApplication("Ski Lift Waiting App",
-                "Mobile application used to predict waiting time",
-                "http://it-innovation.soton.ac.uk/ontologies/experimedia#application_7ee60153-0ba0-4765-b44c-bb1137533d16");
-        linearApplications.add(app);
-
-        // Associate one application per participant's activities
-        for (EccParticipantActivityResultSet ais : participantActivities.values()) {
-            EccParticipant part = ais.getParticipant();
-
-            int appIndex = 0;
-
-            for (EccActivity act : ais.getActivities()) {
-                EccActivityApplicationResultSet aais = new EccActivityApplicationResultSet(act);
-                aais.addApplication(linearApplications.get(appIndex));
-                appIndex++;
-
-                activityApplications.put(act.getIRI(), aais);
+        
+        // Create a single application instance for each participant
+        for ( String partName : participantsByName.keySet() )
+        {
+            EccParticipant part = participantsByName.get( partName );
+            
+            EccApplication app = new EccApplication( "Smart Ski Goggles App",
+                                                     "Mobile application for skiers on the slope",
+                                                     "http://it-innovation.soton.ac.uk/ontologies/experimedia#application " +
+                                                     UUID.randomUUID().toString() );
+            
+            linearApplications.add( app );
+            
+            // Associate the participant's activities with the application
+            EccParticipantActivityResultSet pais = participantActivities.get( part.getIRI() );
+            if ( pais != null )
+            {
+                for ( EccActivity act : pais.getActivities() )
+                {
+                    EccActivityApplicationResultSet appSet = new EccActivityApplicationResultSet( act );
+                    appSet.addApplication( app );
+                    
+                    activityApplications.put( act.getIRI(), appSet );
+                }
             }
         }
     }
 
-    private void createServiceData() {
-        linearServices = new ArrayList<>();
-        applicationServices = new HashMap<>();
-
-        // Create a single service for all the applications
-        EccService service = new EccService("VAS Component (Service)",
-                "VAS provides video analytics",
-                "http://it-innovation.soton.ac.uk/ontologies/experimedia#service_14e3e008-95bb-4423-a21f-c216c614d591");
-        linearServices.add(service);
-
-        // Associate each application with the service
-        for (EccApplication app : linearApplications) {
-            EccApplicationServiceResultSet asrs = new EccApplicationServiceResultSet(app);
-            asrs.addService(service);
-
-            applicationServices.put(app.getIRI(), asrs);
-        }
-
-        // Create QoS attribue for this service
+    private void createServiceData()
+    {
+        servicesByIRI        = new HashMap<>();
+        applicationServices  = new HashMap<>();
         serviceQoSAttributes = new HashMap<>();
-
+        
+        // VAS -----------------------------------------------------------------
+        EccService serv = createServiceInstance( "Video Analytics Service (VAS)", "Provides on-slope video analytics" );
         EccAttributeResultSet ars = new EccAttributeResultSet();
-        ars.addAttributeInfo(qosAttribute);
-
-        serviceQoSAttributes.put(service.getIRI(), ars);
-
-        // Create summary data for service
-        qosDiscreteDistributionData = new HashMap<>();
+        
+        ars.addAttributeInfo( createQoSAttrInfo( "VAS average response time",
+                                                 "Time taken between query time and response being sent",
+                                                 "Seconds", "RATIO") );
+        
+        ars.addAttributeInfo( createQoSAttrInfo( "CPU Usage",
+                                                 "Current CPU usage",
+                                                 "%", "RATIO") );
+        
+        ars.addAttributeInfo( createQoSAttrInfo( "Memory Usage",
+                                                 "Current usage of available RAM",
+                                                 "%", "RATIO") );
+        
+        serviceQoSAttributes.put( serv.getIRI(), ars );
+        
+        // Twitter -------------------------------------------------------------
+        serv = createServiceInstance( "Twitter Service", "Provides twitter feeds" );
+        ars = new EccAttributeResultSet();
+        
+        ars.addAttributeInfo( createQoSAttrInfo( "Twitter query response time",
+                                                 "Time taken between query time and response being sent",
+                                                 "Seconds", "RATIO") );
+        
+        ars.addAttributeInfo( createQoSAttrInfo( "Twitter server load",
+                                                 "Server load",
+                                                 "%", "RATIO") );
+        
+        ars.addAttributeInfo( createQoSAttrInfo( "Twitter server memory usage",
+                                                 "Current usage of available RAM",
+                                                 "%", "RATIO") );
+        
+        serviceQoSAttributes.put( serv.getIRI(), ars );
+        
+        // Weather -------------------------------------------------------------
+        serv = createServiceInstance( "Weather Service", "Provides local weather data" );
+        ars = new EccAttributeResultSet();
+        
+        ars.addAttributeInfo( createQoSAttrInfo( "Weather service query response time",
+                                                 "Time taken between query time and response being sent",
+                                                 "Seconds", "RATIO") );
+        
+        ars.addAttributeInfo( createQoSAttrInfo( "Weather server load",
+                                                 "Server load",
+                                                 "%", "RATIO") );
+        
+        ars.addAttributeInfo( createQoSAttrInfo( "Weather server memory usage",
+                                                 "Current usage of available RAM",
+                                                 "%", "RATIO") );
+        
+        serviceQoSAttributes.put( serv.getIRI(), ars );
+        
+        mapApplicationsToAllServices();
 
         // Create generic QoS distribution data for each activity frame
-        Random rand = new Random();
-        int index = 0;
-        for (EccActivity act : linearActivities) {
-            float floor = rand.nextFloat() * 3.0f;
-            float ceil = rand.nextFloat() * 10.0f;
-            float avg = rand.nextFloat() + 5.0f;
-
-            // Artificially inflate QoS for Bob
-            if (index > 0 || index < 4) {
-                floor += 300.0f;
-                ceil += 305.0f;
-                avg += 302.0f;
-            }
-
-            EccINTRATSummary dd = new EccINTRATSummary(qosAttribute, floor, ceil, avg);
-
-            qosDiscreteDistributionData.put(act.getStartTime(), dd);
-            ++index;
-        }
-
-        // Create dummy QoS data (we won't bother artificially raising this data)
-        qosSeriesDemo = new ArrayList<>();
-        Date ts = new Date(expStartDate.getTime());
-        int maxRandomValueHigh = 32000;
-        int minRandomValueHigh = 28000;
-        int maxRandomValueLow = 22;
-        int minRandomValueLow = 18;
-        float value = 30000.0f;
-
-        for (int i = 0; i < 600; ++i) {
-            EccMeasurement m = new EccMeasurement();
-            m.setTimestamp(ts);
-            m.setValue(Float.toString(value));
-
-            qosSeriesDemo.add(m);
-
-            // Update time & value
-            ts = new Date(ts.getTime() + 60000);
-
-            if (i < 150) {
-                value = rand.nextInt(maxRandomValueHigh - minRandomValueHigh) + minRandomValueHigh;
-            } else {
-                value = rand.nextInt(maxRandomValueLow - minRandomValueLow) + minRandomValueLow;
-            }
-//            value += (rand.nextFloat() * 10.0f);
-//            value -= (rand.nextFloat() * 10.0f);
+//        Random rand = new Random();
+//        int index = 0;
+//        for (EccActivity act : linearActivities) {
+//            float floor = rand.nextFloat() * 3.0f;
+//            float ceil = rand.nextFloat() * 10.0f;
+//            float avg = rand.nextFloat() + 5.0f;
 //
-//            if (value < 1.0f) {
-//                value = 1.0f;
-//            } else if (value > 400.0f) {
-//                value = 400.0f;
+//            // Artificially inflate QoS for Bob
+//            if (index > 0 || index < 4) {
+//                floor += 300.0f;
+//                ceil += 305.0f;
+//                avg += 302.0f;
 //            }
-        }
-
-        // Create dummy series highlights based on activities
-        qosSeriesHighlights = new HashMap<>();
-
-        qosSeriesHighlights.put(AlicePART.getIRI(),
-                createHiliteSeries("Alice's activities", 150, 160));
-
-        qosSeriesHighlights.put(BobPART.getIRI(),
-                createHiliteSeries("Bob's activities", 10, 100));
-
-        qosSeriesHighlights.put(CarolPART.getIRI(),
-                createHiliteSeries("Carol's activities", 400, 450));
+//
+//            EccINTRATSummary dd = new EccINTRATSummary(qosAttribute, floor, ceil, avg);
+//
+//            qosDiscreteDistributionData.put(act.getStartTime(), dd);
+//            ++index;
+//        }
+//
+//        // Create dummy QoS data (we won't bother artificially raising this data)
+//        qosSeriesDemo = new ArrayList<>();
+//        Date ts = new Date(expStartDate.getTime());
+//        int maxRandomValueHigh = 32000;
+//        int minRandomValueHigh = 28000;
+//        int maxRandomValueLow = 22;
+//        int minRandomValueLow = 18;
+//        float value = 30000.0f;
+//
+//        for (int i = 0; i < 600; ++i) {
+//            EccMeasurement m = new EccMeasurement();
+//            m.setTimestamp(ts);
+//            m.setValue(Float.toString(value));
+//
+//            qosSeriesDemo.add(m);
+//
+//            // Update time & value
+//            ts = new Date(ts.getTime() + 60000);
+//
+//            if (i < 150) {
+//                value = rand.nextInt(maxRandomValueHigh - minRandomValueHigh) + minRandomValueHigh;
+//            } else {
+//                value = rand.nextInt(maxRandomValueLow - minRandomValueLow) + minRandomValueLow;
+//            }
+//        }
+//
+//        // Create dummy series highlights based on activities
+//        qosSeriesHighlights = new HashMap<>();
+//
+//        qosSeriesHighlights.put(AlicePART.getIRI(),
+//                createHiliteSeries("Alice's activities", 150, 160));
+//
+//        qosSeriesHighlights.put(BobPART.getIRI(),
+//                createHiliteSeries("Bob's activities", 10, 100));
+//
+//        qosSeriesHighlights.put(CarolPART.getIRI(),
+//                createHiliteSeries("Carol's activities", 400, 450));
     }
 
-    private void createParticipantSummaryData() {
+    private EccService createServiceInstance( String name, String desc )
+    {
+        String IRI = "http://it-innovation.soton.ac.uk/ontologies/experimedia#service " + UUID.randomUUID().toString();
+        
+        EccService service = new EccService( name, desc, IRI );
+        servicesByIRI.put( IRI, service );
+        
+        return service;                                            
+    }
+    
+    private void mapApplicationsToAllServices()
+    {
+        for ( EccApplication app : linearApplications )
+        {
+            EccApplicationServiceResultSet asrs = new EccApplicationServiceResultSet(app);
+            
+            for ( EccService serv : servicesByIRI.values() )
+                asrs.addService( serv );
+            
+            applicationServices.put( app.getIRI(), asrs );
+        }
+    }
+    
+    private EccAttributeInfo createQoSAttrInfo( String name, String desc,
+                                                String unit, String metType )
+    {
+        EccAttributeInfo result = new EccAttributeInfo( name, desc, UUID.randomUUID(),
+                                                        unit, metType,
+                                                        "None", "None" );
+        
+        result.setSampleCount( 600 ); // Same number of samples for all QoS Data
+        
+        return result;
+    }
+    
+    private void createParticipantActivitySummaryData()
+    {
+        // Run through participants summarising their activities
         participantActivitySummary = new HashMap<>();
-
-        // Alice
-        EccParticipantActivitySummaryResultSet psrs = new EccParticipantActivitySummaryResultSet(AlicePART);
-        psrs.addActivitySummary(new EccActivitySummaryInfo("Used lift application", 1));
-        participantActivitySummary.put(AlicePART.getIRI(), psrs);
-
-        // Bob
-        psrs = new EccParticipantActivitySummaryResultSet(BobPART);
-        psrs.addActivitySummary(new EccActivitySummaryInfo("Used lift application", 3));
-        participantActivitySummary.put(BobPART.getIRI(), psrs);
-
-        // Carol
-        psrs = new EccParticipantActivitySummaryResultSet(CarolPART);
-        psrs.addActivitySummary(new EccActivitySummaryInfo("Used lift application", 1));
-        participantActivitySummary.put(CarolPART.getIRI(), psrs);
+        
+        for ( String name : participantsByName.keySet() )
+        {
+            EccParticipant part = participantsByName.get( name );
+            
+            HashMap<String, Integer> actCount = new HashMap<>();
+            EccParticipantActivityResultSet ars = participantActivities.get( part.getIRI() );
+            
+            if ( ars != null )
+            {
+                // Count activity instances by name
+                for ( EccActivity act : ars.getActivities() )
+                {
+                    String actName = act.getName();
+                    
+                    if ( actCount.containsKey(actName) )
+                    {
+                        int count = actCount.get( actName );
+                        actCount.put( actName, ++count );
+                    }
+                    else
+                        actCount.put( actName, 1 );
+                }
+                
+                // Place in summary
+                if ( !actCount.isEmpty() )
+                {
+                    EccParticipantActivitySummaryResultSet psrs = new EccParticipantActivitySummaryResultSet( part );
+                    
+                    for ( String actName : actCount.keySet() )
+                        psrs.addActivitySummary( new EccActivitySummaryInfo( actName, actCount.get(actName)) );
+                    
+                    participantActivitySummary.put( part.getIRI(), psrs );
+                }
+            }
+        }
     }
 
-    private EccINTRATSeries createHiliteSeries(String key, int startIndex, int endIndex) {
-        ArrayList<EccMeasurement> copyMeasures = new ArrayList<>();
+    private EccINTRATSeries createHiliteSeries(String key, int startIndex, int endIndex)
+    {
+//        ArrayList<EccMeasurement> copyMeasures = new ArrayList<>();
+//
+//        int srcIndex = 0;
+//        for (EccMeasurement srcM : qosSeriesDemo) {
+//            // Create copy of measurement components
+//            Date targDate = new Date(srcM.getTimestamp().getTime());
+//            String targValue = null;
+//
+//            // Add the value if within index range
+//            if (srcIndex >= startIndex && srcIndex <= endIndex) {
+//                targValue = srcM.getValue();
+//            }
+//
+//            // Add the duplicated measurement
+//            copyMeasures.add(new EccMeasurement(targDate, targValue));
+//
+//            ++srcIndex;
+//        }
+//
+//        // Return new series
+//        return new EccINTRATSeries(key, true, copyMeasures);
 
-        int srcIndex = 0;
-        for (EccMeasurement srcM : qosSeriesDemo) {
-            // Create copy of measurement components
-            Date targDate = new Date(srcM.getTimestamp().getTime());
-            String targValue = null;
-
-            // Add the value if within index range
-            if (srcIndex >= startIndex && srcIndex <= endIndex) {
-                targValue = srcM.getValue();
-            }
-
-            // Add the duplicated measurement
-            copyMeasures.add(new EccMeasurement(targDate, targValue));
-
-            ++srcIndex;
-        }
-
-        // Return new series
-        return new EccINTRATSeries(key, true, copyMeasures);
+        return null;
     }
 
 }
