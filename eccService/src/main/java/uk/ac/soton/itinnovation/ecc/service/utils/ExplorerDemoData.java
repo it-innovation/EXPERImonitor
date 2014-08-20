@@ -72,11 +72,11 @@ public class ExplorerDemoData {
     public HashMap<String, EccActivityApplicationResultSet> activityApplications;
     public HashMap<String, EccApplicationServiceResultSet> applicationServices;
     
-    public HashMap<String, EccAttributeResultSet> serviceQoSAttributes;
+    public HashMap<UUID, EccAttributeInfo> qosAttributesByID;
+    public HashMap<String, EccAttributeResultSet> qosAttributesByIRI;
     
-    //public HashMap<Date, EccINTRATSummary> qosDiscreteDistributionData;
-    //public ArrayList<EccMeasurement> qosSeriesDemo;
-    //public HashMap<String, EccINTRATSeries> qosSeriesHighlights;
+    public HashMap<UUID, EccINTRATSeries>  qosSeries; 
+    public HashMap<UUID, EccINTRATSummary> qosSummaries;
 
     private final Questionnaire questionnaire;
     public HashMap<UUID, UUID> usersParticipants;
@@ -177,45 +177,104 @@ public class ExplorerDemoData {
         return applicationServices.get(appIRI);
     }
 
-    public EccINTRATSummary getINTRATDistDataDiscrete(UUID attrID, ArrayList<Date> stamps) {
-        // Cheating here: just use first time stamp to return made-up distribution
+    public EccINTRATSummary getINTRATDistDataDiscrete( UUID attrID, ArrayList<Date> stamps )
+    {
+        EccINTRATSummary result = null;
         
+        // Safety
+        if ( attrID != null && stamps != null )
+        {
+            EccAttributeInfo info = qosAttributesByID.get( attrID );
+            EccINTRATSeries srcSeries = qosSeries.get( attrID );
+            
+            if ( info != null && srcSeries != null )
+            {
+                // Copy source series data with just those timestamps
+                ArrayList<EccMeasurement> targMeasures = new ArrayList<>();
+       
+                for ( EccMeasurement srcM : srcSeries.getValues() )
+                    for ( Date targDate : stamps )
+                        if ( srcM.getTimestamp().equals(targDate) )
+                            targMeasures.add( new EccMeasurement(srcM) );
+                
+                // If we've got any data, create a summary
+                if ( !targMeasures.isEmpty() )
+                {
+                    DescriptiveStatistics ds = new DescriptiveStatistics();
+                
+                    for ( EccMeasurement m : targMeasures )
+                        ds.addValue( Double.parseDouble(m.getValue()) );
+                    
+                    result = new EccINTRATSummary( info,
+                                                   ds.getMin(), 
+                                                   ds.getMean(), 
+                                                   ds.getMax() );
+                }
+            }
+        }
         
-        
-        return null;
-        //return qosDiscreteDistributionData.get(stamps.get(0));
+        return result;
     }
 
-    public EccINTRATSummary getQosSummary()
+    public EccINTRATSummary getQosSummary( UUID attrID )
     {
-
-//        DescriptiveStatistics ds = new DescriptiveStatistics();
-//        for (EccMeasurement m : qosSeriesDemo) {
-//            ds.addValue(Double.parseDouble(m.getValue()));
-//        }
-//        return new EccINTRATSummary(qosAttribute, ds.getMin(), ds.getMean(), ds.getMax());
+        EccINTRATSummary result = null;
         
+        if ( attrID != null )
+        {
+            // Find QoS series and calculate summary data
+            EccINTRATSeries series = qosSeries.get( attrID );
+            
+            if ( series != null )
+            {
+                DescriptiveStatistics ds = new DescriptiveStatistics();
+                
+                for ( EccMeasurement m : series.getValues() )
+                    ds.addValue( Double.parseDouble(m.getValue()) );
+                
+                result = new EccINTRATSummary( qosAttributesByID.get( attrID ),
+                                               ds.getMin(), ds.getMean(), ds.getMax());
+            }
+        }        
         
-        return null;
+        return result;
     }
 
     public EccINTRATSeriesSet getINTRATSeriesHighlightActivities( UUID   seriesAttrID,
                                                                   String partIRI,
-                                                                  String activityLabel)
+                                                                  String activityLabel )
     {
-//        // Just return some highlighted time stamps
-//        EccINTRATSeriesSet result = new EccINTRATSeriesSet();
-//
-//        // Get QoS series first
-//        EccINTRATSeries series = new EccINTRATSeries("VAS response time", false, qosSeriesDemo);
-//        result.addSeries(series);
-//
-//        // Then add highlight
-//        result.addSeries(qosSeriesHighlights.get(partIRI));
-//
-//        return result;
+        EccINTRATSeriesSet result = new EccINTRATSeriesSet();
         
-        return null;
+        // Safety
+        if ( seriesAttrID != null && partIRI != null && activityLabel != null )
+        {
+            // Get all activities for this participant
+            EccParticipantActivityResultSet pars = participantActivities.get( partIRI );
+            
+            EccINTRATSeries srcSeries = qosSeries.get( seriesAttrID );
+            EccINTRATSeries hilights  = null;
+            
+            if ( pars != null && srcSeries != null )
+            {
+                // Pick out just the activities with the relevant label
+                ArrayList<EccActivity> targActs = new ArrayList<>();
+                
+                for ( EccActivity act : pars.getActivities() )
+                    if ( act.getName().equals(activityLabel) )
+                        targActs.add( act );
+                
+                // Create a highlight series based on activity time frame
+                String seriesName = srcSeries.getKey() + " (" + pars.getParticipant().getName() + ")";
+                hilights = createHiliteSeries( seriesName, srcSeries, targActs );
+            }
+            
+            // Add results as required
+            if ( srcSeries != null ) result.addSeries( srcSeries );
+            if ( hilights  != null ) result.addSeries( hilights );
+        }
+        
+        return result;
     }
 
     // Private methods ---------------------------------------------------------
@@ -558,124 +617,104 @@ public class ExplorerDemoData {
 
     private void createServiceData()
     {
-        servicesByIRI        = new HashMap<>();
-        applicationServices  = new HashMap<>();
-        serviceQoSAttributes = new HashMap<>();
+        servicesByIRI       = new HashMap<>();
+        applicationServices = new HashMap<>();
+        qosAttributesByID   = new HashMap<>();
+        qosAttributesByIRI  = new HashMap<>();
+        qosSeries           = new HashMap<>();
+        qosSummaries        = new HashMap<>();
         
         // VAS -----------------------------------------------------------------
-        EccService serv = createServiceInstance( "Video Analytics Service (VAS)", "Provides on-slope video analytics" );
+        EccService serv           = createServiceInstance( "Video Analytics Service (VAS)", "Provides on-slope video analytics" );
         EccAttributeResultSet ars = new EccAttributeResultSet();
         
-        ars.addAttributeInfo( createQoSAttrInfo( "VAS average response time",
-                                                 "Time taken between query time and response being sent",
-                                                 "Seconds", "RATIO") );
+        // Average response time
+        EccAttributeInfo aInfo = createQoSAttrInfo( "VAS average response time", "Time taken between query time and response being sent", "Seconds", "RATIO");
+        UUID aID = UUID.fromString( aInfo.getMetricID() );
+        qosAttributesByID.put( aID, aInfo );
+        ars.addAttributeInfo( aInfo );
+        EccINTRATSeries series = createQoSDataSeries( aInfo.getName(), 0.0f, 5.0f, 1.8f, 400.0f, 60, 600 );
+        qosSeries.put( aID, series );
         
-        ars.addAttributeInfo( createQoSAttrInfo( "CPU Usage",
-                                                 "Current CPU usage",
-                                                 "%", "RATIO") );
+        // CPU Usage
+        aInfo = createQoSAttrInfo( "CPU Usage", "Current CPU usage", "%", "RATIO" );
+        aID = UUID.fromString( aInfo.getMetricID() );
+        qosAttributesByID.put( aID, aInfo );
+        ars.addAttributeInfo( aInfo );
+        series = createQoSDataSeries( aInfo.getName(), 0.0f, 33.0f, 1.25f, 90.0f, 60, 600 );
+        qosSeries.put( aID, series );
         
-        ars.addAttributeInfo( createQoSAttrInfo( "Memory Usage",
-                                                 "Current usage of available RAM",
-                                                 "%", "RATIO") );
+        // Memory usage
+        aInfo = createQoSAttrInfo( "Memory Usage", "Current memory usage", "%", "RATIO" );
+        aID = UUID.fromString( aInfo.getMetricID() );
+        qosAttributesByID.put( aID, aInfo );
+        ars.addAttributeInfo( aInfo );
+        series = createQoSDataSeries( aInfo.getName(), 0.0f, 25.0f, 1.1f, 80.0f, 60, 600 );
+        qosSeries.put( aID, series );
         
-        serviceQoSAttributes.put( serv.getIRI(), ars );
+        qosAttributesByIRI.put( serv.getIRI(), ars );
         
         // Twitter -------------------------------------------------------------
         serv = createServiceInstance( "Twitter Service", "Provides twitter feeds" );
-        ars = new EccAttributeResultSet();
+        ars  = new EccAttributeResultSet();
         
-        ars.addAttributeInfo( createQoSAttrInfo( "Twitter query response time",
-                                                 "Time taken between query time and response being sent",
-                                                 "Seconds", "RATIO") );
+        // Twitter response time
+        aInfo = createQoSAttrInfo( "Twitter query response time", "Time taken between query time and response being sent", "Seconds", "RATIO");
+        aID = UUID.fromString( aInfo.getMetricID() );
+        qosAttributesByID.put( aID, aInfo );
+        ars.addAttributeInfo( aInfo );
+        series = createQoSDataSeries( aInfo.getName(), 0.0f, 10.0f, 0.2f, 0.0f, 0, 600 );
+        qosSeries.put( aID, series );
         
-        ars.addAttributeInfo( createQoSAttrInfo( "Twitter server load",
-                                                 "Server load",
-                                                 "%", "RATIO") );
+        // Twitter server load        
+        aInfo = createQoSAttrInfo( "Twitter server load", "Server load", "%", "RATIO");
+        aID = UUID.fromString( aInfo.getMetricID() );
+        qosAttributesByID.put( aID, aInfo );
+        ars.addAttributeInfo( aInfo );
+        series = createQoSDataSeries( aInfo.getName(), 0.0f, 50.0f, 0.6f, 0.0f, 0, 600 );
+        qosSeries.put( aID, series );
         
-        ars.addAttributeInfo( createQoSAttrInfo( "Twitter server memory usage",
-                                                 "Current usage of available RAM",
-                                                 "%", "RATIO") );
+        // Twitter server memory usage        
+        aInfo = createQoSAttrInfo( "Twitter server memory usage", "Current usage of available RAM", "%", "RATIO");
+        aID = UUID.fromString( aInfo.getMetricID() );
+        qosAttributesByID.put( aID, aInfo );
+        ars.addAttributeInfo( aInfo );
+        series = createQoSDataSeries( aInfo.getName(), 0.0f, 100.0f, 0.2f, 0.0f, 0, 600 );
+        qosSeries.put( aID, series );
         
-        serviceQoSAttributes.put( serv.getIRI(), ars );
+        qosAttributesByIRI.put( serv.getIRI(), ars );
         
         // Weather -------------------------------------------------------------
         serv = createServiceInstance( "Weather Service", "Provides local weather data" );
         ars = new EccAttributeResultSet();
         
-        ars.addAttributeInfo( createQoSAttrInfo( "Weather service query response time",
-                                                 "Time taken between query time and response being sent",
-                                                 "Seconds", "RATIO") );
+        // Response time        
+        aInfo = createQoSAttrInfo( "Weather service query response time", "Time taken between query time and response being sent", "Seconds", "RATIO");
+        aID = UUID.fromString( aInfo.getMetricID() );
+        qosAttributesByID.put( aID, aInfo );
+        ars.addAttributeInfo( aInfo );
+        series = createQoSDataSeries( aInfo.getName(), 0.0f, 5.0f, 0.3f, 0.0f, 0, 600 );
+        qosSeries.put( aID, series );
         
-        ars.addAttributeInfo( createQoSAttrInfo( "Weather server load",
-                                                 "Server load",
-                                                 "%", "RATIO") );
+        // Server load        
+        aInfo = createQoSAttrInfo( "Weather server load", "Server load", "%", "RATIO");
+        aID = UUID.fromString( aInfo.getMetricID() );
+        qosAttributesByID.put( aID, aInfo );
+        ars.addAttributeInfo( aInfo );
+        series = createQoSDataSeries( aInfo.getName(), 0.0f, 50.0f, 0.2f, 0.0f, 0, 600 );
+        qosSeries.put( aID, series );
         
-        ars.addAttributeInfo( createQoSAttrInfo( "Weather server memory usage",
-                                                 "Current usage of available RAM",
-                                                 "%", "RATIO") );
+        // Memory usage        
+        aInfo = createQoSAttrInfo( "Weather server memory usage", "Current usage of available RAM", "%", "RATIO");
+        aID = UUID.fromString( aInfo.getMetricID() );
+        qosAttributesByID.put( aID, aInfo );
+        ars.addAttributeInfo( aInfo );
+        series = createQoSDataSeries( aInfo.getName(), 0.0f, 100.0f, 0.1f, 0.0f, 0, 600 );
+        qosSeries.put( aID, series );
         
-        serviceQoSAttributes.put( serv.getIRI(), ars );
+        qosAttributesByIRI.put( serv.getIRI(), ars );
         
         mapApplicationsToAllServices();
-
-        // Create generic QoS distribution data for each activity frame
-//        Random rand = new Random();
-//        int index = 0;
-//        for (EccActivity act : linearActivities) {
-//            float floor = rand.nextFloat() * 3.0f;
-//            float ceil = rand.nextFloat() * 10.0f;
-//            float avg = rand.nextFloat() + 5.0f;
-//
-//            // Artificially inflate QoS for Bob
-//            if (index > 0 || index < 4) {
-//                floor += 300.0f;
-//                ceil += 305.0f;
-//                avg += 302.0f;
-//            }
-//
-//            EccINTRATSummary dd = new EccINTRATSummary(qosAttribute, floor, ceil, avg);
-//
-//            qosDiscreteDistributionData.put(act.getStartTime(), dd);
-//            ++index;
-//        }
-//
-//        // Create dummy QoS data (we won't bother artificially raising this data)
-//        qosSeriesDemo = new ArrayList<>();
-//        Date ts = new Date(expStartDate.getTime());
-//        int maxRandomValueHigh = 32000;
-//        int minRandomValueHigh = 28000;
-//        int maxRandomValueLow = 22;
-//        int minRandomValueLow = 18;
-//        float value = 30000.0f;
-//
-//        for (int i = 0; i < 600; ++i) {
-//            EccMeasurement m = new EccMeasurement();
-//            m.setTimestamp(ts);
-//            m.setValue(Float.toString(value));
-//
-//            qosSeriesDemo.add(m);
-//
-//            // Update time & value
-//            ts = new Date(ts.getTime() + 60000);
-//
-//            if (i < 150) {
-//                value = rand.nextInt(maxRandomValueHigh - minRandomValueHigh) + minRandomValueHigh;
-//            } else {
-//                value = rand.nextInt(maxRandomValueLow - minRandomValueLow) + minRandomValueLow;
-//            }
-//        }
-//
-//        // Create dummy series highlights based on activities
-//        qosSeriesHighlights = new HashMap<>();
-//
-//        qosSeriesHighlights.put(AlicePART.getIRI(),
-//                createHiliteSeries("Alice's activities", 150, 160));
-//
-//        qosSeriesHighlights.put(BobPART.getIRI(),
-//                createHiliteSeries("Bob's activities", 10, 100));
-//
-//        qosSeriesHighlights.put(CarolPART.getIRI(),
-//                createHiliteSeries("Carol's activities", 400, 450));
     }
 
     private EccService createServiceInstance( String name, String desc )
@@ -754,32 +793,88 @@ public class ExplorerDemoData {
             }
         }
     }
-
-    private EccINTRATSeries createHiliteSeries(String key, int startIndex, int endIndex)
+    
+    private EccINTRATSeries createQoSDataSeries( String seriesKey,
+                                                 float  minValue,
+                                                 float  maxValue,
+                                                 float  changeRange,
+                                                 float  influence,
+                                                 int    influenceCount,
+                                                 int    count )
     {
-//        ArrayList<EccMeasurement> copyMeasures = new ArrayList<>();
-//
-//        int srcIndex = 0;
-//        for (EccMeasurement srcM : qosSeriesDemo) {
-//            // Create copy of measurement components
-//            Date targDate = new Date(srcM.getTimestamp().getTime());
-//            String targValue = null;
-//
-//            // Add the value if within index range
-//            if (srcIndex >= startIndex && srcIndex <= endIndex) {
-//                targValue = srcM.getValue();
-//            }
-//
-//            // Add the duplicated measurement
-//            copyMeasures.add(new EccMeasurement(targDate, targValue));
-//
-//            ++srcIndex;
-//        }
-//
-//        // Return new series
-//        return new EccINTRATSeries(key, true, copyMeasures);
-
-        return null;
+        ArrayList<EccMeasurement> dataSeries = new ArrayList<>();
+        
+        Date ts     = new Date( expStartDate.getTime() );
+        float value = 0.0f;
+        Random rand = new Random();
+        
+        for ( int i = 0; i < count; i++ )
+        {
+            // Create measurement and add to data set
+            EccMeasurement m = new EccMeasurement();
+            m.setTimestamp( ts );
+            dataSeries.add( m );
+            
+            // Update next value
+            value += ( rand.nextFloat() * changeRange ) - (rand.nextFloat() * changeRange);
+            
+            // Boundary
+            if ( value < minValue ) value = minValue;
+            else if ( value > maxValue ) value = maxValue;
+            
+            // Set measurement value with influence (or not)
+            if ( influenceCount > 0 )
+            {
+                float infValue = influence + value;
+                
+                // Check just floor boundary with influence
+                if ( infValue < minValue ) infValue = minValue;
+                
+                m.setValue( Float.toString(infValue) );
+                --influenceCount;
+            }
+            else 
+                m.setValue( Float.toString(value) );
+            
+            // Update next time stamp
+            ts = new Date( ts.getTime() + 60000 );
+        }
+        
+        return new EccINTRATSeries( seriesKey, false, dataSeries );
+    }
+    
+    private EccINTRATSeries createHiliteSeries( String newKey, EccINTRATSeries srcSeries, ArrayList<EccActivity> actList )
+    {        
+        // Copy source series data
+        ArrayList<EccMeasurement> targMeasures = new ArrayList<>();
+        for ( EccMeasurement srcM : srcSeries.getValues() )
+        {
+            EccMeasurement targM = new EccMeasurement( srcM );
+            targMeasures.add( targM );
+        }
+        
+        // Run through list making null those measurements that do not match activity start or end times
+        for ( EccMeasurement targM : targMeasures )
+        {
+            // See if it falls within activity set
+            boolean makeNull = true;
+            
+            for ( EccActivity act : actList )
+            {
+                Date actStart = act.getStartTime();
+                Date actEnd   = act.getEndTime();
+                Date mStamp   = targM.getTimestamp();
+                
+                if ( (mStamp.equals(actStart) || mStamp.after(actStart)) &&
+                     (mStamp.equals(actEnd)   || mStamp.before(actEnd)) )
+                    makeNull = false;
+            }
+            
+            // Nullify value if not in set
+            if ( makeNull ) targM.setValue( null );
+        }
+        
+        return new EccINTRATSeries( newKey, true, targMeasures );
     }
 
 }

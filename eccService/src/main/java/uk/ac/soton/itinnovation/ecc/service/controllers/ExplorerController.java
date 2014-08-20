@@ -208,13 +208,13 @@ public class ExplorerController {
     @RequestMapping(method = RequestMethod.GET, value = "/{expID}/attributes/distribution/qos")
     @ResponseBody
     public EccINTRATSummary getINTRATAttributeDistributionSummary(@PathVariable UUID expID,
-            @RequestParam(value = "attrID", defaultValue = "") UUID attrID) {
+                                                                  @RequestParam(value = "attrID", defaultValue = "") UUID attrID) {
 
         EccINTRATSummary result = null;
 
         if (explorerService != null && explorerService.isReady() && expID != null && attrID != null) {
 //            result = explorerService.getINTRATAttrDistribution(expID, attrID);
-            result = demoData.getQosSummary();
+            result = demoData.getQosSummary( attrID );
         } else {
             logger.error("Could not execute explorer service: service is null/not ready/parameters are invalid");
         }
@@ -371,7 +371,7 @@ public class ExplorerController {
 
         if (explorerService != null && explorerService.isReady() && expID != null && IRI != null) {
 //            result = explorerService.getProvenanceAttributeSet(expID, IRI);
-            result = demoData.serviceQoSAttributes.get(IRI);
+            result = demoData.qosAttributesByIRI.get(IRI);
         } else {
             logger.error("Could not execute explorer service: service is null");
         }
