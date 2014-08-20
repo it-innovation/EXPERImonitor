@@ -890,7 +890,7 @@ public class ExplorerDemoData {
         UUID aID = UUID.fromString( aInfo.getMetricID() );
         qosAttributesByID.put( aID, aInfo );
         ars.addAttributeInfo( aInfo );
-        EccINTRATSeries series = createQoSDataSeries( aInfo.getName(), 0.0f, 5.0f, 1.8f, 400.0f, 180, 840 );
+        EccINTRATSeries series = createQoSDataSeries( aInfo.getName(), 1.0f, 5.0f, 1.8f, 400.0f, 180, 840 );
         qosSeries.put( aID, series );
         
         // CPU Usage
@@ -920,7 +920,7 @@ public class ExplorerDemoData {
         aID = UUID.fromString( aInfo.getMetricID() );
         qosAttributesByID.put( aID, aInfo );
         ars.addAttributeInfo( aInfo );
-        series = createQoSDataSeries( aInfo.getName(), 0.0f, 10.0f, 0.2f, 0.0f, 0, 840 );
+        series = createQoSDataSeries( aInfo.getName(), 1.0f, 10.0f, 0.2f, 0.0f, 0, 840 );
         qosSeries.put( aID, series );
         
         // Twitter server load        
@@ -928,7 +928,7 @@ public class ExplorerDemoData {
         aID = UUID.fromString( aInfo.getMetricID() );
         qosAttributesByID.put( aID, aInfo );
         ars.addAttributeInfo( aInfo );
-        series = createQoSDataSeries( aInfo.getName(), 0.0f, 50.0f, 0.6f, 0.0f, 0, 840 );
+        series = createQoSDataSeries( aInfo.getName(), 1.0f, 50.0f, 0.6f, 0.0f, 0, 840 );
         qosSeries.put( aID, series );
         
         // Twitter server memory usage        
@@ -936,7 +936,7 @@ public class ExplorerDemoData {
         aID = UUID.fromString( aInfo.getMetricID() );
         qosAttributesByID.put( aID, aInfo );
         ars.addAttributeInfo( aInfo );
-        series = createQoSDataSeries( aInfo.getName(), 0.0f, 100.0f, 0.2f, 0.0f, 0, 840 );
+        series = createQoSDataSeries( aInfo.getName(), 1.0f, 100.0f, 0.2f, 0.0f, 0, 840 );
         qosSeries.put( aID, series );
         
         qosAttributesByIRI.put( serv.getIRI(), ars );
@@ -950,7 +950,7 @@ public class ExplorerDemoData {
         aID = UUID.fromString( aInfo.getMetricID() );
         qosAttributesByID.put( aID, aInfo );
         ars.addAttributeInfo( aInfo );
-        series = createQoSDataSeries( aInfo.getName(), 0.0f, 5.0f, 0.3f, 0.0f, 0, 840 );
+        series = createQoSDataSeries( aInfo.getName(), 1.0f, 5.0f, 0.3f, 0.0f, 0, 840 );
         qosSeries.put( aID, series );
         
         // Server load        
@@ -958,7 +958,7 @@ public class ExplorerDemoData {
         aID = UUID.fromString( aInfo.getMetricID() );
         qosAttributesByID.put( aID, aInfo );
         ars.addAttributeInfo( aInfo );
-        series = createQoSDataSeries( aInfo.getName(), 0.0f, 50.0f, 0.2f, 0.0f, 0, 840 );
+        series = createQoSDataSeries( aInfo.getName(), 1.0f, 50.0f, 0.2f, 0.0f, 0, 840 );
         qosSeries.put( aID, series );
         
         // Memory usage        
@@ -966,7 +966,7 @@ public class ExplorerDemoData {
         aID = UUID.fromString( aInfo.getMetricID() );
         qosAttributesByID.put( aID, aInfo );
         ars.addAttributeInfo( aInfo );
-        series = createQoSDataSeries( aInfo.getName(), 0.0f, 100.0f, 0.1f, 0.0f, 0, 840 );
+        series = createQoSDataSeries( aInfo.getName(), 1.0f, 100.0f, 0.1f, 0.0f, 0, 840 );
         qosSeries.put( aID, series );
         
         qosAttributesByIRI.put( serv.getIRI(), ars );
@@ -1110,26 +1110,30 @@ public class ExplorerDemoData {
             targMeasures.add( targM );
         }
         
-        // Run through list making null those measurements that do not match activity start or end times
-        for ( EccMeasurement targM : targMeasures )
-        {
+        // Run through list making null those measurements that match within time slices
+        for ( int i = 0; i < targMeasures.size() -1; ++i )
+        {          
+            Date m1Start = targMeasures.get( i ).getTimestamp();
+            Date m2Start = targMeasures.get( i +1 ).getTimestamp();
+            
             // See if it falls within activity set
             boolean makeNull = true;
             
             for ( EccActivity act : actList )
             {
-                Date actStart = act.getStartTime();
-                Date actEnd   = act.getEndTime();
-                Date mStamp   = targM.getTimestamp();
+                Date actStamp = act.getStartTime();
                 
-                if ( (mStamp.equals(actStart) || mStamp.after(actStart)) &&
-                     (mStamp.equals(actEnd)   || mStamp.before(actEnd)) )
+                // If measurement data within an activity range
+                if ( (actStamp.equals(m1Start) || actStamp.after(m1Start)) && actStamp.before(m2Start) )
                     makeNull = false;
             }
             
-            // Nullify value if not in set
-            if ( makeNull ) targM.setValue( null );
+            // Make measurement null if not in activity ranges
+            if ( makeNull ) targMeasures.get( i ).setValue( null );
         }
+        
+        // Always make last measurement null
+        targMeasures.get( targMeasures.size() - 1 ).setValue( null );
         
         return new EccINTRATSeries( newKey, true, targMeasures );
     }
