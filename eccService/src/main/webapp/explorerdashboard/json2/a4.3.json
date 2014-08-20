@@ -4,7 +4,8 @@
     "values": [
       {
         "label": "Ease of use",
-        "count": 4
+        "count": 4,
+        "attrib": "fff"
       },
       {
         "label": "Usefulness",

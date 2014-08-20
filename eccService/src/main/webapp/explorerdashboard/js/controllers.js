@@ -45,7 +45,8 @@ appControllers.controller('ParticipantController', ['$scope', '$http', function(
         if($scope.participantSelection === null && $scope.attributeSelection === null){
         // -- this shows a viz of all participants and all attributes
             $('#selectedParticipants, #selectedAttributes').hide();
-            d3.json(BASE_URL + "/explorer/" + EXP_ID + "/participants/distribution/stratified", function(data) {
+            d3.json("json2/a4.3.json", function(data) {
+//            d3.json(BASE_URL + "/explorer/" + EXP_ID + "/participants/distribution/stratified", function(data) {
                 $('#attribBarChart svg, #attribDonutChart svg').hide();
                 $('#allQoEChart svg').show().height(CHART_HEIGHT);
                 nv.addGraph(function() {
@@ -164,7 +165,7 @@ appControllers.controller('ParticipantController', ['$scope', '$http', function(
     };    
 }]);
 
-appControllers.controller('DetailsController', ['$scope', '$http', '$routeParams', function($scope, $http, $routeParams) {
+appControllers.controller('DetailsController', ['$scope', '$http', '$routeParams', 'ngTableParams', function($scope, $http, $routeParams, ngTableParams) {
     $http.get(BASE_URL + "/explorer/" + EXP_ID + "/participants").success(function(data) {
         $scope.participants = data.participants;
     });
@@ -182,10 +183,19 @@ appControllers.controller('DetailsController', ['$scope', '$http', '$routeParams
             $scope.activityInstances = data.activities;
             $scope.numActivities = data.activityTotal;
             var actIRI = data.activities[0].iri;
+            $scope.tableParams = new ngTableParams({
+                page: 1,            // show first page
+                count: 5           // count per page
+            }, {
+                total: data.activities.length, // length of data
+                getData: function($defer, params) {
+                    $defer.resolve(data.activities.slice((params.page() - 1) * params.count(), params.page() * params.count()));
+                }
+            });
             $.get( BASE_URL + "/explorer/" + EXP_ID + "/activities/iri/applications?IRI=" + encodeURIComponent(actIRI), function( data ) {
                 $scope.applications = data.applications;
             });
-        });
+        }); 
         $('#applications').show();
     };
     $scope.getServices = function(){
@@ -207,7 +217,7 @@ appControllers.controller('DetailsController', ['$scope', '$http', '$routeParams
             nv.addGraph(function() {
                 var chart = nv.models.lineChart()
                     .x(function(d) { return d.timestamp; })
-                    .y(function(d) { return d.value; })
+                    .y(function(d) { return d.value/10; })
                     .useInteractiveGuideline(true)
                     .color(d3.scale.category10().range())
                     .isArea(true);

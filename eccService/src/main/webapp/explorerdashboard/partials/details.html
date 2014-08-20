@@ -2,67 +2,65 @@
 <hr>
 <div class="row" ng-model="participants">
     <div class="large-3 columns">
-        <label>Participants</label>
-        <select 
+        <label>Participants
+            <select 
             ng-model="participantSelection" 
             ng-init="getActivities()"
             ng-change="getActivities()"
             ng-options="participant.iri as participant.name for participant in participants">
         </select>
-    </div>
-    <div id="activities" class="large-3 columns">
-        <label>Activities<strong></strong></label>
-        <select 
+        </label>
+        <label id="activities" >Activities<strong></strong>
+            <select 
             ng-change="getActivityInstancesNApps()"
             ng-model="activitySelection" 
             ng-options="activity.label for activity in activities"></select>
-    </div>
-    <div id="applications" class="large-3 columns">
-        <label>Applications<strong></strong></label>
-        <select 
+        </label>
+        <label id="applications">Applications
+            <select 
             ng-change="getServices()"
             ng-model="applicationSelection" 
             ng-options="app.name for app in applications"></select>
-    </div>
-    <div id="services" class="large-3 columns">
-        <label>Services<strong></strong></label>
-        <select 
+        </label>
+        <label id="services">Services
+            <select 
             ng-change="getServiceMetrics()"
             ng-model="serviceSelection" 
             ng-options="service.name for service in services" ></select>
-    </div>
-    <div id="serviceMetrics" class="large-3 columns">
-        <label>Service Metrics<strong></strong></label>
-        <select 
+        </label>
+        <label id="serviceMetrics">Service Metrics
+            <select 
             ng-change="timeSeries()"
             ng-model="serviceMetricSelection" 
             ng-options="serviceMetric.name for serviceMetric in serviceMetrics" ></select>
 <!--        <button ng-click="" class="small button">Visualize</button>-->
+        </label>
     </div>
-</div>
-<div class="row">
-<!--    <div class="large-7 columns" ng-model="activityInstances">
-        <h5>Activities</h5>
-        <h6>Number of Activity Instances: <strong>{{numActivities}}</strong></h6>
-        <table>
-            <thead>
-                <tr>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Start Time</th>
-                <th>End Time</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr ng-repeat="activity in activityInstances">
-                <td>{{activity.name}}</td>
-                <td>{{activity.description}}</td>
-                <td>{{activity.startTime}}</td>
-                <td>{{activity.endTime}}</td>
-              </tr>
-            </tbody>
-        </table>
-    </div>-->
+    <div class="large-9 columns">
+        <div ng-model="activityInstances">
+            <h6>Activity Instances: <strong>{{numActivities}}</strong></h6>
+            <p><strong>Page:</strong> {{tableParams.page()}}</p>
+            <p><strong>Count per page:</strong> {{tableParams.count()}}</p> 
+            <table ng-table="tableParams">
+                <thead>
+                    <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="activity in activityInstances">
+                    <td>{{activity.name}}</td>
+                    <td>{{activity.description}}</td>
+                    <td>{{activity.startTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+                    <td>{{activity.endTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+                  </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
     <div id="qosChart">
         <svg></svg>
     </div>
