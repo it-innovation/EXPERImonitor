@@ -496,7 +496,7 @@ public class ExplorerDemoData {
         questionnaire.addAnswer(new Answer(frank, q3, answers[2]));
         qoeParticipantSummaryData.put(FrankPART.getIRI(), ps);
 
-        answers = new int[]{4, 4, 3};
+        answers = new int[]{4, 3, 3};
         ps = new EccNOMORDParticipantSummary(GemmaPART);
         ps.addORDINALResponse(qoeAttrONE.getName(), getStringForIndexStartingAtOne(qoeAttrONE.getMetaContent(), answers[0]), answers[0]);
         questionnaire.addAnswer(new Answer(gemma, q1, answers[0]));
@@ -526,7 +526,7 @@ public class ExplorerDemoData {
         questionnaire.addAnswer(new Answer(imogen, q3, answers[2]));
         qoeParticipantSummaryData.put(ImogenPART.getIRI(), ps);
 
-        answers = new int[]{4, 4, 4};
+        answers = new int[]{4, 3, 4};
         ps = new EccNOMORDParticipantSummary(JuliePART);
         ps.addORDINALResponse(qoeAttrONE.getName(), getStringForIndexStartingAtOne(qoeAttrONE.getMetaContent(), answers[0]), answers[0]);
         questionnaire.addAnswer(new Answer(julie, q1, answers[0]));
