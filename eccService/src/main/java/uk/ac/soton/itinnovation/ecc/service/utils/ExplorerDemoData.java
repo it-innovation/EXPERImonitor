@@ -916,7 +916,7 @@ public class ExplorerDemoData {
         aID = UUID.fromString( aInfo.getMetricID() );
         qosAttributesByID.put( aID, aInfo );
         ars.addAttributeInfo( aInfo );
-        series = createQoSDataSeries( aInfo.getName(), 20.0f, 19.0f, 1.25f, 80.0f, 180, 840 );
+        series = createQoSDataSeries( aInfo.getName(), 12.0f, 20.0f, 1.25f, 80.0f, 180, 840 );
         qosSeries.put( aID, series );
         
         // Memory usage
