@@ -170,6 +170,17 @@ public class ExplorerDemoData {
         return participantActivities.get(partIRI);
     }
 
+    public EccParticipantActivityResultSet getActivitiesByParticipantAndName(String partIRI, String actLabel) {
+        EccParticipantActivityResultSet all = participantActivities.get(partIRI);
+        EccParticipantActivityResultSet filtered = new EccParticipantActivityResultSet(all.getParticipant());
+        for (EccActivity item: all.getActivities()) {
+            if (item.getName().equals(actLabel)) {
+                filtered.addActivity(item);
+            }
+        }
+        return filtered;
+    }
+        
     public EccActivityApplicationResultSet getApplicationsByActivity(String actIRI) {
         return activityApplications.get(actIRI);
     }
@@ -266,7 +277,7 @@ public class ExplorerDemoData {
                         targActs.add( act );
                 
                 // Create a highlight series based on activity time frame
-                String seriesName = srcSeries.getKey() + " (" + pars.getParticipant().getName() + ")";
+                String seriesName = pars.getParticipant().getName() + "'s";
                 hilights = createHiliteSeries( seriesName, srcSeries, targActs );
             }
             
@@ -905,7 +916,7 @@ public class ExplorerDemoData {
         aID = UUID.fromString( aInfo.getMetricID() );
         qosAttributesByID.put( aID, aInfo );
         ars.addAttributeInfo( aInfo );
-        series = createQoSDataSeries( aInfo.getName(), 0.0f, 33.0f, 1.25f, 90.0f, 180, 840 );
+        series = createQoSDataSeries( aInfo.getName(), 20.0f, 19.0f, 1.25f, 80.0f, 180, 840 );
         qosSeries.put( aID, series );
         
         // Memory usage
@@ -913,7 +924,7 @@ public class ExplorerDemoData {
         aID = UUID.fromString( aInfo.getMetricID() );
         qosAttributesByID.put( aID, aInfo );
         ars.addAttributeInfo( aInfo );
-        series = createQoSDataSeries( aInfo.getName(), 0.0f, 25.0f, 1.1f, 80.0f, 180, 840 );
+        series = createQoSDataSeries( aInfo.getName(), 30.0f, 39.0f, 1.1f, 60.0f, 180, 840 );
         qosSeries.put( aID, series );
         
         qosAttributesByIRI.put( serv.getIRI(), ars );
@@ -935,7 +946,7 @@ public class ExplorerDemoData {
         aID = UUID.fromString( aInfo.getMetricID() );
         qosAttributesByID.put( aID, aInfo );
         ars.addAttributeInfo( aInfo );
-        series = createQoSDataSeries( aInfo.getName(), 1.0f, 50.0f, 0.6f, 0.0f, 0, 840 );
+        series = createQoSDataSeries( aInfo.getName(), 10.0f, 50.0f, 0.6f, 0.0f, 0, 840 );
         qosSeries.put( aID, series );
         
         // Twitter server memory usage        
@@ -943,7 +954,7 @@ public class ExplorerDemoData {
         aID = UUID.fromString( aInfo.getMetricID() );
         qosAttributesByID.put( aID, aInfo );
         ars.addAttributeInfo( aInfo );
-        series = createQoSDataSeries( aInfo.getName(), 1.0f, 100.0f, 0.2f, 0.0f, 0, 840 );
+        series = createQoSDataSeries( aInfo.getName(), 15.0f, 100.0f, 0.2f, 0.0f, 0, 840 );
         qosSeries.put( aID, series );
         
         qosAttributesByIRI.put( serv.getIRI(), ars );
@@ -965,7 +976,7 @@ public class ExplorerDemoData {
         aID = UUID.fromString( aInfo.getMetricID() );
         qosAttributesByID.put( aID, aInfo );
         ars.addAttributeInfo( aInfo );
-        series = createQoSDataSeries( aInfo.getName(), 1.0f, 50.0f, 0.2f, 0.0f, 0, 840 );
+        series = createQoSDataSeries( aInfo.getName(), 10.0f, 50.0f, 0.2f, 0.0f, 0, 840 );
         qosSeries.put( aID, series );
         
         // Memory usage        
@@ -973,7 +984,7 @@ public class ExplorerDemoData {
         aID = UUID.fromString( aInfo.getMetricID() );
         qosAttributesByID.put( aID, aInfo );
         ars.addAttributeInfo( aInfo );
-        series = createQoSDataSeries( aInfo.getName(), 1.0f, 100.0f, 0.1f, 0.0f, 0, 840 );
+        series = createQoSDataSeries( aInfo.getName(), 20.0f, 100.0f, 0.1f, 0.0f, 0, 840 );
         qosSeries.put( aID, series );
         
         qosAttributesByIRI.put( serv.getIRI(), ars );

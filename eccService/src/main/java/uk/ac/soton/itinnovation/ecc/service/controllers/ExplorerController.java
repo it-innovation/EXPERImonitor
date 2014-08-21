@@ -300,7 +300,7 @@ public class ExplorerController {
 
         if (explorerService != null && explorerService.isReady() && expID != null && IRI != null && actLabel != null) {
 //            result = explorerService.getPartActivitiesByName(expID, IRI, actLabel);
-            result = demoData.getActivitiesByParticipant(IRI);
+            result = demoData.getActivitiesByParticipantAndName(IRI, actLabel);
         } else {
             logger.error("Could not execute explorer service: service is null");
         }
