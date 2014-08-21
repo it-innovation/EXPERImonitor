@@ -1,9 +1,8 @@
-//var BASE_URL = "http://" + $(location).attr('host') + "/" + $(location).attr('href').split('/')[3];
-var BASE_URL = "http://zts14:8080/EccService-2.1";
+var BASE_URL = "http://" + $(location).attr('host') + "/" + $(location).attr('href').split('/')[3];
 var EXP_ID;
 var CHART_HEIGHT = 500;
 
-var appControllers = angular.module('appControllers', ['angular-loading-bar', 'ngTable']);
+var appControllers = angular.module('appControllers', ['angular-loading-bar']);
 
 appControllers.controller('MainController', ['$scope', function($scope) {
         $scope.experiments = [
@@ -164,7 +163,8 @@ appControllers.controller('ParticipantController', ['$scope', '$http', function(
     };    
 }]);
 
-appControllers.controller('DetailsController', ['$scope', '$http', '$routeParams', 'ngTableParams', function($scope, $http, $routeParams, ngTableParams) {
+appControllers.controller('DetailsController', ['$scope', '$http', '$routeParams', function($scope, $http, $routeParams) {
+    $('#activityInstances').hide();
     $http.get(BASE_URL + "/explorer/" + EXP_ID + "/participants").success(function(data) {
         $scope.participants = data.participants;
     });
@@ -180,24 +180,13 @@ appControllers.controller('DetailsController', ['$scope', '$http', '$routeParams
     };
     $scope.getActivityInstancesNApps = function(){
         $.get(BASE_URL + "/explorer/" + EXP_ID + "/participants/iri/activities/select?IRI=" + encodeURIComponent($scope.participantSelection)+ "&actLabel=" + encodeURIComponent($scope.activitySelection.label)).success(function(data) {
-            console.log(data);
             $scope.activityInstances = data.activities;
-            $scope.numActivities = data.activityTotal;
+            $('#activityInstances, #applications').show();
             var actIRI = data.activities[0].iri;
-            $scope.tableParams = new ngTableParams({
-                page: 1,            // show first page
-                count: 5           // count per page
-            }, {
-                total: data.activities.length, // length of data
-                getData: function($defer, params) {
-                    $defer.resolve(data.activities.slice((params.page() - 1) * params.count(), params.page() * params.count()));
-                }
-            });
             $.get( BASE_URL + "/explorer/" + EXP_ID + "/activities/iri/applications?IRI=" + encodeURIComponent(actIRI), function( data ) {
                 $scope.applications = data.applications;
             });
         }); 
-        $('#applications').show();
     };
     $scope.getServices = function(){
         $.get( BASE_URL + "/explorer/" + EXP_ID + "/applications/iri/services?IRI=" + encodeURIComponent($scope.applicationSelection.iri), function( data ) {
@@ -229,7 +218,7 @@ appControllers.controller('DetailsController', ['$scope', '$http', '$routeParams
                     .showMaxMin(true)
                     .tickFormat(function(d) { return d3.time.format('%X')(new Date(d)); });
                 chart.yAxis
-                    .axisLabel(units())
+                    .axisLabel(units(data.seriesSet[0].key))
                     .tickFormat(d3.format(',.2f'));
                 d3.select('#qosChart svg')
                     .datum(data.seriesSet)
@@ -239,13 +228,13 @@ appControllers.controller('DetailsController', ['$scope', '$http', '$routeParams
                 return chart;
             });
             // TODO -- get service metric units from service once implemented
-            function units(){
-                if($scope.serviceMetricSelection.metricID === '26833588-e95d-431f-a275-ea133bf7f4a3'){
-                    return 'Memory Usage (%)';
-                } else if ($scope.serviceMetricSelection.metricID === '65dd7d0d-3974-40fa-8a84-6a2f0d91a03a'){
+            function units(key){
+                if(key === 'Average response time'){
                     return 'Response Time (s)';
-                } else if ($scope.serviceMetricSelection.metricID === 'a8a5ee9f-cb58-4b38-84e0-d9397b979a54'){
+                } else if (key === 'CPU Usage'){
                     return 'CPU Usage (%)';
+                } else if (key === 'Memory Usage'){
+                    return 'Memory Usage (%)';
                 }
             }
         });

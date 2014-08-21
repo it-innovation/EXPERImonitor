@@ -42,31 +42,28 @@
                 }
                 return data;
             }
-               console.log(JSON.stringify(dp));
             
-            //d3.json("scatter.json", function(error, data){
-                nv.addGraph(function() {
-                    var chart;
-                    chart = nv.models.scatterChart()
-                        .x(function(d){ return d.qos; })
-                        .y(function(d){ return d.qoe; })
-                        .sizeRange([400,400])
-                        .showDistX(true)
-                        .showDistY(true);
-                    chart.xAxis
-                        .tickFormat(d3.format('.02f'));
-                    chart.yAxis
-                        .tickFormat(d3.format('.01f'));
-                    chart.tooltipContent(function(key) { return "<h3>" + key + "</h3>"; });
-                    d3.select('#test10 svg')
-                        .datum(dp)
-                        .transition()
-                        .duration(500)
-                        .call(chart);
-                    nv.utils.windowResize(chart.update);
-                    return chart;
-                });
-            //});
+            nv.addGraph(function() {
+                var chart;
+                chart = nv.models.scatterChart()
+                    .x(function(d){ return d.qos; })
+                    .y(function(d){ return d.qoe; })
+                    .sizeRange([400,400])
+                    .showDistX(true)
+                    .showDistY(true);
+                chart.xAxis
+                    .tickFormat(d3.format('.02f'));
+                chart.yAxis
+                    .tickFormat(d3.format('.01f'));
+                chart.tooltipContent(function(key) { return "<h3>" + key + "</h3>"; });
+                d3.select('#test10 svg')
+                    .datum(dp)
+                    .transition()
+                    .duration(500)
+                    .call(chart);
+                nv.utils.windowResize(chart.update);
+                return chart;
+            });
         </script>
     </body>
 </html>

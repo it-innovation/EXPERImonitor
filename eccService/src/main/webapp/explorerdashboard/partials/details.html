@@ -9,10 +9,10 @@
             ng-options="participant.iri as participant.name for participant in participants">
         </select>
         </label>
-        <label id="activities" >Activities<strong></strong>
+        <label id="activities">Activities
             <select 
-            ng-change="getActivityInstancesNApps()"
             ng-model="activitySelection" 
+            ng-change="getActivityInstancesNApps()"
             ng-options="activity.label for activity in activities"></select>
         </label>
         <label id="applications">Applications
@@ -32,13 +32,12 @@
             ng-change="timeSeries()"
             ng-model="serviceMetricSelection" 
             ng-options="serviceMetric.name for serviceMetric in serviceMetrics" ></select>
-<!--        <button ng-click="" class="small button">Visualize</button>-->
         </label>
     </div>
     <div class="large-9 columns">
-        <div ng-model="activityInstances">
-            <h6>Activity Instances: <strong>{{numActivities}}</strong> Page: {{tableParams.page()}} Count per page: {{tableParams.count()}}</h6>
-            <table ng-table="tableParams">
+        <div id="activityInstances" ng-model="activityInstances">
+            <h6>Activity Instances: <strong>{{activityInstances.length}}</strong></h6>
+            <table>
                 <thead>
                     <tr>
                     <th>Name</th>
