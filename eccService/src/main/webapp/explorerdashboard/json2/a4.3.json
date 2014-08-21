@@ -1,109 +1,76 @@
-[
-  {
-    "key": "1 of 5",
-    "values": [
-      {
-        "label": "Ease of use",
-        "count": 4,
-        "attrib": "fff"
-      },
-      {
-        "label": "Usefulness",
-        "count": 2
-      },
-      {
-        "label": "Responsiveness",
-        "count": 3
-      },
-      {
-        "label": "Aesthetics",
-        "count": 4
-      }
-    ]
-  },
-  {
-    "key": "2 of 5",
-    "values": [
-      {
-        "label": "Ease of use",
-        "count": 3
-      },
-      {
-        "label": "Usefulness",
-        "count": 4
-      },
-      {
-        "label": "Responsiveness",
-        "count": 3
-      },
-      {
-        "label": "Aesthetics",
-        "count": 5
-      }
-    ]
-  },
-  {
-    "key": "3 of 5",
-    "values": [
-      {
-        "label": "Ease of use",
-        "count": 2
-      },
-      {
-        "label": "Usefulness",
-        "count": 4
-      },
-      {
-        "label": "Responsiveness",
-        "count": 4
-      },
-      {
-        "label": "Aesthetics",
-        "count": 3
-      }
-    ]
-  },
-  {
-    "key": "4 of 5",
-    "values": [
-      {
-        "label": "Ease of use",
-        "count": 5
-      },
-      {
-        "label": "Usefulness",
-        "count": 3
-      },
-      {
-        "label": "Responsiveness",
-        "count": 6
-      },
-      {
-        "label": "Aesthetics",
-        "count": 3
-      }
-    ]
-  },
-  {
-    "key": "5 of 5",
-    "values": [
-      {
-        "label": "Ease of use",
-        "count": 5
-      },
-      {
-        "label": "Usefulness",
-        "count": 6
-      },
-      {
-        "label": "Responsiveness",
-        "count": 3
-      },
-      {
-        "label": "Aesthetics",
-        "count": 4
-      }
-    ]
-  }
-]
-
+[{
+        "key": "1 of 5",
+        "values": [{
+                "label": "Ease of use",
+                "count": 0,
+                "labelValue": "difficult"
+            }, {
+                "label": "Usefulness",
+                "count": 0,
+                "labelValue": "not very useful"
+            }, {
+                "label": "Responsiveness",
+                "count": 1,
+                "labelValue": "not very responsive"
+            }]
+    }, {
+        "key": "2 of 5",
+        "values": [{
+                "label": "Ease of use",
+                "count": 0,
+                "labelValue": "not easy/difficult"
+            }, {
+                "label": "Usefulness",
+                "count": 1,
+                "labelValue": "sometimes useful"
+            }, {
+                "label": "Responsiveness",
+                "count": 0,
+                "labelValue": "moderately responsive"
+            }]
+    }, {
+        "key": "3 of 5",
+        "values": [{
+                "label": "Ease of use",
+                "count": 3,
+                "labelValue": "easy"
+            }, {
+                "label": "Usefulness",
+                "count": 0,
+                "labelValue": "often useful"
+            }, {
+                "label": "Responsiveness",
+                "count": 2,
+                "labelValue": "quite responsive"
+            }]
+    }, {
+        "key": "4 of 5",
+        "values": [{
+                "label": "Ease of use",
+                "count": 4,
+                "labelValue": "very easy"
+            }, {
+                "label": "Usefulness",
+                "count": 4,
+                "labelValue": "always useful"
+            }, {
+                "label": "Responsiveness",
+                "count": 3,
+                "labelValue": "very responsive"
+            }]
+    }, {
+        "key": "5 of 5",
+        "values": [{
+                "label": "Ease of use",
+                "count": 3,
+                "labelValue": "Unknown"
+            }, {
+                "label": "Usefulness",
+                "count": 5,
+                "labelValue": "Unknown"
+            }, {
+                "label": "Responsiveness",
+                "count": 4,
+                "labelValue": "Unknown"
+            }]
+    }]

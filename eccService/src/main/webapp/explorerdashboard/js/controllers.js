@@ -44,9 +44,8 @@ appControllers.controller('ParticipantController', ['$scope', '$http', function(
     $scope.viz = function(){
         if($scope.participantSelection === null && $scope.attributeSelection === null){
         // -- this shows a viz of all participants and all attributes
-            $('#selectedParticipants, #selectedAttributes').hide();
-            d3.json("json2/a4.3.json", function(data) {
-//            d3.json(BASE_URL + "/explorer/" + EXP_ID + "/participants/distribution/stratified", function(data) {
+            $('#selectedParticipants').hide();
+            d3.json(BASE_URL + "/explorer/" + EXP_ID + "/participants/distribution/stratified", function(data) {
                 $('#attribBarChart svg, #attribDonutChart svg').hide();
                 $('#allQoEChart svg').show().height(CHART_HEIGHT);
                 nv.addGraph(function() {
@@ -55,7 +54,7 @@ appControllers.controller('ParticipantController', ['$scope', '$http', function(
                         .y(function(d) { return d.count; })
                         .margin({top: 50, right: 40, bottom: 50, left: 100})
                         .showValues(false)
-                        .tooltipContent(function(key, label, count) { return '<p><strong>' + count + ' participants</strong> selected ' + key + ' for ' + label + '</p>' ; })
+                        .tooltipContent(function(key, label, count, e) { return '<p><strong>' + count + ' participants</strong> selected ' + e.point.labelValue + ' for ' + label + '</p>' ; })
                         .color(d3.scale.customColors().range())
                         .transitionDuration(350)
                         .stacked(true)
@@ -67,23 +66,23 @@ appControllers.controller('ParticipantController', ['$scope', '$http', function(
                         .call(chart);
                     nv.utils.windowResize(chart.update);
                     chart.multibar.dispatch.on("elementClick", function(e) {
-                        $('#selectedParticipants, #selectedAttributes, #selectedAttributes h6').show();
+                        $('#selectedParticipants').show();
                         $('#selectedParticipants h6').html("<strong>" + e.point.size + " participants</strong>");
-                        $('#selectedAttributes h6').html("QoE of <strong>" + e.series.key + "</strong> for <strong>" + e.point.label + "</strong>");
-                        $http.get(BASE_URL + "/explorer/" + EXP_ID + "/participants/attributes/select?attrName=" + encodeURIComponent(e.point.label) + "&nomOrdLabel=" + encodeURIComponent(e.series.key)).success(function(data) {
+                        $('#selectedAttributes h6').html("QoE of <strong>" + e.point.labelValue + "</strong> for <strong>" + e.point.label + "</strong>");
+                        $http.get(BASE_URL + "/explorer/" + EXP_ID + "/participants/attributes/select?attrName=" + encodeURIComponent(e.point.label) + "&nomOrdLabel=" + encodeURIComponent(e.point.labelValue)).success(function(data) {
                             $scope.selectedParticipants = data.participants;
                         });
                         //-- build service to support this
-                        $http.get(BASE_URL + "/explorer/" + EXP_ID + "/participants/groupAttributes").success(function(data) {
-                            $scope.selectedAttributes = data.qoEAttributes[0];
-                        });
+//                        $http.get(BASE_URL + "/explorer/" + EXP_ID + "/participants/groupAttributes").success(function(data) {
+//                            $scope.selectedAttributes = data.qoEAttributes[0];
+//                        });
                     });
                     return chart;
                 });
             });
         } else if($scope.participantSelection === null && $scope.attributeSelection !== null){
         // -- this shows a viz of a single attribute for all participants
-            $('#selectedParticipants, #selectedAttributes').hide();
+            $('#selectedParticipants, #selectedAttributes h6').hide();
             d3.json(BASE_URL + "/explorer/" + EXP_ID + "/attributes/distribution/qoe?attrName=" + encodeURIComponent($scope.attributeSelection), function(data) {
                 $('#allQoEChart svg').hide();
                 $('#attribBarChart svg, #attribDonutChart svg').show().height(CHART_HEIGHT);
@@ -141,26 +140,24 @@ appControllers.controller('ParticipantController', ['$scope', '$http', function(
                         $scope.selectedParticipants = data.participants;
                     });
                     //-- build service to support this
-                    $http.get(BASE_URL + "/explorer/" + EXP_ID + "/participants/groupAttributes").success(function(data) {
-                        $scope.selectedAttributes = data.qoEAttributes[0];
-                    });
+//                    $http.get(BASE_URL + "/explorer/" + EXP_ID + "/participants/groupAttributes").success(function(data) {
+//                        $scope.selectedAttributes = data.qoEAttributes[0];
+//                    });
                 };
             });
         } else if($scope.participantSelection !== null && $scope.attributeSelection === null){
         // -- this shows info on all attributes for a single participant
             $('#selectedParticipants, #attribBarChart svg, #attribDonutChart svg, #allQoEChart svg').hide();
-            $('#selectedAttributes, #selectedAttributes table').show();
-            $('#selectedAttributes h6').hide();
-            $http.get(BASE_URL + "/explorer/" + EXP_ID + "/participants/groupAttributes").success(function(data) {
-                $scope.selectedAttributes = data.qoEAttributes;
-            });
+            $('#selectedAttributes, #selectedAttributes h6').show();
+            $('#selectedAttributes table').hide();
+            $('#selectedAttributes h6').html("Should return info on all attributes for a single participant. Service not fully implemented.");
 
         } else if($scope.participantSelection !== null && $scope.attributeSelection !== null){
         // -- this shows info on a single attribute for a single participant
             $('#selectedParticipants, #attribBarChart svg, #attribDonutChart svg, #allQoEChart svg').hide();
             $('#selectedAttributes, #selectedAttributes h6').show();
             $('#selectedAttributes table').hide();
-            $('#selectedAttributes h6').html("Should return info on the selecetd attribute for a single participant. Service not implemented yet.");
+            $('#selectedAttributes h6').html("Should return info on the selecetd attribute for a single participant. Service not available yet.");
         }
     };    
 }]);
@@ -219,6 +216,7 @@ appControllers.controller('DetailsController', ['$scope', '$http', '$routeParams
                     .x(function(d) { return d.timestamp; })
                     .y(function(d) { return d.value/10; })
                     .useInteractiveGuideline(true)
+                    .forceY([0])
                     .color(d3.scale.category10().range())
                     .isArea(true);
                 chart.xAxis
