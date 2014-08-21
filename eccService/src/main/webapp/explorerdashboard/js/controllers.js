@@ -92,7 +92,7 @@ appControllers.controller('ParticipantController', ['$scope', '$http', function(
                         .y(function(d) { return d.count; })
                         .tooltipContent(function(key, label, count) { return '<p><strong>' + count + ' participants</strong> selected ' + label + '</p>' ; })
                         .showYAxis(false)
-                        .margin({top: 30, right: 20, bottom: 50, left: 75})
+                        .margin({top: 30, right: 20, bottom: 50, left: 130})
                         .barColor(d3.scale.customColors().range())
                         .showValues(true)
                         .showControls(false)
