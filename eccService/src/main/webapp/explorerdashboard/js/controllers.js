@@ -45,6 +45,8 @@ appControllers.controller('ParticipantController', ['$scope', '$http', function(
         if($scope.participantSelection === null && $scope.attributeSelection === null){
         // -- this shows a viz of all participants and all attributes
             $('#selectedParticipants').hide();
+            $('#selectedAttributes table').show();
+            $('#selectedAttributes h6').html("Attributes");
             d3.json(BASE_URL + "/explorer/" + EXP_ID + "/participants/distribution/stratified", function(data) {
                 $('#attribBarChart svg, #attribDonutChart svg').hide();
                 $('#allQoEChart svg').show().height(CHART_HEIGHT);
@@ -168,6 +170,7 @@ appControllers.controller('DetailsController', ['$scope', '$http', '$routeParams
     });
     $http.get(BASE_URL + "/explorer/" + EXP_ID + "/participants/iri?IRI=" + encodeURIComponent($routeParams.iri)).success(function(data) {
         $scope.participantSelection = data.iri;
+        $scope.getActivities();
     });
     $scope.getActivities = function(){
         $('#applications, #services, #serviceMetrics, #qosChart').hide();
@@ -177,6 +180,7 @@ appControllers.controller('DetailsController', ['$scope', '$http', '$routeParams
     };
     $scope.getActivityInstancesNApps = function(){
         $.get(BASE_URL + "/explorer/" + EXP_ID + "/participants/iri/activities/select?IRI=" + encodeURIComponent($scope.participantSelection)+ "&actLabel=" + encodeURIComponent($scope.activitySelection.label)).success(function(data) {
+            console.log(data);
             $scope.activityInstances = data.activities;
             $scope.numActivities = data.activityTotal;
             var actIRI = data.activities[0].iri;
@@ -214,16 +218,18 @@ appControllers.controller('DetailsController', ['$scope', '$http', '$routeParams
             nv.addGraph(function() {
                 var chart = nv.models.lineChart()
                     .x(function(d) { return d.timestamp; })
-                    .y(function(d) { return d.value/10; })
+                    .y(function(d) { return d.value/10; })      // TODO -- fix scalling problems, dividing by 10 is a hack to get round scalling issues
+                    .margin({top: 30, right: 0, bottom: 50, left: 100})
                     .useInteractiveGuideline(true)
                     .forceY([0])
                     .color(d3.scale.category10().range())
                     .isArea(true);
                 chart.xAxis
+                    .axisLabel('Time')
                     .showMaxMin(true)
                     .tickFormat(function(d) { return d3.time.format('%X')(new Date(d)); });
                 chart.yAxis
-                    .axisLabel('Response Time(ms)')
+                    .axisLabel(units())
                     .tickFormat(d3.format(',.2f'));
                 d3.select('#qosChart svg')
                     .datum(data.seriesSet)
@@ -232,6 +238,16 @@ appControllers.controller('DetailsController', ['$scope', '$http', '$routeParams
                 nv.utils.windowResize(chart.update);
                 return chart;
             });
+            // TODO -- get service metric units from service once implemented
+            function units(){
+                if($scope.serviceMetricSelection.metricID === '26833588-e95d-431f-a275-ea133bf7f4a3'){
+                    return 'Memory Usage (%)';
+                } else if ($scope.serviceMetricSelection.metricID === '65dd7d0d-3974-40fa-8a84-6a2f0d91a03a'){
+                    return 'Response Time (s)';
+                } else if ($scope.serviceMetricSelection.metricID === 'a8a5ee9f-cb58-4b38-84e0-d9397b979a54'){
+                    return 'CPU Usage (%)';
+                }
+            }
         });
     };
 }]);
