@@ -893,7 +893,7 @@ public class ExplorerDemoData {
         EccAttributeResultSet ars = new EccAttributeResultSet();
         
         // Average response time
-        EccAttributeInfo aInfo = createQoSAttrInfo( "VAS average response time", "Time taken between query time and response being sent", "Seconds", "RATIO");
+        EccAttributeInfo aInfo = createQoSAttrInfo( "Average response time", "Time taken between query time and response being sent", "Seconds", "RATIO");
         UUID aID = UUID.fromString( aInfo.getMetricID() );
         qosAttributesByID.put( aID, aInfo );
         ars.addAttributeInfo( aInfo );
@@ -919,11 +919,11 @@ public class ExplorerDemoData {
         qosAttributesByIRI.put( serv.getIRI(), ars );
         
         // Twitter -------------------------------------------------------------
-        serv = createServiceInstance( "Twitter Service", "Provides twitter feeds" );
+        serv = createServiceInstance( "Hot Tweet Service", "Provides twitter feeds" );
         ars  = new EccAttributeResultSet();
         
         // Twitter response time
-        aInfo = createQoSAttrInfo( "Twitter query response time", "Time taken between query time and response being sent", "Seconds", "RATIO");
+        aInfo = createQoSAttrInfo( "Average response time", "Time taken between query time and response being sent", "Seconds", "RATIO");
         aID = UUID.fromString( aInfo.getMetricID() );
         qosAttributesByID.put( aID, aInfo );
         ars.addAttributeInfo( aInfo );
@@ -931,7 +931,7 @@ public class ExplorerDemoData {
         qosSeries.put( aID, series );
         
         // Twitter server load        
-        aInfo = createQoSAttrInfo( "Twitter server load", "Server load", "%", "RATIO");
+        aInfo = createQoSAttrInfo( "CPU Usage", "Current CPU usage", "%", "RATIO");
         aID = UUID.fromString( aInfo.getMetricID() );
         qosAttributesByID.put( aID, aInfo );
         ars.addAttributeInfo( aInfo );
@@ -939,7 +939,7 @@ public class ExplorerDemoData {
         qosSeries.put( aID, series );
         
         // Twitter server memory usage        
-        aInfo = createQoSAttrInfo( "Twitter server memory usage", "Current usage of available RAM", "%", "RATIO");
+        aInfo = createQoSAttrInfo( "Memory Usage", "Current memory usage", "%", "RATIO");
         aID = UUID.fromString( aInfo.getMetricID() );
         qosAttributesByID.put( aID, aInfo );
         ars.addAttributeInfo( aInfo );
@@ -953,7 +953,7 @@ public class ExplorerDemoData {
         ars = new EccAttributeResultSet();
         
         // Response time        
-        aInfo = createQoSAttrInfo( "Weather service query response time", "Time taken between query time and response being sent", "Seconds", "RATIO");
+        aInfo = createQoSAttrInfo( "Average response time", "Time taken between query time and response being sent", "Seconds", "RATIO");
         aID = UUID.fromString( aInfo.getMetricID() );
         qosAttributesByID.put( aID, aInfo );
         ars.addAttributeInfo( aInfo );
@@ -961,7 +961,7 @@ public class ExplorerDemoData {
         qosSeries.put( aID, series );
         
         // Server load        
-        aInfo = createQoSAttrInfo( "Weather server load", "Server load", "%", "RATIO");
+        aInfo = createQoSAttrInfo( "CPU Usage", "Current CPU usage", "%", "RATIO");
         aID = UUID.fromString( aInfo.getMetricID() );
         qosAttributesByID.put( aID, aInfo );
         ars.addAttributeInfo( aInfo );
@@ -969,7 +969,7 @@ public class ExplorerDemoData {
         qosSeries.put( aID, series );
         
         // Memory usage        
-        aInfo = createQoSAttrInfo( "Weather server memory usage", "Current usage of available RAM", "%", "RATIO");
+        aInfo = createQoSAttrInfo( "Memory Usage", "Current memory usage", "%", "RATIO");
         aID = UUID.fromString( aInfo.getMetricID() );
         qosAttributesByID.put( aID, aInfo );
         ars.addAttributeInfo( aInfo );
