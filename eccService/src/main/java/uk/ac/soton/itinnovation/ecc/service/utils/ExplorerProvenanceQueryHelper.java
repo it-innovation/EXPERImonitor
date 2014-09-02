@@ -65,6 +65,8 @@ public class ExplorerProvenanceQueryHelper {
      *
      */
     public void shutdown() {
+        
+        store.unlockRepo();
         store.disconnect();
     }
 
@@ -118,22 +120,33 @@ public class ExplorerProvenanceQueryHelper {
 
 		String sparql = "SELECT (COUNT(DISTINCT ?instance) AS ?count) WHERE {" +
 						"?instance a <" + typeIRI + "> . }";
+        
+        try
+        {
+            store.lockRepo( expID.toString() );
+            
+            TupleQueryResult tqr = store.query(expID, sparql);
 
-		TupleQueryResult tqr = store.query(expID, sparql);
+            if (tqr!=null) {
+                while (tqr.hasNext()) {
 
-		if (tqr!=null) {
-			while (tqr.hasNext()) {
+                    BindingSet tqrb = tqr.next();
+                    amount = tqrb.getBinding("count").getValue().toString();
+                    amount = amount.substring(amount.indexOf("\"")+1, amount.lastIndexOf("\""));
 
-				BindingSet tqrb = tqr.next();
-				amount = tqrb.getBinding("count").getValue().toString();
-				amount = amount.substring(amount.indexOf("\"")+1, amount.lastIndexOf("\""));
-
-				//this is intentional; there should only be one row returned since we're counting
-				// if there were more, they would be ignored
-				break;
-			}
-		}
-
+                    //this is intentional; there should only be one row returned since we're counting
+                    // if there were more, they would be ignored
+                    break;
+                }
+            }
+        }
+        catch ( Exception ex )
+        { 
+            logger.error( "Could not get XXXXX: " + ex.getMessage() ); 
+        }
+        finally
+        { store.unlockRepo(); }
+        
 		return amount;
 	}
 
@@ -152,23 +165,34 @@ public class ExplorerProvenanceQueryHelper {
 
 		String sparql = "SELECT * WHERE { ?svc a <http://experimedia.eu/ontologies/ExperimediaExperimentExplorer#Service> . "
 					  + "?svc rdfs:label ?label }";
+        
+        try
+        {
+            store.lockRepo( expID.toString() );
+            
+            TupleQueryResult tqr = store.query(expID.toString(), sparql);
 
-		TupleQueryResult tqr = store.query(expID.toString(), sparql);
+            if (tqr!=null) {
+                while (tqr.hasNext()) {
+                    BindingSet tqrb = tqr.next();
 
-		if (tqr!=null) {
-			while (tqr.hasNext()) {
-				BindingSet tqrb = tqr.next();
+                    String service = tqrb.getBinding("svc").getValue().toString();
 
-				String service = tqrb.getBinding("svc").getValue().toString();
-
-				if (service.equals(svcIRI)) {
-					String l = tqrb.getBinding("label").getValue().toString();
-					svc = new EccService(l.substring(l.indexOf("\"")+1, l.lastIndexOf("\"")), "TODO: description", svcIRI);
-					break;
-				}
-			}
-		}
-
+                    if (service.equals(svcIRI)) {
+                        String l = tqrb.getBinding("label").getValue().toString();
+                        svc = new EccService(l.substring(l.indexOf("\"")+1, l.lastIndexOf("\"")), "TODO: description", svcIRI);
+                        break;
+                    }
+                }
+            }
+        }
+        catch ( Exception ex )
+        { 
+            logger.error( "Could not get XXXXX: " + ex.getMessage() ); 
+        }
+        finally
+        { store.unlockRepo(); }
+        
 		return svc;
 	}
 
@@ -187,25 +211,36 @@ public class ExplorerProvenanceQueryHelper {
 
 		String sparql = "SELECT * WHERE { ?app a <http://experimedia.eu/ontologies/ExperimediaExperimentExplorer#Application> . "
 					  + "?app rdfs:label ?label }";
+        
+        try
+        {
+            store.lockRepo( expID.toString() );
+            
+            TupleQueryResult tqr = store.query(expID.toString(), sparql);
 
-		TupleQueryResult tqr = store.query(expID.toString(), sparql);
+            if (tqr!=null) {
+                while (tqr.hasNext()) {
 
-		if (tqr!=null) {
-			while (tqr.hasNext()) {
+                    BindingSet tqrb = tqr.next();
 
-				BindingSet tqrb = tqr.next();
+                    String application = tqrb.getBinding("app").getValue().toString();
 
-				String application = tqrb.getBinding("app").getValue().toString();
+                    if (application.equals(appIRI)) {
 
-				if (application.equals(appIRI)) {
-
-					String l = tqrb.getBinding("label").getValue().toString();
-					app = new EccApplication(l.substring(l.indexOf("\"")+1, l.lastIndexOf("\"")), "TODO: description", appIRI);
-					break;
-				}
-			}
-		}
-
+                        String l = tqrb.getBinding("label").getValue().toString();
+                        app = new EccApplication(l.substring(l.indexOf("\"")+1, l.lastIndexOf("\"")), "TODO: description", appIRI);
+                        break;
+                    }
+                }
+            }
+        }
+        catch ( Exception ex )
+        { 
+            logger.error( "Could not get XXXXX: " + ex.getMessage() ); 
+        }
+        finally
+        { store.unlockRepo(); }
+        
 		return app;
 	}
 
@@ -226,31 +261,42 @@ public class ExplorerProvenanceQueryHelper {
 					  + "?activity <http://www.w3.org/ns/prov#startedAtTime> ?start . "
 				      + "?activity <http://www.w3.org/ns/prov#endedAtTime> ?end . "
 					  + "?activity rdfs:label ?label }";
+        
+        try
+        {
+            store.lockRepo( expID.toString() );
+            
+            TupleQueryResult tqr = store.query(expID.toString(), sparql);
 
-		TupleQueryResult tqr = store.query(expID.toString(), sparql);
+            HashMap<String, Integer> activities = new HashMap<>();
+            if (tqr!=null) {
+                while (tqr.hasNext()) {
 
-		HashMap<String, Integer> activities = new HashMap<>();
-		if (tqr!=null) {
-			while (tqr.hasNext()) {
+                    BindingSet tqrb = tqr.next();
 
-				BindingSet tqrb = tqr.next();
+                    String s = tqrb.getBinding("start").getValue().toString();
+                    String e = tqrb.getBinding("end").getValue().toString();
+                    Calendar start = javax.xml.bind.DatatypeConverter.parseDateTime(s.substring(s.indexOf("\"")+1, s.lastIndexOf("\"")));
+                    Calendar end = javax.xml.bind.DatatypeConverter.parseDateTime(e.substring(e.indexOf("\"")+1, e.lastIndexOf("\"")));
+                    //TODO: not sure about timestamp format here...
 
-				String s = tqrb.getBinding("start").getValue().toString();
-				String e = tqrb.getBinding("end").getValue().toString();
-				Calendar start = javax.xml.bind.DatatypeConverter.parseDateTime(s.substring(s.indexOf("\"")+1, s.lastIndexOf("\"")));
-				Calendar end = javax.xml.bind.DatatypeConverter.parseDateTime(e.substring(e.indexOf("\"")+1, e.lastIndexOf("\"")));
-				//TODO: not sure about timestamp format here...
+                    String l = tqrb.getBinding("label").getValue().toString();
+                    activity = new EccActivity(l.substring(l.indexOf("\"")+1, l.lastIndexOf("\"")), "TODO: description",
+                            actIRI, new Date(start.getTimeInMillis()), new Date(end.getTimeInMillis()));
 
-				String l = tqrb.getBinding("label").getValue().toString();
-				activity = new EccActivity(l.substring(l.indexOf("\"")+1, l.lastIndexOf("\"")), "TODO: description",
-						actIRI, new Date(start.getTimeInMillis()), new Date(end.getTimeInMillis()));
-
-				//this is intentional; there should only be one row returned since we're querying by iri.
-				// if there were more, they would be ignored
-				break;
-			}
-		}
-
+                    //this is intentional; there should only be one row returned since we're querying by iri.
+                    // if there were more, they would be ignored
+                    break;
+                }
+            }
+        }
+        catch ( Exception ex )
+        { 
+            logger.error( "Could not get XXXXX: " + ex.getMessage() ); 
+        }
+        finally
+        { store.unlockRepo(); }
+        
 		return activity;
 	}
 
@@ -264,12 +310,26 @@ public class ExplorerProvenanceQueryHelper {
     public Set<String> getParticipantIRIs( UUID expID ) throws Exception {
 
 		String sparql = "SELECT * WHERE { ?participant a <http://experimedia.eu/ontologies/ExperimediaExperimentExplorer#Participant> . }";
-        TupleQueryResult tqr = store.query(expID.toString(), sparql);
+        
         HashSet<String> result = new HashSet<>();
-		while (tqr.hasNext()) {
-			result.add(tqr.next().getBinding("participant").getValue().toString());
-		}
-
+        
+        try
+        {
+            store.lockRepo( expID.toString() );
+            
+            TupleQueryResult tqr = store.query(expID.toString(), sparql);
+            
+            while (tqr.hasNext()) {
+                result.add(tqr.next().getBinding("participant").getValue().toString());
+            }
+        }
+        catch ( Exception ex )
+        { 
+            logger.error( "Could not get XXXXX: " + ex.getMessage() ); 
+        }
+        finally
+        { store.unlockRepo(); }
+        
         return result;
     }
 
@@ -292,27 +352,39 @@ public class ExplorerProvenanceQueryHelper {
 		String sparql = "SELECT * WHERE { ?activity a <http://www.w3.org/ns/prov#Activity> . "
 					  + "?activity <http://www.w3.org/ns/prov#wasStartedBy> <" + part.getIRI() + "> . "
 					  + "?activity rdfs:label ?label }";
-		TupleQueryResult tqr = store.query(expID.toString(), sparql);
+        
+        try
+        {
+            store.lockRepo( expID.toString() );
+            
+            TupleQueryResult tqr = store.query(expID.toString(), sparql);
 
-		HashMap<String, Integer> activities = new HashMap<>();
-		if (tqr!=null) {
-			while (tqr.hasNext()) {
-				String label = tqr.next().getBinding("label").getValue().toString();
-				label = label.substring(label.indexOf("\"")+1, label.lastIndexOf("\""));
+            HashMap<String, Integer> activities = new HashMap<>();
+            if (tqr!=null) {
+                while (tqr.hasNext()) {
+                    String label = tqr.next().getBinding("label").getValue().toString();
+                    label = label.substring(label.indexOf("\"")+1, label.lastIndexOf("\""));
 
-				if (!activities.containsKey(label)) {
-					activities.put(label, 1);
-				} else {
-					activities.put(label, activities.get(label)+1);
-				}
-			}
-		}
+                    if (!activities.containsKey(label)) {
+                        activities.put(label, 1);
+                    } else {
+                        activities.put(label, activities.get(label)+1);
+                    }
+                }
+            }
 
-		for (Map.Entry<String, Integer> e: activities.entrySet()) {
-			logger.info("Activity count: " + e.getKey() + ": " + e.getValue());
-			result.addActivitySummary(new EccActivitySummaryInfo(e.getKey(), e.getValue()));
-		}
-
+            for (Map.Entry<String, Integer> e: activities.entrySet()) {
+                logger.info("Activity count: " + e.getKey() + ": " + e.getValue());
+                result.addActivitySummary(new EccActivitySummaryInfo(e.getKey(), e.getValue()));
+            }
+        }
+        catch ( Exception ex )
+        { 
+            logger.error( "Could not get XXXXX: " + ex.getMessage() ); 
+        }
+        finally
+        { store.unlockRepo(); }
+        
         return result;
     }
 
@@ -337,31 +409,43 @@ public class ExplorerProvenanceQueryHelper {
 					+ "?activity rdfs:label ?label . "
 					+ "?activity <http://www.w3.org/ns/prov#startedAtTime> ?start . "
 					+ "?activity <http://www.w3.org/ns/prov#endedAtTime> ?end . }";
-		TupleQueryResult tqr = store.query(expID.toString(), sparql);
+        
+        try
+        {
+            store.lockRepo( expID.toString() );
+            
+            TupleQueryResult tqr = store.query(expID.toString(), sparql);
 
 
-		if (tqr!=null) {
+            if (tqr!=null) {
 
-			result = new EccParticipantActivityResultSet(part);
-			while (tqr.hasNext()) {
+                result = new EccParticipantActivityResultSet(part);
+                while (tqr.hasNext()) {
 
-				BindingSet tqrb = tqr.next();
-				String label = tqrb.getBinding("label").getValue().toString();
+                    BindingSet tqrb = tqr.next();
+                    String label = tqrb.getBinding("label").getValue().toString();
 
-				String s = tqrb.getBinding("start").getValue().toString();
-				String e = tqrb.getBinding("end").getValue().toString();
-				Calendar start = javax.xml.bind.DatatypeConverter.parseDateTime(s.substring(s.indexOf("\"")+1, s.lastIndexOf("\"")));
-				Calendar end = javax.xml.bind.DatatypeConverter.parseDateTime(e.substring(e.indexOf("\"")+1, e.lastIndexOf("\"")));
-				//TODO: not sure about timestamp format here...
-				
-				String l = tqrb.getBinding("label").getValue().toString();
-				EccActivity a = new EccActivity(l.substring(l.indexOf("\"")+1, l.lastIndexOf("\"")), "TODO: description",
-						tqrb.getBinding("activity").getValue().toString(), new Date(start.getTimeInMillis()), new Date(end.getTimeInMillis()));
+                    String s = tqrb.getBinding("start").getValue().toString();
+                    String e = tqrb.getBinding("end").getValue().toString();
+                    Calendar start = javax.xml.bind.DatatypeConverter.parseDateTime(s.substring(s.indexOf("\"")+1, s.lastIndexOf("\"")));
+                    Calendar end = javax.xml.bind.DatatypeConverter.parseDateTime(e.substring(e.indexOf("\"")+1, e.lastIndexOf("\"")));
+                    //TODO: not sure about timestamp format here...
 
-				result.addActivity(a);
-			}
-		}
+                    String l = tqrb.getBinding("label").getValue().toString();
+                    EccActivity a = new EccActivity(l.substring(l.indexOf("\"")+1, l.lastIndexOf("\"")), "TODO: description",
+                            tqrb.getBinding("activity").getValue().toString(), new Date(start.getTimeInMillis()), new Date(end.getTimeInMillis()));
 
+                    result.addActivity(a);
+                }
+            }
+        }
+        catch ( Exception ex )
+        { 
+            logger.error( "Could not get XXXXX: " + ex.getMessage() ); 
+        }
+        finally
+        { store.unlockRepo(); }
+       
         return result;
     }
 
@@ -417,28 +501,41 @@ public class ExplorerProvenanceQueryHelper {
 				+ "?app a <http://www.w3.org/ns/prov#Entity> . "
 				+ "?app rdfs:label ?label . }";
 
-        TupleQueryResult tqr = store.query(expID.toString(), sparql);
+        String repoID = expID.toString();
+        
+        try
+        {
+            store.lockRepo(repoID);
+            
+            TupleQueryResult tqr = store.query(repoID, sparql);
 
-		if (tqr!=null) {
-
-			EccActivity act = getActivity(expID, activityIRI);
-            result = new EccActivityApplicationResultSet(act);
-
-			while (tqr.hasNext()) {
-
-				BindingSet tqrb = tqr.next();
-
-				String l = tqrb.getBinding("label").getValue().toString();
-				String app = tqrb.getBinding("app").getValue().toString();
-
-				EccApplication application = new EccApplication(l.substring(l.indexOf("\"")+1, l.lastIndexOf("\"")), "TODO: description", app);
+            if (tqr!=null)
+            {
+                EccActivity act = getActivity(expID, activityIRI);
+                result = new EccActivityApplicationResultSet(act);
                 
-                // TODO: Stefanie to fix SPARQL query: for now, manually select only entities
-                if ( application.getIRI().contains("entity") )
-                    result.addApplication(application);
-			}
-		}
+                while (tqr.hasNext())
+                {
+                    BindingSet tqrb = tqr.next();
 
+                    String l = tqrb.getBinding("label").getValue().toString();
+                    String app = tqrb.getBinding("app").getValue().toString();
+
+                    EccApplication application = new EccApplication(l.substring(l.indexOf("\"")+1, l.lastIndexOf("\"")), "TODO: description", app);
+
+                    // TODO: Stefanie to fix SPARQL query: for now, manually select only entities
+                    if ( application.getIRI().contains("entity") )
+                        result.addApplication(application);
+                }
+            }
+        }
+        catch ( Exception ex )
+        { 
+            logger.error( "Could not get applications used by activity: " + ex.getMessage() ); 
+        }
+        finally
+        { store.unlockRepo(); }
+        
         return result;
     }
 
