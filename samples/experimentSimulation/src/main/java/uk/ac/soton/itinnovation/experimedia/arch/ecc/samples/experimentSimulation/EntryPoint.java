@@ -67,7 +67,7 @@ public class EntryPoint
 		ExperimentDataGenerator provGen = createProvGen(args, eccLogger);
 
         // Press 'q' to exit...
-        logger.info( "Press 'q' key to exit demo" );
+        //logger.info( "Press 'q' key to exit demo" );
         boolean running = true;
 
         // Start simulation loop
@@ -77,11 +77,11 @@ public class EntryPoint
             try
             {
 				//abort on q
-                if ( System.in.read() == 113 ) {
-                    running = false;
-				} else {
-					logger.debug("input received");
-				}
+                //if ( System.in.read() == 113 ) {
+                //    running = false;
+				//} else {
+				//	logger.debug("input received");
+				//}
 
                 // Send a metric (if we are ready to do so)
                 if ( provGen.getEccLogger().isReadyToPush() )
@@ -93,7 +93,7 @@ public class EntryPoint
 						//push prov
 						if (provGen.processNextLog()) {
 							EDMProvReport report = provGen.getFactory().getProvFactory().createProvReport();
-							logger.info("Processed log line:\n" + provGen.getCurrentLog().toString() + "\nCurrent triples:\n"
+							logger.debug("Processed log line:\n" + provGen.getCurrentLog().toString() + "\nCurrent triples:\n"
 									+ report.toString());
 							provGen.getEccLogger().pushProv(report);
 						} else {
@@ -109,9 +109,11 @@ public class EntryPoint
                     }
                 } else {
 					logger.debug("NOT ready to push");
+					Thread.sleep(1000);
 				}
             }
-            catch (IOException ioe)
+			catch (Throwable t)
+            //catch (IOException ioe)
             {
                 // Yikes! Is there a keyboard available?
                 logger.error( "Could not read keyboard" );
@@ -138,7 +140,7 @@ public class EntryPoint
         MetricGroup group = MetricHelper.createMetricGroup( "Demo group", "Data set for demo", metGen );
 
         // That's all for now - will create Entities representing participants later
-        
+
         return metGen;
     }
 

@@ -72,6 +72,7 @@ public class ExperimentDataGenerator {
 	//services
 	Service twitterService;
 	Service messageService;
+	Service weatherService;
 	Service babylonService;
 	Service lwtService;
 
@@ -149,7 +150,6 @@ public class ExperimentDataGenerator {
 			factory.getProvFactory().addOntology("foaf", "http://xmlns.com/foaf/0.1/");
 			factory.getProvFactory().addOntology("sioc", "http://rdfs.org/sioc/ns#");
 			factory.getProvFactory().addOntology("eee", "http://experimedia.eu/ontologies/ExperimediaExperimentExplorer#");
-			factory.getProvFactory().addOntology("ski", "http://www.semanticweb.org/sw/ontologies/skiing#");
 
 			//prepare metric attributes
 			genericAttributes.ensureCapacity(3);
@@ -215,16 +215,16 @@ public class ExperimentDataGenerator {
 				MeasurementSet ms = MetricHelper.createMeasurementSet( a, MetricType.ORDINAL,
 									   new Unit( "Scale item" ),
 									   metricGroup );
-                
+
                 // Add appropriate metric meta-data to measurement set
                 Metric metric = ms.getMetric();
                 metric.setMetaType("Likert scale");
-                
+
                 ArrayList<String> scaleItems = ordinalValues.get(i);
                 String scaleMeta = "";
                 for ( String item : scaleItems )
                     scaleMeta += item + ",";
-                
+
                 scaleMeta = scaleMeta.substring(0, scaleMeta.length() -1 );
                 metric.setMetaContent( scaleMeta );
 			}
@@ -235,10 +235,12 @@ public class ExperimentDataGenerator {
 			//create services - using static names as they are the same across participants
 			twitterService = factory.createService("entity_twitterService", "Twitter service");
 			messageService = factory.createService("entity_messageService", "Message service");
+			weatherService = factory.createService("entity_weatherService", "Weather service");
 			babylonService = factory.createService("entity_babylonService", "Babylon service");
 			lwtService = factory.createService("entity_lwtService", "Lift Waiting Time service");
 
 			//create skilifts
+			/*
 			Entity skilift1 = factory.createEntity("skilift-37", "Fritz Blitz");
 			skilift1.entity.addOwlClass(factory.getProvFactory().getNamespaceForPrefix("ski") + "Skilift");
 			lifts.put("37", skilift1);
@@ -258,6 +260,7 @@ public class ExperimentDataGenerator {
 			Entity skilift5 = factory.createEntity("skilift-35", "Weitmoos-Tellerlift");
 			skilift5.entity.addOwlClass(factory.getProvFactory().getNamespaceForPrefix("ski") + "Skilift");
 			lifts.put("35", skilift5);
+			*/
 
 		} catch (Exception e) {
 			logger.error("Error filling EDMProvFactory with data", e);
@@ -300,27 +303,37 @@ public class ExperimentDataGenerator {
 
 			//event from "perfect" log
 			if (this.logclass.equals("PerfectLog")) {
-				String event = currentLog.toString().split(",")[1];
-				String[] splitevent = event.split(":");
-				if (splitevent.length<2) {
+				String event = currentLog.getActivity();
+				String[] splitevent;
+				splitevent = event.split(":");
+
+				if (splitevent.length<1) {
 					logger.warn("Invalid log line: " + event + "; skipping...");
 					return goOn;
 				}
+				//set value to empty string if nonexistent
+				if (splitevent.length<=1) {
+					//logger.debug("empty event ({})", event);
+					splitevent = new String[2];
+					splitevent[0] = event;
+					splitevent[1] = "";
+				}
+
 				String eventKey = splitevent[0];
 				String eventValue = splitevent[1];
 
+				logger.debug("processing event {}", eventKey);
+
 				try {
-					if (eventKey.equals("lift")) {
-
-						if (lifts.containsKey(eventValue)) {
-
-							//use skilift
-							Activity a = factory.useRealWorldEntity(participant, lifts.get(eventValue), currentLog.getTimestamp().toString());
-							a.activity.addOwlClass(factory.getProvFactory().getNamespaceForPrefix("ski") + "UsingSkiliftActivity");
-						}
-					} else if (eventKey.equals("lwtservice")) {
-						Content liftinfo = factory.retrieveDataFromService(participant, app, lwtService, "lwtinfo", currentLog.getTimestamp().toString());
-
+					if (eventKey.equals("lwtservice")) {
+						Content liftinfo = factory.retrieveDataFromService(participant, app, lwtService, "lwtinfo",
+								currentLog.getTimestamp().toString(), currentLog.getDuration());
+					} else if (eventKey.equals("weather")) {
+						Content weatherinfo = factory.retrieveDataFromService(participant, app, weatherService,
+								"weatherinfo", currentLog.getTimestamp().toString(), currentLog.getDuration());
+					} else if (eventKey.equals("tweet")) {
+						Content tweet = factory.createDataAtService(participant, app, twitterService, "tweet",
+								currentLog.getTimestamp().toString(), currentLog.getDuration());
 					} else if (eventKey.equals("questionnaire")) {
 						//get agent metric entity
 						uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Entity entity
@@ -329,11 +342,11 @@ public class ExperimentDataGenerator {
 						//get value from log
 						int i=0;
 						for (String v: eventValue.split(";")) {
-                            
+
                             String attrName = genericAttributes.get(i);
                             int vIndex = Integer.parseInt(v) -1;
                             String value = ordinalValues.get(i).get(vIndex);
-                            
+
                             if ( attrName != null && value != null )
                                 eccLogger.pushSimpleMetric( entity.getName(), attrName, value );
 

@@ -39,12 +39,25 @@ public class PerfectLog implements ILog {
 	public String date;
 	public String time;
 	public Long timestamp;
+	public String duration;
+	public String activity;
 
 	public String speed;
 
 	PerfectLog(String line) {
 
+		/*
+		example:
+		2014-07-31 09:00:00,15,weather
+		2014-07-31 09:17:00,30,lwtservice
+		2014-07-31 09:18:00,8,tweet:#LWTService not working properly
+		2013-12-20 19:31:00,questionnaire:4;4;3
+		*/
+
 		this.line = line;
+
+		//split line
+		String[] splitline = line.split(",");
 
 		//date/time
 		this.date = line.substring(0,10);
@@ -58,6 +71,12 @@ public class PerfectLog implements ILog {
 		} catch (ParseException e) {
 			logger.error("Error parsing date to create timestamp", e);
 		}
+
+		//duration
+		this.duration = splitline[1].trim();
+
+		//activity
+		this.activity = splitline[2];
 
 		//speed
 		this.speed = "0";
@@ -86,5 +105,15 @@ public class PerfectLog implements ILog {
 	@Override
 	public String getSpeed() {
 		return speed;
+	}
+
+	@Override
+	public String getActivity() {
+		return  activity;
+	}
+
+	@Override
+	public String getDuration() {
+		return  duration;
 	}
 }

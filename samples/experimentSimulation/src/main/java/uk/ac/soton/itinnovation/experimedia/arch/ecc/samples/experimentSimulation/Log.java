@@ -120,4 +120,14 @@ public class Log implements ILog {
 		public String getSpeed() {
 			return speed;
 		}
+
+	@Override
+	public String getActivity() {
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	@Override
+	public String getDuration() {
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
 	}

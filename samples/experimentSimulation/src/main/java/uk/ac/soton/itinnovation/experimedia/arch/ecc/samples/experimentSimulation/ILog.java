@@ -38,4 +38,8 @@ public interface ILog {
 
 	public String getSpeed();
 
+	public String getActivity();
+
+	public String getDuration();
+
 }
