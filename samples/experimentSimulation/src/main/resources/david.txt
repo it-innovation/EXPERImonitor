@@ -1,0 +1,16 @@
+2014-07-31 10:12:00,8,tweet:Lets go #skiing
+2014-07-31 10:13:00,7,weather
+2014-07-31 10:17:00,10,lwtservice
+2014-07-31 11:11:00,7,tweet:#LWTService looks cool
+2014-07-31 11:15:00,8,lwtservice
+2014-07-31 11:50:00,10,lwtservice
+2014-07-31 12:55:00,20,lwtservice
+2014-07-31 12:57:00,8,tweet:Lunch break
+2014-07-31 13:48:00,14,lwtservice
+2014-07-31 14:57:00,20,lwtservice
+2014-07-31 14:59:00,8,tweet:I love snow
+2014-07-31 15:50:00,10,lwtservice
+2014-07-31 16:49:00,12,lwtservice
+2014-07-31 17:48:00,22,lwtservice
+2014-07-31 17:50:00,8,tweet:Awesome #LWTService
+2013-12-20 19:36:00,questionnaire:4;5;5

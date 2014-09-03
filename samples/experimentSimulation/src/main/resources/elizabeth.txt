@@ -1,0 +1,16 @@
+2014-07-31 10:22:00,8,tweet:Hangover...
+2014-07-31 10:23:00,7,weather
+2014-07-31 10:27:00,10,lwtservice
+2014-07-31 11:21:00,7,tweet:#LWTService is impressive
+2014-07-31 11:25:00,8,lwtservice
+2014-07-31 11:50:00,10,lwtservice
+2014-07-31 12:55:00,20,lwtservice
+2014-07-31 12:57:00,8,tweet:Sausages for lunch
+2014-07-31 13:48:00,14,lwtservice
+2014-07-31 14:47:00,20,lwtservice
+2014-07-31 14:49:00,8,tweet:Weather is fantastic @LizMum
+2014-07-31 15:40:00,10,lwtservice
+2014-07-31 16:39:00,12,lwtservice
+2014-07-31 17:38:00,22,lwtservice
+2014-07-31 17:40:00,8,tweet:Had a great day in @Schladming
+2013-12-20 19:32:00,questionnaire:5;5;4
