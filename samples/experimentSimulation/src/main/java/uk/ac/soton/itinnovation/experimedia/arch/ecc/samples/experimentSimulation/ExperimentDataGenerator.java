@@ -230,7 +230,7 @@ public class ExperimentDataGenerator {
 			}
 
 			//create app for participant
-			app = factory.createApplication(participant, "SSG client", "1387531200");
+			app = factory.createApplication(participant, agentName + "'s SSG client", "1387531200");
 
 			//create services - using static names as they are the same across participants
 			twitterService = factory.createService("entity_twitterService", "Twitter service");

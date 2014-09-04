@@ -85,7 +85,7 @@ public class ExperimentService {
 
     private ExperimentStateModel expStateModel;
     private LiveMetricScheduler liveMetricScheduler;
-//    private LivePROVConsumer livePROVConsumer;
+    private LivePROVConsumer livePROVConsumer;
 
     private boolean started = false;
 
@@ -138,12 +138,12 @@ public class ExperimentService {
                 expMetGeneratorDAO = null;
                 expDataManager = null;
 
-//                // PROV repository tidy up (if required)
-//                if (livePROVConsumer != null) {
-//                    if (livePROVConsumer.isRepoInitialised()) {
-//                        livePROVConsumer.closeCurrentExperimentRepository();
-//                    }
-//                }
+                // PROV repository tidy up (if required)
+                if (livePROVConsumer != null) {
+                    if (livePROVConsumer.isRepoInitialised()) {
+                        livePROVConsumer.closeCurrentExperimentRepository();
+                    }
+                }
                 return true;
 
             } catch (Throwable e) {
@@ -364,13 +364,13 @@ public class ExperimentService {
             IExperimentDAO expDAO = expDataManager.getExperimentDAO();
             expDAO.saveExperiment(newExp);
 
-//            // Try initialising the access to the PROVenance data store for experiment
-//            PROVDatabaseConfiguration pdc = new PROVDatabaseConfiguration();
-//            livePROVConsumer = new LivePROVConsumer();
-//
-//            livePROVConsumer.createExperimentRepository(newExp.getUUID(),
-//                    newExp.getName(),
-//                    pdc.getPROVRepoProperties());
+            // Try initialising the access to the PROVenance data store for experiment
+            PROVDatabaseConfiguration pdc = new PROVDatabaseConfiguration();
+            livePROVConsumer = new LivePROVConsumer();
+
+            livePROVConsumer.createExperimentRepository(newExp.getUUID(),
+                    newExp.getName(),
+                    pdc.getPROVRepoProperties());
             // Go straight into live monitoring
             expMonitor.startLifecycle(newExp, EMPhase.eEMLiveMonitoring);
 
@@ -432,10 +432,10 @@ public class ExperimentService {
                 IExperimentDAO expDAO = expDataManager.getExperimentDAO();
                 expDAO.finaliseExperiment(exp);
 
-//                // Tidy up PROV
-//                if (livePROVConsumer.isRepoInitialised()) {
-//                    livePROVConsumer.closeCurrentExperimentRepository();
-//                }
+                // Tidy up PROV
+                if (livePROVConsumer.isRepoInitialised()) {
+                    livePROVConsumer.closeCurrentExperimentRepository();
+                }
                 // Set no experiment active
                 expStateModel.setActiveExperiment(null);
 
@@ -755,22 +755,22 @@ public class ExperimentService {
 
     private void processLivePROVData(EDMProvReport report) throws Exception {
 
-//        if (livePROVConsumer == null) {
-//            throw new Exception("Could not process PROV report: PROV consumer is null");
-//        }
-//
-//        if (report == null) {
-//            throw new Exception("Could not process PROV report: report is null");
-//        }
-//
-//        try {
-//            livePROVConsumer.addPROVReport(report);
-//        } catch (Exception ex) {
-//            String msg = "Could not store PROV report: " + ex.getMessage();
-//            logger.error(msg);
-//
-//            throw new Exception(msg);
-//        }
+        if (livePROVConsumer == null) {
+            throw new Exception("Could not process PROV report: PROV consumer is null");
+        }
+
+        if (report == null) {
+            throw new Exception("Could not process PROV report: report is null");
+        }
+
+        try {
+            livePROVConsumer.addPROVReport(report);
+        } catch (Exception ex) {
+            String msg = "Could not store PROV report: " + ex.getMessage();
+            logger.error(msg);
+
+            throw new Exception(msg);
+        }
     }
 
     // Private classes ---------------------------------------------------------
