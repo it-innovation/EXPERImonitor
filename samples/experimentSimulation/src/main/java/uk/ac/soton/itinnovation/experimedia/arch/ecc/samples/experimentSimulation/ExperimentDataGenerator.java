@@ -95,7 +95,7 @@ public class ExperimentDataGenerator {
 
 		try {
 			logger.info("Loading properties file");
-			props.load(ExperimentDataGeneratorTest.class.getClassLoader().getResourceAsStream("prov.properties"));
+			props.load(ExperimentDataGenerator.class.getClassLoader().getResourceAsStream("prov.properties"));
 		} catch (IOException e) {
 			logger.error("Error loading properties file", e);
 		}
@@ -125,7 +125,7 @@ public class ExperimentDataGenerator {
 	private void readLog(String logfile, String logClass) {
 		if (logfile==null) { return; }
 		try {
-				String logfilePath = ExperimentDataGeneratorTest.class.getClassLoader().getResource(logfile).getPath();
+				String logfilePath = ExperimentDataGenerator.class.getClassLoader().getResource(logfile).getPath();
 				FileReader fr = new FileReader(new File(logfilePath));
 				BufferedReader br = new BufferedReader(fr);
 
