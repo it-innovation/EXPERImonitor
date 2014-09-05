@@ -316,7 +316,7 @@ public class ExplorerService
     }
     
     // Called from controller [line 340]
-    public EccApplicationServiceResultSet getAppServices( UUID expID,
+    public EccApplicationServiceResultSet getActServices( UUID expID,
                                                           String applicationIRI )
     {
         EccApplicationServiceResultSet result = null;
@@ -325,7 +325,7 @@ public class ExplorerService
         {
             try
             {
-                result = provenanceQueryHelper.getServicesUsedByApplication( expID, applicationIRI ); 
+                result = provenanceQueryHelper.getServicesUsedByActivity( expID, applicationIRI ); 
             }
             catch ( Exception ex )
             { logger.error( "Could not retrieve applications by activity", ex ); }

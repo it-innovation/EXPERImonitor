@@ -571,8 +571,8 @@ public class ExplorerProvenanceQueryHelper {
 	 * @return
 	 * @throws Exception
 	 */
-    public EccApplicationServiceResultSet getServicesUsedByApplication( UUID expID,
-                                                                         String actIRI ) throws Exception {
+    public EccApplicationServiceResultSet getServicesUsedByActivity( UUID expID,
+                                                                     String actIRI ) throws Exception {
 
         EccApplicationServiceResultSet result = null;
 
@@ -587,11 +587,11 @@ public class ExplorerProvenanceQueryHelper {
 
 		String repoID = expID.toString();
 
+        TupleQueryResult tqr = null;
+        
         try
         {
-            store.lockRepo(repoID);
-
-            TupleQueryResult tqr = store.query(repoID, sparql);
+            tqr = store.query(repoID, sparql);
 
             if (tqr!=null)
             {
@@ -621,7 +621,9 @@ public class ExplorerProvenanceQueryHelper {
             logger.error( "Could not get applications used by activity: " + ex.getMessage() );
         }
         finally
-        { store.unlockRepo(); }
+        { 
+            if ( tqr != null ) tqr.close();
+        }
 
         return result;
     }

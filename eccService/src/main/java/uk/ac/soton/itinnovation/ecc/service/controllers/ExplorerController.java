@@ -345,14 +345,14 @@ public class ExplorerController {
 
     // Application based queries -----------------------------------------------
     // -------------------------------------------------------------------------
-    @RequestMapping(method = RequestMethod.GET, value = "/{expID}/applications/iri/services")
+    @RequestMapping(method = RequestMethod.GET, value = "/{expID}/activities/iri/services")
     @ResponseBody
     public EccApplicationServiceResultSet getApplicationServices(@PathVariable UUID expID,
             @RequestParam(value = "IRI", defaultValue = "") String IRI) {
         EccApplicationServiceResultSet result = null;
 
         if (explorerService != null && explorerService.isReady() && expID != null && IRI != null) {
-            result = explorerService.getAppServices(expID, IRI);
+            result = explorerService.getActServices(expID, IRI);
 //            result = demoData.getServicesByApplication(IRI);
         } else {
             logger.error("Could not execute explorer service: service is null");
