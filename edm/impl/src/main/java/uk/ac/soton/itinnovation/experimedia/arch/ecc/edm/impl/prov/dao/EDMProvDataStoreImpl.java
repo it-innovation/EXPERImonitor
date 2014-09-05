@@ -30,7 +30,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Properties;
-import java.util.logging.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.ac.soton.itinnovation.owlimstore.common.NoSuchRepositoryException;
@@ -87,12 +86,9 @@ public final class EDMProvDataStoreImpl implements IEDMProvDataStore {
 		}
 
         connect();
-
-		try {
-			logger.info("repo exists? " + edmProvStoreWrapper.repositoryExists(props.getProperty("owlim.repositoryID")));
-		} catch (SesameException e) {
-			logger.error("Error checking for existing repository", e);
-		}
+        
+        logger.info("repo exists? " + edmProvStoreWrapper.repositoryExists(props.getProperty("owlim.repositoryID")));
+	
 		createRepository(props.getProperty("owlim.repositoryID"), props.getProperty("owlim.repositoryName"));
     }
 
@@ -134,7 +130,14 @@ public final class EDMProvDataStoreImpl implements IEDMProvDataStore {
 	public void disconnect() {
 		if ((edmProvStoreWrapper != null) && edmProvStoreWrapper.isConnected()) {
 			logger.warn("EDMProvStoreWrapper has still got an open connection - disconnecting now");
-			edmProvStoreWrapper.disconnect();
+			
+            try
+            {
+                edmProvStoreWrapper.disconnect();
+            }
+            catch ( Exception ex ) {
+                logger.error("Error disconnecting from repository ", ex);
+            }
 		}
 		provWriter.disconnect();
 		provReader.disconnect();

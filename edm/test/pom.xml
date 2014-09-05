@@ -80,7 +80,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-plugin</artifactId>
-                        <version>${ecc.surefire.plugin}</version>
+                        <version>${ecc.surefirereportplugin.version}</version>
                         <configuration>
                             <skipTests>false</skipTests>
                             <includes>
