@@ -325,7 +325,7 @@ public class ExplorerService
         {
             try
             {
-                result = provenanceQueryHelper.getServicesUsedByAppplication( expID, applicationIRI ); 
+                result = provenanceQueryHelper.getServicesUsedByApplication( expID, applicationIRI ); 
             }
             catch ( Exception ex )
             { logger.error( "Could not retrieve applications by activity", ex ); }

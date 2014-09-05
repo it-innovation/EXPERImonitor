@@ -153,7 +153,7 @@ public class EccParallelSetData
                 for ( EccApplication app : appInsts )
                 {
                     EccApplicationServiceResultSet srs =
-                            provHelper.getServicesUsedByAppplication( experimentID, app.getIRI() );
+                            provHelper.getServicesUsedByApplication( experimentID, app.getIRI() );
                     
                     if ( srs != null )
                     {
