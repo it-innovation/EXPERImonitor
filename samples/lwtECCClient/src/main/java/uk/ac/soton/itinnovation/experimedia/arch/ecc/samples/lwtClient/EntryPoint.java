@@ -36,9 +36,26 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared.*;
 public class EntryPoint
 {
 	private static final Logger logger = LoggerFactory.getLogger(EntryPoint.class);
-	private static PeriodicMetricLogParserTool logTool;
+	private static PeriodicMetricLogParserTool lwtLogTool;
+	private static PeriodicMetricLogParserTool generalServiceLogTool;
 
 	private static MetricGenerator metGen;
+
+	private static Entity vas;
+	private static Entity ts;
+	private static Entity ws;
+
+	private static MeasurementSet VASResponseTime;
+	private static MeasurementSet VASCPUUsage;
+	private static MeasurementSet VASMemoryUsage;
+
+	private static MeasurementSet TSResponseTime;
+	private static MeasurementSet TSCPUUsage;
+	private static MeasurementSet TSMemoryUsage;
+
+	private static MeasurementSet WSResponseTime;
+	private static MeasurementSet WSCPUUsage;
+	private static MeasurementSet WSMemoryUsage;
 
     // Main entry point
     public static void main( String args[] )
@@ -46,20 +63,17 @@ public class EntryPoint
 		// Get EXPERIMonitor EM properties to connect to service (in src/main/resources)
         Properties emProps = Utilitybox.getProperties( EntryPoint.class, "em" );
 
-        // Create a very simple metric model
+        // Create vas_rt very simple metric model
         MetricGenerator	metGen  = createSimpleModel();
 
-        // Create a simple ECC Logger
+        // Create vas_rt simple ECC Logger
         ECCSimpleLogger	eccLogger = new ECCSimpleLogger();
-
-		//Create Log tool
-		logTool = new PeriodicMetricLogParserTool();
 
         // Try connecting to the ECC...
         try
         {
-            logger.info( "Starting Lift Waiting Time client..." );
-            eccLogger.initialise( "Lift waiting time client", emProps, metGen );
+            logger.info( "Starting service metrics client..." );
+            eccLogger.initialise( "Lift service metrics client", emProps, metGen );
         }
         catch ( Exception ex )
         {
@@ -80,13 +94,15 @@ public class EntryPoint
             }
         }
 
+		//VAS//////////////////////////////////////////////////////////////////////////////////////
+		lwtLogTool = new PeriodicMetricLogParserTool("lwt.txt", vas);
         // Start sending data
 		boolean lwtServiceRunning = true;
 
 		while ( lwtServiceRunning )
 		{
 			//check for break:
-			if (logTool.hasFinished) {
+			if (lwtLogTool.hasFinished) {
 				logger.info("Stopping now");
 				lwtServiceRunning = false;
 				break;
@@ -94,9 +110,57 @@ public class EntryPoint
 
 			try {
 				// Do cool simulation codey bit & push whole report to ECC using Simon's new and shiny method
-				eccLogger.pushSimpleMetric("LWTService", "Average response time", logTool.createReport("Average response time", 60));
-				eccLogger.pushSimpleMetric("LWTService", "CPU usage", logTool.createReport("CPU usage", 60));
-				eccLogger.pushSimpleMetric("LWTService", "Memory usage", logTool.createReport("Memory usage", 60));
+				eccLogger.pushSimpleMetric("LWTService", "Average response time", lwtLogTool.createReport(VASResponseTime, metGen, 60));
+				eccLogger.pushSimpleMetric("LWTService", "CPU usage", lwtLogTool.createReport(VASCPUUsage, metGen, 60));
+				eccLogger.pushSimpleMetric("LWTService", "Memory usage", lwtLogTool.createReport(VASMemoryUsage, metGen, 60));
+			} catch (Exception e) {
+				logger.error("Error pushing metric", e);
+			}
+		}
+
+		// twitter service/////////////////////////////////////////////////////////////////////////
+		generalServiceLogTool = new PeriodicMetricLogParserTool("standardService.txt", ts);
+		// Start sending data
+		boolean twitterServiceRunning = true;
+
+		while ( twitterServiceRunning )
+		{
+			//check for break:
+			if (generalServiceLogTool.hasFinished) {
+				logger.info("Stopping now");
+				twitterServiceRunning = false;
+				break;
+			}
+
+			try {
+				// Do cool simulation codey bit & push whole report to ECC using Simon's new and shiny method
+				eccLogger.pushSimpleMetric("TwitterService", "Average response time", generalServiceLogTool.createReport(TSResponseTime, metGen, 60));
+				eccLogger.pushSimpleMetric("TwitterService", "CPU usage", generalServiceLogTool.createReport(TSCPUUsage, metGen, 60));
+				eccLogger.pushSimpleMetric("TwitterService", "Memory usage", generalServiceLogTool.createReport(TSMemoryUsage, metGen, 60));
+			} catch (Exception e) {
+				logger.error("Error pushing metric", e);
+			}
+		}
+
+		// weather service ////////////////////////////////////////////////////////////////////////
+		generalServiceLogTool = new PeriodicMetricLogParserTool("standardService.txt", ws);
+		// Start sending data
+		boolean weatherServiceRunning = true;
+
+		while ( weatherServiceRunning )
+		{
+			//check for break:
+			if (generalServiceLogTool.hasFinished) {
+				logger.info("Stopping now");
+				weatherServiceRunning = false;
+				break;
+			}
+
+			try {
+				// Do cool simulation codey bit & push whole report to ECC using Simon's new and shiny method
+				eccLogger.pushSimpleMetric("WeatherService", "Average response time", generalServiceLogTool.createReport(WSResponseTime, metGen, 60));
+				eccLogger.pushSimpleMetric("WeatherService", "CPU usage", generalServiceLogTool.createReport(WSCPUUsage, metGen, 60));
+				eccLogger.pushSimpleMetric("WeatherService", "Memory usage", generalServiceLogTool.createReport(WSMemoryUsage, metGen, 60));
 			} catch (Exception e) {
 				logger.error("Error pushing metric", e);
 			}
@@ -120,28 +184,77 @@ public class EntryPoint
         MetricGroup group = MetricHelper.createMetricGroup( "Demo group", "Data set for demo", metGen );
 
 		//Prov-metric link
-		 // A simple entity
-        Entity e = new Entity();
-        e.setName( "LWTService" );
-		e.setEntityID("http://experimedia.eu/ontologies/ExperimediaExperimentExplorer#entity_lwtService");
-        e.setDescription( "Lift waiting time service" );
-        metGen.addEntity( e );
 
-        // A simple attribute
-        Attribute a = MetricHelper.createAttribute( "Average response time", "The Server's response time", e );
-		Attribute b = MetricHelper.createAttribute( "CPU usage", "The Server's CPU usage in percent", e );
-		Attribute c = MetricHelper.createAttribute( "Memory usage", "The Server's memory usage in percent", e );
+		// Service entities
+        vas = new Entity();
+        vas.setName( "LWTService" );
+		vas.setEntityID("http://experimedia.eu/ontologies/ExperimediaExperimentExplorer#entity_lwtService");
+        vas.setDescription( "Lift waiting time service" );
+        metGen.addEntity( vas );
 
-        // A measurement set associated with the attribute
-        MetricHelper.createMeasurementSet( a, MetricType.RATIO,
+		ts = new Entity();
+        ts.setName( "TwitterService" );
+		ts.setEntityID("http://experimedia.eu/ontologies/ExperimediaExperimentExplorer#entity_twitterService");
+        ts.setDescription( "Lift waiting time service" );
+        metGen.addEntity( ts );
+
+		ws = new Entity();
+        ws.setName( "WeatherService" );
+		ws.setEntityID("http://experimedia.eu/ontologies/ExperimediaExperimentExplorer#entity_weatherService");
+        ws.setDescription( "Lift waiting time service" );
+        metGen.addEntity( ws );
+
+        // attributes
+        Attribute vas_rt = MetricHelper.createAttribute( "Average response time", "The Server's response time", vas );
+		Attribute vas_cpu = MetricHelper.createAttribute( "CPU usage", "The Server's CPU usage in percent", vas );
+		Attribute vas_mem = MetricHelper.createAttribute( "Memory usage", "The Server's memory usage in percent", vas );
+
+		Attribute ts_rt = MetricHelper.createAttribute( "Average response time", "The Server's response time", ts );
+		Attribute ts_cpu = MetricHelper.createAttribute( "CPU usage", "The Server's CPU usage in percent", ts );
+		Attribute ts_mem = MetricHelper.createAttribute( "Memory usage", "The Server's memory usage in percent", ts );
+
+		Attribute ws_rt = MetricHelper.createAttribute( "Average response time", "The Server's response time", ws );
+		Attribute ws_cpu = MetricHelper.createAttribute( "CPU usage", "The Server's CPU usage in percent", ws );
+		Attribute ws_mem = MetricHelper.createAttribute( "Memory usage", "The Server's memory usage in percent", ws );
+
+        // measurement sets associated with the attributes
+        VASResponseTime = MetricHelper.createMeasurementSet( vas_rt, MetricType.RATIO,
                                            new Unit( "ms" ),
                                            group );
 
-		MetricHelper.createMeasurementSet( b, MetricType.RATIO,
+		VASCPUUsage = MetricHelper.createMeasurementSet( vas_cpu, MetricType.RATIO,
                                            new Unit( "%" ),
                                            group );
 
-		MetricHelper.createMeasurementSet( c, MetricType.RATIO,
+		VASMemoryUsage = MetricHelper.createMeasurementSet( vas_mem, MetricType.RATIO,
+                                           new Unit( "%" ),
+                                           group );
+
+
+
+		TSResponseTime = MetricHelper.createMeasurementSet( ts_rt, MetricType.RATIO,
+                                           new Unit( "ms" ),
+                                           group );
+
+		TSCPUUsage = MetricHelper.createMeasurementSet( ts_cpu, MetricType.RATIO,
+                                           new Unit( "%" ),
+                                           group );
+
+		TSMemoryUsage = MetricHelper.createMeasurementSet( ts_mem, MetricType.RATIO,
+                                           new Unit( "%" ),
+                                           group );
+
+
+
+		WSResponseTime = MetricHelper.createMeasurementSet( ws_rt, MetricType.RATIO,
+                                           new Unit( "ms" ),
+                                           group );
+
+		WSCPUUsage = MetricHelper.createMeasurementSet( ws_cpu, MetricType.RATIO,
+                                           new Unit( "%" ),
+                                           group );
+
+		WSMemoryUsage = MetricHelper.createMeasurementSet( ws_mem, MetricType.RATIO,
                                            new Unit( "%" ),
                                            group );
 

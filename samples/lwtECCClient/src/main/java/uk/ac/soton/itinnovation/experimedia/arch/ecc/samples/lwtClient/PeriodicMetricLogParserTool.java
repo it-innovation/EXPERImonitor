@@ -47,8 +47,12 @@ public class PeriodicMetricLogParserTool
 
 	private final LinkedList<String> log = new LinkedList<String>();
 
+	private final String logfile;
+
     private Date currentDate;
     private Date nextDate;
+
+	private Entity entity;
 
     private int  currentResponseTime;
 	private int  nextResponseTime;
@@ -67,14 +71,16 @@ public class PeriodicMetricLogParserTool
 	public static final int VARIANCE_PERCENTAGE = 10;
 	public static final int FREQUENCY = 60; //Time between measurements in seconds
 
-    public PeriodicMetricLogParserTool()
+    public PeriodicMetricLogParserTool(String logfile, Entity entity)
     {
-       init();
+		this.logfile = logfile;
+		this.entity = entity;
+		init(logfile);
     }
 
-	private void init() {
+	private void init(String logfile) {
 		 //read log
-		String logfilePath = PeriodicMetricLogParserTool.class.getClassLoader().getResource("lwt.txt").getPath();
+		String logfilePath = PeriodicMetricLogParserTool.class.getClassLoader().getResource(logfile).getPath();
 		try {
 			FileReader fr = new FileReader(new File(logfilePath));
 			BufferedReader br = new BufferedReader(fr);
@@ -115,6 +121,10 @@ public class PeriodicMetricLogParserTool
 			currentRandomResponseTime = currentResponseTime + createRandomVarianceOf(currentResponseTime);
 			currentRandomCPU = currentCPU + createRandomVarianceOf(currentCPU);
 			currentRandomMem = currentMem + createRandomVarianceOf(currentMem);
+
+			//logger.debug("Current random response time: " + String.valueOf(currentRandomResponseTime));
+			//logger.debug("Current random CPU: " + String.valueOf(currentRandomCPU));
+			//logger.debug("Current random Mem: " + String.valueOf(currentRandomMem));
 		}
 	}
 
@@ -143,18 +153,28 @@ public class PeriodicMetricLogParserTool
 			nextResponseTime = Integer.valueOf(l.split(",")[1].split(":")[1]);
 			nextMem = Integer.valueOf(l.split(",")[2].split(":")[1]);
 			nextCPU = Integer.valueOf(l.split(",")[3].split(":")[1]);
-            
+
+			//logger.debug(nextDate.toString() + ", " + nextResponseTime);
+			//logger.debug("Response time: " + nextResponseTime);
+			//logger.debug("Mem: " + nextMem);
+			//logger.debug("CPU: " + nextCPU);
+
 		} else {
 			nextDate = null;
 		}
 	}
 
-    public Collection<Measurement> createReport( String attrName, int sampleCount )
+    public Collection<Measurement> createReport( MeasurementSet ms, MetricGenerator metGen, int sampleCount )
     {
 
-		Collection<Measurement> samples = new LinkedList<>();
+		Collection<Measurement> samples = new LinkedList<Measurement>();
 
-		logger.debug( "Creating report data for " + attrName );
+		//get attribute for measurement
+		UUID aID = ms.getAttributeID();
+		Attribute a = MetricHelper.getAttributeByID(aID, entity);
+		String aName = a.getName();
+
+		logger.debug(ms.getAttributeID() + ", " + aName);
 
 		while (nextDate!=null) {
 			for (int i=0; i<sampleCount; i++) {
@@ -162,21 +182,24 @@ public class PeriodicMetricLogParserTool
 				logger.debug("Current date: " + currentDate.toString());
 
 				// Create measurement instances
-				Measurement m = null;
+				Measurement m;
 
-				if (attrName.equals("Average response time")) {
+				if (aName.equals("Average response time")) {
 					m = new Measurement(currentRandomResponseTime + "");
-				} else if (attrName.equals("CPU usage")) {
+				} else if (aName.equals("CPU usage")) {
 					m = new Measurement(currentRandomCPU + "");
-				} else if (attrName.equals("Memory usage")) {
+				} else if (aName.equals("Memory usage")) {
 					m = new Measurement(currentRandomMem + "");
 				} else {
-					logger.warn("Unknown attribute for measurement: " + attrName + ", skipping");
+					logger.warn("Unknown attribute for measurement: " + aName + ", skipping");
 					break;
 				}
 
 				m.setTimeStamp( new Date(currentDate.getTime()) );
+				m.setMeasurementSetUUID( ms.getID() );
 				samples.add(m);
+
+				logger.debug("Added " + aName + " measurement");
 
 				if (nextDate==null) {
 					hasFinished = true;
@@ -186,7 +209,7 @@ public class PeriodicMetricLogParserTool
 		}
 
 		//reset log
-		init();
+		init(this.logfile);
 
 		return samples;
 	}
