@@ -66,8 +66,15 @@ public class ExplorerProvenanceQueryHelper {
      */
     public void shutdown() {
 
-        store.unlockRepo();
-        store.disconnect();
+        try
+        {
+            store.disconnect();
+        }
+        catch ( Exception ex )
+        {
+            String msg = "Could not cleanly shutdown prov query helper:  " + ex.getMessage();
+            logger.error( msg );
+        }
     }
 
     /**
@@ -121,11 +128,11 @@ public class ExplorerProvenanceQueryHelper {
 		String sparql = "SELECT (COUNT(DISTINCT ?instance) AS ?count) WHERE {" +
 						"?instance a <" + typeIRI + "> . }";
 
+        TupleQueryResult tqr = null;
+        
         try
         {
-            store.lockRepo( expID.toString() );
-
-            TupleQueryResult tqr = store.query(expID, sparql);
+            tqr = store.query(expID, sparql);
 
             if (tqr!=null) {
                 while (tqr.hasNext()) {
@@ -141,11 +148,13 @@ public class ExplorerProvenanceQueryHelper {
             }
         }
         catch ( Exception ex )
-        {
-            logger.error( "Could not get XXXXX: " + ex.getMessage() );
+        { 
+            logger.error( "Could not get provenance count: " + ex.getMessage() ); 
         }
         finally
-        { store.unlockRepo(); }
+        {
+            if ( tqr != null ) tqr.close();
+        }
 
 		return amount;
 	}
@@ -166,11 +175,11 @@ public class ExplorerProvenanceQueryHelper {
 		String sparql = "SELECT * WHERE { ?svc a <http://experimedia.eu/ontologies/ExperimediaExperimentExplorer#Service> . "
 					  + "?svc rdfs:label ?label }";
 
+        TupleQueryResult tqr = null;
+        
         try
         {
-            store.lockRepo( expID.toString() );
-
-            TupleQueryResult tqr = store.query(expID.toString(), sparql);
+            tqr = store.query(expID.toString(), sparql);
 
             if (tqr!=null) {
                 while (tqr.hasNext()) {
@@ -187,11 +196,13 @@ public class ExplorerProvenanceQueryHelper {
             }
         }
         catch ( Exception ex )
-        {
-            logger.error( "Could not get XXXXX: " + ex.getMessage() );
+        { 
+            logger.error( "Could not get service: " + ex.getMessage() ); 
         }
         finally
-        { store.unlockRepo(); }
+        { 
+            if ( tqr != null ) tqr.close();
+        }
 
 		return svc;
 	}
@@ -212,11 +223,11 @@ public class ExplorerProvenanceQueryHelper {
 		String sparql = "SELECT * WHERE { ?app a <http://experimedia.eu/ontologies/ExperimediaExperimentExplorer#Application> . "
 					  + "?app rdfs:label ?label }";
 
+        TupleQueryResult tqr = null;
+        
         try
         {
-            store.lockRepo( expID.toString() );
-
-            TupleQueryResult tqr = store.query(expID.toString(), sparql);
+            tqr = store.query(expID.toString(), sparql);
 
             if (tqr!=null) {
                 while (tqr.hasNext()) {
@@ -235,11 +246,13 @@ public class ExplorerProvenanceQueryHelper {
             }
         }
         catch ( Exception ex )
-        {
-            logger.error( "Could not get XXXXX: " + ex.getMessage() );
+        { 
+            logger.error( "Could not get application: " + ex.getMessage() ); 
         }
         finally
-        { store.unlockRepo(); }
+        {
+            if ( tqr != null ) tqr.close();
+        }
 
 		return app;
 	}
@@ -262,11 +275,11 @@ public class ExplorerProvenanceQueryHelper {
 				      + "?activity <http://www.w3.org/ns/prov#endedAtTime> ?end . "
 					  + "?activity rdfs:label ?label }";
 
+        TupleQueryResult tqr = null;
+        
         try
         {
-            store.lockRepo( expID.toString() );
-
-            TupleQueryResult tqr = store.query(expID.toString(), sparql);
+            tqr = store.query(expID.toString(), sparql);
 
             HashMap<String, Integer> activities = new HashMap<>();
             if (tqr!=null) {
@@ -291,11 +304,13 @@ public class ExplorerProvenanceQueryHelper {
             }
         }
         catch ( Exception ex )
-        {
-            logger.error( "Could not get XXXXX: " + ex.getMessage() );
+        { 
+            logger.error( "Could not get activity: " + ex.getMessage() ); 
         }
         finally
-        { store.unlockRepo(); }
+        {
+            if ( tqr != null ) tqr.close();
+        }
 
 		return activity;
 	}
@@ -313,22 +328,25 @@ public class ExplorerProvenanceQueryHelper {
 
         HashSet<String> result = new HashSet<>();
 
+        TupleQueryResult tqr = null;
+        
         try
         {
-            store.lockRepo( expID.toString() );
-
-            TupleQueryResult tqr = store.query(expID.toString(), sparql);
+            tqr = store.query(expID.toString(), sparql);
 
             while (tqr.hasNext()) {
                 result.add(tqr.next().getBinding("participant").getValue().toString());
             }
+            
         }
         catch ( Exception ex )
-        {
-            logger.error( "Could not get XXXXX: " + ex.getMessage() );
+        { 
+            logger.error( "Could not get participant IRIs: " + ex.getMessage() ); 
         }
         finally
-        { store.unlockRepo(); }
+        { 
+            if ( tqr != null ) tqr.close();
+        }
 
         return result;
     }
@@ -353,11 +371,11 @@ public class ExplorerProvenanceQueryHelper {
 					  + "?activity <http://www.w3.org/ns/prov#wasStartedBy> <" + part.getIRI() + "> . "
 					  + "?activity rdfs:label ?label }";
 
+        TupleQueryResult tqr = null;
+        
         try
         {
-            store.lockRepo( expID.toString() );
-
-            TupleQueryResult tqr = store.query(expID.toString(), sparql);
+            tqr = store.query(expID.toString(), sparql);
 
             HashMap<String, Integer> activities = new HashMap<>();
             if (tqr!=null) {
@@ -379,11 +397,13 @@ public class ExplorerProvenanceQueryHelper {
             }
         }
         catch ( Exception ex )
-        {
-            logger.error( "Could not get XXXXX: " + ex.getMessage() );
+        { 
+            logger.error( "Could not get activity summary: " + ex.getMessage() ); 
         }
         finally
-        { store.unlockRepo(); }
+        { 
+            if ( tqr != null ) tqr.close();
+        }
 
         return result;
     }
@@ -410,12 +430,11 @@ public class ExplorerProvenanceQueryHelper {
 					+ "?activity <http://www.w3.org/ns/prov#startedAtTime> ?start . "
 					+ "?activity <http://www.w3.org/ns/prov#endedAtTime> ?end . }";
 
+        TupleQueryResult tqr = null;
+        
         try
         {
-            store.lockRepo( expID.toString() );
-
-            TupleQueryResult tqr = store.query(expID.toString(), sparql);
-
+            tqr = store.query(expID.toString(), sparql);
 
             if (tqr!=null) {
 
@@ -440,11 +459,13 @@ public class ExplorerProvenanceQueryHelper {
             }
         }
         catch ( Exception ex )
-        {
-            logger.error( "Could not get XXXXX: " + ex.getMessage() );
+        { 
+            logger.error( "Could not get activity instances: " + ex.getMessage() ); 
         }
         finally
-        { store.unlockRepo(); }
+        { 
+            if ( tqr != null ) tqr.close();
+        }
 
         return result;
     }
@@ -503,11 +524,11 @@ public class ExplorerProvenanceQueryHelper {
 
         String repoID = expID.toString();
 
+        TupleQueryResult tqr = null;
+        
         try
         {
-            store.lockRepo(repoID);
-
-            TupleQueryResult tqr = store.query(repoID, sparql);
+            tqr = store.query(repoID, sparql);
 
             if (tqr!=null)
             {
@@ -534,7 +555,9 @@ public class ExplorerProvenanceQueryHelper {
             logger.error( "Could not get applications used by activity: " + ex.getMessage() );
         }
         finally
-        { store.unlockRepo(); }
+        { 
+            if ( tqr != null ) tqr.close();
+        }
 
         return result;
     }

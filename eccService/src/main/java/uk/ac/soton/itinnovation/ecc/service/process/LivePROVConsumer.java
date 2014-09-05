@@ -32,6 +32,8 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance
 
 import org.slf4j.*;
 import java.util.*;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMProvPersistenceFactory;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.prov.dao.EDMProvDataStoreImpl;
 
 
 
@@ -40,9 +42,10 @@ public class LivePROVConsumer
 {
     private final Logger lpcLog = LoggerFactory.getLogger(LivePROVConsumer.class);
     
-    private boolean        repoInitialised;
-    private String         repoID;
-    private IEDMProvWriter provWriter;
+    private boolean              repoInitialised;
+    private String               repoID;
+    private EDMProvWriterImpl    provStoreWriter;
+    private EDMProvStoreWrapper  provStoreWrapper;
     
     private HashMap<String,String> nsBaseURIMap; // name x baseURI
     private HashMap<String,String> nsPrefixMap;  // name x prefix
@@ -65,7 +68,7 @@ public class LivePROVConsumer
         
         try
         {
-            provWriter = null;   
+            provStoreWrapper = null; 
             String expIDVal = expID.toString();
             
             lpcLog.info( "Attempting to create PROV repository for experiment: " + expTitle + ": " + expIDVal );
@@ -73,26 +76,24 @@ public class LivePROVConsumer
             repoProps.setProperty( "owlim.repositoryID", expIDVal );
             repoProps.setProperty( "owlim.repositoryName", expTitle );
             
-            // Create impls for verification/creation of repository
-            EDMProvStoreWrapper psw = new EDMProvStoreWrapper( repoProps );
-            if ( psw.repositoryExists(expIDVal) )
+            // Check to see if repository exists (throw it if it does)
+            provStoreWrapper = new EDMProvStoreWrapper( repoProps );
+            if ( provStoreWrapper.repositoryExists(expIDVal) )
                 throw new Exception( "Could not create repository: it already exists" );
             
-            psw.disconnect(); // We're finished with this one
-            
-            // Repository doesn't exist, so create a new one
-            EDMProvWriterImpl provWriterImpl = new EDMProvWriterImpl( repoProps );
+            // Create the new repository
             repoID = expIDVal;
-            
-            // All seems well
-            provWriter = provWriterImpl;
-            createDefaultNamespaces(expTitle);
+            provStoreWrapper.createNewRepository( repoID, expTitle );
+            provStoreWriter = new EDMProvWriterImpl( provStoreWrapper );
+            createDefaultNamespaces();
             
             repoInitialised = true;
             lpcLog.info( "Repository created OK" );
         }
         catch ( Exception ex )
         {
+            repoID = null;
+            
             String msg = "Could not create experiment repository: " + ex.getMessage();
             lpcLog.error( msg );
             
@@ -109,7 +110,7 @@ public class LivePROVConsumer
         {
             lpcLog.info( "Trying to close current experiment repository" );
             
-            provWriter.disconnect();
+            provStoreWrapper.disconnect();
             
             repoInitialised = false;
             
@@ -135,7 +136,7 @@ public class LivePROVConsumer
         // Add triples, if there are some
         if ( !triples.isEmpty() )
         {
-            provWriter.storeReport( report );
+            provStoreWriter.storeReport( report );
         }
         else
             lpcLog.warn( "PROV report contained no triples - droppped" );
@@ -158,37 +159,29 @@ public class LivePROVConsumer
         nsPrefixMap.put( "experimedia", "http://it-innovation.soton.ac.uk/ontologies/experimedia#" );
     }
     
-    private void createDefaultNamespaces(String expTitle) throws Exception
-    {
-        EDMProvWriterImpl writerImpl = (EDMProvWriterImpl) provWriter;
-        EDMProvStoreWrapper psw = writerImpl.getEDMProvStoreWrapper();
-        
-        if ( psw == null )        throw new Exception( "Cannot create default namespaces: ProvStoreWrapper is null" );
-        if ( !psw.isConnected() ) throw new Exception( "Cannot create default namespaces: ProvStoreWrapper is not conencted" );
-		
-		psw.createNewRepository(repoID, expTitle);
-        
+    private void createDefaultNamespaces() throws Exception
+    {		    
         try
         {
             // FOAF
-            psw.importOntologyToKnowledgeBase( nsBaseURIMap.get("foaf"),
-                                               nsPrefixMap.get("foaf"), 
-                                               "foaf", LivePROVConsumer.class );
+            provStoreWrapper.importOntologyToKnowledgeBase( nsBaseURIMap.get("foaf"),
+                                                            nsPrefixMap.get("foaf"), 
+                                                            "foaf", LivePROVConsumer.class );
 
             // SIOC
-            psw.importOntologyToKnowledgeBase( nsBaseURIMap.get("sioc"),
-                                               nsPrefixMap.get("sioc"),
-                                               "sioc", LivePROVConsumer.class );
+            provStoreWrapper.importOntologyToKnowledgeBase( nsBaseURIMap.get("sioc"),
+                                                            nsPrefixMap.get("sioc"),
+                                                            "sioc", LivePROVConsumer.class );
 
             // PROV
-            psw.importOntologyToKnowledgeBase( nsBaseURIMap.get("prov"),
-                                               nsPrefixMap.get("prov"),
-                                               "prov", LivePROVConsumer.class );
+            provStoreWrapper.importOntologyToKnowledgeBase( nsBaseURIMap.get("prov"),
+                                                            nsPrefixMap.get("prov"),
+                                                            "prov", LivePROVConsumer.class );
 
             // EXPERIMEDIA
-            psw.importOntologyToKnowledgeBase( nsBaseURIMap.get("experimedia"),
-                                               nsPrefixMap.get("experimedia"),
-                                               "experimedia", LivePROVConsumer.class );
+            provStoreWrapper.importOntologyToKnowledgeBase( nsBaseURIMap.get("experimedia"),
+                                                            nsPrefixMap.get("experimedia"),
+                                                            "experimedia", LivePROVConsumer.class );
         }
         catch ( Exception ex )
         {
