@@ -76,13 +76,6 @@ public class EntryPoint
             // Get an input from the keyboard
             try
             {
-				//abort on q
-                //if ( System.in.read() == 113 ) {
-                //    running = false;
-				//} else {
-				//	logger.debug("input received");
-				//}
-
                 // Send a metric (if we are ready to do so)
                 if ( provGen.getEccLogger().isReadyToPush() )
                 {
@@ -120,6 +113,11 @@ public class EntryPoint
                 running = false;
             }
         }
+        
+        // Wait a short period before shutting down (final pushes may need processing)
+        try { Thread.sleep(1000); } 
+        catch ( Throwable t )
+        { logger.info( "Shutting down now..." ); }
 
         // Clean up
         eccLogger.shutdown();

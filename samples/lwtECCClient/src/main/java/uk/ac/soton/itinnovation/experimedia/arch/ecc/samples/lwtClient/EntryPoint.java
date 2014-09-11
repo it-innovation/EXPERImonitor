@@ -165,6 +165,11 @@ public class EntryPoint
 				logger.error("Error pushing metric", e);
 			}
 		}
+        
+        // Wait a short period before shutting down (final pushes may need processing)
+        try { Thread.sleep(1000); } 
+        catch ( Throwable t )
+        { logger.info( "Shutting down now..." ); }
 
         eccLogger.shutdown();
 
