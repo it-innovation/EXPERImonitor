@@ -147,14 +147,15 @@ public class EDMProvStoreWrapperTest extends TestCase {
 	public void testDeleteRepository() {
 		try {
 			store.deleteRepository(repoID);
+            
+            if (store.repositoryExists(repoID)) {
+                fail("Repository still exists");
+            }
+            
 		} catch (Exception e) {
 			logger.error("Error deleting repository", e);
 			fail("Error deleting repository");
-		}
-	
-        if (store.repositoryExists(repoID)) {
-            fail("Repository still exists");
-        }
+		}    
 	}
 	
 	@Test
@@ -162,19 +163,21 @@ public class EDMProvStoreWrapperTest extends TestCase {
 		String testrepo = "test-" + UUID.randomUUID().toString();
 		try {
 			store.createNewRepository(testrepo, "this is a test repo");
+            
+            if (!store.repositoryExists(testrepo)) {
+                fail("Repository was not created");
+            }
+            
+            try {
+                store.deleteRepository(testrepo);
+            } catch (Exception ex) {
+                logger.error("Error deleting test repository", ex);
+            }
+            
+            
 		} catch (Exception e) {
 			logger.error("Error creating repository", e);
 			fail("Error creating repository");
-		}
-
-		if (!store.repositoryExists(testrepo)) {
-            fail("Repository was not created");
-		}
-        
-		try {
-			store.deleteRepository(testrepo);
-		} catch (Exception ex) {
-			logger.error("Error deleting test repository", ex);
 		}
 	}
 	
@@ -240,6 +243,7 @@ public class EDMProvStoreWrapperTest extends TestCase {
 	public void testQuery() {
 		LinkedList<HashMap<String, String>> result = null;
 		try {
+            store.loadPrefixes();
 			storeTestTriples();
 			String sparql = "SELECT * WHERE { "
 					+ "owl:Test ?p ?o . "

@@ -25,15 +25,12 @@
 
 package uk.ac.soton.itinnovation.ecc.service.process;
 
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.prov.dao.IEDMProvWriter;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.prov.dao.EDMProvWriterImpl;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.prov.db.EDMProvStoreWrapper;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.*;
 
 import org.slf4j.*;
 import java.util.*;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.factory.EDMProvPersistenceFactory;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.prov.dao.EDMProvDataStoreImpl;
 
 
 
