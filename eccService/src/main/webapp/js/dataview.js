@@ -9,6 +9,8 @@ $(document).ready(function() {
 
     var experimentId = getParameter('experimentId');
 
+    $("#provDataLink").attr('href', BASE_URL + '/provview.html?experimentId=' + experimentId);
+
     $("#change_experiment").click(function(e) {
         e.preventDefault();
         $('#nameExperimentModal').foundation('reveal', 'open');
@@ -182,7 +184,7 @@ $(document).ready(function() {
             success: function(data) {
                 console.log(data);
                 if (data.hasOwnProperty('uuid')) {
-                    window.location.replace(BASE_URL + "/data.html?experimentId=" + data.uuid);
+                    window.location.replace(BASE_URL + "/dataview.html?experimentId=" + data.uuid);
                 } else {
                     $('#configStatus').attr('class', 'right alert-color');
                     $('#configStatus').text('failed to load experiment [' + oldProjectUuid + ']');
@@ -198,19 +200,20 @@ function showConfigurationDetails(configurationMetadata) {
     var d = configurationMetadata.databaseConfig;
     var r = configurationMetadata.rabbitConfig;
     $("#configuration_details").empty();
-    $("#configuration_details").append("<p class='details'>Project: " + configurationMetadata.projectName + "</p>");
-    $("#configuration_details").append("<p class='details'>Database: " + d.url + " / " + d.databaseName + "</p>");
-    $("#configuration_details").append("<p class='details'>Rabbit: " + r.ip + ":" + r.port + " / " + r.monitorId + "</p>");
+    $("#configuration_details").append("<div class='clearfix'><p class='details'><span class='left'>Project: </span><span class='right'>" + configurationMetadata.projectName + "</span></p></div>");
+    $("#configuration_details").append("<div class='clearfix'><p class='details'><span class='left'>Database: </span><span class='right'>" + d.url + " / " + d.databaseName + "</span></p></div>");
+    $("#configuration_details").append("<div class='clearfix'><p class='details'><span class='left'>Rabbit: </span><span class='right'>" + r.ip + ":" + r.port + " / " + r.monitorId + "</span></p></div>");
+
 }
 
 // shows active experiment details
 function showActiveExperimentDetails(experimentMetadata) {
     console.log(experimentMetadata);
     $("#experiment_details").empty();
-    $("#experiment_details").append("<p class='details'>Project: " + experimentMetadata.projectName + "</p>");
-    $("#experiment_details").append("<p class='details'>Name: " + experimentMetadata.name + "</p>");
-    $("#experiment_details").append("<p class='details'>Description: " + experimentMetadata.description + "</p>");
-    $("#experiment_details").append("<p class='details'>Started: " + moment(new Date(experimentMetadata.startTime)).format(DISPLAY_TIME_FORMAT) + "</p>");
+    $("#experiment_details").append("<div class='clearfix'><p class='details'><span class='left'>Project: </span><span class='right'>" + experimentMetadata.projectName + "</span></p></div>");
+    $("#experiment_details").append("<div class='clearfix'><p class='details'><span class='left'>Name: </span><span class='right'>" + experimentMetadata.name + "</span></p></div>");
+    $("#experiment_details").append("<div class='clearfix'><p class='details'><span class='left'>Description: </span><span class='right'>" + experimentMetadata.description + "</span></p></div>");
+    $("#experiment_details").append("<div class='clearfix'><p class='details'><span class='left'>Started: </span><span class='right'>" + moment(new Date(experimentMetadata.startTime)).format(DISPLAY_TIME_FORMAT) + "</span></p></div>");
     $("#download_experiment_data").attr('href', BASE_URL + "/data/export/experiment/" + experimentMetadata.uuid);
 }
 
