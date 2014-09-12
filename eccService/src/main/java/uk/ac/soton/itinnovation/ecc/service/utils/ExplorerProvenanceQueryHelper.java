@@ -576,7 +576,7 @@ public class ExplorerProvenanceQueryHelper {
 
         EccActivityServiceResultSet result = null;
 
-		String sparql = "SELECT * WHERE {\n" +
+		String sparql = "SELECT DISTINCT ?a ?s ?label WHERE {\n" +
 		"?a a <http://www.w3.org/ns/prov#Activity> .\n" +
 		"?a <http://www.w3.org/ns/prov#wasInformedBy> <" + actIRI + "> .\n" +
 		"?app a <http://experimedia.eu/ontologies/ExperimediaExperimentExplorer#Application> .\n" +
