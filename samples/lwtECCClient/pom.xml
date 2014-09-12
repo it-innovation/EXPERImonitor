@@ -41,7 +41,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>1.2.1</version>
                 <configuration>
-                    <mainClass>uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.headlessECCClient.EntryPoint</mainClass>
+                    <mainClass>uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.lwtClient.EntryPoint</mainClass>
                 </configuration>
             </plugin>
         </plugins>

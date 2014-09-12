@@ -1,0 +1,114 @@
+<!doctype html>
+<html class="no-js" lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <!-- disable all caching-->
+        <meta http-equiv="cache-control" content="max-age=0" />
+        <meta http-equiv="cache-control" content="no-cache" />
+        <meta http-equiv="expires" content="0" />
+        <meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT" />
+        <meta http-equiv="pragma" content="no-cache" />
+
+        <title>EXPERIMEDIA ECC Dashboard | Experiment data</title>
+        <link rel="stylesheet" href="css/foundation.min.css" />
+        <link rel="stylesheet" href="explorerdashboard/js/libs/nvd3/nv.d3.css"/>
+        <link rel="stylesheet" href="explorerdashboard/js/libs/d3/d3-parsets/d3.parsets.css"/>
+        <link rel="stylesheet" type="text/css" href="css/tablesorter.css" />
+        <link rel="stylesheet" href="css/app.css" />
+        <script src="js/vendor/modernizr.min.js"></script>
+    </head>
+    <body>
+
+        <div class="row">
+            <div class="small-12 columns clearfix">
+                <p class="left">Data Explorer: Provenance view &mdash;</p><p class="left"><a href="#" id="metricDataLink">  &nbsp;switch to Metric view</a></p>
+                <p class="right" id="configStatus"></p>
+            </div>
+            <div class="small-12 columns">
+                <h4>Configuration</h4>
+                <div class="row">
+                    <div class="large-7 columns" id="configuration_details">
+
+                    </div>
+                    <div class="large-5 columns text-right" id="configuration_controls">
+                        <p class='details'><a href="#" id="to_monitor">Back to experiment monitor</a></p>
+                        <p class='details'><a href="#" id="change_experiment">Select different experiment</a></p>
+                    </div>
+                </div>
+            </div>
+            <div class="small-12 columns">
+                <hr>
+                <h4>Experiment info</h4>
+                <div class="row">
+                    <div class="large-7 columns" id="experiment_details">
+                    </div>
+                    <div class="large-1 columns">
+                    </div>
+                    <div class="large-3 columns" id="prov_details">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="small-12 columns cleafix">
+                <hr>
+                <p class="left">Add new widget:
+                    <a href="#" id="addNewQoe" class="addToProvenanceExplorer">Participant QoE</a>
+                    <a href="#" id="addNewParticipant" class="addToProvenanceExplorer">Participant activities</a>
+                    <a href="#" id="addNewQoS" class="addToProvenanceExplorer">Service QoS</a>
+                </p>
+                <p class="right">
+                    <a href="#" id="removeAllWidgets" class="addToProvenanceExplorer">Remove all widgets</a>
+                </p>
+                <div class="row" id="prov_widgets">
+
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <hr>
+            <div class="small-12 columns">
+                <a href="#" class="button small" id="restartEccButton">Restart Service</a>
+
+            </div>
+        </div>
+
+        <!-- ***** -->
+        <div id="nameExperimentModal" class="reveal-modal medium" data-reveal>
+            <div class="row fullWidth">
+                <h3>Select an experiment</h3>
+                <form id="newOldExperimentsForm">
+
+                    <div id="oldProjects" class="experimentsSelection">
+                    </div>
+                    <div id="oldProjectDetails" class="experimentsSelectionDetails">
+                    </div>
+
+                </form>
+            </div>
+            <div class="row fullWidth">
+                <div class="small-12 columns text-center">
+                    <a href="#" class="button" id="setProjectNameAndDescription">Let's Go</a>
+                </div>
+            </div>
+            <a class="close-reveal-modal">&#215;</a>
+
+        </div>
+
+        <script src="js/vendor/jquery.min.js"></script>
+        <script src="js/foundation.min.js"></script>
+        <script src="js/vendor/jquery.serializeJSON.min.js"></script>
+        <script src="js/vendor/highcharts.js"></script>
+        <script src="js/vendor/moment.min.js"></script>
+        <script src="explorerdashboard/js/libs/d3/d3.js"></script>
+        <script src="explorerdashboard/js/libs/d3/d3-parsets/d3.parsets.js"></script>
+        <script src="explorerdashboard/js/libs/nvd3/nv.d3.js"></script>
+        <script type="text/javascript" src="js/vendor/jquery.tablesorter.min.js"></script>
+        <script src="js/common.js"></script>
+        <script src="js/provview.js"></script>
+    </body>
+</html>

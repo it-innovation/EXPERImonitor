@@ -229,7 +229,7 @@ $(document).ready(function() {
                 success: function(data) {
                     console.log(data);
                     if (data.hasOwnProperty('uuid')) {
-                        window.location.replace(BASE_URL + "/data.html?experimentId=" + data.uuid);
+                        window.location.replace(BASE_URL + "/provview.html?experimentId=" + data.uuid);
                     } else {
                         $('#configStatus').attr('class', 'right alert-color');
                         $('#configStatus').text('failed to load experiment [' + oldProjectUuid + ']');
