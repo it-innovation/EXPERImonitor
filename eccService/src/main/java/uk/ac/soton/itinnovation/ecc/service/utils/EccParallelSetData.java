@@ -152,19 +152,7 @@ public class EccParallelSetData
                 
                 for ( EccApplication app : appInsts )
                 {
-                    EccApplicationServiceResultSet srs =
-                            provHelper.getServicesUsedByActivity( experimentID, app.getIRI() );
-                    
-                    if ( srs != null )
-                    {
-                        // Map services by IRI
-                        for ( EccService serv : srs.getServices() )
-                            servsByIRI.put( serv.getIRI(), serv );
-                        
-                        // Map app labels to service IRIs
-                        
-                        
-                    }
+                   
                 }
             }
         }

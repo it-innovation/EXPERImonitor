@@ -571,18 +571,19 @@ public class ExplorerProvenanceQueryHelper {
 	 * @return
 	 * @throws Exception
 	 */
-    public EccApplicationServiceResultSet getServicesUsedByActivity( UUID expID,
-                                                                     String actIRI ) throws Exception {
+    public EccActivityServiceResultSet getServicesUsedByActivity( UUID expID,
+                                                                  String actIRI ) throws Exception {
 
-        EccApplicationServiceResultSet result = null;
+        EccActivityServiceResultSet result = null;
 
 		String sparql = "SELECT * WHERE {\n" +
-		"?a a prov:Activity .\n" +
-		"?a prov:wasInformedBy <" + actIRI + "> .\n" +
+		"?a a <http://www.w3.org/ns/prov#Activity> .\n" +
+		"?a <http://www.w3.org/ns/prov#wasInformedBy> <" + actIRI + "> .\n" +
 		"?app a <http://experimedia.eu/ontologies/ExperimediaExperimentExplorer#Application> .\n" +
-		"?a prov:wasStartedBy ?app .\n" +
+		"?a <http://www.w3.org/ns/prov#wasStartedBy> ?app .\n" +
 		"?s a <http://experimedia.eu/ontologies/ExperimediaExperimentExplorer#Service> .\n" +
-		"?a prov:used ?s .\n" +
+        "?s rdfs:label ?label .\n" +
+		"?a <http://www.w3.org/ns/prov#used> ?s .\n" +
 		"}";
 
 		String repoID = expID.toString();
@@ -596,23 +597,27 @@ public class ExplorerProvenanceQueryHelper {
             if (tqr!=null)
             {
                 EccActivity act = getActivity(expID, actIRI);
-
-				result = new EccApplicationServiceResultSet(getApplication(expID, actIRI));
-
-				//TODO: add all services found here
-				//result.addService(getService(expID, "http://experimedia.eu/ontologies/ExperimediaExperimentExplorer#entity_lwtService"));
-
-                while (tqr.hasNext())
+                
+                if ( act != null )
                 {
-                    BindingSet tqrb = tqr.next();
+                    result = new EccActivityServiceResultSet( act );
 
-					//TODO: could we perhaps remove app from query? could there be more than one app?
-                    String s = tqrb.getBinding("s").getValue().toString();
-                    String app = tqrb.getBinding("app").getValue().toString();
+                    while (tqr.hasNext())
+                    {
+                        BindingSet tqrb = tqr.next();
+                        
+                        String servIRI   = tqrb.getBinding("s").getValue().toString();
+                        String servLabel = tqrb.getBinding("label").getValue().toString();
 
-                    EccService svc = new EccService(s.substring(s.indexOf("\"")+1, s.lastIndexOf("\"")), "TODO: description", app);
-
-                    result.addService(svc);
+                        if ( servIRI != null && servLabel != null ) 
+                        {            
+                            EccService svc = new EccService( servLabel.substring( servLabel.indexOf("\"")+1, 
+                                                             servLabel.lastIndexOf("\"")),
+                                                             "TODO: description", 
+                                                             servIRI );
+                            result.addService(svc);
+                        }
+                    }
                 }
             }
         }

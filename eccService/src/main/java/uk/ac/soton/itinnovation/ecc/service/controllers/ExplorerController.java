@@ -347,9 +347,10 @@ public class ExplorerController {
     // -------------------------------------------------------------------------
     @RequestMapping(method = RequestMethod.GET, value = "/{expID}/activities/iri/services")
     @ResponseBody
-    public EccApplicationServiceResultSet getApplicationServices(@PathVariable UUID expID,
+    public EccActivityServiceResultSet getApplicationServices(@PathVariable UUID expID,
             @RequestParam(value = "IRI", defaultValue = "") String IRI) {
-        EccApplicationServiceResultSet result = null;
+        
+        EccActivityServiceResultSet result = null;
 
         if (explorerService != null && explorerService.isReady() && expID != null && IRI != null) {
             result = explorerService.getActServices(expID, IRI);
