@@ -129,7 +129,7 @@ public class ExplorerProvenanceQueryHelper {
 						"?instance a <" + typeIRI + "> . }";
 
         TupleQueryResult tqr = null;
-        
+
         try
         {
             tqr = store.query(expID, sparql);
@@ -148,8 +148,8 @@ public class ExplorerProvenanceQueryHelper {
             }
         }
         catch ( Exception ex )
-        { 
-            logger.error( "Could not get provenance count: " + ex.getMessage() ); 
+        {
+            logger.error( "Could not get provenance count: " + ex.getMessage() );
         }
         finally
         {
@@ -176,7 +176,7 @@ public class ExplorerProvenanceQueryHelper {
 					  + "?svc rdfs:label ?label }";
 
         TupleQueryResult tqr = null;
-        
+
         try
         {
             tqr = store.query(expID.toString(), sparql);
@@ -196,11 +196,11 @@ public class ExplorerProvenanceQueryHelper {
             }
         }
         catch ( Exception ex )
-        { 
-            logger.error( "Could not get service: " + ex.getMessage() ); 
+        {
+            logger.error( "Could not get service: " + ex.getMessage() );
         }
         finally
-        { 
+        {
             if ( tqr != null ) tqr.close();
         }
 
@@ -224,7 +224,7 @@ public class ExplorerProvenanceQueryHelper {
 					  + "?app rdfs:label ?label }";
 
         TupleQueryResult tqr = null;
-        
+
         try
         {
             tqr = store.query(expID.toString(), sparql);
@@ -246,8 +246,8 @@ public class ExplorerProvenanceQueryHelper {
             }
         }
         catch ( Exception ex )
-        { 
-            logger.error( "Could not get application: " + ex.getMessage() ); 
+        {
+            logger.error( "Could not get application: " + ex.getMessage() );
         }
         finally
         {
@@ -276,7 +276,7 @@ public class ExplorerProvenanceQueryHelper {
 					  + "?activity rdfs:label ?label }";
 
         TupleQueryResult tqr = null;
-        
+
         try
         {
             tqr = store.query(expID.toString(), sparql);
@@ -304,8 +304,8 @@ public class ExplorerProvenanceQueryHelper {
             }
         }
         catch ( Exception ex )
-        { 
-            logger.error( "Could not get activity: " + ex.getMessage() ); 
+        {
+            logger.error( "Could not get activity: " + ex.getMessage() );
         }
         finally
         {
@@ -329,7 +329,7 @@ public class ExplorerProvenanceQueryHelper {
         HashSet<String> result = new HashSet<>();
 
         TupleQueryResult tqr = null;
-        
+
         try
         {
             tqr = store.query(expID.toString(), sparql);
@@ -337,14 +337,14 @@ public class ExplorerProvenanceQueryHelper {
             while (tqr.hasNext()) {
                 result.add(tqr.next().getBinding("participant").getValue().toString());
             }
-            
+
         }
         catch ( Exception ex )
-        { 
-            logger.error( "Could not get participant IRIs: " + ex.getMessage() ); 
+        {
+            logger.error( "Could not get participant IRIs: " + ex.getMessage() );
         }
         finally
-        { 
+        {
             if ( tqr != null ) tqr.close();
         }
 
@@ -372,7 +372,7 @@ public class ExplorerProvenanceQueryHelper {
 					  + "?activity rdfs:label ?label }";
 
         TupleQueryResult tqr = null;
-        
+
         try
         {
             tqr = store.query(expID.toString(), sparql);
@@ -397,11 +397,11 @@ public class ExplorerProvenanceQueryHelper {
             }
         }
         catch ( Exception ex )
-        { 
-            logger.error( "Could not get activity summary: " + ex.getMessage() ); 
+        {
+            logger.error( "Could not get activity summary: " + ex.getMessage() );
         }
         finally
-        { 
+        {
             if ( tqr != null ) tqr.close();
         }
 
@@ -431,7 +431,7 @@ public class ExplorerProvenanceQueryHelper {
 					+ "?activity <http://www.w3.org/ns/prov#endedAtTime> ?end . }";
 
         TupleQueryResult tqr = null;
-        
+
         try
         {
             tqr = store.query(expID.toString(), sparql);
@@ -459,11 +459,11 @@ public class ExplorerProvenanceQueryHelper {
             }
         }
         catch ( Exception ex )
-        { 
-            logger.error( "Could not get activity instances: " + ex.getMessage() ); 
+        {
+            logger.error( "Could not get activity instances: " + ex.getMessage() );
         }
         finally
-        { 
+        {
             if ( tqr != null ) tqr.close();
         }
 
@@ -525,7 +525,7 @@ public class ExplorerProvenanceQueryHelper {
         String repoID = expID.toString();
 
         TupleQueryResult tqr = null;
-        
+
         try
         {
             tqr = store.query(repoID, sparql);
@@ -555,7 +555,7 @@ public class ExplorerProvenanceQueryHelper {
             logger.error( "Could not get applications used by activity: " + ex.getMessage() );
         }
         finally
-        { 
+        {
             if ( tqr != null ) tqr.close();
         }
 
@@ -589,7 +589,7 @@ public class ExplorerProvenanceQueryHelper {
 		String repoID = expID.toString();
 
         TupleQueryResult tqr = null;
-        
+
         try
         {
             tqr = store.query(repoID, sparql);
@@ -597,7 +597,7 @@ public class ExplorerProvenanceQueryHelper {
             if (tqr!=null)
             {
                 EccActivity act = getActivity(expID, actIRI);
-                
+
                 if ( act != null )
                 {
                     result = new EccActivityServiceResultSet( act );
@@ -605,15 +605,15 @@ public class ExplorerProvenanceQueryHelper {
                     while (tqr.hasNext())
                     {
                         BindingSet tqrb = tqr.next();
-                        
+
                         String servIRI   = tqrb.getBinding("s").getValue().toString();
                         String servLabel = tqrb.getBinding("label").getValue().toString();
 
-                        if ( servIRI != null && servLabel != null ) 
-                        {            
-                            EccService svc = new EccService( servLabel.substring( servLabel.indexOf("\"")+1, 
+                        if ( servIRI != null && servLabel != null )
+                        {
+                            EccService svc = new EccService( servLabel.substring( servLabel.indexOf("\"")+1,
                                                              servLabel.lastIndexOf("\"")),
-                                                             "TODO: description", 
+                                                             "TODO: description",
                                                              servIRI );
                             result.addService(svc);
                         }
@@ -626,10 +626,67 @@ public class ExplorerProvenanceQueryHelper {
             logger.error( "Could not get applications used by activity: " + ex.getMessage() );
         }
         finally
-        { 
+        {
             if ( tqr != null ) tqr.close();
         }
 
         return result;
     }
+
+	/**
+	 * Get all services in a specific experiment.
+	 *
+	 * @param expID the experiment's ID
+	 * @return the services
+	 */
+	public Set<EccService> getServicesByExperiment (UUID expID) throws QueryEvaluationException {
+
+		Set<EccService> result = null;
+
+		String sparql = "SELECT DISTINCT ?s ?label WHERE {\n" +
+		"?s a <http://experimedia.eu/ontologies/ExperimediaExperimentExplorer#Service> .\n" +
+        "?s rdfs:label ?label .\n" +
+		"}";
+
+		String repoID = expID.toString();
+
+        TupleQueryResult tqr = null;
+
+        try
+        {
+            tqr = store.query(repoID, sparql);
+
+            if (tqr!=null)
+            {
+				while (tqr.hasNext())
+				{
+					BindingSet tqrb = tqr.next();
+
+					String servIRI   = tqrb.getBinding("s").getValue().toString();
+					String servLabel = tqrb.getBinding("label").getValue().toString();
+
+					if ( servIRI != null && servLabel != null )
+					{
+						EccService svc = new EccService( servLabel.substring( servLabel.indexOf("\"")+1,
+														 servLabel.lastIndexOf("\"")),
+														 "TODO: description",
+														 servIRI );
+						result.add(svc);
+					}
+				}
+            }
+        }
+        catch ( Exception ex )
+        {
+            logger.error( "Could not get services from experiment: " + ex.getMessage() );
+        }
+        finally
+        {
+            if ( tqr != null ) {
+				tqr.close();
+			}
+        }
+
+        return result;
+	}
 }
