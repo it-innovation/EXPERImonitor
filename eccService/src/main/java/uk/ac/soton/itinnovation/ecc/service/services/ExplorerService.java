@@ -752,8 +752,16 @@ public class ExplorerService
 
                 for ( String attrName : stratAttrs.keySet() )
                 {
+                    // Get metric info to get correct labelling
+                    Metric metric      = superMSSet.get( attrName ).getMetric();
+                    String qoeIndLabel = MetricHelper.getORDINALLabelFromIndex( metric, index );
+                    
+                    if ( qoeIndLabel == null ) qoeIndLabel = "Unknown";
+                    
+                    // Create the count
                     EccItemCount eic = new EccItemCount( attrName,
-                                                        stratAttrs.get(attrName) );
+                                                         stratAttrs.get(attrName),
+                                                         qoeIndLabel );
 
                     ss.addStratifiedItem( eic );
                 }
