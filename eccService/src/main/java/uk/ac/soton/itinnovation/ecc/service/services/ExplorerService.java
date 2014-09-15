@@ -696,16 +696,18 @@ public class ExplorerService
             for ( String attrName : superMSSet.keySet() )
             {
                 MeasurementSet ms = superMSSet.get( attrName );
-
+                Metric metric     = superMSSet.get( attrName ).getMetric();
+                
+                // Get frequency of itmes
                 Map<String,Integer> freqMap
-                        = MetricCalculator.countValueFrequencies( ms.getMeasurements() );
-
+                        = MetricCalculator.countORDINALValueFrequencies( ms.getMeasurements(), metric );
+                
                 attrDistrMap.put( attrName, freqMap );
             }
 
             // Summarise distributions by indexed order
-            HashMap<Integer, TreeMap<String, Integer>> stratifiedSamples = new HashMap<>();
-
+            HashMap<Integer, TreeMap<String, Integer>> stratifiedSamples = new HashMap<>();            
+            
             for ( String attrName : attrDistrMap.keySet() )
             {
                 // Get associated metric for attribute

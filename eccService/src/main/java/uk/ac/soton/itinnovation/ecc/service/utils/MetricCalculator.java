@@ -61,6 +61,25 @@ public class MetricCalculator
         return freqMap;        
     }
     
+    public static Map<String, Integer> countORDINALValueFrequencies( Set<Measurement> measurements, Metric metric )
+    {
+        Map<String, Integer> freqMap = countValueFrequencies( measurements );
+        
+        // If non-null and ordinal semantics are available, add in zero count items
+        if ( freqMap != null && metric != null && metric.getMetricType() == MetricType.ORDINAL )
+        {
+            ArrayList<String> ordLabels = MetricHelper.getORDINALLabels( metric );
+            
+            for ( String label : ordLabels )
+            {
+                if ( !freqMap.containsKey(label) )
+                    freqMap.put( label, 0 );
+            }
+        }
+                
+        return freqMap;        
+    }
+    
     public static String getMostFrequentValue( Set<Measurement> measurements )
     {
         String result = null;
