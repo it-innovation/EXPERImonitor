@@ -1015,6 +1015,30 @@ public class ExplorerService
         return result;
     }
     
+    public EccServiceResultSet getServices( UUID expID )
+    {
+        EccServiceResultSet result = new EccServiceResultSet();
+        
+        if ( serviceReady && expID != null )
+        {
+            try
+            {
+                Set<EccService> resSet = provenanceQueryHelper.getServicesByExperiment( expID );
+                
+                if ( resSet != null )
+                    for ( EccService serv : resSet )
+                        result.addService( serv );
+            }
+            catch ( Exception ex )
+            {
+                String msg = "Could not get services for experiment " + expID.toString() + ": " + ex.getMessage();
+                logger.error( msg );
+            }
+        }
+        
+        return result;
+    }
+    
     // Private methods ---------------------------------------------------------
     private EccParticipant createParticipant( Entity ent )
     {

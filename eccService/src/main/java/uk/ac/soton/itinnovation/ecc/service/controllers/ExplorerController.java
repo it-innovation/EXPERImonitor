@@ -364,6 +364,20 @@ public class ExplorerController {
 
     // Service based queries ---------------------------------------------------
     // -------------------------------------------------------------------------
+    @RequestMapping(method = RequestMethod.GET, value = "/{expID}/services")
+    @ResponseBody
+    public EccServiceResultSet getServices(@PathVariable UUID expID) {
+        EccServiceResultSet result = null;
+
+        if (explorerService != null && explorerService.isReady() && expID != null) {
+            result = explorerService.getServices(expID);
+        } else {
+            logger.error("Could not execute explorer service: service is null/parameters invalid");
+        }
+
+        return result;
+    }
+    
     @RequestMapping(method = RequestMethod.GET, value = "/{expID}/services/iri/attributes")
     @ResponseBody
     public EccAttributeResultSet getServiceAttributes(@PathVariable UUID expID,
