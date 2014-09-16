@@ -9,7 +9,7 @@ cd ../../../;
 for n in "${Participants[@]}"; do
 	echo "Processing participant $n"
 	sleep 1
-	mvn "-Dexec.args=-classpath %classpath uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.experimentSimulation.EntryPoint 	"$n".txt" -Dexec.executable=/usr/lib/jvm/jdk1.8.0/bin/java -DskipTests=true org.codehaus.mojo:exec-maven-plugin:1.2.1:exec
+	mvn "-Dexec.args=-classpath %classpath uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.experimentSimulation.EntryPoint 	"$n".txt" -Dexec.executable=/usr/bin/java -DskipTests=true org.codehaus.mojo:exec-maven-plugin:1.2.1:exec
 done
 
 
