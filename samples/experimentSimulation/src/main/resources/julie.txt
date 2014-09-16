@@ -1,7 +1,5 @@
-2014-07-31 11:22:00,8,tweet:@Schladming has a new #LWTService
-2014-07-31 11:24:00,7,weather
-2014-07-31 11:25:00,10,lwtservice
-2014-07-31 16:21:00,22,lwtservice
-2014-07-31 17:35:00,8,tweet:Done for today
-2014-07-31 17:58:00,7,weather
+2013-12-20 11:22:00,8,tweet:Here we go!
+2013-12-20 11:24:00,7,weather
+2013-12-20 17:35:00,8,tweet:Done for today
+2013-12-20 17:58:00,7,weather
 2013-12-20 19:39:00,9,questionnaire:4;3;4

@@ -1,15 +1,15 @@
-2014-07-31 09:00:00,15,weather
-2014-07-31 09:17:00,30,lwtservice
-2014-07-31 09:18:00,8,tweet:#LWTService not working properly
-2014-07-31 09:54:00,30,lwtservice
-2014-07-31 10:17:00,8,tweet:This is better #LWTService
-2014-07-31 10:27:00,10,lwtservice
-2014-07-31 11:04:00,10,lwtservice
-2014-07-31 11:45:00,10,lwtservice
-2014-07-31 12:22:00,15,weather
-2014-07-31 12:24:00,10,lwtservice
-2014-07-31 14:19:00,10,lwtservice
-2014-07-31 14:59:00,10,lwtservice
-2014-07-31 15:36:00,15,lwtservice
-2014-07-31 16:14:00,10,lwtservice
+2013-12-20 09:00:00,15,weather
+2013-12-20 09:17:00,30,lwtservice
+2013-12-20 09:18:00,8,tweet:#LWTService not working properly
+2013-12-20 09:54:00,30,lwtservice
+2013-12-20 10:17:00,8,tweet:This is better #LWTService
+2013-12-20 10:27:00,10,lwtservice
+2013-12-20 11:04:00,10,lwtservice
+2013-12-20 11:45:00,10,lwtservice
+2013-12-20 12:22:00,15,weather
+2013-12-20 12:24:00,10,lwtservice
+2013-12-20 14:19:00,10,lwtservice
+2013-12-20 14:59:00,10,lwtservice
+2013-12-20 15:36:00,15,lwtservice
+2013-12-20 16:14:00,10,lwtservice
 2013-12-20 19:31:00,9,questionnaire:4;4;3

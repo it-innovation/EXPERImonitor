@@ -1,16 +1,15 @@
-2014-07-31 11:22:00,8,tweet:@Liz looks like she had a long night
-2014-07-31 11:23:00,7,weather
-2014-07-31 11:27:00,10,lwtservice
-2014-07-31 12:21:00,7,tweet:Trying new #LWTService
-2014-07-31 12:25:00,8,lwtservice
-2014-07-31 12:50:00,10,lwtservice
-2014-07-31 13:55:00,20,lwtservice
-2014-07-31 13:57:00,8,tweet:Love my new goggles
-2014-07-31 14:48:00,14,lwtservice
-2014-07-31 15:47:00,20,lwtservice
-2014-07-31 15:49:00,8,tweet:Yay #skiing
-2014-07-31 16:40:00,10,lwtservice
-2014-07-31 17:39:00,12,lwtservice
-2014-07-31 18:38:00,22,lwtservice
-2014-07-31 18:40:00,8,tweet:Such #skiing @Schladming
+2013-12-20 11:22:00,8,tweet:@Liz looks like she had a long night
+2013-12-20 11:27:00,10,lwtservice
+2013-12-20 12:21:00,7,tweet:Trying new #LWTService
+2013-12-20 12:25:00,8,lwtservice
+2013-12-20 12:50:00,10,lwtservice
+2013-12-20 13:55:00,20,lwtservice
+2013-12-20 13:57:00,8,tweet:Love my new goggles
+2013-12-20 14:48:00,14,lwtservice
+2013-12-20 15:47:00,20,lwtservice
+2013-12-20 15:49:00,8,tweet:Yay #skiing
+2013-12-20 16:40:00,10,lwtservice
+2013-12-20 17:39:00,12,lwtservice
+2013-12-20 18:38:00,22,lwtservice
+2013-12-20 18:40:00,8,tweet:Such #skiing @Schladming
 2013-12-20 19:38:00,9,questionnaire:3;4;5

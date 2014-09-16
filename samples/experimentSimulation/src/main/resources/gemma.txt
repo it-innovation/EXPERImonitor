@@ -1,12 +1,12 @@
-2014-07-31 11:12:00,8,tweet:#skiing @Schladming
-2014-07-31 11:13:00,7,weather
-2014-07-31 11:17:00,10,lwtservice
-2014-07-31 12:11:00,7,tweet:#LWTService=hardcore
-2014-07-31 12:15:00,8,lwtservice
-2014-07-31 15:37:00,20,lwtservice
-2014-07-31 15:39:00,8,tweet:Lolzzz
-2014-07-31 16:30:00,10,lwtservice
-2014-07-31 17:29:00,12,lwtservice
-2014-07-31 18:28:00,22,lwtservice
-2014-07-31 18:30:00,8,tweet:@Imogen watch out for the cute guy
+2013-12-20 11:12:00,8,tweet:#skiing @Schladming
+2013-12-20 11:13:00,7,weather
+2013-12-20 11:17:00,10,lwtservice
+2013-12-20 12:11:00,7,tweet:#LWTService=hardcore
+2013-12-20 12:15:00,8,lwtservice
+2013-12-20 15:37:00,20,lwtservice
+2013-12-20 15:39:00,8,tweet:Lolzzz
+2013-12-20 16:30:00,10,lwtservice
+2013-12-20 17:29:00,12,lwtservice
+2013-12-20 18:28:00,22,lwtservice
+2013-12-20 18:30:00,8,tweet:@Imogen watch out for the cute guy
 2013-12-20 19:30:00,9,questionnaire:4;3;3
