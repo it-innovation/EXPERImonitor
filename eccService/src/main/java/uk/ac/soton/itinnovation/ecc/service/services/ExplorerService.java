@@ -904,7 +904,7 @@ public class ExplorerService
                     
                     // 'Turn off' not relevant measurements (use two sample interval
                     // to catch 'single date stamp' activity measurements
-                    for ( int i = 0; i < subMeasures.size()-2; i++ )
+                    for ( int i = 0; i < subMeasures.size() -1; ++i )
                     {
                         Date m1Stamp = subMeasures.get( i ).getTimestamp();
                         Date m2Stamp = subMeasures.get( i + 1 ).getTimestamp();
@@ -912,11 +912,9 @@ public class ExplorerService
                         boolean switchOff = true;
                         for ( EccActivity act : partActs )
                         {
-                            Date actStart = act.getStartTime();
-                            Date actEnd   = act.getEndTime();
+                            Date actStamp = act.getStartTime();
                             
-                            if ( (actStart.equals(m1Stamp) || actStart.after(m1Stamp)) &&
-                                 (actEnd.equals(m2Stamp)   || actEnd.before(m2Stamp)) )
+                            if ( (actStamp.equals(m1Stamp) || actStamp.after(m1Stamp)) && actStamp.before(m2Stamp) )
                             {
                                 switchOff = false;
                                 break;
@@ -926,6 +924,9 @@ public class ExplorerService
                         // Switch 'off' measurement
                         if ( switchOff ) subMeasures.get( i ).setValue( null );
                     }
+                    
+                    // Always make last measurement null
+                    subMeasures.get( subMeasures.size() - 1 ).setValue( null );
                     
                     // Add sub-set to result
                     result.addSeries( subSeries );
