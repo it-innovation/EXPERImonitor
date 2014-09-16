@@ -641,7 +641,7 @@ public class ExplorerProvenanceQueryHelper {
 	 */
 	public Set<EccService> getServicesByExperiment (UUID expID) throws QueryEvaluationException {
 
-		Set<EccService> result = null;
+		Set<EccService> result = new HashSet<>();
 
 		String sparql = "SELECT DISTINCT ?s ?label WHERE {\n" +
 		"?s a <http://experimedia.eu/ontologies/ExperimediaExperimentExplorer#Service> .\n" +
