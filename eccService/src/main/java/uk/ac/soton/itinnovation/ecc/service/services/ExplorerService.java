@@ -739,12 +739,15 @@ public class ExplorerService
             }
 
             // Finally, convert to domain data objects
-            for ( int index : stratifiedSamples.keySet() )
+            Set<Integer> stratKeySet = stratifiedSamples.keySet();
+            String indexMax = " of " + stratKeySet.size();
+            
+            for ( int index : stratKeySet )
             {
                 // Create the index label
                 String indexLabel = (index == -1) ? "NOMINAL"
                                                   // Add 1 to index to display as non-zero scale
-                                                  : "Scale index: " + Integer.toString( index +1 );
+                                                  : Integer.toString( index +1 ) + indexMax;
                 // Create summary
                 EccNOMORDStratifiedSummary ss =
                         new EccNOMORDStratifiedSummary( indexLabel );
@@ -898,7 +901,7 @@ public class ExplorerService
                     
                     // Copy attribute series and 'turn off' data not relavant to activities
                     EccINTRATSeries subSeries = copySeries( part.getName() + ": " + actLabel, 
-                                                            false, attrSeries );
+                                                            true, attrSeries );
                     
                     ArrayList<EccMeasurement> subMeasures = subSeries.getValues();
                     
