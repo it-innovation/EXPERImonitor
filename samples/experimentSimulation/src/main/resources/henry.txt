@@ -1,5 +1,4 @@
 2014-07-31 11:13:00,8,tweet:@Schladming has a new #LWTService
-2014-07-31 11:15:00,7,weather
 2014-07-31 12:11:00,10,lwtservice
 2014-07-31 12:13:00,7,tweet:#LWTService seems impressive so far
 2014-07-31 15:37:00,20,lwtservice
@@ -7,6 +6,5 @@
 2014-07-31 16:32:00,10,lwtservice
 2014-07-31 17:22:00,12,lwtservice
 2014-07-31 18:22:00,22,lwtservice
-2014-07-31 18:30:00,8,tweet:@Imogen watch out for the cute guy
-2014-07-31 18:55:00,7,weather
-2013-12-20 19:37:00,9,questionnaire:5;5;5
+2014-07-31 18:30:00,8,tweet:@Julie watch out for the cute guy
+2014-07-31 19:37:00,9,questionnaire:5;5;5
