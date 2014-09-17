@@ -25,6 +25,7 @@
 		<module>simplePROVECCClient</module>
 		<module>databaseExport</module>
 		<module>experimentSimulation</module>
+                <module>lwtECCClient</module>
   </modules>
 
 </project>
