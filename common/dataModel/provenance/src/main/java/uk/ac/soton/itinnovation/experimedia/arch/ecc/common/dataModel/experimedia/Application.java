@@ -38,7 +38,11 @@ public class Application {
 	public EDMAgent agent;
 	//the prov entity representation of the same application
 	public EDMEntity entity;
+        
+        // the next two attributes are required so that we can easily end the application
+        
 	//the activity of running the application. Ususally started on application startup and ended on application shutdown.
 	public EDMActivity activity;
-
+        // the participant who started the activity
+        public Participant participant;
 }

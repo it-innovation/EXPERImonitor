@@ -71,22 +71,15 @@ public class ExperimentDataGenerator {
 
 	//services
 	Service twitterService;
-	Service messageService;
 	Service weatherService;
-	Service babylonService;
 	Service lwtService;
-
-	//queues
-	LinkedList<Content> messages = new LinkedList<Content>();
-	LinkedList<Content> tweets = new LinkedList<Content>();
-	HashMap<String, Entity> lifts = new HashMap<String, Entity>();
 
 	//other objects that remain the same for the whole duration of the log
 	Random rand = new Random();
 	Participant participant;
 	Application app;
 
-	private static final Properties props = new Properties();
+	private static final Properties props = new Properties();  // TODO: remove this now?
 	private static final Logger logger = LoggerFactory.getLogger(ExperimentDataGenerator.class);
 
 	public ExperimentDataGenerator() {
@@ -153,9 +146,9 @@ public class ExperimentDataGenerator {
 
 			//prepare metric attributes
 			genericAttributes.ensureCapacity(3);
-			genericAttributes.add(0, "Ease of use: Ski lift app");
-			genericAttributes.add(1, "Usefulness: Ski lift app");
-			genericAttributes.add(2, "Responsiveness: Ski lift app");
+			genericAttributes.add(0, "Ease of use");
+			genericAttributes.add(1, "Usefulness");
+			genericAttributes.add(2, "Responsiveness");
 
 			logger.info(props.entrySet().toString());
 
@@ -230,37 +223,12 @@ public class ExperimentDataGenerator {
 			}
 
 			//create app for participant
-			app = factory.createApplication(participant, agentName + "'s SSG client", "1387531200");
+			app = factory.createApplication(participant, agentName + "'s SSG client", "1387531200");  // Fri, 20 Dec 2013 09:20:00 GMT
 
 			//create services - using static names as they are the same across participants
-			twitterService = factory.createService("entity_twitterService", "Twitter service");
-			messageService = factory.createService("entity_messageService", "Message service");
-			weatherService = factory.createService("entity_weatherService", "Weather service");
-			babylonService = factory.createService("entity_babylonService", "Babylon service");
-			lwtService = factory.createService("entity_lwtService", "Lift Waiting Time service");
-
-			//create skilifts
-			/*
-			Entity skilift1 = factory.createEntity("skilift-37", "Fritz Blitz");
-			skilift1.entity.addOwlClass(factory.getProvFactory().getNamespaceForPrefix("ski") + "Skilift");
-			lifts.put("37", skilift1);
-
-			Entity skilift2 = factory.createEntity("skilift-31", "Sonneckbahn");
-			skilift2.entity.addOwlClass(factory.getProvFactory().getNamespaceForPrefix("ski") + "Skilift");
-			lifts.put("31", skilift2);
-
-			Entity skilift3 = factory.createEntity("skilift-33", "Märchenwiesebahn");
-			skilift3.entity.addOwlClass(factory.getProvFactory().getNamespaceForPrefix("ski") + "Skilift");
-			lifts.put("33", skilift3);
-
-			Entity skilift4 = factory.createEntity("skilift-27", "Lärchkogelbahn");
-			skilift4.entity.addOwlClass(factory.getProvFactory().getNamespaceForPrefix("ski") + "Skilift");
-			lifts.put("27", skilift4);
-
-			Entity skilift5 = factory.createEntity("skilift-35", "Weitmoos-Tellerlift");
-			skilift5.entity.addOwlClass(factory.getProvFactory().getNamespaceForPrefix("ski") + "Skilift");
-			lifts.put("35", skilift5);
-			*/
+			twitterService = factory.createService("entity_hotTweetService", "Hot Tweet Service");
+			weatherService = factory.createService("entity_weatherService", "Weather Service");
+			lwtService = factory.createService("entity_lwtService", "Lift Waiting Time Service");
 
 		} catch (Exception e) {
 			logger.error("Error filling EDMProvFactory with data", e);
@@ -269,7 +237,7 @@ public class ExperimentDataGenerator {
 
 	/**
 	 * Parses the in-memory log and creates prov statements
-	 * @param logClass the ype of log used (Log, PerfectLog)
+	 * @param logClass the type of log used (Log, PerfectLog)
 	 */
 	public void parseLog() {
 
@@ -277,9 +245,8 @@ public class ExperimentDataGenerator {
 			logger.debug("Processing next log...");
 		}
 
-		app.activity.invalidateEntity(app.entity);
 		try {
-			participant.agent.stopActivity(app.activity, "1387533300");
+                    factory.destroyApplication(app, "1387569600"); // Fri, 20 Dec 2013 20:00:00 GMT
 		} catch (DataFormatException e) {
 			logger.error("Error stopping \"use app\" activity", e);
 		}
@@ -326,14 +293,14 @@ public class ExperimentDataGenerator {
 
 				try {
 					if (eventKey.equals("lwtservice")) {
-						Content liftinfo = factory.retrieveDataFromService(participant, app, lwtService, "lwtinfo",
-								currentLog.getTimestamp().toString(), currentLog.getDuration());
+						Content liftinfo = factory.retrieveDataFromService(participant, app, lwtService, 
+                                                        "lift waiting times", currentLog.getTimestamp().toString(), currentLog.getDuration());
 					} else if (eventKey.equals("weather")) {
 						Content weatherinfo = factory.retrieveDataFromService(participant, app, weatherService,
-								"weatherinfo", currentLog.getTimestamp().toString(), currentLog.getDuration());
-					} else if (eventKey.equals("tweet")) {
-						Content tweet = factory.createDataAtService(participant, app, twitterService, "tweet",
-								currentLog.getTimestamp().toString(), currentLog.getDuration());
+							"weather", currentLog.getTimestamp().toString(), currentLog.getDuration());
+					} else if (eventKey.equals("hottweet")) {
+						Content tweet = factory.retrieveDataFromService(participant, app, twitterService, 
+                                                        "hot tweets", currentLog.getTimestamp().toString(), currentLog.getDuration());
 					} else if (eventKey.equals("questionnaire")) {
 						//get agent metric entity
 						uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Entity entity
@@ -358,41 +325,7 @@ public class ExperimentDataGenerator {
 					logger.error("Error processing \"perfect\" log", e);
 				}
 			}
-
-			//random event: throw dice
-			double random = rand.nextDouble();
-
-			if (random>0.99) {
-				//navigate app
-				factory.navigateClient(participant, app, currentLog.getTimestamp().toString());
-			} else if (random<=0.99 && random>0.98) {
-				//read message
-				if (messages.size()>0) {
-					factory.useDataOnClient(participant, app, messages.pollFirst(), "message", currentLog.getTimestamp().toString());
-				}
-			} else if (random<=0.98 && random>0.97) {
-				//create data on client
-				Content photo = factory.createDataOnClient(participant, app, "photo", currentLog.getTimestamp().toString());
-			} else if (random<=0.97 && random>0.96) {
-				//read tweet
-				if (tweets.size()>0) {
-					factory.useDataOnClient(participant, app, tweets.pollFirst(), "tweet", currentLog.getTimestamp().toString());
-				}
-			} else if (random<=0.96 && random>0.95) {
-				//receive message
-				messages.add(factory.retrieveDataFromService(participant, app, messageService, "message", currentLog.getTimestamp().toString()));
-				//TODO: put metric data here, link to relevant entities
-			} else if (random<=0.95 && random>0.94) {
-				//receive tweet
-				tweets.add(factory.retrieveDataFromService(participant, app, twitterService, "tweet", currentLog.getTimestamp().toString()));
-				//TODO: put metric data here, link to relevant entities
-			} else if (random<=0.94 && random>0.93) {
-				//tweet
-				factory.createDataAtService(participant, app, twitterService, "tweet", currentLog.getTimestamp().toString());
-				//TODO: put metric data here, link to relevant entities
-			}
 		}
-
 		return goOn;
 	}
 

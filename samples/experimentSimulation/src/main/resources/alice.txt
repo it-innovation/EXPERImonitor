@@ -1,8 +1,8 @@
 2013-12-20 09:00:00,15,weather
 2013-12-20 09:17:00,30,lwtservice
-2013-12-20 09:18:00,8,tweet:#LWTService not working properly
+2013-12-20 09:18:00,8,hottweet
 2013-12-20 09:54:00,30,lwtservice
-2013-12-20 10:17:00,8,tweet:This is better #LWTService
+2013-12-20 10:17:00,8,hottweet
 2013-12-20 10:27:00,10,lwtservice
 2013-12-20 11:04:00,10,lwtservice
 2013-12-20 11:45:00,10,lwtservice

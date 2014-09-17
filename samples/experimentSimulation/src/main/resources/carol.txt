@@ -1,16 +1,16 @@
-2013-12-20 09:12:00,8,tweet:Good morning sunshine!
+2013-12-20 09:12:00,8,hottweet
 2013-12-20 09:13:00,7,weather
 2013-12-20 09:17:00,10,lwtservice
-2013-12-20 10:11:00,7,tweet:Cool new #LWTService
+2013-12-20 10:11:00,7,hottweet
 2013-12-20 10:15:00,8,lwtservice
 2013-12-20 10:50:00,10,lwtservice
 2013-12-20 11:55:00,20,lwtservice
-2013-12-20 11:57:00,8,tweet:Skiing away...
+2013-12-20 11:57:00,8,hottweet
 2013-12-20 12:48:00,14,lwtservice
 2013-12-20 13:57:00,20,lwtservice
-2013-12-20 13:59:00,8,tweet:Anyone up for a #skiing race?
+2013-12-20 13:59:00,8,hottweet
 2013-12-20 14:50:00,10,lwtservice
 2013-12-20 15:49:00,12,lwtservice
 2013-12-20 16:48:00,22,lwtservice
-2013-12-20 16:50:00,8,tweet:What a good day
+2013-12-20 16:50:00,8,hottweet
 2013-12-20 19:34:00,9,questionnaire:3;5;4

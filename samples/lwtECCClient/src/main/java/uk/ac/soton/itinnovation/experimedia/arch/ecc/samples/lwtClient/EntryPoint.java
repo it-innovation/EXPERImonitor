@@ -110,9 +110,9 @@ public class EntryPoint
 
 			try {
 				// Do cool simulation codey bit & push whole report to ECC using Simon's new and shiny method
-				eccLogger.pushSimpleMetric("LWTService", "Average response time", lwtLogTool.createReport(VASResponseTime, metGen, 60));
-				eccLogger.pushSimpleMetric("LWTService", "CPU usage", lwtLogTool.createReport(VASCPUUsage, metGen, 60));
-				eccLogger.pushSimpleMetric("LWTService", "Memory usage", lwtLogTool.createReport(VASMemoryUsage, metGen, 60));
+				eccLogger.pushSimpleMetric("LiftWaitingTimeService", "Average response time", lwtLogTool.createReport(VASResponseTime, metGen, 60));
+				eccLogger.pushSimpleMetric("LiftWaitingTimeService", "CPU usage", lwtLogTool.createReport(VASCPUUsage, metGen, 60));
+				eccLogger.pushSimpleMetric("LiftWaitingTimeService", "Memory usage", lwtLogTool.createReport(VASMemoryUsage, metGen, 60));
 			} catch (Exception e) {
 				logger.error("Error pushing metric", e);
 			}
@@ -134,9 +134,9 @@ public class EntryPoint
 
 			try {
 				// Do cool simulation codey bit & push whole report to ECC using Simon's new and shiny method
-				eccLogger.pushSimpleMetric("TwitterService", "Average response time", generalServiceLogTool.createReport(TSResponseTime, metGen, 60));
-				eccLogger.pushSimpleMetric("TwitterService", "CPU usage", generalServiceLogTool.createReport(TSCPUUsage, metGen, 60));
-				eccLogger.pushSimpleMetric("TwitterService", "Memory usage", generalServiceLogTool.createReport(TSMemoryUsage, metGen, 60));
+				eccLogger.pushSimpleMetric("HotTweetService", "Average response time", generalServiceLogTool.createReport(TSResponseTime, metGen, 60));
+				eccLogger.pushSimpleMetric("HotTweetService", "CPU usage", generalServiceLogTool.createReport(TSCPUUsage, metGen, 60));
+				eccLogger.pushSimpleMetric("HotTweetService", "Memory usage", generalServiceLogTool.createReport(TSMemoryUsage, metGen, 60));
 			} catch (Exception e) {
 				logger.error("Error pushing metric", e);
 			}
@@ -192,21 +192,21 @@ public class EntryPoint
 
 		// Service entities
         vas = new Entity();
-        vas.setName( "LWTService" );
+        vas.setName( "LiftWaitingTimeService" );
 		vas.setEntityID("http://experimedia.eu/ontologies/ExperimediaExperimentExplorer#entity_lwtService");
         vas.setDescription( "Lift waiting time service" );
         metGen.addEntity( vas );
 
 		ts = new Entity();
-        ts.setName( "TwitterService" );
-		ts.setEntityID("http://experimedia.eu/ontologies/ExperimediaExperimentExplorer#entity_twitterService");
-        ts.setDescription( "Lift waiting time service" );
+        ts.setName( "HotTweetService" );
+		ts.setEntityID("http://experimedia.eu/ontologies/ExperimediaExperimentExplorer#entity_hotTweetService");
+        ts.setDescription( "Hot Tweets Service" );
         metGen.addEntity( ts );
 
 		ws = new Entity();
         ws.setName( "WeatherService" );
 		ws.setEntityID("http://experimedia.eu/ontologies/ExperimediaExperimentExplorer#entity_weatherService");
-        ws.setDescription( "Lift waiting time service" );
+        ws.setDescription( "Weather Service" );
         metGen.addEntity( ws );
 
         // attributes

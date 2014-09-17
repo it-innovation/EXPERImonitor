@@ -89,29 +89,21 @@ public class ExperimediaFactory {
 	 * @param participant the participant who runs the application
 	 * @param name the human readable name of the application
 	 * @param timestamp the time the application is started
-	 * @param duration in seconds
 	 * @return the application
 	 */
-	public Application createApplication(Participant participant, String name, String timestamp, String duration) {
+	public Application createApplication(Participant participant, String name, String timestamp) {
 		Application app = new Application();
 		String appName = name.trim().substring(0,1).toUpperCase() + name.replace(" ", "").substring(1).toLowerCase();
 		try {
-
-			if (duration==null) {
-				app.activity = participant.agent.doDiscreteActivity("Start" + appName + "Activity_"
-						+ UUID.randomUUID(), "Start " + name + " activity", timestamp);
-			} else {
-				app.activity = participant.agent.startActivity("Start" + appName + "Activity_"
-						+ UUID.randomUUID(), "Start " + name + " activity", timestamp);
-				participant.agent.stopActivity(app.activity, getEndTimestamp(timestamp, duration));
-			}
-
+                        app.activity = participant.agent.startActivity("Using" + appName + "Activity_"
+					+ UUID.randomUUID(), "Using " + name + " activity", timestamp);
 			app.entity = app.activity.generateEntity("entity_" + UUID.randomUUID(), name, timestamp);
 			app.entity.addOwlClass(provFactory.getNamespaceForPrefix("eee") + "Application");
 			app.agent = provFactory.createAgent("agent_" + UUID.randomUUID(), name);
 			app.agent.addTriple(provFactory.getNamespaceForPrefix("owl") + "sameAs",
 					app.entity.getIri(), EDMTriple.TRIPLE_TYPE.OBJECT_PROPERTY);
 			app.agent.actOnBehalfOf(participant.agent);
+                        app.participant = participant;
 		} catch (DataFormatException | DatatypeConfigurationException | AlreadyBoundException | NoSuchFieldException e) {
 			logger.error("Error creating application", e);
 			app = null;
@@ -119,10 +111,37 @@ public class ExperimediaFactory {
 		return app;
 	}
 
-	public Application createApplication(Participant participant, String name, String timestamp) {
-		return createApplication(participant, name, timestamp, null);
-	}
-
+        /**
+         * Destroys the application instance. Stops the application activity and invalidates the entity.
+         * We assume that the same Participant stops the app as starts it.
+         * 
+         * @param app the Application to be destroyed
+         * @param timestamp the time the application is destroyed
+         * @throws java.util.zip.DataFormatException
+         */
+        public void destroyApplication(Application app, String timestamp) throws DataFormatException {
+                app.participant.agent.stopActivity(app.activity, timestamp);
+                app.activity.invalidateEntity(app.entity);
+        }
+        
+    /**
+     *
+	 * Creates an application including all the required EDMProv elements: agent, entity
+	 * and the activity of running the app, started by the participant running it.
+	 *
+	 * @param participant the participant who runs the application
+	 * @param name the human readable name of the application
+	 * @param timestamp the time the application is started
+     * @param duration the number of seconds the app exists for
+     * @return the Application
+     * @throws DataFormatException
+     */
+    public Application createAndDestroyApplication(Participant participant, String name, String timestamp, String duration) throws DataFormatException {
+            Application app = createApplication(participant, name, timestamp);
+            destroyApplication(app, getEndTimestamp(timestamp, duration));
+            return app;
+        }
+        
 	/**
 	 * Make the participant create data on the client without sending it to the service
 	 *
@@ -305,6 +324,8 @@ public class ExperimediaFactory {
 		Content data = new Content();
 		try {
 			String actName = activityName.substring(0,1).toUpperCase() + activityName.substring(1);
+                        actName = actName.replaceAll("\\s+", "");
+                        
 			EDMActivity a;
 			EDMActivity b;
 
@@ -358,6 +379,7 @@ public class ExperimediaFactory {
 
 		try {
 			String actName = activityName.substring(0,1).toUpperCase() + activityName.substring(1);
+                        actName = actName.replaceAll("\\s+", "");
 
 			EDMActivity a;
 			EDMActivity b;
