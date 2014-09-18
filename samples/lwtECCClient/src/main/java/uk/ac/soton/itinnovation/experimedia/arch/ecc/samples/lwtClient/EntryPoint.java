@@ -193,19 +193,19 @@ public class EntryPoint
 		// Service entities
         vas = new Entity();
         vas.setName( "LiftWaitingTimeService" );
-		vas.setEntityID("http://experimedia.eu/ontologies/ExperimediaExperimentExplorer#entity_lwtService");
+		vas.setEntityID("http://vas.joanneum.at/");
         vas.setDescription( "Lift waiting time service" );
         metGen.addEntity( vas );
 
 		ts = new Entity();
         ts.setName( "HotTweetService" );
-		ts.setEntityID("http://experimedia.eu/ontologies/ExperimediaExperimentExplorer#entity_hotTweetService");
+		ts.setEntityID("http://sad.it-innovation.soton.ac.uk/");
         ts.setDescription( "Hot Tweets Service" );
         metGen.addEntity( ts );
 
 		ws = new Entity();
         ws.setName( "WeatherService" );
-		ws.setEntityID("http://experimedia.eu/ontologies/ExperimediaExperimentExplorer#entity_weatherService");
+		ws.setEntityID("http://weather.com/");
         ws.setDescription( "Weather Service" );
         metGen.addEntity( ws );
 

@@ -46,14 +46,16 @@ public class ExperimediaFactory {
 	}
 
 	/**
-	 * Creates a participant
+	 * Creates a participant along with all necessary triples.
+         * The participant's IRI is the factory's baseIRI plus a random element.
+         * 
 	 * @param name the (human readable) name of the participant
 	 * @return the participant
 	 */
 	public Participant createParticipant(String name) {
 		Participant participant = new Participant();
 		try {
-			participant.agent = provFactory.createAgent("agent_" + UUID.randomUUID(), name);
+			participant.agent = provFactory.createAgent("participant_agent_" + UUID.randomUUID(), name);
 			participant.agent.addOwlClass(provFactory.getNamespaceForPrefix("foaf") + "Person");
 			participant.agent.addOwlClass(provFactory.getNamespaceForPrefix("eee") + "Participant");
 		} catch (DatatypeConfigurationException | AlreadyBoundException | NoSuchFieldException e) {
@@ -64,16 +66,36 @@ public class ExperimediaFactory {
 	}
 
 	/**
+	 * Creates a participant.
+         * 
+	 * @param iri the IRI for the participant
+	 * @param name the (human readable) name of the participant
+	 * @return the participant
+	 */
+	public Participant createParticipant(String iri, String name) {
+		Participant participant = new Participant();
+		try {
+			participant.agent = provFactory.createAgent(iri, "", name);
+			participant.agent.addOwlClass(provFactory.getNamespaceForPrefix("foaf") + "Person");
+			participant.agent.addOwlClass(provFactory.getNamespaceForPrefix("eee") + "Participant");
+		} catch (DatatypeConfigurationException | AlreadyBoundException | NoSuchFieldException e) {
+			logger.error("Error creating participant", e);
+			participant = null;
+		}
+		return participant;
+	}
+        
+	/**
 	 * Creates an experimedia service including all required triples.
+         * The service's IRI is the factory's baseIRI plus a random element.
 	 *
-	 * @param uniqueIdentifier the local name of the service
 	 * @param label a human readable label
 	 * @return the service object
 	 */
-	public Service createService(String uniqueIdentifier, String label) {
+        public Service createService(String label) {
 		Service service = new Service();
 		try {
-			service.entity = provFactory.createEntity(uniqueIdentifier, label);
+			service.entity = provFactory.createEntity("service_entity_" + UUID.randomUUID(), label);
 			service.entity.addOwlClass(provFactory.getNamespaceForPrefix("eee") + "Service");
 		} catch (DatatypeConfigurationException | AlreadyBoundException | NoSuchFieldException e) {
 			logger.error("Could not create service", e);
@@ -81,7 +103,26 @@ public class ExperimediaFactory {
 		}
 		return service;
 	}
-
+              
+	/**
+	 * Creates an experimedia service including all required triples.
+	 *
+	 * @param uri the service's uri
+	 * @param label a human readable label
+	 * @return the service object
+	 */
+	public Service createService(String uri, String label) {
+		Service service = new Service();
+		try {
+			service.entity = provFactory.createEntity(uri, "", label);
+			service.entity.addOwlClass(provFactory.getNamespaceForPrefix("eee") + "Service");
+		} catch (DatatypeConfigurationException | AlreadyBoundException | NoSuchFieldException e) {
+			logger.error("Could not create service", e);
+			service = null;
+		}
+		return service;
+	}
+  
 	/**
 	 * Creates an application including all the required EDMProv elements: agent, entity
 	 * and the activity of running the app, started by the participant running it.
@@ -97,9 +138,9 @@ public class ExperimediaFactory {
 		try {
                         app.activity = participant.agent.startActivity("Using" + appName + "Activity_"
 					+ UUID.randomUUID(), "Using " + name + " activity", timestamp);
-			app.entity = app.activity.generateEntity("entity_" + UUID.randomUUID(), name, timestamp);
+			app.entity = app.activity.generateEntity("app_entity_" + UUID.randomUUID(), name, timestamp);
 			app.entity.addOwlClass(provFactory.getNamespaceForPrefix("eee") + "Application");
-			app.agent = provFactory.createAgent("agent_" + UUID.randomUUID(), name);
+			app.agent = provFactory.createAgent("app_agent_" + UUID.randomUUID(), name);
 			app.agent.addTriple(provFactory.getNamespaceForPrefix("owl") + "sameAs",
 					app.entity.getIri(), EDMTriple.TRIPLE_TYPE.OBJECT_PROPERTY);
 			app.agent.actOnBehalfOf(participant.agent);

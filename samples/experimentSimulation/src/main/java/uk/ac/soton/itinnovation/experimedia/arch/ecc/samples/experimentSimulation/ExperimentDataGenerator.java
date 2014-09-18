@@ -225,10 +225,10 @@ public class ExperimentDataGenerator {
 			//create app for participant
 			app = factory.createApplication(participant, agentName + "'s SSG client", "1387531200");  // Fri, 20 Dec 2013 09:20:00 GMT
 
-			//create services - using static names as they are the same across participants
-			twitterService = factory.createService("entity_hotTweetService", "Hot Tweet Service");
-			weatherService = factory.createService("entity_weatherService", "Weather Service");
-			lwtService = factory.createService("entity_lwtService", "Lift Waiting Time Service");
+			//create services - using static names as they are the same across participants and used by QoS model
+			twitterService = factory.createService("http://sad.it-innovation.soton.ac.uk/", "Hot Tweet Service");
+			weatherService = factory.createService("http://weather.com/", "Weather Service");
+			lwtService = factory.createService("http://vas.joanneum.at/", "Lift Waiting Time Service");
 
 		} catch (Exception e) {
 			logger.error("Error filling EDMProvFactory with data", e);
