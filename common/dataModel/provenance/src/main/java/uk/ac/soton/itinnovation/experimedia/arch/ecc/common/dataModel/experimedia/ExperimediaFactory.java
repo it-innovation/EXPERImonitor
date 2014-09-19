@@ -286,7 +286,7 @@ public class ExperimediaFactory {
 	 * @param timestamp the unix timestamp of this discrete useData (start=end)
 	 * @param duration in seconds
 	 *
-	 * @return the useData of the agent using the entity
+	 * @return the useData Activity of the agent using the entity
 	 */
 	public Activity useRealWorldEntity(Participant participant, Entity entity, String timestamp, String duration) {
 
@@ -294,10 +294,10 @@ public class ExperimediaFactory {
 		try {
 
 			if (duration==null) {
-				useEntity.activity = participant.agent.doDiscreteActivity("useSkiliftActivity_" +
+				useEntity.activity = participant.agent.doDiscreteActivity("UseActivity_" +
 					UUID.randomUUID(), "Use " + entity.entity.getFriendlyName(), timestamp);
 			} else {
-				useEntity.activity = participant.agent.startActivity("useSkiliftActivity_" +
+				useEntity.activity = participant.agent.startActivity("UseActivity_" +
 					UUID.randomUUID(), "Use " + entity.entity.getFriendlyName(), timestamp);
 				participant.agent.stopActivity(useEntity.activity, getEndTimestamp(timestamp, duration));
 			}
