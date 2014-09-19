@@ -7,6 +7,7 @@ var widgetsCounter = 0;
 var graphsCounter = 0;
 var tablesCounter = 0;
 var participants = [];
+var services = [];
 var groupAttributes = [];
 
 $(document).ready(function () {
@@ -98,20 +99,23 @@ $(document).ready(function () {
 //                                addParticipantAttributesWidget(participantsResponse.participants);
                                 participants = participantsResponse.participants;
                                 $.getJSON(BASE_URL + "/explorer/" + experimentId + "/participants/groupAttributes", function (attributes) {
-//                                    console.log(groupAttributes);
-                                    groupAttributes = attributes;
-                                    addParticipantAttributesWidget();
-                                    $("#addNewQoe").click(function (e) {
-                                        e.preventDefault();
+                                    $.getJSON(BASE_URL + "/explorer/" + experimentId + "/services", function (servicesResponse) {
+                                        console.log(servicesResponse);
+                                        services = servicesResponse.services;
+                                        groupAttributes = attributes;
                                         addParticipantAttributesWidget();
-                                    });
-                                    $("#addNewParticipant").click(function (e) {
-                                        e.preventDefault();
-                                        addParticipantExplorerWidget("");
-                                    });
-                                    $("#addNewQoS").click(function (e) {
-                                        e.preventDefault();
-                                        addQosServicesExplorerWidget("", "", "", "");
+                                        $("#addNewQoe").click(function (e) {
+                                            e.preventDefault();
+                                            addParticipantAttributesWidget();
+                                        });
+                                        $("#addNewParticipant").click(function (e) {
+                                            e.preventDefault();
+                                            addParticipantExplorerWidget("");
+                                        });
+                                        $("#addNewQoS").click(function (e) {
+                                            e.preventDefault();
+                                            addQosServicesExplorerWidget("", "", "");
+                                        });
                                     });
                                 });
 
@@ -213,7 +217,7 @@ $(document).ready(function () {
  * FUNCTIONS
  */
 
-function addQosServicesExplorerWidget(services, service, participantName, activity) {
+function addQosServicesExplorerWidget(service, participantName, activity) {
     widgetsCounter++;
     var widgetContainerId = "wc" + widgetsCounter;
     var widgetContainer = $('<div id ="' + widgetContainerId + '" class="widgetContainer small-12 columns"></div>').appendTo("#prov_widgets");
@@ -535,7 +539,7 @@ function addParticipantExplorerWidget(selectedParticipant) {
                                     serviceLink.click(function (e) {
                                         e.preventDefault();
                                         console.log('Adding service "' + service.name + '", user "' + sel + '", activity "' + a.name + '"');
-                                        addQosServicesExplorerWidget(servicesForApp.services, service, sel, a);
+                                        addQosServicesExplorerWidget(service, sel, a);
                                     });
 
                                 });

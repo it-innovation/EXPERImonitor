@@ -164,19 +164,18 @@ public class LivePROVConsumer {
 //                    "foaf", LivePROVConsumer.class);
 
             // SIOC
-            provStoreWrapper.importOntologyToKnowledgeBase(nsBaseURIMap.get("sioc"),
-                    nsPrefixMap.get("sioc"),
-                    "sioc", LivePROVConsumer.class);
-
+//            provStoreWrapper.importOntologyToKnowledgeBase(nsBaseURIMap.get("sioc"),
+//                    nsPrefixMap.get("sioc"),
+//                    "sioc", LivePROVConsumer.class);
             // PROV
             provStoreWrapper.importOntologyToKnowledgeBase(nsBaseURIMap.get("prov"),
                     nsPrefixMap.get("prov"),
                     "prov", LivePROVConsumer.class);
 
             // EXPERIMEDIA
-            provStoreWrapper.importOntologyToKnowledgeBase(nsBaseURIMap.get("experimedia"),
-                    nsPrefixMap.get("experimedia"),
-                    "experimedia", LivePROVConsumer.class);
+//            provStoreWrapper.importOntologyToKnowledgeBase(nsBaseURIMap.get("experimedia"),
+//                    nsPrefixMap.get("experimedia"),
+//                    "experimedia", LivePROVConsumer.class);
         } catch (Exception ex) {
             String msg = "Could not create default namespaces: " + ex.getMessage();
             lpcLog.error(msg);
