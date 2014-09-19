@@ -1,4 +1,3 @@
-
 /////////////////////////////////////////////////////////////////////////
 //
 // © University of Southampton IT Innovation Centre, 2014
@@ -23,7 +22,6 @@
 //      Created for Project :   EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
-
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.experimentSimulation;
 
 import java.io.IOException;
@@ -34,127 +32,114 @@ import java.util.*;
 import org.slf4j.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvReport;
 
+public class EntryPoint {
 
-public class EntryPoint
-{
     private static final Logger logger = LoggerFactory.getLogger(EntryPoint.class);
 
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) {
         // Get EXPERIMonitor EM properties to connect to service (in src/main/resources)
-        Properties emProps = Utilitybox.getProperties( EntryPoint.class, "em" );
+        Properties emProps = Utilitybox.getProperties(EntryPoint.class, "em");
 
         // Create a very simple metric model
-        MetricGenerator			metGen  = createSimpleModel();
+        MetricGenerator metGen = createSimpleModel();
 
         // Create a simple ECC Logger
-        ECCSimpleLogger			eccLogger = new ECCSimpleLogger();
+        ECCSimpleLogger eccLogger = new ECCSimpleLogger();
 
         // Try connecting to the ECC...
-        try
-        {
-            logger.info( "Starting Experiment simulation client..." );
-            eccLogger.initialise( "Experiment simulation", emProps, metGen );
-        }
-        catch ( Exception ex )
-        {
+        try {
+            logger.info("Starting Experiment simulation client...");
+            eccLogger.initialise("Experiment simulation", emProps, metGen);
+        } catch (Exception ex) {
             // Notify if failed
             String msg = "Could not start ECC logger: " + ex.getMessage();
-            logger.error( msg, ex );
+            logger.error(msg, ex);
         }
 
-		//Create a prov experiment data generator
-		ExperimentDataGenerator provGen = createProvGen(args, eccLogger);
+        //Create a prov experiment data generator
+        ExperimentDataGenerator provGen = createProvGen(args, eccLogger);
 
         // Press 'q' to exit...
         //logger.info( "Press 'q' key to exit demo" );
         boolean running = true;
 
         // Start simulation loop
-        while ( running )
-        {
+        while (running) {
             // Get an input from the keyboard
-            try
-            {
+            try {
                 // Send a metric (if we are ready to do so)
-                if ( provGen.getEccLogger().isReadyToPush() )
-                {
-					logger.debug("ready to push");
-                    try
-                    {
+                if (provGen.getEccLogger().isReadyToPush()) {
+                    logger.debug("ready to push");
+                    try {
 
-						//push prov
-						if (provGen.processNextLog()) {
-							EDMProvReport report = provGen.getFactory().getProvFactory().createProvReport();
-							logger.debug("Processed log line:\n" + provGen.getCurrentLog().toString() + "\nCurrent triples:\n"
-									+ report.toString());
-							provGen.getEccLogger().pushProv(report);
-						} else {
-							logger.info("End of log reached, stopping client");
-							running = false;
-						}
+                        //push prov
+                        if (provGen.processNextLog()) {
+                            EDMProvReport report = provGen.getFactory().getProvFactory().createProvReport();
+                            logger.debug("Processed log line:\n" + provGen.getCurrentLog().toString() + "\nCurrent triples:\n"
+                                    + report.toString());
+                            provGen.getEccLogger().pushProv(report);
+                        } else {
+                            logger.info("End of log reached, stopping client");
+                            running = false;
+                        }
 
-                    }
-                    catch ( Exception ex )
-                    {
+                    } catch (Exception ex) {
                         // Catch & log problems
-                        logger.error( "Failed to send metric: " + ex.getMessage() );
+                        logger.error("Failed to send metric: " + ex.getMessage());
                     }
                 } else {
-					logger.debug("NOT ready to push");
-					Thread.sleep(1000);
-				}
-            }
-			catch (Throwable t)
-            //catch (IOException ioe)
+                    logger.debug("NOT ready to push");
+                    Thread.sleep(1000);
+                }
+            } catch (Throwable t) //catch (IOException ioe)
             {
                 // Yikes! Is there a keyboard available?
-                logger.error( "Could not read keyboard" );
+                logger.error("Could not read keyboard");
                 running = false;
             }
         }
-        
+
         // Wait a short period before shutting down (final pushes may need processing)
-        try { Thread.sleep(1000); } 
-        catch ( Throwable t )
-        { logger.info( "Shutting down now..." ); }
+        try {
+            Thread.sleep(1000);
+        } catch (Throwable t) {
+            logger.info("Shutting down now...");
+        }
 
         // Clean up
         eccLogger.shutdown();
 
-        logger.info( "Finishing up demo" );
+        logger.info("Finishing up demo");
 
-        System.exit( 0 );
+        System.exit(0);
     }
 
-    private static MetricGenerator createSimpleModel()
-    {
+    private static MetricGenerator createSimpleModel() {
         // Metric Generator
         MetricGenerator metGen = new MetricGenerator();
-        metGen.setName( "Experiment Simulator metric generator" );
-        metGen.setDescription("Created: " + (new Date()).toString() );
+        metGen.setName("Experiment Simulator metric generator");
+        metGen.setDescription("Created: " + (new Date()).toString());
 
         // A simple metric group belonging to the metric generator
-        MetricGroup group = MetricHelper.createMetricGroup( "Demo group", "Data set for demo", metGen );
+        MetricGroup group = MetricHelper.createMetricGroup("Demo group", "Data set for demo", metGen);
 
         // That's all for now - will create Entities representing participants later
-
         return metGen;
     }
 
-	private static ExperimentDataGenerator createProvGen(String[] args, ECCSimpleLogger eccLogger) {
-		ExperimentDataGenerator provGen = new ExperimentDataGenerator();
+    private static ExperimentDataGenerator createProvGen(String[] args, ECCSimpleLogger eccLogger) {
+        ExperimentDataGenerator provGen = new ExperimentDataGenerator();
 
-		String logfile = null;
-		if (args.length>0) {
-			logfile = args[0];
-			logger.info("Using logfile " + logfile);
-		} else {
-			logger.info("No logfile given");
-		}
+        String logfile = null;
+        if (args.length > 0) {
+            logfile = args[0];
+            logger.info("Using logfile " + logfile);
+        } else {
+            logger.info("No logfile given");
+        }
 
-		provGen.init(logfile, "PerfectLog", eccLogger);
+        provGen.init(logfile, "PerfectLog", eccLogger);
 
-		return provGen;
-	}
+        return provGen;
+    }
 }
