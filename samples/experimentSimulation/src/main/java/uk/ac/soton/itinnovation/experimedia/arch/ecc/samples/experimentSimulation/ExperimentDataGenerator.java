@@ -300,13 +300,13 @@ public class ExperimentDataGenerator {
                 try {
                     if (eventKey.equals("lwtservice")) {
                         Content liftinfo = factory.retrieveDataFromService(participant, app, lwtService,
-                                "lift waiting times", currentLog.getTimestamp().toString(), currentLog.getDuration());
+                                null, "lift waiting times", currentLog.getTimestamp().toString(), currentLog.getDuration());
                     } else if (eventKey.equals("weather")) {
                         Content weatherinfo = factory.retrieveDataFromService(participant, app, weatherService,
-                                "weather", currentLog.getTimestamp().toString(), currentLog.getDuration());
+                                null, "weather", currentLog.getTimestamp().toString(), currentLog.getDuration());
                     } else if (eventKey.equals("hottweet")) {
                         Content tweet = factory.retrieveDataFromService(participant, app, twitterService,
-                                "hot tweets", currentLog.getTimestamp().toString(), currentLog.getDuration());
+                                null, "hot tweets", currentLog.getTimestamp().toString(), currentLog.getDuration());
                     } else if (eventKey.equals("questionnaire")) {
                         //get agent metric entity
                         uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Entity entity

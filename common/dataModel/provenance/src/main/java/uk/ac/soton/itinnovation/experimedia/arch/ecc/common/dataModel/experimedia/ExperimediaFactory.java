@@ -193,17 +193,18 @@ public class ExperimediaFactory {
      *
      * @param participant the participant
      * @param client the client which the participant is using
-     * @param dataName the name of the data to be used for labelling
+     * @param dataIRI the IRI for the Content (if null then one is generated)
+     * @param dataName the name for the Content to be used as the label
      * @param timestamp the unix timestamp of this discrete useData (start=end)
-     * @param duration in seconds
+     * @param duration in seconds (can be null)
      *
      * @return the data created on the client
      */
-    public Content createDataOnClient(Participant participant, Application client, String dataName, String timestamp, String duration) {
+    public Content createDataOnClient(Participant participant, Application client, String dataIRI, String dataName, String timestamp, String duration) {
 
         Content data = new Content();
         try {
-            String dName = dataName.substring(0, 1).toUpperCase() + dataName.replaceAll(" ", "").substring(1);
+            String dName = dataName.substring(0, 1).toUpperCase() + dataName.replaceAll("\\s+", "").substring(1);
             EDMActivity a;
 
             if (duration == null) {
@@ -214,8 +215,12 @@ public class ExperimediaFactory {
             }
 
             a.useEntity(client.entity);
-            data.entity = a.generateEntity("Content_" + UUID.randomUUID(), dataName);
-            data.entity.addOwlClass(provFactory.getNamespaceForPrefix("eee") + "Content");
+            if (dataIRI == null) {
+                data.entity = a.generateEntity("Content_" + UUID.randomUUID(), dataName, timestamp);
+            } else {
+                data.entity = a.generateEntityWithIRI(dataIRI, dataName, timestamp);
+            }
+            data.entity.addOwlClass(provFactory.getNamespaceForPrefix("eee") + "Content");  //TODO: move to Content constructor!
         } catch (DataFormatException | DatatypeConfigurationException | AlreadyBoundException | NoSuchFieldException e) {
             logger.error("Error creating \"create data on client\" pattern", e);
             data = null;
@@ -224,7 +229,7 @@ public class ExperimediaFactory {
     }
 
     public Content createDataOnClient(Participant participant, Application client, String dataName, String timestamp) {
-        return createDataOnClient(participant, client, dataName, timestamp, null);
+        return createDataOnClient(participant, client, null, dataName, timestamp, null);
     }
 
     /**
@@ -360,41 +365,41 @@ public class ExperimediaFactory {
      * @param participant the participant
      * @param app agent representation of the client
      * @param service the service
-     * @param activityName the name of the useData to be used for labelling
+     * @param dataIRI the IRI for the Content (if null then one is created)
+     * @param dataName the name for the Content to be used as the label
      * @param timestamp the unix timestamp of this discrete useData (start=end)
-     * @param duration in seconds
+     * @param duration in seconds (can be null)
      *
      * @return the data retrieved from the service
      */
     public Content retrieveDataFromService(Participant participant, Application app,
-            Service service, String activityName, String timestamp, String duration) {
+            Service service, String dataIRI, String dataName, String timestamp, String duration) {
 
         Content data = new Content();
         try {
-            String actName = activityName.substring(0, 1).toUpperCase() + activityName.substring(1);
-            actName = actName.replaceAll("\\s+", "");
+            String dName = dataName.substring(0, 1).toUpperCase() + dataName.replaceAll("\\s+", "").substring(1);
 
             EDMActivity a;
             EDMActivity b;
 
             if (duration == null) {
-                a = participant.agent.doDiscreteActivity("Receive" + actName + "Activity_"
-                        + UUID.randomUUID(), "Receive " + activityName, timestamp);
-                b = app.agent.doDiscreteActivity("Retrieve" + actName + "Activity_"
-                        + UUID.randomUUID(), "Retrieve " + activityName, timestamp);
+                a = participant.agent.doDiscreteActivity("Receive" + dName + "Activity_" + UUID.randomUUID(), "Receive " + dataName, timestamp);
+                b = app.agent.doDiscreteActivity("Retrieve" + dName + "Activity_" + UUID.randomUUID(), "Retrieve " + dataName, timestamp);
             } else {
-                a = participant.agent.startActivity("Receive" + actName + "Activity_"
-                        + UUID.randomUUID(), "Receive " + activityName, timestamp);
+                a = participant.agent.startActivity("Receive" + dName + "Activity_" + UUID.randomUUID(), "Receive " + dataName, timestamp);
                 participant.agent.stopActivity(a, getEndTimestamp(timestamp, duration));
-                b = app.agent.startActivity("Retrieve" + actName + "Activity_"
-                        + UUID.randomUUID(), "Retrieve " + activityName, timestamp);
+                b = app.agent.startActivity("Retrieve" + dName + "Activity_" + UUID.randomUUID(), "Retrieve " + dataName, timestamp);
                 app.agent.stopActivity(b, getEndTimestamp(timestamp, duration));
             }
 
             a.useEntity(app.entity);
             a.informActivity(b);
             b.useEntity(service.entity);
-            data.entity = b.generateEntity(actName + "Data_" + UUID.randomUUID(), actName + " data", timestamp);
+            if (dataIRI == null) {
+                data.entity = b.generateEntity("Content_" + UUID.randomUUID(), dataName, timestamp);
+            } else {
+                data.entity = b.generateEntityWithIRI(dataIRI, dataName, timestamp);
+            }
             data.entity.addOwlClass(provFactory.getNamespaceForPrefix("eee") + "Content");
             a.useEntity(data.entity);
         } catch (DataFormatException | DatatypeConfigurationException | AlreadyBoundException | NoSuchFieldException e) {
@@ -404,8 +409,8 @@ public class ExperimediaFactory {
     }
 
     public Content retrieveDataFromService(Participant participant, Application app,
-            Service service, String activityName, String timestamp) {
-        return retrieveDataFromService(participant, app, service, activityName, timestamp, null);
+            Service service, String dataIRI, String dataName, String timestamp) {
+        return retrieveDataFromService(participant, app, service, dataIRI, dataName, timestamp, null);
     }
 
     /**
@@ -415,41 +420,40 @@ public class ExperimediaFactory {
      * @param participant the participant
      * @param app the application
      * @param service the service
-     * @param activityName the name of the useData to be used for labelling
+     * @param dataIRI the IRI for the Content (if null then one is generated)
+     * @param dataName the name for the Content to be used as the label
      * @param timestamp the unix timestamp of this discrete useData (start=end)
-     * @param duration in seconds
+     * @param duration in seconds (can be null)
      *
      * @return the data created in the process
      */
     public Content createDataAtService(Participant participant, Application app,
-            Service service, String activityName, String timestamp, String duration) {
+            Service service, String dataIRI, String dataName, String timestamp, String duration) {
 
         Content data = new Content();
 
         try {
-            String actName = activityName.substring(0, 1).toUpperCase() + activityName.substring(1);
-            actName = actName.replaceAll("\\s+", "");
+            String dName = dataName.substring(0, 1).toUpperCase() + dataName.replaceAll("\\s+", "").substring(1);
 
             EDMActivity a;
             EDMActivity b;
 
             if (duration == null) {
-                a = participant.agent.doDiscreteActivity("Create" + actName + "Activity_"
-                        + UUID.randomUUID(), participant.agent.getFriendlyName() + " tweets", timestamp);
-                b = app.agent.doDiscreteActivity("Send" + actName + "Activity_"
-                        + UUID.randomUUID(), "Send " + activityName + " to server", timestamp);
+                a = participant.agent.doDiscreteActivity("Create" + dName + "Activity_" + UUID.randomUUID(), "Create " + dataName, timestamp);
+                b = app.agent.doDiscreteActivity("Send" + dName + "Activity_" + UUID.randomUUID(), "Send " + dataName + " to server", timestamp);
             } else {
-                a = participant.agent.startActivity("Create" + actName + "Activity_"
-                        + UUID.randomUUID(), participant.agent.getFriendlyName() + " tweets", timestamp);
+                a = participant.agent.startActivity("Create" + dName + "Activity_" + UUID.randomUUID(), "Create " + dataName, timestamp);
                 participant.agent.stopActivity(a, getEndTimestamp(timestamp, duration));
-                b = app.agent.startActivity("Send" + actName + "Activity_"
-                        + UUID.randomUUID(), "Send " + activityName + " to server", timestamp);
+                b = app.agent.startActivity("Send" + dName + "Activity_" + UUID.randomUUID(), "Send " + dataName + " to server", timestamp);
                 app.agent.stopActivity(b, getEndTimestamp(timestamp, duration));
             }
 
             a.useEntity(app.entity);
-            data.entity = a.generateEntity(actName + "_" + UUID.randomUUID(),
-                    participant.agent.getFriendlyName() + "'s " + activityName, timestamp);
+            if (dataIRI == null) {
+                data.entity = a.generateEntity("Content_" + UUID.randomUUID(), dataName, timestamp);
+            } else {
+                data.entity = a.generateEntityWithIRI(dataIRI, dataName, timestamp);
+            }
             data.entity.addOwlClass(provFactory.getNamespaceForPrefix("eee") + "Content");
             b.useEntity(service.entity);
             b.useEntity(data.entity);
@@ -462,8 +466,8 @@ public class ExperimediaFactory {
     }
 
     public Content createDataAtService(Participant participant, Application app,
-            Service service, String activityName, String timestamp) {
-        return createDataAtService(participant, app, service, activityName, timestamp, null);
+            Service service, String dataIRI, String dataName, String timestamp) {
+        return createDataAtService(participant, app, service, dataIRI, dataName, timestamp, null);
     }
 
     private String getEndTimestamp(String start, String duration) {
