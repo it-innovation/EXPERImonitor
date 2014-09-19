@@ -43,11 +43,11 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance
  */
 public class EDMProvBaseElement {
 
-    private UUID instanceID;
+    private final UUID instanceID;
     private PROV_TYPE provType = PROV_TYPE.ePROV_UNKNOWN_TYPE;
-    private String iri;
-    private String prefix;
-    private String uniqueIdentifier;
+    private final String iri;
+    private final String prefix;
+    private final String uniqueIdentifier;
     private HashMap<UUID, EDMTriple> triples;
 
     protected static SimpleDateFormat format = new SimpleDateFormat("\"yyyy-MM-dd'T'HH:mm:ss'Z\"^^xsd:dateTime'");
@@ -68,20 +68,49 @@ public class EDMProvBaseElement {
      * Creates an EDMProvBaseElement
      *
      * @param prefix the prefix of the element
-     * @param uniqueIdentifier
-     * @param a unique identifier. This could be something like domain_uniqueID,
-     * e.g. facebook_56735762153. It needs to be unique across clients.
+     * @param uniqueIdentifier a unique identifier. This could be something like domain_uniqueID, e.g. facebook_56735762153.
      * @param label a human readable name
      */
     public EDMProvBaseElement(String prefix, String uniqueIdentifier, String label) {
-        this.instanceID = UUID.randomUUID();
+        this(prefix + uniqueIdentifier, label);
+    }
+    
+    /**
+     * Creates an EDMProvBaseElement
+     * 
+     * @param iri the element's IRI
+     * @param label a human readable name
+     */
+    public EDMProvBaseElement(String iri, String label) {
+        String prefix = null;
+        String uniqueIdentifier = null;
+
+        /* Split the IRI into a prefix and remainder.
+            First see if there is a # in it and if so split it there.
+            Otherwise split at the first / following the http(s):// prefix.
+        */
+        int hashPos = iri.indexOf('#');
+        if (hashPos > -1) {
+            prefix = iri.substring(0, hashPos + 1);  // '#' goes on the end of the prefix
+            uniqueIdentifier = iri.substring(hashPos + 1);
+        } else {
+            int slashPos = iri.indexOf('/', 8);  //start searching for slash after "https://"
+            if (slashPos == -1) {
+                prefix = iri;
+                uniqueIdentifier = "";
+            } else {
+                prefix = iri.substring(0, slashPos + 1);  // '/' goes on the end of the prefix
+                uniqueIdentifier = iri.substring(slashPos + 1);
+            }
+        }
+        
         this.prefix = prefix;
         this.uniqueIdentifier = uniqueIdentifier;
-        this.iri = prefix + uniqueIdentifier;
+        this.instanceID = UUID.randomUUID();
+        this.iri = iri;
         this.triples = new HashMap<UUID, EDMTriple>();
 
         EDMProvBaseElement.format.setTimeZone(TimeZone.getTimeZone("UTC"));
-
         setLabel(label);
     }
 

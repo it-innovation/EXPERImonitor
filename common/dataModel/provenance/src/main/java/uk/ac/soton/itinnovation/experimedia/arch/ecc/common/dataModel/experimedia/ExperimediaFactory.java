@@ -46,8 +46,8 @@ public class ExperimediaFactory {
     }
 
     /**
-     * Creates a participant along with all necessary triples. The participant's
-     * IRI is the factory's baseIRI plus a random element.
+     * Creates a participant along with all necessary triples. 
+     * The participant's IRI is the factory's baseIRI plus a random element.
      *
      * @param name the (human readable) name of the participant
      * @return the participant
@@ -75,7 +75,7 @@ public class ExperimediaFactory {
     public Participant createParticipant(String iri, String name) {
         Participant participant = new Participant();
         try {
-            participant.agent = provFactory.createAgent(iri, "", name);
+            participant.agent = provFactory.createAgentWithIRI(iri, name);
             participant.agent.addOwlClass(provFactory.getNamespaceForPrefix("foaf") + "Person");
             participant.agent.addOwlClass(provFactory.getNamespaceForPrefix("eee") + "Participant");
         } catch (DatatypeConfigurationException | AlreadyBoundException | NoSuchFieldException e) {
@@ -86,8 +86,8 @@ public class ExperimediaFactory {
     }
 
     /**
-     * Creates an experimedia service including all required triples. The
-     * service's IRI is the factory's baseIRI plus a random element.
+     * Creates an experimedia service including all required triples.
+     * The service's IRI is the factory's baseIRI plus a random element.
      *
      * @param label a human readable label
      * @return the service object
@@ -106,6 +106,7 @@ public class ExperimediaFactory {
 
     /**
      * Creates an experimedia service including all required triples.
+     * The service's IRI is the provided URI.
      *
      * @param uri the service's uri
      * @param label a human readable label
@@ -114,7 +115,7 @@ public class ExperimediaFactory {
     public Service createService(String uri, String label) {
         Service service = new Service();
         try {
-            service.entity = provFactory.createEntity(uri, "", label);
+            service.entity = provFactory.createEntityWithIRI(uri, label);
             service.entity.addOwlClass(provFactory.getNamespaceForPrefix("eee") + "Service");
         } catch (DatatypeConfigurationException | AlreadyBoundException | NoSuchFieldException e) {
             logger.error("Could not create service", e);
