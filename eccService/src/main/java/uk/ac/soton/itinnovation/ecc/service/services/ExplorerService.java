@@ -897,40 +897,14 @@ public class ExplorerService
                                                                                    partIRI, 
                                                                                    actLabel, 
                                                                                    part );
-                    partActs = pars.getActivities();
                     
                     // Copy attribute series and 'turn off' data not relavant to activities
                     EccINTRATSeries subSeries = copySeries( part.getName() + ": " + actLabel, 
                                                             true, attrSeries );
                     
-                    ArrayList<EccMeasurement> subMeasures = subSeries.getValues();
-                    
-                    // 'Turn off' not relevant measurements (use two sample interval
-                    // to catch 'single date stamp' activity measurements
-                    for ( int i = 0; i < subMeasures.size() -1; ++i )
-                    {
-                        Date m1Stamp = subMeasures.get( i ).getTimestamp();
-                        Date m2Stamp = subMeasures.get( i + 1 ).getTimestamp();
-                        
-                        boolean switchOff = true;
-                        for ( EccActivity act : partActs )
-                        {
-                            Date actStamp = act.getStartTime();
-                            
-                            if ( (actStamp.equals(m1Stamp) || actStamp.after(m1Stamp)) && actStamp.before(m2Stamp) )
-                            {
-                                switchOff = false;
-                                break;
-                            }
-                        }
-                        
-                        // Switch 'off' measurement
-                        if ( switchOff ) subMeasures.get( i ).setValue( null );
-                    }
-                    
-                    // Always make last measurement null
-                    subMeasures.get( subMeasures.size() - 1 ).setValue( null );
-                    
+                    // Filter series 'turning off' data not relevant to activities
+                    filterSeriesByActivities( pars, subSeries );
+                                        
                     // Add sub-set to result
                     result.addSeries( subSeries );
                 }
@@ -941,60 +915,121 @@ public class ExplorerService
         return result;        
     }
     
+    /**
+     * Use this method to retrieve QoS data series of a specific QoS data set and
+     * a mapped data series for each participant based on their activities.
+     * 
+     * NOTE: This method needs SPARQL optimisation
+     * 
+     * @param expID     - ID of experiment
+     * @param attrID    - ID of QoS Service attribute
+     * @return          - Returns a set of data series
+     */
     public EccINTRATSeriesSet getINTRATAttrSeriesHiliteParticipants( UUID expID,
                                                                      UUID attrID )
     {
         EccINTRATSeriesSet result = new EccINTRATSeriesSet();
         
         if ( expID != null && attrID != null )
-        {
+        {            
+            // Find service IRI relating to attribute
+            String servIRI = null;
             
-            
-            try
+            Attribute attr = metricsQueryHelper.getAttribute(expID, attrID);
+            if ( attr != null )
             {
-                // Create domain series for attribute and to result
-                EccINTRATSeries attrSeries = createDomainSeries( expID, attrID, true );
+                Entity servEntity = metricsQueryHelper.getEntity( expID, attr.getEntityUUID() );
                 
-                if ( attrSeries != null )
-                    result.addSeries( attrSeries );
-                else
-                    logger.warn( "Could not create data series for data set during participant service usage summary" );
-                
-                // Get all participants and duplicate the baseline data in each case
-                Set<String> partIRIs = provenanceQueryHelper.getParticipantIRIs(expID);
-                HashMap<String, EccINTRATSeries> seriesByPartIRI = new HashMap<>();
+                if ( servEntity != null )
+                    servIRI = servEntity.getEntityID();
+            }
             
-                if ( partIRIs != null && !partIRIs.isEmpty() )
+            if ( servIRI != null )
+                try
                 {
+                    // Create domain series for attribute and to result
+                    EccINTRATSeries attrSeries = createDomainSeries( expID, attrID, true );
+
+                    if ( attrSeries != null )
+                        result.addSeries( attrSeries );
+                    else
+                        logger.warn( "Could not create data series for data set during participant service usage summary" );
+
+                    // Get all participants and duplicate the baseline data in each case and create filtered activity set
+                    Set<String> partIRIs = provenanceQueryHelper.getParticipantIRIs(expID);
+                    HashMap<String, EccINTRATSeries> seriesByPartIRI = new HashMap<>();
+                    HashMap<String, EccParticipantActivityResultSet> filteredActsByIRI = new HashMap<>();
+
+                    if ( partIRIs != null && !partIRIs.isEmpty() )
+                    {
+                        for ( String partIRI : partIRIs )
+                        {
+                            EccParticipant part = getParticipant( expID, partIRI );
+
+                            if ( part != null )
+                            {
+                                EccINTRATSeries subSeries = 
+                                        copySeries( part.getName(), true, attrSeries );
+
+                                seriesByPartIRI.put( partIRI, subSeries );
+                                
+                                EccParticipantActivityResultSet ars = 
+                                        new EccParticipantActivityResultSet(part);
+                                
+                                filteredActsByIRI.put( partIRI, ars );
+                            }
+                            else logger.warn( "Could not retrieve participant by IRI " + partIRI );
+                        }
+                    }
+                    else 
+                        logger.warn( "Could not find participants for service usage summary" );
+
+                    // For each participant, pull out all activities and filter against the service
                     for ( String partIRI : partIRIs )
                     {
-                        EccParticipant part = getParticipant( expID, partIRI );
+                        // Get activities for the participant
+                        EccParticipantActivityResultSet pars = getPartActivities( expID, partIRI );
                         
-                        if ( part != null )
-                        {  
-                            EccINTRATSeries subSeries = 
-                                    copySeries( part.getName(), true, attrSeries );
-                            
-                            seriesByPartIRI.put( partIRI, subSeries );
-                        }
-                        else logger.warn( "Could not retrieve participant by IRI " + partIRI );
+                        if ( pars != null )
+                            for ( EccActivity act : pars.getActivities() )
+                            {
+                                // Get services
+                                EccActivityServiceResultSet srs = 
+                                        provenanceQueryHelper.getServicesUsedByActivity( expID, act.getIRI() );
+                                
+                                // If service matches the target, add to filtered activity list
+                                if ( srs != null )
+                                    for ( EccService es : srs.getServices() )
+                                        if ( es.getIRI().equals(servIRI) )
+                                        {
+                                            EccParticipantActivityResultSet ars = filteredActsByIRI.get( partIRI );
+                                            if ( ars != null )
+                                                ars.addActivity( act );
+                                            else
+                                                logger.error( "Could not find participant to add filtered activity" );
+                                        }
+                            }
                     }
-                }
-                else 
-                    logger.warn( "Could not find participants for service usage summary" );
-                
-                // Finally, push filtered series into result
-                for ( String partIRI : partIRIs )
+                    
+                    // For each participant, switch of QoS values that do not fall into the filtered activities
+                    for ( String partIRI : partIRIs )
+                    {
+                        EccINTRATSeries series = seriesByPartIRI.get( partIRI );
+                        EccParticipantActivityResultSet pars = filteredActsByIRI.get( partIRI );
+                        
+                        if ( series != null && pars != null )
+                        {
+                            filterSeriesByActivities( pars, series );
+                            result.addSeries( series );
+                        }
+                        else logger.error( "Could not bind QoS series with activity result set" );
+                    }
+                } 
+                catch (Exception ex) 
                 {
-                    EccINTRATSeries series = seriesByPartIRI.get( partIRI );
-                    result.addSeries( series );
+                    String msg = "Could not summarise participants use of service: " + ex.getMessage();
+                    logger.error( msg );
                 }
-            } 
-            catch (Exception ex) 
-            {
-                String msg = "Could not summarise participants use of service: " + ex.getMessage();
-                logger.error( msg );
-            }
         }
         
         return result;
@@ -1259,5 +1294,38 @@ public class ExplorerService
             targMeasures.add( new EccMeasurement(srcM) );
         
         return new EccINTRATSeries( key, !enabled, targMeasures );
+    }
+    
+    private void filterSeriesByActivities( EccParticipantActivityResultSet pars,
+                                           EccINTRATSeries qosSeriesOUT )
+    {
+        ArrayList<EccActivity> partActs       = pars.getActivities();
+        ArrayList<EccMeasurement> subMeasures = qosSeriesOUT.getValues();
+                    
+        // 'Turn off' not relevant measurements (use two sample interval
+        // to catch 'single date stamp' activity measurements
+        for ( int i = 0; i < subMeasures.size() -1; ++i )
+        {
+            Date m1Stamp = subMeasures.get( i ).getTimestamp();
+            Date m2Stamp = subMeasures.get( i + 1 ).getTimestamp();
+
+            boolean switchOff = true;
+            for ( EccActivity act : partActs )
+            {
+                Date actStamp = act.getStartTime();
+
+                if ( (actStamp.equals(m1Stamp) || actStamp.after(m1Stamp)) && actStamp.before(m2Stamp) )
+                {
+                    switchOff = false;
+                    break;
+                }
+            }
+
+            // Switch 'off' measurement
+            if ( switchOff ) subMeasures.get( i ).setValue( null );
+        }
+
+        // Always make last measurement null
+        subMeasures.get( subMeasures.size() - 1 ).setValue( null );
     }
 }

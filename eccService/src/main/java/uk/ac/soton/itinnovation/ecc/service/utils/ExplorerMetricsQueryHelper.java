@@ -149,6 +149,23 @@ public class ExplorerMetricsQueryHelper
         return result;
     }
     
+    public Entity getEntity( UUID expID, UUID entID )
+    {
+        Entity result = null;
+        
+        if ( helperInitialised && expID != null && entID != null )
+        {
+            try
+            {
+                result = entityDAO.getEntity( entID, true );
+            }
+            catch ( Exception ex )
+            { logger.error( "Could not retrieve entity from database ", ex ); }
+        }
+        
+        return result;
+    }
+    
     public Attribute getAttribute( UUID expID, UUID attrID )
     {
         Attribute result = null;
