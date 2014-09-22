@@ -941,6 +941,65 @@ public class ExplorerService
         return result;        
     }
     
+    public EccINTRATSeriesSet getINTRATAttrSeriesHiliteParticipants( UUID expID,
+                                                                     UUID attrID )
+    {
+        EccINTRATSeriesSet result = new EccINTRATSeriesSet();
+        
+        if ( expID != null && attrID != null )
+        {
+            
+            
+            try
+            {
+                // Create domain series for attribute and to result
+                EccINTRATSeries attrSeries = createDomainSeries( expID, attrID, true );
+                
+                if ( attrSeries != null )
+                    result.addSeries( attrSeries );
+                else
+                    logger.warn( "Could not create data series for data set during participant service usage summary" );
+                
+                // Get all participants and duplicate the baseline data in each case
+                Set<String> partIRIs = provenanceQueryHelper.getParticipantIRIs(expID);
+                HashMap<String, EccINTRATSeries> seriesByPartIRI = new HashMap<>();
+            
+                if ( partIRIs != null && !partIRIs.isEmpty() )
+                {
+                    for ( String partIRI : partIRIs )
+                    {
+                        EccParticipant part = getParticipant( expID, partIRI );
+                        
+                        if ( part != null )
+                        {  
+                            EccINTRATSeries subSeries = 
+                                    copySeries( part.getName(), true, attrSeries );
+                            
+                            seriesByPartIRI.put( partIRI, subSeries );
+                        }
+                        else logger.warn( "Could not retrieve participant by IRI " + partIRI );
+                    }
+                }
+                else 
+                    logger.warn( "Could not find participants for service usage summary" );
+                
+                // Finally, push filtered series into result
+                for ( String partIRI : partIRIs )
+                {
+                    EccINTRATSeries series = seriesByPartIRI.get( partIRI );
+                    result.addSeries( series );
+                }
+            } 
+            catch (Exception ex) 
+            {
+                String msg = "Could not summarise participants use of service: " + ex.getMessage();
+                logger.error( msg );
+            }
+        }
+        
+        return result;
+    }
+    
     public EccAttributeResultSet getProvenanceAttributeSet( UUID   expID,
                                                             String IRI )
     {

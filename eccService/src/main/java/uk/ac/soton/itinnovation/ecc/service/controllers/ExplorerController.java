@@ -272,6 +272,21 @@ public class ExplorerController {
         return result;
     }
 
+    @RequestMapping(method = RequestMethod.GET, value = "/{expID}/attributes/series/qos/highlight/participants")
+    @ResponseBody
+    public EccINTRATSeriesSet getINTRATAttributeSeriesHighlightActivities(@PathVariable UUID expID,
+            @RequestParam(value = "attrID", defaultValue = "") UUID attrID ) {
+        EccINTRATSeriesSet result = null;
+
+        if (explorerService != null && explorerService.isReady() && attrID != null) {
+            result = explorerService.getINTRATAttrSeriesHiliteParticipants(expID, attrID);
+        } else {
+            logger.error("Could not execute explorer service: service is not ready");
+        }
+
+        return result;
+    }
+    
     // Activity based queries --------------------------------------------------
     // -------------------------------------------------------------------------
     @RequestMapping(method = RequestMethod.GET, value = "/{expID}/participants/iri/activities")
