@@ -385,7 +385,9 @@ function renderQoSgraph(addToContainer, attributeId, participantIri, activityLab
                     .datum(data.seriesSet)
                     .transition().duration(500)
                     .call(chart);
+
             nv.utils.windowResize(chart.update);
+
             return chart;
         });
         // TODO -- get service metric units from service once implemented
@@ -426,13 +428,17 @@ function addParticipantAttributesWidget() {
     participantsDropdownList.append("<option value='__any'>Any</option>");
     $.each(participants, function (participantCounter, participant) {
         participantsDropdownList.append("<option value='p" + participant.metricEntityID + "'>" + participant.name + "</option>");
+        participantsDropdownList.data("participant", participant);
     });
     participantsDropdownList.change(function (e) {
         var sel = $(this).find('option:selected').val();
         if (sel === '__any') {
             renderStratParticipansGraphToContainer(widgetGraphsContainer, widgetGraphsSelectedDetailsContainerMain);
         } else {
-            console.log(sel);
+//            console.log(sel);
+            var participant = $(this).data("participant");
+            console.log(participant);
+            headerTitle.text('Participant (' + participant.name + ') QoE');
 
         }
     });
