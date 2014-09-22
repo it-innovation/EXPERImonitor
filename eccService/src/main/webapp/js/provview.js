@@ -103,10 +103,11 @@ $(document).ready(function () {
                                         console.log(servicesResponse);
                                         services = servicesResponse.services;
                                         groupAttributes = attributes;
-                                        addParticipantAttributesWidget();
+                                        addParticipantQoeAttributesWidget("");
+//                                        addQosServicesExplorerWidget("", "", "");
                                         $("#addNewQoe").click(function (e) {
                                             e.preventDefault();
-                                            addParticipantAttributesWidget();
+                                            addParticipantQoeAttributesWidget("");
                                         });
                                         $("#addNewParticipant").click(function (e) {
                                             e.preventDefault();
@@ -235,53 +236,29 @@ function addQosServicesExplorerWidget(service, participantName, activity) {
     var widgetSelectorsContainerRight = $('<div class="small-6 columns"></div>').appendTo(widgetSelectorsContainer);
     var widgetGraphsContainer = $('<div class="row"></div>').appendTo(widgetContainer);
     widgetGraphsContainer.css('height', 1.2 * CHART_HEIGHT);
+    var widgetGraphsSelectedDetailsContainer = $('<div class="row"></div>').appendTo(widgetContainer);
+    var widgetGraphsSelectedDetailsContainerMain = $('<div class="small-12 columns"></div>').appendTo(widgetGraphsSelectedDetailsContainer);
 
     // participants list
     var participantsDropdownLabel = $("<label>Filter by participant</label>").appendTo(widgetSelectorsContainerRight);
-    var participantsDropdownList = $("<select></select>").appendTo(participantsDropdownLabel);
+    var participantsDropdownList = $('<select id="part' + widgetsCounter + '"></select>').appendTo(participantsDropdownLabel);
     participantsDropdownList.append("<option value='__any'>Any</option>");
     var widgetSelectorsContainerRightForm = $('<form></form>').appendTo(widgetSelectorsContainerRight);
-    var theParticipant;
+//    var theParticipant;
     $.each(participants, function (participantCounter, participant) {
-        participantsDropdownList.append("<option value='" + participant.name + "'>" + participant.name + "</option>");
-        if (participant.name === participantName) {
-            theParticipant = participant;
-        }
+        var participantsDropdownListOption = $("<option value='" + participant.name + "'>" + participant.name + "</option>").appendTo(participantsDropdownList);
+        participantsDropdownListOption.data("participant", participant);
+//        if (participant.name === participantName) {
+//            theParticipant = participant;
+//        }
     });
     participantsDropdownList.change(function (e) {
-        var sel = $(this).find('option:selected').val();
-        widgetSelectorsContainerRightForm.empty();
-        if (sel === '__any') {
-//            renderStratParticipansGraphToContainer(widgetGraphsContainer, widgetGraphsSelectedDetailsContainerMain);
-        } else {
-            $.get(BASE_URL + "/explorer/" + experimentId + "/participants/iri/activities/summary?IRI=" + encodeURIComponent(getParticipantByName(sel).iri), function (data) {
-                console.log(data);
-                var rbCounter = 0;
-                $.each(data.activities, function (aC, a) {
-                    var rbId = "rb" + widgetsCounter + "_" + rbCounter;
-                    var radio = $('<input type="radio" name="activity" value="' + a.label + '" id="' + rbId + '">').appendTo(widgetSelectorsContainerRightForm);
-                    widgetSelectorsContainerRightForm.append('<label for="' + rbId + '">' + a.label + '</label><br>');
-
-                    radio.click(function (e) {
-                        var selectedMetric = widgetSelectorsContainerLeftForm.find('input:checked').val();
-                        if (typeof selectedMetric !== "undefined") {
-                            renderQoSgraph(widgetGraphsContainer, selectedMetric, getParticipantByName(sel).iri, a.label);
-                        }
-                    });
-                    rbCounter++;
-                    if (aC === 0) {
-                        radio.attr('checked', 'checked');
-                        radio.click();
-                    }
-                });
-            });
-
-        }
+        runQosWidgetSelection(widgetsCounter, widgetGraphsContainer, widgetSelectorsContainerLeftForm, widgetSelectorsContainerRightForm, widgetGraphsSelectedDetailsContainerMain);
     });
 
     // services list
     var servicesDropdownLabel = $("<label>Filter by service</label>").appendTo(widgetSelectorsContainerLeft);
-    var servicesDropdownList = $("<select></select>").appendTo(servicesDropdownLabel);
+    var servicesDropdownList = $('<select id="serv' + widgetsCounter + '"></select>').appendTo(servicesDropdownLabel);
     servicesDropdownList.append("<option value='__any'>Any</option>");
     var widgetSelectorsContainerLeftForm = $('<form></form>').appendTo(widgetSelectorsContainerLeft);
     $.each(services, function (sCounter, tempService) {
@@ -289,35 +266,7 @@ function addQosServicesExplorerWidget(service, participantName, activity) {
         serviceOption.data('service', tempService);
     });
     servicesDropdownList.change(function (e) {
-        var selOption = $(this).find('option:selected');
-        var sel = selOption.val();
-        widgetSelectorsContainerLeftForm.empty();
-        if (sel === '__any') {
-//            renderStratParticipansGraphToContainer(widgetGraphsContainer, widgetGraphsSelectedDetailsContainerMain);
-            // get service attributes
-        } else {
-            $.getJSON(BASE_URL + "/explorer/" + experimentId + "/services/iri/attributes?IRI=" + encodeURIComponent(selOption.data('service').iri), function (metrics) {
-                console.log(metrics);
-                $.each(metrics.attributes, function (mC, m) {
-                    var radio = $('<input type="radio" name="metric" value="' + m.metricID + '" id="ri' + m.metricID + '">').appendTo(widgetSelectorsContainerLeftForm);
-                    widgetSelectorsContainerLeftForm.append('<label for="ri' + m.metricID + '">' + m.name + '</label><br>');
-                    radio.click(function (e) {
-                        var selectedActivityName = widgetSelectorsContainerRightForm.find('input:checked').val();
-                        if (typeof selectedActivityName !== "undefined") {
-                            renderQoSgraph(widgetGraphsContainer, m.metricID, getParticipantByName(participantsDropdownList.find('option:selected').val()).iri, selectedActivityName);
-                        }
-                    });
-                    if (mC === 0) {
-                        radio.attr('checked', 'checked');
-                        radio.click();
-                    }
-                });
-
-
-            });
-            console.log(sel);
-
-        }
+        runQosWidgetSelection(widgetsCounter, widgetGraphsContainer, widgetSelectorsContainerLeftForm, widgetSelectorsContainerRightForm, widgetGraphsSelectedDetailsContainerMain);
     });
 
     if (service === "") {
@@ -325,17 +274,23 @@ function addQosServicesExplorerWidget(service, participantName, activity) {
     } else {
         servicesDropdownList.val(service.name);
     }
-    servicesDropdownList.change();
 
     if (participantName === "") {
         participantsDropdownList.val('__any');
     } else {
         participantsDropdownList.val(participantName);
+//        participantsDropdownList.change();
     }
-    participantsDropdownList.change();
+    servicesDropdownList.change();
 
 }
 
+/**
+ * Finds participant object by name.
+ *
+ * @param {type} participantName
+ * @returns {participant}
+ */
 function getParticipantByName(participantName) {
     var result;
     $.each(participants, function (participantCounter, participant) {
@@ -347,17 +302,25 @@ function getParticipantByName(participantName) {
     return result;
 }
 
-function renderQoSgraph(addToContainer, attributeId, participantIri, activityLabel) {
+/**
+ * Renders QoS for a service metric with one user's attribute on top
+ *
+ * @param {type} addToContainer
+ * @param {type} attributeId
+ * @param {type} participantIri
+ * @param {type} activityLabel
+ * @returns {undefined}
+ */
+function renderQosGraphWithUser(addToContainer, attributeId, participantIri, activityLabel) {
     console.log('Plotting ' + attributeId + ' and activity ' + activityLabel);
-    addToContainer.empty();
     graphsCounter++;
     var newChartId = 'wg' + graphsCounter;
-    addToContainer.append('<div id="' + newChartId + '" class="widgetGraph"><svg class="large-12 text-center columns"></svg></div>');
-//    d3.json(BASE_URL + "/explorer/" + experimentId + "/attributes/series/qos/highlight/activities?attrID=" + $scope.serviceMetricSelection.metricID + "&IRI=" + encodeURIComponent($scope.participantSelection) + "&actLabel=" + encodeURIComponent($scope.activitySelection.label), function(data) {
     d3.json(BASE_URL + "/explorer/" + experimentId + "/attributes/series/qos/highlight/activities?attrID=" + attributeId +
             "&IRI=" + encodeURIComponent(participantIri) +
             "&actLabel=" + encodeURIComponent(activityLabel), function (data) {
         console.log(data);
+        addToContainer.empty();
+        addToContainer.append('<div id="' + newChartId + '" class="widgetGraph"><svg class="large-12 text-center columns"></svg></div>');
         $('#' + newChartId + ' svg').show().height(CHART_HEIGHT);
         nv.addGraph(function () {
             var chart = nv.models.lineChart()
@@ -367,7 +330,7 @@ function renderQoSgraph(addToContainer, attributeId, participantIri, activityLab
                     .y(function (d) {
                         return d.value / 10;
                     })      // TODO -- fix scalling problems, dividing by 10 is a hack to get round scalling issues
-                    .margin({top: 30, right: 40, bottom: 50, left: 100})
+                    .margin({top: 30, right: 50, bottom: 20, left: 100})
                     .useInteractiveGuideline(true)
                     .forceY([0])
                     .color(d3.scale.category10().range())
@@ -403,7 +366,68 @@ function renderQoSgraph(addToContainer, attributeId, participantIri, activityLab
     });
 }
 
-function addParticipantAttributesWidget() {
+/**
+ * Renders QoS for a service metric of all users on top.
+ *
+ * @param {type} addToContainer
+ * @param {type} attributeId
+ * @returns {undefined}
+ */
+function renderQosGraph(addToContainer, attributeId) {
+    console.log('Plotting ' + attributeId);
+    graphsCounter++;
+    var newChartId = 'wg' + graphsCounter;
+    d3.json(BASE_URL + "/explorer/" + experimentId + "/attributes/series/qos/highlight/participants?attrID=" + attributeId, function (data) {
+        console.log(data);
+        addToContainer.empty();
+        addToContainer.append('<div id="' + newChartId + '" class="widgetGraph"><svg class="large-12 text-center columns"></svg></div>');
+        $('#' + newChartId + ' svg').show().height(CHART_HEIGHT);
+        nv.addGraph(function () {
+            var chart = nv.models.lineChart()
+                    .x(function (d) {
+                        return d.timestamp;
+                    })
+                    .y(function (d) {
+                        return d.value / 10;
+                    })      // TODO -- fix scalling problems, dividing by 10 is a hack to get round scalling issues
+                    .margin({top: 30, right: 50, bottom: 20, left: 100})
+                    .useInteractiveGuideline(true)
+                    .forceY([0])
+                    .color(d3.scale.category10().range())
+                    .isArea(true);
+            chart.xAxis
+                    .axisLabel('Time')
+                    .showMaxMin(true)
+                    .tickFormat(function (d) {
+                        return d3.time.format('%X')(new Date(d));
+                    });
+            chart.yAxis
+                    .axisLabel(units(data.seriesSet[0].key))
+                    .tickFormat(d3.format(',.2f'));
+            d3.select('#' + newChartId + ' svg')
+                    .datum(data.seriesSet)
+                    .transition().duration(500)
+                    .call(chart);
+
+            nv.utils.windowResize(chart.update);
+
+            return chart;
+        });
+        // TODO -- get service metric units from service once implemented
+        function units(key) {
+            if (key === 'Average response time') {
+                return 'Response Time (s)';
+            } else if (key === 'CPU Usage') {
+                return 'CPU Usage (%)';
+            } else if (key === 'Memory Usage') {
+                return 'Memory Usage (%)';
+            }
+        }
+    });
+}
+
+function addParticipantQoeAttributesWidget(selectedParticipant) {
+    console.log(selectedParticipant);
     widgetsCounter++;
     var widgetContainerId = "wc" + widgetsCounter;
     var widgetContainer = $('<div id ="' + widgetContainerId + '" class="widgetContainer small-12 columns"></div>').appendTo("#prov_widgets");
@@ -424,51 +448,197 @@ function addParticipantAttributesWidget() {
 
     // participants list
     var participantsDropdownLabel = $("<label>Filter by participant</label>").appendTo(widgetSelectorsContainerLeft);
-    var participantsDropdownList = $("<select></select>").appendTo(participantsDropdownLabel);
+    var participantsDropdownList = $('<select id="part' + widgetsCounter + '"></select>').appendTo(participantsDropdownLabel);
+    var attributesDropdownLabel = $("<label>Filter by attribute</label>").appendTo(widgetSelectorsContainerRight);
+    var attributesDropdownList = $('<select id="attr' + widgetsCounter + '"></select>').appendTo(attributesDropdownLabel);
+
+    // participants list fill
     participantsDropdownList.append("<option value='__any'>Any</option>");
     $.each(participants, function (participantCounter, participant) {
-        participantsDropdownList.append("<option value='p" + participant.metricEntityID + "'>" + participant.name + "</option>");
-        participantsDropdownList.data("participant", participant);
+        var participantOption = $('<option id="part' + widgetsCounter + "-" + participantCounter + '" value="p' + participant.metricEntityID + '">' + participant.name + '</option>').appendTo(participantsDropdownList);
+        participantOption.data("participant", participant);
     });
     participantsDropdownList.change(function (e) {
-        var sel = $(this).find('option:selected').val();
-        if (sel === '__any') {
-            renderStratParticipansGraphToContainer(widgetGraphsContainer, widgetGraphsSelectedDetailsContainerMain);
-        } else {
-//            console.log(sel);
-            var participant = $(this).data("participant");
-            console.log(participant);
-            headerTitle.text('Participant (' + participant.name + ') QoE');
-
-        }
+        runQoeWidgetSelection(widgetsCounter, widgetGraphsContainer, widgetGraphsSelectedDetailsContainerMain, headerTitle);
     });
 
-    // attributes list
-    var attributesDropdownLabel = $("<label>Filter by attribute</label>").appendTo(widgetSelectorsContainerRight);
-    var attributesDropdownList = $("<select></select>").appendTo(attributesDropdownLabel);
+    // attributes list fill
     attributesDropdownList.append("<option value='__any'>Any</option>");
     $.each(groupAttributes.qoEAttributes, function (participantCounter, attribute) {
         attributesDropdownList.append("<option value='" + attribute.name + "'>" + attribute.name + "</option>");
     });
     attributesDropdownList.change(function (e) {
-        var sel = $(this).find('option:selected').val();
-        if (sel === '__any') {
-            renderStratParticipansGraphToContainer(widgetGraphsContainer, widgetGraphsSelectedDetailsContainerMain);
-            headerTitle.text('Participant QoE');
-        } else {
-            console.log(sel);
-            headerTitle.text('Participant QoE: ' + sel);
-            renderAttributeGraphsToContainer(sel, widgetGraphsContainer, widgetGraphsSelectedDetailsContainerMain);
-        }
+        runQoeWidgetSelection(widgetsCounter, widgetGraphsContainer, widgetGraphsSelectedDetailsContainerMain, headerTitle);
     });
 
     // add strat graph by default
-//    renderStratParticipansGraphToContainer(widgetGraphsContainer, widgetGraphsSelectedDetailsContainerMain);
-    attributesDropdownList.change();
+//    attributesDropdownList.change();
+    if (selectedParticipant === "") {
+        participantsDropdownList.val('__any');
+    } else {
+        participantsDropdownList.val('p' + selectedParticipant.metricEntityID);
+    }
+    participantsDropdownList.change();
 
 }
 
+function runQoeWidgetSelection(widgetsCounter, widgetGraphsContainer, widgetGraphsSelectedDetailsContainerMain, headerTitle) {
+    var participantSelection = $("#part" + widgetsCounter).find('option:selected');
+    console.log(participantSelection.data("participant"));
+    var participantSelectionVal = participantSelection.val();
+    var attributeSelection = $("#attr" + widgetsCounter).find('option:selected');
+    var attributeSelectionVal = attributeSelection.val();
+
+    if (participantSelectionVal === '__any') {
+        if (attributeSelectionVal === '__any') {
+            console.log('Plotting all paritipants, all attributes');
+            headerTitle.text('Participant QoE');
+            renderStratParticipansGraphToContainer(widgetGraphsContainer, widgetGraphsSelectedDetailsContainerMain);
+        } else {
+            console.log('Plotting all participants, attribute: ' + attributeSelectionVal);
+            renderAttributeGraphsToContainer(attributeSelectionVal, widgetGraphsContainer, widgetGraphsSelectedDetailsContainerMain);
+            headerTitle.text('Participant QoE: ' + attributeSelectionVal);
+        }
+    } else {
+        if (attributeSelectionVal === '__any') {
+            console.log('Plotting participant ' + participantSelectionVal + ' (' + participantSelection.data("participant").name + '), all attributes');
+            headerTitle.text('Participant: ' + participantSelection.data("participant").name + ', QoE');
+            widgetGraphsContainer.empty();
+            widgetGraphsContainer.append('<div class="small-12 columns text-center"><h3>Not implemented</h3></div>');
+//            renderParticipantQoeGraphsToContainer(participantSelection.data("participant").iri, widgetGraphsContainer, widgetGraphsSelectedDetailsContainerMain);
+        } else {
+            console.log('Plotting participant ' + participantSelectionVal + ' (' + participantSelection.data("participant").name + '), attribute: ' + attributeSelectionVal);
+            headerTitle.text('Participant: ' + participantSelection.data("participant").name + ', QoE: ' + attributeSelectionVal);
+            widgetGraphsContainer.empty();
+            widgetGraphsContainer.append('<div class="small-12 columns text-center"><h3>Not implemented</h3></div>');
+        }
+    }
+}
+
+/**
+ * Deals with service/user combinations in QoS widget.
+ *
+ * @param {type} widgetsCounter
+ * @param {type} widgetGraphsContainer
+ * @param {type} widgetSelectorsContainerLeftForm
+ * @param {type} widgetSelectorsContainerRightForm
+ * @returns {undefined}
+ */
+function runQosWidgetSelection(widgetsCounter, widgetGraphsContainer, widgetSelectorsContainerLeftForm, widgetSelectorsContainerRightForm, widgetGraphsSelectedDetailsContainerMain) {
+    var serviceSelection = $("#serv" + widgetsCounter).find('option:selected');
+    var serviceSelectionVal = serviceSelection.val();
+    var participantSelection = $("#part" + widgetsCounter).find('option:selected');
+    var participantSelectionVal = participantSelection.val();
+
+    if (participantSelectionVal === '__any') {
+        if (serviceSelectionVal === '__any') {
+            console.log('Plotting all participants, all services');
+            widgetGraphsContainer.empty();
+            widgetSelectorsContainerLeftForm.empty();
+            widgetSelectorsContainerRightForm.empty();
+            widgetGraphsSelectedDetailsContainerMain.empty();
+            widgetGraphsContainer.append('<div class="small-12 columns text-center"><h3>Please select a service first</h3></div>');
+        } else {
+            console.log('Plotting all participants, service: ' + serviceSelectionVal);
+            widgetGraphsContainer.empty();
+            widgetSelectorsContainerLeftForm.empty();
+            widgetSelectorsContainerRightForm.empty();
+            widgetGraphsSelectedDetailsContainerMain.empty();
+            widgetGraphsContainer.append('<div class="small-12 columns text-center"><h3>Loading...</h3></div>');
+
+            $.getJSON(BASE_URL + "/explorer/" + experimentId + "/services/iri/attributes?IRI=" + encodeURIComponent(serviceSelection.data('service').iri), function (metrics) {
+                console.log(metrics);
+                $.each(metrics.attributes, function (mC, m) {
+                    var radio = $('<input type="radio" name="metric" value="' + m.metricID + '" id="ri' + m.metricID + '">').appendTo(widgetSelectorsContainerLeftForm);
+                    widgetSelectorsContainerLeftForm.append('<label for="ri' + m.metricID + '">' + m.name + '</label><br>');
+                    radio.click(function (e) {
+                        renderQosGraph(widgetGraphsContainer, m.metricID);
+                    });
+                    if (mC === 0) {
+                        radio.attr('checked', 'checked');
+                        radio.click();
+                    }
+                });
+            });
+        }
+    } else {
+        if (serviceSelectionVal === '__any') {
+            console.log('Plotting participant ' + participantSelectionVal + ' (' + participantSelection.data("participant").name + '), all services');
+            widgetGraphsContainer.empty();
+            widgetSelectorsContainerLeftForm.empty();
+            widgetSelectorsContainerRightForm.empty();
+            widgetGraphsSelectedDetailsContainerMain.empty();
+            widgetGraphsContainer.append('<div class="small-12 columns text-center"><h3>Please select a service first</h3></div>');
+        } else {
+            console.log('Plotting participant ' + participantSelectionVal + ' (' + participantSelection.data("participant").name + '), service: ' + serviceSelectionVal);
+            widgetGraphsContainer.empty();
+            widgetSelectorsContainerLeftForm.empty();
+            widgetSelectorsContainerRightForm.empty();
+            widgetGraphsSelectedDetailsContainerMain.empty();
+            widgetGraphsContainer.append('<div class="small-12 columns text-center"><h3>Loading...</h3></div>');
+
+            // get services first
+            $.getJSON(BASE_URL + "/explorer/" + experimentId + "/services/iri/attributes?IRI=" + encodeURIComponent(serviceSelection.data('service').iri), function (metrics) {
+
+                $.get(BASE_URL + "/explorer/" + experimentId + "/participants/iri/activities/summary?IRI=" + encodeURIComponent(getParticipantByName(participantSelectionVal).iri), function (data) {
+                    var rbCounter = 0;
+
+                    $.each(metrics.attributes, function (mC, m) {
+                        var radio = $('<input type="radio" name="metric" value="' + m.metricID + '" id="ri' + m.metricID + '">').appendTo(widgetSelectorsContainerLeftForm);
+                        widgetSelectorsContainerLeftForm.append('<label for="ri' + m.metricID + '">' + m.name + '</label><br>');
+                        radio.click(function (e) {
+                            var selectedAttribute = widgetSelectorsContainerRightForm.find('input:checked').val();
+                            if (typeof selectedAttribute !== "undefined") {
+                                widgetGraphsContainer.empty();
+                                widgetGraphsContainer.append('<div class="small-12 columns text-center"><h3>Loading...</h3></div>');
+                                renderQosGraphWithUser(widgetGraphsContainer, m.metricID, getParticipantByName(participantSelectionVal).iri, selectedAttribute);
+                            }
+                        });
+                        if (mC === 0) {
+                            radio.attr('checked', 'checked');
+                            radio.click();
+                        }
+                    });
+
+                    $.each(data.activities, function (aC, a) {
+                        var rbId = "rb" + widgetsCounter + "_" + rbCounter;
+                        var radio = $('<input type="radio" name="activity" value="' + a.label + '" id="' + rbId + '">').appendTo(widgetSelectorsContainerRightForm);
+                        widgetSelectorsContainerRightForm.append('<label for="' + rbId + '">' + a.label + '</label><br>');
+                        radio.click(function (e) {
+                            var selectedMetric = widgetSelectorsContainerLeftForm.find('input:checked').val();
+                            if (typeof selectedMetric !== "undefined") {
+                                widgetGraphsContainer.empty();
+                                widgetGraphsSelectedDetailsContainerMain.empty();
+                                widgetGraphsContainer.append('<div class="small-12 columns text-center"><h3>Loading...</h3></div>');
+                                renderQosGraphWithUser(widgetGraphsContainer, selectedMetric, getParticipantByName(participantSelectionVal).iri, a.label);
+                                var linksContainer = $('<p></p>').appendTo(widgetGraphsSelectedDetailsContainerMain);
+                                var createQoeWidgetLink = $('<a href="#">View QoE for participant ' + participantSelectionVal + '</a>').appendTo(linksContainer);
+                                createQoeWidgetLink.click(function (e) {
+                                    e.preventDefault();
+                                    addParticipantQoeAttributesWidget(participantSelection.data("participant"));
+                                });
+                                var createActivitiesWidgetLink = $('<a href="#" class="tableft">View activities for participant ' + participantSelectionVal + '</a>').appendTo(linksContainer);
+                                createActivitiesWidgetLink.click(function (e) {
+                                    e.preventDefault();
+                                    addParticipantExplorerWidget(participantSelection.data("participant"));
+                                });
+                            }
+                        });
+                        rbCounter++;
+                        if (aC === 0) {
+                            radio.attr('checked', 'checked');
+                            radio.click();
+                        }
+                    });
+                });
+
+            });
+        }
+    }
+}
+
 function addParticipantExplorerWidget(selectedParticipant) {
+    console.log(selectedParticipant);
     widgetsCounter++;
     var widgetContainerId = "wc" + widgetsCounter;
     var widgetContainer = $('<div id ="' + widgetContainerId + '" class="widgetContainer small-12 columns"></div>').appendTo("#prov_widgets");
@@ -566,8 +736,6 @@ function addParticipantExplorerWidget(selectedParticipant) {
     }
     participantsDropdownList.change();
 
-
-
 }
 
 function chartClickAttr(e, detailsContainer, selectedAttributeName) {
@@ -620,6 +788,78 @@ function chartClickStrat(e, detailsContainer) {
     });
 }
 
+function renderParticipantQoeGraphsToContainer(selectedParticipantId, addToContainer, detailsContainer) {
+    addToContainer.empty();
+    graphsCounter++;
+    var newChartId = 'wg' + graphsCounter;
+    addToContainer.append('<div id="l' + newChartId + '" class="widgetGraph"><svg class="large-6 text-center columns"></svg></div>');
+    addToContainer.append('<div id="r' + newChartId + '" class="widgetGraph"><svg class="large-6 text-center columns"></svg></div>');
+
+    d3.json(BASE_URL + "/explorer/" + experimentId + "/participants/iri/distribution/qoe?IRI=" + encodeURIComponent(selectedParticipantId), function (data) {
+        $('#l' + newChartId + ' svg').show().height(CHART_HEIGHT);
+        $('#r' + newChartId + ' svg').show().height(CHART_HEIGHT);
+        console.log(data);
+        nv.addGraph(function () {
+            var chart = nv.models.multiBarHorizontalChart()
+                    .x(function (d) {
+                        return d.label;
+                    })
+                    .y(function (d) {
+                        return d.count;
+                    })
+                    .tooltipContent(function (key, label, count) {
+                        return '<p><strong>' + count + ' participants</strong> selected ' + label + '</p>';
+                    })
+                    .showYAxis(false)
+                    .margin({top: 30, right: 20, bottom: 50, left: 130})
+                    .barColor(d3.scale.customColors().range())
+                    .showValues(true)
+                    .showControls(false)
+                    .transitionDuration(350)
+                    .valueFormat(d3.format(',f'));
+            chart.yAxis
+                    .tickFormat(d3.format(',f'));
+            d3.select('#l' + newChartId + ' svg')
+                    .datum(data)
+                    .call(chart);
+            nv.utils.windowResize(chart.update);
+            chart.multibar.dispatch.on("elementClick", function (e) {
+//                chartClickAttr(e, detailsContainer, selectedAttributeName);
+            });
+            return chart;
+        });
+        // donut chart
+        nv.addGraph(function () {
+            var chart = nv.models.pieChart()
+                    .x(function (d) {
+                        return d.label;
+                    })
+                    .y(function (d) {
+                        return d.count;
+                    })
+                    .height(500)
+                    .tooltipContent(function (label, count) {
+                        return '<p><strong>' + count + ' participants</strong> selected ' + label + '</p>';
+                    })
+                    .showLabels(true)
+                    .labelThreshold(.05)    // Configure the minimum slice size for labels to show up
+                    .color(d3.scale.customColors().range())
+                    .valueFormat(d3.format(',f'))
+                    .labelType("percent")   // Configure what type of data to show in the label. Can be "key", "value" or "percent"
+                    .donut(true)            // Turn on Donut mode.
+                    .donutRatio(0.325);     // Configure how big you want the donut hole size to be.
+            d3.select('#r' + newChartId + ' svg')
+                    .datum(data[0].values)
+                    .transition().duration(350)
+                    .call(chart);
+            chart.pie.dispatch.on("elementClick", function (e) {
+//                chartClickAttr(e, detailsContainer, selectedAttributeName);
+            });
+            return chart;
+        });
+    });
+}
+
 function renderAttributeGraphsToContainer(selectedAttributeName, addToContainer, detailsContainer) {
     addToContainer.empty();
     graphsCounter++;
@@ -630,6 +870,7 @@ function renderAttributeGraphsToContainer(selectedAttributeName, addToContainer,
     d3.json(BASE_URL + "/explorer/" + experimentId + "/attributes/distribution/qoe?attrName=" + encodeURIComponent(selectedAttributeName), function (data) {
         $('#l' + newChartId + ' svg').show().height(CHART_HEIGHT);
         $('#r' + newChartId + ' svg').show().height(CHART_HEIGHT);
+        console.log(data);
         nv.addGraph(function () {
             var chart = nv.models.multiBarHorizontalChart()
                     .x(function (d) {
