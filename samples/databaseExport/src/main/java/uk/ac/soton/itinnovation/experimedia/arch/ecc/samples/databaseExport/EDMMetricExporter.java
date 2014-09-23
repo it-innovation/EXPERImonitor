@@ -185,12 +185,14 @@ public class EDMMetricExporter
 	{
 		Set<MetricGenerator> metGens = exp.getMetricGenerators();
 		
-		// Create Windows friendly folder name for experiment
-		String dateString = exp.getStartTime().toString();
+		// Create Windows friendly folder name for experiment (using ISO-8601)
+        DateTime isoTime = new DateTime( exp.getStartTime().getTime() );
+		String dateString = isoTime.toString();
+        
 		dateString = dateString.replace( ' ', '_' );
-		dateString = dateString.replace( ':', '-' );
+		dateString = dateString.replace( ':', '\'' );
 		
-		String expPath = "exportedData" + FILE_SEPARATOR + dateString + "_" + exp.getUUID().toString();
+		String expPath = "exportedData" + FILE_SEPARATOR + dateString + "_ID_[" + exp.getUUID().toString() + "]";
 		
 		if ( createFolder(expPath) )
 		{			
@@ -299,11 +301,7 @@ public class EDMMetricExporter
 						bw.close();
 					}
 					
-					if ( fw != null )
-					{
-						fw.flush();
-						fw.close();
-					}
+					if ( fw != null ) fw.close();
 				}
 				catch ( IOException ioex ) 
                 {
@@ -394,11 +392,7 @@ public class EDMMetricExporter
 					bw.close();
 				}
 
-				if ( fw != null )
-				{
-					fw.flush();
-					fw.close();
-				}
+				if ( fw != null ) fw.close();
 			}
 			catch ( IOException ioex )
             {
