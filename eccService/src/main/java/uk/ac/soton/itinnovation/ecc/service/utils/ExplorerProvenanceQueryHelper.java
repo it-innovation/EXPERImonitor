@@ -139,11 +139,15 @@ public class ExplorerProvenanceQueryHelper {
 
                     BindingSet tqrb = tqr.next();
                     amount = tqrb.getBinding("count").getValue().toString();
-                    amount = amount.substring(amount.indexOf("\"")+1, amount.lastIndexOf("\""));
+                    
+                    if (amount != null) {
+                        
+                        amount = amount.substring(amount.indexOf("\"")+1, amount.lastIndexOf("\""));
 
-                    //this is intentional; there should only be one row returned since we're counting
-                    // if there were more, they would be ignored
-                    break;
+                        //this is intentional; there should only be one row returned since we're counting
+                        // if there were more, they would be ignored
+                        break;
+                    }
                 }
             }
         }
@@ -187,7 +191,7 @@ public class ExplorerProvenanceQueryHelper {
 
                     String service = tqrb.getBinding("svc").getValue().toString();
 
-                    if (service.equals(svcIRI)) {
+                    if (service != null && service.equals(svcIRI)) {
                         String l = tqrb.getBinding("label").getValue().toString();
                         svc = new EccService(l.substring(l.indexOf("\"")+1, l.lastIndexOf("\"")), "TODO: description", svcIRI);
                         break;
@@ -236,7 +240,7 @@ public class ExplorerProvenanceQueryHelper {
 
                     String application = tqrb.getBinding("app").getValue().toString();
 
-                    if (application.equals(appIRI)) {
+                    if (application != null && application.equals(appIRI)) {
 
                         String l = tqrb.getBinding("label").getValue().toString();
                         app = new EccApplication(l.substring(l.indexOf("\"")+1, l.lastIndexOf("\"")), "TODO: description", appIRI);
@@ -289,17 +293,21 @@ public class ExplorerProvenanceQueryHelper {
 
                     String s = tqrb.getBinding("start").getValue().toString();
                     String e = tqrb.getBinding("end").getValue().toString();
-                    Calendar start = javax.xml.bind.DatatypeConverter.parseDateTime(s.substring(s.indexOf("\"")+1, s.lastIndexOf("\"")));
-                    Calendar end = javax.xml.bind.DatatypeConverter.parseDateTime(e.substring(e.indexOf("\"")+1, e.lastIndexOf("\"")));
-                    //TODO: not sure about timestamp format here...
-
                     String l = tqrb.getBinding("label").getValue().toString();
-                    activity = new EccActivity(l.substring(l.indexOf("\"")+1, l.lastIndexOf("\"")), "TODO: description",
-                            actIRI, new Date(start.getTimeInMillis()), new Date(end.getTimeInMillis()));
+                    
+                    if (s != null && e != null && l != null) {
+                        
+                        Calendar start = javax.xml.bind.DatatypeConverter.parseDateTime(s.substring(s.indexOf("\"")+1, s.lastIndexOf("\"")));
+                        Calendar end = javax.xml.bind.DatatypeConverter.parseDateTime(e.substring(e.indexOf("\"")+1, e.lastIndexOf("\"")));
+                        //TODO: not sure about timestamp format here...
+
+                        activity = new EccActivity(l.substring(l.indexOf("\"")+1, l.lastIndexOf("\"")), "TODO: description",
+                                                   actIRI, new Date(start.getTimeInMillis()), new Date(end.getTimeInMillis()));
 
                     //this is intentional; there should only be one row returned since we're querying by iri.
                     // if there were more, they would be ignored
-                    break;
+                    break;   
+                    }
                 }
             }
         }
@@ -335,7 +343,11 @@ public class ExplorerProvenanceQueryHelper {
             tqr = store.query(expID.toString(), sparql);
 
             while (tqr.hasNext()) {
-                result.add(tqr.next().getBinding("participant").getValue().toString());
+                
+                String part = tqr.next().getBinding("participant").getValue().toString();
+                
+                if (part != null)
+                    result.add(part);
             }
 
         }
@@ -381,13 +393,16 @@ public class ExplorerProvenanceQueryHelper {
             if (tqr!=null) {
                 while (tqr.hasNext()) {
                     String label = tqr.next().getBinding("label").getValue().toString();
-                    label = label.substring(label.indexOf("\"")+1, label.lastIndexOf("\""));
+                    
+                    if (label != null) {
+                        label = label.substring(label.indexOf("\"")+1, label.lastIndexOf("\""));
 
-                    if (!activities.containsKey(label)) {
-                        activities.put(label, 1);
-                    } else {
-                        activities.put(label, activities.get(label)+1);
-                    }
+                        if (!activities.containsKey(label)) {
+                            activities.put(label, 1);
+                        } else {
+                            activities.put(label, activities.get(label)+1);
+                        }
+                    }   
                 }
             }
 
@@ -442,19 +457,23 @@ public class ExplorerProvenanceQueryHelper {
                 while (tqr.hasNext()) {
 
                     BindingSet tqrb = tqr.next();
-                    String label = tqrb.getBinding("label").getValue().toString();
+                    String label    = tqrb.getBinding("label").getValue().toString();
+                    String s        = tqrb.getBinding("start").getValue().toString();
+                    String e        = tqrb.getBinding("end").getValue().toString();
+                    String l        = tqrb.getBinding("label").getValue().toString();
+                    
+                    if (label != null && s != null && e != null && l != null) {
+                        
+                        Calendar start = javax.xml.bind.DatatypeConverter.parseDateTime(s.substring(s.indexOf("\"")+1, s.lastIndexOf("\"")));
+                        Calendar end = javax.xml.bind.DatatypeConverter.parseDateTime(e.substring(e.indexOf("\"")+1, e.lastIndexOf("\"")));
+                        //TODO: not sure about timestamp format here...
 
-                    String s = tqrb.getBinding("start").getValue().toString();
-                    String e = tqrb.getBinding("end").getValue().toString();
-                    Calendar start = javax.xml.bind.DatatypeConverter.parseDateTime(s.substring(s.indexOf("\"")+1, s.lastIndexOf("\"")));
-                    Calendar end = javax.xml.bind.DatatypeConverter.parseDateTime(e.substring(e.indexOf("\"")+1, e.lastIndexOf("\"")));
-                    //TODO: not sure about timestamp format here...
+                        EccActivity a = new EccActivity(l.substring(l.indexOf("\"")+1, l.lastIndexOf("\"")), "TODO: description",
+                                tqrb.getBinding("activity").getValue().toString(), new Date(start.getTimeInMillis()), new Date(end.getTimeInMillis()));
 
-                    String l = tqrb.getBinding("label").getValue().toString();
-                    EccActivity a = new EccActivity(l.substring(l.indexOf("\"")+1, l.lastIndexOf("\"")), "TODO: description",
-                            tqrb.getBinding("activity").getValue().toString(), new Date(start.getTimeInMillis()), new Date(end.getTimeInMillis()));
-
-                    result.addActivity(a);
+                        result.addActivity(a);
+                        
+                    }
                 }
             }
         }
@@ -539,14 +558,17 @@ public class ExplorerProvenanceQueryHelper {
                 {
                     BindingSet tqrb = tqr.next();
 
-                    String l = tqrb.getBinding("label").getValue().toString();
+                    String l   = tqrb.getBinding("label").getValue().toString();
                     String app = tqrb.getBinding("app").getValue().toString();
+                    
+                    if (l != null && app !=null) {
+                        
+                        EccApplication application = new EccApplication(l.substring(l.indexOf("\"")+1, l.lastIndexOf("\"")), "TODO: description", app);
 
-                    EccApplication application = new EccApplication(l.substring(l.indexOf("\"")+1, l.lastIndexOf("\"")), "TODO: description", app);
-
-                    // TODO: Stefanie to fix SPARQL query: for now, manually select only entities
-                    if ( application.getIRI().contains("entity") )
-                        result.addApplication(application);
+                        // TODO: Stefanie to fix SPARQL query: for now, manually select only entities
+                        if ( application.getIRI().contains("entity") )
+                            result.addApplication(application);
+                    }
                 }
             }
         }
