@@ -95,6 +95,14 @@ public interface IExperimentMonitor
   EMClient getClientByID( UUID id );
   
   /**
+   * Use this method to get a previously connected client by UUID - if it exists
+   * 
+   * @param id - UUID of the client
+   * @return   - EMClient instance (or NULL if it does not exist)
+   */
+  EMClient getPreviouslyKnownClientByID( UUID id );
+  
+  /**
    * Use this method to get the set of all currently connected clients.
    * 
    * @return - Set of EMClient instances.

@@ -568,7 +568,18 @@ public class ExperimentService {
             throw new Exception("Cannot get client - ID is null");
         }
 
-        return expMonitor.getClientByID(id);
+        // See if the client is one that is connected
+        EMClient client = expMonitor.getClientByID(id);
+        
+        // If not, try seeing if the client is one that has connected previously
+        if ( client == null )
+            client = expMonitor.getPreviouslyKnownClientByID( id );
+        
+        // Otherwise throw a wobbler
+        if ( client == null )
+            throw new Exception( "Cannot get client, it does not exist" );
+        
+        return client;
     }
 
     /**

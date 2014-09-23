@@ -153,6 +153,25 @@ public class ExperimentMonitor implements IExperimentMonitor,
   }
   
   @Override
+  public EMClient getPreviouslyKnownClientByID( UUID id )
+  {
+      EMClient result = null;
+      
+      Set<EMClient> previousClients = getAllKnownClients();
+      
+      for ( EMClient client : previousClients )
+      {
+          if ( client.getID().equals(id) )
+          {
+              result = client;
+              break;
+          }
+      }
+      
+      return result;
+  }
+  
+  @Override
   public Set<EMClient> getAllConnectedClients()
   {    
     return getSimpleClientSet( connectionManager.getCopyOfConnectedClients() );

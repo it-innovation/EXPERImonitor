@@ -74,6 +74,7 @@ import uk.ac.soton.itinnovation.ecc.service.domain.EccMeasurementSet;
 import uk.ac.soton.itinnovation.ecc.service.utils.EccAttributesComparator;
 import uk.ac.soton.itinnovation.ecc.service.utils.EccEntitiesComparator;
 import uk.ac.soton.itinnovation.ecc.service.utils.EccMeasurementsComparator;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
 
 /**
  * Provides access to data in the database.
@@ -1137,10 +1138,13 @@ public class DataService {
                     Set<EMClient> currClients = experimentService.getKnownClients();
 
                     for (EMClient client : currClients) {
+                        
+                        // Use extended client type to get all metric metric generators
+                        EMClientEx clientEx = (EMClientEx) client;
 
-                        if (client.getID().equals(targetID)) {
+                        if (clientEx.getID().equals(targetID)) {
 
-                            for (MetricGenerator mg : client.getCopyOfMetricGenerators()) {
+                            for (MetricGenerator mg : clientEx.getCopyOfHistoricMetricGenerators()) {
                                 for (Entity entity : mg.getEntities()) {
 
                                     EccEntity ent = toEccEntity(entity, withAttributes);

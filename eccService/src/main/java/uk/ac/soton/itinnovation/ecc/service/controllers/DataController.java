@@ -333,37 +333,43 @@ public class DataController {
             } else {
                 experimentUuid = currentExperiment.getUUID().toString();
             }
+            
+            if (theClient != null) {
+                
+                ArrayList<EccEntity> entities = dataService.getEntitiesForClient(clientId, true);
+                ArrayList<EccAttribute> attributes;
 
-            ArrayList<EccEntity> entities = dataService.getEntitiesForClient(clientId, true);
-            ArrayList<EccAttribute> attributes;
+                String fileName = theClient.getName() + " (client) - experiment " + experimentUuid + ".csv";
+                response.setHeader("Content-disposition", "attachment; filename=\"" + fileName + "\"");
+                response.setContentType("text/csv");
 
-            String fileName = theClient.getName() + " (client) - experiment " + experimentUuid + ".csv";
-            response.setHeader("Content-disposition", "attachment; filename=\"" + fileName + "\"");
-            response.setContentType("text/csv");
+                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(response.getOutputStream()));
+                writer.write("Entity Name, Entity UUID, Attribute Name, Attribute UUID, Timestamp, Value, Metric type, Metric unit");
+                for (EccEntity e : entities) {
+                    attributes = e.getAttributes();
 
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(response.getOutputStream()));
-            writer.write("Entity Name, Entity UUID, Attribute Name, Attribute UUID, Timestamp, Value, Metric type, Metric unit");
-            for (EccEntity e : entities) {
-                attributes = e.getAttributes();
+                    for (EccAttribute a : attributes) {
+                        for (EccMeasurement m : dataService.getAllMeasurementsForAttribute(a.getUuid().toString()).getData()) {
+                            writer.newLine();
+                            writer.write(e.getName() + ", " + e.getUuid().toString() + ", ");
+                            writer.write(a.getName() + ", " + a.getUuid().toString() + ", ");
+                            writer.write(ISODateTimeFormat.dateTime().print(m.getTimestamp().getTime()) + ", " + m.getValue() + ", ");
+                            writer.write(a.getType() + ", " + a.getUnit());
 
-                for (EccAttribute a : attributes) {
-                    for (EccMeasurement m : dataService.getAllMeasurementsForAttribute(a.getUuid().toString()).getData()) {
-                        writer.newLine();
-                        writer.write(e.getName() + ", " + e.getUuid().toString() + ", ");
-                        writer.write(a.getName() + ", " + a.getUuid().toString() + ", ");
-                        writer.write(ISODateTimeFormat.dateTime().print(m.getTimestamp().getTime()) + ", " + m.getValue() + ", ");
-                        writer.write(a.getType() + ", " + a.getUnit());
-
+                        }
                     }
                 }
-            }
 
-            writer.flush();
-            writer.close();
-            response.flushBuffer();
-        } catch (Exception e) {
-            logger.error("Failed to write data to output response stream for client [" + clientId + "]", e);
+                writer.flush();
+                writer.close();
+                response.flushBuffer();
+            }
+            else {
+                String msg = "Failed to write data to output: could not find client for experiment: " + clientId;
+                logger.error(msg); }
         }
+        catch (Exception e) {
+                logger.error("Failed to write data to output response stream for client [" + clientId + "]", e); }
     }
 
     /**
