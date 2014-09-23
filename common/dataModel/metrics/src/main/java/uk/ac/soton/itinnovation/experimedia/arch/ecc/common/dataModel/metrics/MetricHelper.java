@@ -202,22 +202,31 @@ public class MetricHelper
      */
     public static Map<UUID, Attribute> getAllAttributes( Collection<MetricGenerator> mgenSet )
     {
-      HashMap<UUID, Attribute> attributes = new HashMap<UUID, Attribute>();
+        HashMap<UUID, Attribute> attributes = new HashMap<UUID, Attribute>();
       
-      Map<UUID, Entity> entities = getAllEntities( mgenSet );
-      Iterator<Entity> entIt = entities.values().iterator();
-      
-      while ( entIt.hasNext() )
-      {
-        Iterator<Attribute> attIt = entIt.next().getAttributes().iterator();
-        while ( attIt.hasNext() )
+        if ( mgenSet != null )
         {
-          Attribute attr = attIt.next();
-          attributes.put( attr.getUUID(), attr );
+            Map<UUID, Entity> entities = getAllEntities( mgenSet );
+            Iterator<Entity>  entIt    = entities.values().iterator();
+
+            while ( entIt.hasNext() )
+            {
+                Set<Attribute> attrs = entIt.next().getAttributes();
+                
+                if ( attrs != null )
+                {
+                    Iterator<Attribute> attIt = attrs.iterator();
+                    while ( attIt.hasNext() )
+                    {
+                        Attribute attr = attIt.next();
+                        
+                        if ( attr != null ) attributes.put( attr.getUUID(), attr );
+                    }
+                }  
+            }
         }
-      }
       
-      return attributes;
+        return attributes;
     }
   
     /**
