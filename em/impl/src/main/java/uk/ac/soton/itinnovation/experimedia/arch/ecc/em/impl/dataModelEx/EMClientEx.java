@@ -139,6 +139,33 @@ public class EMClientEx extends EMClient
 		return histMG;
 	}
 	
+	public Collection<Entity> getCopyOfUniqueHistoricEntities()
+	{		
+		HashMap<UUID, Entity> uniqueEntities = new HashMap<>();
+		
+		// Run through all entities collected for this client and aggregate unique entities
+		for ( MetricGenerator mg : historicMetricGenerators.values() )
+		{
+			Set<Entity> entities = mg.getEntities();
+			if ( entities != null )
+				for ( Entity ent : entities )
+				{
+					UUID entID = ent.getUUID();
+					
+					// If we already have the entity, see if we have any new attributes
+					if ( uniqueEntities.containsKey(entID) )
+					{
+						Entity existing = uniqueEntities.get( entID );
+						aggregateEntity( ent, existing );
+					}
+					else // Otherwise just add as new entity
+						uniqueEntities.put( entID, ent );
+				}
+		}
+		
+		return uniqueEntities.values();
+	}
+	
   public IEMDiscovery getDiscoveryInterface()
   { return discoveryFace; }
   
@@ -571,5 +598,25 @@ public class EMClientEx extends EMClient
   // Tear-down phase state -----------------------------------------------------
   public void setTearDownResult( boolean success )
   { tearDownSuccessful = success; }
+  
+  // Private methods -----------------------------------------------------------
+  private void aggregateEntity( Entity srcEnt, Entity targEnt )
+  {
+	  Set<Attribute> srcAttrs  = srcEnt.getAttributes();
+	  Set<Attribute> targAttrs = targEnt.getAttributes();
+	  
+	  if ( srcAttrs != null && targAttrs != null )
+	  {
+		  // Collect IDs of target collection
+		  HashSet<UUID> targIDs = new HashSet<>();
+		  for ( Attribute attr : targAttrs )
+			  targIDs.add( attr.getUUID() );
+		  
+		  // Put new attributes into target entity
+		  for ( Attribute attr : srcAttrs )
+			if ( !targIDs.contains(attr.getUUID()) )
+				targEnt.addAttribute( attr );  
+	  }
+  }
 }
  
