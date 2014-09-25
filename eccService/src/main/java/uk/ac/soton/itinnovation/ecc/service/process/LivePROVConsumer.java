@@ -142,40 +142,38 @@ public class LivePROVConsumer {
         nsPrefixMap = new HashMap<String, String>();
         nsBaseURIMap = new HashMap<String, String>();
 
-//        nsBaseURIMap.put("foaf", "http://xmlns.com/foaf/0.1/");
-        nsBaseURIMap.put("foaf", "foaf.rdf");
-//        nsBaseURIMap.put("sioc", "http://rdfs.org/sioc/ns#");
-        nsBaseURIMap.put("sioc", "sioc.rdf");
-//        nsBaseURIMap.put("prov", "http://www.w3.org/ns/prov-o#/");
-        nsBaseURIMap.put("prov", "prov.rdf");
+        nsBaseURIMap.put("foaf",        "foaf.rdf");
+        nsBaseURIMap.put("sioc",        "sioc.rdf");
+        nsBaseURIMap.put("prov",        "prov.rdf");
         nsBaseURIMap.put("experimedia", "experimedia.rdf");
 
-        nsPrefixMap.put("foaf", "http://xmlns.com/foaf/0.1/");
-        nsPrefixMap.put("sioc", "http://rdfs.org/sioc/ns#");
-        nsPrefixMap.put("prov", "http://www.w3.org/ns/prov#");
+        nsPrefixMap.put("foaf",        "http://xmlns.com/foaf/0.1/");
+        nsPrefixMap.put("sioc",        "http://rdfs.org/sioc/ns#");
+        nsPrefixMap.put("prov",		   "http://www.w3.org/ns/prov#");
         nsPrefixMap.put("experimedia", "http://it-innovation.soton.ac.uk/ontologies/experimedia#");
     }
 
     private void createDefaultNamespaces() throws Exception {
         try {
             // FOAF
-//            provStoreWrapper.importOntologyToKnowledgeBase(nsBaseURIMap.get("foaf"),
-//                    nsPrefixMap.get("foaf"),
-//                    "foaf", LivePROVConsumer.class);
+            provStoreWrapper.importOntologyToKnowledgeBase(nsBaseURIMap.get("foaf"),
+                    nsPrefixMap.get("foaf"),
+                    "foaf", LivePROVConsumer.class);
 
             // SIOC
-//            provStoreWrapper.importOntologyToKnowledgeBase(nsBaseURIMap.get("sioc"),
-//                    nsPrefixMap.get("sioc"),
-//                    "sioc", LivePROVConsumer.class);
+            provStoreWrapper.importOntologyToKnowledgeBase(nsBaseURIMap.get("sioc"),
+                    nsPrefixMap.get("sioc"),
+                    "sioc", LivePROVConsumer.class);
             // PROV
             provStoreWrapper.importOntologyToKnowledgeBase(nsBaseURIMap.get("prov"),
                     nsPrefixMap.get("prov"),
                     "prov", LivePROVConsumer.class);
 
             // EXPERIMEDIA
-//            provStoreWrapper.importOntologyToKnowledgeBase(nsBaseURIMap.get("experimedia"),
-//                    nsPrefixMap.get("experimedia"),
-//                    "experimedia", LivePROVConsumer.class);
+            provStoreWrapper.importOntologyToKnowledgeBase(nsBaseURIMap.get("experimedia"),
+                    nsPrefixMap.get("experimedia"),
+                    "experimedia", LivePROVConsumer.class);
+			
         } catch (Exception ex) {
             String msg = "Could not create default namespaces: " + ex.getMessage();
             lpcLog.error(msg);
