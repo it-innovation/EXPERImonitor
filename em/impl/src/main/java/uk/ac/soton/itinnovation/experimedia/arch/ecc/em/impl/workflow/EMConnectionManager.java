@@ -108,6 +108,18 @@ public class EMConnectionManager implements IEMMonitorEntryPoint_ProviderListene
   public void clearAllHistoricClients()
   { synchronized( clientListLock ) { historicClients.clear(); } }
   
+  public void addHistoricClient( EMClientEx client )
+  {
+	  if ( client != null )
+	  {
+		  synchronized( clientListLock )
+		  {
+			  if ( !historicClients.containsKey(client.getID()) )
+				  historicClients.put( client.getID(), client );
+		  }
+	  }
+  }
+  
   public void disconnectAllClients( String reason )
   { 
     // Get copy of all clients to remove
@@ -206,15 +218,18 @@ public class EMConnectionManager implements IEMMonitorEntryPoint_ProviderListene
     public void reRegisterEMClient( UUID userID, String userName )
     {
         // Only re-register client if it is not already connected
-        if ( userID != null && userName != null && !connectedClients.containsKey( userID ) )
+        if ( userID != null && userName != null && !connectedClients.containsKey(userID) )
         {
-            boolean clientKnown	= historicClients.containsKey( userID );
+            EMClientEx incomingClient = createClient( userID, userName );
 
-            EMClientEx incomingClient = createRegisteredClient( userID, userName );
-
-            // Notify listener of new connection
+            // Notify listener of re-registered connection
             if ( incomingClient != null )
             {
+				// Do not indicate client is connected yet (they may not be there anymore)
+				// but see if we know about them already
+				boolean clientKnown = historicClients.containsKey( userID );
+				
+				// Run through registration process to see if we get an actual response from the client
                 incomingClient.setIsReRegistering( true );
                 connectionListener.onClientRegistered( incomingClient, clientKnown );
             }   
@@ -225,45 +240,46 @@ public class EMConnectionManager implements IEMMonitorEntryPoint_ProviderListene
   @Override
   public void onRegisterAsEMClient( UUID userID, String userName )
   {
-    if ( userID != null && userName != null )
-    {
-			boolean clientKnown				= historicClients.containsKey( userID );
-			EMClientEx incomingClient = createRegisteredClient( userID, userName );
+		if ( userID != null && userName != null )
+		{
+			EMClientEx incomingClient = createClient( userID, userName );
       
-      // Notify listener of new connection
-      if ( incomingClient != null )
-      {
-        incomingClient.setIsConnected( true );
-        connectionListener.onClientRegistered( incomingClient, clientKnown );
-      }
-    }
+			// Notify listener of new connection
+			if ( incomingClient != null )
+			{
+				// Record as connected
+				synchronized( clientListLock )
+				{
+					if ( !connectedClients.containsKey(userID) )
+						connectedClients.put( userID, incomingClient );
+					
+					incomingClient.setIsConnected( true );
+				}
+				
+				boolean clientKnown = historicClients.containsKey( userID );
+				connectionListener.onClientRegistered( incomingClient, clientKnown );
+			}
+		}
   }
 	
-	// Private methods -----------------------------------------------------------
-	private EMClientEx createRegisteredClient( UUID userID, String userName )
-	{
-		boolean    clientKnown, clientAlreadyConnected;
+  // Private methods -----------------------------------------------------------
+  private EMClientEx createClient( UUID userID, String userName )
+  {
 		EMClientEx incomingClient = null;
 
 		// Find out what we know about this client
 		synchronized( clientListLock )
-		{ 
-			clientKnown            = historicClients.containsKey( userID );
-			clientAlreadyConnected = connectedClients.containsKey( userID );
-
-			// If unknown, create the new client
-			if ( !clientKnown )
-			{
-				incomingClient = new EMClientEx( userID, userName );
-				historicClients.put( userID, incomingClient );
-			}
+		{			
+			if ( connectedClients.containsKey(userID) )
+				incomingClient = connectedClients.get( userID );
 			else
-				incomingClient = historicClients.get( userID );
-		}
-
-		// If not already connected, put client on connected list
-		if ( incomingClient != null && !clientAlreadyConnected )
-			synchronized( clientListLock ) { connectedClients.put( userID, incomingClient ); }
+			{
+				if ( historicClients.containsKey(userID) )
+					incomingClient = historicClients.get( userID );
+				else
+					incomingClient = new EMClientEx( userID, userName );
+			}
+		}			
 		
 		return incomingClient;
 	}

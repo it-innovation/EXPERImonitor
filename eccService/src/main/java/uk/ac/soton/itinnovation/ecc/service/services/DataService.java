@@ -1055,7 +1055,7 @@ public class DataService {
         if (started && experimentService != null) {
             if (experimentService.isExperimentInProgress()) {
 
-                Set<EMClient> currClients = experimentService.getKnownClients();
+                Set<EMClient> currClients = experimentService.getAllKnownClients();
 
                 for (EMClient client : currClients) {
                     EccClient ec = new EccClient(client.getID().toString(),
@@ -1135,7 +1135,7 @@ public class DataService {
 
                 if (targetID != null) {
 
-                    Set<EMClient> currClients = experimentService.getKnownClients();
+                    Set<EMClient> currClients = experimentService.getAllKnownClients();
 
                     for (EMClient client : currClients) {
                         

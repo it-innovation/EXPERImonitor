@@ -206,6 +206,7 @@ public class ExperimentMonitor implements IExperimentMonitor,
     if ( client.isDisconnecting() ) throw new Exception( "Alreadying trying to de-register client" );
     
     EMClientEx clientEx = (EMClientEx) client;
+	clientEx.setIsDisconnecting( true );
     clientEx.getDiscoveryInterface().deregisteringThisClient( reason );
   }
   
@@ -251,13 +252,16 @@ public class ExperimentMonitor implements IExperimentMonitor,
     
     if ( lifecycleManager.isLifecycleActive() )
       throw new Exception( "Lifecycle has already started" );
+	
+	// Clear experiment client history
+	connectionManager.clearAllHistoricClients();
     
-		// Start lifecyle at the beginning
-		EMPhase startPhase = EMPhase.eEMDiscoverMetricGenerators;
+    // Start lifecyle at the beginning
+	EMPhase startPhase = EMPhase.eEMDiscoverMetricGenerators;
 		
     startLifecycle( expInfo, startPhase );
 		
-		return startPhase;
+	return startPhase;
   }
   
   @Override
@@ -268,24 +272,26 @@ public class ExperimentMonitor implements IExperimentMonitor,
     if ( monitorStatus != IExperimentMonitor.eStatus.ENTRY_POINT_OPEN )
       throw new Exception( "Cannot start life-cycle: client entry point is not open" );
 		
-		if ( lifecycleManager.isLifecycleActive() )
+	if ( lifecycleManager.isLifecycleActive() )
       throw new Exception( "Lifecycle has already started" );
     
+	// Clear experiment client history
+	connectionManager.clearAllHistoricClients();
+	
     try 
     {
-      lifecycleManager.setExperimentInfo( expInfo );
+		lifecycleManager.setExperimentInfo( expInfo );
 			
-			// Add currently (still) connected clients and add them in to the new lifecycle
-			Set<EMClientEx> connectedClients = connectionManager.getCopyOfConnectedClients();
+		// Add currently (still) connected clients and add them in to the new lifecycle
+		Set<EMClientEx> connectedClients = connectionManager.getCopyOfConnectedClients();
 			
-			// Notify listener of existing clients already connected
-			for ( IEMLifecycleListener lcl : lifecycleListeners )
-				for ( EMClientEx client : connectedClients )
-					lcl.onClientConnected( client, true );
-			
-			// Then start experiment lifecycle
-      lifecycleManager.startLifeCycleAt( startPhase,
-																				 connectedClients );
+		// Notify listener of existing clients already connected
+		for ( IEMLifecycleListener lcl : lifecycleListeners )
+			for ( EMClientEx client : connectedClients )
+				lcl.onClientConnected( client, true );
+
+		// Then start experiment lifecycle
+		lifecycleManager.startLifeCycleAt( startPhase, connectedClients );
     }
     catch ( Exception ex ) { throw ex; /* Throw this up*/ }
   }
@@ -477,6 +483,9 @@ public class ExperimentMonitor implements IExperimentMonitor,
 			
 			// Reset re-registering state if we've got metric generators (connection is good)
 			if ( client.isReRegistering() ) client.setIsReRegistering( false );
+			
+			// Add client to historical list for this experiment
+			connectionManager.addHistoricClient( client );
 		}
   }
   
