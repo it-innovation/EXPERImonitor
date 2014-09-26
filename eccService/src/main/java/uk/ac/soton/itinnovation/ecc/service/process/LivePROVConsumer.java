@@ -72,6 +72,7 @@ public class LivePROVConsumer {
 
             // Check to see if repository exists (throw it if it does)
             provStoreWrapper = new EDMProvStoreWrapper(repoProps);
+			
             if (provStoreWrapper.repositoryExists(expIDVal)) {
                 throw new Exception("Could not create repository: it already exists");
             }
@@ -91,7 +92,19 @@ public class LivePROVConsumer {
             lpcLog.error(msg);
 
             throw new Exception(msg, ex);
-        }
+        } finally {
+			// Clean up if we failed to initialise the repository
+			if (!repoInitialised) {			
+				try {				
+					// Try disconnecting
+					if (provStoreWrapper != null) provStoreWrapper.disconnect();
+					provStoreWrapper = null;
+				}
+				catch (Exception ex) {
+					lpcLog.error("Failed to disconnect from OWLIM repository service", ex);
+				}
+			}
+		}
     }
 
     public void closeCurrentExperimentRepository() throws Exception {
