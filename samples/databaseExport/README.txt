@@ -2,7 +2,7 @@ How to use the database export tool
 -----------------------------------
 
 1. Build the complete ECC API (for more information, see the top-level README.txt file)
-	* You should find the 'experimedia-arch-ecc-samples-databaseExport-2.1.jar' in the 'lib' folder in this directory after a successful build
+	* You should find the 'experimedia-arch-ecc-samples-databaseExport-2.1.jar' in the 'target' folder in this directory after a successful build
 
 
 2. This Java console application depends on the following libraries:
