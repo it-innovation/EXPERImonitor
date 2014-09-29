@@ -139,10 +139,11 @@ public class ExperimentService {
                 expDataManager = null;
 
                 // PROV repository tidy up (if required)
-                if ( livePROVConsumer != null )
-                    if ( livePROVConsumer.isRepoInitialised() )
+                if (livePROVConsumer != null) {
+                    if (livePROVConsumer.isRepoInitialised()) {
                         livePROVConsumer.closeCurrentExperimentRepository();
-                
+                    }
+                }
                 return true;
 
             } catch (Throwable e) {
@@ -370,7 +371,6 @@ public class ExperimentService {
             livePROVConsumer.createExperimentRepository(newExp.getUUID(),
                     newExp.getName(),
                     pdc.getPROVRepoProperties());
-
             // Go straight into live monitoring
             expMonitor.startLifecycle(newExp, EMPhase.eEMLiveMonitoring);
 
@@ -433,9 +433,9 @@ public class ExperimentService {
                 expDAO.finaliseExperiment(exp);
 
                 // Tidy up PROV
-                if (livePROVConsumer.isRepoInitialised())
+                if (livePROVConsumer.isRepoInitialised()) {
                     livePROVConsumer.closeCurrentExperimentRepository();
-
+                }
                 // Set no experiment active
                 expStateModel.setActiveExperiment(null);
 
@@ -522,27 +522,27 @@ public class ExperimentService {
             throw new Exception(problem, ex);
         }
     }
-
+	
     /**
-     * Use this method to retrieve all known clients. This call will return an
-     * empty set when there are no clients or no active experiment. IMPORTANT:
-     * the state of each client you find in this set will be correct only at the
+     * Use this method to retrieve just those clients that are currently connected. 
+	 * This call will return an empty set when there are no clients or no active experiment.
+	 * IMPORTANT: the state of each client you find in this set will be correct only at the
      * point of calling.
      *
      * @return - All known clients.
      */
-    public Set<EMClient> getKnownClients() {
+    public Set<EMClient> getConnectedClients() {
 
         HashSet<EMClient> actuallyConnectedClients = new HashSet<EMClient>();
 
         if (started) {
 
             // Get the all clients that the monitor is aware of
-            Set<EMClient> clients = expMonitor.getAllKnownClients();
+            Set<EMClient> clients = expMonitor.getAllConnectedClients();
 
-            // Only return those that are not re-registering
+            // Only return those that are not re-registering or disconnecting
             for (EMClient client : clients) {
-                if (!client.isReRegistering()) {
+                if (!client.isReRegistering() && !client.isDisconnecting()) {
                     actuallyConnectedClients.add(client);
                 }
             }
@@ -550,6 +550,30 @@ public class ExperimentService {
 
         return actuallyConnectedClients;
     }
+	
+	/**
+	 * Use this method to retrieve all known clients for the current experiment 
+	 * (irrespective of their connectedness state).
+	 * 
+	 * IMPORTANT: the state of each client you find in this set will be correct 
+	 * only at the point of calling.
+	 * 
+	 * @return - A set of clients related to the current experiment
+	 */
+	public Set<EMClient> getAllKnownClients() {
+		
+		HashSet<EMClient> result = new HashSet<EMClient>();
+		
+		if (started) {
+						
+			Set<EMClient> clients = expMonitor.getAllKnownClients();
+			
+			for (EMClient client : clients)
+				result.add(client);
+		}
+		
+		return result;
+	}
 
     /**
      * Use this method to get an instance of a client specified by an ID.
@@ -568,7 +592,18 @@ public class ExperimentService {
             throw new Exception("Cannot get client - ID is null");
         }
 
-        return expMonitor.getClientByID(id);
+        // See if the client is one that is connected
+        EMClient client = expMonitor.getClientByID(id);
+        
+        // If not, try seeing if the client is one that has connected previously
+        if ( client == null )
+            client = expMonitor.getPreviouslyKnownClientByID( id );
+        
+        // Otherwise throw a wobbler
+        if ( client == null )
+            throw new Exception( "Cannot get client, it does not exist" );
+        
+        return client;
     }
 
     /**
@@ -591,7 +626,12 @@ public class ExperimentService {
         }
 
         try {
-            expMonitor.deregisterClient(client, "ECC service has requested de-registration");
+            // Set process of de-registration running
+			expMonitor.deregisterClient(client, "ECC service has requested de-registration");
+			
+			// Update (persistent) experiment state
+			expStateModel.setClientConnectedState(client, false);
+			
         } catch (Exception ex) {
 
             String problem = "Had problems deregistering client " + client.getName() + ": " + ex.getMessage();
@@ -610,9 +650,15 @@ public class ExperimentService {
         if (clientID == null) {
             throw new Exception("Could not deregister client: client ID is null");
         }
+		
+		// Try getting client from connected list
+		EMClient client = expMonitor.getClientByID(clientID);
+		
+		if (client == null)
+			throw new Exception("Could not deregister client: client is not connected");
 
-        // Use overloaded method to do the work
-        deregisterClient(expMonitor.getClientByID(clientID));
+        // Otherise, use overloaded method to do the work
+        deregisterClient(client);
     }
 
     /**
@@ -797,6 +843,8 @@ public class ExperimentService {
 
             if (client != null) {
 
+				// Set (persistent) experiment state (this may have already occurred)
+				// if the experimenter de-registered the client, but it doesn't matter if so
                 expStateModel.setClientConnectedState(client, false);
 
                 logger.info("Client " + client.getName() + " disconnected");
@@ -874,14 +922,16 @@ public class ExperimentService {
         public void onFoundClientWithMetricGenerators(EMClient client, Set<MetricGenerator> newGens) {
 
             if (client != null && newGens != null) {
-            
+
                 // Update experiment state with confirmed client connection
-                if ( !expStateModel.isClientConnected(client) )
+                if (!expStateModel.isClientConnected(client)) {
                     expStateModel.setClientConnectedState(client, true);
-                 
+                }
+
                 // Log out if this client is one we already know about
-                if (client.isReRegistering())
+                if (client.isReRegistering()) {
                     logger.info("Previously connected client has reconnected: " + client.getID() + " (\"" + client.getName() + "\")");
+                }
 
                 // Pass on metric generators to the EDM for storage
                 UUID expID = expStateModel.getActiveExperiment().getUUID();

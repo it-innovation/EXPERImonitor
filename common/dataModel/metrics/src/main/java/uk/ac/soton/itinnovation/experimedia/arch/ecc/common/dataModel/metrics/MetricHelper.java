@@ -41,8 +41,8 @@ public class MetricHelper
      * @param mgenSet     - Collection of metric generators, must not be null
      * @return            - Returned attribute instance, if it exists, otherwise null.
      */
-    public static Attribute getAttributeFromID( UUID attributeID,
-                                                Collection<MetricGenerator> mgenSet )
+    public static Attribute getAttributeFromGenerators( UUID attributeID,
+                                                        Collection<MetricGenerator> mgenSet )
     {
       Attribute attr = null;
       
@@ -53,6 +53,32 @@ public class MetricHelper
       }
       
       return attr;
+    }
+    
+    /**
+     * Use this method to find an attribute from a collection of entities.
+     * 
+     * @param attrID    - Non-null attribute ID
+     * @param entities  - non-null collection of entities
+     * @return          - A (possibly null) attribute
+     */
+    public static Attribute getAttributeFromEntities( UUID attrID, 
+                                                      Collection<Entity> entities )
+    {
+        Attribute result = null;
+        
+        if ( entities != null && !entities.isEmpty() )
+        {
+            for( Entity ent : entities )
+                for ( Attribute attr : ent.getAttributes() )
+                    if ( attr.getUUID().equals(attrID) )
+                    {
+                        result = attr;
+                        break;
+                    }
+        }
+        
+        return result;
     }
     
     /**
@@ -176,22 +202,31 @@ public class MetricHelper
      */
     public static Map<UUID, Attribute> getAllAttributes( Collection<MetricGenerator> mgenSet )
     {
-      HashMap<UUID, Attribute> attributes = new HashMap<UUID, Attribute>();
+        HashMap<UUID, Attribute> attributes = new HashMap<UUID, Attribute>();
       
-      Map<UUID, Entity> entities = getAllEntities( mgenSet );
-      Iterator<Entity> entIt = entities.values().iterator();
-      
-      while ( entIt.hasNext() )
-      {
-        Iterator<Attribute> attIt = entIt.next().getAttributes().iterator();
-        while ( attIt.hasNext() )
+        if ( mgenSet != null )
         {
-          Attribute attr = attIt.next();
-          attributes.put( attr.getUUID(), attr );
+            Map<UUID, Entity> entities = getAllEntities( mgenSet );
+            Iterator<Entity>  entIt    = entities.values().iterator();
+
+            while ( entIt.hasNext() )
+            {
+                Set<Attribute> attrs = entIt.next().getAttributes();
+                
+                if ( attrs != null )
+                {
+                    Iterator<Attribute> attIt = attrs.iterator();
+                    while ( attIt.hasNext() )
+                    {
+                        Attribute attr = attIt.next();
+                        
+                        if ( attr != null ) attributes.put( attr.getUUID(), attr );
+                    }
+                }  
+            }
         }
-      }
       
-      return attributes;
+        return attributes;
     }
   
     /**
@@ -254,24 +289,20 @@ public class MetricHelper
      */
     public static Map<UUID, MeasurementSet> getAllMeasurementSets( Collection<MetricGenerator> mgenSet )
     {
-        HashMap<UUID, MeasurementSet> mSets = new HashMap<UUID, MeasurementSet>();
+        HashMap<UUID, MeasurementSet> mSets = new HashMap<>();
         
         if ( mgenSet != null )
         {
-            Iterator<MetricGenerator> mgenIt = mgenSet.iterator();
-            while ( mgenIt.hasNext() )
-            {
-                Iterator<MetricGroup> mgIt = mgenIt.next().getMetricGroups().iterator();
-                while ( mgIt.hasNext() )
+            for ( MetricGenerator metGen : mgenSet )
+                for ( MetricGroup metGrp : metGen.getMetricGroups() )
                 {
-                    Iterator<MeasurementSet> msIt = mgIt.next().getMeasurementSets().iterator();
-                    while ( msIt.hasNext() )
-                    {
-                      MeasurementSet ms = msIt.next();
-                      mSets.put( ms.getID(), ms ); 
-                    }
-                }
-            }
+                    // Make sure measurement set set is not null
+                    Set<MeasurementSet> msSet = metGrp.getMeasurementSets();
+                    
+                    if ( msSet != null )
+                        for ( MeasurementSet ms : msSet)
+                            mSets.put( ms.getID(), ms );
+                }                        
         }
         
         return mSets;        
@@ -519,6 +550,62 @@ public class MetricHelper
         }
         
         return resultMeasurementList;        
+    }
+    
+    public static List<Measurement> sortMeasurementsByDateLinearReverse( Set<Measurement> measurements )
+    {
+        ArrayList<Measurement> resultMeasurementList = new ArrayList<>();
+        
+        if ( measurements != null )
+        {
+            // ..sort them
+            TreeMap <Date, Measurement> sortedMeasures = sortMeasurementsByDate(measurements);
+            
+            // Push into linear list (oldest first)
+            for ( Date d : sortedMeasures.keySet() ) 
+                resultMeasurementList.add( sortedMeasures.get(d) );   
+        }
+        
+        return resultMeasurementList;        
+    }
+    
+    public static List<Attribute> sortAttributesByName( Collection<Attribute> attributes )
+    {
+        ArrayList<Attribute> result = new ArrayList<>();
+        
+        TreeMap<String, ArrayList<Attribute>> sortedAttrs = new TreeMap<>();
+        
+        if ( attributes != null && !attributes.isEmpty() )
+        {
+            // Sort (allowing attributes with the same name)
+            for ( Attribute attr: attributes )
+            {
+                String attrName = attr.getName();
+                
+                if ( sortedAttrs.containsKey(attrName) )
+                {
+                    ArrayList<Attribute> bucket = sortedAttrs.get( attrName );
+                    bucket.add( attr );
+                }
+                else
+                {
+                    ArrayList<Attribute> bucket = new ArrayList<>();
+                    bucket.add( attr );
+                    
+                    sortedAttrs.put( attrName, bucket );
+                }
+            }
+            
+            // Write out all attributes (ascending order)
+            for ( String attrName : sortedAttrs.keySet() )
+            {
+                ArrayList<Attribute> bucket = sortedAttrs.get( attrName );
+                for ( Attribute attr : bucket )
+                    result.add( attr );
+            }
+        }
+        
+        return result;
     }
     
     public static List<Measurement> truncateMeasurements( List<Measurement> measures,
@@ -850,6 +937,31 @@ public class MetricHelper
       return targetReport;
     }
     
+    public static Report createMeasurementReport( MeasurementSet sourceMS,
+                                                  Collection<Measurement> measures )
+    {
+        Report targetReport = null;
+      
+        if ( sourceMS != null && measures != null )
+        {
+          MeasurementSet newMS = new MeasurementSet( sourceMS, false );
+          Date now = new Date();
+
+          // Take only non-null measurements
+          HashSet<Measurement> validMeasures = new HashSet<Measurement>();
+          for ( Measurement m : measures )
+              if ( m != null )
+                  validMeasures.add( m );
+          
+          newMS.addMeasurements( validMeasures );
+          
+          targetReport = new Report( UUID.randomUUID(), newMS, now, now, now );
+          targetReport.setNumberOfMeasurements( validMeasures.size() );
+        }
+
+        return targetReport;
+    }
+    
     /**
      * Use this method to iterate through the contents of a metric generator.
      * 
@@ -914,4 +1026,141 @@ public class MetricHelper
       
       return desc;
     } 
+    
+    /**
+     * Use this method to check the consistency of a collection of measurement sets.
+     * 
+     * @param mSets - Non-null set of MeasuementSets
+     * @return      - Returns true if inputs are valid and consistent
+     */
+    public static boolean areMeasurementSetsConsistent( Collection<MeasurementSet> mSets )
+    {
+        if ( mSets == null ) return false;
+        
+        Iterator<MeasurementSet> msIt = mSets.iterator();
+        
+        MeasurementSet firstMS = msIt.next();
+        if ( firstMS == null ) return false;
+        
+        Metric keyMetric = firstMS.getMetric();
+        if ( keyMetric == null ) return false;
+        
+        // Run through remaining sets checking for consistency
+        while ( msIt.hasNext() )
+        {
+            MeasurementSet nextMS = msIt.next();
+            if ( nextMS == null ) return false;
+            
+            Metric nextMetric = nextMS.getMetric();
+            if ( nextMetric == null ) return false;
+            
+            if ( nextMetric.getMetricType().compareTo(keyMetric.getMetricType()) != 0 ) return false;
+            
+            if ( !nextMetric.getUnit().getName().equals(keyMetric.getUnit().getName()) ) return false;
+            
+            if ( !nextMetric.getMetaType().equals(keyMetric.getMetaType()) ) return false;
+            
+            if ( !nextMetric.getMetaContent().equals(keyMetric.getMetaContent()) ) return false;
+        }
+        
+        return true;        
+    }
+    
+    /**
+     * Use this method to combine a number of MeasuementSet instances. This method will
+     * iterate through the sets checking that they are all consistent before then combining
+     * the measurements found therein. Duplicated measurement instances will be discarded but
+     * measurements with the same date stamp will not.
+     * 
+     * @param mSets         - Non-null collection of measurement sets
+     * @return              - Returns a joined set of measurements
+     * @throws Exception    - Throws if input parameter is invalid or measurement sets are inconsistent
+     */
+    public static MeasurementSet combineMeasurementSets( Collection<MeasurementSet> mSets ) throws Exception
+    {
+        MeasurementSet result = null;
+        
+        // Safety
+        if ( mSets == null )     throw new Exception( "Could not combined measurement sets: invalid input" );
+        if ( mSets.isEmpty() )   throw new Exception( "Could not combine measurement sets: zero sets" );
+        if ( mSets.size() == 1 ) return mSets.iterator().next();
+        
+        // Combine if measurement sets are consistent (semantically)
+        if ( areMeasurementSetsConsistent(mSets) )
+        {
+            // First create single super measurement collection
+            HashMap<UUID, Measurement> allMeasurements = new HashMap<>();
+            
+            for ( MeasurementSet ms : mSets )
+                for ( Measurement m : ms.getMeasurements() )
+                    allMeasurements.put( m.getUUID(), m );
+            
+            // Then create (empty) result set
+            result = new MeasurementSet( mSets.iterator().next(), false );
+            
+            // Push in super measurement set
+            result.addMeasurements( allMeasurements.values() );
+        }
+        else throw new Exception( "Could not combine measurement sets: sets inconsistent" );
+        
+        return result;        
+    }
+    
+    public static int getORDINALIndexFromLabel( Metric metric, String label )
+    {
+        int result = -1;
+        
+        if ( metric != null && metric.getMetricType() == MetricType.ORDINAL && 
+             metric.getMetaContent() != null && label != null )
+        {
+            String[] items = metric.getMetaContent().split( "," );
+            
+            int index = 0;
+            for ( String item : items )
+            {
+                if ( item.equals(label) )
+                {
+                    result = index;
+                    break;
+                }
+                ++index;
+            }
+        }
+        
+        return result;
+    }
+    
+    public static String getORDINALLabelFromIndex( Metric metric, float position )
+    {
+        String result = null;
+        
+        // Safety before we get the position
+        if ( metric != null && metric.getMetricType() == MetricType.ORDINAL &&
+             position != Float.NaN && position >= 0.0f )
+        {
+            String[] items = metric.getMetaContent().split( "," );
+            int intPos     = (int) position;
+            
+            if ( items.length >= intPos )
+                result = items[intPos];
+        }
+        
+        return result;        
+    }
+    
+    public static ArrayList<String> getORDINALLabels( Metric metric )
+    {
+        ArrayList<String> result = new ArrayList<>();
+        
+        // Safety
+        if ( metric != null && metric.getMetricType() == MetricType.ORDINAL )
+        {
+            String[] labels = metric.getMetaContent().split( "," );
+            
+            for ( String label : labels )
+                result.add( label );
+        }
+        
+        return result;
+    }
 }

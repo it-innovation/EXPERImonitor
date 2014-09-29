@@ -1,0 +1,64 @@
+<h3>QoE of Participants recorded at the end of the experiment</h3>
+<hr>
+<div class="row">
+    <div class="large-6 columns">
+        <label>Participants</label>
+        <select 
+            ng-change="viz()"
+            ng-model="participantSelection" 
+            ng-options="participant.iri as participant.name for participant in participants">
+            <option value="">All</option>
+        </select>
+    </div>
+    <div class="large-6 columns">
+        <label>Attributes</label>
+        <select 
+            ng-change="viz()"
+            ng-model="attributeSelection" 
+            ng-options="attribute.name as attribute.name for attribute in attributes">
+            <option value="">All</option>
+        </select>
+    </div>
+</div>
+<div id="charts" class="row" ng-init="viz()">
+    <div id="attribBarChart"><svg class="large-6 text-center columns"></svg></div>
+    <div id="attribDonutChart"><svg class="large-6 text-center columns"></svg></div>
+    <div id="allQoEChart"><svg class="large-12 text-center columns"></svg></div>
+</div>
+<div class="row">
+    <div id="selectedParticipants" class="large-2 columns">
+        <h6><strong>{{selectedParticipants.length}}</strong> Participants</h6>
+        <table>
+            <tbody>
+                <tr ng-repeat="participant in selectedParticipants">
+                    <td><a ng-href="#/participants/qoe?iri={{participant.iri | encodeURIComponent}}">{{participant.name}}</a></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div id="selectedAttributes" class="large-10 columns">
+        <h6>Attributes</h6>
+        <table>
+            <thead>
+                <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Metric Type</th>
+                <th>Sample Count</th>
+                <th>Meta Content</th>
+                <th>Meta Type</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr ng-repeat="attribute in attributes">
+                <td>{{attribute.name}}</td>
+                <td>{{attribute.description}}</td>
+                <td>{{attribute.metricType}}</td>
+                <td>{{attribute.sampleCount}}</td>
+                <td>{{attribute.metaContent}}</td>
+                <td>{{attribute.metaType}}</td>
+              </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

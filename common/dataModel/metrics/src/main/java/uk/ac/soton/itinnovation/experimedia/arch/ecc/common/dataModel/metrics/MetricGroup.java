@@ -53,7 +53,7 @@ public class MetricGroup implements Serializable
     public MetricGroup()
     {
         this.uuid = UUID.randomUUID();
-        this.measurementSets = new HashSet<MeasurementSet>();
+        this.measurementSets = new HashSet<>();
     }
     
     /**
@@ -72,7 +72,7 @@ public class MetricGroup implements Serializable
         this.name = mg.getName();
         this.description = mg.getDescription();
         
-        this.measurementSets = new HashSet<MeasurementSet>();
+        this.measurementSets = new HashSet<>();
         if (mg.getMeasurementSets() != null)
         {
             for (MeasurementSet ms : mg.getMeasurementSets())
@@ -97,6 +97,7 @@ public class MetricGroup implements Serializable
         this.metricGeneratorUUID = metricGeneratorUUID;
         this.name = name;
         this.description = description;
+        this.measurementSets = new HashSet<>();
     }
     
     /**
@@ -110,7 +111,11 @@ public class MetricGroup implements Serializable
     public MetricGroup(UUID uuid, UUID metricGeneratorUUID, String name, String description, Set<MeasurementSet> measurementSets)
     {
         this(uuid, metricGeneratorUUID, name, description);
-        this.measurementSets = measurementSets;
+        
+        if ( measurementSets != null)
+            this.measurementSets = measurementSets;
+        else
+            this.measurementSets = new HashSet<>();
     }
     
     /**
@@ -190,7 +195,8 @@ public class MetricGroup implements Serializable
      */
     public void setMeasurementSets(Set<MeasurementSet> measurementSets)
     {
-        this.measurementSets = measurementSets;
+        if ( measurementSets != null )
+            this.measurementSets = measurementSets;
     }
     
     /**

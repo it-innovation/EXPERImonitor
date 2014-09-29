@@ -31,13 +31,11 @@ using System;
 namespace uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics
 {
 
-/**
- * The metric class details the measurement of an attribute (of an entity).
- * 
- * @author Vegard Engen
- */
 public class Metric
 {
+    private string metricMetaType    = "unknown";
+    private string metricMetaContent = "unknown";
+
     /**
      * Default constructor, which sets a random UUID for the object instance.
      */
@@ -94,6 +92,34 @@ public class Metric
         get;
         set;
     }
+
+    public string metaType
+    {
+        get
+        {
+            return metricMetaType;
+        }
+
+        set
+        {
+            if (value != null) metricMetaType = value;
+        }
+    }
+
+    public string metaContent
+    {
+        get
+        {
+            return metricMetaContent;
+        }
+
+        set
+        {
+            if (value != null) metricMetaContent = value;
+        }
+    }
+
+
 }
 
 } // namespace

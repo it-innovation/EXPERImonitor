@@ -36,10 +36,18 @@ public class EccMeasurement {
 
     public EccMeasurement() {
     }
+    
+    public EccMeasurement(EccMeasurement m) {
+        timestamp = m.getTimestamp();
+        value = m.getValue();
+    }
 
     public EccMeasurement(Date timestamp, String value) {
-        this.timestamp = timestamp;
-        this.value = value;
+        
+        if ( timestamp != null && value != null ) {
+            this.timestamp = new Date(timestamp.getTime());
+            this.value = value;
+        }
     }
 
     public Date getTimestamp() {

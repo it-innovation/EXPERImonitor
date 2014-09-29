@@ -1,0 +1,4 @@
+2013-12-20 07:00:00,lwtservice:24000,mem:80,cpu:60
+2013-12-20 09:45:00,lwtservice:11000,mem:40,cpu:50
+2013-12-20 12:00:00,lwtservice:130,mem:15,cpu:55
+2013-12-20 20:00:00,lwtservice:110,mem:10,cpu:45

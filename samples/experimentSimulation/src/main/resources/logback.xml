@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+	<conversionRule conversionWord="colorlevel"
+                    converterClass="fr.norad.logback.prettier.ColorLevelCompositeConverter" />
+    <conversionRule conversionWord="bold"
+                    converterClass="fr.norad.logback.prettier.BoldCompositeConverter" />
+
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<target>System.out</target>
+        <withJansi>true</withJansi>
+		<encoder>
+			<pattern>%blue(%d{HH:mm:ss.SSS}) %colorlevel(%-5level) [%logger{0}:%line] - %m%n</pattern>
+		</encoder>
+	</appender>
+
+	<logger name="package uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experimedia" level="debug"/>
+
+	<root level="DEBUG">
+		<appender-ref ref="STDOUT"/>
+	</root>
+
+</configuration>

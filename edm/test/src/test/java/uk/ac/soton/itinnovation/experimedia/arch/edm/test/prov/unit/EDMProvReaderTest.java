@@ -86,8 +86,14 @@ public class EDMProvReaderTest extends TestCase
 					"using the testrepo.rdf file. The repositoryID should be \"experimedia-junit\".", e);
 			}
         }
-		
-		((EDMProvReaderImpl) reader).getEDMProvStoreWrapper().getPrefixes();
+        
+        EDMProvReaderImpl readerImpl = (EDMProvReaderImpl) reader;
+        
+        // Import PROV namespace into store
+        readerImpl.getEDMProvStoreWrapper().importOntologyToKnowledgeBase( "http://www.w3.org/ns/prov-o#/", 
+                                                                           "http://www.w3.org/ns/prov#", 
+                                                                           "prov", 
+                                                                           EDMProvReaderTest.class );
     }
 	
 	@After

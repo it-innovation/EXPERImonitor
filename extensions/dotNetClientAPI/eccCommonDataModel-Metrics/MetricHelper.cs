@@ -220,8 +220,10 @@ public class MetricHelper
             {
                 foreach (MetricGroup mGrp in mGen.metricGroups)
                 {
-                    foreach (MeasurementSet ms in mGrp.measurementSets)
-                        mSets.Add(ms.msetID, ms);
+                    // Check measurement set set is not null
+                    if ( mGrp.measurementSets != null )
+                        foreach (MeasurementSet ms in mGrp.measurementSets)
+                            mSets.Add(ms.msetID, ms);
                 }
             }
         }

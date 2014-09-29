@@ -94,7 +94,9 @@ CREATE TABLE Metric
 (
    metricUUID uuid NOT NULL, 
    mType text NOT NULL, 
-   unit text, 
+   unit text,
+	 metaType text,
+	 metaContent text,
    CONSTRAINT metricUUID PRIMARY KEY (metricUUID), 
    CONSTRAINT mType FOREIGN KEY (mType) REFERENCES MetricType (name) ON UPDATE NO ACTION ON DELETE NO ACTION
 ) 

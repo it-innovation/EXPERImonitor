@@ -39,7 +39,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-plugin</artifactId>
-                        <version>${ecc.surefire.plugin}</version>
+                        <version>${ecc.surefirereportplugin.version}</version>
                         <configuration>
                             <skipTests>false</skipTests>
                             <includes>
@@ -80,7 +80,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-plugin</artifactId>
-                        <version>${ecc.surefire.plugin}</version>
+                        <version>${ecc.surefirereportplugin.version}</version>
                         <configuration>
                             <skipTests>false</skipTests>
                             <includes>
@@ -176,6 +176,13 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>${ecc.junit.version}</version>
+        </dependency>
+
+		<!--Pretty Logback, see https://github.com/n0rad/logback-prettier-->
+        <dependency>
+            <groupId>fr.norad.logback.prettier</groupId>
+            <artifactId>logback-prettier</artifactId>
+            <version>0.5</version>
         </dependency>
 
     </dependencies>

@@ -118,8 +118,16 @@ public class EDMProvStoreWrapperTest extends TestCase {
 			}
 
 			if (store !=null) {
-				store.disconnect();
-				store = null;
+                
+                try
+                {
+                    store.disconnect();
+                    store = null;
+                }
+                catch ( Exception ex )
+                {
+                    logger.error( "Could not disconnect cleanly: " + ex.getMessage() );
+                }
 			}
 		}
 	}
@@ -139,18 +147,15 @@ public class EDMProvStoreWrapperTest extends TestCase {
 	public void testDeleteRepository() {
 		try {
 			store.deleteRepository(repoID);
+            
+            if (store.repositoryExists(repoID)) {
+                fail("Repository still exists");
+            }
+            
 		} catch (Exception e) {
 			logger.error("Error deleting repository", e);
 			fail("Error deleting repository");
-		}
-		try {
-			if (store.repositoryExists(repoID)) {
-				fail("Repository still exists");
-			}
-		} catch (SesameException e) {
-			fail("Error connecting to store to verify repository has been deleted");
-			logger.error("Error connecting to store to verify repository has been deleted", e);
-		}
+		}    
 	}
 	
 	@Test
@@ -158,22 +163,21 @@ public class EDMProvStoreWrapperTest extends TestCase {
 		String testrepo = "test-" + UUID.randomUUID().toString();
 		try {
 			store.createNewRepository(testrepo, "this is a test repo");
+            
+            if (!store.repositoryExists(testrepo)) {
+                fail("Repository was not created");
+            }
+            
+            try {
+                store.deleteRepository(testrepo);
+            } catch (Exception ex) {
+                logger.error("Error deleting test repository", ex);
+            }
+            
+            
 		} catch (Exception e) {
 			logger.error("Error creating repository", e);
 			fail("Error creating repository");
-		}
-		try {
-			if (!store.repositoryExists(testrepo)) {
-				fail("Repository was not created");
-			}
-		} catch (SesameException e) {
-			fail("Error connecting to store to verify repository has been created");
-			logger.error("Error connecting to store to verify repository has been created", e);
-		}
-		try {
-			store.deleteRepository(testrepo);
-		} catch (Exception ex) {
-			logger.error("Error deleting test repository", ex);
 		}
 	}
 	
@@ -239,6 +243,7 @@ public class EDMProvStoreWrapperTest extends TestCase {
 	public void testQuery() {
 		LinkedList<HashMap<String, String>> result = null;
 		try {
+            store.loadPrefixes();
 			storeTestTriples();
 			String sparql = "SELECT * WHERE { "
 					+ "owl:Test ?p ?o . "

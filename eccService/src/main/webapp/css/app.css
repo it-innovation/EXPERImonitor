@@ -18,6 +18,10 @@ p.details {
     padding: 0 0 3px 12px;
 }
 
+.tableft {
+    padding-left: 30px;
+}
+
 p.sub_details {
     margin: 0;
     padding: 0 0 5px 16px;
@@ -66,4 +70,29 @@ a.removeSelfGraphButton {
 
 a.clientDisconnectButton {
     color: #cf2a0e;
+}
+
+a.removeWidget {
+    position: absolute;
+    top: 8px;
+    right: 15px;
+    font-size: smaller;
+}
+
+a.removeWidget:hover {
+    text-decoration: underline;
+}
+
+a.addToProvenanceExplorer {
+    font-size: smaller;
+    padding-left: 20px;
+}
+
+a.addToProvenanceExplorer:hover {
+    text-decoration: underline;
+}
+
+div.widgetContainer {
+    border: thin dotted #151515;
+    margin-bottom: 15px;
 }

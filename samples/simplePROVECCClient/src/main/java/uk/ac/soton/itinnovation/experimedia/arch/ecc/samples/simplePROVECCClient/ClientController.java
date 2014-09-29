@@ -141,13 +141,13 @@ public class ClientController implements ClientViewListener
                                                    JOptionPane.INFORMATION_MESSAGE );
                 }
                 catch ( Exception ex )
-                { displayError( "Problems sending to ECC", "Could not find PROV agent to send to ECC: " + ex.getMessage() ); }
+                { displayMessage( "Problems sending to ECC", "Could not find PROV agent to send to ECC: " + ex.getMessage() ); }
             }
             else
-              displayError( "Not ready to send", "Please select an Agent, Activity & Entity" ); 
+              displayMessage( "Not ready to send", "Please select an Agent, Activity & Entity" ); 
         }
         else
-          displayError( "Not connected to ECC/monitoring anymore", "Please check connection to ECC" );
+          displayMessage( "Not connected to ECC/monitoring anymore", "Please check connection to ECC" );
     }
 
     // Private methods ---------------------------------------------------------
@@ -193,7 +193,7 @@ public class ClientController implements ClientViewListener
 
         }
         catch ( Exception ex )
-        { displayError( "Could not create PROV Agents", ex.getMessage() ); }
+        { displayMessage( "Could not create PROV Agents", ex.getMessage() ); }
     }
     
     private void createAgentMetrics()
@@ -208,7 +208,7 @@ public class ClientController implements ClientViewListener
             makeAgentMetric( factory.getAgent("Carol") );
         }
         catch ( Exception ex )
-        { displayError( "Could not create metrics for agents: ", ex.getMessage() ); } 
+        { displayMessage( "Could not create metrics for agents: ", ex.getMessage() ); } 
     }
     
     private void makeAgentMetric( EDMAgent agent )
@@ -261,7 +261,7 @@ public class ClientController implements ClientViewListener
             // Push report to ECC
             eccAdapter.pushMetric( eccReport );
         }
-        else displayError( "Could not send metric data", "Could not find metric entity to send ECC" );   
+        else displayMessage( "Could not send metric data", "Could not find metric entity to send ECC" );   
     }
     
     private void sendPROVData( EDMAgent agent )
@@ -299,7 +299,7 @@ public class ClientController implements ClientViewListener
         }
         catch ( Exception ex )
         { ex.printStackTrace();
-        	displayError( "Could not create PROV report", ex.getMessage() ); }   
+        	displayMessage( "Could not create PROV report", ex.getMessage() ); }   
     }
     
     private void logPROVReportSent( EDMProvReport report )
@@ -317,7 +317,7 @@ public class ClientController implements ClientViewListener
         }
     }
 
-    private void displayError( String title, String detail )
+    private void displayMessage( String title, String detail )
     {
         JOptionPane.showMessageDialog( view, detail, title, 
                                        JOptionPane.ERROR_MESSAGE );
@@ -354,7 +354,7 @@ public class ClientController implements ClientViewListener
         }
         else error = "ECC Properties are null";
 
-        if ( error != null ) displayError( "ECC Connection error", error );
+        if ( error != null ) displayMessage( "ECC Connection error", error );
 
         return false;
     }
@@ -382,6 +382,11 @@ public class ClientController implements ClientViewListener
 
             createPROVAgents();
             createAgentMetrics();
+        }
+        else
+        {
+            displayMessage( "Got disconnected from EXPERIMonitor", "Good-bye" );
+            shutdown();
         }
     }
 

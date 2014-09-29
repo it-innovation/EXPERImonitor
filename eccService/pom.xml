@@ -74,6 +74,13 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+				
+				<!-- Metrics analysis -->
+				<dependency>
+					<groupId>org.apache.commons</groupId>
+					<artifactId>commons-math3</artifactId>
+					<version>3.3</version>
+				</dependency>
 
         <!-- ECC API dependencies __________________________________________ -->
         <dependency>

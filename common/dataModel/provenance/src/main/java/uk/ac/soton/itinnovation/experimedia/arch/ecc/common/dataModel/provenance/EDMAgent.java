@@ -35,9 +35,12 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance
 
 public class EDMAgent extends EDMProvBaseElement {
 
-	
 	public EDMAgent(String prefix, String uniqueIdentifier, String label) {
-		super(prefix, uniqueIdentifier, label);
+            this(prefix + uniqueIdentifier, label);
+        }
+        
+	public EDMAgent(String iri, String label) {
+		super(iri, label);
     
 		this.setProvType(PROV_TYPE.ePROV_AGENT);
 		this.addOwlClass(EDMProvBaseElement.prov + "Agent");

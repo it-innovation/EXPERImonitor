@@ -317,7 +317,7 @@ public class MeasurementSet implements Serializable
      * 
      * @return returns true if all measurements were added
      */
-    public boolean addMeasurements( Set<Measurement> measurements )
+    public boolean addMeasurements( Collection<Measurement> measurements )
     {
         if ( measurements == null || measurements.isEmpty() ) return false;
         

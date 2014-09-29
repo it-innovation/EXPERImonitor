@@ -48,7 +48,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.At
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Entity;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Measurement;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricCalculator;
+import uk.ac.soton.itinnovation.ecc.service.utils.MetricCalculator;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGroup;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricHelper;

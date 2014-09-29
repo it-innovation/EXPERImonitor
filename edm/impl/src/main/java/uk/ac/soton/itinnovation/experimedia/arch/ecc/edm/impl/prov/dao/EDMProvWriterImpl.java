@@ -50,7 +50,16 @@ public class EDMProvWriterImpl implements IEDMProvWriter {
 
 		connect();
     }
-
+    
+    public EDMProvWriterImpl( EDMProvStoreWrapper psw ) {
+        
+        if (psw == null) throw new NullPointerException("Could not construct prov writer impl with null store wrapper");
+        
+        logger = LoggerFactory.getLogger(getClass());
+        props = psw.getStoreProperties();
+        edmProvStoreWrapper = psw;
+    }
+	
 	private void connect() throws SesameException {
 		try {
             edmProvStoreWrapper = new EDMProvStoreWrapper(props);
@@ -64,7 +73,16 @@ public class EDMProvWriterImpl implements IEDMProvWriter {
 	public void disconnect() {
 		if (edmProvStoreWrapper != null && edmProvStoreWrapper.isConnected()) {
 			logger.debug("EDMProvStoreWrapper has still got an open connection - disconnecting now");
-			edmProvStoreWrapper.disconnect();
+			
+            try
+            {
+                edmProvStoreWrapper.disconnect();
+            }
+            catch ( Exception ex )
+            {
+                logger.error( "Had problems trying to disconnect: " + ex.getMessage() );
+            }
+            
 		} else {
 			logger.debug("EDMProvStoreWrapper is already disconnected");
 		}
@@ -99,7 +117,15 @@ public class EDMProvWriterImpl implements IEDMProvWriter {
 	@Override
 	public void clearRepository(String repositoryID) {
 		logger.debug("Clearing repository " + repositoryID + " by deleting all triples");
-		edmProvStoreWrapper.clearRepository(repositoryID);
+		
+        try
+        {
+            edmProvStoreWrapper.clearRepository(repositoryID);
+        }
+        catch ( Exception ex )
+        {
+            logger.error( "Had problems trying to clear repository: " + ex.getMessage() );
+        }
 	}
 
 	public EDMProvStoreWrapper getEDMProvStoreWrapper() {

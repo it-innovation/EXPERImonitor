@@ -38,7 +38,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance
 /**
  * The EDMProvFactory is a singleton factory which helps create provenance.
  */
-public final class EDMProvFactory {
+public class EDMProvFactory {
 
 	public static final String FALLBACK_PREFIX = "experimedia";
 	public static final String FALLBACK_URI = "http://it-innovation.soton.ac.uk/ontologies/experimedia#";
@@ -50,7 +50,7 @@ public final class EDMProvFactory {
 	private HashMap<UUID, EDMTriple> currentTriples;
 	private HashMap<UUID, EDMTriple> sentTriples;
 
-	private EDMProvFactory() {}
+	private EDMProvFactory(String prefix, String baseURI) {}
 
 	/**
 	 * Returns a factory with either the prefix/baseURI it already has or the fallback prefix/baseURI.
@@ -135,10 +135,23 @@ public final class EDMProvFactory {
 	 * @throws AlreadyBoundException
 	 */
 	public EDMAgent createAgent(String uniqueIdentifier, String label) throws DatatypeConfigurationException, AlreadyBoundException {
-		return (EDMAgent) this.createElement(uniqueIdentifier, label, PROV_TYPE.ePROV_AGENT);
+		return (EDMAgent) createElement(uniqueIdentifier, label, PROV_TYPE.ePROV_AGENT);
 	}
 
 	/**
+	 * Create a new Agent
+	 *
+	 * @param iri the element's IRI
+	 * @param label the human readable label (optional)
+	 * @return the agent
+	 * @throws DatatypeConfigurationException
+	 * @throws AlreadyBoundException
+	 */
+	public EDMAgent createAgentWithIRI(String iri, String label) throws DatatypeConfigurationException, AlreadyBoundException {
+		return (EDMAgent) createElementWithIRI(iri, label, PROV_TYPE.ePROV_AGENT);
+	}
+
+        /**
 	 * Create a new Activity
 	 *
 	 * @param uniqueIdentifier the local name
@@ -149,6 +162,19 @@ public final class EDMProvFactory {
 	 */
 	public EDMActivity createActivity(String uniqueIdentifier, String label) throws DatatypeConfigurationException, AlreadyBoundException {
 		return (EDMActivity) this.createElement(uniqueIdentifier, label, PROV_TYPE.ePROV_ACTIVITY);
+	}
+
+        /**
+	 * Create a new Activity
+	 *
+	 * @param iri the element's IRI
+	 * @param label the human readable label (optional)
+	 * @return the activity
+	 * @throws DatatypeConfigurationException
+	 * @throws AlreadyBoundException
+	 */
+	public EDMActivity createActivityWithIRI(String iri, String label) throws DatatypeConfigurationException, AlreadyBoundException {
+		return (EDMActivity) this.createElementWithIRI(iri, label, PROV_TYPE.ePROV_ACTIVITY);
 	}
 
 	/**
@@ -165,6 +191,19 @@ public final class EDMProvFactory {
 	}
 
 	/**
+	 * Create a new Entity
+	 *
+	 * @param iri the element's IRI
+	 * @param label the human readable label (optional)
+	 * @return the entity
+	 * @throws DatatypeConfigurationException
+	 * @throws AlreadyBoundException
+	 */
+	public EDMEntity createEntityWithIRI(String iri, String label) throws DatatypeConfigurationException, AlreadyBoundException {
+		return (EDMEntity) this.createElementWithIRI(iri, label, PROV_TYPE.ePROV_ENTITY);
+	}
+
+	/**
 	 * Get an agent (existing) identified by its unique ID from the factory
 	 *
 	 * @param uniqueIdentifier the local name
@@ -173,10 +212,22 @@ public final class EDMProvFactory {
 	 * @throws DatatypeConfigurationException
 	 */
 	public EDMAgent getAgent(String uniqueIdentifier) throws DataFormatException, DatatypeConfigurationException {
-		return (EDMAgent) this.getElement(EDMProvDataContainer.baseURI + uniqueIdentifier);
+		return (EDMAgent) this.getElementByIRI(EDMProvDataContainer.baseURI + uniqueIdentifier);
 	}
 
 	/**
+	 * Get an agent (existing) identified by its IRI
+	 *
+	 * @param iri the IRI
+	 * @return the agent
+	 * @throws DataFormatException
+	 * @throws DatatypeConfigurationException
+	 */
+	public EDMAgent getAgentByIRI(String iri) throws DataFormatException, DatatypeConfigurationException {
+		return (EDMAgent) this.getElementByIRI(iri);
+	}
+        
+        /**
 	 * Get an activity (existing) identified by its unique ID from the factory
 	 *
 	 * @param uniqueIdentifier the local name
@@ -185,7 +236,19 @@ public final class EDMProvFactory {
 	 * @throws DatatypeConfigurationException
 	 */
 	public EDMActivity getActivity(String uniqueIdentifier) throws DataFormatException, DatatypeConfigurationException {
-		return (EDMActivity) this.getElement(EDMProvDataContainer.baseURI + uniqueIdentifier);
+		return (EDMActivity) this.getElementByIRI(EDMProvDataContainer.baseURI + uniqueIdentifier);
+	}
+
+        /**
+	 * Get an activity (existing) identified by its IRI
+	 *
+	 * @param iri the IRI
+	 * @return the activity
+	 * @throws DataFormatException
+	 * @throws DatatypeConfigurationException
+	 */
+	public EDMActivity getActivitybyIRI(String iri) throws DataFormatException, DatatypeConfigurationException {
+		return (EDMActivity) this.getElementByIRI(iri);
 	}
 
 	/**
@@ -197,10 +260,22 @@ public final class EDMProvFactory {
 	 * @throws DatatypeConfigurationException
 	 */
 	public EDMEntity getEntity(String uniqueIdentifier) throws DataFormatException, DatatypeConfigurationException {
-		return (EDMEntity) this.getElement(EDMProvDataContainer.baseURI + uniqueIdentifier);
+		return (EDMEntity) this.getElementByIRI(EDMProvDataContainer.baseURI + uniqueIdentifier);
 	}
 
-	protected EDMProvBaseElement getElement(String iri) throws DatatypeConfigurationException, DataFormatException {
+        /**
+	 * Get an entity (existing) identified by its IRI
+	 *
+	 * @param iri the IRI
+	 * @return the entity
+	 * @throws DataFormatException
+	 * @throws DatatypeConfigurationException
+	 */
+	public EDMEntity getEntityByIRI(String iri) throws DataFormatException, DatatypeConfigurationException {
+		return (EDMEntity) this.getElementByIRI(iri);
+	}
+        
+	protected EDMProvBaseElement getElementByIRI(String iri) throws DatatypeConfigurationException, DataFormatException {
 		//check if element exists in factory
 		if (container.allProvElements.containsKey(iri)) {
 			return container.allProvElements.get(iri);
@@ -209,31 +284,33 @@ public final class EDMProvFactory {
 		}
 	}
 
-	protected EDMProvBaseElement createElement(String uniqueIdentifier, String label, EDMProvBaseElement.PROV_TYPE type) throws DatatypeConfigurationException, AlreadyBoundException {
-
+        protected EDMProvBaseElement createElement(String uniqueIdentifier, String label, EDMProvBaseElement.PROV_TYPE type) throws DatatypeConfigurationException, AlreadyBoundException {
+            return createElementWithIRI(EDMProvDataContainer.baseURI + uniqueIdentifier, label, type);
+        }
+        
+        protected EDMProvBaseElement createElementWithIRI(String iri, String label, EDMProvBaseElement.PROV_TYPE type) throws DatatypeConfigurationException, AlreadyBoundException {
 		//check whether it exists
-		if (container.allProvElements.containsKey(EDMProvDataContainer.baseURI + uniqueIdentifier)) {
-			throw new AlreadyBoundException("An element with the IRI \"" + EDMProvDataContainer.baseURI
-					+ uniqueIdentifier + "\" already exists.");
+		if (container.allProvElements.containsKey(iri)) {
+			throw new AlreadyBoundException("An element with the IRI \"" + iri + "\" already exists.");
 		}
 
 		EDMProvBaseElement element = null;
 
 		switch (type) {
 			case ePROV_AGENT:
-				element = new EDMAgent(EDMProvDataContainer.baseURI, uniqueIdentifier, label);
+				element = new EDMAgent(iri, label);
 				break;
 			case ePROV_ACTIVITY:
-				element = new EDMActivity(EDMProvDataContainer.baseURI, uniqueIdentifier, label);
+				element = new EDMActivity(iri, label);
 				break;
 			case ePROV_ENTITY:
-				element = new EDMEntity(EDMProvDataContainer.baseURI, uniqueIdentifier, label);
+				element = new EDMEntity(iri, label);
 				break;
 			default:
 				throw new DatatypeConfigurationException(type + " is not a correct provenance type. Please use ePROV_AGENT, ePROV_ACTIVITY or ePROV_ENTITY.");
 		}
 
-		if (element!=null) {
+		if (element != null) {
 			container.allProvElements.put(element.getIri(), element);
 
 			for (Entry<UUID, EDMTriple> e: element.getTriples().entrySet()) {
@@ -273,8 +350,10 @@ public final class EDMProvFactory {
 
 		EDMProvReport report = new EDMProvReport( currentTriples );
 
+		//System.out.println("Current: " + currentTriples.size() + ", Sent: " + sentTriples.size());
 		sentTriples.putAll(currentTriples);
 		currentTriples.clear();
+		//System.out.println("Current: " + currentTriples.size() + ", Sent: " + sentTriples.size());
 
 		return report;
 	}
@@ -314,19 +393,19 @@ public final class EDMProvFactory {
 
 			//first run: identify prov elements
 			for (Entry<UUID, EDMTriple> e: element.entrySet()) {
-				if (e.getValue().getType().equals(TRIPLE_TYPE.CLASS_ASSERTION)
-				//look at prov classes only
-				&& e.getValue().getObject().startsWith(container.namespaces.get("prov"))) {
+				if (e.getValue().getType().equals(TRIPLE_TYPE.CLASS_ASSERTION)) {
+					//look at prov classes only
+					if ( e.getValue().getObject().startsWith(container.namespaces.get("prov"))) {
+						//get local name
+						String localName = EDMTriple.splitURI(e.getValue().getSubject(), 1);
 
-					//get local name
-					String localName = EDMTriple.splitURI(e.getValue().getSubject(), 1);
-
-					if (e.getValue().getObject().endsWith("#Agent")) {
-						factory.getAgent(localName);
-					} else if (e.getValue().getObject().endsWith("#Entity")) {
-						factory.getEntity(localName);
-					} else if (e.getValue().getObject().endsWith("#Activity")) {
-						factory.getActivity(localName);
+						if (e.getValue().getObject().endsWith("#Agent")) {
+							factory.getAgent(localName);
+						} else if (e.getValue().getObject().endsWith("#Entity")) {
+							factory.getEntity(localName);
+						} else if (e.getValue().getObject().endsWith("#Activity")) {
+							factory.getActivity(localName);
+						}
 					}
 				}
 			}

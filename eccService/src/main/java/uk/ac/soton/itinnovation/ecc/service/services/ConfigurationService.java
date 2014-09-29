@@ -85,6 +85,9 @@ public class ConfigurationService {
 
     @Autowired
     DataService dataService;
+    
+    @Autowired
+    ExplorerService explorerService;
 
     @Autowired
     LocalConfiguration localConfiguration;
@@ -160,18 +163,17 @@ public class ConfigurationService {
      * @return true if all service started successfully.
      */
     public boolean startServices() {
-        if (startExperimentService()) {
-            if (startDataService()) {
-                servicesStarted = true;
-                return true;
-            } else {
-                servicesStarted = false;
-                return false;
-            }
-        } else {
-            servicesStarted = false;
-            return false;
-        }
+        
+        boolean result = false;
+        
+        if (startExperimentService())
+            if (startDataService())
+                if (startExplorerService())
+                    result = true;
+        
+        servicesStarted = result;
+        
+        return result;
     }
 
     /**
@@ -270,6 +272,27 @@ public class ConfigurationService {
                     return false;
                 } else {
                     logger.debug("Successfully started data service");
+                    return true;
+                }
+            }
+        }
+    }
+    
+    public boolean startExplorerService() {
+        if (!initialised) {
+            logger.error("Failed to start explorer service: configuration service not initialised");
+            return false;
+        } else {
+            if (!configurationSet) {
+                logger.error("Failed to start data service: configuration not selected");
+                return false;
+            } else {
+                logger.info("Starting explorer service");
+                if (!explorerService.start(selectedEccConfiguration.getDatabaseConfig())) {
+                    logger.error("Failed to start explorer service");
+                    return false;
+                } else {
+                    logger.info("Successfully started explorer service");
                     return true;
                 }
             }

@@ -76,7 +76,16 @@ public final class EDMProvReaderImpl implements IEDMProvReader {
 	public void disconnect() {
 		if (edmProvStoreWrapper != null && edmProvStoreWrapper.isConnected()) {
 			logger.warn("EDMProvStoreWrapper has still got an open connection - disconnecting now");
-			edmProvStoreWrapper.disconnect();
+			
+            try
+            {
+                edmProvStoreWrapper.disconnect();
+            }
+            catch ( Exception ex )
+            {
+                logger.error( "Had problems trying to disconnect: " + ex.getMessage() );
+            }
+            
 		} else {
 			logger.debug("EDMProvStoreWrapper is already disconnected");
 		}

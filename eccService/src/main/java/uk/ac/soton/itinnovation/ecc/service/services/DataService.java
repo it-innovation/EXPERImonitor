@@ -50,7 +50,7 @@ import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.At
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Measurement;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MeasurementSet;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Metric;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricCalculator;
+import uk.ac.soton.itinnovation.ecc.service.utils.MetricCalculator;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricGenerator;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.MetricHelper;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Report;
@@ -74,6 +74,7 @@ import uk.ac.soton.itinnovation.ecc.service.domain.EccMeasurementSet;
 import uk.ac.soton.itinnovation.ecc.service.utils.EccAttributesComparator;
 import uk.ac.soton.itinnovation.ecc.service.utils.EccEntitiesComparator;
 import uk.ac.soton.itinnovation.ecc.service.utils.EccMeasurementsComparator;
+import uk.ac.soton.itinnovation.experimedia.arch.ecc.em.impl.dataModelEx.EMClientEx;
 
 /**
  * Provides access to data in the database.
@@ -583,10 +584,15 @@ public class DataService {
 
         try {
             Set<MeasurementSet> msetInfo = getAllEmptyMeasurementSetsForAttribute(UUID.fromString(experimentId), a);
-            MeasurementSet ms = msetInfo.iterator().next();
-            for (Measurement m : expReportDAO.getReportForAllMeasurements(ms.getID(), true).getMeasurementSet().getMeasurements()) {
-                data.add(new EccMeasurement(m.getTimeStamp(), m.getValue()));
-            }
+			
+			for ( MeasurementSet ms : msetInfo ) {
+				Report rep = expReportDAO.getReportForAllMeasurements(ms.getID(), true);		
+				MeasurementSet repMS = rep.getMeasurementSet();
+				
+				for (Measurement m: repMS.getMeasurements())
+					data.add(new EccMeasurement(m.getTimeStamp(), m.getValue()));
+				
+				}
         } catch (Exception e) {
             if (e instanceof NoDataException) {
                 logger.debug("No data found for attribute [" + attributeId + "] in experiment [" + experimentId + "]");
@@ -616,18 +622,19 @@ public class DataService {
      *
      * @param attributeId the attribute.
      * @param since
+     * @param limit
      * @return last 10 measurements for the attribute.
      */
     public EccMeasurementSet getTailMeasurementsForAttribute(String attributeId, Long since, int limit) {
         EccMeasurementSet result = new EccMeasurementSet();
-        ArrayList<EccMeasurement> data = new ArrayList<EccMeasurement>();
+        ArrayList<EccMeasurement> data = new ArrayList<>();
         result.setData(data);
 
         Experiment currentExperiment = experimentService.getActiveExperiment();
 
         if (currentExperiment != null) {
             try {
-                Attribute attr = MetricHelper.getAttributeFromID(UUID.fromString(attributeId), metricGenDAO.getMetricGeneratorsForExperiment(currentExperiment.getUUID(), true));
+                Attribute attr = MetricHelper.getAttributeFromGenerators(UUID.fromString(attributeId), metricGenDAO.getMetricGeneratorsForExperiment(currentExperiment.getUUID(), true));
                 Set<MeasurementSet> measurementSets = getTailMeasurementSetsForAttribute(currentExperiment.getUUID(), attr, new Date(since), limit);
                 Iterator<MeasurementSet> it = measurementSets.iterator();
                 MeasurementSet ms;
@@ -696,7 +703,7 @@ public class DataService {
 
         if (currentExperiment != null) {
             try {
-                Attribute attr = MetricHelper.getAttributeFromID(UUID.fromString(attributeId), metricGenDAO.getMetricGeneratorsForExperiment(currentExperiment.getUUID(), true));
+                Attribute attr = MetricHelper.getAttributeFromGenerators(UUID.fromString(attributeId), metricGenDAO.getMetricGeneratorsForExperiment(currentExperiment.getUUID(), true));
                 Set<MeasurementSet> measurementSets = getSinceMeasurementSetsForAttribute(currentExperiment.getUUID(), attr, new Date(since), limit);
                 Iterator<MeasurementSet> it = measurementSets.iterator();
                 MeasurementSet ms;
@@ -1053,7 +1060,7 @@ public class DataService {
         if (started && experimentService != null) {
             if (experimentService.isExperimentInProgress()) {
 
-                Set<EMClient> currClients = experimentService.getKnownClients();
+                Set<EMClient> currClients = experimentService.getAllKnownClients();
 
                 for (EMClient client : currClients) {
                     EccClient ec = new EccClient(client.getID().toString(),
@@ -1133,22 +1140,23 @@ public class DataService {
 
                 if (targetID != null) {
 
-                    Set<EMClient> currClients = experimentService.getKnownClients();
+                    Set<EMClient> currClients = experimentService.getAllKnownClients();
 
                     for (EMClient client : currClients) {
+                        
+                        // Use extended client type to get all metric metric generators
+                        EMClientEx clientEx = (EMClientEx) client;
 
-                        if (client.getID().equals(targetID)) {
+                        if (clientEx.getID().equals(targetID)) {
+							
+							for (Entity entity : clientEx.getCopyOfUniqueHistoricEntities()) {
 
-                            for (MetricGenerator mg : client.getCopyOfMetricGenerators()) {
-                                for (Entity entity : mg.getEntities()) {
+								EccEntity ent = toEccEntity(entity, withAttributes);
 
-                                    EccEntity ent = toEccEntity(entity, withAttributes);
-
-                                    if (ent != null) {
-                                        clientEntities.add(ent);
-                                    }
-                                }
-                            }
+								if (ent != null) {
+									clientEntities.add(ent);
+								}
+							}
                         }
                     }
                 } else {

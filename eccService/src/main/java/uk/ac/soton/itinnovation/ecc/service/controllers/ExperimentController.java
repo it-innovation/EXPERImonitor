@@ -225,8 +225,14 @@ public class ExperimentController {
     @ResponseBody
     public ArrayList<EccClient> getClients() {
         ArrayList<EccClient> result = new ArrayList<EccClient>();
-        for (EMClient c : experimentService.getKnownClients()) {
-            result.add(new EccClient(c.getID().toString(), c.getName(), c.isConnected()));
+        
+        for (EMClient c : experimentService.getAllKnownClients()) {
+			
+			// Make sure client is connected (and not in the process of 
+			// re-registering or disconnecting)
+			boolean connected = (c.isConnected() && !c.isReRegistering() && !c.isDisconnecting());
+			
+			result.add(new EccClient(c.getID().toString(), c.getName(), connected));
         }
         logger.debug("Returning known clients (" + result.size() + ")");
         if (result.size() > 0) {

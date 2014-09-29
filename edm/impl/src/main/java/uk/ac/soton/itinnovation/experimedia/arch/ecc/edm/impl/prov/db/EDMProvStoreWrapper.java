@@ -71,20 +71,9 @@ public class EDMProvStoreWrapper extends RemoteSesameConnector {
 			}
 		}
 		try {
-			super.setNamespacesFromRepository(props.getProperty("owlim.repositoryID"));
+			super.updateRepoContextNamespacesFromStore(props.getProperty("owlim.repositoryID"));
 		} catch (SesameException e) {
 			logger.warn("Could not set namespaces from repository", e);
-		}
-	}
-
-	public final boolean repositoryExists(String repositoryID) throws SesameException {
-		try {
-			getRepository(repositoryID);
-			return true;
-		} catch (NoSuchRepositoryException e) {
-			return false;
-		} catch (SesameException e) {
-			throw new SesameException("Not connected to store", e);
 		}
 	}
 
@@ -189,18 +178,25 @@ public class EDMProvStoreWrapper extends RemoteSesameConnector {
 	}
 
 	public HashMap<String, HashMap<String, String>> getRepositoryNamespaces() {
-		return super.repositoryNamespaces;
+		
+        return getAllCachedRepositoryNamespaces();
 	}
 
 	public void setRepositoryNamespaces(HashMap<String, HashMap<String, String>> ns) {
 		//TODO: filter out standard namespace (":"), otherwise it would be overwritten with every ontology import (necessary?)
 		//ns.get(props.getProperty("owlim.repositoryID")).remove(""); => doesn't work
-		super.repositoryNamespaces = ns;
-		this.loadPrefixes();
+		
+        setCachedRepositoryNamespaces( ns );
+		
+        this.loadPrefixes();
 	}
 
 	public String getPrefixes() {
 		return prefixes;
 	}
-
+    
+    public Properties getStoreProperties() {
+        return props;
+    }
+	
 }
