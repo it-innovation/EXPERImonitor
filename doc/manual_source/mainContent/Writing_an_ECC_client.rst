@@ -1,74 +1,105 @@
+Introduction
+============
+In this part of the documentation, we provide you with a technical guide on how to write software using the ECC API. This section is primarily intended for software engineers - a higher level introduction to the ECC can be found at the beginning of this document.
+
+Here we present:
+
+* Key concepts for the ECC client writer
+* The basic architectural pattern for ECC clients
+* An overview of ECC API classes
+
+In the later section ('Advanced ECC client programming') we explore some of the more advanced aspects of ECC client writing including guidelines for ECC integration and an introduction to generating Provenance based experimental data.
+
 Writing an ECC client
 =====================
+EXPERIMEDIA’s baseline technologies provide the technologist and experimenter a set of FMI technologies for integration within both the *content* and *experiment* life-cycles. From a purely experimental point of view, the experimenter will have access to a number of metrics already available for use from the baseline components themselves. For a list of these metrics, see section 'Baseline Metric Services'.
 
-EXPERIMEDIA’s baseline technologies provide the technologist and experimenter a set of FMI technologies for integration within both
-the
-*content*
-and
-*experiment*
-lifecycles. From a purely experimental point of view, the experimenter will have access to
-a number of metrics already available for use from the baseline components
-themselves.
-For a list
-of these metrics, see section
-.
-It is anticipated that additional metrics, based on observations of the behaviours of the new technologies brought to the EXPERIMEDIA baseline (or users associated with their use), will also need to be captured.
-In the follow sections, we will explore how an ECC client can be developed to communicate metrics during the experimental process described in section
-.
-In the following sections, we look at a general monitoring pattern suggested for ECC client writers; the principal (Java
-) classes that are used by a client;
-a review of two sample clients provided in the ECC API; how to test a client; and finally a review of the indicative sample code.
+It is anticipated that additional metrics, based on observations of the behaviours of the new technologies brought to the EXPERIMEDIA baseline (or users associated with their use), will also need to be captured. In the following sections, we will explore how an ECC client can be developed to communicate metrics during the experimental process.
+
+Key ECC client concepts
+-----------------------
+When setting out to write an ECC client there a number of high-level, key concepts that you need to be familiar with before development begins.
+
+1. Connecting to the ECC using unique identifiers
+
+2. The ECC metric model
+
+3. Pushing and pulling metric data
+
+
+Connecting to the ECC using unique identifiers
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The ECC API makes extensive use of unique identifiers (referred to as UUIDs or GUIDs). Before any other kind of communication can happen between the ECC and an ECC client, the client must first try connecting to the ECC (via RabbitMQ). In order to do so, the client minimally requires:
+
+1. The RabbitMQ server IP, port number and authentication (username/password)
+2. A UUID that identifies ECC service deployment
+3. A UUID that identifies the client (software process) to the ECC service
+
+It is typical that the information relating to [1] and [2] above will remain constant throughout the lifetime of an ECC based experimental project. The UUID used by the client is up to the client writer: you may wish to re-use a single UUID or generate a new one each time your client connects to the ECC. Below is a summary of the advantages and disadvantages of both approaches:
+
++-------------------------------+------------------------------------------------------------------------+---------------------------------------------------------------------+
+| Connect strategy              | Advantages                                                             | Disadvantages                                                       |
+|-------------------------------+------------------------------------------------------------------------+---------------------------------------------------------------------+
+| Connect client with same UUID | Status of specific process instance always known to the experimenter   | Client ID & model must be persisted for re-use if client restarted  |
+|                               | Just re-send existing metric model when reconnecting to the ECC        | New metric model needed for new experiment anyway                   |          
+|                               | Just one metric model generated per experiment (data analysis simpler) |                                                                     |
+|-------------------------------+------------------------------------------------------------------------+---------------------------------------------------------------------+
+| Connect client with new UUID  | No need to persist client ID & model in event of a client re-start     | Duplicated entities in experiment data (data analysis more complex) |
++-------------------------------+------------------------------------------------------------------------+---------------------------------------------------------------------+
+
+For further discussion on this topic, see the 'disconnection/re-connection strategies' section in this document.
+
+The ECC metric model
+~~~~~~~~~~~~~~~~~~~~
+Central to an experiment is the experimental metric model: a collection of observable entities ('things' that have attributes describing aspects of them in some way). The ECC metric model separates the specification of the things we wish to observe from the measurement units and raw data used to specify an observation. This allows experimenters to attach multiple data sets to the same observable phenomenon in a variety of ways. For example, the colour of the surface of an object could be quantitatively measured (simplistically) as the reflected wave length of light in nanometres, say 475nm, or qualitatively as the nominal value 'blue'. In addition to this, metric models can also be potentially shared between clients, meaning a super set of observations can be made from the aggregation of multiple data sets. The ECC metric model is explored with a simple example elsewhere in this document.
+
+An ECC client creates a metric model to describe what it is observing during an experiment. This model is sent to the ECC service, which allows it to recognize and store (in a consistent way) the metric data sent by multiple clients as well providing the experimenter some fine-grained control over the data-flow of experimental data at run-time (see the 'More advanced ECC clients' section for further information). Almost all the components of the ECC metric model are uniquely identified using UUIDS: this means that if you wish to re-use (or share) the same metric model during an experiment, you must ensure that this model remains consistent - see the 'disconnection/re-connection strategies' for a further discussion of this.
+
+Pushing and pulling metric data
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+At run-time, clients can elect to either PUSH metric data to the ECC or allow the ECC to query them (by PULLing) for metric data periodically. As has been already stated, ECC clients are connected to the ECC service via an Internet connection which may be discontinuous. The ECC API will throw exceptions in any case where a client attempts to send data to the ECC and network connectivity is no longer available. However, be aware that the ECC API currently does not actively monitor network connectivity on the client's behalf: if the client is waiting for its next PULL request, it may do so indefinitely if a network connection is no longer available.
+
+Below is a summary of the advantages and disadvantages of both PUSH and PULL strategies:
+
++-------------------------------+------------------------------------------------------------------------+---------------------------------------------------------------------+
+| Send data strategy            | Advantages                                                             | Disadvantages                                                       |
+|-------------------------------+------------------------------------------------------------------------+---------------------------------------------------------------------+
+| Pushing client                | Allows client to send metric data on an ad-hoc basis                   | Periodic data pushing must be scheduled by the client itself        |
+|                               | Exceptions immediately raised if client network connection lost        |                                                                     |        
+|-------------------------------+------------------------------------------------------------------------+---------------------------------------------------------------------+
+| Pulling client                | Regular sampling of measurements managed by the ECC                    | Client network connection loss may not be raised as an exception    |
+|                               | Finer grained control over sampling part of ECC API                    |                                                                     |
++-------------------------------+------------------------------------------------------------------------+---------------------------------------------------------------------+
+
+Some examples for selecting an appropriate integration strategy is discussed in more detail in the section 'ECC Integration pattern guidelines'.
 
 Basic monitoring pattern
 ------------------------
-
+In this section, we look at a general monitoring pattern suggested for ECC client writers; the principal (Java) classes that are used by a client; a review of two sample clients provided in the ECC API; how to test a client; and finally a review of the indicative sample code.
 
 |image20_png|
 
-Figure
-9
+Figure 9
 : Client/ECC high-level monitoring pattern
 
-The basic monitoring pattern recommended for client writers is illustrated in
-.
-Here, we see the ‘Headless client’ (a client with no user interface) connected to the ECC (and its dashboard) via a RabbitMQ server.
-This client uses the EMInterfaceAdapter class (see
-) to help handle the messages passing executed during the experimental phases.
-Its controller responds to the essential requests for information via the adapter and, during
-*Live Monitoring*
-and
-*Post Reporting*
-phases, uses an instance of the EDMAgent to help manage its metric data.
-Meanwhile, the ECC handles in-coming and out-going messages via the
-*Experiment Monitor*
-(EM) sub-component; stores all metric data it receives from the client using its Experiment Data management (EDM) sub-component; and presents the experimental process to the user via the dashboard view.
+The basic monitoring pattern recommended for client writers is illustrated in the figure above. Here, we see the ‘Headless client’ (a client with no user interface) connected to the ECC (and its dashboard) via a RabbitMQ server. This client uses the EMInterfaceAdapter class to help handle the messages passing executed during the experimental phases. Its controller responds to the essential requests for information via the adapter and, during *Live Monitoring* and *Post Reporting* phases, uses an instance of the EDMAgent to help manage its metric data. Meanwhile, the ECC handles in-coming and out-going messages via the *Experiment Monitor* (EM) sub-component; stores all metric data it receives from the client using its Experiment Data management (EDM) sub-component; and presents the experimental process to the user via the dashboard view.
 
 |image21_png|
 
-Figure
-10
+Figure 10
 : Client writing classes overview
 
-Client writers are likely to encounter
-many, or all, of the classes presented in
-– relevant ECC API packages are presented on the left and centre; example client code on the right.
-Each client will use the factory classes to create ECC interface classes that provide access to the monitoring protocol classes (within EM) and the experiment data management classes (EDM).
-Common data classes shared by all scopes illustrated above provide the fundamental data types to be exchanged and populated during an experimental process.
-The ‘
-*Basic ECC container*
-’ sample is a desktop testing for early development phases that provides ‘bare bones’ ECC server behaviour (it still requires a RabbitMQ server to be installed) and a means by which basic communication can be tested.
-For more information on the use of this tool, see technote ‘
-*T05 ECC sample notes V1.0*
-’ packaged within the API.
-Software engineers should review these classes and their use through reading the JavaDoc provided in the ECC API.
-The bundled example clients (‘*Basic ECC Client*’ and ‘*Headless Client*’) are described in more detail below.
+Client writers are likely to encounter many, or all, of the classes presented here – relevant ECC API packages are presented on the left and centre; example client code on the right. Each client will use the factory classes to create ECC interface classes that provide access to the monitoring protocol classes (within EM) and the experiment data management classes (EDM).
+
+Common data classes shared by all scopes illustrated above provide the fundamental data types to be exchanged and populated during an experimental process. The ‘*Basic ECC container*’ sample is a desktop testing for early development phases that provides ‘bare bones’ ECC server behaviour (it still requires a RabbitMQ server to be installed) and a means by which basic communication can be tested. For more information on the use of this tool, see technote ‘*T05 ECC sample notes V1.0*’ packaged within the API.
+
+Software engineers should review these classes and their use through reading the JavaDoc provided in the ECC API. The bundled example clients (‘*Basic ECC Client*’ and ‘*Headless Client*’) are described in more detail below.
+
 
 ECC example clients
 -------------------
 
-It is relatively simple to start writing your own ECC client.
-Interested developers should first look at one or both of the
-following sample client projects:
+It is relatively simple to start writing your own ECC client. Interested developers should first look at one or both of the following sample client projects:
 
 +----------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | **Client**           | **Description**                                                                                                                                                                                                                         |
@@ -119,15 +150,10 @@ A high-level class view of the client code samples (both ‘basic’ and ‘head
 
 |image22_png|
 
-Figure
-11
+Figure 11
 : Client class interactions for sample code
 
-As indicated in
-, both client samples share the use of adapter classes (a legacy class adapter is also provided in the shared package, but this is now deprecated). An MVC architecture is applied in the
-*Basic ECC Client*
-; the headless client does not require this structuring.
-The ‘*tools*’ sub-package demonstrates how individual classes can be used to encapsulate actual measurement behaviour which can be abstracted scheduled as required.
+As indicated in the figure above, both client samples share the use of adapter classes (a legacy class adapter is also provided in the shared package, but this is now deprecated). An MVC architecture is applied in the *Basic ECC Client*; the headless client does not require this structuring. The ‘*tools*’ sub-package demonstrates how individual classes can be used to encapsulate actual measurement behaviour which can be abstracted scheduled as required.
 
 Class roles
 ~~~~~~~~~~~
@@ -137,176 +163,77 @@ The roles of each class in the client sample code are as follows:
 ECCClientContainer (basic)/EntryPoint (headless) classes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Both classes simple act as the entry point for the client application. In addition to this, the ‘headless’ entry point class demonstrates how property files can be used to set up connection to the ECC and create a local
-*EDMAgent*
-, see section
-for more information.
+Both classes simple act as the entry point for the client application. In addition to this, the ‘headless’ entry point class demonstrates how property files can be used to set up connection to the ECC and create a local *EDMAgent*.
 
 ECCClientController (Basic client only)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This class co-ordinates ‘high level’ ECC monitoring actions and event handling that is conducted via the
-*EMInterfaceAdapter*
-class. Actions include registering (or ‘connecting’) with the ECC; sending metric generator information; responding to set-up and tear-down processes. In the ‘basic’ client, the controller sends message information to the UI and responds to a simple user interaction.
+This class co-ordinates ‘high level’ ECC monitoring actions and event handling that is conducted via the *EMInterfaceAdapter* class. Actions include registering (or ‘connecting’) with the ECC; sending metric generator information; responding to set-up and tear-down processes. In the ‘basic’ client, the controller sends message information to the UI and responds to a simple user interaction.
 
 ECCClientView (Basic client only)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This view class implements a Java desktop window containing a ‘logging’ panel and a button with which the user can manually push metric data to the ECC during the
-*live monitoring phase*
-.
+This view class implements a Java desktop window containing a ‘logging’ panel and a button with which the user can manually push metric data to the ECC during the *live monitoring phase*.
 
 ClientViewListener (Basic client only)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Listening to events generated by the
-*EMClientView*
-is implemented by the
-*ECCClientController*
-using this interface.
+Listening to events generated by the *EMClientView* is implemented by the *ECCClientController* using this interface.
 
 EMInterfaceAdapter
 ~~~~~~~~~~~~~~~~~~
 
-Simplified interaction with the ECC is achieved through the use of this adapter and its listening interface (
-*EMIAdapterListener*
-). The
-*EMInterfaceAdapter*
-hides some of the more ‘technical’ aspects of communicating with the ECC as a client. These aspects include: setting up interfaces that communicate with the ECC during different phases on an experiment; listening directly to events sent by the ECC to the client; sending data to the ECC. More information about the use of these interfaces can be found in the ECC API JavaDoc.
+Simplified interaction with the ECC is achieved through the use of this adapter and its listening interface (*EMIAdapterListener*). The *EMInterfaceAdapter* hides some of the more ‘technical’ aspects of communicating with the ECC as a client. These aspects include: setting up interfaces that communicate with the ECC during different phases on an experiment; listening directly to events sent by the ECC to the client; sending data to the ECC. More information about the use of these interfaces can be found in the ECC API JavaDoc.
 
 EMIAdapterListener
 ~~~~~~~~~~~~~~~~~~
 
-The
-*EMIAdapterListener*
-is implemented by the
-*ECCClientController*
-and is used to respond (at a high level) to the requests of the ECC.
+The *EMIAdapterListener* is implemented by the *ECCClientController* and is used to respond (at a high level) to the requests of the ECC.
 
 ECCHeadlessClient (Headless client only)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This class is analogous to the
-*ECCClientController*
-found in the basic client code, however, instead of managing a UI, it instead schedules metrics for measurement and stores the data in a local database managed by an EDMAgent (see
-*IMonitoringEDMAgent*
-). Please note that this class can work without invoking the EDMAgent, but it will not be able to respond properly to the ECC’s requests for missing data during the
-*Post-Reporting*
-phase as no local storage has been set aside for metric data. In this case, the headless client will simply create metric data ‘on-the-fly’ and respond with this information when the ECC requests it.
+This class is analogous to the *ECCClientController* found in the basic client code, however, instead of managing a UI, it instead schedules metrics for measurement and stores the data in a local database managed by an EDMAgent (see
+*IMonitoringEDMAgent*). Please note that this class can work without invoking the EDMAgent, but it will not be able to respond properly to the ECC’s requests for missing data during the *Post-Reporting* phase as no local storage has been set aside for metric data. In this case, the headless client will simply create metric data ‘on-the-fly’ and respond with this information when the ECC requests it.
 
 EDMAgent: IMonitoringEDMAgent & IReportDAO (Headless client only)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-An EDMAgent is constructed using the ECC’s
-*EDMInterfaceFactory*
-static class; the agent is then tested to see if a database is available for use and an
-*IReportDAO*
-instance is created. The
-*IReportDAO*
-instance provides the client with the facility to store metric data as it is generated (in report form) and then later retrieve it as required (an example of this can be seen in the ‘
-*onPullMetric(…)*
-’ event implemented by
-*ECCHeadlessClient*
-). The same instance of the
-*IReportDAO*
-is used during the setting up of a scheduled measurement activity (see the
-*ECCHeadlessClient*
-method
-*‘setupMeasurementForAttribute(…)’*
-for further information); this allows a background thread to continuously feed the EDMAgent with new metric data as it arrives.
+An EDMAgent is constructed using the ECC’s *EDMInterfaceFactory* static class; the agent is then tested to see if a database is available for use and an *IReportDAO* instance is created. The *IReportDAO* instance provides the client with the facility to store metric data as it is generated (in report form) and then later retrieve it as required (an example of this can be seen in the ‘*onPullMetric(…)*’ event implemented by *ECCHeadlessClient*). The same instance of the *IReportDAO* is used during the setting up of a scheduled measurement activity (see the *ECCHeadlessClient* method *‘setupMeasurementForAttribute(…)’* for further information); this allows a background thread to continuously feed the EDMAgent with new metric data as it arrives.
 
 Shared: MeasurementScheduler (Headless client only)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The
-*MeasurementScheduler*
-is primarily a utility class that maps the regular sampling of metric data (executed by
-*ITakeMeasurement*
-implementations) to a specified
-*MeasurementSet*
-instance (see section
-for more information on the metric data model).
+The *MeasurementScheduler* is primarily a utility class that maps the regular sampling of metric data (executed by *ITakeMeasurement* implementations) to a specified *MeasurementSet* instance (see section for more information on the metric data model).
 
 Shared: MeasurementTask & ITakeMeasurement (Headless client only)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Each regularly scheduled measurement of a metric (belonging to a
-*MeasurementSet*
-) is represented by a
-*MeasurementTask*
-instance. Every time this task is executed, a metric data collected from the associated
-*ITakeMeasurement*
-instance is stored using the client’s
-*IReportDAO*
-by the
-*MeasurementScheduler*
-. A
-*MeasurementTask*
-can be configured to repeat measurement actions indefinitely or for an arbitrary but finite number of times.
+Each regularly scheduled measurement of a metric (belonging to a *MeasurementSet*) is represented by a *MeasurementTask* instance. Every time this task is executed, a metric data collected from the associated *ITakeMeasurement* instance is stored using the client’s *IReportDAO* by the *MeasurementScheduler*. A *MeasurementTask* can be configured to repeat measurement actions indefinitely or for an arbitrary but finite number of times.
 
 Tools: PsuedoRandomWalkTool & MemoryUsageTool (Headless client only)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Two trivial metric producing classes (both implementing the *ITakeMeasurement* interface) have been supplied for use in the headless client. 
-The *PsuedoRandomWalkTool* class simulates the change in direction a walker might take on a random path (providing their direction in degrees: 0:-359). 
-The *MemoryUsageTool* takes a rough estimation of the memory being used by the headless client at run-time.
-
-More advanced client programming
---------------------------------
-The ECC provides client writers with a number of more advanced levels of control over the way their client interacts with the ECC - these features are outlined below.
-For more detailed information, please read the inline documentation.
-
-Metric PULL semantics
-~~~~~~~~~~~~~~~~~~~~~
-Metrics that will be pulled from the client by the ECC can be scheduled and limited by the client. When a client constructs its metric model, it creates *MeasurementSets* that are associated with an Entity's attribute.
-Using the MeasurementSet class, the client is able to:
-
-  * Set a limit on the number of times the ECC can ask for metric data for this set [see MeasurementSet.setMeasurementRule(..) & MeasurementSet.setMeasurementCountMax(..)]
-  * Set the frequency at which the ECC will ask for metric data for this set [see MeasurementSet.setSamplingInterval(..)]
-
-Entity enabling and disabling
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Some clients may wish to signal to the ECC that want to enable or disable an Entity during the live monitoring process. The meaning of this is as follows:
-
-  * Enabled entities. Pushed metrics will be captured and stored by the ECC. If the client supports pulling, the ECC will issue pull requests for metrics associated with the entity
-    
-  * Disabled entities. Any pushed metrics associated with the entity will be discarded by the ECC. The ECC will not make pull requests for any metrics associated with the entity
-  
-Client writers can send 'enable' or 'disable' signals to the ECC by using the ECC adapter call EMInterfaceAdapter.sendEntityEnabled(..).
-
+Two trivial metric producing classes (both implementing the *ITakeMeasurement* interface) have been supplied for use in the headless client. The *PsuedoRandomWalkTool* class simulates the change in direction a walker might take on a random path (providing their direction in degrees: 0:-359). The *MemoryUsageTool* takes a rough estimation of the memory being used by the headless client at run-time.
   
 Testing clients against the ECC
 -------------------------------
 
-To
-manually
-test the existing client samples, follow these steps:
+To manually test the existing client samples, follow these steps:
 
 #.  Open a command line at the root of the ECC API folder
-
-
 
 #.  Type:
     mvn clean install
 
-
-
 #.  Create two folders (elsewhere in your file system):
 
     *   client
-
-
-
     *   container
-
 
 #.   Search for all JARs created in the root folder of the ECC API folder
 
-
-
 #.   Copy all JARs (ignoring duplicates found in the dashboard) to both folders created in step 3.
-
-
 
 #.   Start the Basic ECC Container *in the container folder* by running the following JAR::
 		experimedia-arch-ecc-samples-basicECCContainer-<version>.jar

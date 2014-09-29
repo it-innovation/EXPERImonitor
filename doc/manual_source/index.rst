@@ -9,6 +9,7 @@ EXPERIMEDIA ECC v2.1 documentation
 |    :maxdepth: 2                                          |    :maxdepth: 2                                       |
 |                                                          |                                                       |
 |    mainContent/Overview                                  |    mainContent/Getting_started_with_the_ECC           |
+|                                                          |    mainContent/eccAPIChangeLog                        |
 |                                                          |                                                       |
 +----------------------------------------------------------+-------------------------------------------------------+
 | **Using the ECC Dashboard**                              |  **Building Sample ECC Clients**                      |
@@ -20,28 +21,31 @@ EXPERIMEDIA ECC v2.1 documentation
 |                                                          |                                                       |
 |                                                          |                                                       |
 +----------------------------------------------------------+-------------------------------------------------------+
-|  **Writing an ECC Client**                               | **Indicative Monitoring Use Cases**                   |
+|  **Writing an ECC Client**                               | **Advanced ECC client programming**                   |
 +----------------------------------------------------------+-------------------------------------------------------+
 | .. toctree::                                             | .. toctree::                                          |
 |    :maxdepth: 2                                          |    :maxdepth: 2                                       |
 |                                                          |                                                       |
-|    mainContent/Writing_an_ECC_client                     |    mainContent/Indicativemonitoring_use-cases         |
+|    mainContent/Writing_an_ECC_client                     |    mainContent/More_advanced_ECC_clients              |
+|                                                          |    mainContent/Creating_Provenance                    |
+|                                                          |                                                       |
 |                                                          |                                                       |
 +----------------------------------------------------------+-------------------------------------------------------+
-| **ECC Monitoring Protocol**                              | **Baseline Metric Services**                          |
+| **Indicative Monitoring Use Cases**                      | **Baseline Metric Services**                          |
 +----------------------------------------------------------+-------------------------------------------------------+
 | .. toctree::                                             | .. toctree::                                          |
 |    :maxdepth: 2                                          |    :maxdepth: 2                                       |
 |                                                          |                                                       |
-|    mainContent/ECC_monitoring_protocol                   |    mainContent/Base_line_metric_services              |              
+|    mainContent/Indicativemonitoring_use-cases            |    mainContent/Base_line_metric_services              |              
 |                                                          |                                                       |
 +----------------------------------------------------------+-------------------------------------------------------+
-| **Provenance**                                           |  **ECC Change Log**                                   |                                                       
+| **ECC Monitoring Protocol**                              |                                                       |
 +----------------------------------------------------------+-------------------------------------------------------+
-| .. toctree::                                             |  .. toctree::                                         |                                                       
-|    :maxdepth: 2                                          |     :maxdepth: 2                                      |                                                       
+| .. toctree::                                             |                                                       |
+|    :maxdepth: 2                                          |                                                       |
 |                                                          |                                                       |
-|    mainContent/Creating_Provenance                       |     mainContent/eccAPIChangeLog                       |                          
-|                                                          |                                                       |                                
+|    mainContent/ECC_monitoring_protocol                   |                                                       |              
+|                                                          |                                                       |
 +----------------------------------------------------------+-------------------------------------------------------+
+
 
