@@ -77,7 +77,7 @@ public class EDMProvFactory {
 	 */
 	public static synchronized EDMProvFactory getInstance(String prefix, String baseURI) {
 		if (factory==null) {
-			factory = new EDMProvFactory();
+			factory = new EDMProvFactory(prefix, baseURI);
 			factory.container = new EDMProvDataContainer(prefix, baseURI);
 			factory.init();
 		} else {
