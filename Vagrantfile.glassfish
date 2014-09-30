@@ -148,6 +148,12 @@ rm logback-core-0.9.28.jar
 
 wget http://repo1.maven.org/maven2/ch/qos/logback/logback-classic/0.9.28/logback-classic-0.9.28.jar
 cp ./logback-classic-0.9.28.jar /opt/glassfish3/glassfish/lib/endorsed/logback-classic-0.9.28.jar
+rm logback-classic-0.9.28.jar
+
+wget http://central.maven.org/maven2/org/slf4j/slf4j-api/1.7.6/slf4j-api-1.7.6.jar
+cp ./slf4j-api-1.7.6.jar /opt/glassfish3/glassfish/lib/endorsed/slf4j-api-1.7.6.jar
+rm slf4j-api-1.7.6.jar
+
 
 # ECC Service
 cp ./eccService/target/EccService-2.1/WEB-INF/lib/jul-to-slf4j-1.7.6.jar /opt/glassfish3/glassfish/lib/endorsed/jul-to-slf4j-1.7.6.jar
@@ -181,12 +187,12 @@ cp ./thirdPartyConfig/glassfish/domain.xml /opt/glassfish3/glassfish/domains/dom
 
 # Deploy OpenRDF services into Glassfish
 echo "**** Deploying OpenRDF sesame & workbench into Glassfish"
-/opt/glassfish3/bin/asadmin deploy ./thirdPartyLibs/openrdf-sesame.war
-/opt/glassfish3/bin/asadmin deploy ./thirdPartyLibs/openrdf-workbench.war
+/opt/glassfish3/bin/asadmin deploy --force ./thirdPartyLibs/openrdf-sesame.war
+/opt/glassfish3/bin/asadmin deploy --force ./thirdPartyLibs/openrdf-workbench.war
 
 # deploy the ECC into Glassfish
 #echo "**** Deploying ECC into Glassfish"
-/opt/glassfish3/bin/asadmin deploy --contextroot ECC ./eccService/target/EccService-2.1.war
+/opt/glassfish3/bin/asadmin deploy --force --contextroot ECC ./eccService/target/EccService-2.1.war
 
 if [ '#{ecc_git}' != "" ]; then
 	echo 'ECC built from git branch #{ecc_git}'
