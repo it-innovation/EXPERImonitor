@@ -56,12 +56,11 @@ public class ClientController implements EMIAdapterListener,
     private AMQPConnectionFactory amqpFactory;    // AMQP connection components
     private AMQPBasicChannel      amqpChannel;
     private EMInterfaceAdapter    emiAdapter;     // ECC adapter and application state
-    private boolean               connected;
-    private boolean               pushingAllowed;
+    private volatile boolean      connected;
+    private volatile boolean      pushingAllowed;
 
     private MetricGenerator generator;            // ECC metric generator model
-    private UUID            measurementSetID;     // MeasurementSet ID of the single metric this sample provides
-    private UUID            sentReportID;         // Last report ID pushed to the ECC (used for traffic control)
+    private MeasurementSet  measurementSet;       // MeasurementSet of the single metric this sample provides
 
     private ClientView  clientView;               // User interface
     private UIMessenger uiMessenger;              // Queued message handler (for background changes to the UI)
@@ -257,11 +256,6 @@ public class ClientController implements EMIAdapterListener,
         if ( lastReportID != null )
         {
           queueLogMessage( "ECC received push report: " + lastReportID );
-
-          // Confirm the ECC has got the report we last sent; then reset report 
-          // ID so that we are ready to send the next report
-          if ( lastReportID.equals(sentReportID) )
-            sentReportID = null;
         }
     }
 
@@ -334,34 +328,18 @@ public class ClientController implements EMIAdapterListener,
         // Make sure we're actually connected and in Live Monitoring phase
         if ( connected && pushingAllowed )
         {
-            // Make sure we're not waiting for a report acknowledgement from the ECC
-            // before sending another report. It is not recommended to send very high
-            // frequency data to the ECC. See onPushReportReceived(..) method for
-            // acknowledgments
-            if ( sentReportID == null ) 
-            {
-                // Get the measurement we want for this push by using the measurement set ID we stored
-                MeasurementSet ms = MetricHelper.getMeasurementSet( generator, measurementSetID );
-                
-                // Create an empty report ready for adding new measurements
-                Report newReport  = MetricHelper.createEmptyMeasurementReport( ms );
-
-                if ( newReport != null )
-                {
-                    // Create a measurement and add it to our report
-                    Measurement sample = new Measurement( Integer.toString(value) );
-                    newReport.getMeasurementSet().addMeasurement( sample );
-
-                    // Push the report
-                    emiAdapter.pushMetric( newReport );
-                    
-                    // Remember the ID of the report so we can confirm the ECC got the data
-                    sentReportID = newReport.getUUID();
-                    
-                    queueLogMessage( "Pushed report: " + sentReportID.toString() );
-                } else { logger.error("Report is null"); }
-            } else { logger.error("ReportID is not null"); }
-        } else { logger.error("Not connected or pushing not allowed"); }
+			// Create a report with a single measurement in it
+			Measurement sample = new Measurement( Integer.toString(value) );
+			Report newReport   = MetricHelper.createMeasurementReport( measurementSet, sample );
+			
+			if ( newReport != null )
+			{
+				emiAdapter.pushMetric( newReport );
+				queueLogMessage( "Pushed report: " + newReport.getUUID().toString() );
+			}
+			else logger.error("Could not send report: report could not be created");
+		} 
+		else { logger.error("Not connected or pushing not allowed"); }
     }
 
     /**
@@ -478,10 +456,10 @@ public class ClientController implements EMIAdapterListener,
 
         // Create a measurement set in which measurements will be stored; keep the ID
         // of this measurement set so that we can easily retrieve it later
-        measurementSetID = MetricHelper.createMeasurementSet( sliderValue, 
-                                                              MetricType.RATIO, 
-                                                              new Unit( "Slider value" ), 
-                                                              group ).getID();
+        measurementSet = MetricHelper.createMeasurementSet( sliderValue, 
+                                                            MetricType.RATIO, 
+                                                            new Unit( "Slider value" ), 
+                                                            group );
 
         // Add our metric generator into a collection and we're done
         HashSet<MetricGenerator> mgSet = new HashSet<MetricGenerator>();
