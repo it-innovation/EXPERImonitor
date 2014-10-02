@@ -37,23 +37,32 @@ The ECC API makes extensive use of unique identifiers (referred to as UUIDs or G
 
 It is typical that the information relating to [1] and [2] above will remain constant throughout the lifetime of an ECC based experimental project. The UUID used by the client is up to the client writer: you may wish to re-use a single UUID or generate a new one each time your client connects to the ECC. Below is a summary of the advantages and disadvantages of both approaches:
 
-+-------------------------------+------------------------------------------------------------------------+---------------------------------------------------------------------+
-| Connect strategy              | Advantages                                                             | Disadvantages                                                       |
-|-------------------------------+------------------------------------------------------------------------+---------------------------------------------------------------------+
-| Connect client with same UUID | Status of specific process instance always known to the experimenter   | Client ID & model must be persisted for re-use if client restarted  |
-|                               | Just re-send existing metric model when reconnecting to the ECC        | New metric model needed for new experiment anyway                   |          
-|                               | Just one metric model generated per experiment (data analysis simpler) |                                                                     |
-|-------------------------------+------------------------------------------------------------------------+---------------------------------------------------------------------+
-| Connect client with new UUID  | No need to persist client ID & model in event of a client re-start     | Duplicated entities in experiment data (data analysis more complex) |
-+-------------------------------+------------------------------------------------------------------------+---------------------------------------------------------------------+
++-------------------------------------+----------------------------------------------------------------------------+--------------------------------------------------------------------------+
+| Connect strategy                    | Advantages                                                                 | Disadvantages                                                            |
+|-------------------------------------+----------------------------------------------------------------------------+--------------------------------------------------------------------------+
+| | **Connect client with same UUID** | | * Status of specific process instance always known to the experimenter   | | * Client ID & model must be persisted for re-use if client restarted   |
+|                                     | | * Just re-send existing metric model when reconnecting to the ECC        | | * New metric model needed for new experiment anyway                    |          
+|                                     | | * Just one metric model generated per experiment (data analysis simpler) | |                                                                        |
+|-------------------------------------+----------------------------------------------------------------------------+--------------------------------------------------------------------------+
+| | **Connect client with new UUID**  | | * No need to persist client ID & model in event of a client re-start     | | * Duplicated entities in experiment data (data analysis more complex)  |
++-------------------------------------+----------------------------------------------------------------------------+--------------------------------------------------------------------------+
 
-For further discussion on this topic, see the 'disconnection/re-connection strategies' section in this document.
+For further discussion on this topic, see the :doc:`Disconnection/re-connection strategies </mainContent/More_advanced_ECC_clients>` section in this document.
 
 The ECC metric model
 ~~~~~~~~~~~~~~~~~~~~
-Central to an experiment is the experimental metric model: a collection of observable entities ('things' that have attributes describing aspects of them in some way). The ECC metric model separates the specification of the things we wish to observe from the measurement units and raw data used to specify an observation. This allows experimenters to attach multiple data sets to the same observable phenomenon in a variety of ways. For example, the colour of the surface of an object could be quantitatively measured (simplistically) as the reflected wave length of light in nanometres, say 475nm, or qualitatively as the nominal value 'blue'. In addition to this, metric models can also be potentially shared between clients, meaning a super set of observations can be made from the aggregation of multiple data sets. The ECC metric model is explored with a simple example elsewhere in this document.
+Central to an experiment is the experimental metric model: a collection of observable entities ('things' that have attributes describing aspects of them in some way). The ECC metric model separates the specification of the things we wish to observe from the measurement units and raw data used to specify an observation. This allows experimenters to attach multiple data sets to the same observable phenomenon in a variety of ways. For example, the colour of the surface of an object could be quantitatively measured (simplistically) using a light sensor as the reflected wave length of light in nanometres, say 475nm, or qualitatively by way of a reported human observation as the nominal value 'Blue'.
 
-An ECC client creates a metric model to describe what it is observing during an experiment. This model is sent to the ECC service, which allows it to recognize and store (in a consistent way) the metric data sent by multiple clients as well providing the experimenter some fine-grained control over the data-flow of experimental data at run-time (see the 'More advanced ECC clients' section for further information). Almost all the components of the ECC metric model are uniquely identified using UUIDS: this means that if you wish to re-use (or share) the same metric model during an experiment, you must ensure that this model remains consistent - see the 'disconnection/re-connection strategies' for a further discussion of this.
+.. figure:: images/ObservationExample.png
+   :alt: Metric model observation example
+   :align: center
+   :height: 500
+
+Using this approach, metric models can be potentially shared between clients, meaning a super set of observations can be made from the aggregation of multiple data sets. For example, we could imagine multiple users reporting their qualitative observations of the same entity during the course of an experiment. 
+
+An ECC client creates a metric model to describe what it is observing during an experiment. This model is sent to the ECC service, which allows it to recognize and store (in a consistent way) the metric data sent by multiple clients as well providing the experimenter some fine-grained control over the data-flow of experimental data at run-time (see the :doc:`More advanced ECC clients </mainContent/More_advanced_ECC_clients>` section for further information). Almost all the components of the ECC metric model are uniquely identified using UUIDS: this means that if you wish to re-use (or share) the same metric model during an experiment, you must ensure that this model remains consistent - see the :doc:`Disconnection/re-connection strategies </mainContent/More_advanced_ECC_clients>` section for a further discussion of this.
+
+
 
 Pushing and pulling metric data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -61,17 +70,17 @@ At run-time, clients can elect to either PUSH metric data to the ECC or allow th
 
 Below is a summary of the advantages and disadvantages of both PUSH and PULL strategies:
 
-+-------------------------------+------------------------------------------------------------------------+---------------------------------------------------------------------+
-| Send data strategy            | Advantages                                                             | Disadvantages                                                       |
-|-------------------------------+------------------------------------------------------------------------+---------------------------------------------------------------------+
-| Pushing client                | Allows client to send metric data on an ad-hoc basis                   | Periodic data pushing must be scheduled by the client itself        |
-|                               | Exceptions immediately raised if client network connection lost        |                                                                     |        
-|-------------------------------+------------------------------------------------------------------------+---------------------------------------------------------------------+
-| Pulling client                | Regular sampling of measurements managed by the ECC                    | Client network connection loss may not be raised as an exception    |
-|                               | Finer grained control over sampling part of ECC API                    |                                                                     |
-+-------------------------------+------------------------------------------------------------------------+---------------------------------------------------------------------+
++-------------------------------+----------------------------------------------------------------------------+----------------------------------------------------------------------+
+| Send data strategy            | Advantages                                                                 | Disadvantages                                                        |
+|-------------------------------+----------------------------------------------------------------------------+----------------------------------------------------------------------+
+| | **Pushing client**          | | * Allows client to send metric data on an ad-hoc basis                   | | * Periodic data pushing must be scheduled by the client itself     |
+|                               | | * Exceptions immediately raised if client network connection lost        | |                                                                    |        
+|-------------------------------+----------------------------------------------------------------------------+----------------------------------------------------------------------+
+| | **Pulling client**          | | * Regular sampling of measurements managed by the ECC                    | | * Client network connection loss may not be raised as an exception |
+|                               | | * Finer grained control over sampling part of ECC API                    | |                                                                    |
++-------------------------------+----------------------------------------------------------------------------+----------------------------------------------------------------------+
 
-Some examples for selecting an appropriate integration strategy is discussed in more detail in the section 'ECC Integration pattern guidelines'.
+Some examples for selecting an appropriate integration strategy is discussed in more detail in the section :doc:`ECC Integration pattern guidelines </mainContent/More_advanced_ECC_clients>`.
 
 Basic monitoring pattern
 ------------------------
