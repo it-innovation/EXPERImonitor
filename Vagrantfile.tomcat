@@ -29,8 +29,8 @@ ecc_git = (ENV['ECC_GIT'] ? ENV['ECC_GIT'] : '')
 debugger_port = (ENV['DEBUGGER_PORT'] ? ENV['DEBUGGER_PORT'] : '8000')
 
 info = "
-ECC service is deployed on VM with IP #{ecc_ip}
-ECC service is mapped to http://localhost:#{ecc_port}/ECC on host machine.
+EXPERImonitor service is deployed on VM with IP #{ecc_ip}
+EXPERImonitor service is mapped to http://localhost:#{ecc_port}/ECC on host machine.
 Tomcat manager is mapped to http://localhost:#{ecc_port}/manager/html with username manager, password manager
 OpenRDF workbench is mapped to http://localhost:#{ecc_port}/openrdf-workbench on host machine
 Using RabbitMQ deployed on #{rabbit_ip}
@@ -73,16 +73,16 @@ apt-get install -y tomcat7-admin
 apt-get install -y postgresql-9.1
 apt-get install -y rabbitmq-server
 
-## Get the ECC code ##
+## Get the EXPERImonitor code ##
 
 # remove old code to get a clean(ish) build in case we are re-provisioning
 rm -rf experimedia-ecc
 
-# get ECC code (need to do this before PostgreSQL config)
+# get EXPERImonitor code (need to do this before PostgreSQL config)
 if [ '#{ecc_git}' != "" ]; then
 	# set up deploy key to enable access to gitlab
 	cp -a /vagrant/thirdPartyConfig/gitLab/.ssh ~
-	# get the latest ECC code from Git
+	# get the latest EXPERImonitor code from Git
 	git clone git@glab-i1.it-innovation.soton.ac.uk:experimedia/ecc.git experimedia-ecc
 	cd experimedia-ecc
 	# need -f to force it, otherwise it prints a warning and nothing happens
@@ -91,7 +91,7 @@ if [ '#{ecc_git}' != "" ]; then
 	cp /vagrant/thirdPartyLibs/* thirdPartyLibs
 	cd ..
 else
-	# or copy ECC code from guest machine to host machine
+	# or copy EXPERImonitor code from guest machine to host machine
 	mkdir experimedia-ecc
 	rsync -a /vagrant/ experimedia-ecc --exclude '.git' --exclude 'target'
 fi
@@ -134,7 +134,7 @@ chown -R tomcat7 /usr/share/tomcat7/.aduna
 
 service tomcat7 restart
 
-## Configure ECC Service ##
+## Configure EXPERImonitor Service ##
 
 # configure location of Rabbit
 # configure uuid
@@ -155,14 +155,14 @@ echo "**** Deploying OpenRDF sesame & workbench into Tomcat"
 cp ./thirdPartyLibs/openrdf-sesame.war /var/lib/tomcat7/webapps/openrdf-sesame.war
 cp ./thirdPartyLibs/openrdf-workbench.war /var/lib/tomcat7/webapps/openrdf-workbench.war
 
-# deploy the ECC into Tomcat
-echo "**** Deploying ECC into Tomcat"
+# deploy the EXPERImonitor into Tomcat
+echo "**** Deploying EXPERImonitor into Tomcat"
 cp eccService/target/*.war /var/lib/tomcat7/webapps/ECC.war
 
 if [ '#{ecc_git}' != "" ]; then
-	echo 'ECC built from git branch #{ecc_git}'
+	echo 'EXPERImonitor built from git branch #{ecc_git}'
 else
-	echo 'ECC code copied from host machine'
+	echo 'EXPERImonitor code copied from host machine'
 fi
 
 echo "Maven build log is in /tmp/build.log on guest machine"

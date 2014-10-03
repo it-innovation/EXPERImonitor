@@ -44,9 +44,9 @@ This means that in the knowledge base, *Beer* will still exist, even after it ha
 The code for beginners
 ----------------------
 
-This section shows with a simple example how to create basic provenance statements using the Experimedia ECC Provenance API.
+This section shows with a simple example how to create basic provenance statements using the Experimedia EXPERImonitor Provenance API.
 
-To create provenance statements in ECC client code, you need an EDMProvFactory object: ::
+To create provenance statements in EXPERImonitor client code, you need an EDMProvFactory object: ::
 
 	EDMProvFactory factory = EDMProvFactory.getInstance();
 
@@ -54,7 +54,7 @@ This object will take care of all the internals so that you only have to maintai
 
 	EDMAgent bob = factory.createAgent("agent_" + UUID.randomUUID(), "Bob Smith");
 	
-Note that the first argument needs to be unique in your experiment but there are no rules regarding what it needs to look like. The second argument is the human readable label that will be used to display the agent in the provenance GUI of the ECC dashboard.
+Note that the first argument needs to be unique in your experiment but there are no rules regarding what it needs to look like. The second argument is the human readable label that will be used to display the agent in the provenance GUI of the EXPERImonitor dashboard.
 
 Next you need to create the entities you want to use: ::
 

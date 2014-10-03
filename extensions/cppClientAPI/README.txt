@@ -1,9 +1,9 @@
-Building the ECC C++ client
-===========================
+Building the EXPERImonitor C++ client
+=====================================
 
 Prerequisites
 -------------
-The ECC C++ API is has been developed with a view to providing as much cross-platform compatibility as possible. There are three main 3rd party libraries you will be required to build for your system platform before compiling the ECC API itself. These 3rd party libraries are:
+The EXPERImonitor C++ API is has been developed with a view to providing as much cross-platform compatibility as possible. There are three main 3rd party libraries you will be required to build for your system platform before compiling the EXPERImonitor API itself. These 3rd party libraries are:
 
   * rabbitmq-c-v0.5.0 (MIT licence)
     - C based protocol client for AMQP
@@ -14,11 +14,11 @@ The ECC C++ API is has been developed with a view to providing as much cross-pla
     - Source can be found here: https://github.com/alanxz/SimpleAmqpClient
     
   * Boost 1.53.0 (Boost licence)
-    - Not included in the ECC distribution
+    - Not included in the EXPERImonitor distribution
     - Download from: http://www.boost.org/users/history/version_1_53_0.html
     
   * cmake 2.8 build system
-    - Not included in the ECC distribution
+    - Not included in the EXPERImonitor distribution
     - Download from: http://www.cmake.org/
     - Required to build:
         > rabbitmq-c-v0.5.0
@@ -46,7 +46,7 @@ Dependencies: NONE.
 
 A copy of the rabbitmq-c-v0.5.0 source can be found in the following directory:
 
-  <ECC API root>/extensions/cppClientAPI/amqpAPI/rabbitmq
+  <EXPERImonitor API root>/extensions/cppClientAPI/amqpAPI/rabbitmq
     
 Instructions on how to use cmake in conjunction with your platform compiler is provided in the README files within this folder. Having successfully compiled rabbitmq-c-v0.5.0 you should have release/debug version of the following binaries:
 
@@ -63,7 +63,7 @@ Dependencies:
   
 A copy of the SimpleAmqpClient source can be found in the following directory:
 
-  <ECC API root>/extensions/cppClientAPI/amqpAPI/simpleamqpclient
+  <EXPERImonitor API root>/extensions/cppClientAPI/amqpAPI/simpleamqpclient
     
 Instructions on how to use cmake in conjunction with your platform compiler is provided in the README files within this folder. Having successfully compiled SimpleAmqpClient you should have release/debug version of the following binaries:
 
@@ -72,9 +72,9 @@ Instructions on how to use cmake in conjunction with your platform compiler is p
   * simpleamqpclient.dll (or equivalent dynamic library executable)
 
   
-C++ ECC API libraries
-=====================
-The following modular libraries need to be built before compiling an ECC client:
+C++ EXPERImonitor API libraries
+===============================
+The following modular libraries need to be built before compiling an EXPERImonitor client:
 
   * eccCodeUtils.lib
   * amqp-Impl.lib
@@ -84,22 +84,22 @@ The following modular libraries need to be built before compiling an ECC client:
 The details for building each library are provided below.
 
 
-ECC library: eccCodeUtils
--------------------------
+EXPERImonitor library: eccCodeUtils
+-----------------------------------
 Dependencies:
   * BOOST
   
 The source files required for this library can be found here:
 
- <ECC API root>/extensions/cppClientAPI/eccCodeUtils/Utils
+ <EXPERImonitor API root>/extensions/cppClientAPI/eccCodeUtils/Utils
  
 This should be built as a static library (currently available as a Visual Studio 2010 project), and result in the following binaries:
 
   * eccCodeUtils.lib (or equivalent library file)
   
 
-ECC library: amqp-Impl
-----------------------
+EXPERImonitor library: amqp-Impl
+--------------------------------
 Dependencies:
     * BOOST
     * rabbitmq-c-v0.5.0
@@ -108,35 +108,35 @@ Dependencies:
     
 The source files required for this library can be found here:
 
-  <ECC API root>/extensions/cppClientAPI/amqp-Spec
-  <ECC API root>/extensions/cppClientAPI/amqp-Impl/amqp
-  <ECC API root>/extensions/cppClientAPI/amqp-Impl/faces
+  <EXPERImonitor API root>/extensions/cppClientAPI/amqp-Spec
+  <EXPERImonitor API root>/extensions/cppClientAPI/amqp-Impl/amqp
+  <EXPERImonitor API root>/extensions/cppClientAPI/amqp-Impl/faces
   
 This should be built as a static library (currently available as a Visual Studio 2010 project), and result in the following binaries:
 
   * amqp-Impl.lib (or equivalent library file)
 
   
-ECC library: eccCommonDataModel
--------------------------------  
+EXPERImonitor library: eccCommonDataModel
+-----------------------------------------
 Dependencies:
   * BOOST
   * eccCodeUtils
 
 The source files required for this library can be found here:
 
-  <ECC API root>/extensions/cppClientAPI/eccCommonDataModel/Base
-  <ECC API root>/extensions/cppClientAPI/eccCommonDataModel/Experiment
-  <ECC API root>/extensions/cppClientAPI/eccCommonDataModel/Metrics
-  <ECC API root>/extensions/cppClientAPI/eccCommonDataModel/Monitor
+  <EXPERImonitor API root>/extensions/cppClientAPI/eccCommonDataModel/Base
+  <EXPERImonitor API root>/extensions/cppClientAPI/eccCommonDataModel/Experiment
+  <EXPERImonitor API root>/extensions/cppClientAPI/eccCommonDataModel/Metrics
+  <EXPERImonitor API root>/extensions/cppClientAPI/eccCommonDataModel/Monitor
   
 This should be built as a static library (currently available as a Visual Studio 2010 project), and result in the following binaries:
 
   * eccCommonDataModel.lib (or equivalent library file)
   
 
-ECC library:  eccEMClient-Impl
-------------------------------
+EXPERImonitor library:  eccEMClient-Impl
+----------------------------------------
 Dependencies:
   * BOOST
   * SimpleAmqpClient
@@ -146,17 +146,17 @@ Dependencies:
   
 The source files required for this library can be found here:
 
-  <ECC API root>/extensions/cppClientAPI/eccEMClient-Spec/impl
-  <ECC API root>/extensions/cppClientAPI/eccEMClient-Spec/listeners
-  <ECC API root>/extensions/cppClientAPI/eccEMClient-Impl/impl
+  <EXPERImonitor API root>/extensions/cppClientAPI/eccEMClient-Spec/impl
+  <EXPERImonitor API root>/extensions/cppClientAPI/eccEMClient-Spec/listeners
+  <EXPERImonitor API root>/extensions/cppClientAPI/eccEMClient-Impl/impl
 
 This should be built as a static library (currently available as a Visual Studio 2010 project), and result in the following binaries:
 
     * eccEMClient-Impl.lib (or equivalent library file)
 
     
-Example C++ ECC client
-======================    
+Example C++ EXPERImonitor client
+================================    
 Dependencies:
   * BOOST
   * SimpleAmqpClient
@@ -165,11 +165,11 @@ Dependencies:
   * eccCommonDataModel
   * eccEMClient-Impl
 
-Having successfully built the ECC API libraries, you are now able to compile the example client found here:
+Having successfully built the EXPERImonitor API libraries, you are now able to compile the example client found here:
 
-  <ECC API root>/samples/basicCPPClient
+  <EXPERImonitor API root>/samples/basicCPPClient
   
-NOTE: This client code lives in the SAMPLES folder because it is an example of an ECC client, rather than code relating to the ECC API itself. The code should be built as an executable (currently available as a Visual Studio 2010 project) and result in the following binary:
+NOTE: This client code lives in the SAMPLES folder because it is an example of an EXPERImonitor client, rather than code relating to the EXPERImonitor API itself. The code should be built as an executable (currently available as a Visual Studio 2010 project) and result in the following binary:
 
   * BasicCPPClient.exe (or equivalent)
   
@@ -179,13 +179,13 @@ This executable requires the 3rd party dynamic libraries rabbitmq.dll and Simple
 -----------------------------------------------------------------------------------------------------------------  
 Building the Microsoft Visual Studio Solution
 -----------------------------------------------------------------------------------------------------------------
-If you are building using Microsoft Windows and Microsoft Visual Studio 2010, you can build the ECC C++ API in two steps:
+If you are building using Microsoft Windows and Microsoft Visual Studio 2010, you can build the EXPERImonitor C++ API in two steps:
 
   1. Install and build your BOOST libraries
   
   2. Open and build the Visual Studio solution:
   
-      <ECC API root>/extensions/cppClientAPI/vsSolution/CPP ECC API.sln
+      <EXPERImonitor API root>/extensions/cppClientAPI/vsSolution/CPP ECC API.sln
 
 You should be able to run the basicCPPClient directly from Visual Studio.
 

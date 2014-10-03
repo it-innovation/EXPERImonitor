@@ -1,3 +1,3 @@
-ECC Configuration API
-=====================
+EXPERImonitor Configuration API
+===============================
 

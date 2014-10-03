@@ -1,7 +1,7 @@
 Overview
 ========
 
-This document sets out the specification, design and implementation for experimental metric data and monitoring processes for the EXPERIMEDIA project with specific focus on the ‘*Experiment Content Component*’ or ‘*ECC’*. Readers of this document are expected to predominantly have an experimental test-bed practitioner or Future Media Internet (FMI) technologist background.
+This document sets out the specification, design and implementation for experimental metric data and monitoring processes for the EXPERIMEDIA project with specific focus on the EXPERImonitor service. Readers of this document are expected to predominantly have an experimental test-bed practitioner or Future Media Internet (FMI) technologist background.
 
 For these readers, this document provides:
 
@@ -9,13 +9,13 @@ For these readers, this document provides:
 
 *   An overview of the EXPERIMEDIA experiment process and metric model
 
-*   Instructions on how to set up the ECC within an experiment test-bed
+*   Instructions on how to set up the EXPERImonitor within an experiment test-bed
 
-*   Instructions on how to use the ECC Dashboard to execute and monitor an experiment
+*   Instructions on how to use the EXPERImonitor Dashboard to execute and monitor an experiment
 
-*   A brief review of each of the ECC’s internal components
+*   A brief review of each of the EXPERImonitor’s internal components
 
-*   Guidance on how to write an ECC software client
+*   Guidance on how to write an EXPERImonitor software client
 
 This technical note is a ‘working’ document which will be updated during the course of the EXPERIMEDIA project. For further information on material presented here, please contact Simon Crowle (`sgc@it-innovation.soton.ac.uk <mailto:sgc@it-innovation.soton.ac.uk>`_).
 
@@ -36,7 +36,7 @@ For further information on this architecture and the content components, please 
 
 EXPERIMEDIA supports the evaluation of FMI systems developed in this way through the provision of the Experiment Content Component.
 
-The ECC is designed to support experimenters by:
+The EXPERImonitor is designed to support experimenters by:
 
 *   Providing a metrics based experimentation process
 
@@ -52,15 +52,15 @@ The ECC is designed to support experimenters by:
 
 *   Providing an API intended to support the instrumentation of an extensible range of technologies
 
-An indicative deployment of an ECC system and its integration with baseline and new, experimental FMI technologies is depicted in the diagram below. In this illustration, we see two distinct content pathways. First of these is the FMI Content data flow (blue arrows) depicting data interchanging between the technologies used to provide the novel FMI services and experiences to the end user within what is referred to as the EXPERIMEDIA *content lifecycle*. Second, we see the experimental instrumentation integration (orange arrows) between some (not necessarily all) of the technologies delivering services. Metrics creation and management is controlled by the ECC via a two-way communication protocol operating with the EXPERIMEDIA *experiment lifecycle*. This protocol is described in further detail in section :doc:`ECC monitoring protocol </mainContent/ECC_monitoring_protocol>`.
+An indicative deployment of an EXPERImonitor system and its integration with baseline and new, experimental FMI technologies is depicted in the diagram below. In this illustration, we see two distinct content pathways. First of these is the FMI Content data flow (blue arrows) depicting data interchanging between the technologies used to provide the novel FMI services and experiences to the end user within what is referred to as the EXPERIMEDIA *content lifecycle*. Second, we see the experimental instrumentation integration (orange arrows) between some (not necessarily all) of the technologies delivering services. Metrics creation and management is controlled by the EXPERImonitor via a two-way communication protocol operating with the EXPERIMEDIA *experiment lifecycle*. This protocol is described in further detail in section :doc:`ECC monitoring protocol </mainContent/ECC_monitoring_protocol>`.
 
 |image5_png|
 
-In the following sections, the reader is introduced to the ECC and its principal components; the experimental process that it supports and the data model that underpins experimental metric capture.
+In the following sections, the reader is introduced to the EXPERImonitor and its principal components; the experimental process that it supports and the data model that underpins experimental metric capture.
 
 
-Introduction to the ECC
------------------------
+Introduction to the EXPERImonitor
+---------------------------------
 
 A high-level architectural overview of the EXPERImonitor architecture is presented in the figure below. 
 
@@ -92,36 +92,36 @@ The EDM manages the storage and retrieval of experiment related data that includ
 The EXPERIMEDIA experiment process
 ----------------------------------
 
-The ECC offers an experimental process through which remotely connecting ECC compliant systems (or users, representing by such systems) are engaged. A linear set of six phases are managed by the experimenter via the ECC, depicted in the figure below.
+The EXPERImonitor offers an experimental process through which remotely connecting EXPERImonitor compliant systems (or users, representing by such systems) are engaged. A linear set of six phases are managed by the experimenter via the EXPERImonitor, depicted in the figure below.
 
 |image7_png|
 
-All clients connecting to the ECC must engage in the first two phases: *Client connection* and *Discovery*. In the latter stage, the client will declare to the ECC which of the subsequent phases it supports; the ECC adapts the remaining part of the protocol relating to these phases accordingly. Each of the experiment phases in this process is described in further detail below. A specification of the protocol used to execute each of these phases is provided in section.
+All clients connecting to the EXPERImonitor must engage in the first two phases: *Client connection* and *Discovery*. In the latter stage, the client will declare to the EXPERImonitor which of the subsequent phases it supports; the EXPERImonitor adapts the remaining part of the protocol relating to these phases accordingly. Each of the experiment phases in this process is described in further detail below. A specification of the protocol used to execute each of these phases is provided in section.
 
-Client connection to the ECC
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Client connection to the EXPERImonitor
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Before an experiment is said to begin, clients must connect to the ECC. Connections are listened for by the ECC dashboard indefinitely until the dashboard user (the experimenter) indicates they have all the clients they need to proceed to the first phase (proper) of the experiment.
+Before an experiment is said to begin, clients must connect to the EXPERImonitor. Connections are listened for by the EXPERImonitor dashboard indefinitely until the dashboard user (the experimenter) indicates they have all the clients they need to proceed to the first phase (proper) of the experiment.
 
 Discovery phase
 ~~~~~~~~~~~~~~~
 
-The discovery phase begins with the ECC requesting all connected clients create a discovery interface – a communication point through which the exchange of meta-data regarding the metrics that will be provided is passed. After clients have created this interface, they send an acknowledgement to the ECC that they are ready to begin. Subsequently, clients are queried by the ECC about a) which of the remaining phases they support and which ‘metric generators’ they are able to provide. A metric generator is a high-level representation of a part of the instrumentation system the client will use to create measurements during the course of an experiment. This abstraction, along with others relating to the metric model, is discussed in more detail in introductory form below and in more technical detail in section :doc:`Writing an EXPERIMonitor Client </mainContent/Writing_an_ECC_client>`.
+The discovery phase begins with the EXPERImonitor requesting all connected clients create a discovery interface – a communication point through which the exchange of meta-data regarding the metrics that will be provided is passed. After clients have created this interface, they send an acknowledgement to the EXPERImonitor that they are ready to begin. Subsequently, clients are queried by the EXPERImonitor about a) which of the remaining phases they support and which ‘metric generators’ they are able to provide. A metric generator is a high-level representation of a part of the instrumentation system the client will use to create measurements during the course of an experiment. This abstraction, along with others relating to the metric model, is discussed in more detail in introductory form below and in more technical detail in section :doc:`Writing an EXPERIMonitor Client </mainContent/Writing_an_ECC_client>`.
 
 Set-up phase
 ~~~~~~~~~~~~
 
-Once all clients have reported their capabilities and metric descriptions, the experimenter moves the experiment phase on and so enters clients (that support it) into the set-up phase. Here, the ECC requires the client to progressively set up the metric generators they have available for use. Clients supporting this phase respond with the result of each set-up attempt.
+Once all clients have reported their capabilities and metric descriptions, the experimenter moves the experiment phase on and so enters clients (that support it) into the set-up phase. Here, the EXPERImonitor requires the client to progressively set up the metric generators they have available for use. Clients supporting this phase respond with the result of each set-up attempt.
 
 Live Monitoring phase
 ~~~~~~~~~~~~~~~~~~~~~
 
-Having completed the two ‘preliminary’ phases of the experiment process, the experimenter can then choose to move into a data collection mode called the ‘Live Monitoring’ phase in which all clients that have opted to engage at this stage are signalled that they should start producing metrics. Clients will have specified whether they support the *pushing* or *pulling* (or both) of metric data by the ECC. In the former case, clients are able to push any metric of their choosing on an ad-hoc basis (they should always wait for an acknowledgement from the ECC after each push, however). Alternatively, clients may be pulled for a specific measurement (identified in their specific metric model) by the ECC; a pull request is sent to the client on a periodic basis – it is the client’s responsibility to return the appropriate measure. This phase continues indefinitely until the experimenter concludes that sufficient measurements have been taken.
+Having completed the two ‘preliminary’ phases of the experiment process, the experimenter can then choose to move into a data collection mode called the ‘Live Monitoring’ phase in which all clients that have opted to engage at this stage are signalled that they should start producing metrics. Clients will have specified whether they support the *pushing* or *pulling* (or both) of metric data by the EXPERImonitor. In the former case, clients are able to push any metric of their choosing on an ad-hoc basis (they should always wait for an acknowledgement from the EXPERImonitor after each push, however). Alternatively, clients may be pulled for a specific measurement (identified in their specific metric model) by the EXPERImonitor; a pull request is sent to the client on a periodic basis – it is the client’s responsibility to return the appropriate measure. This phase continues indefinitely until the experimenter concludes that sufficient measurements have been taken.
 
 Post Reporting phase
 ~~~~~~~~~~~~~~~~~~~~
 
-After the live monitoring phase, the ECC will contact the appropriate clients to begin the Post Reporting phase. The purpose of this phase is to allow the ECC to retrieve metric data that was not possible to collect during the Live Monitoring phase. For example, some clients may generate data too quickly or have a network connection that is too slow for all of their data to be transferred to the ECC in time. During this phase, clients will requested to first provide a summary of all the data they have collected during the Live Monitoring phase, and then be asked to send metric ‘data batches’ that will allow the ECC to complete its centrally stored data set for that client.
+After the live monitoring phase, the EXPERImonitor will contact the appropriate clients to begin the Post Reporting phase. The purpose of this phase is to allow the EXPERImonitor to retrieve metric data that was not possible to collect during the Live Monitoring phase. For example, some clients may generate data too quickly or have a network connection that is too slow for all of their data to be transferred to the EXPERImonitor in time. During this phase, clients will requested to first provide a summary of all the data they have collected during the Live Monitoring phase, and then be asked to send metric ‘data batches’ that will allow the EXPERImonitor to complete its centrally stored data set for that client.
 
 Tear-down phase
 ~~~~~~~~~~~~~~~
@@ -131,7 +131,7 @@ Finally, some clients may be able to report on their tear-down process for some 
 Primary metric dimensions
 -------------------------
 
-An important aspect of the ECC’s support for experimental processes is the specification and delivery of various kinds of metrics that will form a significant component of the final analysis of a FMI system. The experiment data and monitoring processes offered by the ECC focuses specifically on the generation and capture of *quality of service* (QoS), *quality of experience* (QoE) and *quality of community* (QoC) metrics. The characteristics of each dimension vary and are summarized in the table below.
+An important aspect of the EXPERImonitor’s support for experimental processes is the specification and delivery of various kinds of metrics that will form a significant component of the final analysis of a FMI system. The experiment data and monitoring processes offered by the EXPERImonitor focuses specifically on the generation and capture of *quality of service* (QoS), *quality of experience* (QoE) and *quality of community* (QoC) metrics. The characteristics of each dimension vary and are summarized in the table below.
 
 **Table**
 **1**
@@ -154,14 +154,14 @@ An important aspect of the ECC’s support for experimental processes is the spe
 
 A selection of metrics from each of these dimensions may be used by an experimenter to better understand how people and technology interact and perform during the course of an experiment.
 
-ECC metric model overview
-~~~~~~~~~~~~~~~~~~~~~~~~~
+EXPERImonitor metric model overview
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The ECC offers a metric modelling framework that offers support for a range of potential QoS, QoE and QoC measurements, see the figure below.
+The EXPERImonitor offers a metric modelling framework that offers support for a range of potential QoS, QoE and QoC measurements, see the figure below.
 
 |image8_png|
 
-In this model, the objects of experimental observation (referred to as ‘*Entities’*) are de-coupled from the agent (the ECC software client) making the observations. Entities themselves must contain one or more *Attributes* that are be the subject of actual instrumentation and measurement activity. A simple example of such a relationship is presented below in which an ECC client (called ‘SocialAuth ECC client’) observes a Facebook event.
+In this model, the objects of experimental observation (referred to as ‘*Entities’*) are de-coupled from the agent (the EXPERImonitor software client) making the observations. Entities themselves must contain one or more *Attributes* that are be the subject of actual instrumentation and measurement activity. A simple example of such a relationship is presented below in which an EXPERImonitor client (called ‘SocialAuth ECC client’) observes a Facebook event.
 
 |image9_png|
 
@@ -211,7 +211,7 @@ Table 2 : Example metrics
 
 In the table above a number of illustrative examples of metrics from QoS, QoE and QoC domains are shown (with notes to offer context). Reading from left to right, we can see how groups of metric sets (each with an associated metric type and unit) are mapped to the entities under observation in the real or virtual world. To save space, metric generator mappings have not been included.
 
-Moving up the data hierarchy, the next level of logical organisation is the *Metric Group* – a container used to perform one level of partitioning for collections of measurements that relate (for example, video rendering metrics). Metric Groups themselves are collected together by the top level data organisation, the Metric Generator. As previously indicated, the Metric Generator represents system-level components that generate metrics, for example it may be useful to differentiate server and client based metric generators. An additional mapping, similar to that used to link measurement data sets to attributes is specified linking metric generators to entities under observation since it is likely that individual systems will be deployed to observe different entity types. ECC client software must send their specification of the metrics they are going to provide the ECC in this way, during the Discovery phase. In this way, the experimenter has a means by which to understand which clients are performing what kind of measurements, and what they relate to within the experimental venue.
+Moving up the data hierarchy, the next level of logical organisation is the *Metric Group* – a container used to perform one level of partitioning for collections of measurements that relate (for example, video rendering metrics). Metric Groups themselves are collected together by the top level data organisation, the Metric Generator. As previously indicated, the Metric Generator represents system-level components that generate metrics, for example it may be useful to differentiate server and client based metric generators. An additional mapping, similar to that used to link measurement data sets to attributes is specified linking metric generators to entities under observation since it is likely that individual systems will be deployed to observe different entity types. EXPERImonitor client software must send their specification of the metrics they are going to provide the EXPERImonitor in this way, during the Discovery phase. In this way, the experimenter has a means by which to understand which clients are performing what kind of measurements, and what they relate to within the experimental venue.
 
 
 .. |image10_png| image:: images/image10.png

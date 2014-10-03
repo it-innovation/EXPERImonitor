@@ -1,5 +1,5 @@
-ECC monitoring protocol
-=======================
+EXPERImonitor monitoring protocol
+=================================
 
 Client connection interface
 ---------------------------

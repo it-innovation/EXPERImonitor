@@ -1,4 +1,4 @@
-Experiment Content Component (ECC) v${project.version} binary release
+EXPERImonitor v${project.version} binary release
 ------------------------------------------------------
 
 Copyright
@@ -11,10 +11,10 @@ The licence for this software is LGPL v2.1 (see LICENSE.txt). A complete list of
 
 Documentation
 =============
-The ECC documentation can be found in the 'docs' folder.
+The EXPERImonitor documentation can be found in the 'docs' folder.
 
 Javadoc for the source code may be found in 'javadoc' folder.
 
 Binaries
 ========
-The ECC service as a WAR file and the libraries required for client development can be found in the 'bin' folder.
+The EXPERImonitor service as a WAR file and the libraries required for client development can be found in the 'bin' folder.

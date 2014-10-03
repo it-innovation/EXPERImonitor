@@ -1,5 +1,5 @@
-ECC Virtual Machine with Apache WebDAV service using Vagrant
-------------------------------------------------------------
+EXPERImonitor Virtual Machine with Apache WebDAV service using Vagrant
+----------------------------------------------------------------------
 
 The ECC_vagrant folder should contain the following:
 
@@ -15,15 +15,15 @@ The virtual hosts file used by the apache server
 passwords.dav:
 A file that is used to store a list of WebDAV user accounts and encrypted password
 
-To install the ECC virtual machine with WebDAV
------------------------------------------------
+To install the EXPERImonitor virtual machine with WebDAV
+--------------------------------------------------------
 1. Open Virtual Box
 2. Open a command line in the ECC_vagrant directory
 3. Type: 'vagrant up'
 4. When installation is finished type: 'vagrant ssh' to access the VM
 
 Adding Users to the WebDAV Service
--------------------------------------
+----------------------------------
 The virtual machine has two WebDAV user accounts pre-configured:
 
 username: davuser
