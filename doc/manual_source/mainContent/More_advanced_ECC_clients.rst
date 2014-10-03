@@ -132,9 +132,47 @@ Some clients may wish to signal to the ECC that want to enable or disable an Ent
   
 Client writers can send 'enable' or 'disable' signals to the ECC by using the ECC adapter call EMInterfaceAdapter.sendEntityEnabled(..).
 
+Metric meta-data
+~~~~~~~~~~~~~~~~
+As of version V2.2, the EXPERimonitor API allows client writers to add meta-data to their metric model. The advantages of this new data include:
 
+* Multi-value metrics (such as GPS co-ordinated data) can now be more clearly defined
+* Enhancements/extensions to data visualisation on the EXPERImonitor dashboard are now possible
 
+Currently the EXPERimonitor dashboard uses meta-data to enhance the visualisation of QoE data (Likert scales); other visualisations using meta-data are anticipated in later releases. To make use of this feature, you must deploy V2.2 of the EXPERimonitor service (which requires an updated database schema).
+ 
+The EXPERimonitor Metric class now includes two new fields:
 
+.. figure:: images/metadataMetricClass.png
+   :alt: Metric class (with meta-data methods)
+   :align: center
 
+To explore the use of these two fields, we illustrate their use in further specifying ordinal metric as a Likert scale. To describe this in our metric model code we would do the following:
 
+.. code:: java
 
+	// Metric generator and group created before-hand
+	// MetricGroup mg = new MetricGroup(); ... etc
+	
+	// Create user (as an Entity)
+	Entity entity = new Entity();
+	entity.setName( "My User" );
+	
+	// Create an attribute describing UX element
+	Attribute attr = MetricHelper.createAttribute( "Application ease of use",
+	                                               "Perception of application 'X' ease-of-use",
+                                                       entity );
+	
+	// Create a measurement set and link to the attribute (and metric group)	
+	MeasurementSet ms = 
+		MetricHelper.createMeasurementSet( attr,
+		                                   MetricType.ORDINAL,
+                                                   new Unit( "Point scale" ),
+                                                   mg );
+
+	// Enhance metric of measurement set with meta-data
+	Metric metric = ms.getMetric();
+	metric.setMetaType("Likert scale" );
+	metric.setMetaContent( "very difficut,difficult,not difficult/easy,easy,very easy" );
+	
+The example above adds Likert Scale semantics to the measurement set (i.e., the actual point scale labels, their order and total number). Version V2.2 of the EXPERimontor dashboard recognizes the 'Likert scale' meta-type and uses it in its visualisation functions. Please note that the use of meta-data is optional for client writers and that older (ECC) clients will still work without including meta-data in the code.
