@@ -1,6 +1,46 @@
 ECC change log
 ==================
 
+v2.2
+####
+
+Main changes
+------------
+
+ECC is renamed EXPERImonitor
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In this release we renamed the ECC to 'EXPERImonitor'.
+
+
+Experiment explorer user interface
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In addition to the existing metrics based views, EXPERImonitor now comes with a data explorer interface that allows you to:
+
+ * Explore experiment participant interactions with your experimental system (using captured provenance data)
+ * Visualise quality of experience measurements associated with experiment participants
+ * Explore relationships between:
+		* User experience
+		* User activities and application usage
+		* User activities and service usage
+		* Service usage and service QoS metrics
+
+For further information on the use of this new UI, please consult the documentation.
+
+A list of other significant features, updates and bug fixes follows:
+
+================================================================== ====================================================================================================== 
+Change                                                             Description
+================================================================== ======================================================================================================
+New feature: Provenance demo clients added to samples              Clients 'lwtECCClient' and 'experimentSimulation' generate provenance & metric data to explore.
+New feature: Metric API now includes metric meta-data              Client writers can now specify meta-types and meta-content in their model. Please see documentation.
+Update: Provenance API updated for client writers                  Clean-ups and improvements made to the provenance API. Please see documentation. 
+Update: Android client code simplified & bug-fixed                 Android client code now simplified using updated API. Push metric failure on emulator fixed.
+Update: Experiment data export now uses ISO-8601 date labelling    The experiment data export sample now creates folders using ISO-8601 like date formatting.
+Update: Further documenation on EXPERImonitor usage scenarios      The documentation has been extended to include experimental scenarios and recommendations for API use.
+Bug fix: Access to online FOAF ontology data stops EXPERImonitor   FIXED: All ontologies loaded by default at the start of an experiment are loaded from local resource.
+Bug fix: Client UI not updated after client disconnect action      FIXED: Clients now appear in correct drop-down list after they have been disconnected.
+================================================================== ======================================================================================================
+
 v2.1
 #####
 
