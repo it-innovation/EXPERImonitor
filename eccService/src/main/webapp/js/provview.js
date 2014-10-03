@@ -103,8 +103,8 @@ $(document).ready(function () {
                                         console.log(servicesResponse);
                                         services = servicesResponse.services;
                                         groupAttributes = attributes;
-                                        addParticipantQoeAttributesWidget("");
-//                                        addQosServicesExplorerWidget("", "", "");
+//                                        addParticipantQoeAttributesWidget("");
+                                        addQosServicesExplorerWidget("", "", "");
                                         $("#addNewQoe").click(function (e) {
                                             e.preventDefault();
                                             addParticipantQoeAttributesWidget("");
@@ -320,10 +320,11 @@ function renderQosGraphWithUser(addToContainer, attributeId, participantIri, act
             "&actLabel=" + encodeURIComponent(activityLabel), function (data) {
         console.log(data);
         addToContainer.empty();
+        addToContainer.css('height', 1.1 * CHART_HEIGHT);
         addToContainer.append('<div id="' + newChartId + '" class="widgetGraph"><svg class="large-12 text-center columns"></svg></div>');
         $('#' + newChartId + ' svg').show().height(CHART_HEIGHT);
         nv.addGraph(function () {
-            var chart = nv.models.lineChart()
+            var chart = nv.models.lineWithFocusChart()
                     .x(function (d) {
                         return d.timestamp;
                     })
@@ -331,7 +332,8 @@ function renderQosGraphWithUser(addToContainer, attributeId, participantIri, act
                         return d.value / 10;
                     })      // TODO -- fix scalling problems, dividing by 10 is a hack to get round scalling issues
                     .margin({top: 30, right: 50, bottom: 20, left: 100})
-                    .useInteractiveGuideline(true)
+                    .margin2({top: 30, right: 50, bottom: 20, left: 100})
+//                    .useInteractiveGuideline(true)
                     .forceY([0])
                     .color(d3.scale.category10().range())
                     .isArea(true);
@@ -343,6 +345,15 @@ function renderQosGraphWithUser(addToContainer, attributeId, participantIri, act
                     });
             chart.yAxis
                     .axisLabel(units(data.seriesSet[0].key))
+                    .tickFormat(d3.format(',.2f'));
+            chart.x2Axis
+                    .axisLabel('Time')
+                    .showMaxMin(true)
+                    .tickFormat(function (d) {
+                        return d3.time.format('%X')(new Date(d));
+                    });
+            chart.y2Axis
+//                    .axisLabel(units(data.seriesSet[0].key))
                     .tickFormat(d3.format(',.2f'));
             d3.select('#' + newChartId + ' svg')
                     .datum(data.seriesSet)
@@ -380,10 +391,11 @@ function renderQosGraph(addToContainer, attributeId) {
     d3.json(BASE_URL + "/explorer/" + experimentId + "/attributes/series/qos/highlight/participants?attrID=" + attributeId, function (data) {
         console.log(data);
         addToContainer.empty();
+        addToContainer.css('height', 1.1 * CHART_HEIGHT);
         addToContainer.append('<div id="' + newChartId + '" class="widgetGraph"><svg class="large-12 text-center columns"></svg></div>');
         $('#' + newChartId + ' svg').show().height(CHART_HEIGHT);
         nv.addGraph(function () {
-            var chart = nv.models.lineChart()
+            var chart = nv.models.lineWithFocusChart()
                     .x(function (d) {
                         return d.timestamp;
                     })
@@ -391,10 +403,12 @@ function renderQosGraph(addToContainer, attributeId) {
                         return d.value / 10;
                     })      // TODO -- fix scalling problems, dividing by 10 is a hack to get round scalling issues
                     .margin({top: 30, right: 50, bottom: 20, left: 100})
-                    .useInteractiveGuideline(true)
+                    .margin2({top: 30, right: 50, bottom: 20, left: 100})
+//                    .useInteractiveGuideline(true)
                     .forceY([0])
                     .color(d3.scale.category10().range())
                     .isArea(true);
+
             chart.xAxis
                     .axisLabel('Time')
                     .showMaxMin(true)
@@ -404,6 +418,17 @@ function renderQosGraph(addToContainer, attributeId) {
             chart.yAxis
                     .axisLabel(units(data.seriesSet[0].key))
                     .tickFormat(d3.format(',.2f'));
+
+            chart.x2Axis
+                    .axisLabel('Time')
+                    .showMaxMin(true)
+                    .tickFormat(function (d) {
+                        return d3.time.format('%X')(new Date(d));
+                    });
+            chart.y2Axis
+//                    .axisLabel(units(data.seriesSet[0].key))
+                    .tickFormat(d3.format(',.2f'));
+
             d3.select('#' + newChartId + ' svg')
                     .datum(data.seriesSet)
                     .transition().duration(500)
@@ -523,6 +548,7 @@ function runQoeWidgetSelection(widgetsCounter, widgetGraphsContainer, widgetGrap
  * @param {type} widgetGraphsContainer
  * @param {type} widgetSelectorsContainerLeftForm
  * @param {type} widgetSelectorsContainerRightForm
+ * @param {type} widgetGraphsSelectedDetailsContainerMain
  * @returns {undefined}
  */
 function runQosWidgetSelection(widgetsCounter, widgetGraphsContainer, widgetSelectorsContainerLeftForm, widgetSelectorsContainerRightForm, widgetGraphsSelectedDetailsContainerMain) {
