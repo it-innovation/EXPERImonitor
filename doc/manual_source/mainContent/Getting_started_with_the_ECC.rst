@@ -6,7 +6,7 @@ There is a binary and source release of the ECC. The source release contains all
 Acquiring the required 3rd party libraries
 ==========================================
 
-In addition to the ECC distribution, you will also need to acquire some third party libraries that we cannot reditribute due to their licenses.
+In addition to the ECC distribution, you will also need to acquire some third party libraries that we cannot redistribute due to their licenses.
 
 ===================== ==========================================================================================================
 Library               Description
@@ -58,6 +58,7 @@ The following tools are required to build the ECC service and libraries:
 
 * Java JDK 1.7 (Oracle JDK for Windows and OpenJDK for Ubuntu have both been tested)
 * Maven 3.0
+* OWLIM Lite 5.4 (see above)
 
 Install these tools according to their instructions for your platform.
 
