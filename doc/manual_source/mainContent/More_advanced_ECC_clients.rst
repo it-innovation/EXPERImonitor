@@ -62,7 +62,7 @@ SCENARIO 1
 
 This scenario is the most common for client writers and is a typical case for mobile devices operating on a public network, such as an Android application running on a mobile phone. In this case, there are two possible options:
 
-  1. Store and re-use your existing metric model when you re-connect to an experiment. When your client re-connects with the ECC, it will be asked to send its metric model - it can simply re-send the model it used before. Currently there is no direct support for reading/writing the metric model from/to disk, however this can be achieved relatively simply using one of the following methods:
+  1. Store and re-use your existing metric model when you re-connect to an experiment. When your client re-connects with the ECC, it will be asked to send its metric model - it can simply re-send the model it used before (this is simple if the model is still held in memory). Currently there is no direct support for reading/writing the metric model from/to disk, however this can be achieved relatively simply using one of the following methods:
 	
 		1.1 Java: the metric model is serializable or can be 'JSONized' (using the GSON library, for example)
     
@@ -98,7 +98,7 @@ Reconnecting your client (technical)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 When connecting (or re-connecting) to the ECC, your client identifies itself using a UUID which allows the ECC to uniquely identify your client. This is done using the class and method call *EMInterfaceAdapter.registerWithEM(..)* (parameter 4). If you wish to re-connect to an experiment as the same client instance, you should use the same client UUID as you used previously.
 
-Each *new* experiment requires a *new* metric model from your client (to ensure consistency within the ECC database) and is uniquely identified using a UUID - this is presented to the client in the event 'onEMConnectionResult(..)'. If your client can test to see if it is re-connecting to the same experiment by comparing experiment UUIDs and then act accordingly:
+Each *new* experiment requires a *new* metric model from your client (to ensure consistency within the ECC database) and this new experiment is uniquely identified using a UUID - this is presented to the client in the event 'onEMConnectionResult(..)'. Your client can test to see if it is re-connecting to the same experiment by comparing experiment UUIDs and then act accordingly:
 
 * Connected to the same experiment
   * Use the previously defined metric model and continue as normal (recommended)
