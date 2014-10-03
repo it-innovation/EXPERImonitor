@@ -625,8 +625,10 @@ public class ExplorerService
                                 
                                 if ( !Float.isNaN(medianPos) )
                                 {
-                                    String value = MetricHelper.getORDINALLabelFromIndex( metric, medianPos );
-                                    result.addORDINALResponse( attr.getName(), value, (int) medianPos );
+                                    int orderCount = MetricHelper.getORDINALLabelCount( metric );
+									String value = MetricHelper.getORDINALLabelFromIndex( metric, medianPos );
+									
+                                    result.addORDINALResponse( attr.getName(), value, (int) medianPos, orderCount );
                                 }
                             }
                         }

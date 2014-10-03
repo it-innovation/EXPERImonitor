@@ -1163,4 +1163,18 @@ public class MetricHelper
         
         return result;
     }
+	
+	public static int getORDINALLabelCount( Metric metric )
+	{
+		int result = 0;
+		
+		// Safety
+        if ( metric != null && metric.getMetricType() == MetricType.ORDINAL )
+        {
+			String[] labels = metric.getMetaContent().split( "," );
+			result = labels.length;
+		}
+		
+		return result;
+	}
 }

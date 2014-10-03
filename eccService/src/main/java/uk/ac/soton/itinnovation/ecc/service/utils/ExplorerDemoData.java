@@ -447,103 +447,103 @@ public class ExplorerDemoData {
         // Alice
         int[] answers = new int[]{4, 4, 3};
         EccNOMORDParticipantSummary ps = new EccNOMORDParticipantSummary(AlicePART);
-        ps.addORDINALResponse(qoeAttrONE.getName(), getStringForIndexStartingAtOne(qoeAttrONE.getMetaContent(), answers[0]), answers[0]);
+        ps.addORDINALResponse(qoeAttrONE.getName(), getStringForIndexStartingAtOne(qoeAttrONE.getMetaContent(), answers[0]), answers[0], 5);
         questionnaire.addAnswer(new Answer(alice, q1, answers[0]));
-        ps.addORDINALResponse(qoeAttrTWO.getName(), getStringForIndexStartingAtOne(qoeAttrTWO.getMetaContent(), answers[1]), answers[1]);
+        ps.addORDINALResponse(qoeAttrTWO.getName(), getStringForIndexStartingAtOne(qoeAttrTWO.getMetaContent(), answers[1]), answers[1], 5);
         questionnaire.addAnswer(new Answer(alice, q2, answers[1]));
-        ps.addORDINALResponse(qoeAttrTHREE.getName(), getStringForIndexStartingAtOne(qoeAttrTHREE.getMetaContent(), answers[2]), answers[2]);
+        ps.addORDINALResponse(qoeAttrTHREE.getName(), getStringForIndexStartingAtOne(qoeAttrTHREE.getMetaContent(), answers[2]), answers[2], 5);
         questionnaire.addAnswer(new Answer(alice, q3, answers[2]));
         qoeParticipantSummaryData.put(AlicePART.getIRI(), ps);
 
         // Bob
         answers = new int[]{3, 2, 1};
         ps = new EccNOMORDParticipantSummary(BobPART);
-        ps.addORDINALResponse(qoeAttrONE.getName(), getStringForIndexStartingAtOne(qoeAttrONE.getMetaContent(), answers[0]), answers[0]);
+        ps.addORDINALResponse(qoeAttrONE.getName(), getStringForIndexStartingAtOne(qoeAttrONE.getMetaContent(), answers[0]), answers[0], 5);
         questionnaire.addAnswer(new Answer(bob, q1, answers[0]));
-        ps.addORDINALResponse(qoeAttrTWO.getName(), getStringForIndexStartingAtOne(qoeAttrTWO.getMetaContent(), answers[1]), answers[1]);
+        ps.addORDINALResponse(qoeAttrTWO.getName(), getStringForIndexStartingAtOne(qoeAttrTWO.getMetaContent(), answers[1]), answers[1], 5);
         questionnaire.addAnswer(new Answer(bob, q2, answers[1]));
-        ps.addORDINALResponse(qoeAttrTHREE.getName(), getStringForIndexStartingAtOne(qoeAttrTHREE.getMetaContent(), answers[2]), answers[2]);
+        ps.addORDINALResponse(qoeAttrTHREE.getName(), getStringForIndexStartingAtOne(qoeAttrTHREE.getMetaContent(), answers[2]), answers[2], 5);
         questionnaire.addAnswer(new Answer(bob, q3, answers[2]));
         qoeParticipantSummaryData.put(BobPART.getIRI(), ps);
 
         // Carol
         answers = new int[]{3, 5, 4};
         ps = new EccNOMORDParticipantSummary(CarolPART);
-        ps.addORDINALResponse(qoeAttrONE.getName(), getStringForIndexStartingAtOne(qoeAttrONE.getMetaContent(), answers[0]), answers[0]);
+        ps.addORDINALResponse(qoeAttrONE.getName(), getStringForIndexStartingAtOne(qoeAttrONE.getMetaContent(), answers[0]), answers[0], 5);
         questionnaire.addAnswer(new Answer(carol, q1, answers[0]));
-        ps.addORDINALResponse(qoeAttrTWO.getName(), getStringForIndexStartingAtOne(qoeAttrTWO.getMetaContent(), answers[1]), answers[1]);
+        ps.addORDINALResponse(qoeAttrTWO.getName(), getStringForIndexStartingAtOne(qoeAttrTWO.getMetaContent(), answers[1]), answers[1], 5);
         questionnaire.addAnswer(new Answer(carol, q2, answers[1]));
-        ps.addORDINALResponse(qoeAttrTHREE.getName(), getStringForIndexStartingAtOne(qoeAttrTHREE.getMetaContent(), answers[2]), answers[2]);
+        ps.addORDINALResponse(qoeAttrTHREE.getName(), getStringForIndexStartingAtOne(qoeAttrTHREE.getMetaContent(), answers[2]), answers[2], 5);
         questionnaire.addAnswer(new Answer(carol, q3, answers[2]));
         qoeParticipantSummaryData.put(CarolPART.getIRI(), ps);
 
         answers = new int[]{4, 5, 5};
         ps = new EccNOMORDParticipantSummary(DavidPART);
-        ps.addORDINALResponse(qoeAttrONE.getName(), getStringForIndexStartingAtOne(qoeAttrONE.getMetaContent(), answers[0]), answers[0]);
+        ps.addORDINALResponse(qoeAttrONE.getName(), getStringForIndexStartingAtOne(qoeAttrONE.getMetaContent(), answers[0]), answers[0], 5);
         questionnaire.addAnswer(new Answer(david, q1, answers[0]));
-        ps.addORDINALResponse(qoeAttrTWO.getName(), getStringForIndexStartingAtOne(qoeAttrTWO.getMetaContent(), answers[1]), answers[1]);
+        ps.addORDINALResponse(qoeAttrTWO.getName(), getStringForIndexStartingAtOne(qoeAttrTWO.getMetaContent(), answers[1]), answers[1], 5);
         questionnaire.addAnswer(new Answer(david, q2, answers[1]));
-        ps.addORDINALResponse(qoeAttrTHREE.getName(), getStringForIndexStartingAtOne(qoeAttrTHREE.getMetaContent(), answers[2]), answers[2]);
+        ps.addORDINALResponse(qoeAttrTHREE.getName(), getStringForIndexStartingAtOne(qoeAttrTHREE.getMetaContent(), answers[2]), answers[2], 5);
         questionnaire.addAnswer(new Answer(david, q3, answers[2]));
         qoeParticipantSummaryData.put(DavidPART.getIRI(), ps);
 
         answers = new int[]{5, 5, 4};
         ps = new EccNOMORDParticipantSummary(ElizabethPART);
-        ps.addORDINALResponse(qoeAttrONE.getName(), getStringForIndexStartingAtOne(qoeAttrONE.getMetaContent(), answers[0]), answers[0]);
+        ps.addORDINALResponse(qoeAttrONE.getName(), getStringForIndexStartingAtOne(qoeAttrONE.getMetaContent(), answers[0]), answers[0], 5);
         questionnaire.addAnswer(new Answer(elizabeth, q1, answers[0]));
-        ps.addORDINALResponse(qoeAttrTWO.getName(), getStringForIndexStartingAtOne(qoeAttrTWO.getMetaContent(), answers[1]), answers[1]);
+        ps.addORDINALResponse(qoeAttrTWO.getName(), getStringForIndexStartingAtOne(qoeAttrTWO.getMetaContent(), answers[1]), answers[1], 5);
         questionnaire.addAnswer(new Answer(elizabeth, q2, answers[1]));
-        ps.addORDINALResponse(qoeAttrTHREE.getName(), getStringForIndexStartingAtOne(qoeAttrTHREE.getMetaContent(), answers[2]), answers[2]);
+        ps.addORDINALResponse(qoeAttrTHREE.getName(), getStringForIndexStartingAtOne(qoeAttrTHREE.getMetaContent(), answers[2]), answers[2], 5);
         questionnaire.addAnswer(new Answer(elizabeth, q3, answers[2]));
         qoeParticipantSummaryData.put(ElizabethPART.getIRI(), ps);
 
         answers = new int[]{3, 4, 5};
         ps = new EccNOMORDParticipantSummary(FrankPART);
-        ps.addORDINALResponse(qoeAttrONE.getName(), getStringForIndexStartingAtOne(qoeAttrONE.getMetaContent(), answers[0]), answers[0]);
+        ps.addORDINALResponse(qoeAttrONE.getName(), getStringForIndexStartingAtOne(qoeAttrONE.getMetaContent(), answers[0]), answers[0], 5);
         questionnaire.addAnswer(new Answer(frank, q1, answers[0]));
-        ps.addORDINALResponse(qoeAttrTWO.getName(), getStringForIndexStartingAtOne(qoeAttrTWO.getMetaContent(), answers[1]), answers[1]);
+        ps.addORDINALResponse(qoeAttrTWO.getName(), getStringForIndexStartingAtOne(qoeAttrTWO.getMetaContent(), answers[1]), answers[1], 5);
         questionnaire.addAnswer(new Answer(frank, q2, answers[1]));
-        ps.addORDINALResponse(qoeAttrTHREE.getName(), getStringForIndexStartingAtOne(qoeAttrTHREE.getMetaContent(), answers[2]), answers[2]);
+        ps.addORDINALResponse(qoeAttrTHREE.getName(), getStringForIndexStartingAtOne(qoeAttrTHREE.getMetaContent(), answers[2]), answers[2], 5);
         questionnaire.addAnswer(new Answer(frank, q3, answers[2]));
         qoeParticipantSummaryData.put(FrankPART.getIRI(), ps);
 
         answers = new int[]{4, 3, 3};
         ps = new EccNOMORDParticipantSummary(GemmaPART);
-        ps.addORDINALResponse(qoeAttrONE.getName(), getStringForIndexStartingAtOne(qoeAttrONE.getMetaContent(), answers[0]), answers[0]);
+        ps.addORDINALResponse(qoeAttrONE.getName(), getStringForIndexStartingAtOne(qoeAttrONE.getMetaContent(), answers[0]), answers[0], 5);
         questionnaire.addAnswer(new Answer(gemma, q1, answers[0]));
-        ps.addORDINALResponse(qoeAttrTWO.getName(), getStringForIndexStartingAtOne(qoeAttrTWO.getMetaContent(), answers[1]), answers[1]);
+        ps.addORDINALResponse(qoeAttrTWO.getName(), getStringForIndexStartingAtOne(qoeAttrTWO.getMetaContent(), answers[1]), answers[1], 5);
         questionnaire.addAnswer(new Answer(gemma, q2, answers[1]));
-        ps.addORDINALResponse(qoeAttrTHREE.getName(), getStringForIndexStartingAtOne(qoeAttrTHREE.getMetaContent(), answers[2]), answers[2]);
+        ps.addORDINALResponse(qoeAttrTHREE.getName(), getStringForIndexStartingAtOne(qoeAttrTHREE.getMetaContent(), answers[2]), answers[2], 5);
         questionnaire.addAnswer(new Answer(gemma, q3, answers[2]));
         qoeParticipantSummaryData.put(GemmaPART.getIRI(), ps);
 
         answers = new int[]{5, 5, 5};
         ps = new EccNOMORDParticipantSummary(HenryPART);
-        ps.addORDINALResponse(qoeAttrONE.getName(), getStringForIndexStartingAtOne(qoeAttrONE.getMetaContent(), answers[0]), answers[0]);
+        ps.addORDINALResponse(qoeAttrONE.getName(), getStringForIndexStartingAtOne(qoeAttrONE.getMetaContent(), answers[0]), answers[0], 5);
         questionnaire.addAnswer(new Answer(henry, q1, answers[0]));
-        ps.addORDINALResponse(qoeAttrTWO.getName(), getStringForIndexStartingAtOne(qoeAttrTWO.getMetaContent(), answers[1]), answers[1]);
+        ps.addORDINALResponse(qoeAttrTWO.getName(), getStringForIndexStartingAtOne(qoeAttrTWO.getMetaContent(), answers[1]), answers[1], 5);
         questionnaire.addAnswer(new Answer(henry, q2, answers[1]));
-        ps.addORDINALResponse(qoeAttrTHREE.getName(), getStringForIndexStartingAtOne(qoeAttrTHREE.getMetaContent(), answers[2]), answers[2]);
+        ps.addORDINALResponse(qoeAttrTHREE.getName(), getStringForIndexStartingAtOne(qoeAttrTHREE.getMetaContent(), answers[2]), answers[2], 5);
         questionnaire.addAnswer(new Answer(henry, q3, answers[2]));
         qoeParticipantSummaryData.put(HenryPART.getIRI(), ps);
 
         answers = new int[]{5, 5, 5};
         ps = new EccNOMORDParticipantSummary(ImogenPART);
-        ps.addORDINALResponse(qoeAttrONE.getName(), getStringForIndexStartingAtOne(qoeAttrONE.getMetaContent(), answers[0]), answers[0]);
+        ps.addORDINALResponse(qoeAttrONE.getName(), getStringForIndexStartingAtOne(qoeAttrONE.getMetaContent(), answers[0]), answers[0], 5);
         questionnaire.addAnswer(new Answer(imogen, q1, answers[0]));
-        ps.addORDINALResponse(qoeAttrTWO.getName(), getStringForIndexStartingAtOne(qoeAttrTWO.getMetaContent(), answers[1]), answers[1]);
+        ps.addORDINALResponse(qoeAttrTWO.getName(), getStringForIndexStartingAtOne(qoeAttrTWO.getMetaContent(), answers[1]), answers[1], 5);
         questionnaire.addAnswer(new Answer(imogen, q2, answers[1]));
-        ps.addORDINALResponse(qoeAttrTHREE.getName(), getStringForIndexStartingAtOne(qoeAttrTHREE.getMetaContent(), answers[2]), answers[2]);
+        ps.addORDINALResponse(qoeAttrTHREE.getName(), getStringForIndexStartingAtOne(qoeAttrTHREE.getMetaContent(), answers[2]), answers[2], 5);
         questionnaire.addAnswer(new Answer(imogen, q3, answers[2]));
         qoeParticipantSummaryData.put(ImogenPART.getIRI(), ps);
 
         answers = new int[]{4, 3, 4};
         ps = new EccNOMORDParticipantSummary(JuliePART);
-        ps.addORDINALResponse(qoeAttrONE.getName(), getStringForIndexStartingAtOne(qoeAttrONE.getMetaContent(), answers[0]), answers[0]);
+        ps.addORDINALResponse(qoeAttrONE.getName(), getStringForIndexStartingAtOne(qoeAttrONE.getMetaContent(), answers[0]), answers[0], 5);
         questionnaire.addAnswer(new Answer(julie, q1, answers[0]));
-        ps.addORDINALResponse(qoeAttrTWO.getName(), getStringForIndexStartingAtOne(qoeAttrTWO.getMetaContent(), answers[1]), answers[1]);
+        ps.addORDINALResponse(qoeAttrTWO.getName(), getStringForIndexStartingAtOne(qoeAttrTWO.getMetaContent(), answers[1]), answers[1], 5);
         questionnaire.addAnswer(new Answer(julie, q2, answers[1]));
-        ps.addORDINALResponse(qoeAttrTHREE.getName(), getStringForIndexStartingAtOne(qoeAttrTHREE.getMetaContent(), answers[2]), answers[2]);
+        ps.addORDINALResponse(qoeAttrTHREE.getName(), getStringForIndexStartingAtOne(qoeAttrTHREE.getMetaContent(), answers[2]), answers[2], 5);
         questionnaire.addAnswer(new Answer(julie, q3, answers[2]));
         qoeParticipantSummaryData.put(JuliePART.getIRI(), ps);
 

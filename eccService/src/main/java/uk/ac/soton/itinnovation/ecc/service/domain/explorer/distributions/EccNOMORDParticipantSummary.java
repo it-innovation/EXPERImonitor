@@ -60,11 +60,11 @@ public class EccNOMORDParticipantSummary
         }
     }
     
-    public void addORDINALResponse( String label, String value, int order )
+    public void addORDINALResponse( String label, String value, int order, int maxOrder )
     {
         if ( label != null && value != null )
         {
-            EccNOMORDItemCount nic = new EccNOMORDItemCount( label, value, order );
+            EccNOMORDItemCount nic = new EccNOMORDItemCount( label, value, order, maxOrder );
             qoeResponseSummary.add( nic );
         }
     }
