@@ -62,35 +62,31 @@ In the following sections, the reader is introduced to the ECC and its principal
 Introduction to the ECC
 -----------------------
 
-An ‘under the hood’ architectural perspective of the ECC is provided in the figure below.
+A high-level architectural overview of the EXPERImonitor architecture is presented in the figure below. 
 
 |image6_png|
 
-Each of the main components of the ECC are summarised in the sub-sections below. See section for a more detailed break-down of each component.
+From an architectural point of view, it is useful to think of the EXPERIMonitor is a collection of experiment related services and APIs. The 'Config', 'Data', 'Explorer' and 'Experiment' services are implemented as RESTful interfaces that provide the facilities required for the web dashboard to run. The application logic that underpins these services are divided into three main components related to deployment and configuration; experiment data management; and (live) experiment monitoring. A summary of these components (and the web dashboard view) is provided in sub-sections below. 
 
-EDC
-~~~
+Web Dashboard View
+~~~~~~~~~~~~~~~~~~
+This component provides a view on both live and previously run experiments carried out using the EXPERImonitor service. It is designed to be experimenter facing, offering control over the creation and execution of experiments as well as allow the experimenter to view metrics live (during experimentation) or explore/export data sets for later analysis.
 
-The ‘Experiment Deployment and Configuration’ component (EDC) provides deployment and configuration support for the EXPERImonitor service. Using the EDC, developers are able to automatically and rapidly set up an EXPERIMonitor service on a virtual machine using Vagrant/Oracle VM platforms. Configuration details that connect clients to the EXPERIMonitor service are also accessible to client writers via the EDC configuration API.
+Experiment Deployment and Configuration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-ES
-~~
-
-The ‘Experiment Specification’ (ES) component consists of a set of configuration files that allow the experimenter to describe the resources and security details for the ECC components and their dependencies. This includes:
-
-* User name and password configurations for RabbitMQ and PostgreSQL resources
-* EXPERIMonitor entry point IDs
+The ‘Experiment Deployment and Configuration’ component (EDC) provides deployment and configuration functionality for the EXPERImonitor. Configuration details that integrate EXPERImonitor internal components as well as external (metric producing) clients to the EXPERIMonitor service are accessed and updated via this component. These include user name and password configurations for RabbitMQ and PostgreSQL resources and EXPERIMonitor entry point IDs. In addition to this, using EDC resources, developers are able to automatically and rapidly set up an EXPERIMonitor service on a virtual machine using Vagrant/Oracle VM platforms.
 
 
-EM (and AMQP Bus)
-~~~~~~~~~~~~~~~~~
+Experiment Monitoring (and AMQP Bus)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The ‘Experiment Monitoring’ (EM) component manages the delivery of experiment data (QoS/QoE metrics) to the EDM from experimentally instrumented technology, connected via an AMQP bus (RabbitMQ is used as the implementation). Experimenters have access to a user interface (a web based dashboard) that controls the experimental monitoring process.
 
-EDM
-~~~
+Experiment Data Manager
+~~~~~~~~~~~~~~~~~~~~~~~
 
-The EDM manages the storage and retrieval of experiment related data. The current release of the EDM persists monitoring data of entities in experiments. This monitoring data is stored in a PostgreSQL 9.1.x (relational) database, according to a schema reflecting the experiment metrics model. Monitoring data is delivered to the EDM for storage by the EM and can be monitored by experimenters via a user interface.
+The EDM manages the storage and retrieval of experiment related data that includes metric and provenance based data. Metric related data is stored in a PostgreSQL 9.1.x (relational) database, according to a schema reflecting the experiment metrics model. Provenance orientated data is persisted by the EDM via connection to a triple store data service. Experiment data is delivered to the EDM for storage by the EM and can be monitored by experimenters via a user interface.
 
 
 The EXPERIMEDIA experiment process
