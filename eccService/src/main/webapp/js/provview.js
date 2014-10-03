@@ -505,12 +505,13 @@ function runQoeWidgetSelection(widgetsCounter, widgetGraphsContainer, widgetGrap
             headerTitle.text('Participant: ' + participantSelection.data("participant").name + ', QoE');
             widgetGraphsContainer.empty();
             widgetGraphsContainer.append('<div class="small-12 columns text-center"><h3>Not implemented</h3></div>');
-//            renderParticipantQoeGraphsToContainer(participantSelection.data("participant").iri, widgetGraphsContainer, widgetGraphsSelectedDetailsContainerMain);
+            renderParticipantQoeTableToContainer(participantSelection.data("participant").iri, widgetGraphsContainer);
         } else {
             console.log('Plotting participant ' + participantSelectionVal + ' (' + participantSelection.data("participant").name + '), attribute: ' + attributeSelectionVal);
             headerTitle.text('Participant: ' + participantSelection.data("participant").name + ', QoE: ' + attributeSelectionVal);
             widgetGraphsContainer.empty();
             widgetGraphsContainer.append('<div class="small-12 columns text-center"><h3>Not implemented</h3></div>');
+            renderParticipantQoeAndAttributeTableToContainer(participantSelection.data("participant").iri, widgetGraphsContainer, attributeSelectionVal);
         }
     }
 }
@@ -788,74 +789,55 @@ function chartClickStrat(e, detailsContainer) {
     });
 }
 
-function renderParticipantQoeGraphsToContainer(selectedParticipantId, addToContainer, detailsContainer) {
+/**
+ * Puts participant's responses for all attributes into a table.
+ *
+ * @param {type} selectedParticipantId
+ * @param {type} addToContainer
+ * @returns {undefined}
+ */
+function renderParticipantQoeTableToContainer(selectedParticipantId, addToContainer) {
     addToContainer.empty();
+    addToContainer.css('height', '');
     graphsCounter++;
     var newChartId = 'wg' + graphsCounter;
-    addToContainer.append('<div id="l' + newChartId + '" class="widgetGraph"><svg class="large-6 text-center columns"></svg></div>');
-    addToContainer.append('<div id="r' + newChartId + '" class="widgetGraph"><svg class="large-6 text-center columns"></svg></div>');
+    addToContainer.append('<div id="f' + newChartId + '" class="large-12 columns"></div>');
 
     d3.json(BASE_URL + "/explorer/" + experimentId + "/participants/iri/distribution/qoe?IRI=" + encodeURIComponent(selectedParticipantId), function (data) {
-        $('#l' + newChartId + ' svg').show().height(CHART_HEIGHT);
-        $('#r' + newChartId + ' svg').show().height(CHART_HEIGHT);
         console.log(data);
-        nv.addGraph(function () {
-            var chart = nv.models.multiBarHorizontalChart()
-                    .x(function (d) {
-                        return d.label;
-                    })
-                    .y(function (d) {
-                        return d.count;
-                    })
-                    .tooltipContent(function (key, label, count) {
-                        return '<p><strong>' + count + ' participants</strong> selected ' + label + '</p>';
-                    })
-                    .showYAxis(false)
-                    .margin({top: 30, right: 20, bottom: 50, left: 130})
-                    .barColor(d3.scale.customColors().range())
-                    .showValues(true)
-                    .showControls(false)
-                    .transitionDuration(350)
-                    .valueFormat(d3.format(',f'));
-            chart.yAxis
-                    .tickFormat(d3.format(',f'));
-            d3.select('#l' + newChartId + ' svg')
-                    .datum(data)
-                    .call(chart);
-            nv.utils.windowResize(chart.update);
-            chart.multibar.dispatch.on("elementClick", function (e) {
-//                chartClickAttr(e, detailsContainer, selectedAttributeName);
-            });
-            return chart;
+        var table = $('<table class="fullWidth"></table>').appendTo($('#f' + newChartId));
+        table.append('<thead><tr><th>Attribute</th><th>Value</th><th>Order</th></tr></thead>');
+        var tableBody = $('<tbody></tbody>').appendTo(table);
+        $.each(data.summary, function (aCounter, aValue) {
+            tableBody.append('<tr><td>' + aValue.label + '</td><td>' + aValue.value + '</td><td>' + aValue.order + '</td></tr>');
         });
-        // donut chart
-        nv.addGraph(function () {
-            var chart = nv.models.pieChart()
-                    .x(function (d) {
-                        return d.label;
-                    })
-                    .y(function (d) {
-                        return d.count;
-                    })
-                    .height(500)
-                    .tooltipContent(function (label, count) {
-                        return '<p><strong>' + count + ' participants</strong> selected ' + label + '</p>';
-                    })
-                    .showLabels(true)
-                    .labelThreshold(.05)    // Configure the minimum slice size for labels to show up
-                    .color(d3.scale.customColors().range())
-                    .valueFormat(d3.format(',f'))
-                    .labelType("percent")   // Configure what type of data to show in the label. Can be "key", "value" or "percent"
-                    .donut(true)            // Turn on Donut mode.
-                    .donutRatio(0.325);     // Configure how big you want the donut hole size to be.
-            d3.select('#r' + newChartId + ' svg')
-                    .datum(data[0].values)
-                    .transition().duration(350)
-                    .call(chart);
-            chart.pie.dispatch.on("elementClick", function (e) {
-//                chartClickAttr(e, detailsContainer, selectedAttributeName);
-            });
-            return chart;
+    });
+}
+
+/**
+ * Puts participant's responses for all attributes into a table.
+ *
+ * @param {type} selectedParticipantId
+ * @param {type} addToContainer
+ * @param {type} attributeName
+ * @returns {undefined}
+ */
+function renderParticipantQoeAndAttributeTableToContainer(selectedParticipantId, addToContainer, attributeName) {
+    addToContainer.empty();
+    addToContainer.css('height', '');
+    graphsCounter++;
+    var newChartId = 'wg' + graphsCounter;
+    addToContainer.append('<div id="f' + newChartId + '" class="large-12 columns"></div>');
+
+    d3.json(BASE_URL + "/explorer/" + experimentId + "/participants/iri/distribution/qoe?IRI=" + encodeURIComponent(selectedParticipantId), function (data) {
+        console.log(data);
+        var table = $('<table class="fullWidth"></table>').appendTo($('#f' + newChartId));
+        table.append('<thead><tr><th>Attribute</th><th>Value</th><th>Order</th></tr></thead>');
+        var tableBody = $('<tbody></tbody>').appendTo(table);
+        $.each(data.summary, function (aCounter, aValue) {
+            if (attributeName === aValue.label) {
+                tableBody.append('<tr><td>' + aValue.label + '</td><td>' + aValue.value + '</td><td>' + aValue.order + '</td></tr>');
+            }
         });
     });
 }
