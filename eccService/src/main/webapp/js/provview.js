@@ -809,7 +809,7 @@ function renderParticipantQoeTableToContainer(selectedParticipantId, addToContai
         table.append('<thead><tr><th>Attribute</th><th>Value</th><th>Order</th></tr></thead>');
         var tableBody = $('<tbody></tbody>').appendTo(table);
         $.each(data.summary, function (aCounter, aValue) {
-            tableBody.append('<tr><td>' + aValue.label + '</td><td>' + aValue.value + '</td><td>' + aValue.order + '</td></tr>');
+            tableBody.append('<tr><td>' + aValue.label + '</td><td>' + aValue.value + '</td><td>' + aValue.order + ' of ' + aValue.orderMax + '</td></tr>');
         });
     });
 }
@@ -836,7 +836,7 @@ function renderParticipantQoeAndAttributeTableToContainer(selectedParticipantId,
         var tableBody = $('<tbody></tbody>').appendTo(table);
         $.each(data.summary, function (aCounter, aValue) {
             if (attributeName === aValue.label) {
-                tableBody.append('<tr><td>' + aValue.label + '</td><td>' + aValue.value + '</td><td>' + aValue.order + '</td></tr>');
+                tableBody.append('<tr><td>' + aValue.label + '</td><td>' + aValue.value + '</td><td>' + aValue.order + ' of ' + aValue.orderMax + '</td></tr>');
             }
         });
     });
