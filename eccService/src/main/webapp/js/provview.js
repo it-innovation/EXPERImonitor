@@ -103,8 +103,8 @@ $(document).ready(function () {
                                         console.log(servicesResponse);
                                         services = servicesResponse.services;
                                         groupAttributes = attributes;
-//                                        addParticipantQoeAttributesWidget("");
-                                        addQosServicesExplorerWidget("", "", "");
+                                        addParticipantQoeAttributesWidget("");
+//                                        addQosServicesExplorerWidget("", "", "");
                                         $("#addNewQoe").click(function (e) {
                                             e.preventDefault();
                                             addParticipantQoeAttributesWidget("");
