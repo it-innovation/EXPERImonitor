@@ -15,7 +15,7 @@
 
 ## Configuration for this script (this part is Ruby) ##
 
-hostname = "ECC-21"
+hostname = "ECC-22-glassfish"
 ram = "1536"
 
 ecc_ip = (ENV['ECC_IP'] ? ENV['ECC_IP'] : '10.0.0.10')
