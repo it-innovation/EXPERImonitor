@@ -1,0 +1,2 @@
+# /etc/default/tomcat7 file must have LF endings otherwise it does not work
+tomcat7 text eol=lf
