@@ -29,17 +29,13 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Properties;
 import java.util.Random;
 import java.util.zip.DataFormatException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experimedia.Activity;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experimedia.Application;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experimedia.Content;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experimedia.Entity;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experimedia.ExperimediaFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experimedia.Participant;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experimedia.Service;
@@ -78,19 +74,12 @@ public class ExperimentDataGenerator {
     Participant participant;
     Application app;
 
-    private static final Properties props = new Properties();  // TODO: remove this now?
     private static final Logger logger = LoggerFactory.getLogger(ExperimentDataGenerator.class);
 
     public ExperimentDataGenerator() {
 
         logger.info("Starting ExperimentDataGenerator");
 
-        try {
-            logger.info("Loading properties file");
-            props.load(ExperimentDataGenerator.class.getClassLoader().getResourceAsStream("prov.properties"));
-        } catch (IOException e) {
-            logger.error("Error loading properties file", e);
-        }
     }
 
     /**
@@ -153,8 +142,6 @@ public class ExperimentDataGenerator {
             genericAttributes.add(0, "Ease of use");
             genericAttributes.add(1, "Usefulness");
             genericAttributes.add(2, "Responsiveness");
-
-            logger.info(props.entrySet().toString());
 
             MetricGroup metricGroup = MetricHelper.createMetricGroup("SSG questionnaire group",
                     "Questionnaire data set for SSG experiment", eccLogger.metricGenerator);
@@ -238,27 +225,6 @@ public class ExperimentDataGenerator {
         } catch (Exception e) {
             logger.error("Error filling EDMProvFactory with data", e);
         }
-    }
-
-    /**
-     * Parses the in-memory log and creates prov statements
-     *
-     * @param logClass the type of log used (Log, PerfectLog)
-     */
-    public void parseLog() {
-
-        while (processNextLog()) {
-            logger.debug("Processing next log...");
-        }
-
-        try {
-            factory.destroyApplication(app, "1387569600"); // Fri, 20 Dec 2013 20:00:00 GMT
-        } catch (DataFormatException e) {
-            logger.error("Error stopping \"use app\" activity", e);
-        }
-
-        logger.info("finished parsing log");
-
     }
 
     /**
@@ -416,11 +382,11 @@ public class ExperimentDataGenerator {
         return factory;
     }
 
-    public static Properties getProps() {
-        return props;
-    }
-
     public ECCSimpleLogger getEccLogger() {
         return eccLogger;
+    }
+    
+    public void cleanUp() throws DataFormatException {
+        factory.destroyApplication(app, "1387569600"); // Fri, 20 Dec 2013 20:00:00 GMT
     }
 }

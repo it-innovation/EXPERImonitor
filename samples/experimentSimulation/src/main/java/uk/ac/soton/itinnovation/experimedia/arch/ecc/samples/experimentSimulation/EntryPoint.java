@@ -24,11 +24,11 @@
 /////////////////////////////////////////////////////////////////////////
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.experimentSimulation;
 
-import java.io.IOException;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.shared.*;
 
 import java.util.*;
+import java.util.zip.DataFormatException;
 import org.slf4j.*;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.provenance.EDMProvReport;
 
@@ -36,7 +36,7 @@ public class EntryPoint {
 
     private static final Logger logger = LoggerFactory.getLogger(EntryPoint.class);
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws DataFormatException, InterruptedException {
         // Get EXPERIMonitor EM properties to connect to service (in src/main/resources)
         Properties emProps = Utilitybox.getProperties(EntryPoint.class, "em");
 
@@ -59,13 +59,10 @@ public class EntryPoint {
         //Create a prov experiment data generator
         ExperimentDataGenerator provGen = createProvGen(args, eccLogger);
 
-        // Press 'q' to exit...
-        //logger.info( "Press 'q' key to exit demo" );
         boolean running = true;
 
         // Start simulation loop
         while (running) {
-            // Get an input from the keyboard
             try {
                 // Send a metric (if we are ready to do so)
                 if (provGen.getEccLogger().isReadyToPush()) {
@@ -85,27 +82,25 @@ public class EntryPoint {
 
                     } catch (Exception ex) {
                         // Catch & log problems
-                        logger.error("Failed to send metric: " + ex.getMessage());
+                        logger.error("Failed to send metric", ex);
                     }
                 } else {
                     logger.debug("NOT ready to push");
                     Thread.sleep(1000);
                 }
-            } catch (Throwable t) //catch (IOException ioe)
-            {
-                // Yikes! Is there a keyboard available?
-                logger.error("Could not read keyboard");
+            } catch (InterruptedException t) {
+                logger.error("Big problem", t);
                 running = false;
             }
         }
 
-        // Wait a short period before shutting down (final pushes may need processing)
-        try {
-            Thread.sleep(1000);
-        } catch (Throwable t) {
-            logger.info("Shutting down now...");
-        }
+        logger.info("Shutting down now...");
+        provGen.cleanUp();
+        provGen.getEccLogger().pushProv(provGen.getFactory().getProvFactory().createProvReport());
 
+        // Wait a short period before shutting down (final pushes may need processing)
+        Thread.sleep(1000);
+        
         // Clean up
         eccLogger.shutdown();
 
