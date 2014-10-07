@@ -1,13 +1,13 @@
-Using the ECC Dashboard
-=======================
+Using the EXPERImonitor Dashboard
+=================================
 
-After building and deploying the ECC it is then possible to configure the ECC, start and control an experimental process using the ECC Dashboard.
+After building and deploying the EXPERImonitor it is then possible to configure the EXPERImonitor, start and control an experimental process using the EXPERImonitor Dashboard.
 
 
-ECC Configuration View
-----------------------
+EXPERImonitor Configuration View
+--------------------------------
 
-After deploying the ECC, you should be able to access the ECC Configuration page in your browser (see :doc:`Getting started with the ECC </mainContent/Getting_started_with_the_ECC>` section):
+After deploying the EXPERImonitor, you should be able to access the EXPERImonitor Configuration page in your browser (see :doc:`Getting started with the EXPERImonitor </mainContent/Getting_started_with_the_ECC>` section):
 
  .. image:: images/dashboard_configuration.png
   :width: 100 %
@@ -18,13 +18,13 @@ You should be able to use any configuration by manually entering the details on 
 
 #. Remote configurations located at WebDAV server config.experimedia.eu.
 
-Once you have selected a configuration, you have an option to save it on config.experimedia.eu by checking "Save or update this configuration on WebDAV server" (existing configurations will be overwritten). **Use this configuration** button will submit the configuration to the ECC. In case of configuration being invalid or selected RabbitMQ/Database servers inaccessible, a warning message will be displayed and you will be able to edit the configuration and try again. Otherwise, you should be redirected to the Experiment view of the Dashboard.
+Once you have selected a configuration, you have an option to save it on config.experimedia.eu by checking "Save or update this configuration on WebDAV server" (existing configurations will be overwritten). **Use this configuration** button will submit the configuration to the EXPERImonitor. In case of configuration being invalid or selected RabbitMQ/Database servers inaccessible, a warning message will be displayed and you will be able to edit the configuration and try again. Otherwise, you should be redirected to the Experiment view of the Dashboard.
 
 
-ECC Experiment View
--------------------
+EXPERImonitor Experiment View
+-----------------------------
 
-Depending on your current ECC state (experiment in progress, previous experiments stored in the database, clean install), this view will always show a dialog window with all or some of the following options:
+Depending on your current EXPERImonitor state (experiment in progress, previous experiments stored in the database, clean install), this view will always show a dialog window with all or some of the following options:
 
 #. Go to current experiment (only if an experiment is in progress).
 
@@ -62,7 +62,7 @@ Use drop-down menus in respective columns to filter Clients, Entities (by client
  .. image:: images/dashboard_download_example.png
    :width: 100 %
 
-Metrics reported by ECC clients can be monitored live in **Live Metrics: up to 10 latest measurements** part of the view by adding them with **Add to Live metrics** controls on entries in  Clients, Entities or Attributes lists. Live metrics can be removed individually or by Client/Entity/Attribute by clicking on **Remove from Live metrics** link.
+Metrics reported by EXPERImonitor clients can be monitored live in **Live Metrics: up to 10 latest measurements** part of the view by adding them with **Add to Live metrics** controls on entries in  Clients, Entities or Attributes lists. Live metrics can be removed individually or by Client/Entity/Attribute by clicking on **Remove from Live metrics** link.
 
  .. image:: images/dashboard_sad_service_entity.png
    :width: 100 %
@@ -110,7 +110,7 @@ Experiment controls
   .. image:: images/dashboard_stop_experiment_options.png
    :width: 100 %
 
-* **Restart ECC** in the bottom left corner will (confirmation is displayed beforehand):
+* **Restart EXPERImonitor** in the bottom left corner will (confirmation is displayed beforehand):
 
 	#. stop currently running experiment (if one is in progress),
 

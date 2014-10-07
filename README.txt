@@ -1,6 +1,6 @@
-Experiment Content Component
-============================
-----------------------------
+The EXPERImonitor
+=================
+-----------------
 
 Copyright
 =========
@@ -14,25 +14,25 @@ A complete list of licences for this software and associated third party softwar
 
 Documentation
 =============
-The primary source of ECC documentation can be found in the 'doc' folder. This documentation is encapsulated in RST format; readers have a choice of generating a printable version in a variety of formats including HTML and PDF.
+The primary source of EXPERImonitor documentation can be found in the 'doc' folder. This documentation is encapsulated in RST format; readers have a choice of generating a printable version in a variety of formats including HTML and PDF.
 For convenience, an HTML version of our documentation can be found here:
 
-<ECC API root>/doc/manual/html
+<EXPERImonitor API root>/doc/manual/html
 
-Javadoc for the source code may be found in /doc/javaDoc' folder. In addition to this, supplementary READMEs relating to ECC client development can be found in the 'samples' folder.
+Javadoc for the source code may be found in /doc/javaDoc' folder. In addition to this, supplementary READMEs relating to EXPERImonitor client development can be found in the 'samples' folder.
 
 Brief 'quick start' notes can be found below regarding either using Vagrant or installing dependencies manually.
 
 
-Using Vagrant to deploy the ECC
-===============================
-Vagrant (see http://vagrantup.com) along with a suitable virtual machine system (such as Oracle VirtualBox) can be used to simply build and deploy the ECC and all its dependencies including a RabbitMQ server.  This is particularly useful for development and testing.
+Using Vagrant to deploy the EXPERImonitor
+=========================================
+Vagrant (see http://vagrantup.com) along with a suitable virtual machine system (such as Oracle VirtualBox) can be used to simply build and deploy the EXPERImonitor and all its dependencies including a RabbitMQ server.  This is particularly useful for development and testing.
 
 Assuming a working vagrant system, this is done by first choosing your preferred web server (Apache or Glassfish are supported) and then starting the vagrant virtual machine set up.
 
 1. Choosing your preferred web server
 -------------------------------------
-Vagrant based support for the ECC offers you two set up options:
+Vagrant based support for the EXPERImonitor offers you two set up options:
 
  * Tomcat 7 deployment (Vagrantfile.tomcat)
  * Glassfish 3 deployment (Vagrantfile.glassfish)
@@ -41,22 +41,22 @@ Make a copy of hte deployment file you wish to use and rename it to 'Vagrantfile
 
 2. Starting the vagrant virtual machine
 ---------------------------------------
-This is done by simply typing "vagrant up" in the <ECC API root> folder which will execute the instructions found in the "Vagrantfile" you have just selected.  The shell script embedded in the vagrantfile is also a useful reference for deploying the system in Linux.
+This is done by simply typing "vagrant up" in the <EXPERImonitor API root> folder which will execute the instructions found in the "Vagrantfile" you have just selected.  The shell script embedded in the vagrantfile is also a useful reference for deploying the system in Linux.
 
 
-Once the build is completed, the ECC and a RabbitMQ server are hosted in a virtual machine with the necessary ports mapped through to the host machine.  The port mapping can be changed via environment variables in the host machine:
+Once the build is completed, the EXPERImonitor and a RabbitMQ server are hosted in a virtual machine with the necessary ports mapped through to the host machine.  The port mapping can be changed via environment variables in the host machine:
 
-ECC_IP: the IP address for the ECC VM to use (default 10.0.0.10)
-ECC_PORT: the port to map the ECC to on the host machine (default 8090)
+ECC_IP: the IP address for the EXPERImonitor VM to use (default 10.0.0.10)
+ECC_PORT: the port to map the EXPERImonitor to on the host machine (default 8090)
 RABBIT_IP: the IP address to use for RabbitMQ (default 10.0.0.10)
 RABBIT_PORT: the port to map RabbitMQ to on the host machine (default 5682)
 RABBIT_MGT_PORT: the port to map RabbitMQ management interface to on the host machine (default 55682)
 
-The sample clients distributed with the ECC generally attempt to connect to a RabbitMQ server running on localhost with the default 5672 port.  To make these clients work with the ECC and RabbitMQ in the vagrant VM you must map the guest VM's RabbitMQ port through to port 5672 in the host machine.  This is achieved by setting the variable "RABBIT_PORT" to 5672 on the host machine.
+The sample clients distributed with the EXPERImonitor generally attempt to connect to a RabbitMQ server running on localhost with the default 5672 port.  To make these clients work with the EXPERImonitor and RabbitMQ in the vagrant VM you must map the guest VM's RabbitMQ port through to port 5672 in the host machine.  This is achieved by setting the variable "RABBIT_PORT" to 5672 on the host machine.
 
 
-Installing 3rd party software required by the ECC
-=================================================
+Installing 3rd party software required by the EXPERImonitor
+===========================================================
 You will need to install the following 3rd party software:
 
 	- Java JDK 1.7 or better
@@ -87,15 +87,15 @@ You will need to install the following 3rd party software:
 
   Setting up PostgreSQL
   ---------------------
-  You will need to install PostgreSQL 9.2 to support ECC metric storage.
+  You will need to install PostgreSQL 9.2 to support EXPERImonitor metric storage.
 
     1. Visit the PostgreSQL website and install PostgreSQL 9.2
 
     2. Make sure you note your PostgreSQL username and password (you will need this for configuration)
 
-    3. Follow the steps found in the following README to setup an ECC database inside PostgreSQL:
+    3. Follow the steps found in the following README to setup an EXPERImonitor database inside PostgreSQL:
 
-      <ECC API root>\edm\resources\README.txt
+      <EXPERImonitor API root>\edm\resources\README.txt
 
 
   Setting up Tomcat 7.x
@@ -133,32 +133,32 @@ You will need to install the following 3rd party software:
 
 
 
-Building and running the ECC
-============================
-The ECC dashboard can be quickly built to run on your local development machine by following these steps:
+Building and running the EXPERImonitor
+======================================
+The EXPERImonitor dashboard can be quickly built to run on your local development machine by following these steps:
 
-1. Install third party libraries required to build the ECC
+1. Install third party libraries required to build the EXPERImonitor
 
 	1.1 Open a command line and navigate to:
 
-		<ECC API root>/thirdPartyLibs
+		<EXPERImonitor API root>/thirdPartyLibs
 
 	1.2 Run the installLibraries.bat file
 		- Note that Linux users will need to run a shell script version of this file
 
 
-2. Using a command line in the root of the ECC API type:
+2. Using a command line in the root of the EXPERImonitor API type:
 
       mvn clean install
 
-  ... all modules in the ECC API should be reported as successfully built.
+  ... all modules in the EXPERImonitor API should be reported as successfully built.
 
-  You should find the ECC web dashboard WAR file created in the following location:
+  You should find the EXPERImonitor web dashboard WAR file created in the following location:
 
-      <ECC API root>\eccService\target\EccService-2.1.war
+      <EXPERImonitor API root>\eccService\target\EccService-2.1.war
 
 
-3. Deploy and run the ECC dashboard, using:
+3. Deploy and run the EXPERImonitor dashboard, using:
 
 	3.1 Tomcat (default deployment)
 	---------------------------------------------------------------------------------------------------
@@ -167,7 +167,7 @@ The ECC dashboard can be quickly built to run on your local development machine 
 	  Step 2: Copy WAR file generated in step 1 to Tomcat's 'webapps' directory
 	          (Tomcat should automatically unpack and deploy for you)
 
-	  Result: You should see the ECC dashboard running on: http://localhost:8080/EccService-2.1/
+	  Result: You should see the EXPERImonitor dashboard running on: http://localhost:8080/EccService-2.1/
 
 
 

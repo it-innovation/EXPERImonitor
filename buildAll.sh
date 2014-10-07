@@ -7,7 +7,7 @@ cd thirdPartyLibs
 ./installLibraries.sh
 cd ..
 
-echo Building Experimedia-ECC
+echo Building Experimedia-EXPERImonitor
 mvn clean install
 
 echo Done

@@ -1,5 +1,5 @@
 
-EXPERIMEDIA ECC v2.1 documentation
+EXPERIMEDIA EXPERImonitor v2.1 documentation
 ============================================
 
 +----------------------------------------------------------+-------------------------------------------------------+
@@ -12,7 +12,7 @@ EXPERIMEDIA ECC v2.1 documentation
 |                                                          |    mainContent/eccAPIChangeLog                        |
 |                                                          |                                                       |
 +----------------------------------------------------------+-------------------------------------------------------+
-| **Using the ECC Dashboard**                              |  **Building Sample ECC Clients**                      |
+| **Using the EXPERImonitor Dashboard**                    |  **Building Sample EXPERImonitor Clients**            |
 +----------------------------------------------------------+-------------------------------------------------------+
 | .. toctree::                                             | .. toctree::                                          |
 |    :maxdepth: 2                                          |    :maxdepth: 2                                       |
@@ -21,7 +21,7 @@ EXPERIMEDIA ECC v2.1 documentation
 |                                                          |                                                       |
 |                                                          |                                                       |
 +----------------------------------------------------------+-------------------------------------------------------+
-|  **Writing an ECC Client**                               | **Advanced ECC client programming**                   |
+|  **Writing an EXPERImonitor Client**                     | **Advanced EXPERImonitor client programming**         |
 +----------------------------------------------------------+-------------------------------------------------------+
 | .. toctree::                                             | .. toctree::                                          |
 |    :maxdepth: 2                                          |    :maxdepth: 2                                       |
@@ -39,7 +39,7 @@ EXPERIMEDIA ECC v2.1 documentation
 |    mainContent/Indicativemonitoring_use-cases            |    mainContent/Base_line_metric_services              |              
 |                                                          |                                                       |
 +----------------------------------------------------------+-------------------------------------------------------+
-| **ECC Monitoring Protocol**                              |                                                       |
+| **EXPERImonitor Monitoring Protocol**                    |                                                       |
 +----------------------------------------------------------+-------------------------------------------------------+
 | .. toctree::                                             |                                                       |
 |    :maxdepth: 2                                          |                                                       |

@@ -63,7 +63,7 @@ Finally, after filling the ExperimediaFactory with data in most cases you want t
 Special cases and advanced programming
 --------------------------------------
 
-While it is highly encouraged to only use the ExperimediaFactory to create provenance, we acknowledge there might be the need for special modelling which is not covered. In this case there is good news: Under the hood, the ExperimediaFactory creates nothing else than ECC Provenance API objects, wrapped in convenien methods to easily create the required patterns. The basic elements are still accessible and can be used as before to attach additional information.
+While it is highly encouraged to only use the ExperimediaFactory to create provenance, we acknowledge there might be the need for special modelling which is not covered. In this case there is good news: Under the hood, the ExperimediaFactory creates nothing else than EXPERImonitor Provenance API objects, wrapped in convenien methods to easily create the required patterns. The basic elements are still accessible and can be used as before to attach additional information.
 
 If we created for example a participant like this ::
 

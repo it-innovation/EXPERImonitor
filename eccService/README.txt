@@ -1,4 +1,4 @@
-ECC as a Service 2.1
+EXPERImonitor as a Service 2.1
 
 Full build (requires valid PostgreSQL and Rabbit for tests):
 

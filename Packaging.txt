@@ -1,5 +1,5 @@
-Packaging the ECC component (using Maven 3.x+)
-----------------------------------------------
+Packaging the EXPERImonitor component (using Maven 3.x+)
+--------------------------------------------------------
 
 Build docs:
 

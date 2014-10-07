@@ -4,13 +4,13 @@
 # To use, install vagrant and VirtualBox and type "vagrant up"
 
 # The following environment variables can be used to control the behaviour:
-# ECC_IP: the IP address for the ECC VM to use (default 10.0.0.10)
+# ECC_IP: the IP address for the EXPERImonitor VM to use (default 10.0.0.10)
 # ECC_UUID: the UUID for the dashboard to use (default 00000000-0000-0000-0000-000000000000)
-# ECC_PORT: the port to map the ECC to on the host machine (default 8090)
+# ECC_PORT: the port to map the EXPERImonitor to on the host machine (default 8090)
 # RABBIT_IP: the IP address to use for RabbitMQ (default 10.0.0.10)
 # RABBIT_PORT: the port to map RabbitMQ to on the host machine (default 5682)
 # RABBIT_MGT_PORT: the port to map RabbitMQ management interface to on the host machine (default 55682)
-# ECC_GIT: if defined then ECC source is checked out from git and this branch used, otherwise uses source from host machine
+# ECC_GIT: if defined then EXPERImonitor source is checked out from git and this branch used, otherwise uses source from host machine
 # DEBUGGER_PORT: the port to map Java debugger to on the host machine (default 8000)
 
 ## Configuration for this script (this part is Ruby) ##
@@ -30,8 +30,8 @@ debugger_port = (ENV['DEBUGGER_PORT'] ? ENV['DEBUGGER_PORT'] : '8000')
 glassfish_port = (ENV['GLASSFISH_PORT'] ? ENV['GLASSFISH_PORT'] : '4848')
 
 info = "
-ECC service is deployed on VM with IP #{ecc_ip}
-ECC service is mapped to http://localhost:#{ecc_port}/ECC/ on host machine.
+EXPERImonitor service is deployed on VM with IP #{ecc_ip}
+EXPERImonitor service is mapped to http://localhost:#{ecc_port}/ECC/ on host machine.
 Glassfish front page is mapped to http://localhost:#{ecc_port}
 OpenRDF workbench is mapped to http://localhost:#{ecc_port}/openrdf-workbench on host machine
 Using RabbitMQ deployed on #{rabbit_ip}
@@ -72,16 +72,16 @@ apt-get install -y maven
 apt-get install -y postgresql-9.1
 apt-get install -y rabbitmq-server
 
-## Get the ECC code ##
+## Get the EXPERImonitor code ##
 
 # remove old code to get a clean(ish) build in case we are re-provisioning
 rm -rf experimedia-ecc
 
-# get ECC code (need to do this before PostgreSQL config)
+# get EXPERImonitor code (need to do this before PostgreSQL config)
 if [ '#{ecc_git}' != "" ]; then
 	# set up deploy key to enable access to gitlab
 	cp -a /vagrant/thirdPartyConfig/gitLab/.ssh ~
-	# get the latest ECC code from Git
+	# get the latest EXPERImonitor code from Git
 	git clone git@glab-i1.it-innovation.soton.ac.uk:experimedia/ecc.git experimedia-ecc
 	cd experimedia-ecc
 	# need -f to force it, otherwise it prints a warning and nothing happens
@@ -90,7 +90,7 @@ if [ '#{ecc_git}' != "" ]; then
 	cp /vagrant/thirdPartyLibs/* thirdPartyLibs
 	cd ..
 else
-	# or copy ECC code from guest machine to host machine
+	# or copy EXPERImonitor code from guest machine to host machine
 	mkdir experimedia-ecc
 	rsync -a /vagrant/ experimedia-ecc --exclude '.git' --exclude 'target'
 fi
@@ -155,7 +155,7 @@ cp ./slf4j-api-1.7.6.jar /opt/glassfish3/glassfish/lib/endorsed/slf4j-api-1.7.6.
 rm slf4j-api-1.7.6.jar
 
 
-# ECC Service
+# EXPERImonitor Service
 cp ./eccService/target/EccService-2.1/WEB-INF/lib/jul-to-slf4j-1.7.6.jar /opt/glassfish3/glassfish/lib/endorsed/jul-to-slf4j-1.7.6.jar
 
 cp ./eccService/target/EccService-2.1/WEB-INF/lib/slf4j-api-1.7.7.jar /opt/glassfish3/glassfish/lib/endorsed/slf4j-api-1.7.7.jar
@@ -176,7 +176,7 @@ cp ./thirdPartyConfig/glassfish/domain.xml /opt/glassfish3/glassfish/domains/dom
 # Start Glassfish database
 /opt/glassfish3/bin/asadmin start-database --dbhome opt/glassfish3/javadb
 
-## Configure ECC Service ##
+## Configure EXPERImonitor Service ##
 
 # configure location of Rabbit
 # configure uuid
@@ -190,14 +190,14 @@ echo "**** Deploying OpenRDF sesame & workbench into Glassfish"
 /opt/glassfish3/bin/asadmin deploy --force ./thirdPartyLibs/openrdf-sesame.war
 /opt/glassfish3/bin/asadmin deploy --force ./thirdPartyLibs/openrdf-workbench.war
 
-# deploy the ECC into Glassfish
-#echo "**** Deploying ECC into Glassfish"
+# deploy the EXPERImonitor into Glassfish
+#echo "**** Deploying EXPERImonitor into Glassfish"
 /opt/glassfish3/bin/asadmin deploy --force --contextroot ECC ./eccService/target/EccService-2.1.war
 
 if [ '#{ecc_git}' != "" ]; then
-	echo 'ECC built from git branch #{ecc_git}'
+	echo 'EXPERImonitor built from git branch #{ecc_git}'
 else
-	echo 'ECC code copied from host machine'
+	echo 'EXPERImonitor code copied from host machine'
 fi
 
 echo "Maven build log is in /tmp/build.log on guest machine"

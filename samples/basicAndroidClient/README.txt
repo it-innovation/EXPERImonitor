@@ -1,9 +1,9 @@
 Introduction to this client
 ---------------------------
 
-This client is an experimental development; not all of the functionality found in other clients demonstrated in the ECC API is available here. At present, this client is capable of:
+This client is an experimental development; not all of the functionality found in other clients demonstrated in the EXPERImonitor API is available here. At present, this client is capable of:
 
-  * Connecting to the ECC
+  * Connecting to the EXPERImonitor
   * Discovery phase capable (1 example metric is provided)
   * Set-up phase capable
   * Live monitoring phase capable (PUSH only)
@@ -29,13 +29,13 @@ Once you have installed both the Android SDK and NBAndroid plugin, you need to s
 
 Building the Android sample
 ---------------------------
-Having installed the above software, you now need compile the ECC (Maven) project so that you can copy the appropriate ECC JAR files into the 'libs' directory of the sample folder. Do to this:
+Having installed the above software, you now need compile the EXPERImonitor (Maven) project so that you can copy the appropriate EXPERImonitor JAR files into the 'libs' directory of the sample folder. Do to this:
 
-  1. Naviate to the root of the ECC API
+  1. Naviate to the root of the EXPERImonitor API
 
   2. Type 'mvn clean install'
 
-  3. Search for and copy the following ECC JAR files into '<root>\samples\basicAndroidClient\libs':
+  3. Search for and copy the following EXPERImonitor JAR files into '<root>\samples\basicAndroidClient\libs':
       * experimedia-arch-ecc-amqpAPI-impl-2.1.jar
       * experimedia-arch-ecc-amqpAPI-spec-2.1.jar
       * experimedia-arch-ecc-common-dataModel-experiment-2.1.jar
@@ -66,7 +66,7 @@ Having built your APK (and if you have installed the NBAndroid plugin, you shoul
   1. Start up your RabbitMQ service
   2. Start up your PostgreSQL service
   3. Start up your Tomcat Apache server
-  4. Deploy the ECC dashboard in the Apache server
+  4. Deploy the EXPERImonitor dashboard in the Apache server
   5. Run the Android client (through Netbeans)
   6. Enter the IP of your RabbitMQ server (an 'external' IP is required) in the Android UI
   7. Click 'Connect' on the Android UI

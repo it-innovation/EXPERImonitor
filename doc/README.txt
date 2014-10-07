@@ -1,9 +1,8 @@
-# EXPERIMEDIA ECC Documentation #
-#-------------------------------#
+# EXPERIMEDIA EXPERImonitor Documentation #
+#-----------------------------------------#
 
-This is the documentation for the Experiment Content Component (ECC) developed by
-the IT Innovation Centre at the University of Southampton in the EXPERIMEDIA
-project.
+This is the documentation for the EXPERImonitor developed by the IT Innovation Centre at the 
+University of Southampton in the EXPERIMEDIA project.
 
 The documentation is written with [reStructuredText](http://docutils.sourceforge.net/rst.html)
 (rst), which needs to be built (HTML, PDF, etc.) using the [Sphinx](sphinx-doc.org/) tool.

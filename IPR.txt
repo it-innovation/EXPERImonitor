@@ -1,7 +1,7 @@
-------------------------------------------------------------------------------------------------------------
-This software distribution is licensed under the terms found in the file <ECC API root>/licences/LGPL_v2.1.txt
+------------------------------------------------------------------------------------------------------------------------
+This software distribution is licensed under the terms found in the file <EXPERImonitor API root>/licences/LGPL_v2.1.txt
 The IT Innovation software is the source code and the following associated jars/war:
-------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------
 
 experimedia-arch-ecc-amqpAPI-impl-2.0.jar
 experimedia-arch-ecc-amqpAPI-spec-2.0.jar

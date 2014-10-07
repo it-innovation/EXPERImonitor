@@ -1,6 +1,6 @@
 Libraries required for client
 -----------------------------
-ECC libraries:
+EXPERImonitor libraries:
 
       * experimedia-arch-ecc-amqpAPI-impl-${project.version}.jar
       * experimedia-arch-ecc-amqpAPI-spec-${project.version}.jar

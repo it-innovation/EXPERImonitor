@@ -1,7 +1,7 @@
 How to use the database export tool
 -----------------------------------
 
-1. Build the complete ECC API (for more information, see the top-level README.txt file)
+1. Build the complete EXPERImonitor API (for more information, see the top-level README.txt file)
 	* You should find the 'experimedia-arch-ecc-samples-databaseExport-2.1.jar' in the 'target' folder in this directory after a successful build
 
 
@@ -33,4 +33,4 @@ How to use the database export tool
 	* ... Copy the appropriate script into the folder containing your JAR files, then execute.
 
 
-5. All (non-empty) experiments stored in the ECC database will be exported into a folder named 'exportedData'
+5. All (non-empty) experiments stored in the EXPERImonitor database will be exported into a folder named 'exportedData'
