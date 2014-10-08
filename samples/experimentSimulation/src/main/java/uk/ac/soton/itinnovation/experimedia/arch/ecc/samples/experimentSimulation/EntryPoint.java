@@ -95,7 +95,6 @@ public class EntryPoint {
         }
 
         logger.info("Shutting down now...");
-        provGen.cleanUp();
         provGen.getEccLogger().pushProv(provGen.getFactory().getProvFactory().createProvReport());
 
         // Wait a short period before shutting down (final pushes may need processing)
