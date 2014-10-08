@@ -855,11 +855,10 @@ public class ExplorerService {
                                     part);
 
                     // Copy attribute series and 'turn off' data not relavant to activities
-//                    EccINTRATSeries subSeries = copySeries(part.getName() + ": " + actLabel, true, attrSeries);
                     EccINTRATSeries subSeries = copyMaxValueFromSeries(part.getName() + ": " + actLabel, true, attrSeries);
 
-                    // Filter series 'turning off' data not relevant to activities
-                    filterSeriesByActivities(pars, subSeries);
+                    // Filter series 'turning off' points that do not fall within an activity duration
+                    filterSeriesByActivities(pars, subSeries, false);
 
                     // Add sub-set to result
                     result.addSeries(subSeries);
@@ -964,13 +963,13 @@ public class ExplorerService {
                         }
                     }
 
-                    // For each participant, switch of QoS values that do not fall into the filtered activities
+                    // For each participant, switch of QoS values that do not correspond to an activity start time (ignoring the duration)
                     for (String partIRI : partIRIs) {
                         EccINTRATSeries series = seriesByPartIRI.get(partIRI);
                         EccParticipantActivityResultSet pars = filteredActsByIRI.get(partIRI);
 
                         if (series != null && pars != null) {
-                            filterSeriesByActivities(pars, series);
+                            filterSeriesByActivities(pars, series, true);
                             result.addSeries(series);
                         } else {
                             logger.error("Could not bind QoS series with activity result set");
@@ -1263,7 +1262,7 @@ public class ExplorerService {
     }
 
     private void filterSeriesByActivities(EccParticipantActivityResultSet pars,
-            EccINTRATSeries qosSeriesOUT) {
+            EccINTRATSeries qosSeriesOUT, boolean onlyUseStartTime) {
         ArrayList<EccActivity> partActs = pars.getActivities();
         ArrayList<EccMeasurement> subMeasures = qosSeriesOUT.getValues();
 
@@ -1275,11 +1274,18 @@ public class ExplorerService {
 
             boolean switchOff = true;
             for (EccActivity act : partActs) {
-                Date actStamp = act.getStartTime();
+                Date actStart = act.getStartTime();
+                Date actEnd = act.getEndTime();  // could be null?
 
-                if ((actStamp.equals(m1Stamp) || actStamp.after(m1Stamp)) && actStamp.before(m2Stamp)) {
+                if ((actStart.equals(m1Stamp) || actStart.after(m1Stamp)) && actStart.before(m2Stamp)) {
                     switchOff = false;
                     break;
+                }
+                if (!onlyUseStartTime) {
+                    if (m1Stamp.after(actStart) && (m1Stamp.before(actEnd) || m1Stamp.equals(actEnd))) {
+                        switchOff = false;
+                        break;
+                    }
                 }
             }
 
