@@ -119,6 +119,7 @@ public class ExplorerProvenanceQueryHelper {
 
         String sparql = "SELECT (COUNT(DISTINCT ?instance) AS ?count) WHERE {"
                 + "?instance a <" + typeIRI + "> . }";
+        logger.debug(sparql);
 
         TupleQueryResult tqr = null;
 
@@ -167,7 +168,8 @@ public class ExplorerProvenanceQueryHelper {
 
         String sparql = "SELECT * WHERE { ?svc a <http://experimedia.eu/ontologies/ExperimediaExperimentExplorer#Service> . "
                 + "?svc rdfs:label ?label }";
-
+        logger.debug(sparql);
+        
         TupleQueryResult tqr = null;
 
         try {
@@ -212,7 +214,8 @@ public class ExplorerProvenanceQueryHelper {
 
         String sparql = "SELECT * WHERE { ?app a <http://experimedia.eu/ontologies/ExperimediaExperimentExplorer#Application> . "
                 + "?app rdfs:label ?label }";
-
+        logger.debug(sparql);
+        
         TupleQueryResult tqr = null;
 
         try {
@@ -261,7 +264,8 @@ public class ExplorerProvenanceQueryHelper {
                 + "?activity <http://www.w3.org/ns/prov#startedAtTime> ?start . "
                 + "?activity <http://www.w3.org/ns/prov#endedAtTime> ?end . "
                 + "?activity rdfs:label ?label }";
-
+        logger.debug(sparql);
+        
         TupleQueryResult tqr = null;
 
         try {
@@ -315,7 +319,8 @@ public class ExplorerProvenanceQueryHelper {
     public Set<String> getParticipantIRIs(UUID expID) throws Exception {
 
         String sparql = "SELECT * WHERE { ?participant a <http://experimedia.eu/ontologies/ExperimediaExperimentExplorer#Participant> . }";
-
+        logger.debug(sparql);
+        
         HashSet<String> result = new HashSet<>();
 
         TupleQueryResult tqr = null;
@@ -362,7 +367,8 @@ public class ExplorerProvenanceQueryHelper {
         String sparql = "SELECT * WHERE { ?activity a <http://www.w3.org/ns/prov#Activity> . "
                 + "?activity <http://www.w3.org/ns/prov#wasStartedBy> <" + part.getIRI() + "> . "
                 + "?activity rdfs:label ?label }";
-
+        logger.debug(sparql);
+        
         TupleQueryResult tqr = null;
 
         try {
@@ -421,7 +427,8 @@ public class ExplorerProvenanceQueryHelper {
                 + "?activity rdfs:label ?label . "
                 + "?activity <http://www.w3.org/ns/prov#startedAtTime> ?start . "
                 + "?activity <http://www.w3.org/ns/prov#endedAtTime> ?end . }";
-
+        logger.debug(sparql);
+        
         TupleQueryResult tqr = null;
 
         try {
@@ -513,7 +520,8 @@ public class ExplorerProvenanceQueryHelper {
                 //currently just pulling the entity presentation of the Application
                 + "?app a <http://www.w3.org/ns/prov#Entity> . "
                 + "?app rdfs:label ?label . }";
-
+        logger.debug(sparql);
+        
         String repoID = expID.toString();
 
         TupleQueryResult tqr = null;
@@ -576,7 +584,8 @@ public class ExplorerProvenanceQueryHelper {
                 + "?s rdfs:label ?label .\n"
                 + "?a <http://www.w3.org/ns/prov#used> ?s .\n"
                 + "}";
-
+        logger.debug(sparql);
+        
         String repoID = expID.toString();
 
         TupleQueryResult tqr = null;
@@ -622,6 +631,7 @@ public class ExplorerProvenanceQueryHelper {
      *
      * @param expID the experiment's ID
      * @return the services
+     * @throws org.openrdf.query.QueryEvaluationException
      */
     public Set<EccService> getServicesByExperiment(UUID expID) throws QueryEvaluationException {
 
@@ -631,7 +641,8 @@ public class ExplorerProvenanceQueryHelper {
                 + "?s a <http://experimedia.eu/ontologies/ExperimediaExperimentExplorer#Service> .\n"
                 + "?s rdfs:label ?label .\n"
                 + "}";
-
+        logger.debug(sparql);
+        
         String repoID = expID.toString();
 
         TupleQueryResult tqr = null;
