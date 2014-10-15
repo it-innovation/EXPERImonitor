@@ -1,6 +1,6 @@
 
-EXPERIMEDIA EXPERImonitor v2.1 documentation
-============================================
+EXPERImonitor |release| Documentation
+======================================
 
 +----------------------------------------------------------+-------------------------------------------------------+
 | **Overview**                                             | **Installation**                                      |
@@ -9,7 +9,7 @@ EXPERIMEDIA EXPERImonitor v2.1 documentation
 |    :maxdepth: 2                                          |    :maxdepth: 2                                       |
 |                                                          |                                                       |
 |    mainContent/Overview                                  |    mainContent/Getting_started_with_the_ECC           |
-|                                                          |    mainContent/eccAPIChangeLog                        |
+|                                                          |                                                       |
 |                                                          |                                                       |
 +----------------------------------------------------------+-------------------------------------------------------+
 | **Using the EXPERImonitor Dashboard**                    |  **Building Sample EXPERImonitor Clients**            |
@@ -27,8 +27,8 @@ EXPERIMEDIA EXPERImonitor v2.1 documentation
 |    :maxdepth: 2                                          |    :maxdepth: 2                                       |
 |                                                          |                                                       |
 |    mainContent/Writing_an_ECC_client                     |    mainContent/More_advanced_ECC_clients              |
+|                                                          |    mainContent/High_Level_ProvAPI                     |
 |                                                          |    mainContent/Creating_Provenance                    |
-|                                                          |                                                       |
 |                                                          |                                                       |
 +----------------------------------------------------------+-------------------------------------------------------+
 | **Indicative Monitoring Use Cases**                      | **Baseline Metric Services**                          |
@@ -39,12 +39,12 @@ EXPERIMEDIA EXPERImonitor v2.1 documentation
 |    mainContent/Indicativemonitoring_use-cases            |    mainContent/Base_line_metric_services              |              
 |                                                          |                                                       |
 +----------------------------------------------------------+-------------------------------------------------------+
-| **EXPERImonitor Monitoring Protocol**                    |                                                       |
+| **EXPERImonitor Monitoring Protocol**                    | **Change Log**                                        |
 +----------------------------------------------------------+-------------------------------------------------------+
-| .. toctree::                                             |                                                       |
-|    :maxdepth: 2                                          |                                                       |
+| .. toctree::                                             | .. toctree::                                          |
+|    :maxdepth: 2                                          |    :maxdepth: 2                                       |
 |                                                          |                                                       |
-|    mainContent/ECC_monitoring_protocol                   |                                                       |              
+|    mainContent/ECC_monitoring_protocol                   |    mainContent/eccAPIChangeLog                        |
 |                                                          |                                                       |
 +----------------------------------------------------------+-------------------------------------------------------+
 

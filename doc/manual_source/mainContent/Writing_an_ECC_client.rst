@@ -37,15 +37,15 @@ The EXPERImonitor API makes extensive use of unique identifiers (referred to as 
 
 It is typical that the information relating to [1] and [2] above will remain constant throughout the lifetime of an EXPERImonitor based experimental project. The UUID used by the client is up to the client writer: you may wish to re-use a single UUID or generate a new one each time your client connects to the EXPERImonitor. Below is a summary of the advantages and disadvantages of both approaches:
 
-+-------------------------------------+-------------------------------------------------------------------------------+--------------------------------------------------------------------------+
-| Connect strategy                    | Advantages                                                                    | Disadvantages                                                            |
-|-------------------------------------+-------------------------------------------------------------------------------+--------------------------------------------------------------------------+
-| | **Connect client with same UUID** | | * Status of specific process instance always known to the experimenter      | | * Client ID & model must be persisted for re-use if client restarted   |
-|                                     | | * Just re-send existing metric model when reconnecting to the EXPERImonitor | | * New metric model needed for new experiment anyway                    |          
-|                                     | | * Just one metric model generated per experiment (data analysis simpler)    | |                                                                        |
-|-------------------------------------+-------------------------------------------------------------------------------+--------------------------------------------------------------------------+
-| | **Connect client with new UUID**  | | * No need to persist client ID & model in event of a client re-start        | | * Duplicated entities in experiment data (data analysis more complex)  |
-+-------------------------------------+-------------------------------------------------------------------------------+--------------------------------------------------------------------------+
++-----------------------------------+-----------------------------------------------------------------------------+------------------------------------------------------------------------+
+| Connect strategy                  | Advantages                                                                  | Disadvantages                                                          |
+|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| **Connect client with same UUID** | * Status of specific process instance always known to the experimenter      | * Client ID & model must be persisted for re-use if client restarted   |
+|                                   | * Just re-send existing metric model when reconnecting to the EXPERImonitor | * New metric model needed for new experiment anyway                    |
+|                                   | * Just one metric model generated per experiment (data analysis simpler)    |                                                                        |
+|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| **Connect client with new UUID**  | * No need to persist client ID & model in event of a client re-start        | * Duplicated entities in experiment data (data analysis more complex)  |
++-----------------------------------+-----------------------------------------------------------------------------+------------------------------------------------------------------------+
 
 For further discussion on this topic, see the :doc:`Disconnection/re-connection strategies </mainContent/More_advanced_ECC_clients>` section in this document.
 
@@ -60,7 +60,7 @@ Central to an experiment is the experimental metric model: a collection of obser
 
 Using this approach, metric models can be potentially shared between clients, meaning a super set of observations can be made from the aggregation of multiple data sets. For example, we could imagine multiple users reporting their qualitative observations of the same entity during the course of an experiment. 
 
-An EXPERImonitor client creates a metric model to describe what it is observing during an experiment. This model is sent to the EXPERImonitor service, which allows it to recognize and store (in a consistent way) the metric data sent by multiple clients as well providing the experimenter some fine-grained control over the data-flow of experimental data at run-time (see the :doc:`More advanced EXPERImonitor clients </mainContent/More_advanced_ECC_clients>` section for further information). Almost all the components of the EXPERImonitor metric model are uniquely identified using UUIDS: this means that if you wish to re-use (or share) the same metric model during an experiment, you must ensure that this model remains consistent - see the :doc:`Disconnection/re-connection strategies </mainContent/More_advanced_ECC_clients>` section for a further discussion of this.
+An EXPERImonitor client creates a metric model to describe what it is observing during an experiment. This model is sent to the EXPERImonitor service, which allows it to recognize and store (in a consistent way) the metric data sent by multiple clients as well providing the experimenter some fine-grained control over the data-flow of experimental data at run-time (see the :doc:`More advanced EXPERImonitor clients </mainContent/More_advanced_ECC_clients>` section for further information). Almost all the components of the EXPERImonitor metric model are uniquely identified using UUIDs: this means that if you wish to re-use (or share) the same metric model during an experiment, you must ensure that this model remains consistent - see the :doc:`Disconnection/re-connection strategies </mainContent/More_advanced_ECC_clients>` section for a further discussion of this.
 
 Pushing and pulling metric data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -69,13 +69,13 @@ At run-time, clients can elect to either PUSH metric data to the EXPERImonitor o
 Below is a summary of the advantages and disadvantages of both PUSH and PULL strategies:
 
 +-------------------------------+----------------------------------------------------------------------------+----------------------------------------------------------------------+
-| Send data strategy            | Advantages                                                                 | Disadvantages                                                        |
+| Data sending strategy         | Advantages                                                                 | Disadvantages                                                        |
 |-------------------------------+----------------------------------------------------------------------------+----------------------------------------------------------------------+
-| | **Pushing client**          | | * Allows client to send metric data on an ad-hoc basis                   | | * Periodic data pushing must be scheduled by the client itself     |
-|                               | | * Exceptions immediately raised if client network connection lost        | |                                                                    |        
+| **Pushing client**            | * Allows client to send metric data on an ad-hoc basis                     | * Periodic data pushing must be scheduled by the client itself       |
+|                               | * Exceptions immediately raised if client network connection lost          |                                                                      |
 |-------------------------------+----------------------------------------------------------------------------+----------------------------------------------------------------------+
-| | **Pulling client**          | | * Regular sampling of measurements managed by the EXPERImonitor          | | * Client network connection loss may not be raised as an exception |
-|                               | | * Finer grained control over sampling part of EXPERImonitor API          | |                                                                    |
+| **Pulling client**            | * Regular sampling of measurements managed by the EXPERImonitor            | * Client network connection loss may not be raised as an exception   |
+|                               | * Finer grained control over sampling part of EXPERImonitor API            |                                                                      |
 +-------------------------------+----------------------------------------------------------------------------+----------------------------------------------------------------------+
 
 Some examples for selecting an appropriate integration strategy is discussed in more detail in the section :doc:`ECC Integration pattern guidelines </mainContent/More_advanced_ECC_clients>`.
@@ -386,76 +386,69 @@ Tear-down phase
 EXPERImonitor specification files
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-EM configuration
-~~~~~~~~~~~~~~~~
+EXPERImonitor is configured in an application.properties file which is split into several sections:
 
-Connection to the EXPERImonitor can be configured using an em.properties file, described below:
+=============================      ===============================================================  =====
+Property label                     Description                                                      Example
+=============================      ===============================================================  =====
+server.port                        Port to run the server on when using Spring bootstrap            8083
+server.context-path                The root of the server URL                                       /ECC
+=============================      ===============================================================  =====
 
-+-------------------------+------------------------------------------+-------------------------------------------------+
-| **Property label**      | **Description**                          | **Example**                                     |
-|                         |                                          |                                                 |
-+-------------------------+------------------------------------------+-------------------------------------------------+
-| Rabbit_IP               | IP of RabbitMQ server                    | Rabbit_IP=127.0.0.1                             |
-|                         |                                          |                                                 |
-+-------------------------+------------------------------------------+-------------------------------------------------+
-| Rabbit_Port             | Port number of RabbitMQ server           | Rabbit_Port=5672                                |
-|                         |                                          |                                                 |
-+-------------------------+------------------------------------------+-------------------------------------------------+
-| Monitor_ID              | UUID of EXPERImonitor monitoring service | Monitor_ID=00000000-0000-0000-0000-000000000000 |
-|                         |                                          |                                                 |
-+-------------------------+------------------------------------------+-------------------------------------------------+
-| Rabbit_Use_SSL          | True if SSL connection is required       | Rabbit_Use_SSL=true                             |
-|                         |                                          |                                                 |
-+-------------------------+------------------------------------------+-------------------------------------------------+
-| Rabbit_Keystore         | Path to Java keystore file               | Rabbit_Keystore=                                |
-|                         |                                          | /main/resources/rabbitKeyStore.jks              |
-|                         |                                          |                                                 |
-+-------------------------+------------------------------------------+-------------------------------------------------+
-| Rabbit_KeystorePassword | Password for keystore file               | Rabbit_Keystore=rabbit                          |
-|                         |                                          |                                                 |
-+-------------------------+------------------------------------------+-------------------------------------------------+
+Configuration options for the EXPERIMEDIA config service begin "ecc.projectconfig":
 
+=============================      ===============================================================  =====
+Property label                     Description                                                      Example
+=============================      ===============================================================  =====
+ecc.projectconfig.endpoint         Address of the config service                                    http://config.experimedia.eu
+ecc.projectconfig.projectName      Default project name                                             default
+ecc.projectconfig.username         Username to access the service                                   username
+ecc.projectconfig.password         Password to access the service                                   password
+ecc.projectconfig.whitelist        Comma-separated list of config entries to show in the dashboard  Default,EX10,EX11
+=============================      ===============================================================  =====
 
-EDM configuration
-~~~~~~~~~~~~~~~~~
+Default settings:
 
-Configuring an EDMAgent (to store metric data in a local PostgreSQL database) can be specified using an edm.properties file, described below:
+=============================      ===============================================================  =====
+Property label                     Description                                                      Example
+=============================      ===============================================================  =====
+ecc.configuration.projectName      Default project name                                             My Local EXPERIMEDIA Project
+=============================      ===============================================================  =====
 
-+--------------------+-------------------------------------------+--------------------------+
-| **Property label** | **Description**                           | **Example**              |
-|                    |                                           |                          |
-+--------------------+-------------------------------------------+--------------------------+
-| dbURL              | URL of PostgreSQL server                  | dbURL=localhost:5432     |
-|                    |                                           |                          |
-+--------------------+-------------------------------------------+--------------------------+
-| dbName             | Database ID used to store metrics         | dbName=agent-edm-metrics |
-|                    |                                           |                          |
-+--------------------+-------------------------------------------+--------------------------+
-| dbUsername         | Username to access metric database        | dbUsername=postgres      |
-|                    |                                           |                          |
-+--------------------+-------------------------------------------+--------------------------+
-| dbPassword         | Password to access metric database        | dbPassword=password      |
-|                    |                                           |                          |
-+--------------------+-------------------------------------------+--------------------------+
-| dbType             | Database type (currently only PostgreSQL) | dbType=postgresql        |
-|                    |                                           |                          |
-+--------------------+-------------------------------------------+--------------------------+
+Default settings for RabbitMQ:
 
+==============================================  ===============================================================  =====
+Property label                                  Description                                                      Example
+==============================================  ===============================================================  =====
+ecc.configuration.rabbitConfig.monitorId        UUID of this EXPERImonitor dashboard instance                    00000000-0000-0000-0000-000000000000
+ecc.configuration.rabbitConfig.ip               IP address of RabbitMQ service                                   127.0.0.1
+ecc.configuration.rabbitConfig.port             Port for the RabbitMQ service                                    5672
+ecc.configuration.rabbitConfig.userName         Username to connect with                                         guest
+ecc.configuration.rabbitConfig.userPassword     Password to connect with                                         guest
+ecc.configuration.rabbitConfig.keystore         Location of Java keystore to use for SSL connections                  
+ecc.configuration.rabbitConfig.useSsl           Whether to use a keystore or not                                 false
+==============================================  ===============================================================  =====
 
-Dashboard configuration
-~~~~~~~~~~~~~~~~~~~~~~~
+Default settings for the PostgreSQL database:
 
-The EXPERImonitor dashboard requires both EM and EDM configuration files (see above) to correctly initialise. Further configuration of the dashboard can be found in the dashboard.properties file, described below:
+==============================================  ===============================================================  =====
+Property label                                  Description                                                      Example
+==============================================  ===============================================================  =====
+ecc.configuration.databaseConfig.url            URL of PostgreSQL server                                         localhost:5432
+ecc.configuration.databaseConfig.databaseName   Name of the database                                             edm-metrics
+ecc.configuration.databaseConfig.userName       Username to connect with                                         postgres
+ecc.configuration.databaseConfig.userPassword   Password to connect with                                         password
+ecc.configuration.databaseConfig.databaseType   Database type (currently only PostgreSQL supported)              postgresql
+==============================================  ===============================================================  =====
 
-+--------------------+---------------------------+-----------------------------------------------------+
-| **Property label** | **Description**           | **Example**                                         |
-|                    |                           |                                                     |
-+--------------------+---------------------------+-----------------------------------------------------+
-| Nagios.fullurl     | URL of                    | nagios.fullurl=http://username:password@host/nagios |
-|                    | a deployed NAGIOS service |                                                     |
-|                    |                           |                                                     |
-+--------------------+---------------------------+-----------------------------------------------------+
+Miscellaneous default settings:
 
+==============================================  ===============================================================  =====
+Property label                                  Description                                                      Example
+==============================================  ===============================================================  =====
+ecc.configuration.miscConfig.snapshotCount      Number of points to display on live charts                       50
+ecc.configuration.miscConfig.nagiousUrl         Address of Nagios monitoring system (no longer used)             http://username:password@host/nagios
+==============================================  ===============================================================  =====
 
 
 .. |image21_png| image:: images/image21.png

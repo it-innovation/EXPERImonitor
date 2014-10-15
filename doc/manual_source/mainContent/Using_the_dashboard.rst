@@ -14,7 +14,7 @@ After deploying the EXPERImonitor, you should be able to access the EXPERImonito
 
 You should be able to use any configuration by manually entering the details on the right side of the screen, choose between or use as a template:
 
-#. Local configuration loaded from **application.properties** file (located in **eccService/src/main/resources** folder in source distribution or in **EccService-2.1/WEB-INF/classes** folder in your web server deployment).
+#. Local configuration loaded from **application.properties** file (located in **eccService/src/main/resources** folder in source distribution or in **EccService-2.2/WEB-INF/classes** folder in your web server deployment).
 
 #. Remote configurations located at WebDAV server config.experimedia.eu.
 

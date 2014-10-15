@@ -74,7 +74,7 @@ You are now ready to build the EXPERImonitor. To do this get a command line in t
 
 All modules in the EXPERImonitor should be reported as successfully built. You should find the EXPERImonitor web dashboard WAR file created in the following location::
 
-  eccService/target/EccService-2.1.war
+  eccService/target/EccService-2.2.war
 
 To deploy the EXPERImonitor service use ``mvn spring:boot`` or follow the instructions for the "Binary release" below.
 
@@ -179,11 +179,11 @@ TODO: memory to 1GB?
 After installing the Tomcat server, you should have a Tomcat service running – this can be verified by navigating to the management web page usually found at
 http://localhost:8080/
 
-Deploy and run the EXPERImonitor service by copying the two WAR files from the thirdPartyLibs folder and ``eccService/target/EccService-2.1.war`` to Tomcat's ``webapps`` directory (Tomcat should automatically unpack and deploy them for you immediately).
+Deploy and run the EXPERImonitor service by copying the two WAR files from the thirdPartyLibs folder and ``eccService/target/EccService-2.2.war`` to Tomcat's ``webapps`` directory (Tomcat should automatically unpack and deploy them for you immediately).
 
 Copy the owlim-lite-5.4.jar from thirdPartyLibs to the uppacked EXPERImonitor service TODO where?  Then restart the Tomcat service.
 
-You should see the EXPERImonitor dashboard running on: http://localhost:8080/EccService-2.1
+You should see the EXPERImonitor dashboard running on: http://localhost:8080/EccService-2.2
 
 Ubuntu Linux installation
 -------------------------
@@ -211,11 +211,11 @@ Restart tomcat::
 Copy in the required WAR files::
 
   $ sudo cp thirdPartyLibs/*.war /var/lib/tomcat7/webapps
-  $ sudo cp eccService/target/EccService-2.1.war /var/lib/tomcat7/webapps
+  $ sudo cp eccService/target/EccService-2.2.war /var/lib/tomcat7/webapps
 
 Copy in the owlim-lite jar::
 
-  $ sudo cp thirdPartyLibs/*.jar /var/lib/tomcat/webapps/EccService-2.1/WEB-INF/lib
+  $ sudo cp thirdPartyLibs/*.jar /var/lib/tomcat/webapps/EccService-2.2/WEB-INF/lib
 
 Restart tomcat::
 
@@ -227,7 +227,7 @@ Glassfish
 Glassfish may be used as an alternative to Tomcat.
 
 #. Update Glassfish Java permissions for socket access using ``vagrantConf/glassfish/java.policy`` file
-#. Copy the following JARs from ``eccService/target/EccService-2.1/WEB-INF/lib/`` into Glassfish ``/lib/endorsed`` folder for Logback library support:
+#. Copy the following JARs from ``eccService/target/EccService-2.2/WEB-INF/lib/`` into Glassfish ``/lib/endorsed`` folder for Logback library support:
   * logback-core-1.1.2.jar
   * logback-classic-1.1.2.jar
   * jul-to-slf4j-1.7.6.jar
@@ -237,11 +237,11 @@ Glassfish may be used as an alternative to Tomcat.
   * <Glassfish home>/glassfish/domains/domain1/domain.xml
 #. Edit the LOG_DIR variable definition in the ``eccService/src/main/resources/logback.xml`` or ``WEB-INF/classes/logback.xml`` file to set the location of the EXPERImonitor log file.
 #. Start the default Glassfish domain and database.
-#. Deploy the two WAR files from the thirdPartyLibs folder and ``eccService/target/EccService-2.1.war``.
+#. Deploy the two WAR files from the thirdPartyLibs folder and ``eccService/target/EccService-2.2.war``.
 #. Copy the owlim-lite jar from thirdPartyLibs into the WEB-INF/lib folder of the unpacked EXPERImonitor service.
 #. Restart glassfish.
 
-You should see the EXPERImonitor dashboard running on: e.g. http://localhost:8080/EccService-2.1. The OpenRDF workbench should be available on e.g. http://localhost:8080/openrdf-workbench/ (the port numbers depend on your installation choices).
+You should see the EXPERImonitor dashboard running on: e.g. http://localhost:8080/EccService-2.2. The OpenRDF workbench should be available on e.g. http://localhost:8080/openrdf-workbench/ (the port numbers depend on your installation choices).
 
 If you deployed the Dashboard correctly, you should see EXPERImonitor Service Configuration page in your browser:
 
