@@ -1,5 +1,9 @@
+Writing an EXPERImonitor client
+===============================
+
 Introduction
-============
+------------
+
 In this part of the documentation, we provide you with a technical guide on how to write software using the EXPERImonitor API. This section is primarily intended for software engineers - a higher level introduction to the EXPERImonitor can be found at the beginning of this document.
 
 Here we present:
@@ -10,8 +14,6 @@ Here we present:
 
 In the later section ('Advanced EXPERImonitor client programming') we explore some of the more advanced aspects of EXPERImonitor client writing including guidelines for EXPERImonitor integration and an introduction to generating Provenance based experimental data.
 
-Writing an EXPERImonitor client
-===============================
 EXPERIMEDIA’s baseline technologies provide the technologist and experimenter a set of FMI technologies for integration within both the *content* and *experiment* life-cycles. From a purely experimental point of view, the experimenter will have access to a number of metrics already available for use from the baseline components themselves. For a list of these metrics, see section 'Baseline Metric Services'.
 
 It is anticipated that additional metrics, based on observations of the behaviours of the new technologies brought to the EXPERIMEDIA baseline (or users associated with their use), will also need to be captured. In the following sections, we will explore how an EXPERImonitor client can be developed to communicate metrics during the experimental process.
