@@ -305,7 +305,7 @@ public class ExperimentService {
             }
             return newExp;
         } catch (Exception e) {
-            logger.error("Failed to restart experiment [" + uuid + "]");
+            logger.error("Failed to restart experiment [" + uuid + "]", e);
             return null;
         }
 
@@ -401,7 +401,7 @@ public class ExperimentService {
 
         } catch (Exception ex) {
             String problem = "Could not start experiment because: " + ex.getMessage();
-            logger.error(problem);
+            logger.error(problem, ex);
             return null;
         }
     }
@@ -517,7 +517,7 @@ public class ExperimentService {
         } catch (Exception ex) {
 
             String problem = "Could not advance experiment phase: " + ex.getMessage();
-            logger.error(problem);
+            logger.error(problem, ex);
 
             throw new Exception(problem, ex);
         }
@@ -635,7 +635,7 @@ public class ExperimentService {
         } catch (Exception ex) {
 
             String problem = "Had problems deregistering client " + client.getName() + ": " + ex.getMessage();
-            logger.error(problem);
+            logger.error(problem, ex);
 
             throw new Exception(problem, ex);
         }
@@ -687,7 +687,7 @@ public class ExperimentService {
             expMonitor.forceClientDisconnection(client);
             liveMetricScheduler.removeClient(client);
         } catch (Exception ex) {
-            logger.error("Could not forcibly remove client " + client.getName() + " because: " + ex.getMessage());
+            logger.error("Could not forcibly remove client " + client.getName() + " because: " + ex.getMessage(), ex);
         }
     }
 
@@ -813,9 +813,9 @@ public class ExperimentService {
             livePROVConsumer.addPROVReport(report);
         } catch (Exception ex) {
             String msg = "Could not store PROV report: " + ex.getMessage();
-            logger.error(msg);
+            logger.error(msg, ex);
 
-            throw new Exception(msg);
+            throw new Exception(msg, ex);
         }
     }
 
@@ -914,7 +914,7 @@ public class ExperimentService {
             try {
                 expMonitor.resetLifecycle();
             } catch (Exception ex) {
-                logger.error("Could not reset experiment lifecycle: " + ex.getMessage());
+                logger.error("Could not reset experiment lifecycle: " + ex.getMessage(), ex);
             }
         }
 
@@ -944,7 +944,7 @@ public class ExperimentService {
 
                             expMetGeneratorDAO.saveMetricGenerator(mg, expID);
                         } catch (Exception ex) {
-                            logger.error("Failed to save metric generators for client " + client.getName() + ": " + ex.getMessage());
+                            logger.error("Failed to save metric generators for client " + client.getName() + ": " + ex.getMessage(), ex);
                         }
                     }
                 }
@@ -994,7 +994,7 @@ public class ExperimentService {
                     try {
                         liveMetricScheduler.addClient(client);
                     } catch (Exception ex) {
-                        logger.error("Could not add pulling client to live monitoring: " + ex.getMessage());
+                        logger.error("Could not add pulling client to live monitoring: " + ex.getMessage(), ex);
                     }
                 } else {
                     logger.warn("Client " + client.getName() + " trying to start pull process whilst not in Live monitoring");
@@ -1017,7 +1017,7 @@ public class ExperimentService {
                     String problem = "Could not save measurements for client: "
                             + client.getName() + " because: " + ex.getMessage();
 
-                    logger.error(problem);
+                    logger.error(problem, ex);
                 }
             }
         }
@@ -1033,7 +1033,7 @@ public class ExperimentService {
                     String problem = "Could not save provenance statement for client "
                             + client.getName() + " because: " + ex.getMessage();
 
-                    logger.error(problem);
+                    logger.error(problem, ex);
                 }
             }
         }
@@ -1051,7 +1051,7 @@ public class ExperimentService {
                     String problem = "Could not request missing metric data from "
                             + client + " because: " + ex.getMessage();
 
-                    logger.error(problem);
+                    logger.error(problem, ex);
                 }
             } else {
                 logger.error("Client " + client.getName() + " provided an empty summary report");
@@ -1066,7 +1066,7 @@ public class ExperimentService {
                 try {
                     expReportAccessor.saveReport(batch.getBatchReport(), true);
                 } catch (Exception e) {
-                    logger.error("Could not save batch data report: " + e.getMessage());
+                    logger.error("Could not save batch data report: " + e.getMessage(), e);
                 }
             }
         }
