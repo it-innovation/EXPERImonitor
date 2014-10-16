@@ -248,7 +248,7 @@ If you deployed the Dashboard correctly, you should see EXPERImonitor Service Co
  .. image:: images/dashboard_configuration.png
   :width: 100 %
 
-You are now ready to configure EXPERImonitor and start a new experiment. For further instructions please go to :doc:`Using the EXPERImonitor Dashboard </mainContent/Using_the_dashboard>` section.
+You are now ready to configure EXPERImonitor and start a new experiment. For further instructions please go to :doc:`Using the EXPERImonitor Dashboard <Using_the_dashboard>` section.
 
 EXPERImonitor default configuration
 ###################################
