@@ -16,13 +16,14 @@ Experiment explorer user interface
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 In addition to the existing metrics based views, EXPERImonitor now comes with a data explorer interface that allows you to:
 
- * Explore experiment participant interactions with your experimental system (using captured provenance data)
- * Visualise quality of experience measurements associated with experiment participants
- * Explore relationships between:
-		* User experience
-		* User activities and application usage
-		* User activities and service usage
-		* Service usage and service QoS metrics
+* Explore experiment participant interactions with your experimental system (using captured provenance data)
+* Visualise quality of experience measurements associated with experiment participants
+* Explore relationships between:
+
+  * User experience
+  * User activities and application usage
+  * User activities and service usage
+  * Service usage and service QoS metrics
 
 For further information on the use of this new UI, please consult the documentation.
 
@@ -119,11 +120,11 @@ v2.0
 
 This version of the ECC now offers:
 
-- Improved Vagrant support for ECC re-deployment
+* Improved Vagrant support for ECC re-deployment
+* Improved ECC dashboard logging:
 
-- Improved ECC dashboard logging:
-	- ECC logs are now unified in a single log file (ecc.log)
-	- A single log4j configuration file can now be found in the 'WEB-INF/classes' folder
+  * ECC logs are now unified in a single log file (ecc.log)
+  * A single log4j configuration file can now be found in the 'WEB-INF/classes' folder
 
 If you are upgrading from V1.2, please take care to note the changes in V2.0-beta1 (below) as these also apply. As with V2.0-beta1, there is (currently not fully documented) support for Provenance modelling in the ECC client API.
 
@@ -133,16 +134,16 @@ v2.0-beta1
 
 This updated ECC dashboard and API now provides better support for client connectivity over the course of a series of experiments. Given a running RabbitMQ server, experimenters can now use the following features:
 
-1. Start ECC clients before starting up the ECC dashboard or creating a new experiment
-2. Run clients continuously between experiments without needing to explicitly re-start/reconnect their clients (particularly useful for ECC clients that are services themselves)
-3. Shut down and then restart the ECC dashboard – clients that did not disconnect themselves during this time will engaged in the next new experiment
+#. Start ECC clients before starting up the ECC dashboard or creating a new experiment
+#. Run clients continuously between experiments without needing to explicitly re-start/reconnect their clients (particularly useful for ECC clients that are services themselves)
+#. Shut down and then restart the ECC dashboard – clients that did not disconnect themselves during this time will engaged in the next new experiment
 
 Please note that [1] will work for v1.2 clients but features [2] and [3] are only available to ECC clients that are re-compiled against the new V2.0-beta API and use the V2.0-beta dashboard (see option 3 below).
 
 For users intending to use the V2.0-beta1 dashboard, please note two important changes:
 
-- Our database schema has updated slightly (no impact on metrics data)
-- The client <-> ECC messaging protocol has changed slightly
+* Our database schema has updated slightly (no impact on metrics data)
+* The client <-> ECC messaging protocol has changed slightly
 
 **Deployment**
 This means when deploying the ECC dashboard, you must run the schema set-up script (if you have an existing database, back this up first).
@@ -175,10 +176,10 @@ Option 3: Update your client to ECC V2.0-beta changes
 Dashboards you can use: V2.0-SNAPSHOT, V2.0-beta1
 Code changes:
 
-- Re-build your client against new API is required
-- You must ensure your create a new metric model for each new experiment
-- Minor package name refactors in the EDM specification package
-- Minor PROVENANCE API create/get method changes
+* Re-build your client against new API is required
+* You must ensure your create a new metric model for each new experiment
+* Minor package name refactors in the EDM specification package
+* Minor PROVENANCE API create/get method changes
 
 **Re-build your client**
 You must re-build your code against the new ECC API version.
@@ -188,15 +189,16 @@ With the previous pattern of behaviour, clients would be created and connected f
 
 You also have the option of re-using Entites between experiments. To do this, follow these steps:
 
-1. Create a new Metric Generator and metric group for the new experiment
-2. Add the Entities you wish to re-use to the generator
-3. Create and map new Measurement Sets to the appropriate Attributes in the usual way
+#. Create a new Metric Generator and metric group for the new experiment
+#. Add the Entities you wish to re-use to the generator
+#. Create and map new Measurement Sets to the appropriate Attributes in the usual way
 
 **Minor package name refactors**
 Unless you use our metric database locally, these changes will not affect you:
- - Maven artifact <artifactId>experimedia-arch-ecc-edm-impl</artifactId> is now called <artifactId>experimedia-arch-ecc-edm-impl-metrics</artifactId>
- - Package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec is now uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics
- - Package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao is now uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao
+
+* Maven artifact <artifactId>experimedia-arch-ecc-edm-impl</artifactId> is now called <artifactId>experimedia-arch-ecc-edm-impl-metrics</artifactId>
+* Package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec is now uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics
+* Package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.mon.dao is now uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.spec.metrics.dao
 
 **Minor PROVENANCE API create/get method changes**
 If your client uses the PROVENANCE API, be aware that EDMProvFactory 'getOrCreate' method calls have been split into separate 'create' and 'get' methods. You must always create Entities, Agents and Activities; if you wish to retrieve them from the EDMProvFactory you should use the appropriate 'get' method.
@@ -204,11 +206,9 @@ If your client uses the PROVENANCE API, be aware that EDMProvFactory 'getOrCreat
 
 A few examples of such changes can be seen in our sample clients:
 
- - BasicECCClient: Cleared old metric model when experiment starts (see ECCClientController.java, line 132)
-
- - PROVECCClient : Moved metric/provenance model creation from construction to when experiment starts (see ClientController.java line 372)
-
- - HeadlessClient: Moved measurement task scheduling from constructor to when experiment starts (see ECCHeadlessClient.java line 209)
+* BasicECCClient: Cleared old metric model when experiment starts (see ECCClientController.java, line 132)
+* PROVECCClient : Moved metric/provenance model creation from construction to when experiment starts (see ClientController.java line 372)
+* HeadlessClient: Moved measurement task scheduling from constructor to when experiment starts (see ECCHeadlessClient.java line 209)
 
 v1.2
 ####
