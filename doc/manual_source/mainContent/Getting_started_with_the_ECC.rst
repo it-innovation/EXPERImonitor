@@ -149,9 +149,11 @@ Windows installation
 Download PostgreSQL from http://www.postgresql.org/download/  Install PostgreSQL and the pgAdmin tool using the graphical installer.
 
 #. Create a database called edm-metrics with UTF-8 encoding
-#. Execute the SQL script found in the EXPERImonitor package::
+#. Execute the SQL script found in the EXPERImonitor package: 
 
-  psql -d edm-metrics -U<username> -f edm/resources/edm-metrics-postgres.sql
+::
+
+   psql -d edm-metrics -U<username> -f edm/resources/edm-metrics-postgres.sql
 
 Above, the term <username> refers to your chosen username.
 
@@ -228,13 +230,17 @@ Glassfish may be used as an alternative to Tomcat.
 
 #. Update Glassfish Java permissions for socket access using ``vagrantConf/glassfish/java.policy`` file
 #. Copy the following JARs from ``eccService/target/EccService-2.2/WEB-INF/lib/`` into Glassfish ``/lib/endorsed`` folder for Logback library support:
+
   * logback-core-1.1.2.jar
   * logback-classic-1.1.2.jar
   * jul-to-slf4j-1.7.6.jar
+
 #. Configure Glassfish support for Logback libraries by using the files in the ``thirdPartyConfig/glassfish`` folder to update the following files:
+
   * <Glassfish home>/glassfish/domains/domain1/config/logback.xml
   * <Glassfish home>/glassfish/domains/domain1/config/logging.properties
   * <Glassfish home>/glassfish/domains/domain1/domain.xml
+
 #. Edit the LOG_DIR variable definition in the ``eccService/src/main/resources/logback.xml`` or ``WEB-INF/classes/logback.xml`` file to set the location of the EXPERImonitor log file.
 #. Start the default Glassfish domain and database.
 #. Deploy the two WAR files from the thirdPartyLibs folder and ``eccService/target/EccService-2.2.war``.
