@@ -245,7 +245,9 @@ function addQosServicesExplorerWidget(service, participantName, activity) {
     participantsDropdownList.append("<option value='__any'>Any</option>");
     var widgetSelectorsContainerRightForm = $('<form></form>').appendTo(widgetSelectorsContainerRight);
 //    var theParticipant;
-    $.each(participants, function (participantCounter, participant) {
+    $.each(participants.sort(function (a, b) {
+        return a.name.localeCompare(b.name);
+    }), function (participantCounter, participant) {
         var participantsDropdownListOption = $("<option value='" + participant.name + "'>" + participant.name + "</option>").appendTo(participantsDropdownList);
         participantsDropdownListOption.data("participant", participant);
 //        if (participant.name === participantName) {
@@ -261,7 +263,9 @@ function addQosServicesExplorerWidget(service, participantName, activity) {
     var servicesDropdownList = $('<select id="serv' + widgetsCounter + '"></select>').appendTo(servicesDropdownLabel);
     servicesDropdownList.append("<option value='__any'>Any</option>");
     var widgetSelectorsContainerLeftForm = $('<form></form>').appendTo(widgetSelectorsContainerLeft);
-    $.each(services, function (sCounter, tempService) {
+    $.each(services.sort(function (a, b) {
+        return a.name.localeCompare(b.name);
+    }), function (sCounter, tempService) {
         var serviceOption = $("<option value='" + tempService.name + "'>" + tempService.name + "</option>").appendTo(servicesDropdownList);
         serviceOption.data('service', tempService);
     });
@@ -457,7 +461,9 @@ function addParticipantQoeAttributesWidget(selectedParticipant) {
 
     // participants list fill
     participantsDropdownList.append("<option value='__any'>Any</option>");
-    $.each(participants, function (participantCounter, participant) {
+    $.each(participants.sort(function (a, b) {
+        return a.name.localeCompare(b.name);
+    }), function (participantCounter, participant) {
         var participantOption = $('<option id="part' + widgetsCounter + "-" + participantCounter + '" value="p' + participant.metricEntityID + '">' + participant.name + '</option>').appendTo(participantsDropdownList);
         participantOption.data("participant", participant);
     });
@@ -467,7 +473,9 @@ function addParticipantQoeAttributesWidget(selectedParticipant) {
 
     // attributes list fill
     attributesDropdownList.append("<option value='__any'>Any</option>");
-    $.each(groupAttributes.qoEAttributes, function (participantCounter, attribute) {
+    $.each(groupAttributes.qoEAttributes.sort(function (a, b) {
+        return a.name.localeCompare(b.name);
+    }), function (participantCounter, attribute) {
         attributesDropdownList.append("<option value='" + attribute.name + "'>" + attribute.name + "</option>");
     });
     attributesDropdownList.change(function (e) {
@@ -676,7 +684,9 @@ function addParticipantExplorerWidget(selectedParticipant) {
     var participantsDropdownLabel = $("<label>Filter by participant</label>").appendTo(widgetSelectorsContainerLeft);
     var participantsDropdownList = $("<select></select>").appendTo(participantsDropdownLabel);
     participantsDropdownList.append("<option value='__any'>Any</option>");
-    $.each(participants, function (participantCounter, participant) {
+    $.each(participants.sort(function (a, b) {
+        return a.name.localeCompare(b.name);
+    }), function (participantCounter, participant) {
         var option = $("<option value='" + participant.name + "'>" + participant.name + "</option>").appendTo(participantsDropdownList);
         option.data('participant', participant);
     });
