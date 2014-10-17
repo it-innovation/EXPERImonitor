@@ -97,7 +97,11 @@ public class ExplorerProvenanceQueryHelper {
         result.setProperty("activitiesPerformedCount", countAmountOf(expID.toString(), "http://www.w3.org/ns/prov#Activity"));
 
         //applicationsUsedCount
-        result.setProperty("applicationsUsedCount", countAmountOf(expID.toString(), "http://experimedia.eu/ontologies/ExperimediaExperimentExplorer#Application"));
+        //WARNING: Just counting items that are "Applications" returns an agent and entity for each Application so we divide the result by 2.
+        String sCount = countAmountOf(expID.toString(), "http://experimedia.eu/ontologies/ExperimediaExperimentExplorer#Application");
+        int iCount = Integer.parseInt(sCount);
+        sCount = String.valueOf(iCount / 2);
+        result.setProperty("applicationsUsedCount", sCount);
 
         //servicesUsedCount
         result.setProperty("servicesUsedCount", countAmountOf(expID.toString(), "http://experimedia.eu/ontologies/ExperimediaExperimentExplorer#Service"));
