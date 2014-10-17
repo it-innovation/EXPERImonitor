@@ -1,5 +1,9 @@
 #!/bin/sh
 
+SCRIPT=$(readlink -f "$0")
+SCRIPTPATH=$(dirname "$SCRIPT")
+cd "$SCRIPTPATH"/..
+
 cd thirdPartyLibs
 ./installLibraries.sh
 mvn package assembly:assembly -Preleasesrc

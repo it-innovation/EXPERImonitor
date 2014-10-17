@@ -1,14 +1,13 @@
 #!/bin/sh
 
 # For developers using vagrant
-# Run this script as root to stop tomcat, clear out PostgreSQL DB and start tomcat.
-# Also resynch with code on host machine and rebuilds.
+# Run this script as root to stop tomcat, clear out PostgreSQL DB, rsync with code on host machine, and start tomcat.
 
 echo "Resetting the EXPERImonitor"
 
 SCRIPT=$(readlink -f "$0")
 SCRIPTPATH=$(dirname "$SCRIPT")
-cd $SCRIPTPATH
+cd "$SCRIPTPATH"/..
 
 # stop tomcat
 service tomcat7 stop
