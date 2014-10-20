@@ -1493,8 +1493,6 @@ public class DataService {
         if (mSets != null) {
             if (mSets.isEmpty()) {
                 logger.warn("Could not find any measurement sets for attribute " + attr.getName());
-            } else {
-//                logger.warn("Measurement set retrieval: Attribute " + attr.getName() + " has more than one measurement set");
             }
 
             // Take the first measurement set

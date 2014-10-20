@@ -144,10 +144,10 @@ public class Questionnaire {
         ArrayList<Integer> sortedOptions = new ArrayList(numberOfPeoplePerOption.keySet());
         Collections.sort(sortedOptions);
         Iterator<Integer> it = sortedOptions.iterator();
-        Integer option, numberOfPeople;
+        Integer option;
+        Integer numberOfPeople;
         String thePeopleAsString;
         ArrayList<User> thePeople;
-//        System.out.println("Question: " + q.getName());
         while (it.hasNext()) {
             option = it.next();
             numberOfPeople = numberOfPeoplePerOption.get(option);
@@ -216,16 +216,12 @@ public class Questionnaire {
     }
 
     public void getAnswerDistributionForUser(User u) {
-//        System.out.println("Answers for user '" + u.getName() + "': ");
-        int counter = 1;
         for (Question q : questions) {
             for (Answer a : answers) {
                 if (a.getUserId().equals(u.getId()) && a.getQuestionId().equals(q.getId())) {
-//                    System.out.println("\tQuestion " + counter + " (" + q.getName() + "): " + a.getOptionSelected());
                     break;
                 }
             }
-            counter++;
         }
     }
 

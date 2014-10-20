@@ -186,8 +186,8 @@ public class ExplorerProvenanceQueryHelper {
                     String service = tqrb.getBinding("svc").getValue().toString();
 
                     if (service != null && service.equals(svcIRI)) {
-                        String l = tqrb.getBinding("label").getValue().toString();
-                        svc = new EccService(l.substring(l.indexOf("\"") + 1, l.lastIndexOf("\"")), "TODO: description", svcIRI);
+                        String lab = tqrb.getBinding("label").getValue().toString();
+                        svc = new EccService(lab.substring(lab.indexOf("\"") + 1, lab.lastIndexOf("\"")), "TODO: description", svcIRI);
                         break;
                     }
                 }
@@ -234,8 +234,8 @@ public class ExplorerProvenanceQueryHelper {
 
                     if (application != null && application.equals(appIRI)) {
 
-                        String l = tqrb.getBinding("label").getValue().toString();
-                        app = new EccApplication(l.substring(l.indexOf("\"") + 1, l.lastIndexOf("\"")), "TODO: description", appIRI);
+                        String lab = tqrb.getBinding("label").getValue().toString();
+                        app = new EccApplication(lab.substring(lab.indexOf("\"") + 1, lab.lastIndexOf("\"")), "TODO: description", appIRI);
                         break;
                     }
                 }
@@ -275,7 +275,6 @@ public class ExplorerProvenanceQueryHelper {
         try {
             tqr = store.query(expID.toString(), sparql);
 
-            HashMap<String, Integer> activities = new HashMap<>();
             if (tqr != null) {
                 while (tqr.hasNext()) {
 
@@ -283,15 +282,15 @@ public class ExplorerProvenanceQueryHelper {
 
                     String s = tqrb.getBinding("start").getValue().toString();
                     String e = tqrb.getBinding("end").getValue().toString();
-                    String l = tqrb.getBinding("label").getValue().toString();
+                    String lab = tqrb.getBinding("label").getValue().toString();
 
-                    if (s != null && e != null && l != null) {
+                    if (s != null && e != null && lab != null) {
 
                         Calendar start = javax.xml.bind.DatatypeConverter.parseDateTime(s.substring(s.indexOf("\"") + 1, s.lastIndexOf("\"")));
                         Calendar end = javax.xml.bind.DatatypeConverter.parseDateTime(e.substring(e.indexOf("\"") + 1, e.lastIndexOf("\"")));
                         //TODO: not sure about timestamp format here...
 
-                        activity = new EccActivity(l.substring(l.indexOf("\"") + 1, l.lastIndexOf("\"")), "TODO: description",
+                        activity = new EccActivity(lab.substring(lab.indexOf("\"") + 1, lab.lastIndexOf("\"")), "TODO: description",
                                 actIRI, new Date(start.getTimeInMillis()), new Date(end.getTimeInMillis()));
 
                     //this is intentional; there should only be one row returned since we're querying by iri.
@@ -447,15 +446,15 @@ public class ExplorerProvenanceQueryHelper {
                     String label = tqrb.getBinding("label").getValue().toString();
                     String s = tqrb.getBinding("start").getValue().toString();
                     String e = tqrb.getBinding("end").getValue().toString();
-                    String l = tqrb.getBinding("label").getValue().toString();
+                    String lab = tqrb.getBinding("label").getValue().toString();
 
-                    if (label != null && s != null && e != null && l != null) {
+                    if (label != null && s != null && e != null && lab != null) {
 
                         Calendar start = javax.xml.bind.DatatypeConverter.parseDateTime(s.substring(s.indexOf("\"") + 1, s.lastIndexOf("\"")));
                         Calendar end = javax.xml.bind.DatatypeConverter.parseDateTime(e.substring(e.indexOf("\"") + 1, e.lastIndexOf("\"")));
                         //TODO: not sure about timestamp format here...
 
-                        EccActivity a = new EccActivity(l.substring(l.indexOf("\"") + 1, l.lastIndexOf("\"")), "TODO: description",
+                        EccActivity a = new EccActivity(lab.substring(lab.indexOf("\"") + 1, lab.lastIndexOf("\"")), "TODO: description",
                                 tqrb.getBinding("activity").getValue().toString(), new Date(start.getTimeInMillis()), new Date(end.getTimeInMillis()));
 
                         result.addActivity(a);
@@ -540,12 +539,12 @@ public class ExplorerProvenanceQueryHelper {
                 while (tqr.hasNext()) {
                     BindingSet tqrb = tqr.next();
 
-                    String l = tqrb.getBinding("label").getValue().toString();
+                    String lab = tqrb.getBinding("label").getValue().toString();
                     String app = tqrb.getBinding("app").getValue().toString();
 
-                    if (l != null && app != null) {
+                    if (lab != null && app != null) {
 
-                        EccApplication application = new EccApplication(l.substring(l.indexOf("\"") + 1, l.lastIndexOf("\"")), "TODO: description", app);
+                        EccApplication application = new EccApplication(lab.substring(lab.indexOf("\"") + 1, lab.lastIndexOf("\"")), "TODO: description", app);
 
                         // TODO: Stefanie to fix SPARQL query: for now, manually select only entities
                         if (application.getIRI().contains("entity")) {

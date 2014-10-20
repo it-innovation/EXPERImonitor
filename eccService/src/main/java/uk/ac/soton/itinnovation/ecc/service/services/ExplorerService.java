@@ -24,7 +24,6 @@
 /////////////////////////////////////////////////////////////////////////
 package uk.ac.soton.itinnovation.ecc.service.services;
 
-import uk.ac.soton.itinnovation.ecc.service.utils.MetricCalculator;
 import uk.ac.soton.itinnovation.ecc.service.domain.explorer.EccExperimentSummary;
 import uk.ac.soton.itinnovation.ecc.service.domain.explorer.metrics.*;
 import uk.ac.soton.itinnovation.ecc.service.domain.explorer.provenance.*;
@@ -844,7 +843,6 @@ public class ExplorerService {
                 // Now try get participant activities based on label
                 Entity ent = metricsQueryHelper.getParticipantEntity(expID, partIRI);
                 EccParticipant part = createParticipant(ent);
-                ArrayList<EccActivity> partActs = null;
 
                 // If we are good, then create a sub-set series based on the attribute data
                 if (part != null && attrSeries != null) {
@@ -1042,6 +1040,7 @@ public class ExplorerService {
                             if (psd.createActivitySet()) {
                                 if (psd.createApplicationSet()) {
                                     if (psd.createServiceSet());
+                                    //TODO: finish this visualisation
                                 }
                             }
                         }
