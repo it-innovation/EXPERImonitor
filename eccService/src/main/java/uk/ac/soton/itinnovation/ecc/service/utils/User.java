@@ -19,7 +19,7 @@
 //
 //	Created By :			Maxim Bashevoy
 //	Created Date :			2014-08-19
-//	Created for Project :           Sense4us
+//	Created for Project :           EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 package uk.ac.soton.itinnovation.ecc.service.utils;

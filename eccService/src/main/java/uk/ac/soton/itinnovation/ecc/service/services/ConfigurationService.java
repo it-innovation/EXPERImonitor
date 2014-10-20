@@ -17,9 +17,7 @@
 // PURPOSE, except where stated in the Licence Agreement supplied with
 // the software.
 //
-//	Created By :			Maxim Bashevoy
-//                                      Simon Crowle
-//
+//	Created By :			Maxim Bashevoy, Simon Crowle
 //	Created Date :			2014-04-01
 //	Created for Project :           EXPERIMEDIA
 //

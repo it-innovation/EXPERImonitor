@@ -17,11 +17,9 @@
 // PURPOSE, except where stated in the Licence Agreement supplied with
 // the software.
 //
-//      Created By :            Vegard Engen
-//															Simon Crowle
+//      Created By :            Vegard Engen, Simon Crowle
 //      Created Date :          2012-08-13
-//															2014-02-25 (Simon)
-//      Created for Project :   BonFIRE/EXPERIMEDIA
+//      Created for Project :   BonFIRE, EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 package uk.ac.soton.itinnovation.experimedia.arch.ecc.edm.impl.metrics;

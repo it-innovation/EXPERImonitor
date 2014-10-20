@@ -17,10 +17,9 @@
 // PURPOSE, except where stated in the Licence Agreement supplied with
 // the software.
 //
-//	Created By :			Simon Crowle
-//                          Maxim Bashevoy
-//	Created Date :			2014-04-02
-//	Created for Project :   EXPERIMEDIA
+//	Created By : Simon Crowle, Maxim Bashevoy
+//	Created Date : 2014-04-02
+//	Created for Project : EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 package uk.ac.soton.itinnovation.ecc.service.services;

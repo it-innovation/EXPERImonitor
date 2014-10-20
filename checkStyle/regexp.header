@@ -17,8 +17,8 @@
 ^// PURPOSE, except where stated in the Licence Agreement supplied with\s*$
 ^// the software.\s*$
 ^//$
-^//\s+Created By ?:\s+[-A-Za-z]+\.?\s[-A-Za-z]+
+^//\s+Created By ?:\s+[-A-Za-z]+\.?\s[-A-Za-z,\s]+
 ^//\s+Created Date ?:\s+\d
-^//\s+Created for Project ?:\s+[-A-Za-z]+\s*$
+^//\s+Created for Project ?:\s+[-A-Za-z,\s]+\s*$
 ^//\s*$
 ^/////////////////////////////////////////////////////////////////////////$
