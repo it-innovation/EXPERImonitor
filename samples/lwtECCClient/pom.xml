@@ -30,7 +30,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>2.4.3</version>
+                <version>${ecc.resourceplugin.version}</version>
                 <configuration>
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
@@ -39,7 +39,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
-                <version>1.2.1</version>
+                <version>${ecc.execmavenplugin.version}</version>
                 <configuration>
                     <mainClass>uk.ac.soton.itinnovation.experimedia.arch.ecc.samples.lwtClient.EntryPoint</mainClass>
                 </configuration>

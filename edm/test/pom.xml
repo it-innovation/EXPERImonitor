@@ -109,7 +109,7 @@
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>exec-maven-plugin</artifactId>
-                        <version>${exec.maven.mojo.ver}</version>
+                        <version>${ecc.execmavenplugin.version}</version>
                         <executions>
                             <execution>
                                 <goals>

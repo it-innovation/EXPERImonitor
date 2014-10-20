@@ -8,7 +8,10 @@
     <name>EXPERImonitor</name>
     <packaging>pom</packaging>
     <url>https://github.com/it-innovation/EXPERImonitor/</url>
-    <organization>University of Southampton IT Innovation Centre</organization>
+    <organization>
+        <name>University of Southampton IT Innovation Centre</name>
+        <url>http://www.it-innovation.soton.ac.uk</url>
+    </organization>
 
     <prerequisites>
         <maven>3.0.0</maven>
@@ -50,7 +53,7 @@
         <ecc.siteplugin.version>3.4</ecc.siteplugin.version>
         <ecc.compilerplugin.version>3.2</ecc.compilerplugin.version>
         <ecc.versionsplugin.version>2.1</ecc.versionsplugin.version>
-        <exec.maven.mojo.ver>1.3.1</exec.maven.mojo.ver>
+        <ecc.execmavenplugin.version>1.3.2</ecc.execmavenplugin.version>
         <ecc.deployplugin.version>2.8.2</ecc.deployplugin.version>
         <ecc.installplugin.version>2.5.2</ecc.installplugin.version>
         <ecc.jarplugin.version>2.5</ecc.jarplugin.version>
