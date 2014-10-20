@@ -546,7 +546,12 @@ public class ExplorerProvenanceQueryHelper {
 
                         EccApplication application = new EccApplication(lab.substring(lab.indexOf("\"") + 1, lab.lastIndexOf("\"")), "TODO: description", app);
 
-                        // TODO: Stefanie to fix SPARQL query: for now, manually select only entities
+                        // TODO: fix this!
+                        // The current SPARQL query will return the agent and the entity (they are the "sameAs" each other).
+                        // We then do a substring match on the IRI to get the entity.
+                        // This will only work if it was all created using the high-level API with default naming.
+                        // Question: does it matter which we get?  Could we just take the first one?
+                        // Can we change the SPARQL query to only return the entity?
                         if (application.getIRI().contains("entity")) {
                             result.addApplication(application);
                         }
