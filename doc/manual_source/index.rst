@@ -9,7 +9,7 @@ EXPERImonitor 2.2 Documentation
 |    :maxdepth: 2                                          |    :maxdepth: 2                                       |
 |                                                          |                                                       |
 |    mainContent/Overview                                  |    mainContent/Getting_started_with_the_ECC           |
-|                                                          |                                                       |
+|    mainContent/Introduction                              |                                                       |
 |                                                          |                                                       |
 +----------------------------------------------------------+-------------------------------------------------------+
 | **Using the EXPERImonitor Dashboard**                    |  **Building Sample EXPERImonitor Clients**            |
@@ -36,8 +36,7 @@ EXPERImonitor 2.2 Documentation
 | .. toctree::                                             | .. toctree::                                          |
 |    :maxdepth: 2                                          |    :maxdepth: 2                                       |
 |                                                          |                                                       |
-<<<<<<< HEAD
-|    mainContent/Indicativemonitoring_use-cases            |    mainContent/Base_line_metric_services              |              
+|    mainContent/Indicativemonitoring_use-cases            |    mainContent/Base_line_metric_services              |
 |                                                          |                                                       |
 +----------------------------------------------------------+-------------------------------------------------------+
 | **EXPERImonitor Monitoring Protocol**                    | **Change Log**                                        |
@@ -46,17 +45,6 @@ EXPERImonitor 2.2 Documentation
 |    :maxdepth: 2                                          |    :maxdepth: 2                                       |
 |                                                          |                                                       |
 |    mainContent/ECC_monitoring_protocol                   |    mainContent/eccAPIChangeLog                        |
-=======
-|    mainContent/ECC_monitoring_protocol                   |    mainContent/Base_line_metric_services              |
-|                                                          |                                                       |
-+----------------------------------------------------------+-------------------------------------------------------+
-| **Provenance**                                           |  **ECC Change Log**                                   |
-+----------------------------------------------------------+-------------------------------------------------------+
-| .. toctree::                                             |  .. toctree::                                         |
-|    :maxdepth: 2                                          |     :maxdepth: 2                                      |
-|                                                          |                                                       |
-|    mainContent/Creating_Provenance                       |     mainContent/eccAPIChangeLog                       |
->>>>>>> feature/explorer
 |                                                          |                                                       |
 +----------------------------------------------------------+-------------------------------------------------------+
 
