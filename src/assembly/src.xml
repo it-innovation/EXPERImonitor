@@ -415,6 +415,15 @@
         </fileSet>
 
         <fileSet>
+            <directory>${basedir}/common/target/site</directory>
+            <includes>
+                <include>css/**</include>
+                <include>images/**</include>
+            </includes>
+            <outputDirectory>licenses/common</outputDirectory>
+        </fileSet>
+
+        <fileSet>
             <directory>${basedir}/common/uif/target/site</directory>
             <includes>
                 <include>css/**</include>
