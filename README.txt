@@ -155,7 +155,7 @@ The EXPERImonitor dashboard can be quickly built to run on your local developmen
 
   You should find the EXPERImonitor web dashboard WAR file created in the following location:
 
-      <EXPERImonitor API root>\eccService\target\EccService-2.1.war
+      <EXPERImonitor API root>\eccService\target\EccService-2.2.war
 
 
 3. Deploy and run the EXPERImonitor dashboard, using:
@@ -167,7 +167,7 @@ The EXPERImonitor dashboard can be quickly built to run on your local developmen
 	  Step 2: Copy WAR file generated in step 1 to Tomcat's 'webapps' directory
 	          (Tomcat should automatically unpack and deploy for you)
 
-	  Result: You should see the EXPERImonitor dashboard running on: http://localhost:8080/EccService-2.1/
+	  Result: You should see the EXPERImonitor dashboard running on: http://localhost:8080/EccService-2.2/
 
 
 

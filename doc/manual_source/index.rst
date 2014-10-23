@@ -36,6 +36,7 @@ EXPERImonitor 2.2 Documentation
 | .. toctree::                                             | .. toctree::                                          |
 |    :maxdepth: 2                                          |    :maxdepth: 2                                       |
 |                                                          |                                                       |
+<<<<<<< HEAD
 |    mainContent/Indicativemonitoring_use-cases            |    mainContent/Base_line_metric_services              |              
 |                                                          |                                                       |
 +----------------------------------------------------------+-------------------------------------------------------+
@@ -45,6 +46,17 @@ EXPERImonitor 2.2 Documentation
 |    :maxdepth: 2                                          |    :maxdepth: 2                                       |
 |                                                          |                                                       |
 |    mainContent/ECC_monitoring_protocol                   |    mainContent/eccAPIChangeLog                        |
+=======
+|    mainContent/ECC_monitoring_protocol                   |    mainContent/Base_line_metric_services              |
+|                                                          |                                                       |
++----------------------------------------------------------+-------------------------------------------------------+
+| **Provenance**                                           |  **ECC Change Log**                                   |
++----------------------------------------------------------+-------------------------------------------------------+
+| .. toctree::                                             |  .. toctree::                                         |
+|    :maxdepth: 2                                          |     :maxdepth: 2                                      |
+|                                                          |                                                       |
+|    mainContent/Creating_Provenance                       |     mainContent/eccAPIChangeLog                       |
+>>>>>>> feature/explorer
 |                                                          |                                                       |
 +----------------------------------------------------------+-------------------------------------------------------+
 

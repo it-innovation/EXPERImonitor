@@ -583,15 +583,16 @@ public class DataService {
 
         try {
             Set<MeasurementSet> msetInfo = getAllEmptyMeasurementSetsForAttribute(UUID.fromString(experimentId), a);
-			
-			for ( MeasurementSet ms : msetInfo ) {
-				Report rep = expReportDAO.getReportForAllMeasurements(ms.getID(), true);		
-				MeasurementSet repMS = rep.getMeasurementSet();
-				
-				for (Measurement m: repMS.getMeasurements())
-					data.add(new EccMeasurement(m.getTimeStamp(), m.getValue()));
-				
-				}
+
+            for (MeasurementSet ms : msetInfo) {
+                Report rep = expReportDAO.getReportForAllMeasurements(ms.getID(), true);
+                MeasurementSet repMS = rep.getMeasurementSet();
+
+                for (Measurement m : repMS.getMeasurements()) {
+                    data.add(new EccMeasurement(m.getTimeStamp(), m.getValue()));
+                }
+
+            }
         } catch (Exception e) {
             if (e instanceof NoDataException) {
                 logger.debug("No data found for attribute [" + attributeId + "] in experiment [" + experimentId + "]");
@@ -1142,20 +1143,19 @@ public class DataService {
                     Set<EMClient> currClients = experimentService.getAllKnownClients();
 
                     for (EMClient client : currClients) {
-                        
+
                         // Use extended client type to get all metric metric generators
                         EMClientEx clientEx = (EMClientEx) client;
 
                         if (clientEx.getID().equals(targetID)) {
-							
-							for (Entity entity : clientEx.getCopyOfUniqueHistoricEntities()) {
+                            for (Entity entity : clientEx.getCopyOfUniqueHistoricEntities()) {
 
-								EccEntity ent = toEccEntity(entity, withAttributes);
+                                EccEntity ent = toEccEntity(entity, withAttributes);
 
-								if (ent != null) {
-									clientEntities.add(ent);
-								}
-							}
+                                if (ent != null) {
+                                    clientEntities.add(ent);
+                                }
+                            }
                         }
                     }
                 } else {
