@@ -80,8 +80,8 @@
         </file>
 
         <file>
-            <source>${basedir}/common/uif/target/site/third-party-report.html</source>
-            <outputDirectory>licenses/common/uif</outputDirectory>
+            <source>${basedir}/common/target/site/third-party-report.html</source>
+            <outputDirectory>licenses/common</outputDirectory>
             <filtered>true</filtered>
             <destName>third-party-licences.html</destName>
         </file>
@@ -272,11 +272,6 @@
         <fileSet>
             <directory>${basedir}/common/dataModel/provenance/target/site/apidocs</directory>
             <outputDirectory>javadoc/common/dataModel/provenance</outputDirectory>
-        </fileSet>
-
-        <fileSet>
-            <directory>${basedir}/common/uif/target/site/apidocs</directory>
-            <outputDirectory>javadoc/common/uif</outputDirectory>
         </fileSet>
 
         <fileSet>
