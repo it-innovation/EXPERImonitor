@@ -1,4 +1,4 @@
-ECC as a Service 2.1
+ECC as a Service 2.2
 
 Full build (requires valid PostgreSQL and Rabbit for tests):
 
@@ -28,4 +28,4 @@ Dashboard (if ran in spring boot):
 
 Dashboard (if ran as WAR, requires Tomcat v7.0.53+ for Servlet 3.0 support):
 
-	http://localhost:8080/EccService-2.1
+	http://localhost:8080/EccService-2.2

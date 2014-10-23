@@ -155,7 +155,7 @@ The ECC dashboard can be quickly built to run on your local development machine 
 
   You should find the ECC web dashboard WAR file created in the following location:
 
-      <ECC API root>\eccService\target\EccService-2.1.war
+      <ECC API root>\eccService\target\EccService-2.2.war
 
 
 3. Deploy and run the ECC dashboard, using:
@@ -167,7 +167,7 @@ The ECC dashboard can be quickly built to run on your local development machine 
 	  Step 2: Copy WAR file generated in step 1 to Tomcat's 'webapps' directory
 	          (Tomcat should automatically unpack and deploy for you)
 
-	  Result: You should see the ECC dashboard running on: http://localhost:8080/EccService-2.1/
+	  Result: You should see the ECC dashboard running on: http://localhost:8080/EccService-2.2/
 
 
 
