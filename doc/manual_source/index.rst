@@ -1,5 +1,5 @@
 
-EXPERIMEDIA ECC v2.1 documentation
+EXPERIMEDIA ECC v2.2 documentation
 ============================================
 
 +----------------------------------------------------------+-------------------------------------------------------+
@@ -33,15 +33,15 @@ EXPERIMEDIA ECC v2.1 documentation
 | .. toctree::                                             | .. toctree::                                          |
 |    :maxdepth: 2                                          |    :maxdepth: 2                                       |
 |                                                          |                                                       |
-|    mainContent/ECC_monitoring_protocol                   |    mainContent/Base_line_metric_services              |              
+|    mainContent/ECC_monitoring_protocol                   |    mainContent/Base_line_metric_services              |
 |                                                          |                                                       |
 +----------------------------------------------------------+-------------------------------------------------------+
-| **Provenance**                                           |  **ECC Change Log**                                   |                                                       
+| **Provenance**                                           |  **ECC Change Log**                                   |
 +----------------------------------------------------------+-------------------------------------------------------+
-| .. toctree::                                             |  .. toctree::                                         |                                                       
-|    :maxdepth: 2                                          |     :maxdepth: 2                                      |                                                       
+| .. toctree::                                             |  .. toctree::                                         |
+|    :maxdepth: 2                                          |     :maxdepth: 2                                      |
 |                                                          |                                                       |
-|    mainContent/Creating_Provenance                       |     mainContent/eccAPIChangeLog                       |                          
-|                                                          |                                                       |                                
+|    mainContent/Creating_Provenance                       |     mainContent/eccAPIChangeLog                       |
+|                                                          |                                                       |
 +----------------------------------------------------------+-------------------------------------------------------+
 
