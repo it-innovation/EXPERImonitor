@@ -30,7 +30,7 @@
         <!-- Maven plugin versions -->
         <ecc.surefire.version>2.17</ecc.surefire.version>
         <ecc.javadocplugin.version>2.9.1</ecc.javadocplugin.version>
-        <ecc.licenseplugin.version>1.7</ecc.licenseplugin.version>
+        <ecc.licenseplugin.version>1.5</ecc.licenseplugin.version>
         <ecc.reportplugin.version>2.7</ecc.reportplugin.version>
         <ecc.resourceplugin.version>2.6</ecc.resourceplugin.version>
         <ecc.assemblyplugin.version>2.4</ecc.assemblyplugin.version>
@@ -120,17 +120,17 @@
 
                 <!-- Packaging configuration ___________________________________ -->
                 <!--
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-assembly-plugin</artifactId>
-                    <version>${ecc.assemblyplugin.version}</version>
-                    <configuration>
-                        <descriptors>
-                            <descriptor>${ecc.assemblypath}/eccSourceAssembly.xml</descriptor>
-                        </descriptors>
-                    </configuration>
-                </plugin>
--->
+                                <plugin>
+                                    <groupId>org.apache.maven.plugins</groupId>
+                                    <artifactId>maven-assembly-plugin</artifactId>
+                                    <version>${ecc.assemblyplugin.version}</version>
+                                    <configuration>
+                                        <descriptors>
+                                            <descriptor>${ecc.assemblypath}/eccSourceAssembly.xml</descriptor>
+                                        </descriptors>
+                                    </configuration>
+                                </plugin>
+                -->
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>license-maven-plugin</artifactId>
