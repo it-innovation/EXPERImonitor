@@ -1,34 +1,35 @@
-------------------------------------------------------------------------------------------------------------------------
-This software distribution is licensed under the terms found in the file <EXPERImonitor API root>/licences/LGPL_v2.1.txt
+#############################################################################################################
+This software distribution is licensed under the terms found in the file LICENCE.txt
 The IT Innovation software is the source code and the following associated jars/war:
-------------------------------------------------------------------------------------------------------------------------
+#############################################################################################################
 
-experimedia-arch-ecc-amqpAPI-impl-2.0.jar
-experimedia-arch-ecc-amqpAPI-spec-2.0.jar
-experimedia-arch-ecc-common-dataModel-experiment-2.0.jar
-experimedia-arch-ecc-common-dataModel-metrics-2.0.jar
-experimedia-arch-ecc-common-dataModel-monitor-2.0.jar
-experimedia-arch-ecc-common-dataModel-provenance-2.0.jar
-experimedia-arch-ecc-edc-configAPI-2.0.jar
-experimedia-arch-ecc-edm-factory-2.0.jar
-experimedia-arch-ecc-edm-impl-2.0.jar
-experimedia-arch-ecc-edm-spec-2.0.jar
-experimedia-arch-ecc-edm-test-2.0.jar
-experimedia-arch-ecc-em-factory-2.0.jar
-experimedia-arch-ecc-em-impl-2.0.jar
-experimedia-arch-ecc-em-spec-2.0.jar
-experimedia-arch-ecc-em-test-2.0.jar
-experimedia-arch-ecc-samples-basicECCClient-2.0.jar
-experimedia-arch-ecc-samples-basicECCContainer-2.0.jar
-experimedia-arch-ecc-samples-headlessECCClient-2.0.jar
-experimedia-arch-ecc-samples-dynamicEntityDemoClient-2.0.jar
-experimedia-arch-ecc-samples-metricGeneratorExamples-2.0.jar
-experimedia-arch-ecc-samples-simplePROVECCClient-2.0.jar
-experimedia-arch-ecc-samples-shared-2.0.jar
+experimedia-arch-ecc-amqpAPI-impl-2.2.jar
+experimedia-arch-ecc-amqpAPI-spec-2.2.jar
+experimedia-arch-ecc-common-dataModel-experiment-2.2.jar
+experimedia-arch-ecc-common-dataModel-metrics-2.2.jar
+experimedia-arch-ecc-common-dataModel-monitor-2.2.jar
+experimedia-arch-ecc-common-dataModel-provenance-2.2.jar
+experimedia-arch-ecc-edc-configAPI-2.2.jar
+experimedia-arch-ecc-edm-factory-2.2.jar
+experimedia-arch-ecc-edm-impl-metrics-2.2.jar
+experimedia-arch-ecc-edm-spec-2.2.jar
+experimedia-arch-ecc-edm-test-2.2.jar
+experimedia-arch-ecc-em-factory-2.2.jar
+experimedia-arch-ecc-em-impl-2.2.jar
+experimedia-arch-ecc-em-spec-2.2.jar
 
-robust-cat-core-components-viewEngine-spec-uif-1.0-SNAPSHOT.jar
+experimedia-arch-ecc-samples-basicECCClient-2.2.jar
+experimedia-arch-ecc-samples-basicECCContainer-2.2.jar
+experimedia-arch-ecc-samples-databaseExport-2.2.jar
+experimedia-arch-ecc-samples-dynamicEntityDemoClient-2.2.jar
+experimedia-arch-ecc-samples-experimentSimulation-2.2.jar
+experimedia-arch-ecc-samples-headlessECCClient-2.2.jar
+experimedia-arch-ecc-samples-lwtECCClient-2.2.jar
+experimedia-arch-ecc-samples-metricGeneratorExamples-2.2.jar
+experimedia-arch-ecc-samples-simplePROVECCClient-2.2.jar
+experimedia-arch-ecc-samples-shared-2.2.jar
 
-OWLimProvStore-1.1-SNAPSHOT.jar
+OWLimProvStore-1.3.jar
 
 BasicAndroidClient-debug.apk
 BasicAndroidClient-debug-unaligned.apk
@@ -57,101 +58,43 @@ eccCommonDataModel_d.lib
 eccEMClient-Impl.lib
 eccEMClient-Impl_d.lib
 
-experimedia-arch-ecc-eccDash-2.0.war
+EccService-v2.2.war
 
-------------------------------------------------------------------------------------------------------------
+#############################################################################################################
 This software requires various third-party libraries to compile and/or execute.
-These libraries and their associated licences are:
-------------------------------------------------------------------------------------------------------------
-
-The Apache Software License, Version 2.0
------------------------------------------------
-commons-codec:1.8
-commons-collections:3.2.1
-commons-dbcp:1.3
-commons-fileupload:1.2
-commons-httpclient:3.1
-commons-io-2.4.jar
-commons-lang:2.2
-commons-logging:1.1.2
-commons-pool:1.5.4
-gson-2.2.2.jar
-gwt-user-2.3.0.jar
-httpclient:4.2.4
-httpcore:4.2.4
-invient-charts-0.8.6.jar
-icepush-0.2.1.jar
-icepush-3.0.1.jar
-javax.validation-api-1.0.0.GA.jar
-joda-time-2.1.jar
-log4net.dll
-org.apache.maven.surefire:common-junit3:2.12.4.jar
-org.apache.maven.surefire:common-junit4:2.12.4.jar
-org.apache.maven.surefire:surefire-junit47:2.12.4.jar
-org.apache.maven.surefire:common-junit48:2.12.4.jar
-org.apache.maven.surefire:surefire-grouper:2.12.4.jar
-RabbitMQ.Client.dll
-sardine-5.0.1.jar
-surefire-api:2.12.4
-vaadin-6.8.12.jar
-
-CPL 1.0
------------------------------------------------
-junit-4.10.jar
-
-MPL v1.1
------------------------------------------------
-amqp-client-2.8.6.jar
-icepush-2.0.0-alpha3.jar
-icepush-gwt-2.0.0-alpha3.jar
-
-CDDL
------------------------------------------------
-activation-1.1.jar
-servlet-api-2.3.jar
-jaxb-api:2.2.4
-jaxb-impl:2.2.6
-stax-api:1.0-2
-
-BSD (and variants)
------------------------------------------------
-postgresql-9.1-901.jdbc4.jar
-org.hamcrest:hamcrest-core:1.1.jar
-sesame-1.2.7.jar (Aduna BSD)
-antlr:2.7.7
-antlr-runtime:3.4
-stringtemplate:4.0.2
-
-Creative Commons Attribution-NonCommercial 3.0
------------------------------------------------
-invient-charts-0.8.6.jar
+Most libraries and their licences (those involved in the maven build) may be found in the "licenses" folder.
+Third party libraries that are not included there are listed below.
+#############################################################################################################
 
 MIT Licence
 -----------------------------------------------
-Newtonsoft.Json.dll
-rabbitmq-c-v0.3.0 (see https://github.com/alanxz/rabbitmq-c)
+Newtonsoft.Json.dll (see https://github.com/JamesNK/Newtonsoft.Json)
+rabbitmq-c-v0.5.0 (see https://github.com/alanxz/rabbitmq-c)
 SimpleAmqpClient (see https://github.com/alanxz/SimpleAmqpClient)
-org.slf4j:slf4j-api:1.7.6.jar
 
 BOOST Licence
 -----------------------------------------------
-Boost 1.53.0
+Boost 1.53.0 (see http://www.boost.org/)
 
-OWLIM-Lite Licence
+Apache v2.0
 -----------------------------------------------
-OWLIM-Lite_licence_v5.3
+Log4net.dll (see http://logging.apache.org/log4net/)
+commons-cli-1.1.jar (see http://commons.apache.org/proper/commons-cli/)
 
-Public domain
------------------------------------------------
-base64-2.3.8.jar
-
-LGPL
------------------------------------------------
-sesame:1.2.7
-ch.qos.logback:logback-classic:1.1.1.jar
-ch.qos.logback:slf4j-android:1.7.6.jar
+#############################################################################################################
+This software also requires some external services in order to execute.
+Their licenses are:
+#############################################################################################################
 
 ADUNA Licence (BSD variant)
 -----------------------------------------------
 openrdf-sesame.war
 openrdf-workbench.war
+
+Mozilla Public License v1.1
+-----------------------------------------------
+RabbitMQ (see http://www.rabbitmq.com/)
+
+PostgreSQL license
+-----------------------------------------------
+PostgreSQL (see http://www.postgresql.org/)
