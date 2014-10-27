@@ -93,7 +93,7 @@ if [ '#{ecc_git}' != "" ]; then
 else
 	# or copy EXPERImonitor code from guest machine to host machine
 	mkdir experimedia-ecc
-	rsync -a /vagrant/ experimedia-ecc --exclude '.git' --exclude 'target'
+	rsync -a /vagrant/ experimedia-ecc --exclude '.git' --exclude 'target' --exclude '.vagrant'
 fi
 
 ## Set up PostgreSQL ##
