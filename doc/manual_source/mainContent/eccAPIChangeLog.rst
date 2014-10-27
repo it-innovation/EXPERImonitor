@@ -7,11 +7,6 @@ v2.2
 Main changes
 ------------
 
-ECC is renamed EXPERImonitor
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-In this release we renamed the ECC to 'EXPERImonitor'.
-
-
 Experiment explorer user interface
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 In addition to the existing metrics based views, EXPERImonitor now comes with a data explorer interface that allows you to:
@@ -27,13 +22,23 @@ In addition to the existing metrics based views, EXPERImonitor now comes with a 
 
 For further information on the use of this new UI, please consult the documentation.
 
-A list of other significant features, updates and bug fixes follows:
+ECC is renamed EXPERImonitor
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In this release we renamed the ECC to 'EXPERImonitor'.
+
+
+Summary of v2.2 changes
+------------------------
+
+The list of major new features, updates and bug fixes is as follows:
 
 ================================================================== ====================================================================================================== 
 Change                                                             Description
 ================================================================== ======================================================================================================
+New feature: Provenance explorer view added                        Provides rich visualisations linking different metric entities together through provenance data.
 New feature: Provenance demo clients added to samples              Clients 'lwtECCClient' and 'experimentSimulation' generate provenance & metric data to explore.
 New feature: Metric API now includes metric meta-data              Client writers can now specify meta-types and meta-content in their model. Please see documentation.
+Update: 'ECC' now renamed 'EXPERImonitor'                          A clearer name reflecting use of the software beyond the EXPERIMEDIA project.
 Update: Provenance API updated for client writers                  Clean-ups and improvements made to the provenance API. Please see documentation. 
 Update: Android client code simplified & bug-fixed                 Android client code now simplified using updated API. Push metric failure on emulator fixed.
 Update: Experiment data export now uses ISO-8601 date labelling    The experiment data export sample now creates folders using ISO-8601 like date formatting.

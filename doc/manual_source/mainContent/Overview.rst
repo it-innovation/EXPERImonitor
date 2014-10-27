@@ -15,7 +15,41 @@ The software was developed primarily in the `EXPERIMEDIA`_ project to support di
 .. _3DLive: http://3dliveproject.eu/wp/
 .. _STEER: http://fp7-steer.eu/
 
-This document provides:
+License
+--------
+
+The software is Copyright University of Southampton IT Innovation Centre. It is licensed under the `LGPL`_ v2.1 license.
+
+.. _LGPL: https://www.gnu.org/licenses/lgpl-2.1.html
+
+Licenses for the Java and web application components of this software and of the third-party software distributed with and/or used in those components may be found in the top-level "licenses" folder.
+
+Licenses for the Android, C# and C++ libraries and their dependencies may be found in the "IPR.txt" file.
+
+Contact
+---------
+
+For further information on collaboration, support or alternative licensing, please contact:
+
+:Website: http://www.it-innovation.soton.ac.uk
+:Email: info@it-innovation.soton.ac.uk
+:Telephone: +44 (0)23 8059 8866
+
+Screenshots
+------------
+
++----------------------------------------------+------------------------------------------------------+---------------------------------------------------+
+| .. figure:: images/explorerQoEUsefulness.png | .. figure:: images/dashboard_sad_service_entity2.png | .. figure:: images/explorerQoSLiftResponseAll.png |
+|    :width: 100 %                             |    :width: 100 %                                     |    :width: 100 %                                  |
+|                                              |                                                      |                                                   |
+|    Participant QoE summary                   |    Live metric dashboard                             |    Overlaying activities on a QoS graph           |
++----------------------------------------------+------------------------------------------------------+---------------------------------------------------+
+
+
+Documentation Summary
+--------------------------
+
+The documentation provides:
 
 *   An introduction to the EXPERIMEDIA test-bed context
 
@@ -29,18 +63,8 @@ This document provides:
 
 *   Guidance on how to write an EXPERImonitor software client
 
-Screenshots
-------------
 
-+----------------------------------------------+------------------------------------------------------+---------------------------------------------------+
-| .. figure:: images/explorerQoEUsefulness.png | .. figure:: images/dashboard_sad_service_entity2.png | .. figure:: images/explorerQoSLiftResponseAll.png |
-|    :width: 100 %                             |    :width: 100 %                                     |    :width: 100 %                                  |
-|                                              |                                                      |                                                   |
-|    Participant QoE summary                   |    Live metric dashboard                             |    Overlaying activities on a QoS graph           |
-+----------------------------------------------+------------------------------------------------------+---------------------------------------------------+
-
-
-EXPERIMEDIA venue based experimentation
+EXPERIMEDIA Venue-Based Experimentation
 ---------------------------------------
 
 `EXPERIMEDIA`_ was an FP7 funded project that was focussed on developing and operating unique facilities for large-scale, Future Media Internet experimentation. The experiments were conducted on test-beds situated in advanced and exciting real-world venues that host large communities of people interacting with each other in physical and on-line contexts using new FMI technologies and infrastructures.
