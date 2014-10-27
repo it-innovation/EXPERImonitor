@@ -22,7 +22,7 @@ sudo -u postgres psql -d edm-metrics -f edm/resources/edm-metrics-postgres.sql
 rm -rf /var/lib/tomcat7/webapps/ECC
 rm -rf /var/cache/tomcat7/Catalina/localhost/ECC
 # resync code from host machine and do clean build
-rsync -a /vagrant/ ../experimedia-ecc --exclude '.git' --exclude 'target'
+rsync -a /vagrant/ ../experimedia-ecc --exclude '.git' --exclude 'target' --exclude '.vagrant'
 mvn clean install
 cp eccService/target/*.war /var/lib/tomcat7/webapps/ECC.war
 # start tomcat
