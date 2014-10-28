@@ -25,10 +25,15 @@ $(document).ready(function () {
     experimentId = getParameter('experimentId');
 
     $("#metricDataLink").attr('href', BASE_URL + '/dataview.html?experimentId=' + experimentId);
+    $("#goToMetricViewLink").attr('href', BASE_URL + '/dataview.html?experimentId=' + experimentId);
 
     $("#change_experiment").click(function (e) {
         e.preventDefault();
         $('#nameExperimentModal').foundation('reveal', 'open');
+    });
+    $("#stayOnPageLink").click(function (e) {
+        e.preventDefault();
+        $('#noProvDataModal').foundation('reveal', 'close');
     });
 
     $("#to_monitor").attr('href', BASE_URL + "/experiment.html?experimentId=" + experimentId);
@@ -91,36 +96,49 @@ $(document).ready(function () {
                             $.getJSON(BASE_URL + "/explorer/" + experimentId + "/summary", function (provData) {
                                 console.log(provData);
                                 showProvDetails(provData);
-                            });
 
-                            // create participants + attributes widget
-                            $.getJSON(BASE_URL + "/explorer/" + experimentId + "/participants", function (participantsResponse) {
+                                // only carry on if there is prov data available, otherwise offer to go to metric view.
+                                if (provData.activitiesPerformedCount === 0
+                                        && provData.applicationsUsedCount === 0
+                                        && provData.participantCount === 0
+                                        && provData.servicesUsedCount === 0
+                                        ) {
+                                    console.log('No prov data');
+                                    $('#noProvDataModal').foundation('reveal', 'open');
+                                } else {
+                                    console.log('Prov data to show');
+                                    // create participants + attributes widget
+                                    $.getJSON(BASE_URL + "/explorer/" + experimentId + "/participants", function (participantsResponse) {
 //                                console.log(participantsResponse);
 //                                addParticipantAttributesWidget(participantsResponse.participants);
-                                participants = participantsResponse.participants;
-                                $.getJSON(BASE_URL + "/explorer/" + experimentId + "/participants/groupAttributes", function (attributes) {
-                                    $.getJSON(BASE_URL + "/explorer/" + experimentId + "/services", function (servicesResponse) {
-                                        console.log(servicesResponse);
-                                        services = servicesResponse.services;
-                                        groupAttributes = attributes;
-                                        addParticipantQoeAttributesWidget("");
+                                        participants = participantsResponse.participants;
+                                        $.getJSON(BASE_URL + "/explorer/" + experimentId + "/participants/groupAttributes", function (attributes) {
+                                            $.getJSON(BASE_URL + "/explorer/" + experimentId + "/services", function (servicesResponse) {
+                                                console.log(servicesResponse);
+                                                services = servicesResponse.services;
+                                                groupAttributes = attributes;
+                                                addParticipantQoeAttributesWidget("");
 //                                        addQosServicesExplorerWidget("", "", "");
-                                        $("#addNewQoe").click(function (e) {
-                                            e.preventDefault();
-                                            addParticipantQoeAttributesWidget("");
+                                                $("#addNewQoe").click(function (e) {
+                                                    e.preventDefault();
+                                                    addParticipantQoeAttributesWidget("");
+                                                });
+                                                $("#addNewParticipant").click(function (e) {
+                                                    e.preventDefault();
+                                                    addParticipantExplorerWidget("");
+                                                });
+                                                $("#addNewQoS").click(function (e) {
+                                                    e.preventDefault();
+                                                    addQosServicesExplorerWidget("", "", "");
+                                                });
+                                            });
                                         });
-                                        $("#addNewParticipant").click(function (e) {
-                                            e.preventDefault();
-                                            addParticipantExplorerWidget("");
-                                        });
-                                        $("#addNewQoS").click(function (e) {
-                                            e.preventDefault();
-                                            addQosServicesExplorerWidget("", "", "");
-                                        });
-                                    });
-                                });
 
+                                    });
+                                }
                             });
+
+
 
 
                         } else {
@@ -502,11 +520,9 @@ function runQoeWidgetSelection(widgetsCounter, widgetGraphsContainer, widgetGrap
 
     if (participantSelectionVal === '__any') {
         if (attributeSelectionVal === '__any') {
-            console.log('Plotting all paritipants, all attributes');
             headerTitle.text('Participant QoE');
             renderStratParticipansGraphToContainer(widgetGraphsContainer, widgetGraphsSelectedDetailsContainerMain);
         } else {
-            console.log('Plotting all participants, attribute: ' + attributeSelectionVal);
             renderAttributeGraphsToContainer(attributeSelectionVal, widgetGraphsContainer, widgetGraphsSelectedDetailsContainerMain);
             headerTitle.text('Participant QoE: ' + attributeSelectionVal);
         }
