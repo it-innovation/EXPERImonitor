@@ -30,3 +30,8 @@ cd "$ROOT"/target/experimedia-arch-ecc-2.2-bin/bin
 zip -d EccService-2.2.war WEB-INF/lib/owlim-lite-5.4.jar
 cd "$ROOT"/target
 zip -r experimedia-arch-ecc-2.2-bin.zip experimedia-arch-ecc-2.2-bin
+
+echo
+echo "Check /tmp/release*.log for further information."
+echo "To update the committed license file data, execute the following command and then commit:"
+echo "cp -a target/experimedia-arch-ecc-2.2-src/licenses ."
