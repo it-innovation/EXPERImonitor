@@ -166,7 +166,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.17</version>
+                <version>${ecc.surefire.version}</version>
                 <configuration>
                     <skipTests>${skipTests}</skipTests>
                 </configuration>
@@ -179,7 +179,16 @@
                     <packagingExcludes>WEB-INF/lib/*tomcat*.jar</packagingExcludes>
                 </configuration>
             </plugin>
-        </plugins>
 
+            <!-- remove the WAR file from the automatic deployment to maven repository -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>${ecc.deployplugin.version}</version>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+        </plugins>
     </build>
 </project>

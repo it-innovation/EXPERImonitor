@@ -18,11 +18,17 @@
     </prerequisites>
 
     <distributionManagement>
-        <site>
-            <!-- dummy values to make site build wwork -->
-            <id>it-innovation</id>
+        <repository>
+            <!-- The public IT Innovation Maven repository for deploying jars -->
+            <id>it-innovation-public-repository</id>
             <name>IT Innovation</name>
-            <url>http://example.it-innovation</url>
+            <url>scpexe://altano/var/www/maven2/release</url>
+        </repository>
+        <site>
+            <!-- Dummy values to make site build work -->
+            <id>it-innovation-dummy</id>
+            <name>IT Innovation</name>
+            <url>http://www.it-innovation.soton.ac.uk</url>
         </site>
     </distributionManagement>
 
@@ -62,6 +68,8 @@
         <ecc.pmdplugin.version>3.2</ecc.pmdplugin.version>
         <ecc.releaseplugin.version>2.5.1</ecc.releaseplugin.version>
         <ecc.dependencyplugin.version>2.9</ecc.dependencyplugin.version>
+        <ecc.sourceplugin.version>2.4</ecc.sourceplugin.version>
+        <ecc.wagon.version>2.7</ecc.wagon.version>
 
         <!--License-->
         <license.licenseName>lgpl_v2_1</license.licenseName>
@@ -83,7 +91,7 @@
         <pluginManagement>
             <plugins>
 
-                <!-- Compiler configuration ____________________________________ -->
+                <!-- Compiler configuration  -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
@@ -96,6 +104,16 @@
                         <showWarnings>true</showWarnings>
                     </configuration>
                 </plugin>
+                <!-- build the project with UTF-8 encoding -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>${ecc.resourceplugin.version}</version>
+                    <configuration>
+                        <encoding>${project.build.sourceEncoding}</encoding>
+                    </configuration>
+                </plugin>
+
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-deploy-plugin</artifactId>
@@ -111,20 +129,6 @@
                     <artifactId>maven-jar-plugin</artifactId>
                     <version>${ecc.jarplugin.version}</version>
                 </plugin>
-
-                <!-- Packaging configuration ___________________________________ -->
-                <!--
-                                <plugin>
-                                    <groupId>org.apache.maven.plugins</groupId>
-                                    <artifactId>maven-assembly-plugin</artifactId>
-                                    <version>${ecc.assemblyplugin.version}</version>
-                                    <configuration>
-                                        <descriptors>
-                                            <descriptor>${ecc.assemblypath}/eccSourceAssembly.xml</descriptor>
-                                        </descriptors>
-                                    </configuration>
-                                </plugin>
-                -->
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>license-maven-plugin</artifactId>
@@ -159,14 +163,6 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
                     <version>${ecc.checkstyleplugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-resources-plugin</artifactId>
-                    <version>${ecc.resourceplugin.version}</version>
-                    <configuration>
-                        <encoding>${project.build.sourceEncoding}</encoding>
-                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -207,7 +203,7 @@
         </pluginManagement>
 
         <plugins>
-            <!-- Plug-in to build the project with UTF-8 encoding -->
+            <!-- TODO: do we need this here as well as above? -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
@@ -228,8 +224,17 @@
                     </filesets>
                 </configuration>
             </plugin>
+
         </plugins>
 
+        <!-- SSH transmission to ALTANO for deploying the jars -->
+        <extensions>
+            <extension>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-ssh-external</artifactId>
+                <version>${ecc.wagon.version}</version>
+            </extension>
+        </extensions>
     </build>
 
     <!-- PROFILES __________________________________________________________ -->
@@ -361,6 +366,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-project-info-reports-plugin</artifactId>
+                        <version>${ecc.reportplugin.version}</version>
                         <configuration>
                             <dependencyLocationEnabled>false</dependencyLocationEnabled>
                         </configuration>
@@ -403,7 +409,7 @@
                                 </plugin>
                             </reportPlugins>
                         </configuration>
-                    </plugin>
+                    </plugin>               
                 </plugins>
                 <pluginManagement>
                     <plugins>
@@ -479,6 +485,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-project-info-reports-plugin</artifactId>
+                        <version>${ecc.reportplugin.version}</version>
                         <configuration>
                             <dependencyDetailsEnabled>false</dependencyDetailsEnabled>
                             <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
@@ -494,6 +501,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>${ecc.javadocplugin.version}</version>
                     </plugin>
                 </plugins>
             </reporting>
@@ -634,6 +642,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-project-info-reports-plugin</artifactId>
+                        <version>${ecc.reportplugin.version}</version>
                         <configuration>
                             <dependencyDetailsEnabled>false</dependencyDetailsEnabled>
                             <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
@@ -649,6 +658,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>${ecc.javadocplugin.version}</version>
                     </plugin>
                 </plugins>
             </reporting>
