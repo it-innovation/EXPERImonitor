@@ -28,6 +28,7 @@ mvn package assembly:assembly -Preleasebin |tee /tmp/releasebin.log |grep -E 'WA
 # zip
 cd "$ROOT"/target/experimedia-arch-ecc-2.2-bin/bin
 zip -d EccService-2.2.war WEB-INF/lib/owlim-lite-5.4.jar
+rm experimedia-arch-ecc-edm-test-2.2.jar  # this jar should not contain anything other than test code, but it does so we delete it here
 cd "$ROOT"/target
 zip -r experimedia-arch-ecc-2.2-bin.zip experimedia-arch-ecc-2.2-bin
 
