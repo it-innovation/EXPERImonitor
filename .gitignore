@@ -18,3 +18,4 @@ doc/build/
 thirdPartyLibs/*.war
 thirdPartyLibs/*.jar
 samples/basicAndroidClient/libs/
+Vagrantfile
