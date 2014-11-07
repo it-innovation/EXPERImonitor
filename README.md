@@ -14,9 +14,9 @@ EXPERImonitor is a web service with a web-based admin interface and a REST API w
 
 The software was developed primarily in the [EXPERIMEDIA](http://www.experimedia.eu) project to support distributed multimedia experiments. The [3DLive](http://3dliveproject.eu/wp/) and [STEER](http://fp7-steer.eu/) projects also contributed to and used the software.
 
-![Participant QoE summary](./doc/manual_source/mainContent/images/explorerQoEUsefulness.png)
-![Live metric dashboard](./doc/manual_source/mainContent/images/dashboard_sad_service_entity2.png)
-![Overlaying activities on a QoS graph](./doc/manual_source/mainContent/images/explorerQoSLiftResponseAll.png)
+![Participant QoE summary](http://docs.experimedia.eu/_images/explorerQoEUsefulness.png)
+![Live metric dashboard](http://docs.experimedia.eu/_images/dashboard_sad_service_entity2.png)
+![Overlaying activities on a QoS graph](http://docs.experimedia.eu/_images/explorerQoSLiftResponseAll.png)
 
 Copyright
 ---------
@@ -47,7 +47,7 @@ Java artifacts (JAR, source code and JavaDoc) can be found in the [IT Innovation
 Documentation
 -------------
 
-The primary source of EXPERImonitor documentation can be found in the ['doc' folder](./doc/manual_source/index.rst). This documentation is written in RST format; readers have a choice of generating a printable version in a variety of formats including HTML and PDF. Your distribution may have [pre-build documentation](./doc/manual/html) or you can build it oyurself following the [instructions provided](./doc/README.rst).
+The primary source of EXPERImonitor documentation can be found in the ['doc' folder](./doc/manual_source/index.rst). This documentation is written in RST format; readers have a choice of generating a printable version in a variety of formats including HTML and PDF. Your distribution may have [pre-built documentation](./doc/manual/html) or you can build it yourself following the [instructions provided](./doc/README.txt).
 
 [Javadoc for the source code](./doc/javaDoc) is included. In addition to this, supplementary READMEs relating to EXPERImonitor client development can be found in the ['samples' folder](./samples).
 
