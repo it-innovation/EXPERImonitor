@@ -14,8 +14,19 @@ EXPERImonitor is a web service with a web-based admin interface and a REST API w
 
 The software was developed primarily in the [EXPERIMEDIA](http://www.experimedia.eu) project to support distributed multimedia experiments. The [3DLive](http://3dliveproject.eu/wp/) and [STEER](http://fp7-steer.eu/) projects also contributed to and used the software.
 
+Screenshots
+-----------
+
+**Participant QoE summary**
+
 ![Participant QoE summary](http://docs.experimedia.eu/_images/explorerQoEUsefulness.png)
+
+**Live metric dashboard**
+
 ![Live metric dashboard](http://docs.experimedia.eu/_images/dashboard_sad_service_entity2.png)
+
+**Overlaying activities on a QoS graph**
+
 ![Overlaying activities on a QoS graph](http://docs.experimedia.eu/_images/explorerQoSLiftResponseAll.png)
 
 Copyright
@@ -47,11 +58,11 @@ Java artifacts (JAR, source code and JavaDoc) can be found in the [IT Innovation
 Documentation
 -------------
 
-The primary source of EXPERImonitor documentation can be found in the ['doc' folder](./doc/manual_source/index.rst). This documentation is written in RST format; readers have a choice of generating a printable version in a variety of formats including HTML and PDF. Your distribution may have [pre-built documentation](./doc/manual/html) or you can build it yourself following the [instructions provided](./doc/README.txt).
+The primary source of EXPERImonitor documentation can be found in the ['doc' folder](./doc/manual_source/index.rst) or online at [docs.experimedia.eu](http://docs.experimedia.eu/EXPERImonitor/). The documentation is written in RST format; readers have a choice of generating a printable version in a variety of formats including HTML and PDF. Your distribution may have [pre-built documentation](./doc/manual/html) or you can build it yourself following the [instructions provided](./doc/README.txt).
 
-[Javadoc for the source code](./doc/javaDoc) is included. In addition to this, supplementary READMEs relating to EXPERImonitor client development can be found in the ['samples' folder](./samples).
+[Javadoc for the source code](./doc/javaDoc) is included in packaged distributions (or from the maven repository). In addition to this, supplementary READMEs relating to EXPERImonitor client development can be found in the ['samples' folder](./samples).
 
-###Building with Vagrant
+### Building with Vagrant
 
 [Vagrant](http://vagrantup.com) along with a suitable virtual machine system (such as Oracle VirtualBox) can be used to simply build and deploy the EXPERImonitor and all its dependencies including a RabbitMQ server.  This is particularly useful for development and testing.
 
