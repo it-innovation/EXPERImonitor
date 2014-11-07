@@ -44,9 +44,21 @@ The quickest method of building and deploying the EXPERImonitor is to use the Va
 #. Make a copy the appropriate Vagrant deployment file in the EXPERImonitor root directory:
 	- To deploy into Tomcat: Copy Vagrantfile.tomcat -> Vagrantfile
 	- to deploy into Glassfish: Copy Vagrantfile.glassfish -> Vagrantfile
-#. Open a command line in the root directory and enter 'vagrant up'
 
-Once the installation process is complete, you will be able to access the EXPERImonitor dashboard by pointing your web browser to the URL presented in the console.
+Starting the vagrant virtual machine
+---------------------------------------
+
+This is done by simply typing "vagrant up" in the <EXPERImonitor API root> folder which will execute the instructions found in the "Vagrantfile" you have just selected.  The shell script embedded in the vagrantfile is also a useful reference for deploying the system in Linux.
+
+Once the build is completed, the EXPERImonitor and a RabbitMQ server are hosted in a virtual machine with the necessary ports mapped through to the host machine.  The port mapping can be changed via environment variables in the host machine:
+
+ECC_IP: the IP address for the EXPERImonitor VM to use (default 10.0.0.10)
+ECC_PORT: the port to map the EXPERImonitor to on the host machine (default 8090)
+RABBIT_IP: the IP address to use for RabbitMQ (default 10.0.0.10)
+RABBIT_PORT: the port to map RabbitMQ to on the host machine (default 5682)
+RABBIT_MGT_PORT: the port to map RabbitMQ management interface to on the host machine (default 55682)
+
+The sample clients distributed with the EXPERImonitor generally attempt to connect to a RabbitMQ server running on localhost with the default 5672 port.  To make these clients work with the EXPERImonitor and RabbitMQ in the vagrant VM you must map the guest VM's RabbitMQ port through to port 5672 in the host machine.  This is achieved by setting the variable "RABBIT_PORT" to 5672 on the host machine.
 
 Building the EXPERImonitor manually
 ===================================
