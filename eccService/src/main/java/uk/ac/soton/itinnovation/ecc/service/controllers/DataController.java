@@ -30,6 +30,7 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Set;
 import java.util.UUID;
 import javax.servlet.http.HttpServletResponse;
 import org.joda.time.format.ISODateTimeFormat;
@@ -91,12 +92,13 @@ public class DataController {
                 tempEntity.setName(e.getName());
                 tempEntity.setDescription(e.getDescription());
                 tempEntity.setUuid(e.getUUID());
-
-                for (Attribute a : e.getAttributes()) {
-                    // TODO: tidy up
-                    ms = dataService.getAllEmptyMeasurementSetsForAttribute(UUID.fromString(experimentUuid), a).iterator().next();
-//                    ms = MetricHelper.getMeasurementSetForAttribute(a, mg);
-                    attributes.add(new EccAttribute(a.getName(), a.getDescription(), a.getUUID(), a.getEntityUUID(), ms.getMetric().getMetricType().name(), ms.getMetric().getUnit().getName()));
+				
+				Set<Attribute> attrs = e.getAttributes();
+				if ( attrs != null ) {
+					for (Attribute a : e.getAttributes()) {
+						ms = dataService.getAllEmptyMeasurementSetsForAttribute(UUID.fromString(experimentUuid), a).iterator().next();
+						attributes.add(new EccAttribute(a.getName(), a.getDescription(), a.getUUID(), a.getEntityUUID(), ms.getMetric().getMetricType().name(), ms.getMetric().getUnit().getName()));
+					}                
                 }
                 Collections.sort(attributes, new EccAttributesComparator());
                 tempEntity.setAttributes(attributes);
@@ -401,16 +403,22 @@ public class DataController {
                 ArrayList<EccAttribute> attributes;
                 for (EccEntity e : entities) {
                     attributes = e.getAttributes();
-
-                    for (EccAttribute a : attributes) {
-                        for (EccMeasurement m : dataService.getAllMeasurementsForAttribute(experimentId, a.getUuid().toString()).getData()) {
-                            writer.newLine();
-                            writer.write(e.getName() + ", " + e.getUuid().toString() + ", ");
-                            writer.write(a.getName() + ", " + a.getUuid().toString() + ", ");
-                            writer.write(ISODateTimeFormat.dateTime().print(m.getTimestamp().getTime()) + ", " + m.getValue() + ", ");
-                            writer.write(a.getType() + ", " + a.getUnit());
-                        }
-                    }
+					
+					if ( attributes != null ) {
+						
+						for (EccAttribute a : attributes) {
+						ArrayList<EccMeasurement> emsData = dataService.getAllMeasurementsForAttribute(experimentId, a.getUuid().toString()).getData();
+						
+						if ( emsData != null )
+							for ( EccMeasurement m : emsData ) {
+								writer.newLine();
+								writer.write(e.getName() + ", " + e.getUuid().toString() + ", ");
+								writer.write(a.getName() + ", " + a.getUuid().toString() + ", ");
+								writer.write(ISODateTimeFormat.dateTime().print(m.getTimestamp().getTime()) + ", " + m.getValue() + ", ");
+								writer.write(a.getType() + ", " + a.getUnit());
+							}
+						}
+					}
                 }
 
                 writer.flush();

@@ -327,13 +327,18 @@ public class DataService {
             try {
                 Attribute result = null;
                 for (Entity e : entityDAO.getEntitiesForExperiment(UUID.fromString(experimentUuid), true)) {
-                    for (Attribute a : e.getAttributes()) {
-                        if (a.getUUID().equals(UUID.fromString(uuid))) {
-                            result = a;
-                            break;
-                        }
-                    }
-                }
+					
+					Set<Attribute> attributes = e.getAttributes();
+						if ( attributes != null ) {
+						
+							for (Attribute a : attributes) {
+								if (a.getUUID().equals(UUID.fromString(uuid))) {
+								result = a;
+								break;
+								}
+						}
+					}
+				}
 
                 return result;
             } catch (Exception e) {
@@ -569,19 +574,18 @@ public class DataService {
     }
 
     public EccMeasurementSet getAllMeasurementsForAttribute(String experimentId, String attributeId) {
+		
+		EccMeasurementSet result = new EccMeasurementSet();
+		ArrayList<EccMeasurement> data = new ArrayList<EccMeasurement>();
+        result.setData(data);
 
         // TODO: make safe + convert to stream
         Attribute a = getAttribute(experimentId, attributeId);
 
-        EccMeasurementSet result = new EccMeasurementSet();
-
         if (a == null) {
             return result;
         }
-
-        ArrayList<EccMeasurement> data = new ArrayList<EccMeasurement>();
-        result.setData(data);
-
+		
         try {
             Set<MeasurementSet> msetInfo = getAllEmptyMeasurementSetsForAttribute(UUID.fromString(experimentId), a);
 			
@@ -1541,14 +1545,19 @@ public class DataService {
 
         // Add attributes, if required
         if (withAttrs) {
-            for (Attribute attr : entity.getAttributes()) {
+			
+			Set<Attribute> attributes = entity.getAttributes();
+			
+			if ( attributes != null ) {
+				
+				for (Attribute attr : attributes) {
+					EccAttribute ea = toEccAttribute(attr);
 
-                EccAttribute ea = toEccAttribute(attr);
-
-                if (ea != null) {
-                    domAttrs.add(toEccAttribute(attr));
-                }
-            }
+					if (ea != null) {
+						domAttrs.add(toEccAttribute(attr));
+					}
+				}
+			}
         }
 
         if (domAttrs.size() > 1) {
