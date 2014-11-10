@@ -4,13 +4,33 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>uk.ac.soton.itinnovation.experimedia</groupId>
     <artifactId>experimedia-arch-ecc</artifactId>
-    <version>2.1</version>
-    <name>Experiment Content Component</name>
+    <version>2.2</version>
+    <name>EXPERImonitor</name>
     <packaging>pom</packaging>
+    <url>https://github.com/it-innovation/EXPERImonitor/</url>
+    <organization>
+        <name>University of Southampton IT Innovation Centre</name>
+        <url>http://www.it-innovation.soton.ac.uk</url>
+    </organization>
 
     <prerequisites>
         <maven>3.0.0</maven>
     </prerequisites>
+
+    <distributionManagement>
+        <repository>
+            <!-- The public IT Innovation Maven repository for deploying jars -->
+            <id>it-innovation-public-repository</id>
+            <name>IT Innovation</name>
+            <url>scpexe://altano/var/www/maven2/release</url>
+        </repository>
+        <site>
+            <!-- Dummy values to make site build work -->
+            <id>it-innovation-dummy</id>
+            <name>IT Innovation</name>
+            <url>http://www.it-innovation.soton.ac.uk</url>
+        </site>
+    </distributionManagement>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -19,7 +39,7 @@
         <ecc.javadocpath>doc/javaDoc</ecc.javadocpath>
         <ecc.assemblypath>src/assembly</ecc.assemblypath>
 
-        <!-- Global thirdparty jar versions -->
+        <!-- Global third-party jar versions -->
         <ecc.junit.version>4.11</ecc.junit.version>
         <ecc.slf4j.version>1.7.7</ecc.slf4j.version>
         <ecc.gson.version>2.2.2</ecc.gson.version>
@@ -30,22 +50,26 @@
         <!-- Maven plugin versions -->
         <ecc.surefire.version>2.17</ecc.surefire.version>
         <ecc.javadocplugin.version>2.9.1</ecc.javadocplugin.version>
-        <ecc.licenseplugin.version>1.7</ecc.licenseplugin.version>
+        <ecc.licenseplugin.version>1.5</ecc.licenseplugin.version>
         <ecc.reportplugin.version>2.7</ecc.reportplugin.version>
-        <ecc.resourceplugin.version>2.6</ecc.resourceplugin.version>
-        <ecc.assemblyplugin.version>2.4</ecc.assemblyplugin.version>
-        <ecc.checkstyleplugin.version>2.12.1</ecc.checkstyleplugin.version>
-        <ecc.cleanplugin.version>2.5</ecc.cleanplugin.version>
-        <ecc.siteplugin.version>3.3</ecc.siteplugin.version>
-        <ecc.compilerplugin.version>3.1</ecc.compilerplugin.version>
+        <ecc.resourceplugin.version>2.7</ecc.resourceplugin.version>
+        <ecc.assemblyplugin.version>2.4.1</ecc.assemblyplugin.version>
+        <ecc.checkstyleplugin.version>2.13</ecc.checkstyleplugin.version>
+        <ecc.cleanplugin.version>2.6</ecc.cleanplugin.version>
+        <ecc.siteplugin.version>3.4</ecc.siteplugin.version>
+        <ecc.compilerplugin.version>3.2</ecc.compilerplugin.version>
         <ecc.versionsplugin.version>2.1</ecc.versionsplugin.version>
-        <exec.maven.mojo.ver>1.3.1</exec.maven.mojo.ver>
-        <ecc.deployplugin.version>2.8.1</ecc.deployplugin.version>
-        <ecc.installplugin.version>2.5.1</ecc.installplugin.version>
+        <ecc.execmavenplugin.version>1.3.2</ecc.execmavenplugin.version>
+        <ecc.deployplugin.version>2.8.2</ecc.deployplugin.version>
+        <ecc.installplugin.version>2.5.2</ecc.installplugin.version>
         <ecc.jarplugin.version>2.5</ecc.jarplugin.version>
-        <ecc.jxrplugin.version>2.3</ecc.jxrplugin.version>
+        <ecc.jxrplugin.version>2.4</ecc.jxrplugin.version>
         <ecc.surefirereportplugin.version>2.17</ecc.surefirereportplugin.version>
-        <ecc.pmdplugin.version>3.1</ecc.pmdplugin.version>
+        <ecc.pmdplugin.version>3.2</ecc.pmdplugin.version>
+        <ecc.releaseplugin.version>2.5.1</ecc.releaseplugin.version>
+        <ecc.dependencyplugin.version>2.9</ecc.dependencyplugin.version>
+        <ecc.sourceplugin.version>2.4</ecc.sourceplugin.version>
+        <ecc.wagon.version>2.7</ecc.wagon.version>
 
         <!--License-->
         <license.licenseName>lgpl_v2_1</license.licenseName>
@@ -63,33 +87,11 @@
     </licenses>
 
     <build>
-        <plugins>
-            <!-- Plug-in to build the project with UTF-8 encoding __________ -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-            </plugin>
-            <!--Remove generated license file on clean-->
-            <plugin>
-                <artifactId>maven-clean-plugin</artifactId>
-                <version>${ecc.cleanplugin.version}</version>
-                <configuration>
-                    <filesets>
-                        <fileset>
-                            <directory>.</directory>
-                            <includes>
-                                <include>LICENSE.txt</include>
-                            </includes>
-                        </fileset>
-                    </filesets>
-                </configuration>
-            </plugin>
-        </plugins>
 
         <pluginManagement>
             <plugins>
 
-                <!-- Compiler configuration ____________________________________ -->
+                <!-- Compiler configuration  -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
@@ -102,6 +104,16 @@
                         <showWarnings>true</showWarnings>
                     </configuration>
                 </plugin>
+                <!-- build the project with UTF-8 encoding -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>${ecc.resourceplugin.version}</version>
+                    <configuration>
+                        <encoding>${project.build.sourceEncoding}</encoding>
+                    </configuration>
+                </plugin>
+
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-deploy-plugin</artifactId>
@@ -117,20 +129,6 @@
                     <artifactId>maven-jar-plugin</artifactId>
                     <version>${ecc.jarplugin.version}</version>
                 </plugin>
-
-                <!-- Packaging configuration ___________________________________ -->
-                <!--
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-assembly-plugin</artifactId>
-                    <version>${ecc.assemblyplugin.version}</version>
-                    <configuration>
-                        <descriptors>
-                            <descriptor>${ecc.assemblypath}/eccSourceAssembly.xml</descriptor>
-                        </descriptors>
-                    </configuration>
-                </plugin>
--->
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>license-maven-plugin</artifactId>
@@ -139,7 +137,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-clean-plugin</artifactId>
-                    <version>${ecc.cleanplugin.version}</version>                    
+                    <version>${ecc.cleanplugin.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -168,14 +166,6 @@
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-resources-plugin</artifactId>
-                    <version>${ecc.resourceplugin.version}</version>
-                    <configuration>
-                        <encoding>${project.build.sourceEncoding}</encoding>
-                    </configuration>
-                </plugin>                                                                                
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-site-plugin</artifactId>
                     <version>${ecc.siteplugin.version}</version>
                 </plugin>
@@ -193,15 +183,58 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-pmd-plugin</artifactId>
                     <version>${ecc.pmdplugin.version}</version>
-                </plugin>  
+                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-report-plugin</artifactId>
                     <version>${ecc.surefirereportplugin.version}</version>
-                </plugin>                
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <version>${ecc.releaseplugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>${ecc.dependencyplugin.version}</version>
+                </plugin>
             </plugins>
         </pluginManagement>
 
+        <plugins>
+            <!-- TODO: do we need this here as well as above? -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>${ecc.resourceplugin.version}</version>
+            </plugin>
+            <!--Remove generated license file on clean-->
+            <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>${ecc.cleanplugin.version}</version>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>.</directory>
+                            <includes>
+                                <include>LICENSE.txt</include>
+                            </includes>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
+
+        </plugins>
+
+        <!-- SSH transmission to ALTANO for deploying the jars -->
+        <extensions>
+            <extension>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-ssh-external</artifactId>
+                <version>${ecc.wagon.version}</version>
+            </extension>
+        </extensions>
     </build>
 
     <!-- PROFILES __________________________________________________________ -->
@@ -227,7 +260,7 @@
                         <artifactId>maven-project-info-reports-plugin</artifactId>
                         <version>${ecc.reportplugin.version}</version>
                         <configuration>
-                            <dependencyDetailsEnabled>false</dependencyDetailsEnabled>
+                            <dependencyDetailsEnabled>true</dependencyDetailsEnabled>
                             <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
                         </configuration>
                         <reportSets>
@@ -250,11 +283,12 @@
                         <configuration>
                             <configLocation>checkStyle/checkstyle.xml</configLocation>
                             <headerLocation>checkStyle/regexp.header</headerLocation>
+                            <includeResources>false</includeResources>
                         </configuration>
                         <reportSets>
                             <reportSet>
                                 <reports>
-                                    <report>checkstyle</report>
+                                    <report>checkstyle-aggregate</report>
                                 </reports>
                             </reportSet>
                         </reportSets>
@@ -281,6 +315,9 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-report-plugin</artifactId>
                         <version>${ecc.surefirereportplugin.version}</version>
+                        <configuration>
+                            <aggregate>true</aggregate>
+                        </configuration>
                     </plugin>
 
                     <!-- report some bugs -->
@@ -288,6 +325,15 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-pmd-plugin</artifactId>
                         <version>${ecc.pmdplugin.version}</version>
+                        <configuration>
+                            <linkXref>true</linkXref>
+                            <targetJDK>${ecc.java.version}</targetJDK>
+                            <aggregate>true</aggregate>
+                            <excludes>
+                                <exclude>**/test/**/*.java</exclude>
+                                <exclude>**/ecc/samples/**/*.java</exclude>
+                            </excludes>
+                        </configuration>
                         <reportSets>
                             <reportSet>
                                 <reports>
@@ -320,6 +366,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-project-info-reports-plugin</artifactId>
+                        <version>${ecc.reportplugin.version}</version>
                         <configuration>
                             <dependencyLocationEnabled>false</dependencyLocationEnabled>
                         </configuration>
@@ -362,7 +409,7 @@
                                 </plugin>
                             </reportPlugins>
                         </configuration>
-                    </plugin>
+                    </plugin>               
                 </plugins>
                 <pluginManagement>
                     <plugins>
@@ -438,6 +485,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-project-info-reports-plugin</artifactId>
+                        <version>${ecc.reportplugin.version}</version>
                         <configuration>
                             <dependencyDetailsEnabled>false</dependencyDetailsEnabled>
                             <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
@@ -453,6 +501,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>${ecc.javadocplugin.version}</version>
                     </plugin>
                 </plugins>
             </reporting>
@@ -593,6 +642,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-project-info-reports-plugin</artifactId>
+                        <version>${ecc.reportplugin.version}</version>
                         <configuration>
                             <dependencyDetailsEnabled>false</dependencyDetailsEnabled>
                             <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
@@ -608,6 +658,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>${ecc.javadocplugin.version}</version>
                     </plugin>
                 </plugins>
             </reporting>

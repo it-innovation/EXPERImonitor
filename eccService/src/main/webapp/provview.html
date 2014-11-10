@@ -13,8 +13,8 @@
 
         <title>EXPERIMEDIA ECC Dashboard | Experiment data</title>
         <link rel="stylesheet" href="css/foundation.min.css" />
-        <link rel="stylesheet" href="explorerdashboard/js/libs/nvd3/nv.d3.css"/>
-        <link rel="stylesheet" href="explorerdashboard/js/libs/d3/d3-parsets/d3.parsets.css"/>
+        <link rel="stylesheet" href="css/nv.d3.css"/>
+        <link rel="stylesheet" href="css/d3.parsets.css"/>
         <link rel="stylesheet" type="text/css" href="css/tablesorter.css" />
         <link rel="stylesheet" href="css/app.css" />
         <script src="js/vendor/modernizr.min.js"></script>
@@ -96,7 +96,22 @@
                 </div>
             </div>
             <a class="close-reveal-modal">&#215;</a>
-
+        </div>
+        <div id="noProvDataModal" class="reveal-modal small" data-reveal>
+            <div class="row fullWidth">
+                <h3>No provenance data detected</h3>
+                <p>The service returned zero for number of participants, applications, services and activities.
+                    There doesn't appear to be any provenance data in this experiment. Your options are:</p>
+            </div>
+            <div class="row fullWidth">
+                <div class="small-12 columns">
+                    <a href="#" class="button right" id="stayOnPageLink">Stay on this page</a>
+                    <a href="#" class="button left" id="goToMetricViewLink">Switch to Metric view</a>
+                </div>
+                <div class="clearfix">
+                </div>
+            </div>
+            <a class="close-reveal-modal">&#215;</a>
         </div>
 
         <script src="js/vendor/jquery.min.js"></script>
@@ -104,9 +119,9 @@
         <script src="js/vendor/jquery.serializeJSON.min.js"></script>
         <script src="js/vendor/highcharts.js"></script>
         <script src="js/vendor/moment.min.js"></script>
-        <script src="explorerdashboard/js/libs/d3/d3.js"></script>
-        <script src="explorerdashboard/js/libs/d3/d3-parsets/d3.parsets.js"></script>
-        <script src="explorerdashboard/js/libs/nvd3/nv.d3.js"></script>
+        <script src="js/vendor/d3.js"></script>
+        <script src="js/vendor/d3.parsets.js"></script>
+        <script src="js/vendor/nv.d3.js"></script>
         <script type="text/javascript" src="js/vendor/jquery.tablesorter.min.js"></script>
         <script src="js/common.js"></script>
         <script src="js/provview.js"></script>

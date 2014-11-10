@@ -102,10 +102,10 @@ Each *new* experiment requires a *new* metric model from your client (to ensure 
 
 * Connected to the same experiment
   * Use the previously defined metric model and continue as normal (recommended)
-	* Generate a new metric model and continue, returning empty reports for PULL requests for the old metric model
+  * Generate a new metric model and continue, returning empty reports for PULL requests for the old metric model
 	
 * Connected to a new experiment
-	* Generate a new metric model and continue as normal
+  * Generate a new metric model and continue as normal
 
 If you are reconnecting to an on-going experiment, the EXPERImonitor will assume your client will be able to provide data for the previous metric model sent (although this is not strictly required; see scenario 1 above).
 
@@ -131,6 +131,8 @@ Some clients may wish to signal to the EXPERImonitor that want to enable or disa
   * Disabled entities. Any pushed metrics associated with the entity will be discarded by the EXPERImonitor. The EXPERImonitor will not make pull requests for any metrics associated with the entity
   
 Client writers can send 'enable' or 'disable' signals to the EXPERImonitor by using the EXPERImonitor adapter call EMInterfaceAdapter.sendEntityEnabled(..).
+
+.. _metric_meta_data:
 
 Metric meta-data
 ~~~~~~~~~~~~~~~~

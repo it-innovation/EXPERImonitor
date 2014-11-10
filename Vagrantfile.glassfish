@@ -15,7 +15,7 @@
 
 ## Configuration for this script (this part is Ruby) ##
 
-hostname = "ECC-21"
+hostname = "ECC-22-glassfish"
 ram = "1536"
 
 ecc_ip = (ENV['ECC_IP'] ? ENV['ECC_IP'] : '10.0.0.10')
@@ -92,7 +92,7 @@ if [ '#{ecc_git}' != "" ]; then
 else
 	# or copy EXPERImonitor code from guest machine to host machine
 	mkdir experimedia-ecc
-	rsync -a /vagrant/ experimedia-ecc --exclude '.git' --exclude 'target'
+	rsync -a /vagrant/ experimedia-ecc --exclude '.git' --exclude 'target' --exclude '.vagrant'
 fi
 
 ## Build ##

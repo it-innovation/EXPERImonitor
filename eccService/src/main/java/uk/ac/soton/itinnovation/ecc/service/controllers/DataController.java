@@ -52,7 +52,6 @@ import uk.ac.soton.itinnovation.ecc.service.domain.EccEntity;
 import uk.ac.soton.itinnovation.ecc.service.domain.EccGenericMeasurement;
 import uk.ac.soton.itinnovation.ecc.service.domain.EccGenericMeasurementSet;
 import uk.ac.soton.itinnovation.ecc.service.domain.EccMeasurement;
-import uk.ac.soton.itinnovation.ecc.service.domain.EccMeasurementSet;
 import uk.ac.soton.itinnovation.ecc.service.services.ConfigurationService;
 import uk.ac.soton.itinnovation.ecc.service.services.DataService;
 import uk.ac.soton.itinnovation.ecc.service.services.ExperimentService;
@@ -195,21 +194,6 @@ public class DataController {
             logger.error("Failed to find attribute [" + "] in current experiment");
         }
 
-//        EccMeasurementSet tempResult = dataService.getLatestSinceMeasurementsForAttribute(attributeId, timestampMsec, 10);
-//        result.setType(tempResult.getType());
-//        result.setUnit(tempResult.getUnit());
-//
-//        // TODO: this does not work when there is no data to start with
-//        ArrayList<EccMeasurement> measurements = new ArrayList<EccMeasurement>();
-//        for (EccMeasurement em : tempResult.getData()) {
-//            if (em.getTimestamp().after(new Date(timestampMsec))) {
-//                measurements.add(em);
-//                logger.debug("Added: " + em.getTimestamp().getTime() + ": " + em.getValue());
-//            } else {
-//                logger.debug("Ignored: " + em.getTimestamp().getTime() + ": " + em.getValue());
-//            }
-//        }
-//        result.setData(measurements);
         return result;
     }
 

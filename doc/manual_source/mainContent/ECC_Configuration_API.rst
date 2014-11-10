@@ -1,3 +1,0 @@
-EXPERImonitor Configuration API
-===============================
-

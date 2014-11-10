@@ -25,10 +25,15 @@ $(document).ready(function () {
     experimentId = getParameter('experimentId');
 
     $("#metricDataLink").attr('href', BASE_URL + '/dataview.html?experimentId=' + experimentId);
+    $("#goToMetricViewLink").attr('href', BASE_URL + '/dataview.html?experimentId=' + experimentId);
 
     $("#change_experiment").click(function (e) {
         e.preventDefault();
         $('#nameExperimentModal').foundation('reveal', 'open');
+    });
+    $("#stayOnPageLink").click(function (e) {
+        e.preventDefault();
+        $('#noProvDataModal').foundation('reveal', 'close');
     });
 
     $("#to_monitor").attr('href', BASE_URL + "/experiment.html?experimentId=" + experimentId);
@@ -91,36 +96,49 @@ $(document).ready(function () {
                             $.getJSON(BASE_URL + "/explorer/" + experimentId + "/summary", function (provData) {
                                 console.log(provData);
                                 showProvDetails(provData);
-                            });
 
-                            // create participants + attributes widget
-                            $.getJSON(BASE_URL + "/explorer/" + experimentId + "/participants", function (participantsResponse) {
+                                // only carry on if there is prov data available, otherwise offer to go to metric view.
+                                if (provData.activitiesPerformedCount === 0
+                                        && provData.applicationsUsedCount === 0
+                                        && provData.participantCount === 0
+                                        && provData.servicesUsedCount === 0
+                                        ) {
+                                    console.log('No prov data');
+                                    $('#noProvDataModal').foundation('reveal', 'open');
+                                } else {
+                                    console.log('Prov data to show');
+                                    // create participants + attributes widget
+                                    $.getJSON(BASE_URL + "/explorer/" + experimentId + "/participants", function (participantsResponse) {
 //                                console.log(participantsResponse);
 //                                addParticipantAttributesWidget(participantsResponse.participants);
-                                participants = participantsResponse.participants;
-                                $.getJSON(BASE_URL + "/explorer/" + experimentId + "/participants/groupAttributes", function (attributes) {
-                                    $.getJSON(BASE_URL + "/explorer/" + experimentId + "/services", function (servicesResponse) {
-                                        console.log(servicesResponse);
-                                        services = servicesResponse.services;
-                                        groupAttributes = attributes;
-                                        addParticipantQoeAttributesWidget("");
+                                        participants = participantsResponse.participants;
+                                        $.getJSON(BASE_URL + "/explorer/" + experimentId + "/participants/groupAttributes", function (attributes) {
+                                            $.getJSON(BASE_URL + "/explorer/" + experimentId + "/services", function (servicesResponse) {
+                                                console.log(servicesResponse);
+                                                services = servicesResponse.services;
+                                                groupAttributes = attributes;
+                                                addParticipantQoeAttributesWidget("");
 //                                        addQosServicesExplorerWidget("", "", "");
-                                        $("#addNewQoe").click(function (e) {
-                                            e.preventDefault();
-                                            addParticipantQoeAttributesWidget("");
+                                                $("#addNewQoe").click(function (e) {
+                                                    e.preventDefault();
+                                                    addParticipantQoeAttributesWidget("");
+                                                });
+                                                $("#addNewParticipant").click(function (e) {
+                                                    e.preventDefault();
+                                                    addParticipantExplorerWidget("");
+                                                });
+                                                $("#addNewQoS").click(function (e) {
+                                                    e.preventDefault();
+                                                    addQosServicesExplorerWidget("", "", "");
+                                                });
+                                            });
                                         });
-                                        $("#addNewParticipant").click(function (e) {
-                                            e.preventDefault();
-                                            addParticipantExplorerWidget("");
-                                        });
-                                        $("#addNewQoS").click(function (e) {
-                                            e.preventDefault();
-                                            addQosServicesExplorerWidget("", "", "");
-                                        });
-                                    });
-                                });
 
+                                    });
+                                }
                             });
+
+
 
 
                         } else {
@@ -245,7 +263,9 @@ function addQosServicesExplorerWidget(service, participantName, activity) {
     participantsDropdownList.append("<option value='__any'>Any</option>");
     var widgetSelectorsContainerRightForm = $('<form></form>').appendTo(widgetSelectorsContainerRight);
 //    var theParticipant;
-    $.each(participants, function (participantCounter, participant) {
+    $.each(participants.sort(function (a, b) {
+        return a.name.localeCompare(b.name);
+    }), function (participantCounter, participant) {
         var participantsDropdownListOption = $("<option value='" + participant.name + "'>" + participant.name + "</option>").appendTo(participantsDropdownList);
         participantsDropdownListOption.data("participant", participant);
 //        if (participant.name === participantName) {
@@ -261,7 +281,9 @@ function addQosServicesExplorerWidget(service, participantName, activity) {
     var servicesDropdownList = $('<select id="serv' + widgetsCounter + '"></select>').appendTo(servicesDropdownLabel);
     servicesDropdownList.append("<option value='__any'>Any</option>");
     var widgetSelectorsContainerLeftForm = $('<form></form>').appendTo(widgetSelectorsContainerLeft);
-    $.each(services, function (sCounter, tempService) {
+    $.each(services.sort(function (a, b) {
+        return a.name.localeCompare(b.name);
+    }), function (sCounter, tempService) {
         var serviceOption = $("<option value='" + tempService.name + "'>" + tempService.name + "</option>").appendTo(servicesDropdownList);
         serviceOption.data('service', tempService);
     });
@@ -306,24 +328,25 @@ function getParticipantByName(participantName) {
  * Renders QoS for a service metric with one user's attribute on top
  *
  * @param {type} addToContainer
- * @param {type} attributeId
+ * @param {type} serviceMetric
  * @param {type} participantIri
  * @param {type} activityLabel
  * @returns {undefined}
  */
-function renderQosGraphWithUser(addToContainer, attributeId, participantIri, activityLabel) {
-    console.log('Plotting ' + attributeId + ' and activity ' + activityLabel);
+function renderQosGraphWithUser(addToContainer, serviceMetric, participantIri, activityLabel) {
+    console.log('Plotting ' + serviceMetric.name + ' and activity ' + activityLabel);
     graphsCounter++;
     var newChartId = 'wg' + graphsCounter;
-    d3.json(BASE_URL + "/explorer/" + experimentId + "/attributes/series/qos/highlight/activities?attrID=" + attributeId +
+    d3.json(BASE_URL + "/explorer/" + experimentId + "/attributes/series/qos/highlight/activities?attrID=" + serviceMetric.metricID +
             "&IRI=" + encodeURIComponent(participantIri) +
             "&actLabel=" + encodeURIComponent(activityLabel), function (data) {
         console.log(data);
         addToContainer.empty();
+        addToContainer.css('height', 1.1 * CHART_HEIGHT);
         addToContainer.append('<div id="' + newChartId + '" class="widgetGraph"><svg class="large-12 text-center columns"></svg></div>');
         $('#' + newChartId + ' svg').show().height(CHART_HEIGHT);
         nv.addGraph(function () {
-            var chart = nv.models.lineChart()
+            var chart = nv.models.lineWithFocusChart()
                     .x(function (d) {
                         return d.timestamp;
                     })
@@ -331,7 +354,8 @@ function renderQosGraphWithUser(addToContainer, attributeId, participantIri, act
                         return d.value / 10;
                     })      // TODO -- fix scalling problems, dividing by 10 is a hack to get round scalling issues
                     .margin({top: 30, right: 50, bottom: 20, left: 100})
-                    .useInteractiveGuideline(true)
+                    .margin2({top: 30, right: 50, bottom: 20, left: 100})
+//                    .useInteractiveGuideline(true)
                     .forceY([0])
                     .color(d3.scale.category10().range())
                     .isArea(true);
@@ -342,7 +366,15 @@ function renderQosGraphWithUser(addToContainer, attributeId, participantIri, act
                         return d3.time.format('%X')(new Date(d));
                     });
             chart.yAxis
-                    .axisLabel(units(data.seriesSet[0].key))
+                    .axisLabel(serviceMetric.name + ' (' + serviceMetric.unit + ')')
+                    .tickFormat(d3.format(',.2f'));
+            chart.x2Axis
+                    .axisLabel('Time')
+                    .showMaxMin(true)
+                    .tickFormat(function (d) {
+                        return d3.time.format('%X')(new Date(d));
+                    });
+            chart.y2Axis
                     .tickFormat(d3.format(',.2f'));
             d3.select('#' + newChartId + ' svg')
                     .datum(data.seriesSet)
@@ -353,16 +385,6 @@ function renderQosGraphWithUser(addToContainer, attributeId, participantIri, act
 
             return chart;
         });
-        // TODO -- get service metric units from service once implemented
-        function units(key) {
-            if (key === 'Average response time') {
-                return 'Response Time (s)';
-            } else if (key === 'CPU Usage') {
-                return 'CPU Usage (%)';
-            } else if (key === 'Memory Usage') {
-                return 'Memory Usage (%)';
-            }
-        }
     });
 }
 
@@ -370,20 +392,21 @@ function renderQosGraphWithUser(addToContainer, attributeId, participantIri, act
  * Renders QoS for a service metric of all users on top.
  *
  * @param {type} addToContainer
- * @param {type} attributeId
+ * @param {type} serviceMetric
  * @returns {undefined}
  */
-function renderQosGraph(addToContainer, attributeId) {
-    console.log('Plotting ' + attributeId);
+function renderQosGraph(addToContainer, serviceMetric) {
+    console.log('Plotting ' + serviceMetric.name);
     graphsCounter++;
     var newChartId = 'wg' + graphsCounter;
-    d3.json(BASE_URL + "/explorer/" + experimentId + "/attributes/series/qos/highlight/participants?attrID=" + attributeId, function (data) {
+    d3.json(BASE_URL + "/explorer/" + experimentId + "/attributes/series/qos/highlight/participants?attrID=" + serviceMetric.metricID, function (data) {
         console.log(data);
         addToContainer.empty();
+        addToContainer.css('height', 1.1 * CHART_HEIGHT);
         addToContainer.append('<div id="' + newChartId + '" class="widgetGraph"><svg class="large-12 text-center columns"></svg></div>');
         $('#' + newChartId + ' svg').show().height(CHART_HEIGHT);
         nv.addGraph(function () {
-            var chart = nv.models.lineChart()
+            var chart = nv.models.lineWithFocusChart()
                     .x(function (d) {
                         return d.timestamp;
                     })
@@ -391,10 +414,12 @@ function renderQosGraph(addToContainer, attributeId) {
                         return d.value / 10;
                     })      // TODO -- fix scalling problems, dividing by 10 is a hack to get round scalling issues
                     .margin({top: 30, right: 50, bottom: 20, left: 100})
-                    .useInteractiveGuideline(true)
+                    .margin2({top: 30, right: 50, bottom: 20, left: 100})
+//                    .useInteractiveGuideline(true)
                     .forceY([0])
                     .color(d3.scale.category10().range())
                     .isArea(true);
+
             chart.xAxis
                     .axisLabel('Time')
                     .showMaxMin(true)
@@ -402,8 +427,18 @@ function renderQosGraph(addToContainer, attributeId) {
                         return d3.time.format('%X')(new Date(d));
                     });
             chart.yAxis
-                    .axisLabel(units(data.seriesSet[0].key))
+                    .axisLabel(serviceMetric.name + ' (' + serviceMetric.unit + ')')
                     .tickFormat(d3.format(',.2f'));
+
+            chart.x2Axis
+                    .axisLabel('Time')
+                    .showMaxMin(true)
+                    .tickFormat(function (d) {
+                        return d3.time.format('%X')(new Date(d));
+                    });
+            chart.y2Axis
+                    .tickFormat(d3.format(',.2f'));
+
             d3.select('#' + newChartId + ' svg')
                     .datum(data.seriesSet)
                     .transition().duration(500)
@@ -413,16 +448,6 @@ function renderQosGraph(addToContainer, attributeId) {
 
             return chart;
         });
-        // TODO -- get service metric units from service once implemented
-        function units(key) {
-            if (key === 'Average response time') {
-                return 'Response Time (s)';
-            } else if (key === 'CPU Usage') {
-                return 'CPU Usage (%)';
-            } else if (key === 'Memory Usage') {
-                return 'Memory Usage (%)';
-            }
-        }
     });
 }
 
@@ -454,7 +479,9 @@ function addParticipantQoeAttributesWidget(selectedParticipant) {
 
     // participants list fill
     participantsDropdownList.append("<option value='__any'>Any</option>");
-    $.each(participants, function (participantCounter, participant) {
+    $.each(participants.sort(function (a, b) {
+        return a.name.localeCompare(b.name);
+    }), function (participantCounter, participant) {
         var participantOption = $('<option id="part' + widgetsCounter + "-" + participantCounter + '" value="p' + participant.metricEntityID + '">' + participant.name + '</option>').appendTo(participantsDropdownList);
         participantOption.data("participant", participant);
     });
@@ -464,7 +491,9 @@ function addParticipantQoeAttributesWidget(selectedParticipant) {
 
     // attributes list fill
     attributesDropdownList.append("<option value='__any'>Any</option>");
-    $.each(groupAttributes.qoEAttributes, function (participantCounter, attribute) {
+    $.each(groupAttributes.qoEAttributes.sort(function (a, b) {
+        return a.name.localeCompare(b.name);
+    }), function (participantCounter, attribute) {
         attributesDropdownList.append("<option value='" + attribute.name + "'>" + attribute.name + "</option>");
     });
     attributesDropdownList.change(function (e) {
@@ -491,11 +520,9 @@ function runQoeWidgetSelection(widgetsCounter, widgetGraphsContainer, widgetGrap
 
     if (participantSelectionVal === '__any') {
         if (attributeSelectionVal === '__any') {
-            console.log('Plotting all paritipants, all attributes');
             headerTitle.text('Participant QoE');
             renderStratParticipansGraphToContainer(widgetGraphsContainer, widgetGraphsSelectedDetailsContainerMain);
         } else {
-            console.log('Plotting all participants, attribute: ' + attributeSelectionVal);
             renderAttributeGraphsToContainer(attributeSelectionVal, widgetGraphsContainer, widgetGraphsSelectedDetailsContainerMain);
             headerTitle.text('Participant QoE: ' + attributeSelectionVal);
         }
@@ -505,12 +532,13 @@ function runQoeWidgetSelection(widgetsCounter, widgetGraphsContainer, widgetGrap
             headerTitle.text('Participant: ' + participantSelection.data("participant").name + ', QoE');
             widgetGraphsContainer.empty();
             widgetGraphsContainer.append('<div class="small-12 columns text-center"><h3>Not implemented</h3></div>');
-//            renderParticipantQoeGraphsToContainer(participantSelection.data("participant").iri, widgetGraphsContainer, widgetGraphsSelectedDetailsContainerMain);
+            renderParticipantQoeTableToContainer(participantSelection.data("participant").iri, widgetGraphsContainer);
         } else {
             console.log('Plotting participant ' + participantSelectionVal + ' (' + participantSelection.data("participant").name + '), attribute: ' + attributeSelectionVal);
             headerTitle.text('Participant: ' + participantSelection.data("participant").name + ', QoE: ' + attributeSelectionVal);
             widgetGraphsContainer.empty();
             widgetGraphsContainer.append('<div class="small-12 columns text-center"><h3>Not implemented</h3></div>');
+            renderParticipantQoeAndAttributeTableToContainer(participantSelection.data("participant").iri, widgetGraphsContainer, attributeSelectionVal);
         }
     }
 }
@@ -522,6 +550,7 @@ function runQoeWidgetSelection(widgetsCounter, widgetGraphsContainer, widgetGrap
  * @param {type} widgetGraphsContainer
  * @param {type} widgetSelectorsContainerLeftForm
  * @param {type} widgetSelectorsContainerRightForm
+ * @param {type} widgetGraphsSelectedDetailsContainerMain
  * @returns {undefined}
  */
 function runQosWidgetSelection(widgetsCounter, widgetGraphsContainer, widgetSelectorsContainerLeftForm, widgetSelectorsContainerRightForm, widgetGraphsSelectedDetailsContainerMain) {
@@ -552,7 +581,7 @@ function runQosWidgetSelection(widgetsCounter, widgetGraphsContainer, widgetSele
                     var radio = $('<input type="radio" name="metric" value="' + m.metricID + '" id="ri' + m.metricID + '">').appendTo(widgetSelectorsContainerLeftForm);
                     widgetSelectorsContainerLeftForm.append('<label for="ri' + m.metricID + '">' + m.name + '</label><br>');
                     radio.click(function (e) {
-                        renderQosGraph(widgetGraphsContainer, m.metricID);
+                        renderQosGraph(widgetGraphsContainer, m);
                     });
                     if (mC === 0) {
                         radio.attr('checked', 'checked');
@@ -579,6 +608,7 @@ function runQosWidgetSelection(widgetsCounter, widgetGraphsContainer, widgetSele
 
             // get services first
             $.getJSON(BASE_URL + "/explorer/" + experimentId + "/services/iri/attributes?IRI=" + encodeURIComponent(serviceSelection.data('service').iri), function (metrics) {
+                console.log(metrics);
 
                 $.get(BASE_URL + "/explorer/" + experimentId + "/participants/iri/activities/summary?IRI=" + encodeURIComponent(getParticipantByName(participantSelectionVal).iri), function (data) {
                     var rbCounter = 0;
@@ -591,7 +621,7 @@ function runQosWidgetSelection(widgetsCounter, widgetGraphsContainer, widgetSele
                             if (typeof selectedAttribute !== "undefined") {
                                 widgetGraphsContainer.empty();
                                 widgetGraphsContainer.append('<div class="small-12 columns text-center"><h3>Loading...</h3></div>');
-                                renderQosGraphWithUser(widgetGraphsContainer, m.metricID, getParticipantByName(participantSelectionVal).iri, selectedAttribute);
+                                renderQosGraphWithUser(widgetGraphsContainer, m, getParticipantByName(participantSelectionVal).iri, selectedAttribute);
                             }
                         });
                         if (mC === 0) {
@@ -607,21 +637,31 @@ function runQosWidgetSelection(widgetsCounter, widgetGraphsContainer, widgetSele
                         radio.click(function (e) {
                             var selectedMetric = widgetSelectorsContainerLeftForm.find('input:checked').val();
                             if (typeof selectedMetric !== "undefined") {
-                                widgetGraphsContainer.empty();
-                                widgetGraphsSelectedDetailsContainerMain.empty();
-                                widgetGraphsContainer.append('<div class="small-12 columns text-center"><h3>Loading...</h3></div>');
-                                renderQosGraphWithUser(widgetGraphsContainer, selectedMetric, getParticipantByName(participantSelectionVal).iri, a.label);
-                                var linksContainer = $('<p></p>').appendTo(widgetGraphsSelectedDetailsContainerMain);
-                                var createQoeWidgetLink = $('<a href="#">View QoE for participant ' + participantSelectionVal + '</a>').appendTo(linksContainer);
-                                createQoeWidgetLink.click(function (e) {
-                                    e.preventDefault();
-                                    addParticipantQoeAttributesWidget(participantSelection.data("participant"));
+                                var theMetric = '';
+                                $.each(metrics.attributes, function (mC, m) {
+                                    if (m.metricID === selectedMetric) {
+                                        theMetric = m;
+                                        return false;
+                                    }
                                 });
-                                var createActivitiesWidgetLink = $('<a href="#" class="tableft">View activities for participant ' + participantSelectionVal + '</a>').appendTo(linksContainer);
-                                createActivitiesWidgetLink.click(function (e) {
-                                    e.preventDefault();
-                                    addParticipantExplorerWidget(participantSelection.data("participant"));
-                                });
+//                                console.log(theMetric);
+                                if (theMetric !== '') {
+                                    widgetGraphsContainer.empty();
+                                    widgetGraphsSelectedDetailsContainerMain.empty();
+                                    widgetGraphsContainer.append('<div class="small-12 columns text-center"><h3>Loading...</h3></div>');
+                                    renderQosGraphWithUser(widgetGraphsContainer, theMetric, getParticipantByName(participantSelectionVal).iri, a.label);
+                                    var linksContainer = $('<p></p>').appendTo(widgetGraphsSelectedDetailsContainerMain);
+                                    var createQoeWidgetLink = $('<a href="#">View QoE for participant ' + participantSelectionVal + '</a>').appendTo(linksContainer);
+                                    createQoeWidgetLink.click(function (e) {
+                                        e.preventDefault();
+                                        addParticipantQoeAttributesWidget(participantSelection.data("participant"));
+                                    });
+                                    var createActivitiesWidgetLink = $('<a href="#" class="tableft">View activities for participant ' + participantSelectionVal + '</a>').appendTo(linksContainer);
+                                    createActivitiesWidgetLink.click(function (e) {
+                                        e.preventDefault();
+                                        addParticipantExplorerWidget(participantSelection.data("participant"));
+                                    });
+                                }
                             }
                         });
                         rbCounter++;
@@ -660,7 +700,9 @@ function addParticipantExplorerWidget(selectedParticipant) {
     var participantsDropdownLabel = $("<label>Filter by participant</label>").appendTo(widgetSelectorsContainerLeft);
     var participantsDropdownList = $("<select></select>").appendTo(participantsDropdownLabel);
     participantsDropdownList.append("<option value='__any'>Any</option>");
-    $.each(participants, function (participantCounter, participant) {
+    $.each(participants.sort(function (a, b) {
+        return a.name.localeCompare(b.name);
+    }), function (participantCounter, participant) {
         var option = $("<option value='" + participant.name + "'>" + participant.name + "</option>").appendTo(participantsDropdownList);
         option.data('participant', participant);
     });
@@ -788,74 +830,55 @@ function chartClickStrat(e, detailsContainer) {
     });
 }
 
-function renderParticipantQoeGraphsToContainer(selectedParticipantId, addToContainer, detailsContainer) {
+/**
+ * Puts participant's responses for all attributes into a table.
+ *
+ * @param {type} selectedParticipantId
+ * @param {type} addToContainer
+ * @returns {undefined}
+ */
+function renderParticipantQoeTableToContainer(selectedParticipantId, addToContainer) {
     addToContainer.empty();
+    addToContainer.css('height', '');
     graphsCounter++;
     var newChartId = 'wg' + graphsCounter;
-    addToContainer.append('<div id="l' + newChartId + '" class="widgetGraph"><svg class="large-6 text-center columns"></svg></div>');
-    addToContainer.append('<div id="r' + newChartId + '" class="widgetGraph"><svg class="large-6 text-center columns"></svg></div>');
+    addToContainer.append('<div id="f' + newChartId + '" class="large-12 columns"></div>');
 
     d3.json(BASE_URL + "/explorer/" + experimentId + "/participants/iri/distribution/qoe?IRI=" + encodeURIComponent(selectedParticipantId), function (data) {
-        $('#l' + newChartId + ' svg').show().height(CHART_HEIGHT);
-        $('#r' + newChartId + ' svg').show().height(CHART_HEIGHT);
         console.log(data);
-        nv.addGraph(function () {
-            var chart = nv.models.multiBarHorizontalChart()
-                    .x(function (d) {
-                        return d.label;
-                    })
-                    .y(function (d) {
-                        return d.count;
-                    })
-                    .tooltipContent(function (key, label, count) {
-                        return '<p><strong>' + count + ' participants</strong> selected ' + label + '</p>';
-                    })
-                    .showYAxis(false)
-                    .margin({top: 30, right: 20, bottom: 50, left: 130})
-                    .barColor(d3.scale.customColors().range())
-                    .showValues(true)
-                    .showControls(false)
-                    .transitionDuration(350)
-                    .valueFormat(d3.format(',f'));
-            chart.yAxis
-                    .tickFormat(d3.format(',f'));
-            d3.select('#l' + newChartId + ' svg')
-                    .datum(data)
-                    .call(chart);
-            nv.utils.windowResize(chart.update);
-            chart.multibar.dispatch.on("elementClick", function (e) {
-//                chartClickAttr(e, detailsContainer, selectedAttributeName);
-            });
-            return chart;
+        var table = $('<table class="fullWidth"></table>').appendTo($('#f' + newChartId));
+        table.append('<thead><tr><th>Attribute</th><th>Value</th><th>Order</th></tr></thead>');
+        var tableBody = $('<tbody></tbody>').appendTo(table);
+        $.each(data.summary, function (aCounter, aValue) {
+            tableBody.append('<tr><td>' + aValue.label + '</td><td>' + aValue.value + '</td><td>' + aValue.order + ' of ' + aValue.orderMax + '</td></tr>');
         });
-        // donut chart
-        nv.addGraph(function () {
-            var chart = nv.models.pieChart()
-                    .x(function (d) {
-                        return d.label;
-                    })
-                    .y(function (d) {
-                        return d.count;
-                    })
-                    .height(500)
-                    .tooltipContent(function (label, count) {
-                        return '<p><strong>' + count + ' participants</strong> selected ' + label + '</p>';
-                    })
-                    .showLabels(true)
-                    .labelThreshold(.05)    // Configure the minimum slice size for labels to show up
-                    .color(d3.scale.customColors().range())
-                    .valueFormat(d3.format(',f'))
-                    .labelType("percent")   // Configure what type of data to show in the label. Can be "key", "value" or "percent"
-                    .donut(true)            // Turn on Donut mode.
-                    .donutRatio(0.325);     // Configure how big you want the donut hole size to be.
-            d3.select('#r' + newChartId + ' svg')
-                    .datum(data[0].values)
-                    .transition().duration(350)
-                    .call(chart);
-            chart.pie.dispatch.on("elementClick", function (e) {
-//                chartClickAttr(e, detailsContainer, selectedAttributeName);
-            });
-            return chart;
+    });
+}
+
+/**
+ * Puts participant's responses for all attributes into a table.
+ *
+ * @param {type} selectedParticipantId
+ * @param {type} addToContainer
+ * @param {type} attributeName
+ * @returns {undefined}
+ */
+function renderParticipantQoeAndAttributeTableToContainer(selectedParticipantId, addToContainer, attributeName) {
+    addToContainer.empty();
+    addToContainer.css('height', '');
+    graphsCounter++;
+    var newChartId = 'wg' + graphsCounter;
+    addToContainer.append('<div id="f' + newChartId + '" class="large-12 columns"></div>');
+
+    d3.json(BASE_URL + "/explorer/" + experimentId + "/participants/iri/distribution/qoe?IRI=" + encodeURIComponent(selectedParticipantId), function (data) {
+        console.log(data);
+        var table = $('<table class="fullWidth"></table>').appendTo($('#f' + newChartId));
+        table.append('<thead><tr><th>Attribute</th><th>Value</th><th>Order</th></tr></thead>');
+        var tableBody = $('<tbody></tbody>').appendTo(table);
+        $.each(data.summary, function (aCounter, aValue) {
+            if (attributeName === aValue.label) {
+                tableBody.append('<tr><td>' + aValue.label + '</td><td>' + aValue.value + '</td><td>' + aValue.order + ' of ' + aValue.orderMax + '</td></tr>');
+            }
         });
     });
 }

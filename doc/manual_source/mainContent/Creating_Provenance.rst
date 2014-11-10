@@ -1,5 +1,10 @@
-Creating Provenance
-===================
+The Low-Level Provenance API
+============================
+
+Introduction
+------------
+
+The low-level provenance API provides access to the detail of the EXPERImonitor provenance model. The intention is that most developers will not need to understand or use this API and can instead use the :ref:`high-level-prov-api` previously described.
 
 Understanding the basics
 ------------------------

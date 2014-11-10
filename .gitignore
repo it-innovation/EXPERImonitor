@@ -3,8 +3,6 @@
 *.log.*
 *.settings
 *.classpath
-**/lib/
-lib/
 **/target/
 target/
 **/bin/
@@ -13,7 +11,6 @@ bin/
 obj/
 **/gen/
 **/ipch/
-/charm-rabbitmq-tal/precise/management/.bzr/
 doc/javaDoc/
 doc/manual/
 doc/build/
@@ -21,4 +18,4 @@ doc/build/
 thirdPartyLibs/*.war
 thirdPartyLibs/*.jar
 samples/basicAndroidClient/libs/
-/eccService/src/main/webapp/explorer/eed/nbproject/private
+Vagrantfile

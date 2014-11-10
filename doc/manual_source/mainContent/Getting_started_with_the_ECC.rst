@@ -44,9 +44,21 @@ The quickest method of building and deploying the EXPERImonitor is to use the Va
 #. Make a copy the appropriate Vagrant deployment file in the EXPERImonitor root directory:
 	- To deploy into Tomcat: Copy Vagrantfile.tomcat -> Vagrantfile
 	- to deploy into Glassfish: Copy Vagrantfile.glassfish -> Vagrantfile
-#. Open a command line in the root directory and enter 'vagrant up'
 
-Once the installation process is complete, you will be able to access the EXPERImonitor dashboard by pointing your web browser to the URL presented in the console.
+Starting the vagrant virtual machine
+---------------------------------------
+
+This is done by simply typing "vagrant up" in the <EXPERImonitor API root> folder which will execute the instructions found in the "Vagrantfile" you have just selected.  The shell script embedded in the vagrantfile is also a useful reference for deploying the system in Linux.
+
+Once the build is completed, the EXPERImonitor and a RabbitMQ server are hosted in a virtual machine with the necessary ports mapped through to the host machine.  The port mapping can be changed via environment variables in the host machine:
+
+ECC_IP: the IP address for the EXPERImonitor VM to use (default 10.0.0.10)
+ECC_PORT: the port to map the EXPERImonitor to on the host machine (default 8090)
+RABBIT_IP: the IP address to use for RabbitMQ (default 10.0.0.10)
+RABBIT_PORT: the port to map RabbitMQ to on the host machine (default 5682)
+RABBIT_MGT_PORT: the port to map RabbitMQ management interface to on the host machine (default 55682)
+
+The sample clients distributed with the EXPERImonitor generally attempt to connect to a RabbitMQ server running on localhost with the default 5672 port.  To make these clients work with the EXPERImonitor and RabbitMQ in the vagrant VM you must map the guest VM's RabbitMQ port through to port 5672 in the host machine.  This is achieved by setting the variable "RABBIT_PORT" to 5672 on the host machine.
 
 Building the EXPERImonitor manually
 ===================================
@@ -74,7 +86,7 @@ You are now ready to build the EXPERImonitor. To do this get a command line in t
 
 All modules in the EXPERImonitor should be reported as successfully built. You should find the EXPERImonitor web dashboard WAR file created in the following location::
 
-  eccService/target/EccService-2.1.war
+  eccService/target/EccService-2.2.war
 
 To deploy the EXPERImonitor service use ``mvn spring:boot`` or follow the instructions for the "Binary release" below.
 
@@ -149,9 +161,11 @@ Windows installation
 Download PostgreSQL from http://www.postgresql.org/download/  Install PostgreSQL and the pgAdmin tool using the graphical installer.
 
 #. Create a database called edm-metrics with UTF-8 encoding
-#. Execute the SQL script found in the EXPERImonitor package::
+#. Execute the SQL script found in the EXPERImonitor package: 
 
-  psql -d edm-metrics -U<username> -f edm/resources/edm-metrics-postgres.sql
+::
+
+   psql -d edm-metrics -U<username> -f edm/resources/edm-metrics-postgres.sql
 
 Above, the term <username> refers to your chosen username.
 
@@ -179,11 +193,11 @@ TODO: memory to 1GB?
 After installing the Tomcat server, you should have a Tomcat service running – this can be verified by navigating to the management web page usually found at
 http://localhost:8080/
 
-Deploy and run the EXPERImonitor service by copying the two WAR files from the thirdPartyLibs folder and ``eccService/target/EccService-2.1.war`` to Tomcat's ``webapps`` directory (Tomcat should automatically unpack and deploy them for you immediately).
+Deploy and run the EXPERImonitor service by copying the two WAR files from the thirdPartyLibs folder and ``eccService/target/EccService-2.2.war`` to Tomcat's ``webapps`` directory (Tomcat should automatically unpack and deploy them for you immediately).
 
 Copy the owlim-lite-5.4.jar from thirdPartyLibs to the uppacked EXPERImonitor service TODO where?  Then restart the Tomcat service.
 
-You should see the EXPERImonitor dashboard running on: http://localhost:8080/EccService-2.1
+You should see the EXPERImonitor dashboard running on: http://localhost:8080/EccService-2.2
 
 Ubuntu Linux installation
 -------------------------
@@ -211,11 +225,11 @@ Restart tomcat::
 Copy in the required WAR files::
 
   $ sudo cp thirdPartyLibs/*.war /var/lib/tomcat7/webapps
-  $ sudo cp eccService/target/EccService-2.1.war /var/lib/tomcat7/webapps
+  $ sudo cp eccService/target/EccService-2.2.war /var/lib/tomcat7/webapps
 
 Copy in the owlim-lite jar::
 
-  $ sudo cp thirdPartyLibs/*.jar /var/lib/tomcat/webapps/EccService-2.1/WEB-INF/lib
+  $ sudo cp thirdPartyLibs/*.jar /var/lib/tomcat/webapps/EccService-2.2/WEB-INF/lib
 
 Restart tomcat::
 
@@ -227,28 +241,32 @@ Glassfish
 Glassfish may be used as an alternative to Tomcat.
 
 #. Update Glassfish Java permissions for socket access using ``vagrantConf/glassfish/java.policy`` file
-#. Copy the following JARs from ``eccService/target/EccService-2.1/WEB-INF/lib/`` into Glassfish ``/lib/endorsed`` folder for Logback library support:
+#. Copy the following JARs from ``eccService/target/EccService-2.2/WEB-INF/lib/`` into Glassfish ``/lib/endorsed`` folder for Logback library support:
+
   * logback-core-1.1.2.jar
   * logback-classic-1.1.2.jar
   * jul-to-slf4j-1.7.6.jar
+
 #. Configure Glassfish support for Logback libraries by using the files in the ``thirdPartyConfig/glassfish`` folder to update the following files:
+
   * <Glassfish home>/glassfish/domains/domain1/config/logback.xml
   * <Glassfish home>/glassfish/domains/domain1/config/logging.properties
   * <Glassfish home>/glassfish/domains/domain1/domain.xml
+
 #. Edit the LOG_DIR variable definition in the ``eccService/src/main/resources/logback.xml`` or ``WEB-INF/classes/logback.xml`` file to set the location of the EXPERImonitor log file.
 #. Start the default Glassfish domain and database.
-#. Deploy the two WAR files from the thirdPartyLibs folder and ``eccService/target/EccService-2.1.war``.
+#. Deploy the two WAR files from the thirdPartyLibs folder and ``eccService/target/EccService-2.2.war``.
 #. Copy the owlim-lite jar from thirdPartyLibs into the WEB-INF/lib folder of the unpacked EXPERImonitor service.
 #. Restart glassfish.
 
-You should see the EXPERImonitor dashboard running on: e.g. http://localhost:8080/EccService-2.1. The OpenRDF workbench should be available on e.g. http://localhost:8080/openrdf-workbench/ (the port numbers depend on your installation choices).
+You should see the EXPERImonitor dashboard running on: e.g. http://localhost:8080/EccService-2.2. The OpenRDF workbench should be available on e.g. http://localhost:8080/openrdf-workbench/ (the port numbers depend on your installation choices).
 
 If you deployed the Dashboard correctly, you should see EXPERImonitor Service Configuration page in your browser:
 
  .. image:: images/dashboard_configuration.png
   :width: 100 %
 
-You are now ready to configure EXPERImonitor and start a new experiment. For further instructions please go to :doc:`Using the EXPERImonitor Dashboard </mainContent/Using_the_dashboard>` section.
+You are now ready to configure EXPERImonitor and start a new experiment. For further instructions please go to :doc:`Using the EXPERImonitor Dashboard <Using_the_dashboard>` section.
 
 EXPERImonitor default configuration
 ###################################

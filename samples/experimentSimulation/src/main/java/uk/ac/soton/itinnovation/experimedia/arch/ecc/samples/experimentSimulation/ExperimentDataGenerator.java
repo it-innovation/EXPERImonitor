@@ -29,17 +29,13 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Properties;
 import java.util.Random;
 import java.util.zip.DataFormatException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experimedia.Activity;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experimedia.Application;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experimedia.Content;
-import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experimedia.Entity;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experimedia.ExperimediaFactory;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experimedia.Participant;
 import uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.experimedia.Service;
@@ -73,24 +69,21 @@ public class ExperimentDataGenerator {
     Service weatherService;
     Service lwtService;
 
+    // hacky variables
+    Long lastAppEventTime = null;
+
     //other objects that remain the same for the whole duration of the log
     Random rand = new Random();
     Participant participant;
     Application app;
+    String agentName;
 
-    private static final Properties props = new Properties();  // TODO: remove this now?
     private static final Logger logger = LoggerFactory.getLogger(ExperimentDataGenerator.class);
 
     public ExperimentDataGenerator() {
 
         logger.info("Starting ExperimentDataGenerator");
 
-        try {
-            logger.info("Loading properties file");
-            props.load(ExperimentDataGenerator.class.getClassLoader().getResourceAsStream("prov.properties"));
-        } catch (IOException e) {
-            logger.error("Error loading properties file", e);
-        }
     }
 
     /**
@@ -154,8 +147,6 @@ public class ExperimentDataGenerator {
             genericAttributes.add(1, "Usefulness");
             genericAttributes.add(2, "Responsiveness");
 
-            logger.info(props.entrySet().toString());
-
             MetricGroup metricGroup = MetricHelper.createMetricGroup("SSG questionnaire group",
                     "Questionnaire data set for SSG experiment", eccLogger.metricGenerator);
 
@@ -183,7 +174,6 @@ public class ExperimentDataGenerator {
             ordinalValues.get(2).add(4, "very responsive");
 
             //create participant
-            String agentName = "";
             if (this.logclass.equals("PerfectLog")) {
                 //create participant as per name of logfile
                 agentName = logname.substring(0, 1).toUpperCase() + logname.substring(1).toLowerCase();
@@ -227,9 +217,6 @@ public class ExperimentDataGenerator {
                 metric.setMetaContent(scaleMeta);
             }
 
-            //create app for participant
-            app = factory.createApplication(participant, agentName + "'s SSG client", "1387531200");  // Fri, 20 Dec 2013 09:20:00 GMT
-
             //create services - using static names as they are the same across participants and used by QoS model
             twitterService = factory.createService("http://sad.it-innovation.soton.ac.uk/", "Hot Tweet Service");
             weatherService = factory.createService("http://weather.com/", "Weather Service");
@@ -238,27 +225,6 @@ public class ExperimentDataGenerator {
         } catch (Exception e) {
             logger.error("Error filling EDMProvFactory with data", e);
         }
-    }
-
-    /**
-     * Parses the in-memory log and creates prov statements
-     *
-     * @param logClass the type of log used (Log, PerfectLog)
-     */
-    public void parseLog() {
-
-        while (processNextLog()) {
-            logger.debug("Processing next log...");
-        }
-
-        try {
-            factory.destroyApplication(app, "1387569600"); // Fri, 20 Dec 2013 20:00:00 GMT
-        } catch (DataFormatException e) {
-            logger.error("Error stopping \"use app\" activity", e);
-        }
-
-        logger.info("finished parsing log");
-
     }
 
     /**
@@ -273,6 +239,11 @@ public class ExperimentDataGenerator {
 
         if (currentLog != null) {
             goOn = true;
+
+            if (lastAppEventTime == null) {
+                Long appStartTime = currentLog.getTimestamp() - 180;  // start using the app 3 minutes before first activity in app
+                app = factory.createApplication(participant, agentName + "'s SSG client", appStartTime.toString());
+            }
 
             //event from "perfect" log
             if (this.logclass.equals("PerfectLog")) {
@@ -298,16 +269,7 @@ public class ExperimentDataGenerator {
                 logger.debug("processing event {}", eventKey);
 
                 try {
-                    if (eventKey.equals("lwtservice")) {
-                        Content liftinfo = factory.retrieveDataFromService(participant, app, lwtService,
-                                null, "lift waiting times", currentLog.getTimestamp().toString(), currentLog.getDuration());
-                    } else if (eventKey.equals("weather")) {
-                        Content weatherinfo = factory.retrieveDataFromService(participant, app, weatherService,
-                                null, "weather", currentLog.getTimestamp().toString(), currentLog.getDuration());
-                    } else if (eventKey.equals("hottweet")) {
-                        Content tweet = factory.retrieveDataFromService(participant, app, twitterService,
-                                null, "hot tweets", currentLog.getTimestamp().toString(), currentLog.getDuration());
-                    } else if (eventKey.equals("questionnaire")) {
+                    if (eventKey.equals("questionnaire")) {
                         //get agent metric entity
                         uk.ac.soton.itinnovation.experimedia.arch.ecc.common.dataModel.metrics.Entity entity
                                 = MetricHelper.getEntityFromName(participant.agent.getFriendlyName(), eccLogger.metricGenerator);
@@ -326,11 +288,32 @@ public class ExperimentDataGenerator {
 
                             i++;
                         }
+                    } else {
+                        lastAppEventTime = currentLog.getTimestamp();
+
+                        if (eventKey.equals("lwtservice")) {
+                            Content liftinfo = factory.retrieveDataFromService(participant, app, lwtService,
+                                    null, "lift waiting times", currentLog.getTimestamp().toString(), currentLog.getDuration());
+                        } else if (eventKey.equals("weather")) {
+                            Content weatherinfo = factory.retrieveDataFromService(participant, app, weatherService,
+                                    null, "weather", currentLog.getTimestamp().toString(), currentLog.getDuration());
+                        } else if (eventKey.equals("hottweet")) {
+                            Content tweet = factory.retrieveDataFromService(participant, app, twitterService,
+                                    null, "hot tweets", currentLog.getTimestamp().toString(), currentLog.getDuration());
+                        }
                     }
 
                 } catch (Exception e) {
                     logger.error("Error processing \"perfect\" log", e);
                 }
+            }
+        } else {
+            // we have reached the end of the log
+            Long appEndTime = lastAppEventTime + 300;
+            try {
+                factory.destroyApplication(app, appEndTime.toString()); // close app 5 minutes affter last activity
+            } catch (DataFormatException ex) {
+                logger.error("Problem with last app timestamp", ex);
             }
         }
         return goOn;
@@ -366,11 +349,11 @@ public class ExperimentDataGenerator {
 
                 String date1 = lines[0].substring(0, 19);
 
-				//check date
+                //check date
                 //as expected, append next line
                 if (rawlog.peekFirst().startsWith(date1)) {
                     lines[1] = rawlog.pollFirst();
-					//check next date
+                    //check next date
                     //as expected, append last line
                     if (rawlog.peekFirst().startsWith(date1)) {
                         lines[2] = rawlog.pollFirst();
@@ -403,7 +386,7 @@ public class ExperimentDataGenerator {
         return log;
     }
 
-	//GETTERS/SETTERS//////////////////////////////////////////////////////////////////////////////
+    //GETTERS/SETTERS//////////////////////////////////////////////////////////////////////////////
     public ILog getCurrentLog() {
         return currentLog;
     }
@@ -414,10 +397,6 @@ public class ExperimentDataGenerator {
 
     public ExperimediaFactory getFactory() {
         return factory;
-    }
-
-    public static Properties getProps() {
-        return props;
     }
 
     public ECCSimpleLogger getEccLogger() {

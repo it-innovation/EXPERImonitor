@@ -33,6 +33,7 @@ public class EccNOMORDItemCount
     private String label;
     private String value;
     private int    order = 0;
+	private int    orderMax = 0;
     
     public EccNOMORDItemCount( String nomordLabel,
                                String nomordValue )
@@ -43,14 +44,15 @@ public class EccNOMORDItemCount
     
     public EccNOMORDItemCount( String nomordLabel,
                                String nomordValue,
-                               int    ord )
+                               int    ord,
+							   int    ordMax )
     {
-        label = nomordLabel;
-        value = nomordValue;
-        order = ord;
+        label    = nomordLabel;
+        value    = nomordValue;
+        order    = ord;
+		orderMax = ordMax;
     }
-
-    
+	
     public String getLabel()
     { return label; }
     
@@ -59,4 +61,7 @@ public class EccNOMORDItemCount
     
     public int getOrder()
     { return order; }
+	
+	public int getOrderMax()
+	{ return orderMax; }
 }

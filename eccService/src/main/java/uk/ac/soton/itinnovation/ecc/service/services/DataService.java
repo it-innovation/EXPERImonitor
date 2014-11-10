@@ -17,10 +17,9 @@
 // PURPOSE, except where stated in the Licence Agreement supplied with
 // the software.
 //
-//	Created By :			Maxim Bashevoy
-//                          Simon Crowle
-//	Created Date :			2014-04-02
-//	Created for Project :   EXPERIMEDIA
+//	Created By : Maxim Bashevoy, Simon Crowle
+//	Created Date : 2014-04-02
+//	Created for Project : EXPERIMEDIA
 //
 /////////////////////////////////////////////////////////////////////////
 package uk.ac.soton.itinnovation.ecc.service.services;
@@ -588,15 +587,16 @@ public class DataService {
 		
         try {
             Set<MeasurementSet> msetInfo = getAllEmptyMeasurementSetsForAttribute(UUID.fromString(experimentId), a);
-			
-			for ( MeasurementSet ms : msetInfo ) {
-				Report rep = expReportDAO.getReportForAllMeasurements(ms.getID(), true);		
-				MeasurementSet repMS = rep.getMeasurementSet();
-				
-				for (Measurement m: repMS.getMeasurements())
-					data.add(new EccMeasurement(m.getTimeStamp(), m.getValue()));
-				
-				}
+
+            for (MeasurementSet ms : msetInfo) {
+                Report rep = expReportDAO.getReportForAllMeasurements(ms.getID(), true);
+                MeasurementSet repMS = rep.getMeasurementSet();
+
+                for (Measurement m : repMS.getMeasurements()) {
+                    data.add(new EccMeasurement(m.getTimeStamp(), m.getValue()));
+                }
+
+            }
         } catch (Exception e) {
             if (e instanceof NoDataException) {
                 logger.debug("No data found for attribute [" + attributeId + "] in experiment [" + experimentId + "]");
@@ -1147,20 +1147,19 @@ public class DataService {
                     Set<EMClient> currClients = experimentService.getAllKnownClients();
 
                     for (EMClient client : currClients) {
-                        
+
                         // Use extended client type to get all metric metric generators
                         EMClientEx clientEx = (EMClientEx) client;
 
                         if (clientEx.getID().equals(targetID)) {
-							
-							for (Entity entity : clientEx.getCopyOfUniqueHistoricEntities()) {
+                            for (Entity entity : clientEx.getCopyOfUniqueHistoricEntities()) {
 
-								EccEntity ent = toEccEntity(entity, withAttributes);
+                                EccEntity ent = toEccEntity(entity, withAttributes);
 
-								if (ent != null) {
-									clientEntities.add(ent);
-								}
-							}
+                                if (ent != null) {
+                                    clientEntities.add(ent);
+                                }
+                            }
                         }
                     }
                 } else {
@@ -1498,8 +1497,6 @@ public class DataService {
         if (mSets != null) {
             if (mSets.isEmpty()) {
                 logger.warn("Could not find any measurement sets for attribute " + attr.getName());
-            } else {
-//                logger.warn("Measurement set retrieval: Attribute " + attr.getName() + " has more than one measurement set");
             }
 
             // Take the first measurement set
