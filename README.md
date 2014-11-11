@@ -19,15 +19,15 @@ Screenshots
 
 **Participant QoE summary**
 
-![Participant QoE summary](http://docs.experimedia.eu/_images/explorerQoEUsefulness.png)
+![Participant QoE summary](http://experimonitor.readthedocs.org/en/latest/_images/explorerQoEUsefulness.png)
 
 **Live metric dashboard**
 
-![Live metric dashboard](http://docs.experimedia.eu/_images/dashboard_sad_service_entity2.png)
+![Live metric dashboard](http://experimonitor.readthedocs.org/en/latest/_images/dashboard_sad_service_entity2.png)
 
 **Overlaying activities on a QoS graph**
 
-![Overlaying activities on a QoS graph](http://docs.experimedia.eu/_images/explorerQoSLiftResponseAll.png)
+![Overlaying activities on a QoS graph](http://experimonitor.readthedocs.org/en/latest/_images/explorerQoSLiftResponseAll.png)
 
 Copyright
 ---------
@@ -53,12 +53,12 @@ For further information on collaboration, support or alternative licensing, plea
 Binaries
 --------
 
-Java artifacts (JAR, source code and JavaDoc) can be found in the [IT Innovation maven repository](http://repo.it-innovation.soton.ac.uk/maven2/release/uk/ac/soton/itinnovation/experimedia/)
+Java artifacts (JAR, source code and JavaDoc) can be found in the [IT Innovation maven repository](http://repo.it-innovation.soton.ac.uk/maven2/release/uk/ac/soton/itinnovation/experimedia/). Non-java binaries are not available to download at the moment.
 
 Documentation
 -------------
 
-The primary source of EXPERImonitor documentation can be found in the ['doc' folder](./doc/manual_source/index.rst) or online at [docs.experimedia.eu](http://docs.experimedia.eu/EXPERImonitor/). The documentation is written in RST format; readers have a choice of generating a printable version in a variety of formats including HTML and PDF. Your distribution may have [pre-built documentation](./doc/manual/html) or you can build it yourself following the [instructions provided](./doc/README.txt).
+The primary source of EXPERImonitor documentation can be found in the ['doc' folder](./doc/manual_source/index.rst) or online at [ReadTheDocs](http://experimonitor.readthedocs.org/en/latest/). The documentation is written in RST format; readers have a choice of generating a printable version in a variety of formats including HTML and PDF. Your distribution may have [pre-built documentation](./doc/manual/html) or you can build it yourself following the [instructions provided](./doc/README.txt).
 
 [Javadoc for the source code](./doc/javaDoc) is included in packaged distributions (or from the maven repository). In addition to this, supplementary READMEs relating to EXPERImonitor client development can be found in the ['samples' folder](./samples).
 
