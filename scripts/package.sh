@@ -22,8 +22,8 @@ cd "$ROOT"/thirdPartyLibs
 # build
 cd "$ROOT"
 mvn clean
-mvn package assembly:assembly -Preleasesrc |tee /tmp/releasesrc.log |grep -E 'WARNING|ERROR'
-mvn package assembly:assembly -Preleasebin |tee /tmp/releasebin.log |grep -E 'WARNING|ERROR'
+mvn --batch-mode package assembly:assembly -Preleasesrc |tee /tmp/releasesrc.log |grep -E 'WARNING|ERROR'
+mvn --batch-mode package assembly:assembly -Preleasebin |tee /tmp/releasebin.log |grep -E 'WARNING|ERROR'
 
 # zip
 cd "$ROOT"/target/experimedia-arch-ecc-2.2-bin/bin

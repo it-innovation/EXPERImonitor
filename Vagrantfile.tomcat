@@ -146,7 +146,7 @@ echo "**** Building ECC"
 
 cd experimedia-ecc
 cd thirdPartyLibs && /bin/sh ./installLibraries.sh && cd ..
-mvn install |& tee /tmp/build.log
+mvn --batch-mode install |& tee /tmp/build.log
 
 ## Deploy ##
 

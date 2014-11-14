@@ -2,9 +2,9 @@ SCRIPT=$(readlink -f "$0")
 SCRIPTPATH=$(dirname "$SCRIPT")
 cd "$SCRIPTPATH"/..
 
-mvn -Pjenkins clean site:site site:stage |tee /tmp/buildSite.log
-mvn versions:display-dependency-updates |tee /tmp/dependency-updates.log
-mvn versions:display-plugin-updates |tee /tmp/plugin-updates.log
+mvn --batch-mode -Pjenkins clean site:site site:stage |tee /tmp/buildSite.log
+mvn --batch-mode versions:display-dependency-updates |tee /tmp/dependency-updates.log
+mvn --batch-mode versions:display-plugin-updates |tee /tmp/plugin-updates.log
 
 echo
 echo "Site now available in target/staging (log file in /tmp/buildSite.log)"
